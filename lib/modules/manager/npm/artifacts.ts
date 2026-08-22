@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -9,16 +10,25 @@ import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
   localPathExists,
+  outputCacheFile,
+  privateCacheDir,
+  readCacheFile,
   readLocalFile,
+  rmCache,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants.ts';
 import { getNodeToolConstraint } from './post-update/node-version.ts';
 import { processHostRules } from './post-update/rules.ts';
 import { lazyLoadPackageJson } from './post-update/utils.ts';
+import { updateDependency } from './update/dependency/index.ts';
 import {
   getNpmrcContent,
   resetNpmrcContent,
@@ -27,6 +37,55 @@ import {
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
+
+type CorepackUpdate = Upgrade<Record<string, unknown>> & {
+  currentValue: string;
+  depName: string;
+  newVersion: string;
+};
+
+function isCorepackUpdate(
+  update: Upgrade<Record<string, unknown>>,
+): update is CorepackUpdate {
+  return (
+    (update.depType === 'packageManager' ||
+      update.depType === 'devEngines.packageManager') &&
+    isString(update.currentValue) &&
+    regEx(versionWithHashRegString).test(update.currentValue) &&
+    isString(update.depName) &&
+    isString(update.newVersion)
+  );
+}
+
+function getCorepackVersion(
+  packageFileContent: string,
+  depName: string,
+): string | null {
+  try {
+    const packageManager = JSON.parse(packageFileContent).packageManager;
+    if (!isString(packageManager)) {
+      return null;
+    }
+    const prefix = `${depName}@`;
+    if (!packageManager.startsWith(prefix)) {
+      return null;
+    }
+    const version = packageManager.slice(prefix.length);
+    return regEx(versionWithHashRegString).test(version) ? version : null;
+  } catch {
+    return null;
+  }
+}
+
+function getCorepackNpmrcContent(
+  originalContent: string | null,
+  additionalLines: string[],
+): string | null {
+  const lines = originalContent
+    ? [originalContent, ...additionalLines]
+    : additionalLines;
+  return lines.length ? `${lines.join('\n')}\n` : null;
+}
 
 // Execute 'corepack use' command for npm manager updates
 // This step is necessary because Corepack recommends attaching a hash after the version
@@ -56,19 +115,16 @@ async function handlePackageManagerUpdates(
     updatedDeps,
     newPackageFileContent: existingPackageFileContent,
   } = updateArtifactsConfig;
-  const packageManagerUpdate = updatedDeps.find(
-    (dep) => dep.depType === 'packageManager',
-  );
+  const packageManagerUpdates = updatedDeps.filter(isCorepackUpdate);
+  packageManagerUpdates.sort((left, right) => {
+    if (left.depType === right.depType) {
+      return 0;
+    }
+    return left.depType === 'packageManager' ? -1 : 1;
+  });
 
-  if (!packageManagerUpdate) {
-    logger.debug('No packageManager updates - returning null');
-    return null;
-  }
-
-  const { currentValue, depName, newVersion } = packageManagerUpdate;
-
-  // Execute 'corepack use' command only if the currentValue already has hash in it
-  if (!currentValue || !regEx(versionWithHashRegString).test(currentValue)) {
+  if (isEmptyArray(packageManagerUpdates)) {
+    logger.debug('No hashed packageManager updates - returning null');
     return null;
   }
 
@@ -80,9 +136,10 @@ async function handlePackageManagerUpdates(
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
+  const hasTopLevelUpdate = packageManagerUpdates.some(
+    (update) => update.depType === 'packageManager',
+  );
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${quote(`${depName}@${newVersion}`)}`;
-
   const nodeConstraints = await getNodeToolConstraint(
     config,
     updatedDeps,
@@ -113,15 +170,93 @@ async function handlePackageManagerUpdates(
     docker: {},
   };
 
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+  if (hasTopLevelUpdate) {
+    await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+  }
+  let corepackCacheDir: string | null = null;
   try {
-    await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-    const newPackageFileContent = await readLocalFile(packageFileName, 'utf8');
-    if (
-      !newPackageFileContent ||
-      existingPackageFileContent === newPackageFileContent
-    ) {
+    let newPackageFileContent = existingPackageFileContent;
+    const generatedVersions = new Map<string, string>();
+
+    for (const packageManagerUpdate of packageManagerUpdates) {
+      const { depName, newVersion } = packageManagerUpdate;
+      const locator = `${depName}@${newVersion}`;
+      const cmd = `corepack use ${quote(locator)}`;
+      let corepackVersion = generatedVersions.get(locator);
+      if (!corepackVersion) {
+        let corepackPackageFileContent: string | null;
+        if (packageManagerUpdate.depType === 'packageManager') {
+          await writeLocalFile(packageFileName, newPackageFileContent);
+          await exec(cmd, execOptions);
+          corepackPackageFileContent = await readLocalFile(
+            packageFileName,
+            'utf8',
+          );
+        } else {
+          corepackCacheDir ??= upath.join(
+            privateCacheDir(),
+            'npm-corepack',
+            randomUUID(),
+          );
+          const corepackPackageFileName = upath.join(
+            corepackCacheDir,
+            'package.json',
+          );
+          await outputCacheFile(
+            corepackPackageFileName,
+            JSON.stringify({ private: true }),
+          );
+          const corepackNpmrcContent = getCorepackNpmrcContent(
+            npmrcContent,
+            additionalNpmrcContent,
+          );
+          if (corepackNpmrcContent) {
+            await outputCacheFile(
+              upath.join(corepackCacheDir, '.npmrc'),
+              corepackNpmrcContent,
+            );
+          }
+          await exec(cmd, {
+            ...execOptions,
+            cwd: corepackCacheDir,
+            cwdFile: undefined,
+          });
+          corepackPackageFileContent = await readCacheFile(
+            corepackPackageFileName,
+            'utf8',
+          );
+        }
+        const generatedCorepackVersion = getCorepackVersion(
+          corepackPackageFileContent ?? '',
+          depName,
+        );
+        if (!generatedCorepackVersion) {
+          throw new Error(`Corepack did not generate a hash for ${locator}`);
+        }
+        corepackVersion = generatedCorepackVersion;
+        generatedVersions.set(locator, generatedCorepackVersion);
+
+        if (packageManagerUpdate.depType === 'packageManager') {
+          newPackageFileContent = corepackPackageFileContent!;
+          continue;
+        }
+      }
+
+      const updatedPackageFileContent = updateDependency({
+        fileContent: newPackageFileContent,
+        packageFile: packageFileName,
+        upgrade: {
+          ...packageManagerUpdate,
+          newValue: corepackVersion,
+        },
+      });
+      if (!updatedPackageFileContent) {
+        throw new Error(`Failed to apply Corepack hash for ${locator}`);
+      }
+      newPackageFileContent = updatedPackageFileContent;
+    }
+
+    if (existingPackageFileContent === newPackageFileContent) {
       return null;
     }
     logger.debug('Returning updated package.json');
@@ -134,13 +269,19 @@ async function handlePackageManagerUpdates(
     };
   } catch (err) {
     logger.warn({ err }, 'Error updating package.json');
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
     return {
       artifactError: {
         fileName: packageFileName,
         stderr: err.message,
       },
     };
+  } finally {
+    if (hasTopLevelUpdate) {
+      await resetNpmrcContent(pkgFileDir, npmrcContent);
+    }
+    if (corepackCacheDir) {
+      await rmCache(corepackCacheDir);
+    }
   }
 }
 
