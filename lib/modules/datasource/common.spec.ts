@@ -289,6 +289,33 @@ describe('modules/datasource/common', () => {
       });
     });
 
+    it.each`
+      constraint
+      ${'>=3.10'}
+      ${'^3.10'}
+    `(
+      'should compare Python range constraint $constraint',
+      ({ constraint }) => {
+        const config: GetPkgReleasesConfig = {
+          datasource: 'pypi',
+          packageName: 'chardet',
+          versioning: 'pep440',
+          constraintsFiltering: 'strict',
+          constraints: { python: constraint },
+        };
+        const releaseResult = {
+          releases: [
+            { version: '3.0.0', constraints: { python: ['>=3.11'] } },
+            { version: '5.2.0', constraints: { python: ['>=3.6'] } },
+          ],
+        };
+
+        expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+          releases: [{ version: '5.2.0' }],
+        });
+      },
+    );
+
     it('should handle config with a range constraint, and a release with an exact version', () => {
       const config = {
         datasource: 'pypi',

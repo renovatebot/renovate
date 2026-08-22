@@ -1,5 +1,11 @@
 import { isTruthy } from '@sindresorhus/is';
-import { parsePEP508 } from './utils.ts';
+import {
+  applySplitPythonMarkers,
+  extractPythonConstraintFromMarker,
+  parsePEP508,
+  pep508ToPackageDependency,
+  pythonConstraintToMarkerSlug,
+} from './utils.ts';
 
 describe('modules/manager/pep621/utils', () => {
   describe('parsePEP508()', () => {
@@ -27,6 +33,177 @@ describe('modules/manager/pep621/utils', () => {
           ? clear({ packageName, currentValue, extras, marker })
           : null;
         expect(result).toEqual(expected);
+      },
+    );
+  });
+
+  describe('pep508ToPackageDependency()', () => {
+    it('should store marker and pep508String in managerData when marker is present', () => {
+      const result = pep508ToPackageDependency(
+        'project.dependencies',
+        'pytest>=6.0,<7.0; python_version < "3.10"',
+      );
+      expect(result).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=6.0,<7.0',
+        managerData: {
+          marker: 'python_version < "3.10"',
+          pep508String: 'pytest>=6.0,<7.0; python_version < "3.10"',
+        },
+      });
+      expect(result?.replaceString).toBeUndefined();
+    });
+
+    it('should not set managerData or replaceString when no marker', () => {
+      const result = pep508ToPackageDependency(
+        'project.dependencies',
+        'pytest>=6.0,<7.0',
+      );
+      expect(result).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=6.0,<7.0',
+      });
+      expect(result?.managerData).toBeUndefined();
+      expect(result?.replaceString).toBeUndefined();
+    });
+  });
+
+  describe('extractPythonConstraintFromMarker()', () => {
+    it('should extract >= constraint', () => {
+      expect(
+        extractPythonConstraintFromMarker('python_version >= "3.10"'),
+      ).toBe('>=3.10');
+    });
+
+    it('should extract == constraint', () => {
+      expect(extractPythonConstraintFromMarker('python_version == "3.9"')).toBe(
+        '==3.9',
+      );
+    });
+
+    it('should extract < constraint', () => {
+      expect(extractPythonConstraintFromMarker('python_version < "3.10"')).toBe(
+        '<3.10',
+      );
+    });
+
+    it('should extract constraint from single-quoted marker', () => {
+      expect(
+        extractPythonConstraintFromMarker("python_version >= '3.10'"),
+      ).toBe('>=3.10');
+    });
+
+    it('should extract python_full_version constraint', () => {
+      expect(
+        extractPythonConstraintFromMarker('python_full_version >= "3.10.0"'),
+      ).toBe('>=3.10.0');
+    });
+
+    it('should extract ~= constraint', () => {
+      expect(
+        extractPythonConstraintFromMarker('python_version ~= "3.10"'),
+      ).toBe('~=3.10');
+    });
+
+    it('should return null for non-Python marker', () => {
+      expect(
+        extractPythonConstraintFromMarker('sys_platform == "win32"'),
+      ).toBeNull();
+    });
+
+    it('should return null for complex marker with and', () => {
+      expect(
+        extractPythonConstraintFromMarker(
+          'python_version >= "3.10" and sys_platform == "linux"',
+        ),
+      ).toBeNull();
+    });
+
+    it('should return null for complex marker with or', () => {
+      expect(
+        extractPythonConstraintFromMarker(
+          'python_version >= "3.10" or python_version == "3.9"',
+        ),
+      ).toBeNull();
+    });
+  });
+
+  describe('pythonConstraintToMarkerSlug()', () => {
+    it('should handle >= operator', () => {
+      expect(pythonConstraintToMarkerSlug('>=3.10')).toBe('py-gt-eq-3-dot-10');
+    });
+
+    it('should handle == operator', () => {
+      expect(pythonConstraintToMarkerSlug('==3.9')).toBe('py-eq-3-dot-9');
+    });
+
+    it('should handle < operator', () => {
+      expect(pythonConstraintToMarkerSlug('<3.10')).toBe('py-lt-3-dot-10');
+    });
+
+    it('should handle > operator', () => {
+      expect(pythonConstraintToMarkerSlug('>3.10')).toBe('py-gt-3-dot-10');
+    });
+
+    it('should handle <= operator', () => {
+      expect(pythonConstraintToMarkerSlug('<=3.10')).toBe('py-lt-eq-3-dot-10');
+    });
+
+    it('should handle != operator', () => {
+      expect(pythonConstraintToMarkerSlug('!=3.9')).toBe('py-not-eq-3-dot-9');
+    });
+
+    it('should handle ~= operator', () => {
+      expect(pythonConstraintToMarkerSlug('~=3.10')).toBe(
+        'py-tilde-eq-3-dot-10',
+      );
+    });
+
+    it('should keep dotted versions distinct', () => {
+      expect(pythonConstraintToMarkerSlug('>=3.10')).not.toBe(
+        pythonConstraintToMarkerSlug('>=3.1.0'),
+      );
+    });
+
+    it('should encode compound Poetry constraints', () => {
+      expect(pythonConstraintToMarkerSlug('^3.8, <3.12')).toBe(
+        'py-caret-3-dot-8-and-lt-3-dot-12',
+      );
+    });
+
+    it('should use a generic slug when the constraint has no slug tokens', () => {
+      expect(pythonConstraintToMarkerSlug('')).toBe('py');
+    });
+  });
+
+  describe('applySplitPythonMarkers()', () => {
+    it.each`
+      projectConstraint | markerConstraint | expectedConstraint
+      ${'>=3.10'}       | ${'==3.9'}       | ${'>=3.10,==3.9'}
+      ${'==3.10'}       | ${'>=3.9'}       | ${'3.10'}
+      ${'==3.8'}        | ${'>=3.9'}       | ${'==3.8,>=3.9'}
+      ${'>=3.10'}       | ${'>=3.9'}       | ${'>=3.10'}
+    `(
+      'intersects $projectConstraint with $markerConstraint',
+      ({ projectConstraint, markerConstraint, expectedConstraint }) => {
+        const deps = [
+          {
+            depName: 'example',
+            currentValue: '>=1',
+            managerData: { pythonConstraint: markerConstraint },
+          },
+        ];
+
+        expect(
+          applySplitPythonMarkers(
+            deps,
+            { splitPythonMarkers: true },
+            projectConstraint,
+          )[0],
+        ).toMatchObject({
+          extractedConstraints: { python: expectedConstraint },
+          constraintsFiltering: 'strict',
+        });
       },
     );
   });

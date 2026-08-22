@@ -483,6 +483,8 @@ export interface RenovateConfig
 
   constraintsFiltering?: ConstraintsFilter;
 
+  splitPythonMarkers?: boolean;
+
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;

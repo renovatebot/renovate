@@ -25,6 +25,7 @@ type LookupResult = Result<PackageDependency>;
 async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
+  configuredConstraints: RenovateConfig['constraints'],
 ): Promise<LookupResult> {
   const dep = clone(indep);
 
@@ -55,8 +56,9 @@ async function lookup(
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   if (dep.extractedConstraints) {
     depConfig.constraints = {
-      ...dep.extractedConstraints,
       ...depConfig.constraints,
+      ...dep.extractedConstraints,
+      ...configuredConstraints,
     };
   }
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
@@ -143,7 +145,7 @@ async function fetchManagerPackagerFileUpdates(
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => async (): Promise<PackageDependency> => {
-      const updates = await lookup(packageFileConfig, dep);
+      const updates = await lookup(packageFileConfig, dep, config.constraints);
       return updates.unwrapOrThrow();
     },
   );

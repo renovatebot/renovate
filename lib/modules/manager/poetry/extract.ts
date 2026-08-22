@@ -10,17 +10,22 @@ import {
 import { Result } from '../../../util/result.ts';
 import { massage as massageToml } from '../../../util/toml.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
-import type { PackageFileContent } from '../types.ts';
-import { Lockfile, PoetryPyProject } from './schema.ts';
+import { applySplitPythonMarkers } from '../pep621/utils.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
+import { Lockfile, PoetryPyProject, SplitPoetryPyProject } from './schema.ts';
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
+  const pyProjectSchema = config?.splitPythonMarkers
+    ? SplitPoetryPyProject
+    : PoetryPyProject;
   const { val: res, err } = Result.parse(
     massageToml(content),
-    PoetryPyProject.transform(({ packageFileContent }) => packageFileContent),
+    pyProjectSchema.transform(({ packageFileContent }) => packageFileContent),
   ).unwrap();
   if (err) {
     logger.debug({ packageFile, err }, `Poetry: error parsing pyproject.toml`);
@@ -63,12 +68,19 @@ export async function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {
+    ...res.extractedConstraints,
+  };
 
   if (isNonEmptyString(pythonVersion)) {
     extractedConstraints.python = pythonVersion;
   }
   res.extractedConstraints = extractedConstraints;
+  res.deps = applySplitPythonMarkers(
+    res.deps,
+    config,
+    extractedConstraints.python,
+  );
 
   // Try poetry.lock first
   let lockFile = getSiblingFileName(packageFile, 'poetry.lock');

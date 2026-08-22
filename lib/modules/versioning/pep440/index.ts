@@ -1,5 +1,7 @@
 import * as pep440 from '@renovatebot/pep440';
 import type { RangeStrategy } from '../../../types/versioning.ts';
+import { api as npm } from '../npm/index.ts';
+import { poetry2npm } from '../poetry/transform.ts';
 import type { VersioningApi } from '../types.ts';
 import { getNewValue, getPinnedValue, isLessThanRange } from './range.ts';
 
@@ -86,6 +88,17 @@ function matches(version: string, range: string): boolean {
   return isValid(range) && satisfies(version, range, { prereleases: true });
 }
 
+function subset(subRange: string, superRange: string): boolean | undefined {
+  try {
+    return npm.subset!(
+      poetry2npm(subRange, true),
+      poetry2npm(superRange, true),
+    );
+  } catch {
+    return undefined;
+  }
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -103,6 +116,7 @@ export const api: VersioningApi = {
   getNewValue,
   getPinnedValue,
   sortVersions,
+  subset,
   isLessThanRange,
 };
 
