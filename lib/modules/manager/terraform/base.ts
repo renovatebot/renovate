@@ -4,7 +4,7 @@ import { regEx } from '../../../util/regex.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 import { isOCIRegistry } from '../helmv3/oci.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
-import type { TerraformDefinitionFile } from './hcl/types.ts';
+import type { TerraformDefinitionFileJSON } from './hcl/schema.ts';
 import type { ProviderLock } from './lockfile/types.ts';
 import {
   applyOciDependency,
@@ -25,7 +25,7 @@ export abstract class DependencyExtractor {
    * @param locks currently existing locks
    */
   abstract extract(
-    hclRoot: TerraformDefinitionFile,
+    hclRoot: TerraformDefinitionFileJSON,
     locks: ProviderLock[],
     config: ExtractConfig,
   ): PackageDependency[];

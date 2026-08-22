@@ -1,6 +1,6 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types.ts';
-import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { TerraformDefinitionFileJSON } from '../../hcl/schema.ts';
 import { TerraformVersionExtractor } from '../terraform-block/terraform-version.ts';
 
 export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
@@ -8,7 +8,7 @@ export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
     return [`"tfe_workspace"`];
   }
 
-  override extract(hclMap: TerraformDefinitionFile): PackageDependency[] {
+  override extract(hclMap: TerraformDefinitionFileJSON): PackageDependency[] {
     const dependencies = [];
 
     const workspaces = hclMap?.resource?.tfe_workspace;
