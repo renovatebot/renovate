@@ -68,9 +68,23 @@ export type GithubGraphqlResponse<T = unknown> =
       data?: never;
       errors: {
         type?: string;
+        code?: string;
         message: string;
       }[];
     };
+
+/**
+ * GitHub reports a spent GraphQL budget in two shapes: `RATE_LIMITED` from the
+ * GraphQL API itself, and `graphql_rate_limit` when an app installation has
+ * exhausted its allowance. Both mean "come back later", not "unknown error".
+ */
+export function isGraphqlRateLimited(
+  errors: { type?: string; code?: string }[] | undefined,
+): boolean {
+  return !!errors?.some(
+    (err) => err.type === 'RATE_LIMITED' || err.code === 'graphql_rate_limit',
+  );
+}
 
 const GithubError = z.object({
   field: z.string().optional(),

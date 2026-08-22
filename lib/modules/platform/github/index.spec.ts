@@ -520,6 +520,25 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrowWithMessage(Error, 'Init: Authentication failure');
     });
 
+    it('should report a spent App budget as rate limiting, not as authentication failure', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMIT',
+              code: 'graphql_rate_limit',
+              message:
+                'API rate limit already exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' }),
+      ).rejects.toThrowWithMessage(Error, PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
     it('should autodetect email/user on custom endpoint with GitHub App', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com', {
@@ -1162,6 +1181,25 @@ describe('modules/platform/github/index', () => {
             {
               type: 'RATE_LIMITED',
               message: 'API rate limit exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+      await expect(
+        github.initRepo({ repository: 'some/repo' }),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
+    it('should abort when graphql_rate_limit is returned', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMIT',
+              code: 'graphql_rate_limit',
+              message:
+                'API rate limit already exceeded for installation ID XXXXXXX.',
             },
           ],
         });
