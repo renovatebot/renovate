@@ -129,5 +129,15 @@ describe('modules/datasource/git-refs/index', () => {
         authentication: { hostTypes: ['git-refs'] },
       });
     });
+
+    it('returns null if remote call throws exception', async () => {
+      gitMock.listRemote.mockRejectedValue(new Error());
+
+      const digest = await new GitRefsDatasource().getDigest({
+        packageName,
+      });
+      expect(digest).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith({ err: expect.any(Error), packageName }, 'Error getting git-refs');
+    });
   });
 });
