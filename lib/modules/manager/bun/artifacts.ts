@@ -59,7 +59,7 @@ export async function updateArtifacts(
       await deleteLocalFile(lockFileName);
     }
 
-    let cmd = 'bun install';
+    let cmd = 'bun install --lockfile-only';
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       cmd += ' --ignore-scripts';
