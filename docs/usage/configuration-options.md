@@ -2027,9 +2027,9 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 ## `gitlabMergeRequestCommentType`
 
 By default, Renovate posts comments on GitLab merge requests as regular notes.
-Set this option to `discussion` to post new comments as resolvable discussions instead.
+Set this option to `discussion` to post new comments as resolvable threads instead.
 GitLab can be configured to [prevent merging while threads remain unresolved](https://docs.gitlab.com/user/project/merge_requests/#prevent-merge-unless-all-threads-are-resolved).
-When this GitLab setting is enabled, Renovate discussions prevent the merge request from being merged until someone resolves them.
+When this GitLab setting is enabled, Renovate threads prevent the merge request from being merged until someone resolves them.
 
 ## `goGetDirs`
 
