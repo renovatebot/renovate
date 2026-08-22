@@ -113,6 +113,104 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
+    it('paginates cursor links', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&after=cursor-2>; rel="next", <${url}&before=cursor-1>; rel="prev"`,
+        })
+        .get(`${url}&after=cursor-2`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('limits cursor pagination', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&after=cursor-2>; rel="next"`,
+        });
+      const res = await githubApi.getJsonUnchecked(url, {
+        paginate: true,
+        pageLimit: 2,
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('paginates all cursor links', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&after=cursor-2>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-2`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJsonUnchecked(url, {
+        paginate: 'all',
+        pageLimit: 2,
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('limits full cursor pagination', async () => {
+      const url = '/some-url?per_page=1';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .times(100)
+        .reply(200, ['a'], {
+          link: `<${url}>; rel="next"`,
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: 'all' });
+      expect(res.body).toHaveLength(100);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { maxPages: 100 },
+        'GitHub cursor pagination limit reached',
+      );
+    });
+
+    it('does not follow cursor pagination links to a different origin', async () => {
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: '<https://attacker.example.com/some-url?after=cursor-2>; rel="next"',
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestHost: 'api.github.com',
+          paginationHost: 'attacker.example.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+      );
+    });
+
     it('uses paginationField', async () => {
       const url = '/some-url';
       httpMock
