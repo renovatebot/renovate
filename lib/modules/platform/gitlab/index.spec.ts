@@ -150,6 +150,20 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
+  describe('configureRepo()', () => {
+    it('uses the gitlabMergeRequestCommentType configuration if provided', () => {
+      configureRepo({
+        gitlabMergeRequestCommentType: 'discussion',
+      } as any); 
+      expect(mergeRequestCommentType).toBe('discussion');
+    });
+
+    it('uses "note" as the default fallback value', () => {
+      configureRepo({} as any); 
+      expect(mergeRequestCommentType).toBe('note');
+    });
+  });
+
   describe('getRepos', () => {
     it('should throw an error if it receives an error', async () => {
       httpMock
