@@ -1630,7 +1630,8 @@ The description field can be used inside any configuration object to add a human
 A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
 Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
 
-If a preset which consists only of other presets should be described by a single line instead of by all of its presets, use [`overrideDescription`](#overridedescription) in place of `description`.
+> [!NOTE]
+> To overwrite descriptions of child presets, use [`overrideDescription`](#overridedescription) in place of `description`.
 
 ## `digest`
 
