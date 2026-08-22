@@ -283,7 +283,7 @@
     "@openpgp/web-stream-tools": "0.3.1",
     "@oxlint/plugins": "1.72.0",
     "@semantic-release/exec": "7.1.0",
-    "@smithy/util-stream": "4.7.16",
+    "@smithy/util-stream": "4.8.1",
     "@types/adm-zip": "0.5.8",
     "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.5",
