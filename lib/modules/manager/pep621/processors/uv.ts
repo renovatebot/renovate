@@ -60,7 +60,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        /* v8 ignore next 3 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!dep.packageName) {
           continue;
         }
@@ -363,7 +363,7 @@ async function getUvIndexCredentials(
 
   for (const { name, url } of uv_indexes) {
     const parsedUrl = parseUrl(url);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!parsedUrl) {
       continue;
     }

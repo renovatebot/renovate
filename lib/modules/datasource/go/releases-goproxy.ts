@@ -207,7 +207,7 @@ export class GoProxyDatasource extends Datasource {
     }
 
     const parsedUrl = parseUrl(sourceUrl);
-    /* v8 ignore next 3 -- detectPlatform only returns a platform for parseable URLs */
+    /* v8 ignore next -- detectPlatform only returns a platform for parseable URLs */
     if (!parsedUrl) {
       return;
     }
