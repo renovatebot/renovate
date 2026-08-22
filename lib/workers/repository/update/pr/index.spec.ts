@@ -1000,6 +1000,73 @@ describe('workers/repository/update/pr/index', () => {
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig.upgrades).toHaveLength(3);
       });
+
+      describe('changelogsLocation=comment', () => {
+        beforeEach(() => {
+          vi.spyOn(platform, 'massageMarkdown').mockImplementation((x) => x);
+        });
+
+        it('comments the changelogs on a created PR', async () => {
+          platform.createPr.mockResolvedValueOnce(pr);
+
+          const res = await ensurePr({
+            ...config,
+            changelogsLocation: 'comment',
+            upgrades: [dummyUpgrade],
+          });
+
+          expect(res).toEqual({ type: 'with-pr', pr });
+          expect(comment.ensureComment).toHaveBeenCalledExactlyOnceWith({
+            number,
+            topic: 'Release Notes',
+            content: expect.stringContaining('some/repo'),
+          });
+        });
+
+        it('comments the changelogs on an unchanged PR', async () => {
+          platform.getBranchPr.mockResolvedValueOnce(pr);
+
+          const res = await ensurePr({
+            ...config,
+            changelogsLocation: 'comment',
+            upgrades: [dummyUpgrade],
+          });
+
+          expect(res).toEqual({ type: 'with-pr', pr });
+          expect(platform.updatePr).not.toHaveBeenCalled();
+          expect(comment.ensureComment).toHaveBeenCalledExactlyOnceWith({
+            number,
+            topic: 'Release Notes',
+            content: expect.stringContaining('some/repo'),
+          });
+        });
+
+        it('does not comment when there are no changelogs', async () => {
+          platform.createPr.mockResolvedValueOnce(pr);
+
+          const res = await ensurePr({
+            ...config,
+            changelogsLocation: 'comment',
+            upgrades: [],
+          });
+
+          expect(res).toEqual({ type: 'with-pr', pr });
+          expect(comment.ensureComment).not.toHaveBeenCalled();
+        });
+
+        it('does not comment on dry run', async () => {
+          GlobalConfig.set({ dryRun: 'full' });
+
+          const res = await ensurePr({
+            ...config,
+            changelogsLocation: 'comment',
+            upgrades: [dummyUpgrade],
+          });
+
+          expect(res).toEqual({ type: 'with-pr', pr: { number: 0 } });
+          expect(comment.ensureComment).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('Warnings', () => {

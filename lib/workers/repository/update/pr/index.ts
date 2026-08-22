@@ -35,6 +35,10 @@ import type {
 } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
 import { resolveBranchStatus } from '../branch/status-checks.ts';
+import {
+  changelogsCommentTopic,
+  getChangelogsCommentContent,
+} from './body/changelogs.ts';
 import { getPrBody } from './body/index.ts';
 import {
   getChangedLabels,
@@ -149,6 +153,32 @@ function addPullRequestNoteIfAttestationHasBeenLost(
       ].join('\n'),
     );
   }
+}
+
+async function ensureChangelogsComment(
+  config: BranchConfig,
+  prNumber: number,
+): Promise<void> {
+  if (config.changelogsLocation !== 'comment' || !config.hasReleaseNotes) {
+    return;
+  }
+
+  const content = platform.massageMarkdown(
+    getChangelogsCommentContent(config),
+    config.rebaseLabel,
+  );
+
+  if (GlobalConfig.get('dryRun')) {
+    logger.info(`DRY-RUN: Would add release notes comment to PR #${prNumber}`);
+    return;
+  }
+
+  logger.debug(`Adding release notes comment to PR #${prNumber}`);
+  await ensureComment({
+    number: prNumber,
+    topic: changelogsCommentTopic,
+    content,
+  });
 }
 
 // Ensures that PR exists with matching title/body
@@ -387,6 +417,10 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
 
+      // Done before the "does not need updating" check below, because the PR
+      // body only holds a static notice when the release notes are commented
+      await ensureChangelogsComment(config, existingPr.number);
+
       if (
         !existingPr.hasAssignees &&
         !hasNotIgnoredReviewers(existingPr, config) &&
@@ -599,6 +633,7 @@ export async function ensurePr(
     }
     // Skip assign and review if automerging PR
     if (pr) {
+      await ensureChangelogsComment(config, pr.number);
       if (
         config.automerge &&
         !config.assignAutomerge &&
