@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
@@ -180,12 +181,13 @@ async function handlePackageManagerUpdates(
     for (const packageManagerUpdate of packageManagerUpdates) {
       const { depName, newVersion } = packageManagerUpdate;
       const locator = `${depName}@${newVersion}`;
+      const cmd = `corepack use ${quote(locator)}`;
       let corepackVersion = generatedVersions.get(locator);
       if (!corepackVersion) {
         let corepackPackageFileContent: string | null;
         if (packageManagerUpdate.depType === 'packageManager') {
           await writeLocalFile(packageFileName, newPackageFileContent);
-          await exec(`corepack use ${locator}`, execOptions);
+          await exec(cmd, execOptions);
           corepackPackageFileContent = await readLocalFile(
             packageFileName,
             'utf8',
@@ -214,7 +216,7 @@ async function handlePackageManagerUpdates(
               corepackNpmrcContent,
             );
           }
-          await exec(`corepack use ${locator}`, {
+          await exec(cmd, {
             ...execOptions,
             cwd: corepackCacheDir,
             cwdFile: undefined,

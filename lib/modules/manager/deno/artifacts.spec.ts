@@ -314,5 +314,41 @@ describe('modules/manager/deno/artifacts', () => {
         },
       ]);
     });
+
+    it('quotes the allow-import list when a hostRule resolvedHost contains shell metacharacters', async () => {
+      const updateArtifact: UpdateArtifact = {
+        config: {
+          updateType: 'lockFileMaintenance',
+          lockFiles: ['deno.lock'],
+        },
+        newPackageFileContent: '',
+        packageFileName: '',
+        updatedDeps: [],
+      };
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const newLock = Buffer.from('new');
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+      // hostRules can be set via a repo's own committed config, not only by a
+      // trusted platform admin, so matchHost/resolvedHost aren't inherently
+      // trusted. A bare (schemeless) matchHost is preserved verbatim as
+      // resolvedHost when it doesn't parse as a URL.
+      hostRules.add({
+        token: 'some-token',
+        hostType: 'npm',
+        matchHost: 'x$(touch pwned)y',
+      });
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts(updateArtifact);
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: "deno install --frozen=false --allow-import='deno.land:443,esm.sh:443,jsr.io:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443,x$(touch pwned)y'",
+        },
+      ]);
+    });
   });
 });

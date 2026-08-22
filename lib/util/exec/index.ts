@@ -1,9 +1,10 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
-import type { ToolSettingsOptions } from '../../config/types.ts';
+import type { RepoToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
+import { coerceArray } from '../array.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
@@ -92,7 +93,7 @@ async function prepareRawExec(
 
   let rawOptions = getRawExecOptions(opts);
 
-  let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+  let rawCommands = isString(cmd) ? [cmd] : cmd;
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
@@ -104,6 +105,7 @@ async function prepareRawExec(
     const childEnv = getChildEnv(opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
+      ...coerceArray(docker.envVars),
       'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);
@@ -221,20 +223,31 @@ export async function exec(
   return res;
 }
 
+/**
+ * When we resolve `toolSettings` in `getToolSettingsOptions`, we provide a stronger type than our input types, because we set defaults on config options.
+ *
+ * We do not have a default that is set for `nodeMaxMemory`, so it must remain as optional.
+ */
+type ResolvedToolSettingsOptions = Required<
+  Omit<RepoToolSettingsOptions, 'nodeMaxMemory'>
+> &
+  Pick<RepoToolSettingsOptions, 'nodeMaxMemory'>;
+
 export function getToolSettingsOptions(
-  repoConfig?: ToolSettingsOptions,
-): ToolSettingsOptions {
+  repoConfig?: RepoToolSettingsOptions,
+): ResolvedToolSettingsOptions {
   let defaults = GlobalConfig.get('toolSettings');
   defaults ??= {
     jvmMaxMemory: 512,
     jvmMemory: 512,
   };
 
-  const options: ToolSettingsOptions = {};
-
-  options.jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
-  options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
-  options.nodeMaxMemory ??= defaults?.nodeMaxMemory;
+  const jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
+  const options: ResolvedToolSettingsOptions = {
+    jvmMaxMemory,
+    jvmMemory: defaults?.jvmMemory ?? jvmMaxMemory,
+    nodeMaxMemory: defaults?.nodeMaxMemory,
+  };
 
   if (repoConfig !== undefined) {
     if (repoConfig.jvmMaxMemory) {
@@ -289,6 +302,6 @@ export function getToolSettingsOptions(
   return options;
 }
 
-export function gradleJvmArg(config: ToolSettingsOptions): string {
+export function gradleJvmArg(config: RepoToolSettingsOptions): string {
   return ` -Dorg.gradle.jvmargs="-Xms${config.jvmMemory}m -Xmx${config.jvmMaxMemory}m"`;
 }

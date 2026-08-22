@@ -1,27 +1,72 @@
+import { partial } from '~test/util.ts';
 import { NugetDatasource } from '../modules/datasource/nuget/index.ts';
+import type { HostRule } from '../types/index.ts';
 import {
+  type LegacyHostRule,
   add,
   clear,
+  confidentialFields,
   find,
   findAll,
   getAll,
   hostType,
   hosts,
 } from './host-rules.ts';
+import { redactedFields, sanitize } from './sanitize.ts';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
   });
 
+  it('registers every redactedFields entry that is a HostRule field for value-level sanitizing', () => {
+    // exhaustive check for fields of `HostRule`, to introduce a compile-time error when adding a new field to `HostRule`
+    const allHostRuleFields: Record<keyof HostRule, true> = {
+      authType: true,
+      token: true,
+      username: true,
+      password: true,
+      insecureRegistry: true,
+      timeout: true,
+      abortOnError: true,
+      abortIgnoreStatusCodes: true,
+      enabled: true,
+      enableHttp2: true,
+      concurrentRequestLimit: true,
+      maxRequestsPerSecond: true,
+      headers: true,
+      maxRetryAfter: true,
+      keepAlive: true,
+      artifactAuth: true,
+      httpsCertificateAuthority: true,
+      httpsPrivateKey: true,
+      httpsCertificate: true,
+      encrypted: true,
+      hostType: true,
+      matchHost: true,
+      resolvedHost: true,
+      readOnly: true,
+    };
+
+    const expectedConfidentialFields = redactedFields.filter(
+      (field) => field in allHostRuleFields,
+    );
+
+    expect([...confidentialFields].sort()).toEqual(
+      expectedConfidentialFields.sort(),
+    );
+  });
+
   describe('add()', () => {
     it('throws if both domainName and hostName', () => {
       expect(() =>
-        add({
-          hostType: 'azure',
-          domainName: 'github.com',
-          hostName: 'api.github.com',
-        } as never),
+        add(
+          partial<LegacyHostRule & HostRule>({
+            hostType: 'azure',
+            domainName: 'github.com',
+            hostName: 'api.github.com',
+          }),
+        ),
       ).toThrow(
         'hostRules cannot contain more than one host-matching field - use',
       );
@@ -29,11 +74,13 @@ describe('util/host-rules', () => {
 
     it('throws if both domainName and baseUrl', () => {
       expect(() =>
-        add({
-          hostType: 'azure',
-          domainName: 'github.com',
-          matchHost: 'https://api.github.com',
-        } as never),
+        add(
+          partial<LegacyHostRule & HostRule>({
+            hostType: 'azure',
+            domainName: 'github.com',
+            matchHost: 'https://api.github.com',
+          }),
+        ),
       ).toThrow(
         'hostRules cannot contain more than one host-matching field - use',
       );
@@ -41,11 +88,13 @@ describe('util/host-rules', () => {
 
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
-        add({
-          hostType: 'azure',
-          hostName: 'api.github.com',
-          matchHost: 'https://api.github.com',
-        } as never),
+        add(
+          partial<LegacyHostRule & HostRule>({
+            hostType: 'azure',
+            hostName: 'api.github.com',
+            matchHost: 'https://api.github.com',
+          }),
+        ),
       ).toThrow(
         'hostRules cannot contain more than one host-matching field - use',
       );
@@ -107,6 +156,20 @@ describe('util/host-rules', () => {
         username: 'user2',
       });
     });
+
+    it('sanitizes TLS credential values', () => {
+      add({
+        matchHost: 'https://some.endpoint',
+        httpsPrivateKey: 'private-key-value',
+        httpsCertificate: 'certificate-value',
+        httpsCertificateAuthority: 'certificate-authority-value',
+      });
+      expect(
+        sanitize(
+          'key=private-key-value cert=certificate-value ca=certificate-authority-value',
+        ),
+      ).toBe('key=**redacted** cert=**redacted** ca=**redacted**');
+    });
   });
 
   describe('find()', () => {
@@ -120,13 +183,15 @@ describe('util/host-rules', () => {
     });
 
     it('needs exact host matches', () => {
-      add({
-        hostType: NugetDatasource.id,
-        hostName: 'nuget.org',
-        username: 'root',
-        password: 'p4$$w0rd',
-        token: undefined,
-      } as never);
+      add(
+        partial<LegacyHostRule & HostRule>({
+          hostType: NugetDatasource.id,
+          hostName: 'nuget.org',
+          username: 'root',
+          password: 'p4$$w0rd',
+          token: undefined,
+        }),
+      );
       expect(find({ hostType: NugetDatasource.id })).toEqual({});
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.org' }),
@@ -159,10 +224,12 @@ describe('util/host-rules', () => {
     });
 
     it('matches on domainName', () => {
-      add({
-        domainName: 'github.com',
-        token: 'def',
-      } as never);
+      add(
+        partial<LegacyHostRule & HostRule>({
+          domainName: 'github.com',
+          token: 'def',
+        }),
+      );
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://api.github.com' })
           .token,
@@ -242,10 +309,12 @@ describe('util/host-rules', () => {
     });
 
     it('matches on hostName', () => {
-      add({
-        hostName: 'nuget.local',
-        token: 'abc',
-      } as never);
+      add(
+        partial<LegacyHostRule & HostRule>({
+          hostName: 'nuget.local',
+          token: 'abc',
+        }),
+      );
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' }),
       ).toEqual({ token: 'abc' });
@@ -369,11 +438,13 @@ describe('util/host-rules', () => {
         matchHost: 'https://nuget.local/api',
         token: 'abc',
       });
-      add({
-        hostType: NugetDatasource.id,
-        hostName: 'my.local.registry',
-        token: 'def',
-      } as never);
+      add(
+        partial<LegacyHostRule & HostRule>({
+          hostType: NugetDatasource.id,
+          hostName: 'my.local.registry',
+          token: 'def',
+        }),
+      );
       add({
         hostType: NugetDatasource.id,
         matchHost: 'another.local.registry',

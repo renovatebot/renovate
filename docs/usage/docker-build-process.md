@@ -54,9 +54,7 @@ flowchart TD
 ### Adding new tools
 
 If you, as a user, are looking to extend the tool support that Renovate has, for instance to install it via [`constraints`](./configuration-options.md#constraints), then you will need to [request a new tool](https://github.com/containerbase/base/issues/new?template=new-tool.yml).
-
-!!! note
-  In the future, there will be a [clearer guide](https://github.com/containerbase/base/issues/6570) for how to contribute tool support as a user.
+Once raised, you can then work through the ["how to add a new tool" documentation](https://github.com/containerbase/base/blob/HEAD/docs/new-tool.md).
 
 This tool will have its support added in `containerbase/base`, to allow Containerbase's `install-tool` command-line tool to install the tool.
 

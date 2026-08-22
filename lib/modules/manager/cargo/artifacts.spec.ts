@@ -546,11 +546,11 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool rust 1.65.0' +
           ' && ' +
           'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -623,11 +623,11 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool rust 1.65.0' +
           ' && ' +
           'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {

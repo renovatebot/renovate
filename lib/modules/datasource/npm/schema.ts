@@ -26,6 +26,8 @@ const Distribution = z.object({
 
 export const NpmResponseVersion = z.object({
   repository: RepositoryNpmResponse.optional(),
+  // `.catch()` drops non-string entries instead of invalidating the whole
+  // packument, e.g. some old `jsonfile`/`fs-extra` versions have `homepage: [...]`.
   homepage: z.string().optional().catch(undefined),
   deprecated: z.union([z.string(), z.boolean()]).optional(),
   gitHead: z.string().optional(),
@@ -41,15 +43,17 @@ export const NpmResponseVersion = z.object({
 });
 export type NpmResponseVersion = z.infer<typeof NpmResponseVersion>;
 
-export const CachedPackument = z.object({
-  versions: z.record(z.string(), NpmResponseVersion).optional(),
-  repository: Repository.optional(),
-  homepage: z.string().optional(),
-  // `LooseRecord` drops non-string entries (e.g. Artifactory's
-  // `"unpublished": null`) instead of invalidating the whole packument.
-  time: LooseRecord(z.string()).optional(),
-  'dist-tags': z.record(z.string(), z.string()).optional(),
-});
+export const CachedPackument = DeepNullish(
+  z.object({
+    versions: z.record(z.string(), NpmResponseVersion).optional(),
+    repository: Repository.optional(),
+    homepage: z.string().optional().catch(undefined),
+    // `LooseRecord` drops non-string entries (e.g. Artifactory's
+    // `"unpublished": null`) instead of invalidating the whole packument.
+    time: LooseRecord(z.string()).optional(),
+    'dist-tags': z.record(z.string(), z.string()).optional(),
+  }),
+);
 
 /**
  * Full NpmResponse schema — used when fetching from the npm registry.
@@ -64,7 +68,7 @@ export const NpmResponse = z.object({
   name: z.string().optional(),
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
   repository: RepositoryNpmResponse.optional(),
-  homepage: z.string().optional(),
+  homepage: z.string().optional().catch(undefined),
   time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });

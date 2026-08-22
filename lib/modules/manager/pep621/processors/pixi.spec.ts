@@ -184,11 +184,11 @@ requires-pixi = ">=0.40,<0.41"
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool pixi 0.40.1 ' +
             '&& ' +
             'pixi lock --no-progress --color=never --quiet' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -253,11 +253,11 @@ requires-pixi = ">=0.38,<0.39"
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool pixi 0.40.1 ' +
             '&& ' +
             'pixi lock --no-progress --color=never --quiet' +
-            '"',
+            "'",
         },
       ]);
     });

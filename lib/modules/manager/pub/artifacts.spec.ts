@@ -243,11 +243,11 @@ describe('modules/manager/pub/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             `install-tool ${params.sdk} 3.3.9` +
             ' && ' +
             `${params.sdk} pub upgrade ${depNamesWithSpace}` +
-            '"',
+            "'",
         },
       ]);
     });

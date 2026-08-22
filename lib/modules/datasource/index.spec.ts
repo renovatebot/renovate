@@ -707,16 +707,42 @@ describe('modules/datasource/index', () => {
           });
         });
 
-        it('merges registries and aborts on ExternalHostError', async () => {
+        it('keeps merged results when a registry throws ExternalHostError', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryUrls: [
+              'https://reg1.com',
+              'https://reg2.com',
+              'https://reg3.com',
+            ],
+          });
+          expect(res).toMatchObject({
+            releases: [
+              { registryUrl: 'https://reg1.com', version: '1.0.0' },
+              { registryUrl: 'https://reg2.com', version: '1.1.0' },
+            ],
+          });
+        });
+
+        it('returns results found after an ExternalHostError', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryUrls: ['https://reg3.com', 'https://reg1.com'],
+          });
+          expect(res).toMatchObject({
+            registryUrl: 'https://reg1.com',
+            releases: [{ version: '1.0.0' }],
+          });
+        });
+
+        it('aborts on ExternalHostError when no registry returned releases', async () => {
           await expect(
             getPkgReleases({
               datasource,
               packageName,
-              registryUrls: [
-                'https://reg1.com',
-                'https://reg2.com',
-                'https://reg3.com',
-              ],
+              registryUrls: ['https://reg3.com'],
             }),
           ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         });

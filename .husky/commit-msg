@@ -1,0 +1,12 @@
+#!/bin/sh
+if git stripspace --strip-comments <"$1" |
+  grep -Eiq '(closes|fixes|resolves|fixed|closed|resolved):?[[:space:]]+#[0-9]+'; then
+  echo
+  echo "Aborting commit."
+  echo "The commit message contains an issue closing keyword (closes, fixes, resolves, ...)."
+  echo "Put it in the pull request description instead, otherwise CI fails."
+  echo
+  echo "If you're sure you want to keep it, run git commit with the --no-verify flag."
+  echo
+  exit 1
+fi

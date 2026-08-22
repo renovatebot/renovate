@@ -101,13 +101,13 @@ describe('modules/manager/pep621/processors/pdm', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.11.2 ' +
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
             'pdm update --no-sync --update-eager dep1' +
-            '"',
+            "'",
         },
       ]);
     });

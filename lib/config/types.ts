@@ -23,6 +23,7 @@ import type {
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
   | 'global'
@@ -278,7 +279,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   onboardingAutoCloseAge?: number;
   productLinks?: Record<string, string>;
   rebaseAllOpenBranches?: boolean;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: GlobalToolSettingsOptions;
 }
 
 /**
@@ -498,7 +499,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -625,7 +626,8 @@ export interface PackageRule
 }
 
 export interface ValidationMessage {
-  topic: string;
+  // Topic is either the known list of topics, or a dynamically generated one
+  topic: ConfigValidationTopic | (string & {});
   message: string;
 }
 
@@ -851,8 +853,27 @@ export interface BumpVersionConfig {
   name?: string;
 }
 
-export interface ToolSettingsOptions {
+/**
+ * Global Config for specified `toolSettings` options.
+ *
+ */
+export interface GlobalToolSettingsOptions {
+  /** An upper limit on what the Java Virtual Machine's maximum memory can be set to. Repositories can specify <= this value */
   jvmMaxMemory?: number;
+  /** An upper limit on what the Java Virtual Machine's starting memory can be set to. Repositories can specify <= this value */
   jvmMemory?: number;
+  /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
+  nodeMaxMemory?: number;
+}
+
+/**
+ * Repository config options for `toolSettings` options.
+ */
+export interface RepoToolSettingsOptions {
+  /** The maximum memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMaxMemory?: number;
+  /** The starting memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMemory?: number;
+  /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
 }
