@@ -106,15 +106,9 @@ describe('workers/repository/update/pr/body/changelogs', () => {
         hasReleaseNotes: true,
       });
 
-      expect(res).toMatchInlineSnapshot(`
-        "
-
-        ---
-
-        Release notes for this update are in a comment on this PR.
-
-        "
-      `);
+      expect(res).toBe(
+        '\n\n---\n\nRelease notes for this update are in a comment on this PR.\n\n',
+      );
     });
   });
   describe('getChangelogsCommentContent', () => {
