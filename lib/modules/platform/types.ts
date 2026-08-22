@@ -1,5 +1,5 @@
 import type { DateTime } from 'luxon';
-import type { MergeStrategy } from '../../config/types.ts';
+import type { MergeStrategy, RenovateConfig } from '../../config/types.ts';
 import type { BranchStatus, HostRule } from '../../types/index.ts';
 import type { CommitFilesConfig } from '../../util/git/types.ts';
 import type { LongCommitSha } from '../../util/schema-utils/git.ts';
@@ -33,6 +33,7 @@ export interface RepoResult {
 }
 
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
+export type GitlabMergeRequestCommentType = 'note' | 'discussion';
 
 export interface RepoParams {
   repository: string;
@@ -252,6 +253,7 @@ export interface Platform {
     branchOrTag?: string,
   ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
+  configureRepo?(config: RenovateConfig): void;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(

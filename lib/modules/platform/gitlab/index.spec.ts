@@ -150,6 +150,48 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
+  describe('configureRepo()', () => {
+    it('uses the gitlabMergeRequestCommentType configuration if provided', async () => {
+      const scope = await initRepo();
+      gitlab.configureRepo({
+        gitlabMergeRequestCommentType: 'discussion',
+      });
+
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
+        .reply(200);
+
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        }),
+      ).toResolve();
+    });
+
+    it('uses "note" as the default fallback value', async () => {
+      const scope = await initRepo();
+      gitlab.configureRepo({});
+
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200);
+
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        }),
+      ).toResolve();
+    });
+  });
+
   describe('getRepos', () => {
     it('should throw an error if it receives an error', async () => {
       httpMock
@@ -1956,6 +1998,25 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
         .reply(200, [])
         .post('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200);
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        }),
+      ).toResolve();
+    });
+
+    it('adds a comment as a discussion when configured', async () => {
+      const scope = await initRepo();
+      gitlab.configureRepo({
+        gitlabMergeRequestCommentType: 'discussion',
+      });
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
         .reply(200);
       await expect(
         gitlab.ensureComment({
