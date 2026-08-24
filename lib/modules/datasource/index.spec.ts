@@ -353,6 +353,8 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, {
         id: datasource,
         customRegistrySupport: true,
+        releaseTimestampSupport: false,
+        sourceUrlSupport: 'none',
         defaultRegistryUrls: () => ['https://function-registry.com'],
         getReleases: ({ registryUrl }) =>
           Promise.resolve(
@@ -360,6 +362,7 @@ describe('modules/datasource/index', () => {
               ? { releases: [{ version: '2.0.0' }] }
               : null,
           ),
+        postprocessRelease: (_config, release) => Promise.resolve(release),
       });
       const res = await getPkgReleases({ datasource, packageName });
       expect(res).toMatchObject({ releases: [{ version: '2.0.0' }] });
@@ -369,8 +372,11 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, {
         id: datasource,
         customRegistrySupport: true,
+        releaseTimestampSupport: false,
+        sourceUrlSupport: 'none',
         defaultRegistryUrls: undefined,
         getReleases: vi.fn(),
+        postprocessRelease: (_config, release) => Promise.resolve(release),
       });
       expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
