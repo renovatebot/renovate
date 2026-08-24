@@ -198,6 +198,7 @@ function isStable(version: string): boolean {
   return true;
 }
 
+// Returns null when a component exceeds semver's 16-digit limit.
 function coerceNumeric(base: string, strictSemver: boolean): SemVer | null {
   if (strictSemver) {
     return coerce(base);
@@ -215,8 +216,7 @@ function getMajor(version: string): number | null {
   if (parsed?.scheme !== 'numeric') {
     return null;
   }
-  /* coerce always succeeds for `numeric` bases */
-  return coerceNumeric(parsed.base, parsed.strictSemver)!.major;
+  return coerceNumeric(parsed.base, parsed.strictSemver)?.major ?? null;
 }
 
 function getMinor(version: string): number | null {
@@ -224,8 +224,7 @@ function getMinor(version: string): number | null {
   if (parsed?.scheme !== 'numeric') {
     return null;
   }
-  /* coerce always succeeds for `numeric` bases */
-  return coerceNumeric(parsed.base, parsed.strictSemver)!.minor;
+  return coerceNumeric(parsed.base, parsed.strictSemver)?.minor ?? null;
 }
 
 function getPatch(version: string): number | null {
@@ -233,8 +232,7 @@ function getPatch(version: string): number | null {
   if (parsed?.scheme !== 'numeric') {
     return null;
   }
-  /* coerce always succeeds for `numeric` bases */
-  return coerceNumeric(parsed.base, parsed.strictSemver)!.patch;
+  return coerceNumeric(parsed.base, parsed.strictSemver)?.patch ?? null;
 }
 
 function equals(version: string, other: string): boolean {

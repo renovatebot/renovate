@@ -102,16 +102,18 @@ describe('modules/versioning/vcpkg/index', () => {
 
   describe('.getMajor/getMinor/getPatch(version)', () => {
     it.each`
-      input           | major   | minor   | patch
-      ${'1.2.3'}      | ${1}    | ${2}    | ${3}
-      ${'1.2.3#4'}    | ${1}    | ${2}    | ${3}
-      ${'1.2.3-rc.1'} | ${1}    | ${2}    | ${3}
-      ${'1.2'}        | ${1}    | ${2}    | ${0}
-      ${'1.2.3.4'}    | ${1}    | ${2}    | ${3}
-      ${'5'}          | ${5}    | ${0}    | ${0}
-      ${'2024-01-15'} | ${null} | ${null} | ${null}
-      ${'opaque'}     | ${null} | ${null} | ${null}
-      ${''}           | ${null} | ${null} | ${null}
+      input                  | major               | minor   | patch
+      ${'1.2.3'}             | ${1}                | ${2}    | ${3}
+      ${'1.2.3#4'}           | ${1}                | ${2}    | ${3}
+      ${'1.2.3-rc.1'}        | ${1}                | ${2}    | ${3}
+      ${'1.2'}               | ${1}                | ${2}    | ${0}
+      ${'1.2.3.4'}           | ${1}                | ${2}    | ${3}
+      ${'5'}                 | ${5}                | ${0}    | ${0}
+      ${'2024-01-15'}        | ${null}             | ${null} | ${null}
+      ${'opaque'}            | ${null}             | ${null} | ${null}
+      ${''}                  | ${null}             | ${null} | ${null}
+      ${'1234567890123456'}  | ${1234567890123456} | ${0}    | ${0}
+      ${'12345678901234567'} | ${null}             | ${null} | ${null}
     `('getMajor("$input")', ({ input, major, minor, patch }) => {
       expect(vcpkg.getMajor(input)).toBe(major);
       expect(vcpkg.getMinor(input)).toBe(minor);
