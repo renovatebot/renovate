@@ -450,6 +450,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         if (firstPageUrl.origin === resolvedUrl.origin) {
           let pages: HttpResponse<T>[];
           if (linkHeader?.last?.page) {
+            logger.debug('Using GitHub offset-based pagination');
             let lastPage = parseInt(linkHeader.last.page, 10);
             // v8 ignore else -- TODO: add test #40625
             if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
@@ -468,6 +469,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
             );
             pages = await p.all(queue);
           } else {
+            logger.debug('Using GitHub cursor-based pagination');
             pages = [];
             const paginateAll =
               !!env.RENOVATE_PAGINATE_ALL || httpOptions.paginate === 'all';
