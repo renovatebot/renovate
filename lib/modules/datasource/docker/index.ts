@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isArray, isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -926,6 +926,8 @@ export class DockerDatasource extends Datasource {
       {
         namespace: 'datasource-docker-tags',
         key: `${registryHost}:${dockerRepository}`,
+        cacheable: registryHost === DOCKER_HUB,
+        shouldCacheResult: isArray,
       },
       () => this._getTags(registryHost, dockerRepository),
     );

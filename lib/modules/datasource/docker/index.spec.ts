@@ -9,6 +9,7 @@ import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
@@ -1731,6 +1732,67 @@ describe('modules/datasource/docker/index', () => {
           currentDigest,
         ),
       ).toBe('amd64');
+    });
+  });
+
+  describe('getTags', () => {
+    it('does not cache private registry tags by default', async () => {
+      const datasource = new DockerDatasource();
+      const registryHost = 'https://no-cache.registry.example.com';
+      const dockerRepository = 'node';
+      const cacheGet = vi.spyOn(packageCache, 'get');
+      const cacheSet = vi.spyOn(packageCache, 'setWithRawTtl');
+
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/node/tags/list?n=10000')
+        .reply(200, '')
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] });
+
+      expect(await datasource.getTags(registryHost, dockerRepository)).toEqual([
+        '1.0.0',
+      ]);
+      expect(cacheGet).not.toHaveBeenCalled();
+      expect(cacheSet).not.toHaveBeenCalled();
+    });
+
+    it('does not cache failed private registry tag lookups', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+      const datasource = new DockerDatasource();
+      const registryHost = 'https://failed-cache.registry.example.com';
+      const dockerRepository = 'node';
+      const cacheSet = vi.spyOn(packageCache, 'setWithRawTtl');
+
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/node/tags/list?n=10000')
+        .reply(403);
+
+      expect(
+        await datasource.getTags(registryHost, dockerRepository),
+      ).toBeNull();
+      expect(cacheSet).not.toHaveBeenCalled();
+    });
+
+    it('caches successful private registry tag lookups when enabled', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+      const datasource = new DockerDatasource();
+      const registryHost = 'https://cached.registry.example.com';
+      const dockerRepository = 'node';
+      const cacheSet = vi.spyOn(packageCache, 'setWithRawTtl');
+
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/node/tags/list?n=10000')
+        .reply(200, '')
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] });
+
+      expect(await datasource.getTags(registryHost, dockerRepository)).toEqual([
+        '1.0.0',
+      ]);
+      expect(cacheSet).toHaveBeenCalledOnce();
     });
   });
 
