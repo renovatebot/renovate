@@ -69,15 +69,10 @@ function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
   return false;
 }
 
-function getMiseUpdatedLockFileContent(
-  manager: string,
+function getUpdatedLockFileContent(
   updatedDeps: BranchUpgradeConfig[],
   updatedFileContents: Record<string, string>,
 ): string | undefined {
-  if (manager !== 'mise') {
-    return undefined;
-  }
-
   for (const upgrade of updatedDeps) {
     const lockFiles = [upgrade.lockFile, ...(upgrade.lockFiles ?? [])];
     for (const lockFile of lockFiles) {
@@ -88,6 +83,23 @@ function getMiseUpdatedLockFileContent(
   }
 
   return undefined;
+}
+
+function removeUpdatedLockFileChanges(
+  packageFiles: FileChange[],
+  updatedDeps: BranchUpgradeConfig[],
+): void {
+  const lockFiles = new Set(
+    updatedDeps.flatMap((upgrade) => [
+      upgrade.lockFile,
+      ...(upgrade.lockFiles ?? []),
+    ]),
+  );
+  for (let index = packageFiles.length - 1; index >= 0; index -= 1) {
+    if (lockFiles.has(packageFiles[index].path)) {
+      packageFiles.splice(index, 1);
+    }
+  }
 }
 
 type FilePath = Pick<FileChange, 'path'>;
@@ -359,8 +371,7 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
-          newLockFileContent: getMiseUpdatedLockFileContent(
-            manager,
+          newLockFileContent: getUpdatedLockFileContent(
             updatedDeps,
             updatedFileContents,
           ),
@@ -370,12 +381,15 @@ export async function getUpdatedPackageFiles(
             packageFile.path,
           ),
         });
-        processUpdateArtifactResults(
+        const hasArtifactError = processUpdateArtifactResults(
           results,
           updatedArtifacts,
           artifactErrors,
           artifactNotices,
         );
+        if (hasArtifactError) {
+          removeUpdatedLockFileChanges(updatedPackageFiles, updatedDeps);
+        }
         if (isNonEmptyArray(results)) {
           await checkForPendingVersions(
             manager,
@@ -415,8 +429,7 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
-          newLockFileContent: getMiseUpdatedLockFileContent(
-            manager,
+          newLockFileContent: getUpdatedLockFileContent(
             updatedDeps,
             updatedFileContents,
           ),
@@ -544,7 +557,8 @@ function processUpdateArtifactResults(
   updatedArtifacts: FileChange[],
   artifactErrors: ArtifactError[],
   artifactNotices: ArtifactNotice[],
-): void {
+): boolean {
+  let hasArtifactError = false;
   if (isNonEmptyArray(results)) {
     for (const res of results) {
       const { file, notice, artifactError } = res;
@@ -554,6 +568,7 @@ function processUpdateArtifactResults(
 
       if (artifactError) {
         artifactErrors.push(artifactError);
+        hasArtifactError = true;
       }
 
       if (notice) {
@@ -561,6 +576,7 @@ function processUpdateArtifactResults(
       }
     }
   }
+  return hasArtifactError;
 }
 
 /**

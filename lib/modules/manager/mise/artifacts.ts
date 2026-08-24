@@ -108,6 +108,7 @@ function getMiseLockToolConstraints(
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
+  newPackageFileContent,
   newLockFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -208,6 +209,7 @@ export async function updateArtifacts({
     : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
+    await writeLocalFile(packageFileName, newPackageFileContent);
     if (newLockFileContent) {
       await writeLocalFile(lockFileName, newLockFileContent);
     }

@@ -251,6 +251,43 @@ describe('workers/repository/update/branch/get-updated', () => {
       );
     });
 
+    it('does not retain a hand-edited mise lockfile when artifact refresh fails', async () => {
+      config.upgrades.push({
+        packageFile: 'mise.toml',
+        manager: 'mise',
+        branchName: '',
+        lockFile: 'mise.lock',
+        isLockfileUpdate: true,
+        depName: 'node',
+        currentVersion: '20.0.0',
+        newVersion: '22.0.0',
+      });
+      git.getFile.mockResolvedValue('existing content');
+      mise.updateLockedDependency.mockReturnValueOnce({
+        status: 'updated',
+        files: {
+          'mise.toml': '[tools]\nnode = "22"\n',
+          'mise.lock': 'stale lock with target version',
+        },
+      });
+      mise.updateArtifacts.mockResolvedValueOnce([
+        { artifactError: { fileName: 'mise.lock', stderr: 'mise failed' } },
+      ]);
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.artifactErrors).toEqual([
+        { fileName: 'mise.lock', stderr: 'mise failed' },
+      ]);
+      expect(result.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'mise.toml',
+          contents: '[tools]\nnode = "22"\n',
+        },
+      ]);
+    });
+
     it.each([
       {
         name: 'an upgrade without a lockfile',

@@ -1411,6 +1411,26 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('allows the default v prefix for GitHub release selectors', async () => {
+      const lockFileContent = codeBlock`
+        [[tools."github:cli/cli"]]
+        version = "2.64.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "github:cli/cli" = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
+        currentValue: '2.64.0',
+        lockedVersion: '2.64.0',
+      });
+    });
+
     it('supports Java LTS selectors and leaves unsupported LTS tools unchanged', async () => {
       const ltsLockFileContent = codeBlock`
         [[tools.java]]

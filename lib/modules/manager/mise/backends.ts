@@ -133,6 +133,10 @@ export function createGithubToolConfig(
 
   if (isNonEmptyString(prefix)) {
     extractVersion = `^${RegExp.escape(prefix)}(?<version>.+)`;
+  } else {
+    // GitHub release tags commonly use a leading `v`, while mise lockfiles
+    // store the normalized version. Accept both forms from the datasource.
+    extractVersion = '^v?(?<version>.+)';
   }
 
   return {

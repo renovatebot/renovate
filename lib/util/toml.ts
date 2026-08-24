@@ -7,8 +7,7 @@ export function parseTOMLDocument(input: string): AST.TOMLProgram {
 }
 
 export function parse(input: string): unknown {
-  const ast = parseTOML(input, { tomlVersion: '1.1' });
-  return getStaticTOMLValue(ast);
+  return getStaticTOMLValue(parseTOMLDocument(input));
 }
 
 export function massage(input: string): string {

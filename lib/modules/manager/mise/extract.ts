@@ -9,6 +9,7 @@ import {
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
@@ -313,9 +314,12 @@ function getSelectorConfig(
   const { prefix, major, minor } = match.groups;
   const lockedPrefix = versionPrefixRegex.exec(lockedVersion)?.groups?.prefix;
   const effectivePrefix = prefix || lockedPrefix;
-  const prefixPattern = effectivePrefix
-    ? `(?:${RegExp.escape(effectivePrefix)})?`
-    : '';
+  let prefixPattern = '';
+  if (effectivePrefix) {
+    prefixPattern = `(?:${RegExp.escape(effectivePrefix)})?`;
+  } else if (datasource === GithubReleasesDatasource.id) {
+    prefixPattern = `(?:${RegExp.escape('v')})?`;
+  }
   const precisionPattern = minor
     ? `\\.${minor}(?:\\.|-|\\+|$)`
     : `(?:\\.|-|\\+|$)`;
