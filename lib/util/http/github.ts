@@ -40,6 +40,7 @@ import type {
 } from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
+const githubApiOrigin = 'https://api.github.com';
 let baseUrl = githubBaseUrl;
 export function setBaseUrl(url: string): void {
   baseUrl = url;
@@ -249,6 +250,17 @@ function constructAcceptString(input?: unknown): string {
 
 const MAX_GRAPHQL_PAGE_SIZE = 100;
 
+/**
+ * Absolute ceiling for REST cursor pagination, applied even to
+ * `paginate: 'all'`. Unlike page-number pagination there is no
+ * server-supplied total to bound the walk, so this is the only structural
+ * limit preventing an endlessly-repeating `rel="next"` chain from looping
+ * forever.
+ */
+const MAX_CURSOR_PAGES = 1000;
+
+const DEFAULT_PAGE_LIMIT = 10;
+
 interface GraphqlPageCacheItem {
   pageLastResizedAt: string;
   pageSize: number;
@@ -331,6 +343,38 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
 function replaceUrlBase(url: URL, baseUrl: string): URL {
   const relativeUrl = `${url.pathname}${url.search}`;
   return new URL(relativeUrl, baseUrl);
+}
+
+/**
+ * Resolve a pagination link into a URL we are allowed to follow, or `null` if
+ * it points to another origin. Called for every hop of a pagination chain, not
+ * just the first one, so the chain cannot escape the origin midway through.
+ */
+function resolvePaginationUrl(
+  link: string,
+  requestUrl: URL,
+  baseUrl: string | undefined,
+  rebaseLinks: boolean,
+): URL | null {
+  let pageUrl = new URL(link, baseUrl);
+  if (
+    baseUrl &&
+    rebaseLinks &&
+    // Preserve github.com URLs for use cases like release notes
+    pageUrl.origin !== githubApiOrigin
+  ) {
+    pageUrl = replaceUrlBase(pageUrl, baseUrl);
+  }
+  // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
+  if (pageUrl.origin !== requestUrl.origin) {
+    // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+    logger.once.warn(
+      { requestHost: requestUrl.host, paginationHost: pageUrl.host },
+      'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+    );
+    return null;
+  }
+  return pageUrl;
 }
 
 export class GithubHttp extends HttpBase<GithubHttpOptions> {
@@ -419,40 +463,95 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       delete httpOptions.cacheProvider;
       httpOptions.memCache = false;
       // Check if result is paginated
-      const pageLimit = httpOptions.pageLimit ?? 10;
+      const pageLimit = httpOptions.pageLimit ?? DEFAULT_PAGE_LIMIT;
       const linkHeader = parseLinkHeader(result?.headers?.link);
       const next = linkHeader?.next;
       const env = getEnv();
-      if (next?.url && linkHeader?.last?.page) {
-        let lastPage = parseInt(linkHeader.last.page, 10);
-        // v8 ignore else -- TODO: add test #40625
-        if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
-          lastPage = Math.min(pageLimit, lastPage);
-        }
+      if (next?.url) {
+        const unlimited =
+          !!env.RENOVATE_PAGINATE_ALL || httpOptions.paginate === 'all';
         const baseUrl = httpOptions.baseUrl ?? this.baseUrl;
-        const parsedUrl = new URL(next.url, baseUrl);
-        const rebasePagination =
-          !!baseUrl &&
-          !!env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
-          // Preserve github.com URLs for use cases like release notes
-          parsedUrl.origin !== 'https://api.github.com';
-        const firstPageUrl = rebasePagination
-          ? replaceUrlBase(parsedUrl, baseUrl)
-          : parsedUrl;
-        // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
-        if (firstPageUrl.origin === resolvedUrl.origin) {
-          const queue = [...range(2, lastPage)].map(
-            (pageNumber) => (): Promise<HttpResponse<T>> => {
-              // copy before modifying searchParams
-              const nextUrl = parseUrl(firstPageUrl.toString())!;
-              nextUrl.searchParams.set('page', String(pageNumber));
-              return super.requestJsonUnsafe<T>(method, {
-                ...opts,
-                url: nextUrl,
-              });
-            },
-          );
-          const pages = await p.all(queue);
+        const rebaseLinks = !!env.RENOVATE_X_REBASE_PAGINATION_LINKS;
+        const firstPageUrl = resolvePaginationUrl(
+          next.url,
+          resolvedUrl,
+          baseUrl,
+          rebaseLinks,
+        );
+        if (firstPageUrl) {
+          let pages: HttpResponse<T>[];
+          if (linkHeader?.last?.page) {
+            // Page-number pagination: the last page number is known up front,
+            // so the remaining pages can be fetched in parallel.
+            let lastPage = parseInt(linkHeader.last.page, 10);
+            // v8 ignore else -- TODO: add test #40625
+            if (!unlimited) {
+              lastPage = Math.min(pageLimit, lastPage);
+            }
+            const queue = [...range(2, lastPage)].map(
+              (pageNumber) => (): Promise<HttpResponse<T>> => {
+                // copy before modifying searchParams
+                const nextUrl = parseUrl(firstPageUrl.toString())!;
+                nextUrl.searchParams.set('page', String(pageNumber));
+                return super.requestJsonUnsafe<T>(method, {
+                  ...opts,
+                  url: nextUrl,
+                });
+              },
+            );
+            pages = await p.all(queue);
+          } else {
+            // Cursor pagination, used by endpoints such as
+            // `/repos/{owner}/{repo}/dependabot/alerts`. They never send
+            // `rel="last"`, and each response only reveals the next opaque
+            // cursor, so the pages must be walked sequentially rather than
+            // fanned out. Without this branch only the first page was ever
+            // fetched.
+            pages = [];
+            const maxPages = unlimited
+              ? MAX_CURSOR_PAGES
+              : Math.min(pageLimit - 1, MAX_CURSOR_PAGES);
+            const seenPageUrls = new Set<string>([firstPageUrl.href]);
+            let cursorUrl: URL | null = firstPageUrl;
+            while (cursorUrl && pages.length < maxPages) {
+              const page: HttpResponse<T> = await super.requestJsonUnsafe<T>(
+                method,
+                { ...opts, url: cursorUrl },
+              );
+              pages.push(page);
+              const nextLink = parseLinkHeader(page.headers.link)?.next?.url;
+              cursorUrl = nextLink
+                ? resolvePaginationUrl(
+                    nextLink,
+                    resolvedUrl,
+                    baseUrl,
+                    rebaseLinks,
+                  )
+                : null;
+              if (cursorUrl) {
+                // A cursor that repeats a URL we already fetched would loop
+                // forever, so stop instead of trusting the server to terminate.
+                if (seenPageUrls.has(cursorUrl.href)) {
+                  logger.once.warn(
+                    { url: resolvedUrl.href },
+                    'GitHub cursor pagination did not advance; results may be truncated.',
+                  );
+                  cursorUrl = null;
+                } else {
+                  seenPageUrls.add(cursorUrl.href);
+                }
+              }
+            }
+            // Reaching the cap with a `next` link still pending means the
+            // caller silently got partial results, which is exactly the class
+            // of bug this branch exists to fix. Say so.
+            if (cursorUrl) {
+              logger.once.warn(
+                { url: resolvedUrl.href, maxPages },
+                'GitHub cursor pagination stopped before the last page; results are truncated. Increase `pageLimit` or use `paginate: "all"` to fetch more.',
+              );
+            }
+          }
           // v8 ignore else -- TODO: add test #40625
           if (httpOptions.paginationField && isPlainObject(result.body)) {
             const paginatedResult = result.body[httpOptions.paginationField];
@@ -478,15 +577,6 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
               }
             }
           }
-        } else {
-          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
-          logger.once.warn(
-            {
-              requestHost: resolvedUrl.host,
-              paginationHost: firstPageUrl.host,
-            },
-            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
-          );
         }
       }
     }

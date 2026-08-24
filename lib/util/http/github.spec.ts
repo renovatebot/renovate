@@ -327,6 +327,110 @@ describe('util/http/github', () => {
       );
     });
 
+    it('paginates cursor-based endpoints which have no `last` link', async () => {
+      // Endpoints like `/repos/{owner}/{repo}/dependabot/alerts` only ever
+      // reveal the next opaque cursor, so the chain must be walked
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${githubApiHost}${url}&after=c2>; rel="next"`,
+        })
+        .get(`${url}&after=c2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${githubApiHost}${url}&after=e3>; rel="next", <${githubApiHost}${url}&before=c1>; rel="prev"`,
+        })
+        .get(`${url}&after=e3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('stops cursor pagination at the page limit', async () => {
+      const url = '/some-url?per_page=1';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a'], {
+          link: `<${githubApiHost}${url}&after=b>; rel="next"`,
+        })
+        .get(`${url}&after=b`)
+        .reply(200, ['b'], {
+          link: `<${githubApiHost}${url}&after=c>; rel="next"`,
+        });
+      const res = await githubApi.getJsonUnchecked(url, {
+        paginate: true,
+        pageLimit: 2,
+      });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ maxPages: 1 }),
+        'GitHub cursor pagination stopped before the last page; results are truncated. Increase `pageLimit` or use `paginate: "all"` to fetch more.',
+      );
+    });
+
+    it('ignores the page limit for cursor pagination when paginating all', async () => {
+      const url = '/some-url?per_page=1';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a'], {
+          link: `<${githubApiHost}${url}&after=b>; rel="next"`,
+        })
+        .get(`${url}&after=b`)
+        .reply(200, ['b'], {
+          link: `<${githubApiHost}${url}&after=c>; rel="next"`,
+        })
+        .get(`${url}&after=c`)
+        .reply(200, ['c']);
+      const res = await githubApi.getJsonUnchecked(url, {
+        paginate: 'all',
+        pageLimit: 1,
+      });
+      expect(res.body).toEqual(['a', 'b', 'c']);
+    });
+
+    it('stops cursor pagination when the cursor does not advance', async () => {
+      const url = '/some-url?per_page=1';
+      const link = `<${githubApiHost}${url}&after=b>; rel="next"`;
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a'], { link })
+        .get(`${url}&after=b`)
+        .reply(200, ['b'], { link });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: 'all' });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'GitHub cursor pagination did not advance; results may be truncated.',
+      );
+    });
+
+    it('does not follow cursor pagination links to a different origin', async () => {
+      const url = '/some-url?per_page=1';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a'], {
+          link: `<${githubApiHost}${url}&after=b>; rel="next"`,
+        })
+        .get(`${url}&after=b`)
+        .reply(200, ['b'], {
+          link: `<https://attacker.example.com${url}&after=c>; rel="next"`,
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: 'all' });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestHost: 'api.github.com',
+          paginationHost: 'attacker.example.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+      );
+    });
+
     describe('handleGotError', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(
