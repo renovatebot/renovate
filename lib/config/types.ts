@@ -403,6 +403,7 @@ export interface RenovateConfig
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   description?: string | string[];
+  overrideDescription?: string | string[];
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;

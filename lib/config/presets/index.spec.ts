@@ -247,15 +247,38 @@ describe('config/presets/index', () => {
     it('works with valid', async () => {
       // @ts-expect-error -- invalid config
       config.foo = 1;
-      config.ignoreDeps = [];
       config.extends = [':pinVersions'];
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
+        description: [
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
+        ],
         foo: 1,
-        ignoreDeps: [],
         rangeStrategy: 'pin',
       });
       expect(res.rangeStrategy).toBe('pin');
+    });
+
+    it('replaces preset descriptions with overrideDescription', async () => {
+      config.overrideDescription = ['Pin everything.'];
+      config.extends = [':pinVersions'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        description: ['Pin everything.'],
+        rangeStrategy: 'pin',
+      });
+    });
+
+    it('ignores empty overrideDescription', async () => {
+      config.overrideDescription = [];
+      config.extends = [':pinVersions'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        description: [
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
+        ],
+        rangeStrategy: 'pin',
+      });
     });
 
     it('throws if valid and invalid', async () => {

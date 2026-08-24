@@ -284,10 +284,6 @@ export async function resolveConfigPresets(
             existingPresets.concat([preset]),
             mergeInternalPresets,
           );
-        if (inputConfig?.ignoreDeps?.length === 0) {
-          delete presetConfig.description;
-        }
-
         config = mergeChildConfig(config, presetConfig);
         allVisitedPresets.merged.add(preset);
 
@@ -307,6 +303,12 @@ export async function resolveConfigPresets(
   config = mergeChildConfig(config, inputConfig);
   delete config.extends;
   delete config.ignorePresets;
+  // Any description of this config replaces the ones collated from its presets.
+  // Check the length, because array options default to an empty array.
+  if (config.overrideDescription?.length) {
+    config.description = config.overrideDescription;
+  }
+  delete config.overrideDescription;
   logger.trace({ config }, `Post-merge resolve config`);
   for (const [key, val] of Object.entries(config) as [
     keyof AllConfig,
