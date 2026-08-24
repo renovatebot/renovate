@@ -28,6 +28,16 @@ export abstract class Datasource implements DatasourceApi {
 
   defaultRegistryUrls?: string[] | (() => string[]);
 
+  getDefaultRegistryUrls(_packageName: string): string[] | undefined {
+    return typeof this.defaultRegistryUrls === 'function'
+      ? this.defaultRegistryUrls()
+      : this.defaultRegistryUrls;
+  }
+
+  supportsCustomRegistry(_packageName: string): boolean {
+    return this.customRegistrySupport;
+  }
+
   defaultVersioning?: string | undefined;
 
   registryStrategy: RegistryStrategy | undefined = 'first';

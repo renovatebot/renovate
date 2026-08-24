@@ -13,11 +13,21 @@ export class JavaVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  override readonly customRegistrySupport = false;
 
   override readonly defaultRegistryUrls = [adoptiumRegistryUrl];
 
   override readonly caching = true;
+
+  override getDefaultRegistryUrls(packageName: string): string[] {
+    return packageName.includes('oracle-graalvm')
+      ? [graalvmRegistryUrl]
+      : [adoptiumRegistryUrl];
+  }
+
+  override supportsCustomRegistry(packageName: string): boolean {
+    return packageName.includes('oracle-graalvm');
+  }
 
   private async _getReleases({
     registryUrl,

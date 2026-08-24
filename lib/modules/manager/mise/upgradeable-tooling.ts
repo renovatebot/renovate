@@ -144,7 +144,7 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
       if (oracleGraalvmJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
-          packageName: 'oracle-graalvm-jdk?system=true',
+          packageName: 'oracle-graalvm-jdk',
           currentValue: oracleGraalvmJdkMatches.version,
           ...shortJavaVersioning(oracleGraalvmJdkMatches.version),
         };

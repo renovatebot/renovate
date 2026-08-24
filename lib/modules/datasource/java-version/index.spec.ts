@@ -8,7 +8,6 @@ import { getPkgReleases } from '../index.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
 import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
 import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
-import { JavaVersionDatasource } from './index.ts';
 
 function getPath(page: number, imageType = 'jdk', args = ''): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC${args}&page=${page}`;
@@ -375,12 +374,10 @@ describe('modules/datasource/java-version/index', () => {
       });
 
       it('returns null when system detection fails', async () => {
-        vi.spyOn(process, 'arch', 'get').mockReturnValueOnce(
-          'unsupported' as any,
-        );
-        vi.spyOn(process, 'platform', 'get').mockReturnValueOnce(
-          'unsupported' as any,
-        );
+        // @ts-expect-error - test unsupported architecture
+        vi.spyOn(process, 'arch', 'get').mockReturnValueOnce('unsupported');
+        // @ts-expect-error - test unsupported platform
+        vi.spyOn(process, 'platform', 'get').mockReturnValueOnce('unsupported');
         const res = await getPkgReleases({
           datasource,
           packageName: 'oracle-graalvm-jdk?system=true',
@@ -390,9 +387,8 @@ describe('modules/datasource/java-version/index', () => {
 
       it('returns null when only OS is missing', async () => {
         vi.spyOn(process, 'arch', 'get').mockReturnValueOnce('x64');
-        vi.spyOn(process, 'platform', 'get').mockReturnValueOnce(
-          'unsupported' as any,
-        );
+        // @ts-expect-error - test unsupported platform
+        vi.spyOn(process, 'platform', 'get').mockReturnValueOnce('unsupported');
         const res = await getPkgReleases({
           datasource,
           packageName: 'oracle-graalvm-jdk?system=true',
@@ -401,9 +397,8 @@ describe('modules/datasource/java-version/index', () => {
       });
 
       it('returns null when only architecture is missing', async () => {
-        vi.spyOn(process, 'arch', 'get').mockReturnValueOnce(
-          'unsupported' as any,
-        );
+        // @ts-expect-error - test unsupported architecture
+        vi.spyOn(process, 'arch', 'get').mockReturnValueOnce('unsupported');
         vi.spyOn(process, 'platform', 'get').mockReturnValueOnce('linux');
         const res = await getPkgReleases({
           datasource,
@@ -543,8 +538,8 @@ describe('modules/datasource/java-version/index', () => {
           .scope(graalvmRegistryUrl)
           .get('/jvm/ga/linux/x86_64.json')
           .reply(200, oracleGraalvmJdkReleases);
-        const ds = new JavaVersionDatasource();
-        const res = await ds.getReleases({
+        const res = await getPkgReleases({
+          datasource,
           packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
         });
         expect(res?.releases).toHaveLength(3);

@@ -53,7 +53,7 @@ export async function getGraalvmReleases(
     const filteredReleases = response.body
       .filter((release) => {
         return (
-          release.vendor === 'oracle-graalvm' &&
+          release.vendor === pkgConfig.vendor &&
           release.image_type === pkgConfig.imageType
         );
       })
