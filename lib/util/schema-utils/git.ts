@@ -7,8 +7,18 @@ export const LongCommitSha = z
   .brand('LongCommitSha');
 export type LongCommitSha = z.infer<typeof LongCommitSha>;
 
+export const ShortCommitSha = z
+  .string()
+  .regex(regEx(/^[a-f0-9]{6,7}$/))
+  .brand('ShortCommitSha');
+export type ShortCommitSha = z.infer<typeof ShortCommitSha>;
+
 export function isLongCommitSha(value: unknown): value is LongCommitSha {
   return LongCommitSha.safeParse(value).success;
+}
+
+export function isShortCommitSha(value: unknown): value is ShortCommitSha {
+  return ShortCommitSha.safeParse(value).success;
 }
 
 export function toLongCommitSha(value: unknown): LongCommitSha {
