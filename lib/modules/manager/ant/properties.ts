@@ -1,5 +1,5 @@
 import type { XmlElement } from 'xmldoc';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import type { PackageDependency } from '../types.ts';
 import type { AntProp } from './types.ts';
 
@@ -25,7 +25,7 @@ export function findAttrValuePosition(
   const tagContent = content.slice(startTag, tagEnd + 1);
 
   const attrPattern = regEx(
-    `${escapeRegExp(attrName)}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`,
+    `${RegExp.escape(attrName)}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`,
   );
   const match = attrPattern.exec(tagContent)!;
 

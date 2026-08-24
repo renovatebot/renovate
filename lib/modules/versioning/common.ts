@@ -1,6 +1,8 @@
 import { regEx } from '../../util/regex.ts';
 import type { VersioningApi, VersioningApiConstructor } from './types.ts';
 
+export const markdownLinkRegex = regEx(/\[[^\]]+\]\([^)]+\)/);
+
 export function isVersioningApiConstructor(
   obj: VersioningApi | VersioningApiConstructor,
 ): obj is VersioningApiConstructor {

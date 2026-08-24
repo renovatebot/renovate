@@ -367,6 +367,7 @@ const staticGroups = {
           '!docker.io/calico/node',
           '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
+          '!docker.io/kindest/node',
         ],
       },
     ],

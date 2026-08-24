@@ -4,6 +4,7 @@ import {
   ATTR_VCS_REPOSITORY_NAME,
 } from '@opentelemetry/semantic-conventions/incubating';
 import {
+  isNonEmptyObject,
   isNonEmptyString,
   isNonEmptyStringAndNotWhitespace,
   isString,
@@ -18,8 +19,10 @@ import { resolveConfigPresets } from '../../config/presets/index.ts';
 import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
 import type {
   AllConfig,
+  InternalGlobalConfigOptions,
   RenovateConfig,
   RenovateRepository,
+  RepoGlobalConfig,
 } from '../../config/types.ts';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.ts';
@@ -44,6 +47,17 @@ import { parseConfigs } from './config/parse/index.ts';
 import { globalFinalize, globalInitialize } from './initialize.ts';
 import { isLimitReached } from './limits.ts';
 
+function applyGlobalOption<
+  K extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
+>(
+  target: RepoGlobalConfig & InternalGlobalConfigOptions,
+  source: RepoGlobalConfig & InternalGlobalConfigOptions,
+  key: K,
+): void {
+  target[key] = source[key];
+  delete source[key];
+}
+
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
   repository: RenovateRepository,
@@ -58,9 +72,21 @@ export async function getRepositoryConfig(
 
   if (!repoIsString) {
     const { repository: _repository, ...repositoryEntryConfig } = repository;
-    // mergeRenovateConfig later resolves this repositories[] object-entry
-    // config in the correct order
-    repoConfig.repositoryEntryConfig = repositoryEntryConfig;
+
+    // Promote GlobalConfig.OPTIONS keys into repoConfig directly so that
+    // GlobalConfig.set(repoConfig) in the repository worker picks them up
+    // with per-repo overrides before onboarding checks run.
+    for (const option of GlobalConfig.OPTIONS) {
+      if (option in repositoryEntryConfig) {
+        applyGlobalOption(repoConfig, repositoryEntryConfig, option);
+      }
+    }
+
+    if (isNonEmptyObject(repositoryEntryConfig)) {
+      // mergeRenovateConfig later resolves this repositories[] object-entry
+      // config in the correct order
+      repoConfig.repositoryEntryConfig = repositoryEntryConfig;
+    }
   }
 
   const repoParts = repoName.split('/');
@@ -139,6 +165,12 @@ export async function start(): Promise<number> {
     if (isNonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
       addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
+    if (isNonEmptyStringAndNotWhitespace(env.COREPACK_NPM_TOKEN)) {
+      addSecretForSanitizing(env.COREPACK_NPM_TOKEN, 'global');
+    }
+    if (isNonEmptyStringAndNotWhitespace(env.COREPACK_NPM_PASSWORD)) {
+      addSecretForSanitizing(env.COREPACK_NPM_PASSWORD, 'global');
+    }
 
     await instrument('config', async () => {
       // read global config from file, env and cli args
@@ -191,7 +223,7 @@ export async function start(): Promise<number> {
       }
 
       const { owner, repo } = repositoryToOwnerAndRepo(
-        typeof repository === 'string' ? repository : repository.repository,
+        isString(repository) ? repository : repository.repository,
       );
 
       await instrument(
@@ -218,10 +250,9 @@ export async function start(): Promise<number> {
             [ATTR_VCS_OWNER_NAME]: owner,
             [ATTR_VCS_REPOSITORY_NAME]: repo,
             /** @deprecated TODO remove */
-            repository:
-              typeof repository === 'string'
-                ? repository
-                : repository.repository,
+            repository: isString(repository)
+              ? repository
+              : repository.repository,
           },
         },
       );

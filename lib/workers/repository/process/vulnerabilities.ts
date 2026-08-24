@@ -170,6 +170,7 @@ export class Vulnerabilities {
 
     const packageName = dep.packageName ?? dep.depName!;
     let osvPackageName = packageName;
+    let depType: string | undefined;
     if (ecosystem === 'PyPI') {
       // https://peps.python.org/pep-0503/#normalized-names
       osvPackageName = osvPackageName
@@ -181,6 +182,7 @@ export class Vulnerabilities {
         return null;
       }
       osvPackageName = 'stdlib';
+      depType = dep.depType;
     }
 
     try {
@@ -264,6 +266,7 @@ export class Vulnerabilities {
             osvPackageName,
             vulnerability: osvVulnerability,
             affected,
+            depType,
             depVersion,
             fixedVersion,
             datasource: dep.datasource!,
@@ -406,9 +409,14 @@ export class Vulnerabilities {
     osvPackageName: string,
     affected: Osv.Affected,
   ): boolean {
+    const pkg = affected.package;
+    if (pkg?.name !== osvPackageName) {
+      return false;
+    }
+
+    // Match exact ecosystems and OSV sub-ecosystems (e.g. Packagist:https://packages.drupal.org/8).
     return (
-      affected.package?.name === osvPackageName &&
-      affected.package?.ecosystem === ecosystem
+      pkg.ecosystem === ecosystem || pkg.ecosystem.startsWith(`${ecosystem}:`)
     );
   }
 
@@ -565,6 +573,7 @@ export class Vulnerabilities {
       vulnerability,
       affected,
       packageName,
+      depType,
       depVersion,
       fixedVersion,
       datasource,
@@ -597,6 +606,7 @@ export class Vulnerabilities {
     return {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
+      ...(depType ? { matchDepTypes: [depType] } : {}),
       matchCurrentVersion: depVersion,
       versioning,
       allowedVersions: fixedVersion,
@@ -635,11 +645,14 @@ export class Vulnerabilities {
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
         return `[${id}](https://nvd.nist.gov/vuln/detail/${id})`;
-      } else if (id.startsWith('GHSA-')) {
+      }
+      if (id.startsWith('GHSA-')) {
         return `[${id}](https://github.com/advisories/${id})`;
-      } else if (id.startsWith('GO-')) {
+      }
+      if (id.startsWith('GO-')) {
         return `[${id}](https://pkg.go.dev/vuln/${id})`;
-      } else if (id.startsWith('RUSTSEC-')) {
+      }
+      if (id.startsWith('RUSTSEC-')) {
         return `[${id}](https://rustsec.org/advisories/${id}.html)`;
       }
 

@@ -32,7 +32,12 @@ import {
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';
-import { getExpectedPrList } from './pr-list.ts';
+import {
+  getPackageFilesDesc,
+  getPackageFilesSummary,
+} from './package-files.ts';
+import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
+import type { OnboardingPrSections } from './types.ts';
 
 /**
  * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.
@@ -79,6 +84,115 @@ async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
     return true;
   }
   return false;
+}
+
+/**
+ * Full onboarding PRs list package files before the PR list.
+ */
+const FULL_SECTION_ORDER = [
+  'PACKAGE FILES',
+  'CONFIG',
+  'BASEBRANCH',
+  'PRLIST',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
+/**
+ * "Summarised" onboarding PRs list PRs before other sections.
+ */
+const SUMMARY_SECTION_ORDER = [
+  'PRLIST',
+  'CONFIG',
+  'BASEBRANCH',
+  'PACKAGE FILES',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
+function buildOnboardingPrTemplate(
+  config: RenovateConfig,
+  configFile: string,
+  rebaseCheckBox: string,
+  sectionOrder: readonly string[],
+): string {
+  let prTemplate = `Welcome to [Renovate](${
+    GlobalConfig.get('productLinks').homepage
+  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
+  prTemplate +=
+    getInheritedOrGlobal('requireConfig') === 'required'
+      ? emojify(
+          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
+        )
+      : emojify(
+          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
+        );
+
+  prTemplate += emojify(
+    `:books: See our [Reading List](${GlobalConfig.get('productLinks').documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+  );
+
+  prTemplate += emojify(
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
+  );
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
+  prTemplate += '\n\n';
+  // TODO #22198
+  prTemplate += emojify(
+    `
+
+---
+${sectionOrder.map((section) => `{{${section}}}`).join('\n')}
+
+---
+
+:question: Got questions? Check out Renovate's [Docs](${
+      GlobalConfig.get('productLinks').documentation
+    }), particularly the Getting Started section.
+If you need any further assistance then you can also [request help here](${
+      GlobalConfig.get('productLinks').help
+    }).
+`,
+  );
+  prTemplate += rebaseCheckBox;
+  return prTemplate;
+}
+
+function fillOnboardingPrBody(
+  prTemplate: string,
+  sections: OnboardingPrSections,
+): string {
+  let prBody = prTemplate;
+  if (sections.packageFiles) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', sections.packageFiles)}\n`;
+  } else {
+    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
+  }
+  prBody = prBody.replace('{{CONFIG}}\n', sections.config);
+  prBody = prBody.replace('{{WARNINGS}}\n', sections.warnings);
+  prBody = prBody.replace('{{ERRORS}}\n', sections.errors);
+  prBody = prBody.replace('{{BASEBRANCH}}\n', sections.baseBranch);
+  prBody = prBody.replace('{{PRLIST}}\n', sections.prList);
+  return prBody;
+}
+
+function finalizeOnboardingPrBody(
+  prBody: string,
+  config: RenovateConfig,
+  onboardingConfigHashComment: string,
+): string {
+  let finalPrBody = prBody;
+  if (isString(config.prHeader)) {
+    finalPrBody = `${template.compile(config.prHeader, config)}\n\n${finalPrBody}`;
+  }
+  if (isString(config.prFooter)) {
+    finalPrBody = `${finalPrBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
+  }
+  return finalPrBody + onboardingConfigHashComment;
 }
 
 export async function ensureOnboardingPr(
@@ -136,71 +250,10 @@ export async function ensureOnboardingPr(
 
   const onboardingConfigHashComment = await getOnboardingConfigHashComment();
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
-  logger.debug('Filling in onboarding PR template');
-  let prTemplate = `Welcome to [Renovate](${
-    config.productLinks!.homepage
-  })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
-  prTemplate +=
-    getInheritedOrGlobal('requireConfig') === 'required'
-      ? emojify(
-          `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
-        )
-      : emojify(
-          `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
-        );
-
-  prTemplate += emojify(
-    `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
-  );
-
   const configFile = getDefaultConfigFileName();
-  prTemplate += emojify(
-    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
-  );
-  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
-    config.onboardingRebaseCheckbox
-      ? ' and select the Retry/Rebase checkbox below'
-      : ''
-  }. Renovate will update the Pull Request description the next time it runs.`;
-  prTemplate += '\n\n';
-  // TODO #22198
-  prTemplate += emojify(
-    `
+  logger.debug('Filling in onboarding PR template');
 
----
-{{PACKAGE FILES}}
-{{CONFIG}}
-{{BASEBRANCH}}
-{{PRLIST}}
-{{WARNINGS}}
-{{ERRORS}}
-
----
-
-:question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks!.documentation
-    }), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${
-      config.productLinks!.help
-    }).
-`,
-  );
-  prTemplate += rebaseCheckBox;
-  let prBody = prTemplate;
-  if (packageFiles && Object.entries(packageFiles).length) {
-    let files: string[] = [];
-    for (const [manager, managerFiles] of Object.entries(packageFiles)) {
-      files = files.concat(
-        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
-      );
-    }
-    prBody = `${prBody.replace(
-      '{{PACKAGE FILES}}',
-      `### Detected Package Files\n\n${files.join('\n')}`,
-    )}\n`;
-  } else {
-    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
-  }
+  const packageFilesDesc = getPackageFilesDesc(packageFiles);
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#22198)
@@ -208,22 +261,66 @@ If you need any further assistance then you can also [request help here](${
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
-  prBody = prBody.replace('{{CONFIG}}\n', configDesc);
-  prBody = prBody.replace(
-    '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config),
-  );
-  prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
-  prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
-  prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
-  if (isString(config.prHeader)) {
-    prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
-  }
-  if (isString(config.prFooter)) {
-    prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
-  }
+  const warnings =
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config);
+  const errors = getErrors(config);
+  const baseBranchDesc = getBaseBranchDesc(config);
+  const prList = getExpectedPrList(config, branches);
 
-  prBody += onboardingConfigHashComment;
+  let prBody = finalizeOnboardingPrBody(
+    fillOnboardingPrBody(
+      buildOnboardingPrTemplate(
+        config,
+        configFile,
+        rebaseCheckBox,
+        FULL_SECTION_ORDER,
+      ),
+      {
+        packageFiles: packageFilesDesc,
+        config: configDesc,
+        baseBranch: baseBranchDesc,
+        prList,
+        warnings,
+        errors,
+      },
+    ),
+    config,
+    onboardingConfigHashComment,
+  );
+
+  if (prBody.length > platform.maxBodyLength()) {
+    logger.debug(
+      'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+    );
+    const prListSummary = getExpectedPrListSummary(config, branches);
+    if (packageFilesDesc) {
+      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
+      // "What to Expect" should render before "Detected Package Files" in the summary view,
+      // so rebuild from a template with that section order rather than reordering the rendered body.
+      prBody = finalizeOnboardingPrBody(
+        fillOnboardingPrBody(
+          buildOnboardingPrTemplate(
+            config,
+            configFile,
+            rebaseCheckBox,
+            SUMMARY_SECTION_ORDER,
+          ),
+          {
+            packageFiles: packageFilesSummary,
+            config: configDesc,
+            baseBranch: baseBranchDesc,
+            prList: prListSummary,
+            warnings,
+            errors,
+          },
+        ),
+        config,
+        onboardingConfigHashComment,
+      );
+    } else {
+      prBody = prBody.replace(prList, prListSummary);
+    }
+  }
 
   logger.trace(`prBody:\n${prBody}`);
 

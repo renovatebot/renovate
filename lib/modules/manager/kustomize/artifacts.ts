@@ -40,7 +40,7 @@ function helmRepositoryArgs(
       return `--repo ${quote(repository)} ${quote(depName)}`;
     case DockerDatasource.id:
       return quote(`oci://${repository}`);
-    /* v8 ignore next 2: should never happen */
+    /* v8 ignore next: should never happen */
     default:
       throw new Error(`Unknown datasource: ${datasource}`);
   }

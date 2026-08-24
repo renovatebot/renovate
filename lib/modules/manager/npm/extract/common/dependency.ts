@@ -24,7 +24,26 @@ export function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
+  // Yarn selective dependency resolutions may nest a path of parent
+  // packages before the target package, e.g. `parent/child` or
+  // `@scope/parent/child`, and any segment (including the last) may carry
+  // a `@range` suffix used to disambiguate which version of that package
+  // to match, e.g. `@cypress/request/qs@~6.14.1`.
+  const parts = key.split('/');
+  const segments: string[] = [];
+  for (let i = 0; i < parts.length; i += 1) {
+    const part = parts[i];
+    if (part.startsWith('@') && i + 1 < parts.length) {
+      i += 1;
+      segments.push(`${part}/${parts[i]}`);
+    } else {
+      segments.push(part);
+    }
+  }
+
+  const lastSegment = segments.at(-1);
+  const [, depName] =
+    regEx(/^((?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? '') ?? [];
   return depName;
 }
 
@@ -38,7 +57,7 @@ export function extractDependency(
     dep.skipReason = 'invalid-name';
     return dep;
   }
-  if (typeof input !== 'string') {
+  if (!isString(input)) {
     dep.skipReason = 'invalid-value';
     return dep;
   }
@@ -157,9 +176,12 @@ export function extractDependency(
     githubRepo = matchUrlSshFormat[2];
     githubOwnerRepo = `${githubOwner}/${githubRepo}`;
   }
-  const githubOwnerRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
+  // combined with the length check below, this is equivalent to
+  // /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i without the lookahead
+  const githubOwnerRegex = regEx(/^[a-z\d](?:-?[a-z\d]){0,38}$/i);
   const githubRepoRegex = regEx(/^[a-zA-Z0-9._-]{1,100}$/);
   if (
+    githubOwner.length > 39 ||
     !githubOwnerRegex.test(githubOwner) ||
     !githubRepoRegex.test(githubRepo)
   ) {

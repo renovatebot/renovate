@@ -4,7 +4,6 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
-import { exec } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ToolConstraint,
@@ -13,9 +12,10 @@ import {
   findLocalSiblingOrParent,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { find } from '../../../../util/host-rules.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -29,10 +29,10 @@ import type {
 import { applyGitSource } from '../../util.ts';
 import { type PyProject, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
-
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
+const gitExec = withGitEnvironment(['pep621']);
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -62,7 +62,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        /* v8 ignore next 3 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!dep.packageName) {
           continue;
         }
@@ -198,7 +198,6 @@ export class UvProcessor extends BasePyProjectProcessor {
       };
 
       const extraEnv = {
-        ...getGitEnvironmentVariables(['pep621']),
         ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
         ...(await getUvIndexCredentials(project)),
       };
@@ -257,7 +256,7 @@ export class UvProcessor extends BasePyProjectProcessor {
       // resolve because the existing lock file contains packages published
       // after the cutoff.
       try {
-        await exec(
+        await gitExec(
           excludeNewerFlag ? `${cmd} ${excludeNewerFlag}` : cmd,
           execOptions,
         );
@@ -267,7 +266,7 @@ export class UvProcessor extends BasePyProjectProcessor {
             { err },
             'uv --exclude-newer caused a resolution error, retrying without --exclude-newer',
           );
-          await exec(cmd, execOptions);
+          await gitExec(cmd, execOptions);
         } else {
           throw err;
         }
@@ -368,9 +367,8 @@ async function getUsernamePassword(
     const hostRule = await getGoogleAuthHostRule();
     if (hostRule) {
       return hostRule;
-    } else {
-      logger.once.debug({ url }, 'Could not get Google access token');
     }
+    logger.once.debug({ url }, 'Could not get Google access token');
   }
 
   return {};
@@ -440,7 +438,7 @@ async function getUvIndexCredentials(
 
   for (const { name, url } of uv_indexes) {
     const parsedUrl = parseUrl(url);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!parsedUrl) {
       continue;
     }
@@ -452,7 +450,7 @@ async function getUvIndexCredentials(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
 
-    const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+    const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);

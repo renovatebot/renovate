@@ -1,4 +1,4 @@
-import { isDate, isUndefined } from '@sindresorhus/is';
+import { isDate, isTruthy, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger/index.ts';
@@ -9,7 +9,7 @@ import { detectPlatform } from '../../../../../util/common.ts';
 import { linkify } from '../../../../../util/markdown.ts';
 import { newlineRegex, regEx } from '../../../../../util/regex.ts';
 import { coerceString } from '../../../../../util/string.ts';
-import { isHttpUrl, joinUrlParts } from '../../../../../util/url.ts';
+import { isHttpUrl } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import * as bitbucket from './bitbucket/index.ts';
 import * as bitbucketServer from './bitbucket-server/index.ts';
@@ -17,6 +17,7 @@ import * as forgejo from './forgejo/index.ts';
 import * as gitea from './gitea/index.ts';
 import * as github from './github/index.ts';
 import * as gitlab from './gitlab/index.ts';
+import type { ChangeLogSource } from './source.ts';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -28,7 +29,10 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
 
-const repositoriesToSkipMdFetching = ['facebook/react-native'];
+const repositoriesToSkipMdFetching = [
+  'facebook/react-native',
+  'react/react-native',
+];
 
 export async function getReleaseList(
   project: ChangeLogProject,
@@ -349,6 +353,7 @@ export function getReleaseNotesMdFile(
 export async function getReleaseNotesMd(
   project: ChangeLogProject,
   release: ChangeLogRelease,
+  source: ChangeLogSource,
 ): Promise<ChangeLogNotes | null> {
   const { baseUrl, repository, packageName } = project;
   const version = release.version;
@@ -378,22 +383,21 @@ export async function getReleaseNotesMd(
             ' ',
           );
           const [heading] = deParenthesizedSection.split(newlineRegex);
+          const [parenthesizedHeading] = section.split(newlineRegex);
           const title = heading
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
-            .filter(Boolean);
+            .filter(isTruthy);
           const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
-          const notesSourceUrl = getNotesSourceUrl(
+          const notesSourceUrl = source.getNotesSourceUrl(
             baseUrl,
             repository,
-            project,
             changelogFile,
           );
-          const mdHeadingLink = title
-            .filter((word) => !isHttpUrl(word))
-            .join('-')
-            .replace(regEx(/[^A-Za-z0-9-]/g), '');
-          const url = `${notesSourceUrl}#${mdHeadingLink}`;
+          const url = source.getReleaseNotesMdAnchorUrl(
+            notesSourceUrl,
+            parenthesizedHeading,
+          );
           // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
@@ -472,6 +476,7 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
 export async function addReleaseNotes(
   input: ChangeLogResult | null | undefined,
   config: BranchUpgradeConfig,
+  source: ChangeLogSource,
 ): Promise<ChangeLogResult | null> {
   if (!input?.versions || !input.project?.type) {
     logger.debug('Missing project or versions');
@@ -491,9 +496,10 @@ export async function addReleaseNotes(
 
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = `${cacheKeyPrefix}:${v.version}`;
+    const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
+    const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
-    releaseNotes ??= await getReleaseNotesMd(input.project, v);
+    releaseNotes ??= await getReleaseNotesMd(input.project, v, source);
     releaseNotes ??= await getReleaseNotes(input.project, v, config);
 
     // If there is no release notes, at least try to show the compare URL
@@ -526,35 +532,6 @@ export async function addReleaseNotes(
  */
 export function shouldSkipChangelogMd(repository: string): boolean {
   return repositoriesToSkipMdFetching.includes(repository);
-}
-
-function getNotesSourceUrl(
-  baseUrl: string,
-  repository: string,
-  project: ChangeLogProject,
-  changelogFile: string,
-): string {
-  if (project.type === 'bitbucket-server') {
-    const [projectKey, repositorySlug] = repository.split('/');
-    return joinUrlParts(
-      baseUrl,
-      'projects',
-      projectKey,
-      'repos',
-      repositorySlug,
-      'browse',
-      changelogFile,
-      '?at=HEAD',
-    );
-  }
-
-  return joinUrlParts(
-    baseUrl,
-    repository,
-    project.type === 'bitbucket' ? 'src' : 'blob',
-    'HEAD',
-    changelogFile,
-  );
 }
 
 async function linkifyBody(

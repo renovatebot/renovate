@@ -4,7 +4,10 @@ import upath from 'upath';
 import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { ExecError } from '../../../../util/exec/exec-error.ts';
 import { GitRefsDatasource } from '../../../datasource/git-refs/index.ts';
@@ -26,10 +29,11 @@ const googleAuth = vi.mocked(_googleAuth);
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const processor = new UvProcessor();
@@ -451,13 +455,13 @@ describe('modules/manager/pep621/processors/uv', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.11.1 ' +
             '&& ' +
             'install-tool uv 0.2.35 ' +
             '&& ' +
             'uv lock --upgrade-package dep1' +
-            '"',
+            "'",
         },
       ]);
     });

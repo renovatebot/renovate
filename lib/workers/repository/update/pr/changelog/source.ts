@@ -3,6 +3,7 @@ import {
   isFalsy,
   isNonEmptyString,
   isNullOrUndefined,
+  isTruthy,
 } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
@@ -12,7 +13,12 @@ import * as packageCache from '../../../../../util/cache/package/index.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { memoize } from '../../../../../util/memoize.ts';
 import { regEx } from '../../../../../util/regex.ts';
-import { parseUrl, trimSlashes } from '../../../../../util/url.ts';
+import {
+  isHttpUrl,
+  joinUrlParts,
+  parseUrl,
+  trimSlashes,
+} from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { slugifyUrl } from './common.ts';
 import { addReleaseNotes } from './release-notes.ts';
@@ -138,9 +144,12 @@ export abstract class ChangeLogSource {
     const changelogReleases: ChangeLogRelease[] = [];
 
     // Check if `v` belongs to the range (currentVersion, newVersion]
-    const inRange = (v: string): boolean =>
-      versioningApi.isGreaterThan(v, currentVersion) &&
-      !versioningApi.isGreaterThan(v, newVersion);
+    function inRange(v: string): boolean {
+      return (
+        versioningApi.isGreaterThan(v, currentVersion) &&
+        !versioningApi.isGreaterThan(v, newVersion)
+      );
+    }
 
     const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
     for (let i = 1; i < validReleases.length; i += 1) {
@@ -210,7 +219,7 @@ export abstract class ChangeLogSource {
       versions: changelogReleases,
     };
 
-    res = await addReleaseNotes(res, config);
+    res = await addReleaseNotes(res, config, this);
 
     return res;
   }
@@ -300,5 +309,33 @@ export abstract class ChangeLogSource {
 
   hasValidRepository(repository: string): boolean {
     return repository.split('/').length === 2;
+  }
+
+  /**
+   * Build the URL to the changelog markdown file for the release notes.
+   * Platform sources can override this to match their web UI conventions.
+   */
+  getNotesSourceUrl(
+    baseUrl: string,
+    repository: string,
+    changelogFile: string,
+  ): string {
+    return joinUrlParts(baseUrl, repository, 'blob', 'HEAD', changelogFile);
+  }
+
+  /**
+   * Build the URL pointing to a specific heading within the changelog markdown
+   * file. Platform sources can override this to match their anchor conventions.
+   */
+  getReleaseNotesMdAnchorUrl(notesSourceUrl: string, heading: string): string {
+    const mdHeadingLink = heading
+      .replace(regEx(/[[\]()]/g), ' ')
+      .replace(regEx(/^\s*#*\s*/), '')
+      .split(' ')
+      .filter(isTruthy)
+      .filter((word) => !isHttpUrl(word))
+      .join('-')
+      .replace(regEx(/[^A-Za-z0-9-]/g), '');
+    return `${notesSourceUrl}#${mdHeadingLink}`;
   }
 }

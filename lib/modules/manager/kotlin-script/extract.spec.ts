@@ -78,6 +78,32 @@ describe('modules/manager/kotlin-script/extract', () => {
       expect(packageFile).toBeNull();
     });
 
+    it('extracts multiple dependencies and repositories from vararg annotations', () => {
+      const packageFile = extractPackageFile(`
+        #!/usr/bin/env kotlin
+        @file:Repository("https://jitpack.io", "https://some.other.repo")
+        @file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.22.0", "org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r")`);
+
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            depName: 'it.krzeminski:github-actions-kotlin-dsl',
+            currentValue: '0.22.0',
+            replaceString: '"it.krzeminski:github-actions-kotlin-dsl:0.22.0"',
+            datasource: 'maven',
+          },
+          {
+            depName: 'org.eclipse.jgit:org.eclipse.jgit',
+            currentValue: '4.6.0.201612231935-r',
+            replaceString:
+              '"org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r"',
+            datasource: 'maven',
+          },
+        ],
+        registryUrls: ['https://jitpack.io', 'https://some.other.repo'],
+      });
+    });
+
     it('skips dependencies with missing parts', () => {
       // when
       const packageFile = extractPackageFile(missingPartsFileContent);

@@ -98,7 +98,7 @@ export class DenoDatasource extends Datasource {
       versions,
       async (version) => {
         const cacheRelease = releasesCache[version];
-        /* v8 ignore next 3: hard to test */
+        /* v8 ignore next: hard to test */
         if (cacheRelease) {
           return cacheRelease;
         }

@@ -25,6 +25,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
@@ -227,7 +228,7 @@ export async function generateLockFile(
       ],
       docker: {},
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -436,7 +437,7 @@ export function divideWorkspaceAndRootDeps(
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns) {
           const massagedPattern = (workspacePattern as string).replace(
-            /^\.\//,
+            regEx(/^\.\//),
             '',
           );
           if (minimatch(massagedPattern).match(workspaceDir)) {

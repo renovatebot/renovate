@@ -5,6 +5,7 @@ import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { getEnv } from '../env.ts';
+import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
@@ -77,6 +78,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
   flux: {
     datasource: 'github-releases',
     packageName: 'fluxcd/flux2',
+    versioning: 'semver',
+  },
+  gh: {
+    datasource: 'github-releases',
+    packageName: 'cli/cli',
     versioning: 'semver',
   },
   gleam: {
@@ -203,9 +209,9 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     versioning: 'ruby',
   },
   rust: {
-    datasource: 'docker',
+    datasource: 'rust-version',
     packageName: 'rust',
-    versioning: 'semver',
+    versioning: 'rust-release-channel',
   },
   uv: {
     datasource: 'pypi',
@@ -289,10 +295,8 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (isString(latest)) {
-    if (versioningApi.isGreaterThan(version, latest)) {
-      return false;
-    }
+  if (isString(latest) && versioningApi.isGreaterThan(version, latest)) {
+    return false;
   }
   return true;
 }
@@ -313,7 +317,7 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint.replace(/^=+/, '').trim();
+        return constraint.replace(regEx(/^=+/), '').trim();
       }
     } else {
       logger.warn(
