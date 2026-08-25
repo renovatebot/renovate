@@ -172,7 +172,8 @@ export async function extractPackageFile(
           if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
-        } else if (gitRefsMatch.repoName) {
+        } else {
+          // we always have repoName, as `gitRefsMatchRegex`'s first group requires either `gitUrl` or `repoName`
           dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;
           dep.sourceUrl = dep.packageName;
         }
