@@ -4,12 +4,14 @@ import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
+import { matchRegexOrGlobList } from '../../../util/string-match.ts';
 import {
   massage as massageToml,
   parse as parseToml,
 } from '../../../util/toml.ts';
 import { extractPackageFile as extractPyProjectFile } from '../pep621/extract.ts';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract.ts';
+import { defaultConfig as pipRequirementsConfig } from '../pip_requirements/index.ts';
 import { extractPackageFile as extractPoetryFile } from '../poetry/extract.ts';
 import type {
   ExtractConfig,
@@ -257,17 +259,24 @@ function extractInlineDeps(targets: PantsTarget[]): PackageDependency[] {
 }
 
 /**
- * Reads a generator source, and reports nothing at all for one this manager
- * cannot maintain: a lock file beside the source, or hashes that only
- * `pip_requirements` can refresh.
- *
- * Reporting such a file would take it from the manager that owns its format,
- * because an entry is a claim on the file. Renovate settles that overlap in
- * favour of whichever manager reported it, and only the other one can regenerate
- * a lock file or rewrite a hash.
+ * Reads a generator source, and marks its dependencies as skipped when nothing
+ * here can update them: a lock file beside the source, or hashes that only
+ * `pip_requirements` can refresh. The entry then declares `cannotUpdate`, so it
+ * reports what is in the file without taking it from the manager that owns the
+ * format.
  *
  * Both entry points read a source through this, so a file both agree is a source
  * cannot be extracted one way and confirmed another.
+ *
+ * `cannotUpdate` depends on an invariant worth stating: every other skip reason
+ * here is the delegate's own, inherited from its extractor -- Poetry marking a
+ * path override `path-dependency`, say -- and taking such a file from the
+ * delegate loses nothing. Only the lock and hash cases are this manager's own
+ * judgement, and they are exactly the two that set `cannotUpdate`. A
+ * pants-specific skip added without setting it would start taking files from the
+ * manager that could maintain them.
+ *
+ * Returns null for a hashed source that `pip_requirements` claims by name.
  */
 async function readSource(
   content: string,
@@ -275,8 +284,22 @@ async function readSource(
 ): Promise<PackageFileContent | null> {
   const format = sourceFormat(content, packageFile);
 
+  let hashed = false;
   if (hasRequirementHashes(content, format)) {
-    return null;
+    // The other manager's *default* patterns, not the user's resolved config.
+    // Where a user has widened `pip_requirements` to cover this name, both
+    // managers report the file and `cannotUpdate` below stops this one taking
+    // it. Reading the effective config here would return null in that same
+    // case, leaving nobody holding the file.
+    if (
+      matchRegexOrGlobList(
+        packageFile,
+        pipRequirementsConfig.managerFilePatterns,
+      )
+    ) {
+      return null;
+    }
+    hashed = true;
   }
 
   const extracted = await extractSourceFile(content, packageFile, format);
@@ -284,12 +307,10 @@ async function readSource(
     return extracted;
   }
 
-  if (extracted.lockFiles?.length) {
-    return null;
-  }
-
+  const locked = !!extracted.lockFiles?.length;
   // Never forwarded, not even empty: an empty list still reads as a claim this
-  // manager cannot honour.
+  // manager cannot honour. Stripped before the early return too, so no path out
+  // of here can carry one.
   const { lockFiles: _lockFiles, ...withoutLockFiles } = extracted;
   if (!extracted.deps?.length) {
     return withoutLockFiles;
@@ -297,7 +318,24 @@ async function readSource(
 
   return {
     ...withoutLockFiles,
-    deps: extracted.deps.map((dep) => readAs(dep, 'source')),
+    // Every dependency below is skipped, so this entry exists to be seen rather
+    // than acted on, and says so explicitly to keep Renovate from taking the
+    // file from the manager that owns its format.
+    //
+    // The `locked` half only looks redundant. Renovate drops this entry when the
+    // other manager reports a lock file for the same path, but only when that
+    // manager matched the file by name: the same file under a name a `source=`
+    // gave it is matched by nothing, and then the flag is what stops this entry
+    // claiming it.
+    ...(locked || hashed ? { cannotUpdate: true } : {}),
+    deps: extracted.deps.map((dep) =>
+      readAs(
+        (locked || hashed) && !dep.skipReason
+          ? { ...dep, skipReason: 'unsupported' as const }
+          : dep,
+        'source',
+      ),
+    ),
   };
 }
 
@@ -453,6 +491,12 @@ export async function extractAllPackageFiles(
 
       const extracted = await readSource(sourceContent, source);
       if (extracted?.deps?.length) {
+        if (extracted.deps.some((dep) => dep.skipReason)) {
+          logger.debug(
+            { packageFile, source },
+            'pants: nothing here can update this source, reporting it as skipped',
+          );
+        }
         result.push({
           ...extracted,
           packageFile: source,

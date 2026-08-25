@@ -925,9 +925,15 @@ describe('modules/manager/pants/extract', () => {
       fs.localPathExists.mockResolvedValue(true);
 
       // Bumping the source would leave the lock file stale, and only the manager
-      // that owns the format can regenerate it. Reporting the file at all would
-      // take it from that manager, because an entry is a claim on the file.
-      expect(await extractAllPackageFiles({}, ['BUILD.pants'])).toEqual([]);
+      // that matched the file by name can regenerate it. The dependencies are
+      // still reported, so they stay visible, but skipped.
+      expect(await extractAllPackageFiles({}, ['BUILD.pants'])).toMatchObject([
+        {
+          packageFile: 'pyproject.toml',
+          cannotUpdate: true,
+          deps: [{ depName: 'requests', skipReason: 'unsupported' }],
+        },
+      ]);
     });
 
     it('leaves a lock file beside a source named by the target', async () => {
@@ -943,10 +949,16 @@ describe('modules/manager/pants/extract', () => {
       fs.localPathExists.mockResolvedValue(true);
 
       // `poetry` matches `pyproject.toml` only, so nothing else reports this
-      // name and its dependencies go unseen. That is the cost of not claiming a
-      // file this manager cannot maintain, and it is the right way round:
-      // proposing a bump that leaves the lock file stale is worse than silence.
-      expect(await extractAllPackageFiles({}, ['BUILD.pants'])).toEqual([]);
+      // name. Dropping the file would make its dependencies invisible rather
+      // than merely un-updatable, and `cannotUpdate` is what lets the entry
+      // exist without claiming the file.
+      expect(await extractAllPackageFiles({}, ['BUILD.pants'])).toMatchObject([
+        {
+          packageFile: 'poetry-deps.toml',
+          cannotUpdate: true,
+          deps: [{ depName: 'tenacity', skipReason: 'unsupported' }],
+        },
+      ]);
     });
 
     it('extracts a Poetry source named by the target', async () => {
@@ -986,7 +998,15 @@ describe('modules/manager/pants/extract', () => {
         `,
       });
 
-      expect(await extractAllPackageFiles({}, ['BUILD.pants'])).toEqual([]);
+      // `pip_requirements` does not match this name, so nobody else would report
+      // the file. It is reported as skipped rather than disappearing.
+      expect(await extractAllPackageFiles({}, ['BUILD.pants'])).toMatchObject([
+        {
+          packageFile: 'constraints.toml',
+          cannotUpdate: true,
+          deps: [{ depName: 'boto3', skipReason: 'unsupported' }],
+        },
+      ]);
     });
 
     it('leaves a hashed requirements file alone', async () => {

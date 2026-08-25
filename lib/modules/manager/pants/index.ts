@@ -13,11 +13,11 @@ export { bumpPackageVersion } from '../pep621/update.ts';
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
 export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
-// A generator source is usually also matched by the manager owning its format,
-// which would give the same file two entries and two pull requests. Renovate
-// drops the superseded manager's entry for any file this one reported, and a
-// source this manager cannot maintain is not reported at all, so the manager
-// that can keeps it.
+// A generator source is usually also matched by the manager owning its format.
+// Renovate drops the superseded manager's entry for any file this one claimed,
+// and two things stop a file being claimed: the other manager reporting a lock
+// file it can regenerate, checked first, and this manager marking its own entry
+// `cannotUpdate`.
 export const supersedesManagers = ['pip_requirements', 'pep621', 'poetry'];
 
 export const displayName = 'Pants';

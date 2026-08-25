@@ -99,6 +99,19 @@ export interface PackageFileContent<
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
   deps: PackageDependency<T>[];
+  /**
+   * Declares that this entry is not a claim on the file: the manager read it and
+   * reports what is in it, but cannot maintain it.
+   *
+   * It has one effect, and only for a manager declaring `supersedesManagers`:
+   * such an entry supersedes nothing, so another manager's entry for the same
+   * file survives. It does not make anything visible, since dependencies are
+   * visible because they are reported, and it does not keep this entry alive. A
+   * secondary reporting `lockFiles` for the path still rejects the primary
+   * first, so where a lock file sits beside the source this entry is dropped and
+   * only the manager owning the format remains.
+   */
+  cannotUpdate?: boolean;
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;

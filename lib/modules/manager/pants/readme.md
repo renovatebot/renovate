@@ -90,9 +90,8 @@ Renovate settles this on its own, so there is nothing to configure, but leave th
   `poetry` reports `poetry.lock`, and `pep621` reports `uv.lock`.
   Requirements files carrying `--hash=` entries stay with `pip_requirements` for the same reason.
 
-A source this manager cannot maintain is not reported at all, so the manager that can keeps it.
-Where a `source=` gives such a file a name no other manager matches, nothing reports it and its dependencies go unseen.
-Name those files conventionally, or enable the manager that owns the format for that name.
+Where a `source=` gives such a file a name no other manager matches, this manager reports it with every dependency skipped.
+They stay visible on the dashboard, and nothing proposes an update to them.
 
 ### Private indexes
 
