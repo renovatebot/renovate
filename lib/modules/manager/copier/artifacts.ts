@@ -100,13 +100,14 @@ export async function updateArtifacts({
     return null;
   }
 
+  const res: UpdateArtifactsResult[] = [];
+
   if (status.conflicted.length > 0) {
     // Sometimes, Copier erroneously reports conflicts.
     const msg = `Updating the Copier template yielded ${status.conflicted.length} merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * ${status.conflicted.join('\n  * ')}`;
     logger.debug({ packageFileName, depName: updatedDeps[0]?.depName }, msg);
+    res.push(...artifactError(packageFileName, msg));
   }
-
-  const res: UpdateArtifactsResult[] = [];
 
   for (const f of [
     ...status.modified,
