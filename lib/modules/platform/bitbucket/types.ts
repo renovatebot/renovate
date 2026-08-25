@@ -10,7 +10,6 @@ export interface MergeRequestBody {
 
 export interface Config {
   defaultBranch: string;
-  has_issues: boolean;
   mergeMethod: string;
   owner: string;
   repository: string;
