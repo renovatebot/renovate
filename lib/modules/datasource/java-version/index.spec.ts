@@ -426,51 +426,61 @@ describe('modules/datasource/java-version/index', () => {
         expect(versions).toContain('17.0.13');
       });
 
-      it('skips malformed releases while preserving valid releases', async () => {
+      it('returns null for malformed releases instead of partial results', async () => {
         httpMock
           .scope(graalvmRegistryUrl)
-          .get(graalvmBasePath)
+          .get('/jvm/ea/linux/x86_64.json')
           .reply(200, [
             oracleGraalvmJdkReleases[0],
             { image_type: 'jdk', vendor: 'oracle-graalvm' },
           ]);
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
-          registryUrls: [graalvmRegistryUrl],
-        });
-
-        expect(res?.releases).toEqual([{ version: '23.0.1' }]);
+        await expect(
+          getPkgReleases({
+            datasource,
+            packageName:
+              'oracle-graalvm-jdk?os=linux&architecture=x86_64&release-type=ea',
+            registryUrls: [graalvmRegistryUrl],
+          }),
+        ).resolves.toBeNull();
       });
 
-      it('returns null for undefined response body', async () => {
+      it('returns null for an undefined response body', async () => {
+        httpMock
+          .scope(graalvmRegistryUrl)
+          .get('/jvm/ea/linux/x86_64.json')
+          .reply(200, undefined);
+        await expect(
+          getPkgReleases({
+            datasource,
+            packageName:
+              'oracle-graalvm-jdk?os=linux&architecture=x86_64&release-type=ea',
+            registryUrls: [graalvmRegistryUrl],
+          }),
+        ).resolves.toBeNull();
+      });
+
+      it('uses the default OS when it is omitted', async () => {
         httpMock
           .scope(graalvmRegistryUrl)
           .get(graalvmBasePath)
-          .reply(200, undefined);
-        expect(
-          await getPkgReleases({
-            datasource,
-            packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
-            registryUrls: [graalvmRegistryUrl],
-          }),
-        ).toBeNull();
-      });
-
-      it('returns null when OS is explicitly missing', async () => {
+          .reply(200, oracleGraalvmJdkReleases);
         const res = await getPkgReleases({
           datasource,
           packageName: 'oracle-graalvm-jdk?architecture=x86_64',
         });
-        expect(res).toBeNull();
+        expect(res?.releases).toHaveLength(3);
       });
 
-      it('returns null when architecture is explicitly missing', async () => {
+      it('uses the default architecture when it is omitted', async () => {
+        httpMock
+          .scope(graalvmRegistryUrl)
+          .get(graalvmBasePath)
+          .reply(200, oracleGraalvmJdkReleases);
         const res = await getPkgReleases({
           datasource,
           packageName: 'oracle-graalvm-jdk?os=linux',
         });
-        expect(res).toBeNull();
+        expect(res?.releases).toHaveLength(3);
       });
 
       it('supports custom registry URL', async () => {
@@ -542,6 +552,18 @@ describe('modules/datasource/java-version/index', () => {
         const res = await getPkgReleases({
           datasource,
           packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
+        });
+        expect(res?.releases).toHaveLength(3);
+      });
+
+      it('uses default platform for a bare GraalVM package', async () => {
+        httpMock
+          .scope(graalvmRegistryUrl)
+          .get('/jvm/ga/linux/x86_64.json')
+          .reply(200, oracleGraalvmJdkReleases);
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'oracle-graalvm-jdk',
         });
         expect(res?.releases).toHaveLength(3);
       });

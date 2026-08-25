@@ -999,6 +999,7 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            packageName: 'oracle-graalvm-jdk',
           },
         ],
       });

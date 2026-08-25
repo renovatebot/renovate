@@ -15,13 +15,18 @@ export function parsePackage(packageName: string): PackageConfig {
   const pathname = trimLeadingSlash(u.pathname);
   const vendor = getVendor(pathname);
   const useSystem = u.searchParams.get('system') === 'true';
+  const useGraalvmDefaults = vendor === 'oracle-graalvm' && !useSystem;
   return {
     vendor,
     imageType: getImageType(pathname),
     architecture:
       u.searchParams.get('architecture') ??
-      getSystemArchitecture(useSystem, vendor),
-    os: u.searchParams.get('os') ?? getSystemOs(useSystem, vendor),
+      (useGraalvmDefaults
+        ? 'x86_64'
+        : getSystemArchitecture(useSystem, vendor)),
+    os:
+      u.searchParams.get('os') ??
+      (useGraalvmDefaults ? 'linux' : getSystemOs(useSystem, vendor)),
     releaseType: parseReleaseType(u.searchParams.get('release-type')),
   };
 }

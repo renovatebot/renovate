@@ -42,6 +42,14 @@ describe('modules/datasource/java-version/common', () => {
         const config = parsePackage('adoptium-jre');
         expect(config.vendor).toBe('adoptium');
       });
+
+      it('defaults bare GraalVM packages to Linux x86_64', () => {
+        expect(parsePackage('oracle-graalvm-jdk')).toMatchObject({
+          vendor: 'oracle-graalvm',
+          architecture: 'x86_64',
+          os: 'linux',
+        });
+      });
     });
 
     describe('image type detection', () => {
