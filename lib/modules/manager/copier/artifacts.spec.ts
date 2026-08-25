@@ -439,7 +439,7 @@ describe('modules/manager/copier/artifacts', () => {
       ]);
     });
 
-    it('warns about, but adds conflicts', async () => {
+    it('reports an error, but adds conflicts', async () => {
       mockExecAll();
 
       git.getRepoStatus.mockResolvedValueOnce(
@@ -473,6 +473,13 @@ describe('modules/manager/copier/artifacts', () => {
         'Updating the Copier template yielded 1 merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * conflict_file.py',
       );
       expect(result).toEqual([
+        {
+          artifactError: {
+            fileName: '.copier-answers.yml',
+            stderr:
+              'Updating the Copier template yielded 1 merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * conflict_file.py',
+          },
+        },
         {
           file: {
             type: 'addition',
