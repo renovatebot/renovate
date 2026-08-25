@@ -227,13 +227,7 @@ export function encodeUrlPathSegments(inputUrl: string): string {
     return inputUrl;
   }
 
-  // Decode each segment, re-encode it and join them together.
-  // A segment may contain a literal '%' that isn't part of a valid
-  // percent-encoded sequence (e.g. a project named "50% off"). The WHATWG
-  // URL parser accepts such a bare '%' in a path without error, but
-  // decodeURIComponent() throws "URI malformed" on it. Escape any such
-  // stray '%' first so decoding never throws, then decode and re-encode
-  // as usual.
+  // Escape stray % so decodeURIComponent cannot throw.
   url.pathname = url.pathname
     .split('/')
     .map((segment) =>
