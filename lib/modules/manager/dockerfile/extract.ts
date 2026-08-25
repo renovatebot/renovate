@@ -185,7 +185,7 @@ export function getDep(
     // `$CI_REGISTRY` still require `/` so they can't eat `$CI_REGISTRY_IMAGE/`.
     const matchedWithSlash = currentFrom.startsWith(`${name}/`);
     const matchedAtBoundary =
-      !matchedWithSlash && name.endsWith('}') && currentFrom.startsWith(name);
+      name.endsWith('}') && currentFrom.startsWith(name);
     if (!matchedWithSlash && !matchedAtBoundary) {
       continue;
     }

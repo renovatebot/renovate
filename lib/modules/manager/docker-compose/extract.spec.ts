@@ -169,6 +169,34 @@ describe('modules/manager/docker-compose/extract', () => {
       });
     });
 
+    it('extracts image with variable default registry alias', () => {
+      const compose = codeBlock`
+        version: "3"
+        services:
+          nginx:
+            image: \${CI_REGISTRY:-}nginx:0.0.1
+      `;
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          '${CI_REGISTRY:-}': 'my-registry.io',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '${CI_REGISTRY:-}nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: '${CI_REGISTRY:-}nginx',
+            packageName: 'my-registry.io/nginx',
+            replaceString: '${CI_REGISTRY:-}nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
     it('extracts image of templated compose file', () => {
       const compose = codeBlock`
         version: "3"
