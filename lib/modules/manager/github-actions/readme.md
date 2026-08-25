@@ -62,8 +62,6 @@ For example, to keep pinning action digests but leave reusable workflow calls on
 }
 ```
 
-This is useful when an AWS IAM role trust policy, or another OIDC consumer, matches on the `job_workflow_ref` claim: that claim contains the ref the workflow was called with, so pinning the call to a digest changes the claim and breaks the policy.
-
 ### GitHub Actions lockfile (`actions.lock`)
 
 !!! warning "This feature is flagged as experimental"

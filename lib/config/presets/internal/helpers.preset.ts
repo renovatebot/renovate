@@ -119,7 +119,6 @@ export const presets: Record<string, Preset> = {
     description: 'Pin `github-action` digests.',
     packageRules: [
       {
-        // `workflow` is a reusable workflow call, which was also a depType of `action` before it was split out
         matchDepTypes: ['action', 'workflow'],
         pinDigests: true,
       },

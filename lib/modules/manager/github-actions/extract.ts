@@ -66,12 +66,6 @@ function extractDockerAction(
   return dep;
 }
 
-/**
- * Matches the sub-path of a reusable workflow call, relative to the referenced repository's root.
- *
- * GitHub only resolves a reusable workflow at `.github/workflows/<file>.yml`, so exactly one path segment, and only a job-level `uses:` may reference one.
- * Anything else below the repository root is an action.
- */
 const reusableWorkflowPathRe = regEx(/^\.github\/workflows\/[^/]+\.ya?ml$/);
 
 function extractRepositoryAction(
