@@ -222,7 +222,7 @@ const invalidPercentEncoding = /%(?![0-9a-fA-F]{2})/g;
 export function encodeUrlPathSegments(inputUrl: string): string {
   // Parsing the URL is not enough. URL doesn't encode
   // every reserved character.
-  const url: URL | null = parseUrl(inputUrl);
+  const url = parseUrl(inputUrl);
   if (!url) {
     return inputUrl;
   }
