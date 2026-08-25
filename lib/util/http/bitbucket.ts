@@ -1,5 +1,9 @@
 import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
+import { RequestError } from 'got';
+import { z } from 'zod/v4';
+import { logger } from '../../logger/index.ts';
 import type { PagedResult } from '../../modules/platform/bitbucket/types.ts';
+import { Json } from '../schema-utils/index.ts';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
@@ -30,6 +34,32 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     return super
       .extraOptions()
       .concat(['paginate', 'pagelen'] as (keyof BitbucketHttpOptions)[]);
+  }
+
+  protected override handleError(
+    url: string | URL,
+    httpOptions: HttpOptions,
+    err: Error,
+  ): never {
+    if (err instanceof RequestError && err.response) {
+      const announcement = DeprecationAnnouncementBody.safeParse(
+        err.response.body,
+      );
+      if (announcement.success) {
+        const { message, detail, data } = announcement.data.error;
+        logger.once.warn(
+          {
+            // `url` is only resolved against the base URL for JSON requests
+            url: err.response.url,
+            message,
+            detail,
+            announcementUrl: data.announcement_url,
+          },
+          'Bitbucket API functionality has been deprecated or removed',
+        );
+      }
+    }
+    return super.handleError(url, httpOptions, err);
   }
 
   protected override async requestJsonUnsafe<T>(
@@ -85,6 +115,27 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     return result as HttpResponse<T>;
   }
 }
+
+/**
+ * Bitbucket Cloud responds with an error body linking to the relevant changelog entry when the endpoint's functionality has been deprecated or removed.
+ *
+ * See https://developer.atlassian.com/cloud/bitbucket/changelog/
+ */
+const DeprecationAnnouncement = z.object({
+  error: z.object({
+    message: z.string(),
+    detail: z.string().optional(),
+    data: z.object({
+      announcement_url: z.string(),
+    }),
+  }),
+});
+
+/** The body is already parsed for JSON requests, but a raw string otherwise. */
+const DeprecationAnnouncementBody = z.union([
+  DeprecationAnnouncement,
+  Json.pipe(DeprecationAnnouncement),
+]);
 
 function hasPagelen(url: URL): boolean {
   return !isNullOrUndefined(url.searchParams.get('pagelen'));
