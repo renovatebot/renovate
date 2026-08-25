@@ -14,7 +14,6 @@ import type { HostRule, PrState } from '../../../types/index.ts';
 import { isProbablyJwt } from '../../../util/http/jwt.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { AzurePr } from './types.ts';
 
@@ -213,29 +212,4 @@ export function getWorkItemTitle(rawTitle: string, repository: string): string {
     return `[${repoName}] ${rawTitle}`;
   }
   return rawTitle;
-}
-
-// Matches a '%' that is NOT the start of a valid percent-encoded triplet
-// (i.e. not followed by two hex digits), e.g. the literal '%' in "50% off".
-const invalidPercentEncoding = /%(?![0-9a-fA-F]{2})/g;
-
-export function encodeUrlPathSegments(inputUrl: string): string {
-  // Parsing the URL is not enough. URL doesn't encode
-  // every reserved character.
-  const url = parseUrl(inputUrl);
-  if (!url) {
-    return inputUrl;
-  }
-
-  // Escape stray % so decodeURIComponent cannot throw.
-  url.pathname = url.pathname
-    .split('/')
-    .map((segment) =>
-      encodeURIComponent(
-        decodeURIComponent(segment.replace(invalidPercentEncoding, '%25')),
-      ),
-    )
-    .join('/');
-
-  return url.toString();
 }

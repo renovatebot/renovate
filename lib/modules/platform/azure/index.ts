@@ -29,7 +29,10 @@ import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import {
+  encodeUrlPathSegments,
+  ensureTrailingSlash,
+} from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -56,7 +59,6 @@ import { IssueService } from './issue.ts';
 import type { AzurePr, Config } from './types.ts';
 import { AzurePrVote } from './types.ts';
 import {
-  encodeUrlPathSegments,
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,

@@ -158,6 +158,36 @@ export function parseUrl(url: URL | string | undefined | null): URL | null {
   }
 }
 
+// Matches a '%' that is NOT the start of a valid percent-encoded triplet
+// (i.e. not followed by two hex digits), e.g. the literal '%' in "50% off".
+//
+// NOTE: Intentionally a plain RegExp literal, not wrapped in regEx().
+// This pattern relies on a negative lookahead `(?!...)`, which RE2 does
+// not support. Wrapping it in regEx() will throw CONFIG_VALIDATION at
+// module load time. Do not "fix" this by adding the regEx() wrapper.
+const invalidPercentEncoding = /%(?![0-9a-fA-F]{2})/g;
+
+export function encodeUrlPathSegments(inputUrl: string): string {
+  // Parsing the URL is not enough. URL doesn't encode
+  // every reserved character.
+  const url = parseUrl(inputUrl);
+  if (!url) {
+    return inputUrl;
+  }
+
+  url.pathname = url.pathname
+    .split('/')
+    .map((segment) =>
+      encodeURIComponent(
+        // Escape stray % so decodeURIComponent cannot throw.
+        decodeURIComponent(segment.replace(invalidPercentEncoding, '%25')),
+      ),
+    )
+    .join('/');
+
+  return url.toString();
+}
+
 /**
  * Tries to create an URL object from either a full URL string or a hostname
  * @param url either the full url or a hostname
