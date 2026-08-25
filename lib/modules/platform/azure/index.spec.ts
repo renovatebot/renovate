@@ -240,7 +240,7 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('initRepo URL encoding', () => {
-    it('encodes whitespace in org/collection when falling back to manualUrl', async () => {
+    it('doesn not manually encode whitespace in org/collection when falling back to manualUrl', async () => {
       await azure.initPlatform({
         endpoint: 'https://dev.azure.com/my org/',
         token: 'token',
@@ -263,7 +263,7 @@ describe('modules/platform/azure/index', () => {
 
       expect(git.initRepo).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://dev.azure.com/my%20org/my-project/_git/my-repo',
+          url: 'https://dev.azure.com/my org/my-project/_git/my-repo',
         }),
       );
     });
