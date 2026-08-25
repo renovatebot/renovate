@@ -56,7 +56,7 @@ function flushApkPackage(packageInfo: Partial<ApkPackage>): ApkPackage | null {
 export async function parseApkIndexFile(
   extractedFile: string,
 ): Promise<ApkPackage[]> {
-  logger.debug({ extractedFile }, 'Parsing APK index file');
+  logger.debug(`Parsing APK index file ${extractedFile}`);
 
   const packages: ApkPackage[] = [];
   const rl = readline.createInterface({

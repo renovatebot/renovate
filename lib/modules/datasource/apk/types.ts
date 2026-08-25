@@ -27,8 +27,8 @@
  *
  * Only fields that are actually used downstream are included in this interface.
  * Many APK index fields (arch, size, description, license, maintainer, etc.)
- * are parsed but not stored to reduce complexity and memory usage since they
- * are not needed for Renovate's version checking functionality.
+ * are ignored to reduce complexity and memory usage since they are not needed
+ * for Renovate's version checking functionality.
  */
 export interface ApkPackage {
   /** Package name (required) - used for filtering packages by name */

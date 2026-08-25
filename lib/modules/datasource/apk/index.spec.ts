@@ -512,6 +512,40 @@ describe('modules/datasource/apk/index', () => {
       expect(result).toBeNull();
     });
 
+    it('should extract the index from an archive laid out like a real one', async () => {
+      const tarGzBuffer = await createTarGz([
+        {
+          name: '.SIGN.RSA.alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub',
+          content: 'signature',
+        },
+        { name: 'DESCRIPTION', content: 'alpine v3.19 main' },
+        { name: './APKINDEX', content: nginxApkIndex },
+      ]);
+
+      httpMock
+        .scope('https://dl-cdn.alpinelinux.org')
+        .get('/alpine/v3.19/main/x86_64/APKINDEX.tar.gz')
+        .reply(200, tarGzBuffer);
+
+      const result = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=x86_64',
+      });
+
+      expect(result).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=x86_64',
+        releases: [
+          {
+            version: '1.24.0-r16',
+            releaseTimestamp: '2024-04-26T22:27:14.000Z',
+          },
+        ],
+      });
+    });
+
     it('should handle packages without buildDate', async () => {
       const indexContent = codeBlock`
         C:Q1vtlRfMK8sXD8JDnaOMI5kCrJG9A=

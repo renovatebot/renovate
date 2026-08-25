@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyObject } from '@sindresorhus/is';
 import { extract as tarExtract } from 'tar';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -19,10 +19,29 @@ import { constructComponentUrls } from './url.ts';
 export const apkDatasourceId = 'apk';
 
 const defaultConfig = {
-  commitMessageTopic: '{{{depName}}} Alpine package',
+  commitMessageTopic: '{{{depName}}} APK package',
   commitMessageExtra:
     'to {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}',
 };
+
+/**
+ * Groups packages by name so that a lookup does not scan the whole index.
+ *
+ * An index holds thousands of packages, and a name can appear more than once
+ * when the component serves multiple versions of it.
+ */
+function groupPackagesByName(
+  packages: ApkPackage[],
+): Record<string, ApkPackage[]> {
+  const packagesByName: Record<string, ApkPackage[]> = {};
+
+  for (const pkg of packages) {
+    packagesByName[pkg.name] ??= [];
+    packagesByName[pkg.name].push(pkg);
+  }
+
+  return packagesByName;
+}
 
 export class ApkDatasource extends Datasource {
   static readonly id = apkDatasourceId;
@@ -64,19 +83,21 @@ export class ApkDatasource extends Datasource {
   }
 
   /**
-   * Gets all available packages from a single APK component
+   * Gets all available packages from a single APK component, keyed by package name
    */
-  private async _getPackages(componentUrl: string): Promise<ApkPackage[]> {
+  private async _getPackages(
+    componentUrl: string,
+  ): Promise<Record<string, ApkPackage[]>> {
     logger.debug(`Fetching APK packages from ${componentUrl}`);
 
-    const indexUrl = joinUrlParts(componentUrl, 'APKINDEX.tar.gz');
     const extractId = randomUUID();
     const cacheDir = await fs.ensureCacheDir(upath.join('apk', extractId));
     const tarFile = upath.join(cacheDir, 'APKINDEX.tar.gz');
     const extractedFile = upath.join(cacheDir, 'APKINDEX');
 
     try {
-      logger.debug({ indexUrl }, 'Attempting to download APKINDEX.tar.gz');
+      const indexUrl = joinUrlParts(componentUrl, 'APKINDEX.tar.gz');
+      logger.debug(`Attempting to download ${indexUrl}`);
       const readStream = this.http.stream(indexUrl);
       const writeStream = fs.createCacheWriteStream(tarFile);
       await fs.pipeline(readStream, writeStream);
@@ -84,12 +105,12 @@ export class ApkDatasource extends Datasource {
       await tarExtract({
         file: tarFile,
         cwd: cacheDir,
-        filter: (path) => path === 'APKINDEX',
+        filter: (path) => upath.basename(path) === 'APKINDEX',
       });
 
       if (!(await fs.cachePathExists(extractedFile))) {
-        logger.warn({componentUrl}, 'APKINDEX file not found in tar archive');
-        return [];
+        logger.warn({ componentUrl }, 'APKINDEX file not found in tar archive');
+        return {};
       }
 
       logger.debug('Successfully extracted APKINDEX content');
@@ -98,8 +119,8 @@ export class ApkDatasource extends Datasource {
       try {
         packages = await parseApkIndexFile(extractedFile);
       } catch (err) {
-        logger.warn({ err }, 'Error parsing APK index file');
-        return [];
+        logger.warn({ componentUrl, err }, 'Error parsing APK index file');
+        return {};
       }
 
       logger.debug(
@@ -107,33 +128,38 @@ export class ApkDatasource extends Datasource {
         'Successfully parsed APK index',
       );
 
-      return packages;
+      return groupPackagesByName(packages);
     } catch (err) {
       if (err instanceof HttpError) {
         const statusCode = err.response?.statusCode;
         if (statusCode === 429 || (statusCode && statusCode >= 500)) {
           throw new ExternalHostError(err);
         }
-        logger.warn({ componentUrl, err }, 'Failed to fetch APK packages');
+        // The caller logs the failure once for the component it was skipping
         throw err;
       }
 
-      logger.warn({ err }, 'Error extracting APK index from tar.gz');
-      return [];
+      logger.warn(
+        { componentUrl, err },
+        'Error extracting APK index from tar.gz',
+      );
+      return {};
     } finally {
       await fs.rmCache(cacheDir);
     }
   }
 
-  private getPackages(componentUrl: string): Promise<ApkPackage[]> {
+  private getPackages(
+    componentUrl: string,
+  ): Promise<Record<string, ApkPackage[]>> {
     return withCache(
       {
         namespace: `datasource-${ApkDatasource.id}`,
         key: componentUrl,
         ttlMinutes: 60,
         fallback: true,
-        // Soft failures resolve to an empty list, which must not be cached as a valid index
-        shouldCacheResult: isNonEmptyArray,
+        // Soft failures resolve to an empty index, which must not be cached as a valid one
+        shouldCacheResult: isNonEmptyObject,
       },
       () => this._getPackages(componentUrl),
     );
@@ -159,13 +185,9 @@ export class ApkDatasource extends Datasource {
     for (const componentUrl of componentUrls) {
       try {
         const packages = await this.getPackages(componentUrl);
+        const matchingPackages = packages[packageName];
 
-        // Find packages matching the requested package name
-        const matchingPackages = packages.filter(
-          (pkg) => pkg.name === packageName,
-        );
-
-        if (!matchingPackages.length) {
+        if (!matchingPackages) {
           logger.debug(
             { packageName, componentUrl },
             'No matching packages found',
