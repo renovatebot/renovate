@@ -158,14 +158,10 @@ export function parseUrl(url: URL | string | undefined | null): URL | null {
   }
 }
 
-// Matches a '%' that is NOT the start of a valid percent-encoded triplet
-// (i.e. not followed by two hex digits), e.g. the literal '%' in "50% off".
-//
-// NOTE: Intentionally a plain RegExp literal, not wrapped in regEx().
-// This pattern relies on a negative lookahead `(?!...)`, which RE2 does
-// not support. Wrapping it in regEx() will throw CONFIG_VALIDATION at
-// module load time. Do not "fix" this by adding the regEx() wrapper.
-const invalidPercentEncoding = /%(?![0-9a-fA-F]{2})/g;
+// Matches either a valid percent-encoded triplet (%XX) or a single stray '%'.
+// Used to escape stray '%' characters so decodeURIComponent cannot throw,
+// e.g. the literal '%' in "50% off" becomes '%25'.
+const invalidPercentEncoding = regEx(/%[0-9a-fA-F]{2}|%/g);
 
 export function encodeUrlPathSegments(inputUrl: string): string {
   // Parsing the URL is not enough. URL doesn't encode
@@ -180,7 +176,11 @@ export function encodeUrlPathSegments(inputUrl: string): string {
     .map((segment) =>
       encodeURIComponent(
         // Escape stray % so decodeURIComponent cannot throw.
-        decodeURIComponent(segment.replace(invalidPercentEncoding, '%25')),
+        decodeURIComponent(
+          segment.replace(invalidPercentEncoding, (match) =>
+            match.length === 3 ? match : '%25',
+          ),
+        ),
       ),
     )
     .join('/');
