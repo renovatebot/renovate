@@ -1,6 +1,6 @@
 import type { WebApi } from 'azure-devops-node-api';
-import type { MockedObject } from 'vitest';
 import type { DeploymentFlags } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
+import type { MockedObject } from 'vitest';
 import { buildTestJwt } from '~test/jwt-util.ts';
 import type { logger as _logger } from '../../../logger/index.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
