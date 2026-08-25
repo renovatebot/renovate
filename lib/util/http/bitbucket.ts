@@ -59,7 +59,7 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
             // `url` is only resolved against the base URL for JSON requests
             url: err.response.url,
             message,
-            detail,
+            ...(detail && { detail }),
             announcementUrl: data.announcement_url,
           },
           'Bitbucket API functionality has been deprecated or removed',
@@ -78,15 +78,15 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
       return;
     }
 
+    const announcementUrl = parseLinkHeader(isString(link) ? link : undefined)
+      ?.deprecation?.url;
+
     logger.once.warn(
       {
         url: url.toString(),
-        deprecation: isString(deprecation)
-          ? formatDate(deprecation)
-          : undefined,
-        sunset: isString(sunset) ? formatDate(sunset) : undefined,
-        announcementUrl: parseLinkHeader(isString(link) ? link : undefined)
-          ?.deprecation?.url,
+        ...(isString(deprecation) && { deprecation: formatDate(deprecation) }),
+        ...(isString(sunset) && { sunset: formatDate(sunset) }),
+        ...(announcementUrl && { announcementUrl }),
       },
       'Bitbucket API endpoint has been marked as deprecated',
     );
