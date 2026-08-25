@@ -78,7 +78,7 @@ export async function extractPackageFile(
               depTypes,
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + groupLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + groupLineNumber + 1,
               },
             };
             if (repositoryUrl) {
@@ -238,7 +238,7 @@ export async function extractPackageFile(
               registryUrls: [repositoryUrl],
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + sourceLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + sourceLineNumber + 1,
               },
             })),
           );
@@ -272,7 +272,7 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + platformsLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + platformsLineNumber + 1,
             },
           })),
         );
@@ -305,7 +305,7 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + ifLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + ifLineNumber + 1,
             },
           })),
         );

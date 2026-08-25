@@ -385,6 +385,7 @@ export function extractPackageFile(
           { image: copyFromMatch.groups.image },
           'Skipping alias COPY --from',
         );
+        // oxlint-disable-next-line renovate/no-number-constructor -- must reject strings that aren't entirely numeric (e.g. `0abc`), which parseInt() would silently accept as a stage index
       } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
         const dep = getDep(
           copyFromMatch.groups.image,

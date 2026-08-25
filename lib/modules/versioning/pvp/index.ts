@@ -33,6 +33,7 @@ function getMajor(version: string): number | null {
   if (parts === null) {
     return null;
   }
+  // oxlint-disable-next-line renovate/no-number-constructor -- must preserve decimal precision (e.g. `1.10` vs `1.1`), which parseInt() would truncate
   return Number(parts.major.join('.'));
 }
 
@@ -41,6 +42,7 @@ function getMinor(version: string): number | null {
   if (parts === null || parts.minor.length === 0) {
     return null;
   }
+  // oxlint-disable-next-line renovate/no-number-constructor -- must preserve decimal precision (e.g. `1.10` vs `1.1`), which parseInt() would truncate
   return Number(parts.minor.join('.'));
 }
 
@@ -49,6 +51,7 @@ function getPatch(version: string): number | null {
   if (parts === null || parts.patch.length === 0) {
     return null;
   }
+  // oxlint-disable-next-line renovate/no-number-constructor -- must preserve decimal precision (e.g. `1.10` vs `1.1`), which parseInt() would truncate
   return Number(`${parts.patch[0]}.${parts.patch.slice(1).join('')}`);
 }
 
