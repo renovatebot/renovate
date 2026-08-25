@@ -11,7 +11,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as looseVersioning } from '../../versioning/loose/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { parseApkIndexFile } from './parser.ts';
 import type { ApkPackage } from './types.ts';
 import { constructComponentUrls } from './url.ts';
@@ -181,6 +181,9 @@ export class ApkDatasource extends Datasource {
 
     const componentUrls = constructComponentUrls(registryUrl);
     let result: ReleaseResult | null = null;
+    // A package can be served by more than one component, so the same version
+    // must not be reported twice
+    const seenVersions = new Set<string>();
 
     for (const componentUrl of componentUrls) {
       try {
@@ -195,13 +198,19 @@ export class ApkDatasource extends Datasource {
           continue;
         }
 
-        // Convert packages to releases
-        const releases = matchingPackages.map((pkg) => ({
-          version: pkg.version,
-          releaseTimestamp: pkg.buildDate
-            ? asTimestamp(pkg.buildDate * 1000)
-            : undefined,
-        }));
+        const releases: Release[] = [];
+        for (const pkg of matchingPackages) {
+          if (seenVersions.has(pkg.version)) {
+            continue;
+          }
+          seenVersions.add(pkg.version);
+          releases.push({
+            version: pkg.version,
+            releaseTimestamp: pkg.buildDate
+              ? asTimestamp(pkg.buildDate * 1000)
+              : undefined,
+          });
+        }
 
         logger.trace(
           {

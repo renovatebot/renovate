@@ -194,6 +194,40 @@ describe('modules/datasource/apk/index', () => {
       });
     });
 
+    it('should report a version served by two components only once', async () => {
+      const communityArchive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: ['P:nginx', 'V:1.24.0-r16', 't:1714170434'].join('\n'),
+        },
+      ]);
+
+      httpMock
+        .scope('https://dl-cdn.alpinelinux.org')
+        .get('/alpine/v3.19/main/x86_64/APKINDEX.tar.gz')
+        .reply(200, apkIndexArchive)
+        .get('/alpine/v3.19/community/x86_64/APKINDEX.tar.gz')
+        .reply(200, communityArchive);
+
+      const res = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+        releases: [
+          {
+            version: '1.24.0-r16',
+            releaseTimestamp: '2024-04-26T22:27:14.000Z',
+          },
+        ],
+      });
+    });
+
     it('should skip components which do not contain the package', async () => {
       const communityArchive = await createTarGz([
         {
