@@ -32,6 +32,15 @@ import * as github from './index.ts';
 import type { ApiPageCache, GhRestPr } from './types.ts';
 
 const githubApiHost = 'https://api.github.com';
+const graphqlRateLimitResponse = {
+  errors: [
+    {
+      type: 'RATE_LIMIT',
+      code: 'graphql_rate_limit',
+      message: 'API rate limit already exceeded for installation ID XXXXXXX.',
+    },
+  ],
+};
 
 vi.mock('timers/promises');
 
@@ -524,16 +533,7 @@ describe('modules/platform/github/index', () => {
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
-        .reply(200, {
-          errors: [
-            {
-              type: 'RATE_LIMIT',
-              code: 'graphql_rate_limit',
-              message:
-                'API rate limit already exceeded for installation ID XXXXXXX.',
-            },
-          ],
-        });
+        .reply(200, graphqlRateLimitResponse);
       await expect(
         github.initPlatform({ token: 'x-access-token:ghs_123test' }),
       ).rejects.toThrowWithMessage(Error, PLATFORM_RATE_LIMIT_EXCEEDED);
@@ -1193,16 +1193,7 @@ describe('modules/platform/github/index', () => {
       httpMock
         .scope(githubApiHost)
         .post(`/graphql`)
-        .reply(200, {
-          errors: [
-            {
-              type: 'RATE_LIMIT',
-              code: 'graphql_rate_limit',
-              message:
-                'API rate limit already exceeded for installation ID XXXXXXX.',
-            },
-          ],
-        });
+        .reply(200, graphqlRateLimitResponse);
       await expect(
         github.initRepo({ repository: 'some/repo' }),
       ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
@@ -2747,6 +2738,41 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('ensureIssue()', () => {
+    it('propagates GraphQL rate limit errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(
+        github.ensureIssue({ title: 'new-title', body: 'new-content' }),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
+    it('handles repositories with issues disabled', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: { hasNextPage: false, endCursor: null },
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/repos/some/repo/issues')
+        .reply(410, { message: 'Issues are disabled for this repo' });
+
+      await expect(
+        github.ensureIssue({ title: 'new-title', body: 'new-content' }),
+      ).resolves.toBeNull();
+    });
+
     it('creates issue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -4238,6 +4264,15 @@ describe('modules/platform/github/index', () => {
         ]);
       });
 
+      it('should propagate GraphQL rate limit errors', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+        await expect(github.createPr(prConfig)).rejects.toThrow(
+          PLATFORM_RATE_LIMIT_EXCEEDED,
+        );
+      });
+
       it('should pass commit message as commitHeadline and commitBody for squash merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);
@@ -4840,6 +4875,17 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(PR_ALREADY_IN_MERGE_QUEUE);
     });
 
+    it('propagates rate limits from the base branch check', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
     it('logs if the merge queue check returns errors', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -4871,6 +4917,19 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.assertPrNotInMergeQueue('somebranch', 'main'),
       ).toResolve();
+    });
+
+    it('propagates rate limits from the PR merge queue check', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope);
+      prListMock(scope);
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
     it('skips merge queue check on GHE <3.12.0', async () => {
@@ -5120,6 +5179,15 @@ describe('modules/platform/github/index', () => {
           err: new ExternalHostError(expect.any(RequestError), 'github'),
         },
         'Error re-attempting PR platform automerge',
+      );
+    });
+
+    it('propagates GraphQL rate limit errors', async () => {
+      const scope = await mockScope();
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(github.reattemptPlatformAutomerge(pr)).rejects.toThrow(
+        PLATFORM_RATE_LIMIT_EXCEEDED,
       );
     });
   });

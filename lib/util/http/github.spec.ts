@@ -791,6 +791,26 @@ describe('util/http/github', () => {
       ).toMatchInlineSnapshot(`[]`);
     });
 
+    it('throws when an app installation exhausts its GraphQL budget', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          errors: [
+            {
+              type: 'RATE_LIMIT',
+              code: 'graphql_rate_limit',
+              message:
+                'API rate limit already exceeded for installation ID XXXXXXX.',
+            },
+          ],
+        });
+
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem'),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
     it('queryRepo', async () => {
       const repository = {
         foo: 'foo',

@@ -78,7 +78,7 @@ export type GithubGraphqlResponse<T = unknown> =
  * GraphQL API itself, and `graphql_rate_limit` when an app installation has
  * exhausted its allowance. Both mean "come back later", not "unknown error".
  */
-export function isGraphqlRateLimited(
+function isGraphqlRateLimited(
   errors: { type?: string; code?: string }[] | undefined,
 ): boolean {
   return !!errors?.some(
@@ -535,9 +535,10 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     }
     logger.trace(`Performing Github GraphQL request`);
 
+    let response: GithubGraphqlResponse<T> | null;
     try {
       const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
-      return res?.body;
+      response = res?.body ?? null;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError && count && count > 10) {
@@ -546,6 +547,12 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       }
       throw handleGotError(err, path, opts);
     }
+
+    if (isGraphqlRateLimited(response?.errors)) {
+      throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+    }
+
+    return response;
   }
 
   async queryRepoField<T = Record<string, unknown>>(

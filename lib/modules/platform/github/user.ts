@@ -17,11 +17,6 @@ export async function getAppDetails(token: string): Promise<UserDetails> {
       };
     }>('query { viewer { login databaseId }}', { token, count: 1 });
     if (!appData?.data) {
-      // A spent budget is not a credentials problem, and the caller retries
-      // rate limiting rather than giving up on the run.
-      if (githubHttp.isGraphqlRateLimited(appData?.errors)) {
-        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
-      }
       throw new Error("Init: Can't get App details");
     }
     return {
@@ -32,7 +27,7 @@ export async function getAppDetails(token: string): Promise<UserDetails> {
       email: null,
     };
   } catch (err) {
-    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       throw err;
     }
     logger.debug({ err }, 'Error authenticating with GitHub');
