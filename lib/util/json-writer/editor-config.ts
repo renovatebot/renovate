@@ -39,9 +39,9 @@ export class EditorConfig {
   }
 
   private static getIndentationSize(knownProps: Props): number | undefined {
-    const indentSize = Number(knownProps.indent_size);
+    const { indent_size: indentSize } = knownProps;
 
-    if (!Number.isNaN(indentSize) && Number.isInteger(indentSize)) {
+    if (typeof indentSize === 'number' && Number.isInteger(indentSize)) {
       return indentSize;
     }
 
