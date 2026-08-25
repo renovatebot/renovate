@@ -15,9 +15,30 @@ export const supportedRangeStrategies = ['pin', 'replace'];
 
 const floatingMinorTagRegex = regEx(/^\d+(\.\d+)?$/);
 const majorOnlyRegex = regEx(/^\d+$/);
+const componentPrefixRegex = regEx(/^(?<compatibility>[\w-]*[-/])v?\d+/);
+
+function splitComponentPrefix(input: string): {
+  compatibility: string;
+  version: string;
+} {
+  const trimmed = input.trim();
+  const compatibility =
+    componentPrefixRegex.exec(trimmed)?.groups?.compatibility ?? '';
+  return { compatibility, version: trimmed.slice(compatibility.length) };
+}
+
+function hasCompatibleComponentPrefix(
+  version: string,
+  current: string,
+): boolean {
+  return (
+    splitComponentPrefix(version).compatibility ===
+    splitComponentPrefix(current).compatibility
+  );
+}
 
 function massageValue(input: string): string {
-  return input.trim().replace(regEx(/^v/i), '');
+  return splitComponentPrefix(input).version.replace(regEx(/^v/i), '');
 }
 
 function parseVersion(input: string): SemVer | null {
@@ -130,6 +151,9 @@ function sortVersions(x: string, y: string): number {
 }
 
 function equals(x: string, y: string): boolean {
+  if (!hasCompatibleComponentPrefix(x, y)) {
+    return false;
+  }
   const a = parseVersionCoerced(x);
   const b = parseVersionCoerced(y);
   if (!a || !b) {
@@ -139,6 +163,9 @@ function equals(x: string, y: string): boolean {
 }
 
 function isGreaterThan(x: string, y: string): boolean {
+  if (!hasCompatibleComponentPrefix(x, y)) {
+    return false;
+  }
   const a = parseVersionCoerced(x);
   const b = parseVersionCoerced(y);
   if (!a || !b) {
@@ -148,6 +175,10 @@ function isGreaterThan(x: string, y: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
+  if (!hasCompatibleComponentPrefix(version, range)) {
+    return false;
+  }
+
   // if we have a valid floating tag provided, and it's the same as the range, treat it as the same
   if (
     parseVersionCoerced(version) &&
@@ -354,11 +385,17 @@ function getShortestMatchingVersion(
   return null;
 }
 
-function isCompatible(version: string): boolean {
-  return isValid(version);
+function isCompatible(version: string, current?: string): boolean {
+  return (
+    isValid(version) &&
+    (!current || hasCompatibleComponentPrefix(version, current))
+  );
 }
 
 function isBreaking(version: string, current: string): boolean {
+  if (!hasCompatibleComponentPrefix(version, current)) {
+    return false;
+  }
   const versionParsed = parseVersion(version);
   const currentParsed = parseVersion(current);
 
