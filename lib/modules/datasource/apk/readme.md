@@ -70,7 +70,7 @@ Say you pin Alpine packages in a `Dockerfile` and want Renovate to bump the vers
 Combine the `apk` datasource with a [regex manager](../../manager/regex/index.md).
 
 Add a custom manager in `renovate.json`.
-The optional `branch` capture group is filled from the renovate comment and interpolated into `registryUrlTemplate` by the regex manager.
+The optional `branch` capture group is filled from the Renovate comment and interpolated into `registryUrlTemplate` by the regex manager.
 
 ```json
 {

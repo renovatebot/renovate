@@ -88,7 +88,7 @@ export class ApkDatasource extends Datasource {
       });
 
       if (!(await fs.cachePathExists(extractedFile))) {
-        logger.warn('APKINDEX file not found in tar archive');
+        logger.warn({componentUrl}, 'APKINDEX file not found in tar archive');
         return [];
       }
 
