@@ -1,6 +1,7 @@
 import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { Datasource } from '../datasource.ts';
 import { defaultRegistryUrl } from '../npm/common.ts';
@@ -11,7 +12,6 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
-
 import { UnpkgDigestResponse } from './schema.ts';
 
 function splitPackageAndAsset(packageName: string): {
@@ -84,7 +84,7 @@ export class UnpkgDatasource extends Datasource {
     }
 
     const file = val?.files.find(
-      (file) => file.path.replace(/^\/+/, '') === asset,
+      (file) => file.path.replace(regEx(/^\/+/), '') === asset,
     );
 
     return file?.integrity ? `${file.integrity}` : null;
