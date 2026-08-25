@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
 import * as hostRules from '../host-rules.ts';
 import { range } from '../range.ts';
 import { BitbucketHttp, setBaseUrl } from './bitbucket.ts';
@@ -52,6 +53,94 @@ describe('util/http/bitbucket', () => {
       },
       statusCode: 200,
     });
+  });
+
+  it('warns about deprecated functionality', async () => {
+    httpMock
+      .scope(baseUrl)
+      .get('/some-url')
+      .reply(410, {
+        type: 'error',
+        error: {
+          message: 'CHANGE-3071 - Functionality has been deprecated',
+          detail: 'Please read the changelog entry for more details.',
+          data: {
+            announcement_url:
+              'https://developer.atlassian.com/cloud/bitbucket/changelog#CHANGE-3071',
+          },
+        },
+      });
+
+    await expect(api.getJsonUnchecked('some-url')).rejects.toThrow(
+      'Request failed with status code 410 (Gone)',
+    );
+
+    expect(logger.logger.once.warn).toHaveBeenCalledWith(
+      {
+        url: `${baseUrl}/some-url`,
+        message: 'CHANGE-3071 - Functionality has been deprecated',
+        detail: 'Please read the changelog entry for more details.',
+        announcementUrl:
+          'https://developer.atlassian.com/cloud/bitbucket/changelog#CHANGE-3071',
+      },
+      'Bitbucket API functionality has been deprecated or removed',
+    );
+  });
+
+  it('warns about deprecated functionality for non-JSON responses', async () => {
+    httpMock
+      .scope(baseUrl)
+      .get('/some-url')
+      .reply(
+        410,
+        JSON.stringify({
+          error: {
+            message: 'CHANGE-3071 - Functionality has been deprecated',
+            data: {
+              announcement_url:
+                'https://developer.atlassian.com/cloud/bitbucket/changelog#CHANGE-3071',
+            },
+          },
+        }),
+      );
+
+    await expect(api.get('some-url')).rejects.toThrow(
+      'Request failed with status code 410 (Gone)',
+    );
+
+    expect(logger.logger.once.warn).toHaveBeenCalledWith(
+      {
+        url: `${baseUrl}/some-url`,
+        message: 'CHANGE-3071 - Functionality has been deprecated',
+        detail: undefined,
+        announcementUrl:
+          'https://developer.atlassian.com/cloud/bitbucket/changelog#CHANGE-3071',
+      },
+      'Bitbucket API functionality has been deprecated or removed',
+    );
+  });
+
+  it('does not warn when the request failed without a response', async () => {
+    httpMock.scope(baseUrl).get('/some-url').replyWithError('some error');
+
+    await expect(api.getJsonUnchecked('some-url')).rejects.toThrow(
+      'some error',
+    );
+
+    expect(logger.logger.once.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not warn for unrelated errors', async () => {
+    httpMock
+      .scope(baseUrl)
+      .get('/some-url')
+      .reply(404, { type: 'error', error: { message: 'Not found' } });
+
+    await expect(api.getJsonUnchecked('some-url')).rejects.toThrow(
+      'Request failed with status code 404 (Not Found)',
+    );
+
+    expect(logger.logger.once.warn).not.toHaveBeenCalled();
   });
 
   it('paginates: adds default pagelen if non is present', async () => {
