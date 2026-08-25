@@ -339,20 +339,24 @@ describe('util/url', () => {
       ).toBe('https://dev.azure.com/my%20org/my%20project/_git/my%20repo/');
     });
 
-    it('leaves the origin untouched', () => {
+    it('drops the default https port and encodes path segments', () => {
       const origin = 'https://dev.azure.com:443/';
       const encoded = encodeUrlPathSegments(
         `${origin}my org/my project/_git/my repo`,
       );
-      expect(encoded.startsWith('https://dev.azure.com/')).toBe(true);
+      expect(encoded).toBe(
+        'https://dev.azure.com/my%20org/my%20project/_git/my%20repo',
+      );
     });
 
-    it('preserves non-default ports', () => {
+    it('preserves non-default ports and encodes path segments', () => {
       const origin = 'https://azure-devops.interal.corp:8080/tfs/';
       const encoded = encodeUrlPathSegments(
         `${origin}my org/my project/_git/my repo`,
       );
-      expect(encoded.startsWith(origin)).toBe(true);
+      expect(encoded).toBe(
+        'https://azure-devops.interal.corp:8080/tfs/my%20org/my%20project/_git/my%20repo',
+      );
     });
 
     it('leaves a plain URL with no special characters unchanged (regression baseline)', () => {
