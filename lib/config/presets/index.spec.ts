@@ -335,11 +335,11 @@ describe('config/presets/index', () => {
 
       expect(res.packageRules).toEqual([
         {
-          matchDepTypes: ['action'],
+          matchDepTypes: ['action', 'workflow'],
           pinDigests: true,
         },
         {
-          matchDepTypes: ['action'],
+          matchDepTypes: ['action', 'workflow'],
           extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
           versioning:
             'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
