@@ -36,8 +36,13 @@ export function constructComponentUrls(registryUrl: string): string[] {
     const branch = getBranch(url);
     const components = getComponents(url);
 
-    // Only the parameters describe the path, so anything else in the URL is dropped
-    const baseUrl = `${url.origin}${url.pathname}`;
+    // The parameters describe the path, so they are stripped before the segments
+    // are appended. Unknown parameters are rejected above, so nothing else remains.
+    for (const param of KNOWN_PARAMS) {
+      url.searchParams.delete(param);
+    }
+    url.hash = '';
+    const baseUrl = url.toString();
 
     return components.map((component) =>
       joinUrlParts(

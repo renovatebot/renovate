@@ -57,6 +57,24 @@ describe('modules/datasource/apk/url', () => {
       ]);
     });
 
+    it('keeps credentials in the base URL', () => {
+      const registryUrl =
+        'https://user:token@mirror.example.com/alpine?branch=v3.19&components=main&arch=x86_64';
+
+      expect(constructComponentUrls(registryUrl)).toEqual([
+        'https://user:token@mirror.example.com/alpine/v3.19/main/x86_64',
+      ]);
+    });
+
+    it('keeps a non-default port in the base URL', () => {
+      const registryUrl =
+        'https://mirror.example.com:8443/alpine?branch=v3.19&components=main&arch=x86_64';
+
+      expect(constructComponentUrls(registryUrl)).toEqual([
+        'https://mirror.example.com:8443/alpine/v3.19/main/x86_64',
+      ]);
+    });
+
     it('drops anything else in the base URL', () => {
       const registryUrl =
         'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=x86_64#fragment';
