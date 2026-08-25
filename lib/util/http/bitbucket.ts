@@ -176,7 +176,8 @@ function formatDate(value: string): string {
   const seconds = regEx(/^@(?<seconds>\d+)$/).exec(value)?.groups?.seconds;
   if (seconds) {
     return (
-      DateTime.fromSeconds(Number(seconds), { zone: 'utc' }).toISO() ?? value
+      DateTime.fromSeconds(parseInt(seconds, 10), { zone: 'utc' }).toISO() ??
+      value
     );
   }
 
