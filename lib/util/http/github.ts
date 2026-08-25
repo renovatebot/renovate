@@ -538,7 +538,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     let response: GithubGraphqlResponse<T> | null;
     try {
       const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
-      response = res?.body ?? null;
+      response = res.body;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError && count && count > 10) {
