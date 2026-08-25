@@ -295,7 +295,7 @@ describe('modules/platform/azure/util', () => {
       ).toBe('https://dev.azure.com/my-org/my-project/_git/my%20repo/');
     });
 
-    it('encodes a spaces in multiple path segments', () => {
+    it('encodes spaces in multiple path segments', () => {
       expect(
         encodeUrlPathSegments(
           'https://dev.azure.com/my org/my project/_git/my repo/',
@@ -311,7 +311,7 @@ describe('modules/platform/azure/util', () => {
       expect(encoded.startsWith('https://dev.azure.com/')).toBe(true);
     });
 
-    it('prevserves non-default ports', () => {
+    it('preserves non-default ports', () => {
       const origin = 'https://azure-devops.interal.corp:8080/tfs/';
       const encoded = encodeUrlPathSegments(
         `${origin}my org/my project/_git/my repo`,
