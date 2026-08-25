@@ -19,7 +19,7 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
-    it('returns null if dependency not found', () => {
+    it('returns the original content if dependency not found', () => {
       const fileContent = codeBlock`
         {
           inputs = {
@@ -35,13 +35,13 @@ describe('modules/manager/nix/update', () => {
           newValue: '2.0.0',
         },
       });
-      expect(result).toBeNull();
+      expect(result).toBe(fileContent);
       expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Could not find URL for dependency nonexistent',
       );
     });
 
-    it('returns null if dependency has invalid URL', () => {
+    it('returns the original content if dependency has invalid URL', () => {
       const fileContent = codeBlock`
         {
           inputs = {
@@ -55,7 +55,7 @@ describe('modules/manager/nix/update', () => {
           depName: 'nixpkgs',
         },
       });
-      expect(result).toBeNull();
+      expect(result).toBe(fileContent);
       expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         'Could not parse URL for dependency nixpkgs: derp',
       );
@@ -281,9 +281,55 @@ describe('modules/manager/nix/update', () => {
           'rev=73d65dcf7d7af76346b084c775e4df9697372a45',
         );
       });
+
+      it('leaves rev unchanged when only ref is updated', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              foo-bar.url = "git+ssh://git@example.com/foo/bar?ref=refs/tags/2.8.0&rev=73d65dcf7d7af76346b084c775e4df9697372a45";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'foo-bar',
+            currentValue: '2.8.0',
+            newValue: '2.23.0',
+          },
+        });
+
+        expect(result).toContain('ref=refs/tags/2.23.0');
+        expect(result).toContain(
+          'rev=73d65dcf7d7af76346b084c775e4df9697372a45',
+        );
+      });
+
+      it('preserves the position of a fragment after the query', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              mypackage.url = "git+https://example.com/org/repo?ref=release-1.0#subdir";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'mypackage',
+            currentValue: '1.0',
+            newValue: '2.0',
+          },
+        });
+
+        expect(result).toContain(
+          'git+https://example.com/org/repo?ref=release-2.0#subdir',
+        );
+        expect(result).not.toContain('#subdir?');
+      });
     });
 
-    it('returns null when no changes are needed', () => {
+    it('returns the original content when no changes are needed', () => {
       const fileContent = codeBlock`
         {
           inputs = {
@@ -299,7 +345,7 @@ describe('modules/manager/nix/update', () => {
           newValue: '1.0.0',
         },
       });
-      expect(result).toBeNull();
+      expect(result).toBe(fileContent);
       expect(logger.logger.trace).toHaveBeenNthCalledWith(
         2,
         {
@@ -497,6 +543,35 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
+    it('updates the root input instead of a nested override', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            foo = {
+              url = "github:owner/foo";
+              inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+            };
+            nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+          };
+        }
+      `;
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs',
+          currentValue: '24.05',
+          newValue: '25.05',
+        },
+      });
+
+      expect(result).toContain(
+        'inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"',
+      );
+      expect(result).toContain(
+        'nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05"',
+      );
+    });
+
     it('does not match complex attribute sets', () => {
       const fileContent = codeBlock`
         {
@@ -517,10 +592,10 @@ describe('modules/manager/nix/update', () => {
         },
       });
 
-      expect(result).toBeNull();
+      expect(result).toBe(fileContent);
     });
 
-    it('returns null for digest-only updates when digests are the same', () => {
+    it('returns the original content for unchanged digest-only updates', () => {
       const fileContent = codeBlock`
         {
           inputs = {
@@ -538,7 +613,7 @@ describe('modules/manager/nix/update', () => {
           newDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
         },
       });
-      expect(result).toBeNull();
+      expect(result).toBe(fileContent);
       expect(logger.logger.trace).toHaveBeenNthCalledWith(
         2,
         {
