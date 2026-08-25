@@ -36,12 +36,12 @@ Follow these steps to see which version the Mend Renovate app used for a specifi
    ```
    INFO: Renovate started
    {
-     "renovateVersion": "44.18.0"
+     "renovateVersion": "44.39.3"
    }
    ...
    INFO: Repository started
    {
-     "renovateVersion": "44.18.0"
+     "renovateVersion": "44.39.3"
    }
    ```
 

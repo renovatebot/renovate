@@ -7,6 +7,7 @@ import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
 import { setCustomEnv } from '../env.ts';
 import * as dockerModule from './docker/index.ts';
+import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs } from './hermit.ts';
 import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
@@ -250,7 +251,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -282,7 +283,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e FORCED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e FORCED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -351,7 +352,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -405,7 +406,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -433,7 +434,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -461,7 +462,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -492,7 +493,7 @@ describe('util/exec/index', () => {
         outCmd: [
           `docker pull ghcr.io/renovatebot/base-image`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -523,7 +524,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           `docker ps --filter name=myprefix_${sideCarName} -aq`,
-          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -557,7 +558,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c 'preCommand1 && preCommand2 && ${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c 'preCommand1 && preCommand2 && ${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -585,7 +586,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -743,7 +744,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -779,7 +780,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CI -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -1005,17 +1006,39 @@ describe('util/exec/index', () => {
       `echo hello`,
       `docker pull ${fullImage}`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `echo hello`,
       `echo hello`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CI -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
     ]);
   });
+
+  it.each(Object.keys(hardcodedProcessEnv))(
+    'always forwards %s into the Docker sidecar',
+    async (envVar) => {
+      process.env = processEnv;
+
+      const actualCmd: string[] = [];
+      cpExec.mockImplementation((execCmd) => {
+        actualCmd.push(asRawCommand(execCmd));
+        return Promise.resolve({ stdout: '', stderr: '' });
+      });
+
+      GlobalConfig.set({
+        ...globalConfig,
+        localDir: cwd,
+        binarySource: 'docker',
+      });
+      await exec(inCmd, { docker });
+
+      expect(actualCmd.at(-1)).toContain(`-e ${envVar} `);
+    },
+  );
 
   it('throws when an error is thrown', async () => {
     process.env = processEnv;
@@ -1137,6 +1160,7 @@ describe('util/exec/index', () => {
           'PATH',
           'LC_ALL',
           'LANG',
+          'CI',
         ],
       },
       'Executing command',

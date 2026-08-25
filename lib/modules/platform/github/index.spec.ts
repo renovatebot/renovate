@@ -5647,6 +5647,103 @@ describe('modules/platform/github/index', () => {
       expect(res[1].security_vulnerability!.package.name).toBe('right-pad');
       expect(res[2].security_vulnerability!.package.name).toBe('center-pad');
     });
+
+    it('handles cursor pagination correctly', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(
+          200,
+          [
+            {
+              security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
+                description: 'description',
+                identifiers: [{ type: 'type', value: 'value' }],
+                references: [],
+                severity: 'high',
+              },
+              security_vulnerability: {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'left-pad',
+                },
+                severity: 'high',
+                vulnerable_version_range: '0.0.2',
+                first_patched_version: { identifier: '0.0.3' },
+              },
+              dependency: {
+                manifest_path: 'bar/foo',
+              },
+            },
+            {
+              security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
+                description: 'description',
+                identifiers: [{ type: 'type', value: 'value' }],
+                references: [],
+                severity: 'critical',
+              },
+              security_vulnerability: {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'right-pad',
+                },
+                severity: 'critical',
+                vulnerable_version_range: '0.0.1',
+                first_patched_version: { identifier: '0.0.2' },
+              },
+              dependency: {
+                manifest_path: 'bar/foo',
+              },
+            },
+          ],
+          {
+            link: `<${githubApiHost}/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1>; rel="next"`,
+          },
+        )
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+              severity: 'low',
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'center-pad',
+              },
+              severity: 'low',
+              vulnerable_version_range: '0.0.3',
+              first_patched_version: { identifier: '0.0.4' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
+        ]);
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+
+      expect(res).toHaveLength(3);
+      expect(res[0].security_vulnerability!.package.name).toBe('left-pad');
+      expect(res[1].security_vulnerability!.package.name).toBe('right-pad');
+      expect(res[2].security_vulnerability!.package.name).toBe('center-pad');
+    });
   });
 
   describe('getJsonFile()', () => {

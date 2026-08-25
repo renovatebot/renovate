@@ -40,6 +40,7 @@ import type {
 } from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
+const MAX_PAGINATION_PAGES = 100;
 let baseUrl = githubBaseUrl;
 export function setBaseUrl(url: string): void {
   baseUrl = url;
@@ -333,6 +334,20 @@ function replaceUrlBase(url: URL, baseUrl: string): URL {
   return new URL(relativeUrl, baseUrl);
 }
 
+function resolvePaginationUrl(
+  url: string,
+  baseUrl: string | undefined,
+  rebasePaginationLinks: boolean,
+): URL {
+  const parsedUrl = new URL(url, baseUrl);
+  const rebasePagination =
+    !!baseUrl &&
+    rebasePaginationLinks &&
+    // Preserve github.com URLs for use cases like release notes
+    parsedUrl.origin !== 'https://api.github.com';
+  return rebasePagination ? replaceUrlBase(parsedUrl, baseUrl) : parsedUrl;
+}
+
 export class GithubHttp extends HttpBase<GithubHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
@@ -423,36 +438,79 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const linkHeader = parseLinkHeader(result?.headers?.link);
       const next = linkHeader?.next;
       const env = getEnv();
-      if (next?.url && linkHeader?.last?.page) {
-        let lastPage = parseInt(linkHeader.last.page, 10);
-        // v8 ignore else -- TODO: add test #40625
-        if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
-          lastPage = Math.min(pageLimit, lastPage);
-        }
+      if (next?.url) {
         const baseUrl = httpOptions.baseUrl ?? this.baseUrl;
-        const parsedUrl = new URL(next.url, baseUrl);
-        const rebasePagination =
-          !!baseUrl &&
-          !!env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
-          // Preserve github.com URLs for use cases like release notes
-          parsedUrl.origin !== 'https://api.github.com';
-        const firstPageUrl = rebasePagination
-          ? replaceUrlBase(parsedUrl, baseUrl)
-          : parsedUrl;
+        const rebasePaginationLinks = !!env.RENOVATE_X_REBASE_PAGINATION_LINKS;
+        const firstPageUrl = resolvePaginationUrl(
+          next.url,
+          baseUrl,
+          rebasePaginationLinks,
+        );
         // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
         if (firstPageUrl.origin === resolvedUrl.origin) {
-          const queue = [...range(2, lastPage)].map(
-            (pageNumber) => (): Promise<HttpResponse<T>> => {
-              // copy before modifying searchParams
-              const nextUrl = parseUrl(firstPageUrl.toString())!;
-              nextUrl.searchParams.set('page', String(pageNumber));
-              return super.requestJsonUnsafe<T>(method, {
-                ...opts,
-                url: nextUrl,
-              });
-            },
-          );
-          const pages = await p.all(queue);
+          let pages: HttpResponse<T>[];
+          if (linkHeader?.last?.page) {
+            logger.debug('Using GitHub offset-based pagination');
+            let lastPage = parseInt(linkHeader.last.page, 10);
+            // v8 ignore else -- TODO: add test #40625
+            if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
+              lastPage = Math.min(pageLimit, lastPage);
+            }
+            const queue = [...range(2, lastPage)].map(
+              (pageNumber) => (): Promise<HttpResponse<T>> => {
+                // copy before modifying searchParams
+                const nextUrl = parseUrl(firstPageUrl.toString())!;
+                nextUrl.searchParams.set('page', String(pageNumber));
+                return super.requestJsonUnsafe<T>(method, {
+                  ...opts,
+                  url: nextUrl,
+                });
+              },
+            );
+            pages = await p.all(queue);
+          } else {
+            logger.debug('Using GitHub cursor-based pagination');
+            pages = [];
+            const paginateAll =
+              !!env.RENOVATE_PAGINATE_ALL || httpOptions.paginate === 'all';
+            const cursorPageLimit = paginateAll
+              ? MAX_PAGINATION_PAGES
+              : pageLimit;
+            let nextUrl: URL | null = firstPageUrl;
+            let pageNumber = 2;
+            for (; nextUrl && pageNumber <= cursorPageLimit; pageNumber += 1) {
+              if (nextUrl.origin !== resolvedUrl.origin) {
+                logger.once.warn(
+                  {
+                    requestHost: resolvedUrl.host,
+                    paginationHost: nextUrl.host,
+                  },
+                  'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+                );
+                break;
+              }
+              const nextPage: HttpResponse<T> =
+                await super.requestJsonUnsafe<T>(method, {
+                  ...opts,
+                  url: nextUrl,
+                });
+              pages.push(nextPage);
+              const nextLink = parseLinkHeader(nextPage.headers.link)?.next;
+              nextUrl = nextLink?.url
+                ? resolvePaginationUrl(
+                    nextLink.url,
+                    baseUrl,
+                    rebasePaginationLinks,
+                  )
+                : null;
+            }
+            if (paginateAll && nextUrl && pageNumber > cursorPageLimit) {
+              logger.warn(
+                { maxPages: MAX_PAGINATION_PAGES },
+                'GitHub cursor pagination limit reached',
+              );
+            }
+          }
           // v8 ignore else -- TODO: add test #40625
           if (httpOptions.paginationField && isPlainObject(result.body)) {
             const paginatedResult = result.body[httpOptions.paginationField];
