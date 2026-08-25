@@ -75,6 +75,22 @@ describe('modules/manager/nix/artifacts', () => {
     expect(execSnapshots).toEqual([]);
   });
 
+  it('returns if there are no named inputs to update', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('content');
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: undefined }, { depName: ' ' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(res).toBeNull();
+    expect(fs.writeLocalFile).not.toHaveBeenCalled();
+    expect(execSnapshots).toEqual([]);
+  });
+
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce('content');
     const execSnapshots = mockExecAll();

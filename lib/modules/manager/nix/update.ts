@@ -55,6 +55,40 @@ function updateGithubPath(
   return `${match.groups.prefix}${ref}${match.groups.suffix ?? ''}`;
 }
 
+function updateQueryParameter(
+  url: string,
+  parameter: string,
+  updateValue: (value: string) => string,
+): string {
+  const queryStart = url.indexOf('?');
+  const fragmentStart = url.indexOf('#');
+  if (
+    queryStart === -1 ||
+    (fragmentStart !== -1 && queryStart > fragmentStart)
+  ) {
+    return url;
+  }
+
+  const queryEnd = fragmentStart === -1 ? url.length : fragmentStart;
+  const query = url.slice(queryStart, queryEnd);
+  const match = regEx(`[?&]${RegExp.escape(parameter)}=(?<value>[^&]*)`).exec(
+    query,
+  );
+  if (!match?.groups || match.index === undefined) {
+    return url;
+  }
+
+  const value = match.groups.value;
+
+  const updatedValue = updateValue(value);
+  if (updatedValue === value) {
+    return url;
+  }
+
+  const valueStart = queryStart + match.index + match[0].lastIndexOf(value);
+  return `${url.slice(0, valueStart)}${updatedValue}${url.slice(valueStart + value.length)}`;
+}
+
 function updateUrl(
   oldUrl: string,
   currentValue?: string,
@@ -78,36 +112,54 @@ function updateUrl(
     );
   }
 
-  const updatedUrl = parseUrl(newUrl)!;
-  let queryModified = false;
-  const ref = updatedUrl.searchParams.get('ref');
-  if (ref) {
-    const updatedRef = replaceVersion(ref, currentValue, newValue);
-    if (updatedRef !== ref) {
-      updatedUrl.searchParams.set('ref', updatedRef);
-      queryModified = true;
-    }
-  }
-
-  const rev = updatedUrl.searchParams.get('rev');
-  if (
-    rev &&
+  newUrl = updateQueryParameter(newUrl, 'ref', (ref) =>
+    replaceVersion(ref, currentValue, newValue),
+  );
+  newUrl = updateQueryParameter(newUrl, 'rev', (rev) =>
     currentDigest &&
     newDigest &&
     currentDigest !== newDigest &&
     rev === currentDigest
-  ) {
-    updatedUrl.searchParams.set('rev', newDigest);
-    queryModified = true;
-  }
-
-  if (queryModified) {
-    const query = updatedUrl.search.replace(regEx(/%2F/g), '/');
-    updatedUrl.search = '';
-    newUrl = `${updatedUrl.toString()}${query}`;
-  }
+      ? newDigest
+      : rev,
+  );
 
   return newUrl;
+}
+
+function getBraceDepth(content: string, end: number): number {
+  const nixSyntax = content
+    .slice(0, end)
+    .replace(
+      regEx(/"(?:\\.|[^"\\])*"|''[\s\S]*?''|#[^\n]*|\/\*[\s\S]*?\*\//g),
+      '',
+    );
+  let depth = 0;
+  for (const char of nixSyntax) {
+    if (char === '{') {
+      depth += 1;
+    } else if (char === '}') {
+      depth -= 1;
+    }
+  }
+  return depth;
+}
+
+function findInputUrl(
+  fileContent: string,
+  patterns: RegExp[],
+): RegExpMatchArray | null {
+  const matches = patterns.flatMap((pattern) => [
+    ...fileContent.matchAll(pattern),
+  ]);
+
+  matches.sort(
+    (left, right) =>
+      getBraceDepth(fileContent, left.index) -
+      getBraceDepth(fileContent, right.index),
+  );
+
+  return matches[0] ?? null;
 }
 
 export function updateDependency({
@@ -124,24 +176,23 @@ export function updateDependency({
 
   const inputPrefix = '(?:inputs\\.)?';
   const directPattern = regEx(
-    `^\\s*${inputPrefix}${RegExp.escape(depName)}\\.url\\s*=\\s*"([^"]+)"`,
+    `^\\s*${inputPrefix}${RegExp.escape(depName)}\\.url\\s*=\\s*"(?<url>[^"]+)"`,
     'gm',
   );
   // Only match simple attribute sets where `url` is the first member. This
   // intentionally avoids trying to parse arbitrary Nix expressions with regex.
   const attrSetPattern = regEx(
-    `^\\s*${inputPrefix}${RegExp.escape(depName)}\\s*=\\s*\\{\\s*url\\s*=\\s*"([^"]+)"`,
+    `^\\s*${inputPrefix}${RegExp.escape(depName)}\\s*=\\s*\\{\\s*url\\s*=\\s*"(?<url>[^"]+)"`,
     'gm',
   );
-  const match =
-    directPattern.exec(fileContent) ?? attrSetPattern.exec(fileContent);
+  const match = findInputUrl(fileContent, [directPattern, attrSetPattern]);
 
-  if (!match) {
+  if (!match?.groups || match.index === undefined) {
     logger.debug(`Could not find URL for dependency ${depName}`);
-    return null;
+    return fileContent;
   }
 
-  const oldUrl = match[1];
+  const oldUrl = match.groups.url;
   const newUrl = updateUrl(
     oldUrl,
     currentValue ?? undefined,
@@ -151,7 +202,7 @@ export function updateDependency({
   );
   if (newUrl === null) {
     logger.debug(`Could not parse URL for dependency ${depName}: ${oldUrl}`);
-    return null;
+    return fileContent;
   }
 
   if (newUrl === oldUrl) {
@@ -169,7 +220,7 @@ export function updateDependency({
     }
 
     logger.trace({ depName, url: oldUrl }, 'No changes made to URL');
-    return null;
+    return fileContent;
   }
 
   const urlStart = match.index + match[0].lastIndexOf(oldUrl);

@@ -31,6 +31,20 @@ export async function updateArtifacts({
     return null;
   }
 
+  let updateCommand = 'flake update';
+  if (!config.isLockFileMaintenance) {
+    const inputs = updatedDeps
+      .map(({ depName }) => depName)
+      .filter(isNonEmptyStringAndNotWhitespace)
+      .map((depName) => quote(depName))
+      .join(' ');
+    if (!inputs) {
+      logger.debug('No flake inputs to update');
+      return null;
+    }
+    updateCommand += ` ${inputs}`;
+  }
+
   // Nix reads flake.nix from the working tree, while Renovate keeps package
   // file updates in memory until artifact generation has finished.
   await writeLocalFile(packageFileName, newPackageFileContent);
@@ -48,16 +62,7 @@ export async function updateArtifacts({
     cmd += `--extra-access-tokens github.com=${quote(token)} `;
   }
 
-  if (config.isLockFileMaintenance) {
-    cmd += 'flake update';
-  } else {
-    const inputs = updatedDeps
-      .map(({ depName }) => depName)
-      .filter(isNonEmptyStringAndNotWhitespace)
-      .map((depName) => quote(depName))
-      .join(' ');
-    cmd += `flake update ${inputs}`;
-  }
+  cmd += updateCommand;
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
