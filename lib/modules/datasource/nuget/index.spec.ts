@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { codeBlock } from 'common-tags';
-import upath from 'upath';
+import type { DirectoryResult } from 'tmp-promise';
+import tmp from 'tmp-promise';
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -346,11 +347,18 @@ describe('modules/datasource/nuget/index', () => {
     });
 
     describe('determine source URL from nupkg', () => {
-      beforeEach(() => {
-        GlobalConfig.set({
-          cacheDir: upath.join('/tmp/cache'),
-        });
+      // These tests really download the .nupkg to disk, so give them a
+      // throwaway directory instead of a fixed path under the system tmpdir.
+      let cacheDirResult: DirectoryResult;
+
+      beforeEach(async () => {
+        cacheDirResult = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ cacheDir: cacheDirResult.path });
         vi.stubEnv('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS', 'true');
+      });
+
+      afterEach(async () => {
+        await cacheDirResult?.cleanup();
       });
 
       it('can determine source URL from nupkg when PackageBaseAddress is missing', async () => {
