@@ -2033,6 +2033,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
       vi.stubEnv('GIT_CONFIG_SYSTEM', '/tmp/system-gitconfig');
       vi.stubEnv('PAGER', 'less');
       vi.stubEnv('GIT_ASKPASS', '/tmp/.git-askpass');
+      // process.env deliberately overrides the default GIT_SSH_COMMAND, so an
+      // ambient value would be forwarded instead of the one asserted below.
+      vi.stubEnv('GIT_SSH_COMMAND', undefined);
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
@@ -2060,6 +2063,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       // + GIT_CONFIG_VALUE_n via customEnvVariables.
       // simple-git >=3.36.0 blocks git operations when these vars are present unless
       // allowUnsafeConfigEnvCount is enabled in the simple-git config.
+      vi.stubEnv('GIT_SSH_COMMAND', undefined);
       setCustomEnv({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',

@@ -28,6 +28,11 @@ describe('util/exec/env', () => {
   ];
 
   beforeEach(() => {
+    // Clear any ambient value first, so that a forwarded variable which is set
+    // in the surrounding environment cannot leak into the assertions below.
+    basicEnvVars.forEach((env) => {
+      vi.stubEnv(env, undefined);
+    });
     envVars.forEach((env) => {
       vi.stubEnv(env, env);
     });
