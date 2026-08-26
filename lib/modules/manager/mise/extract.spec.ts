@@ -1389,6 +1389,29 @@ describe('modules/manager/mise/extract', () => {
       ]);
     });
 
+    it('treats a golangci-lint major selector as lockfile-only', async () => {
+      const lockFileContent = codeBlock`
+        [[tools.golangci-lint]]
+        version = "2.12.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        golangci-lint = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'golangci-lint',
+        currentValue: '2.12.0',
+        lockedVersion: '2.12.0',
+        allowedVersions: '/^2(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+        rangeStrategy: 'update-lockfile',
+      });
+    });
+
     it('allows a datasource prefix from the locked version', async () => {
       const lockFileContent = codeBlock`
         [[tools."github:cli/cli"]]
