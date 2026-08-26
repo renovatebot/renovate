@@ -1,4 +1,5 @@
 import { logger } from '../logger/index.ts';
+import { coerceArray } from './array.ts';
 import * as memCache from './cache/memory/index.ts';
 import type { GitOperationType } from './git/types.ts';
 import { parseUrl } from './url.ts';
@@ -109,8 +110,9 @@ export class GetDatasourceReleasesStats {
     packageName: string,
     duration: number,
   ): void {
-    const data =
-      memCache.get<GetReleasesDataPoint[]>('get-releases-stats') ?? [];
+    const data = coerceArray(
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats'),
+    );
     data.push({ datasource, registryUrl, packageName, duration });
     memCache.set('get-releases-stats', data);
   }
@@ -129,8 +131,9 @@ export class GetDatasourceReleasesStats {
   }
 
   static getReport(): GetReleaseStatsReport {
-    const data =
-      memCache.get<GetReleasesDataPoint[]>('get-releases-stats') ?? [];
+    const data = coerceArray(
+      memCache.get<GetReleasesDataPoint[]>('get-releases-stats'),
+    );
 
     // Process all datapoints into a hierarchical structure of datasource, registry url, and package name.
     const durationData: getReleaseStatsInternal<number[]> = {
@@ -226,7 +229,9 @@ type PackageCacheData = number[];
 
 export class PackageCacheStats {
   static writeSet(duration: number): void {
-    const data = memCache.get<PackageCacheData>('package-cache-sets') ?? [];
+    const data = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-sets'),
+    );
     data.push(duration);
     memCache.set('package-cache-sets', data);
   }
@@ -240,7 +245,9 @@ export class PackageCacheStats {
   }
 
   static writeGet(duration: number): void {
-    const data = memCache.get<PackageCacheData>('package-cache-gets') ?? [];
+    const data = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-gets'),
+    );
     data.push(duration);
     memCache.set('package-cache-gets', data);
   }
@@ -254,12 +261,14 @@ export class PackageCacheStats {
   }
 
   static getReport(): { get: TimingStatsReport; set: TimingStatsReport } {
-    const packageCacheGets =
-      memCache.get<PackageCacheData>('package-cache-gets') ?? [];
+    const packageCacheGets = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-gets'),
+    );
     const get = makeTimingReport(packageCacheGets);
 
-    const packageCacheSets =
-      memCache.get<PackageCacheData>('package-cache-sets') ?? [];
+    const packageCacheSets = coerceArray(
+      memCache.get<PackageCacheData>('package-cache-sets'),
+    );
     const set = makeTimingReport(packageCacheSets);
 
     return { get, set };
@@ -307,8 +316,8 @@ export interface DatasourceCacheReport {
 
 export class DatasourceCacheStats {
   private static getData(): DatasourceCacheDataPoint[] {
-    return (
-      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? []
+    return coerceArray(
+      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats'),
     );
   }
 
@@ -449,15 +458,17 @@ interface HttpStatsCollection {
 
 export class HttpStats {
   static write(data: HttpRequestStatsDataPoint): void {
-    const httpRequests =
-      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+    const httpRequests = coerceArray(
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests'),
+    );
     httpRequests.push(data);
     memCache.set('http-requests', httpRequests);
   }
 
   static getDataPoints(): HttpRequestStatsDataPoint[] {
-    const httpRequests =
-      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+    const httpRequests = coerceArray(
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests'),
+    );
 
     // istanbul ignore next: sorting is hard and not worth testing
     httpRequests.sort((a, b) => {
@@ -705,7 +716,7 @@ type AbandonedPackageReport = Record<string, Record<string, string>>;
 
 export class AbandonedPackageStats {
   static getData(): AbandonedPackage[] {
-    return memCache.get<AbandonedPackage[]>('abandonment-stats') ?? [];
+    return coerceArray(memCache.get<AbandonedPackage[]>('abandonment-stats'));
   }
 
   private static setData(data: AbandonedPackage[]): void {

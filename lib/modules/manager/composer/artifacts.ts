@@ -6,6 +6,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import {
   findGithubToken,
   takePersonalAccessTokenIfPossible,
@@ -84,7 +85,7 @@ function getAuthJson(): string | null {
       // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
       authJson['gitlab-domains'] = [
         host,
-        ...(authJson['gitlab-domains'] ?? []),
+        ...coerceArray(authJson['gitlab-domains']),
       ];
     }
   }

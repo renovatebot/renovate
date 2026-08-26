@@ -10,6 +10,7 @@ import {
 } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import { clone } from '../../util/clone.ts';
 import { regEx } from '../../util/regex.ts';
@@ -242,7 +243,7 @@ export async function resolveConfigPresets(
 
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets ?? [];
+    ignorePresets = coerceArray(inputConfig.ignorePresets);
   }
   logger.trace(
     { config: inputConfig, existingPresets, mergeInternalPresets },

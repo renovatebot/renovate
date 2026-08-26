@@ -1,4 +1,5 @@
 import { isNumericString } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
@@ -159,8 +160,8 @@ class RpmVersioningApi extends GenericVersioningApi {
       return 0;
     }
 
-    const matchesv1 = v1.match(alphaNumPattern) ?? [];
-    const matchesv2 = v2.match(alphaNumPattern) ?? [];
+    const matchesv1 = coerceArray(v1.match(alphaNumPattern));
+    const matchesv2 = coerceArray(v2.match(alphaNumPattern));
     const matches = Math.min(matchesv1.length, matchesv2.length);
 
     for (let i = 0; i < matches; i++) {

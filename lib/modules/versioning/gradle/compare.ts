@@ -1,4 +1,5 @@
 import { isString } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 
 export const TokenType = {
@@ -179,8 +180,8 @@ function tokenCmp(left: Token | null, right: Token | null): number {
 }
 
 export function compare(left: string, right: string): number {
-  const leftTokens = tokenize(left) ?? [];
-  const rightTokens = tokenize(right) ?? [];
+  const leftTokens = coerceArray(tokenize(left));
+  const rightTokens = coerceArray(tokenize(right));
   const length = Math.max(leftTokens.length, rightTokens.length);
   for (let idx = 0; idx < length; idx += 1) {
     const leftToken = leftTokens[idx] || null;

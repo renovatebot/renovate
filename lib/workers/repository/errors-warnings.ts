@@ -39,7 +39,7 @@ function getDepWarnings(
   const warnings: string[] = [];
   const warningFiles: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
-    for (const file of files ?? []) {
+    for (const file of coerceArray(files)) {
       // TODO: remove condition when type is fixed (#22198)
       if (file.packageFile) {
         for (const dep of coerceArray(file.deps)) {

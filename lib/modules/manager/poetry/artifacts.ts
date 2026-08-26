@@ -9,6 +9,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
@@ -118,7 +119,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
     return [];
   }
 
-  const sources = pyprojectFile.tool?.poetry?.source ?? [];
+  const sources = coerceArray(pyprojectFile.tool?.poetry?.source);
   const sourceArray: PoetrySource[] = [];
   for (const source of sources) {
     if (source.name && source.url) {

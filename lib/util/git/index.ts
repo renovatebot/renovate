@@ -37,6 +37,7 @@ import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
+import { coerceArray } from '../array.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
@@ -406,7 +407,7 @@ export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
 }: RenovateConfig): void {
-  config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  config.ignoredAuthors = coerceArray(gitIgnoredAuthors);
   setGitAuthor(gitAuthor);
 }
 

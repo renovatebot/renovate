@@ -336,7 +336,7 @@ function resolveRegistryUrls(
     }
     return isFunction(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
-      : (datasource.defaultRegistryUrls ?? []);
+      : coerceArray(datasource.defaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
   let resolvedUrls: string[] = [];
@@ -344,13 +344,13 @@ function resolveRegistryUrls(
     resolvedUrls = [...customUrls];
   } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   } else if (isFunction(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   }
   return massageRegistryUrls(resolvedUrls);
 }

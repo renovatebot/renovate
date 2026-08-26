@@ -2,7 +2,7 @@ import { isString } from '@sindresorhus/is';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import { isNotNullOrUndefined } from '../../../util/array.ts';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
 import type {
   ExecOptions,
   ExtraEnv,
@@ -229,17 +229,17 @@ export function extractHeaderCommand(
     if (arg.includes('=')) {
       const [option, value] = arg.split('=');
       if (option === '--extra') {
-        result.extra = result.extra ?? [];
+        result.extra = coerceArray(result.extra);
         result.extra.push(value);
       } else if (option === '--extra-index-url') {
-        result.extraIndexUrl = result.extraIndexUrl ?? [];
+        result.extraIndexUrl = coerceArray(result.extraIndexUrl);
         result.extraIndexUrl.push(value);
         // TODO: add to secrets? next PR
       } else if (['--constraint', '--constraints'].includes(option)) {
-        result.constraintsFiles = result.constraintsFiles ?? [];
+        result.constraintsFiles = coerceArray(result.constraintsFiles);
         result.constraintsFiles.push(value);
       } else if (['--override', '--overrides'].includes(option)) {
-        result.overridesFiles = result.overridesFiles ?? [];
+        result.overridesFiles = coerceArray(result.overridesFiles);
         result.overridesFiles.push(value);
       } else if (option === '--output-file') {
         if (result.outputFile) {
@@ -375,8 +375,8 @@ export function getRegistryCredVarsFromPackageFiles(
   const urls: string[] = [];
   for (const packageFile of packageFiles) {
     urls.push(
-      ...(packageFile.registryUrls ?? []),
-      ...(packageFile.additionalRegistryUrls ?? []),
+      ...coerceArray(packageFile.registryUrls),
+      ...coerceArray(packageFile.additionalRegistryUrls),
     );
   }
   logger.debug(urls, 'Extracted registry URLs from package files');

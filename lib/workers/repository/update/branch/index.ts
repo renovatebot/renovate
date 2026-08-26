@@ -30,6 +30,7 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { getElapsedMs } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
 import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
@@ -627,13 +628,13 @@ export async function processBranch(
         config,
         branchConfig.packageFiles!,
       );
-      config.artifactErrors = (config.artifactErrors ?? []).concat(
+      config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );
-      config.artifactNotices = (config.artifactNotices ?? []).concat(
-        additionalFiles.artifactNotices ?? [],
+      config.artifactNotices = coerceArray(config.artifactNotices).concat(
+        coerceArray(additionalFiles.artifactNotices),
       );
-      config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
+      config.updatedArtifacts = coerceArray(config.updatedArtifacts).concat(
         additionalFiles.updatedArtifacts,
       );
       // `gh actions-lock` rewrites the whole lockfile from the workflows on disk, so like the lock files above it runs once here, after every updated package file has been written, rather than per package file.
