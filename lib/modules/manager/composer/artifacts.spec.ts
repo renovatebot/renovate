@@ -226,6 +226,44 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('prefers a readonly GitHub token for COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'ghp_write-token',
+    });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      readOnly: true,
+      token: 'ghp_readonly-token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH:
+              '{"github-oauth":{"github.com":"ghp_readonly-token"}}',
+          },
+        },
+      },
+    ]);
+  });
+
   it('Skip github application access token hostRules in COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: 'github',
