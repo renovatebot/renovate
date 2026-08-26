@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
 import { regEx } from '../regex.ts';
 
@@ -61,7 +62,7 @@ export function getChildProcessEnv(
   }
   const envVars = [...basicEnvVars, ...customEnvVars];
   envVars.forEach((envVar) => {
-    if (typeof process.env[envVar] !== 'undefined') {
+    if (!isUndefined(process.env[envVar])) {
       env[envVar] = process.env[envVar];
     }
   });
