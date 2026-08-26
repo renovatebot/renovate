@@ -66,7 +66,7 @@ export function extractPackageJson(
           const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
             dependencies as string,
           );
-          /* v8 ignore next 3 -- needs test */
+          /* v8 ignore next -- needs test */
           if (!match?.groups) {
             break;
           }

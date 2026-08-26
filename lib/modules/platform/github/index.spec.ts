@@ -4174,6 +4174,36 @@ describe('modules/platform/github/index', () => {
         ]);
       });
 
+      it('should use the configured automerge strategy', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeStrategy: 'rebase',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'REBASE',
+              },
+            },
+          },
+        ]);
+      });
+
       it('should handle GraphQL errors', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
@@ -5162,11 +5192,15 @@ describe('modules/platform/github/index', () => {
       ).toBeFalse();
     });
 
-    it('should handle approvers required', async () => {
+    it.each([
+      'Waiting on code owner review from org/team.',
+      'At least 1 approving review is required by reviewers with write access',
+      'Repository rule violations found\n\nNew changes require approval from someone other than the last pusher.\n\n',
+    ])('should handle approvers required: %j', async (message) => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
-        message: 'Waiting on code owner review from org/team.',
+        message,
       });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
@@ -5609,6 +5643,103 @@ describe('modules/platform/github/index', () => {
         )
         .get(
           '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&page=2',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+              severity: 'low',
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'center-pad',
+              },
+              severity: 'low',
+              vulnerable_version_range: '0.0.3',
+              first_patched_version: { identifier: '0.0.4' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
+        ]);
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+
+      expect(res).toHaveLength(3);
+      expect(res[0].security_vulnerability!.package.name).toBe('left-pad');
+      expect(res[1].security_vulnerability!.package.name).toBe('right-pad');
+      expect(res[2].security_vulnerability!.package.name).toBe('center-pad');
+    });
+
+    it('handles cursor pagination correctly', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(
+          200,
+          [
+            {
+              security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
+                description: 'description',
+                identifiers: [{ type: 'type', value: 'value' }],
+                references: [],
+                severity: 'high',
+              },
+              security_vulnerability: {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'left-pad',
+                },
+                severity: 'high',
+                vulnerable_version_range: '0.0.2',
+                first_patched_version: { identifier: '0.0.3' },
+              },
+              dependency: {
+                manifest_path: 'bar/foo',
+              },
+            },
+            {
+              security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
+                description: 'description',
+                identifiers: [{ type: 'type', value: 'value' }],
+                references: [],
+                severity: 'critical',
+              },
+              security_vulnerability: {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'right-pad',
+                },
+                severity: 'critical',
+                vulnerable_version_range: '0.0.1',
+                first_patched_version: { identifier: '0.0.2' },
+              },
+              dependency: {
+                manifest_path: 'bar/foo',
+              },
+            },
+          ],
+          {
+            link: `<${githubApiHost}/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1>; rel="next"`,
+          },
+        )
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1',
         )
         .reply(200, [
           {

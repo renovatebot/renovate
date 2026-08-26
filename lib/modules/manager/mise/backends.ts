@@ -4,7 +4,7 @@ import {
   isUndefined,
   isUrlString,
 } from '@sindresorhus/is';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -132,7 +132,7 @@ export function createGithubToolConfig(
   const prefix = toolOptions.version_prefix;
 
   if (isNonEmptyString(prefix)) {
-    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+    extractVersion = `^${RegExp.escape(prefix)}(?<version>.+)`;
   }
 
   return {

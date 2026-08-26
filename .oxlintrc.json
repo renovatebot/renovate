@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
-  "jsPlugins": ["./tools/lint/rules.js"],
+  "jsPlugins": ["./tools/lint/rules.ts"],
   "options": {
     "typeAware": true
   },
@@ -78,9 +78,11 @@
     "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-number-constructor": "error",
     "renovate/prefer-json-pipe": "error",
     "renovate/prefer-nullish-util": "error",
     "renovate/require-regex-util": "error",
+    "renovate/v8-ignore-no-count": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/validate-config-warnings-and-errors": "error",
     "renovate/zod-schema-naming": "error",

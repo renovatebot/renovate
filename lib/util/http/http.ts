@@ -242,6 +242,8 @@ export abstract class HttpBase<
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
+      this.handleResponse(resolvedUrl, resCopy);
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
@@ -292,6 +294,10 @@ export abstract class HttpBase<
     err: Error,
   ): never {
     throw err;
+  }
+
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
   }
 
   resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {

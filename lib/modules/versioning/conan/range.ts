@@ -21,7 +21,7 @@ export function getMajor(version: string): null | number {
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
   if (isString(cleanerVersion)) {
-    return Number(cleanerVersion.split('.')[0]);
+    return parseInt(cleanerVersion.split('.')[0], 10);
   }
   return null;
 }
@@ -33,7 +33,7 @@ export function getMinor(version: string): null | number {
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
   if (isString(cleanerVersion)) {
-    return Number(cleanerVersion.split('.')[1]);
+    return parseInt(cleanerVersion.split('.')[1], 10);
   }
   return null;
 }
@@ -52,7 +52,8 @@ export function getPatch(version: string): null | number {
       }),
       options,
     );
-    return Number(newVersion?.split('.')[2]);
+    /* v8 ignore next -- newVersion always has a patch segment once cleanerVersion is a valid, coercible semver string */
+    return parseInt(coerceString(newVersion).split('.')[2] ?? '', 10);
   }
   return null;
 }
@@ -104,6 +105,7 @@ export function fixParsedRange(range: string): any {
           full = `${full}.${patch}`;
         }
       }
+      /* v8 ignore next -- a segment with no operator is only reachable when adjacent to `||`, which always makes `operator` truthy (`'||'`) above; any other bare segment throws earlier at ordValues[i] */
       if (operator) {
         NewSemVer.operator = operator;
         full = range.includes(`${operator} `)
@@ -317,6 +319,7 @@ export function bumpRange(
       if (x.operator === '||') {
         return x.semver;
       }
+      /* v8 ignore next -- fixParsedRange only ever produces elements with `operator === '||'` (handled above) or a real comparator operator; a falsy, non-`||` operator would have already thrown inside fixParsedRange */
       if (x.operator) {
         const bumpedSubRange = bumpRange(
           {

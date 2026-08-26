@@ -1887,7 +1887,11 @@ async function tryPrAutomerge(
   }
 
   try {
-    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
+    const mergeMethod =
+      (
+        mapMergeStartegy(platformPrOptions.automergeStrategy) ??
+        config.mergeMethod
+      )?.toUpperCase() || 'MERGE';
 
     let commitHeadline: string | undefined;
     let commitBody: string | undefined;
@@ -2187,7 +2191,10 @@ export async function mergePr({
         if (
           isNonEmptyString(body?.message) &&
           (body.message.includes('approving review') ||
-            body.message.includes('code owner review'))
+            body.message.includes('code owner review') ||
+            body.message.includes(
+              'New changes require approval from someone other than the last pusher',
+            ))
         ) {
           logger.debug(
             { response: body },

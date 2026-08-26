@@ -17,7 +17,7 @@ let npmrcRaw = '';
 let packageRules: PackageRule[] = [];
 
 function envReplace(value: any, env = getEnv()): any {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!isString(value)) {
     return value;
   }

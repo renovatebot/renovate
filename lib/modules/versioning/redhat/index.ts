@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
@@ -22,14 +23,10 @@ class RedhatVersioningApi extends GenericVersioningApi {
     const { major, minor, patch, releaseMajor, releaseMinor } = matches;
     const release = [
       Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
-      typeof releaseMajor === 'undefined'
-        ? 0
-        : Number.parseInt(releaseMajor, 10),
-      typeof releaseMinor === 'undefined'
-        ? 0
-        : Number.parseInt(releaseMinor, 10),
+      isUndefined(minor) ? 0 : Number.parseInt(minor, 10),
+      isUndefined(patch) ? 0 : Number.parseInt(patch, 10),
+      isUndefined(releaseMajor) ? 0 : Number.parseInt(releaseMajor, 10),
+      isUndefined(releaseMinor) ? 0 : Number.parseInt(releaseMinor, 10),
     ];
 
     return { release, prerelease: '' };

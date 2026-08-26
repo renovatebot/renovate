@@ -270,6 +270,23 @@ function addChildrenArrayInParents(
                     },
                   ],
                 },
+                overrideDescription: {
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        description:
+                          'Description which replaces the descriptions of any presets which this config extends',
+                      },
+                    },
+                    {
+                      type: 'string',
+                      description:
+                        'Description which replaces the descriptions of any presets which this config extends',
+                    },
+                  ],
+                },
               },
             },
           ],

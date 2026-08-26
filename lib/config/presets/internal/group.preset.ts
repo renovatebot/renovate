@@ -479,8 +479,6 @@ const staticGroups = {
     ],
   },
   recommended: {
-    description:
-      'Use curated list of recommended non-monorepo package groupings.',
     extends: [
       'group:nodeJs',
       'group:allApollographql',
@@ -537,7 +535,8 @@ const staticGroups = {
       'group:springWs',
       'group:symfony',
     ],
-    ignoreDeps: [], // Hack to improve onboarding PR description
+    overrideDescription:
+      'Use curated list of recommended non-monorepo package groupings.',
   },
   remark: {
     description: 'Group remark packages together.',
@@ -917,9 +916,8 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: 'Group known monorepo packages together.',
   extends: monorepoNames,
-  ignoreDeps: [], // Hack to improve onboarding PR description
+  overrideDescription: 'Group known monorepo packages together.',
 };
 
 export const presets: Record<string, Preset> = config;
