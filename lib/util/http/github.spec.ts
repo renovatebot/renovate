@@ -54,7 +54,7 @@ describe('util/http/github', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
-    delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
+    vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', undefined);
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     repoCache = {};
@@ -333,7 +333,7 @@ describe('util/http/github', () => {
     });
 
     it('rebases GHE Server pagination links', async () => {
-      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', '1');
       // The origin and base URL which Renovate uses (from its config) to reach GHE:
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
       setBaseUrl(baseUrl);
@@ -384,7 +384,7 @@ describe('util/http/github', () => {
     });
 
     it('preserves pagination links for github.com', async () => {
-      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', '1');
       const baseUrl = 'https://api.github.com/';
 
       setBaseUrl(baseUrl);

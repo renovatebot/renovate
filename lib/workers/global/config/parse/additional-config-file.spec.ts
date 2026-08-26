@@ -195,7 +195,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       await fs.promises.unlink(configFile);
-      delete process.env.SOME_KEY;
+      vi.stubEnv('SOME_KEY', undefined);
     });
 
     it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
@@ -224,8 +224,8 @@ describe('workers/global/config/parse/additional-config-file', () => {
       expect(process.env.valid_Key).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
       await fs.promises.unlink(configFile);
-      delete process.env.SOME_KEY;
-      delete process.env.valid_Key;
+      vi.stubEnv('SOME_KEY', undefined);
+      vi.stubEnv('valid_Key', undefined);
     });
   });
 

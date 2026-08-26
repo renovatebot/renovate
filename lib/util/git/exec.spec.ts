@@ -16,12 +16,6 @@ describe('util/git/exec', () => {
     clear();
   });
 
-  afterEach(() => {
-    delete process.env.GIT_CONFIG_COUNT;
-    delete process.env.GIT_CONFIG_KEY_0;
-    delete process.env.GIT_CONFIG_VALUE_0;
-  });
-
   it('appends authentication to approved runtime Git configuration', async () => {
     exec.mockResolvedValue({ stdout: '', stderr: '' });
     const gitExec = withGitEnvironment();
@@ -78,9 +72,9 @@ describe('util/git/exec', () => {
   it('does not import unapproved runtime Git configuration', async () => {
     exec.mockResolvedValue({ stdout: '', stderr: '' });
     const gitExec = withGitEnvironment();
-    process.env.GIT_CONFIG_COUNT = '1';
-    process.env.GIT_CONFIG_KEY_0 = 'process-key';
-    process.env.GIT_CONFIG_VALUE_0 = 'process-value';
+    vi.stubEnv('GIT_CONFIG_COUNT', '1');
+    vi.stubEnv('GIT_CONFIG_KEY_0', 'process-key');
+    vi.stubEnv('GIT_CONFIG_VALUE_0', 'process-value');
     add({
       hostType: 'github',
       matchHost: 'api.github.com',

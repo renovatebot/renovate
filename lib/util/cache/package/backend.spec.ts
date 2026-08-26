@@ -25,7 +25,7 @@ describe('util/cache/package/backend', () => {
   let sqliteBackend: ReturnType<typeof mockBackend>;
 
   beforeEach(() => {
-    delete process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE;
+    vi.stubEnv('RENOVATE_X_SQLITE_PACKAGE_CACHE', undefined);
     fileBackend = mockBackend();
     redisBackend = mockBackend();
     sqliteBackend = mockBackend();
@@ -77,7 +77,7 @@ describe('util/cache/package/backend', () => {
   });
 
   it('initializes sqlite backend', async () => {
-    process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE = 'true';
+    vi.stubEnv('RENOVATE_X_SQLITE_PACKAGE_CACHE', 'true');
 
     await backend.init({ cacheDir: 'some-dir' });
 

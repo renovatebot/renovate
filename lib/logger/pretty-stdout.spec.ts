@@ -126,11 +126,7 @@ describe('logger/pretty-stdout', () => {
 
   describe('formatRecord(rec)', () => {
     beforeEach(() => {
-      process.env.FORCE_COLOR = '1';
-    });
-
-    afterEach(() => {
-      delete process.env.FORCE_COLOR;
+      vi.stubEnv('FORCE_COLOR', '1');
     });
 
     it('formats record', () => {

@@ -121,7 +121,7 @@ const configV3Deprecated = {
 describe('modules/datasource/nuget/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    delete process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN;
+    vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
   });
 
   describe('parseRegistryUrl', () => {
@@ -350,11 +350,7 @@ describe('modules/datasource/nuget/index', () => {
         GlobalConfig.set({
           cacheDir: upath.join('/tmp/cache'),
         });
-        process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS = 'true';
-      });
-
-      afterEach(() => {
-        delete process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS;
+        vi.stubEnv('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS', 'true');
       });
 
       it('can determine source URL from nupkg when PackageBaseAddress is missing', async () => {
@@ -979,7 +975,7 @@ describe('modules/datasource/nuget/index', () => {
     });
 
     it('follows cross-origin pagination when the datasource is opted in (v2)', async () => {
-      process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
       httpMock
         .scope('https://www.nuget.org')
         .get(

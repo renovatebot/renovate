@@ -34,7 +34,7 @@ describe('workers/global/config/parse/env', () => {
       );
     });
 
-    delete process.env.RENOVATE_CONFIG_MIGRATION;
+    vi.stubEnv('RENOVATE_CONFIG_MIGRATION', undefined);
 
     it('supports list single', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a' };

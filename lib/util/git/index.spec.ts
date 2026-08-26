@@ -84,9 +84,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await fs.writeFile(`${base.path}/master_file`, defaultBranch);
     await fs.writeFile(`${base.path}/file_to_delete`, 'bye');
     await repo.add(['master_file', 'file_to_delete']);
-    process.env.GIT_COMMITTER_DATE = masterCommitDate.toISOString();
+    vi.stubEnv('GIT_COMMITTER_DATE', masterCommitDate.toISOString());
     await repo.commit('master message');
-    delete process.env.GIT_COMMITTER_DATE;
+    vi.stubEnv('GIT_COMMITTER_DATE', undefined);
 
     await repo.checkout(['-b', 'renovate/future_branch', defaultBranch]);
     await fs.writeFile(`${base.path}/future_file`, 'future');
@@ -173,10 +173,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   let tmpDir: tmp.DirectoryResult;
 
-  const OLD_ENV = process.env;
-
   beforeEach(async () => {
-    process.env = { ...OLD_ENV };
     setCustomEnv({});
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(origin.path);
@@ -211,7 +208,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   afterAll(async () => {
     setCustomEnv({});
-    process.env = OLD_ENV;
     await base?.cleanup();
   });
 
@@ -260,7 +256,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('retries the func call if ExternalHostError thrown', async () => {
-      process.env.NODE_ENV = '';
+      vi.stubEnv('NODE_ENV', '');
       const gitFunc = vi
         .fn()
         .mockImplementationOnce(() => {
@@ -275,7 +271,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('retries the func call up to retry count if ExternalHostError thrown', async () => {
-      process.env.NODE_ENV = '';
+      vi.stubEnv('NODE_ENV', '');
       const gitFunc = vi.fn().mockImplementation(() => {
         throw new Error('The remote end hung up unexpectedly');
       });
@@ -2013,7 +2009,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
-      process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+      vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', 'true');
       await git.initRepo({
         url: origin.path,
       });
@@ -2026,17 +2022,17 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const tmpGit = simpleGit(tmpDir.path);
       const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
       expect(hooksPath).toBe('/dev/null');
-      delete process.env.RENOVATE_X_CLEAR_HOOKS;
+      vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', undefined);
     });
 
     it('should not inherit unsafe git environment variables from process.env', async () => {
-      process.env.GIT_CONFIG_COUNT = '1';
-      process.env.GIT_CONFIG_KEY_0 = 'core.hooksPath';
-      process.env.GIT_CONFIG_VALUE_0 = '/tmp/hooks';
-      process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
-      process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
-      process.env.PAGER = 'less';
-      process.env.GIT_ASKPASS = '/tmp/.git-askpass';
+      vi.stubEnv('GIT_CONFIG_COUNT', '1');
+      vi.stubEnv('GIT_CONFIG_KEY_0', 'core.hooksPath');
+      vi.stubEnv('GIT_CONFIG_VALUE_0', '/tmp/hooks');
+      vi.stubEnv('GIT_CONFIG_GLOBAL', '/tmp/global-gitconfig');
+      vi.stubEnv('GIT_CONFIG_SYSTEM', '/tmp/system-gitconfig');
+      vi.stubEnv('PAGER', 'less');
+      vi.stubEnv('GIT_ASKPASS', '/tmp/.git-askpass');
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
@@ -2138,7 +2134,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('should allow process.env GIT_SSH_COMMAND to override the default', async () => {
       // GIT_SSH_COMMAND is declared in extraEnv, so the key is inherited
       // from process.env via parentEnv (higher priority than extraEnv).
-      process.env.GIT_SSH_COMMAND = 'ssh -o SomeHostOption=yes';
+      vi.stubEnv('GIT_SSH_COMMAND', 'ssh -o SomeHostOption=yes');
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
