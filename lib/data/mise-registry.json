@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.8.6 linux-x64 (2026-08-14)"
+    "version": "2026.8.10 linux-x64 (2026-08-20)"
   },
   "tools": {
     "1password": {
@@ -805,7 +805,7 @@
       "asdf": "xeedio/asdf-cyclonedx"
     },
     "d2": {
-      "aqua": "terrastruct/d2",
+      "aqua": "d2lang/d2",
       "github": "terrastruct/d2"
     },
     "dagger": {
@@ -813,7 +813,7 @@
       "asdf": "virtualstaticvoid/asdf-dagger"
     },
     "dagu": {
-      "aqua": "dagu-org/dagu"
+      "aqua": "dagucloud/dagu"
     },
     "danger-js": {
       "npm": "danger"
@@ -1280,7 +1280,7 @@
       "cargo": "gitu"
     },
     "gitui": {
-      "aqua": "extrawurst/gitui",
+      "aqua": "gitui-org/gitui",
       "asdf": "looztra/asdf-gitui",
       "cargo": "gitui"
     },
@@ -1401,7 +1401,7 @@
       "vfox": "jdx/vfox-graalvm"
     },
     "gradle": {
-      "aqua": "gradle/gradle",
+      "aqua": "gradle/gradle-distributions",
       "vfox": "mise-plugins/vfox-gradle"
     },
     "grafana-kubernetes-plugin": {
@@ -1867,7 +1867,7 @@
       "asdf": "janpieper/asdf-ksops"
     },
     "ktlint": {
-      "aqua": "pinterest/ktlint",
+      "aqua": "ktlint/ktlint",
       "asdf": "mise-plugins/mise-ktlint"
     },
     "kube-capacity": {
@@ -1948,7 +1948,7 @@
       "asdf": "NeoHsu/asdf-kubergrunt"
     },
     "kubeseal": {
-      "aqua": "bitnami-labs/sealed-secrets",
+      "aqua": "bitnami/sealed-secrets",
       "asdf": "stefansedich/asdf-kubeseal"
     },
     "kubesec": {
@@ -1976,7 +1976,7 @@
       "asdf": "gustavclausen/asdf-kubevela"
     },
     "kubie": {
-      "aqua": "sbstp/kubie",
+      "aqua": "kubie-org/kubie",
       "asdf": "johnhamelink/asdf-kubie"
     },
     "kustomize": {
@@ -2260,7 +2260,7 @@
       "github": "mongodb-js/mongosh"
     },
     "mprocs": {
-      "aqua": "pvolok/mprocs"
+      "aqua": "pvolok/dekit"
     },
     "mssqldef": {
       "aqua": "sqldef/sqldef/mssqldef"
@@ -2376,7 +2376,7 @@
       "go": "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen"
     },
     "oauth2c": {
-      "aqua": "cloudentity/oauth2c"
+      "aqua": "SecureAuthCorp/oauth2c"
     },
     "oc": {
       "asdf": "mise-plugins/mise-oc",
@@ -3252,7 +3252,7 @@
       "cargo": "taplo-cli"
     },
     "tart": {
-      "aqua": "cirruslabs/tart"
+      "aqua": "openai/tart"
     },
     "task": {
       "aqua": "go-task/task",
@@ -3524,7 +3524,7 @@
       "github": "typst/typst"
     },
     "typstyle": {
-      "aqua": "Enter-tainer/typstyle",
+      "aqua": "typstyle-rs/typstyle",
       "cargo": "typstyle"
     },
     "ubi": {
@@ -3597,7 +3597,7 @@
       "github": "kubevela/velad"
     },
     "velero": {
-      "aqua": "vmware-tanzu/velero",
+      "aqua": "velero-io/velero",
       "asdf": "looztra/asdf-velero"
     },
     "vendir": {
@@ -3640,7 +3640,8 @@
       "cargo": "vivid"
     },
     "vlang": {
-      "vfox": "mise-plugins/vfox-vlang"
+      "asdf": "mise-plugins/mise-v",
+      "vfox": "jdx/vfox-v"
     },
     "vp": {
       "npm": "vite-plus"
@@ -3700,6 +3701,9 @@
     },
     "witr": {
       "aqua": "pranshuparmar/witr"
+    },
+    "workerd": {
+      "github": "cloudflare/workerd"
     },
     "workmux": {
       "cargo": "workmux",

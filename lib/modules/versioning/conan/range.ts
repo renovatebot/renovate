@@ -104,6 +104,7 @@ export function fixParsedRange(range: string): any {
           full = `${full}.${patch}`;
         }
       }
+      /* v8 ignore next -- a segment with no operator is only reachable when adjacent to `||`, which always makes `operator` truthy (`'||'`) above; any other bare segment throws earlier at ordValues[i] */
       if (operator) {
         NewSemVer.operator = operator;
         full = range.includes(`${operator} `)
@@ -317,6 +318,7 @@ export function bumpRange(
       if (x.operator === '||') {
         return x.semver;
       }
+      /* v8 ignore next -- fixParsedRange only ever produces elements with `operator === '||'` (handled above) or a real comparator operator; a falsy, non-`||` operator would have already thrown inside fixParsedRange */
       if (x.operator) {
         const bumpedSubRange = bumpRange(
           {

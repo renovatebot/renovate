@@ -285,6 +285,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
@@ -344,6 +345,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
@@ -405,6 +407,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
@@ -459,6 +462,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e BUNDLE_GEMS___PRIVATE__COM ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +

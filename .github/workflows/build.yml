@@ -297,9 +297,6 @@ jobs:
       - name: Lint documentation
         run: pnpm lint-documentation
 
-      - name: Markdown lint
-        run: pnpm markdown-lint
-
   lint-other:
     needs:
       - setup-build
@@ -324,7 +321,9 @@ jobs:
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-
+          restore-keys: |
+            tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-
+            tsbuildinfo-
 
       - name: Type check
         run: pnpm type-check
@@ -349,8 +348,6 @@ jobs:
         run: pnpm lint-other
 
   lint-actions:
-    needs:
-      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
     permissions:
@@ -362,7 +359,9 @@ jobs:
         with:
           persist-credentials: false
           show-progress: false
-          sparse-checkout: .github/workflows
+          # include local composite actions, so that actionlint validates
+          # their metadata, and zizmor audits them
+          sparse-checkout: .github/
 
       - name: Check workflow files
         uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
@@ -410,16 +409,27 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache/vitest
+          # the shard cache key comes before the lockfile hash so that
+          # `restore-keys` can fall back to the same shard's cache after
+          # a lockfile change
           key: |
             vitest-cache-${{
               runner.os
             }}-${{
               env.NODE_VERSION
             }}-${{
+              matrix.cache-key
+            }}-${{
               hashFiles('pnpm-lock.yaml')
+            }}
+          restore-keys: |
+            vitest-cache-${{
+              runner.os
+            }}-${{
+              env.NODE_VERSION
             }}-${{
               matrix.cache-key
-            }}
+            }}-
 
       - name: Unit tests
         shell: bash
@@ -491,7 +501,7 @@ jobs:
         with:
           use_oidc: true
           directory: coverage/lcov
-          fail_ci_if_error: github.event_name != 'pull_request'
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' }}
           verbose: true
 
   coverage-threshold:
@@ -545,6 +555,10 @@ jobs:
       - codecov
       - coverage-threshold
       - lint-actions
+      - lint-docs
+      - lint-other
+      - lint-oxlint
+      - lint-prettier
       - build-docker
       - build-docs
     runs-on: ubuntu-latest
@@ -601,6 +615,30 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.lint-actions.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled linting
+        if: |
+          needs.lint-docs.result == 'failure' ||
+          needs.lint-docs.result == 'cancelled' ||
+          needs.lint-other.result == 'failure' ||
+          needs.lint-other.result == 'cancelled' ||
+          needs.lint-oxlint.result == 'failure' ||
+          needs.lint-oxlint.result == 'cancelled' ||
+          needs.lint-prettier.result == 'failure' ||
+          needs.lint-prettier.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped linting when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          (
+            needs.lint-docs.result == 'skipped' ||
+            needs.lint-other.result == 'skipped' ||
+            needs.lint-oxlint.result == 'skipped' ||
+            needs.lint-prettier.result == 'skipped'
+          )
         run: exit 1
 
       - name: Fail for failed or cancelled docs build
@@ -701,7 +739,6 @@ jobs:
 
   build-docs:
     needs:
-      - lint-docs
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -722,7 +759,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: 0.12.5
+          version: 0.12.6
           enable-cache: true
           cache-python: true
 
@@ -845,6 +882,8 @@ jobs:
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
+          # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
+          use-cache: false
 
       - name: Install newer npm if needed
         run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
@@ -852,25 +891,34 @@ jobs:
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Docker registry login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$REPOSITORY_OWNER" --password-stdin
 
       - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: 0.12.5
-          enable-cache: true
+          version: 0.12.6
+          # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
+          enable-cache: false
           cache-python: true
 
       - name: Install uv dependencies
         run: uv sync --locked
 
       - name: Check dry run
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dryRun }}
         run: |
-          if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && "$INPUT_DRY_RUN" != "true"  ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
-          elif [[ "${{env.DO_RELEASE}}" == "true" ]]; then
+          elif [[ "$DO_RELEASE" == "true" ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
@@ -891,7 +939,7 @@ jobs:
 
       - name: semantic-release
         run: |
-          pnpm semantic-release --dry-run ${{env.DRY_RUN}}
+          pnpm semantic-release --dry-run "$DRY_RUN"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug

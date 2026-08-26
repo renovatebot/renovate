@@ -205,6 +205,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIP_CACHE_DIR ' +
           '-e PIP_NO_INPUT ' +
           '-e PIP_KEYRING_PROVIDER ' +
@@ -541,6 +542,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIP_CACHE_DIR ' +
           '-e PIP_NO_INPUT ' +
           '-e PIP_KEYRING_PROVIDER ' +

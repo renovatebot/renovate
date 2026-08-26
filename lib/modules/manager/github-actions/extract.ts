@@ -66,6 +66,8 @@ function extractDockerAction(
   return dep;
 }
 
+const reusableWorkflowPathRe = regEx(/^\.github\/workflows\/[^/]+\.ya?ml$/);
+
 function extractRepositoryAction(
   actionRef: RepositoryReference,
   parsed: ReturnType<typeof parseUsesLine> & object,
@@ -91,12 +93,13 @@ function extractRepositoryAction(
   const depName = `${registryUrl}${packageName}`;
   const pathSuffix = subPath ? `/${subPath}` : '';
   const commentWs = commentPrecedingWhitespace || ' ';
+  const isReusableWorkflow = !!subPath && reusableWorkflowPathRe.test(subPath);
 
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
     versioning: githubActionsVersioning.id,
-    depType: 'action',
+    depType: isReusableWorkflow ? 'workflow' : 'action',
     replaceString: valueString,
     autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
     ...(isExplicitHostname
@@ -430,7 +433,7 @@ export async function extractPackageFile(
     // Deliberately no `lockFiles`: nothing here goes through `updateArtifacts`, and `matchFileNames` also tests `lockFiles`, so declaring it would make a negated rule such as `!.github/workflows/release.yml` match every workflow through the lock file path.
     for (const dep of deps) {
       // The lock file only records `OWNER/REPO@REF` pins, so a `docker://` image in a `uses:` is still ours to pin.
-      if (dep.depType === 'action') {
+      if (dep.depType === 'action' || dep.depType === 'workflow') {
         dep.digestManagedExternally = true;
       }
     }

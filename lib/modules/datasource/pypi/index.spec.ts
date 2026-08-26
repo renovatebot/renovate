@@ -3,6 +3,7 @@ import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { PypiDatasource } from './index.ts';
@@ -13,6 +14,7 @@ const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const numpyResponse = Fixtures.get('numpy.json');
+const numpySimpleResponse = Fixtures.get('numpy-simple.json');
 const htmlResponse = Fixtures.get('versions-html.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
@@ -478,6 +480,29 @@ describe('modules/datasource/pypi/index', () => {
       ).toMatchSnapshot();
     });
 
+    it('keeps versions with a file without requires_python under strict constraints filtering', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/doit/json')
+        .reply(200, {
+          info: { name: 'doit' },
+          releases: {
+            '1.0.0': [{ requires_python: '>=3.9' }, { requires_python: null }],
+            '1.1.0': [{ requires_python: '>=3.9' }],
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource,
+        constraints: { python: '3.8.0' },
+        constraintsFiltering: 'strict',
+        packageName: 'doit',
+      });
+
+      // `1.0.0` has a file installable on any Python version, `1.1.0` does not
+      expect(res?.releases).toMatchObject([{ version: '1.0.0' }]);
+    });
+
     it('process data from simple endpoint', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
@@ -853,6 +878,507 @@ describe('modules/datasource/pypi/index', () => {
           constraintsFiltering: 'strict',
         }),
       ).toMatchSnapshot();
+    });
+
+    it('parses JSON-based Simple API response', async () => {
+      const simpleJson = codeBlock`
+        {
+          "files": [
+            {
+              "filename": "dj-database-url-0.4.1.tar.gz",
+              "requires-python": null,
+              "yanked": false,
+              "upload-time": "2016-04-18T07:30:00.000Z"
+            },
+            {
+              "filename": "dj-database-url-0.4.2.tar.gz",
+              "requires-python": ">=3.6",
+              "yanked": false,
+              "upload-time": "2016-11-01T15:20:33.000Z"
+            },
+            {
+              "filename": "dj_database_url-0.5.0-py2.py3-none-any.whl",
+              "requires-python": null,
+              "yanked": "security vulnerability",
+              "upload-time": "2018-04-10T11:05:00.000Z"
+            },
+            {
+              "filename": "dj-database-url-0.5.0.tar.gz",
+              "requires-python": ">=3.5",
+              "yanked": false,
+              "upload-time": "2018-04-10T11:05:00.000Z"
+            },
+            {
+              "filename": "dj_database_url-0.5.0-py2.py3-none-any.whl.metadata",
+              "requires-python": null,
+              "yanked": false,
+              "upload-time": "2018-04-10T11:05:00.000Z"
+            }
+          ]
+        }
+      `;
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, simpleJson, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.4.1',
+          releaseTimestamp: '2016-04-18T07:30:00.000Z',
+        },
+        {
+          version: '0.4.2',
+          releaseTimestamp: '2016-11-01T15:20:33.000Z',
+        },
+        {
+          version: '0.5.0',
+          releaseTimestamp: '2018-04-10T11:05:00.000Z',
+          isDeprecated: true,
+        },
+      ]);
+    });
+
+    it('parses JSON body served with a non-vendor +json content-type', async () => {
+      const simpleJson = codeBlock`
+        {
+          "files": [
+            {
+              "filename": "dj-database-url-0.4.1.tar.gz",
+              "yanked": false,
+              "upload-time": "2016-04-18T07:30:00.000Z"
+            }
+          ]
+        }
+      `;
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, simpleJson, {
+          // Some registries/proxies relabel or don't emit the exact vendor media type, while still returning a JSON body.
+          'content-type': 'application/json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.4.1',
+          releaseTimestamp: '2016-04-18T07:30:00.000Z',
+        },
+      ]);
+    });
+
+    it('retries without negotiated Accept header when registry responds 406', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(406)
+        .get('/dj-database-url/')
+        .reply(200, htmlResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
+    });
+
+    it('does not retry for a status code which is not `406`', async () => {
+      // only `406` means the registry could not serve any of the negotiated types, so anything else is a real failure rather than a rejected `Accept` header
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(415);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('retries without negotiated Accept header when abortOnError is set', async () => {
+      hostRules.add({
+        matchHost: 'abort-on-error.registry.org',
+        abortOnError: true,
+      });
+      httpMock
+        .scope('https://abort-on-error.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(406)
+        .get('/dj-database-url/')
+        .reply(200, htmlResponse);
+      const config = {
+        registryUrls: ['https://abort-on-error.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
+    });
+
+    it('does not retry for status codes unrelated to content negotiation', async () => {
+      hostRules.add({
+        matchHost: 'abort-on-error.registry.org',
+        abortOnError: true,
+      });
+      httpMock
+        .scope('https://abort-on-error.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(500);
+      const config = {
+        registryUrls: ['https://abort-on-error.registry.org/simple/'],
+      };
+
+      await expect(
+        getPkgReleases({
+          datasource,
+          ...config,
+          packageName: 'dj-database-url',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('does not retry when the request fails before it is sent', async () => {
+      hostRules.add({ matchHost: 'disabled.registry.org', enabled: false });
+      const config = {
+        registryUrls: ['https://disabled.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('does not retry when the request failed without a response', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .replyWithError('some error');
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns no releases when JSON-based Simple API schema validation fails', async () => {
+      const invalidSchemaJson = JSON.stringify({ name: 'dj-database-url' });
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, invalidSchemaJson, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      // The body is JSON, so HTML parsing is not attempted; no releases found
+      expect(res).toBeNull();
+    });
+
+    it('parses HTML body served with a JSON content-type', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, htmlResponse, {
+          // Some registries/proxies mislabel the HTML serialization as JSON
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        { version: '0.1.2' },
+        { version: '0.1.3' },
+        { version: '0.1.4' },
+        { version: '0.2.0' },
+        { version: '0.2.1' },
+        { version: '0.2.2' },
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.4.1' },
+        { version: '0.4.2' },
+        { version: '0.5.0', isDeprecated: true },
+      ]);
+    });
+
+    it('parses JSON-based Simple API response without upload-time', async () => {
+      const jsonBody = {
+        meta: { 'api-version': '1.0' },
+        name: 'some-package',
+        files: [
+          {
+            filename: 'some-package-1.0.0.tar.gz',
+            yanked: false,
+          },
+        ],
+      };
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/some-package/')
+        .reply(200, JSON.stringify(jsonBody), {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'some-package',
+      });
+
+      expect(res?.releases).toMatchObject([{ version: '1.0.0' }]);
+      expect(res?.releases?.[0].releaseTimestamp).toBeUndefined();
+    });
+
+    it('parses JSON body served with an HTML content-type', async () => {
+      const simpleJson = codeBlock`
+        {
+          "files": [
+            {
+              "filename": "dj-database-url-0.4.1.tar.gz",
+              "upload-time": "2016-04-18T07:30:00.000Z"
+            }
+          ]
+        }
+      `;
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, simpleJson, {
+          // Some registries honor the `Accept` header but mislabel the response
+          'content-type': 'text/html',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.4.1',
+          releaseTimestamp: '2016-04-18T07:30:00.000Z',
+        },
+      ]);
+    });
+
+    it('returns no releases for an invalid JSON body served with an HTML content-type', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, JSON.stringify({ name: 'dj-database-url' }), {
+          'content-type': 'text/html',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('uses the earliest upload-time of a version', async () => {
+      const simpleJson = codeBlock`
+        {
+          "files": [
+            {
+              "filename": "dj_database_url-0.4.1-py2.py3-none-any.whl",
+              "upload-time": "2016-04-25T07:30:00.000Z"
+            },
+            {
+              "filename": "dj-database-url-0.4.1.tar.gz",
+              "upload-time": "2016-04-18T07:30:00.000Z"
+            },
+            {
+              "filename": "dj-database-url-0.4.1.zip"
+            }
+          ]
+        }
+      `;
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, simpleJson, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.4.1',
+          releaseTimestamp: '2016-04-18T07:30:00.000Z',
+        },
+      ]);
+    });
+
+    it('uses the earliest upload-time of real world data', async () => {
+      // `numpy` shows how far off that can be:
+      // - `1.5.1` was released in 2010
+      // - `1.5.1` gained a wheel in 2014, which PyPI lists first
+      // - `1.5.0` lists its sdist first, even though a Windows installer was uploaded earlier
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/numpy/')
+        .reply(200, numpySimpleResponse, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+
+      const res = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://some.registry.org/simple/'],
+        packageName: 'numpy',
+      });
+
+      expect(res?.releases).toEqual([
+        { releaseTimestamp: '2010-09-15T14:44:53.723Z', version: '1.5.0' },
+        { releaseTimestamp: '2010-11-18T14:16:58.801Z', version: '1.5.1' },
+      ]);
+    });
+
+    it('uses the earliest upload_time of a version from the JSON API', async () => {
+      const jsonBody = {
+        info: { name: 'some-package' },
+        releases: {
+          '1.0.0': [
+            { upload_time: '2018-04-25T07:30:00.000Z' },
+            { upload_time: '2018-04-18T07:30:00.000Z' },
+          ],
+        },
+      };
+      httpMock
+        .scope(baseUrl)
+        .get('/some-package/json')
+        .reply(200, JSON.stringify(jsonBody));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'some-package',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2018-04-18T07:30:00.000Z',
+        },
+      ]);
+    });
+
+    it('keeps versions with a file without requires-python under strict constraints filtering', async () => {
+      const simpleJson = codeBlock`
+        {
+          "files": [
+            {
+              "filename": "dj_database_url-1.0.0-py3-none-any.whl"
+            },
+            {
+              "filename": "dj-database-url-1.0.0.tar.gz",
+              "requires-python": ">=3.9"
+            },
+            {
+              "filename": "dj-database-url-1.1.0.tar.gz",
+              "requires-python": ">=3.9"
+            }
+          ]
+        }
+      `;
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, simpleJson, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        constraints: { python: '3.8.0' },
+        constraintsFiltering: 'strict',
+        packageName: 'dj-database-url',
+      });
+
+      // `1.0.0` has a file installable on any Python version, `1.1.0` does not
+      expect(res?.releases).toMatchObject([{ version: '1.0.0' }]);
     });
   });
 

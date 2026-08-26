@@ -1,8 +1,13 @@
 import { GlobalConfig } from '../../config/global.ts';
-import { getChildProcessEnv } from './env.ts';
+import {
+  basicEnvVars,
+  getChildProcessEnv,
+  hardcodedProcessEnv,
+} from './env.ts';
 
 describe('util/exec/env', () => {
   const envVars = [
+    'CI',
     'HTTP_PROXY',
     'HTTPS_PROXY',
     'NO_PROXY',
@@ -33,7 +38,7 @@ describe('util/exec/env', () => {
   });
 
   it('returns default environment variables', () => {
-    expect(getChildProcessEnv()).toMatchObject({
+    expect(getChildProcessEnv()).toEqual({
       DOCKER_HOST: 'DOCKER_HOST',
       GIT_SSL_CAPATH: 'GIT_SSL_CAPATH',
       GIT_SSL_CAINFO: 'GIT_SSL_CAINFO',
@@ -51,7 +56,25 @@ describe('util/exec/env', () => {
       'PROGRAMFILES(X86)': 'PROGRAMFILES(X86)',
       APPDATA: 'APPDATA',
       LOCALAPPDATA: 'LOCALAPPDATA',
+
+      CI: 'true',
     });
+  });
+
+  it('always sets static values for CI', () => {
+    expect(getChildProcessEnv()).toMatchObject({
+      CI: 'true',
+    });
+  });
+
+  it('static environment variables override the process environment variables', () => {
+    process.env.CI = 'false';
+
+    expect(getChildProcessEnv()).toMatchObject({
+      CI: 'true',
+    });
+
+    delete process.env.CI;
   });
 
   it('returns environment variable only if defined', () => {
@@ -78,7 +101,55 @@ describe('util/exec/env', () => {
   describe('getChildProcessEnv when exposeAllEnv=true', () => {
     it('returns process.env if exposeAllEnv=true', () => {
       GlobalConfig.set({ exposeAllEnv: true });
-      expect(getChildProcessEnv()).toMatchObject(process.env);
+      expect(getChildProcessEnv()).toMatchObject({
+        ...process.env,
+        CI: 'true',
+      });
+    });
+
+    it('static environment variables override the process environment variables', () => {
+      GlobalConfig.set({ exposeAllEnv: true });
+      process.env.CI = 'false';
+
+      expect(getChildProcessEnv()).toMatchObject({
+        CI: 'true',
+      });
+    });
+  });
+
+  describe('basicEnvVars and hardcodedProcessEnv should not have any overlap', () => {
+    describe('basicEnvVars does not include any environment variables in hardcodedProcessEnv', () => {
+      for (const env of Object.keys(hardcodedProcessEnv)) {
+        it(`${env} is not in basicEnvVars`, () => {
+          expect(basicEnvVars).not.toContain(env);
+        });
+      }
+    });
+
+    describe('hardcodedProcessEnv does not include any environment variables in basicEnvVars', () => {
+      for (const env of basicEnvVars) {
+        it(`${env} is not in hardcodedProcessEnv`, () => {
+          expect(hardcodedProcessEnv).not.toContainKey(env);
+        });
+      }
+    });
+  });
+
+  describe('basicEnvVars and hardcodedProcessEnv should not have any overlap', () => {
+    describe('basicEnvVars does not include any environment variables in hardcodedProcessEnv', () => {
+      for (const env of Object.keys(hardcodedProcessEnv)) {
+        it(`${env} is not in basicEnvVars`, () => {
+          expect(basicEnvVars).not.toContain(env);
+        });
+      }
+    });
+
+    describe('hardcodedProcessEnv does not include any environment variables in basicEnvVars', () => {
+      for (const env of basicEnvVars) {
+        it(`${env} is not in hardcodedProcessEnv`, () => {
+          expect(hardcodedProcessEnv).not.toContainKey(env);
+        });
+      }
     });
   });
 });

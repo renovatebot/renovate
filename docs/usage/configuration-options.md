@@ -1630,6 +1630,9 @@ The description field can be used inside any configuration object to add a human
 A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
 Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
 
+> [!NOTE]
+> To overwrite descriptions of child presets, use [`overrideDescription`](#overridedescription) in place of `description`.
+
 ## `digest`
 
 Add to this object if you wish to define rules that apply only to PRs that update digests.
@@ -3048,6 +3051,19 @@ If you currently have a dependency that is using a malicious version, Renovate w
 If Renovate finds a dependency update available, and that dependency update is found to be malicious, Renovate will skip **any updates to the dependency**, marking it with `skipReason: malicious-update-proposed`, and report this via a warning log.
 
 <!-- markdownlint-enable MD001 -->
+
+## `overrideDescription`
+
+Use `overrideDescription` instead of [`description`](#description) if this config's description should replace, and not be added to, the descriptions collated from the presets which this config extends.
+
+This is useful for a preset which extends many other presets, and where a single line describes them better than one line per preset would.
+For example, `workarounds:all` extends around twenty presets, but its `overrideDescription` means the onboarding PR shows only:
+
+```
+- Apply crowd-sourced workarounds for known problems with packages.
+```
+
+Renovate applies `overrideDescription` when it resolves presets, so the resolved config only ever has a `description`.
 
 ## `packageRules`
 

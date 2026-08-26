@@ -37,12 +37,11 @@ function fixSnapshots(snapshots: ExecSnapshots): ExecSnapshots {
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
-
 describe('modules/manager/npm/post-update/yarn', () => {
   const removeDockerContainer = vi.spyOn(docker, 'removeDockerContainer');
 
   beforeEach(() => {
+    util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
     delete process.env.BUILDPACK;
     delete process.env.HTTP_PROXY;
     delete process.env.HTTPS_PROXY;
