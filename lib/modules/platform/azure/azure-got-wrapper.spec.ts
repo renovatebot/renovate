@@ -1,25 +1,18 @@
 import type { WebApi } from 'azure-devops-node-api';
 import type { DeploymentFlags } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
-import type { MockedObject } from 'vitest';
 import { buildTestJwt } from '~test/jwt-util.ts';
-import type { logger as _logger } from '../../../logger/index.ts';
+import { logger } from '~test/util.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
 
 describe('modules/platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('./azure-got-wrapper.ts');
   let hostRules: typeof _hostRules;
-  let logger: MockedObject<typeof _logger>;
 
   beforeEach(async () => {
     // reset module
     vi.resetModules();
     hostRules = await vi.importActual('../../../util/host-rules.ts');
     azure = await vi.importActual('./azure-got-wrapper.ts');
-    logger = (
-      await vi.importMock<typeof import('../../../logger/index.ts')>(
-        '../../../logger/index.ts',
-      )
-    ).logger;
   });
 
   describe('gitApi', () => {
@@ -324,7 +317,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(
         await azure.getAuthenticatedUserId({ token: '123test' }),
       ).toBeUndefined();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { err: new Error('boom') },
         'Azure: could not determine authenticated user ID',
       );

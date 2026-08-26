@@ -16,14 +16,10 @@ import { hash } from '../../../util/hash.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { isProbablyJwt } from '../../../util/http/jwt.ts';
 import { safeStringify } from '../../../util/stringify.ts';
+import type { AuthenticationContext } from './types.ts';
 
 const hostType = 'azure';
 let endpoint: string;
-
-export interface AuthenticationContext {
-  credentials: HostRule;
-  key: string;
-}
 
 function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {

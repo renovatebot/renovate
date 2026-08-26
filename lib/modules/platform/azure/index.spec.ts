@@ -23,6 +23,7 @@ import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -33,6 +34,9 @@ import type * as _hostRules from '../../../util/host-rules.ts';
 import type { Platform, RepoParams } from '../types.ts';
 import { AzurePrVote } from './types.ts';
 
+vi.mock('../../../config/global.ts', async (importOriginal) =>
+  importOriginal<typeof import('../../../config/global.ts')>(),
+);
 vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 vi.mock('./azure-helper.ts', () => mockDeep());
 vi.mock('../../../util/sanitize.ts', () =>
@@ -41,7 +45,6 @@ vi.mock('../../../util/sanitize.ts', () =>
 vi.mock('timers/promises');
 
 describe('modules/platform/azure/index', () => {
-  let GlobalConfig: typeof import('../../../config/global.ts').GlobalConfig;
   let hostRules: typeof _hostRules;
   let azure: Platform;
   let azureApi: Mocked<typeof import('./azure-got-wrapper.ts')>;
@@ -52,7 +55,6 @@ describe('modules/platform/azure/index', () => {
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    ({ GlobalConfig } = await vi.importActual('../../../config/global.ts'));
     GlobalConfig.reset();
     hostRules = await vi.importActual('../../../util/host-rules.ts');
     azure = await vi.importActual('./index.ts');
@@ -515,7 +517,7 @@ describe('modules/platform/azure/index', () => {
           sourceRefName: 'refs/heads/branch-a',
           targetRefName: 'refs/heads/branch-b',
           title: 'branch a pr',
-          status: PullRequestStatus.Active,
+          status: 1,
         },
       ]);
       azureApi.gitApi.mockResolvedValueOnce(
@@ -542,7 +544,7 @@ describe('modules/platform/azure/index', () => {
         {
           sourceRefName: 'refs/heads/branch-a',
           sourceRepositoryId: '1',
-          status: PullRequestStatus.Active,
+          status: 1,
           targetRefName: 'refs/heads/branch-b',
         },
         'some',
@@ -573,7 +575,7 @@ describe('modules/platform/azure/index', () => {
         {
           sourceRefName: 'refs/heads/branch-a',
           sourceRepositoryId: '1',
-          status: PullRequestStatus.Active,
+          status: 1,
         },
         'some',
         0,
@@ -615,7 +617,7 @@ describe('modules/platform/azure/index', () => {
         {
           creatorId: 'renovate-user-id',
           sourceRepositoryId: '1',
-          status: PullRequestStatus.All,
+          status: 4,
         },
         'some',
         0,
@@ -640,7 +642,7 @@ describe('modules/platform/azure/index', () => {
         '1',
         {
           sourceRepositoryId: '1',
-          status: PullRequestStatus.All,
+          status: 4,
         },
         'some',
         0,
@@ -664,7 +666,7 @@ describe('modules/platform/azure/index', () => {
         '1',
         {
           sourceRepositoryId: '1',
-          status: PullRequestStatus.All,
+          status: 4,
         },
         'some',
         0,
