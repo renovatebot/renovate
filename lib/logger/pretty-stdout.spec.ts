@@ -51,6 +51,34 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getMeta(rec, false)).toBe(' (repository=a/b) [test]');
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'branch' },
+    ])(
+      'stringifies a non-string value for the $field meta field as "[object Object]"',
+      ({ field }) => {
+        const rec = partial<BunyanRecord>({
+          [field]: { count: 1 },
+        });
+        expect(prettyStdout.getMeta(rec)).toEqual(
+          util.styleText('gray', ` (${field}=[object Object])`),
+        );
+      },
+    );
+
+    it('stringifies a non-string (array) value for the dependencies meta field via Array#toString', () => {
+      const rec = partial<BunyanRecord>({
+        dependencies: ['abc', 'def'],
+      });
+      expect(prettyStdout.getMeta(rec)).toEqual(
+        util.styleText('gray', ' (dependencies=abc,def)'),
+      );
+    });
   });
 
   describe('getDetails(rec)', () => {
@@ -71,6 +99,44 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getDetails(rec)).toBeEmptyString();
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'dependencies' },
+      { field: 'branch' },
+    ])(
+      'drops the $field meta string field entirely from details',
+      ({ field }) => {
+        const rec = partial<BunyanRecord>({
+          v: 0,
+          [field]: 'value',
+        });
+        expect(prettyStdout.getDetails(rec)).toBeEmptyString();
+      },
+    );
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'dependencies' },
+      { field: 'branch' },
+    ])(
+      'drops the $field meta field entirely from details, even when non-string',
+      ({ field }) => {
+        const rec = partial<BunyanRecord>({
+          v: 0,
+          [field]: { count: 1 },
+        });
+        expect(prettyStdout.getDetails(rec)).toBeEmptyString();
+      },
+    );
 
     it('supports a config', () => {
       const rec = partial<BunyanRecord>({
