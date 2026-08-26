@@ -148,12 +148,11 @@ export async function detectGhe(token: string): Promise<void> {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
     const gheHeaders = coerceObject(gheQueryRes?.headers);
-    const [, gheVersion] = coerceArray(
-      Object.entries(gheHeaders).find(
-        ([k]) => k.toLowerCase() === gheHeaderKey,
-      ),
+    const gheVersionHeader = Object.entries(gheHeaders).find(
+      ([k]) => k.toLowerCase() === gheHeaderKey,
     );
-    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+    platformConfig.gheVersion =
+      semver.valid(gheVersionHeader?.[1] as string) ?? null;
     logger.debug(
       `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`,
     );
