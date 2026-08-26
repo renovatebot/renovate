@@ -39,6 +39,10 @@ const updateInputTokenCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 --extra-access-tokens github.com=token \
 flake update nixpkgs`;
+const updateInputReadonlyTokenCmd = `nix \
+--extra-experimental-features 'nix-command flakes' \
+--extra-access-tokens github.com=readonly-token \
+flake update nixpkgs`;
 const lockfileMaintenanceCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake update`;
@@ -130,7 +134,17 @@ describe('modules/manager/nix/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
-    hostRules.add({ matchHost: 'github.com', token: 'token' });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'token',
+    });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      readOnly: true,
+      token: 'readonly-token',
+    });
 
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
@@ -148,7 +162,7 @@ describe('modules/manager/nix/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateInputReadonlyTokenCmd }]);
   });
 
   it('trims "x-access-token:" prefix from GitHub token', async () => {
