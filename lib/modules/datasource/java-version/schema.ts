@@ -10,3 +10,11 @@ export const AdoptiumJavaResponse = z.object({
 });
 
 export type AdoptiumJavaResponse = z.infer<typeof AdoptiumJavaResponse>;
+
+export const AdoptiumAvailableReleases = z.object({
+  available_lts_releases: z.array(z.number()),
+});
+
+export type AdoptiumAvailableReleases = z.infer<
+  typeof AdoptiumAvailableReleases
+>;

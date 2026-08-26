@@ -6,6 +6,7 @@ import {
   isObject,
   isString,
 } from '@sindresorhus/is';
+import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -294,8 +295,7 @@ function getSelectorConfig(
     }
     if (ltsDatasource === JavaVersionDatasource.id) {
       return {
-        // Update this list when the OpenJDK release roadmap designates a new LTS.
-        allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|\\+|$)/',
+        allowedVersions: `/^(?:${javaLtsVersions.join('|')})(?:\\.|-|\\+|$)/`,
         ignoreUnstable: true,
       };
     }
