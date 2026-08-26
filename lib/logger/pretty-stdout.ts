@@ -24,7 +24,6 @@ const metaFields = [
   'packageFile',
   'depType',
   'dependency',
-  'dependencies',
   'branch',
 ];
 

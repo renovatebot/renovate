@@ -70,15 +70,6 @@ describe('logger/pretty-stdout', () => {
         );
       },
     );
-
-    it('stringifies a non-string (array) value for the dependencies meta field via Array#toString', () => {
-      const rec = partial<BunyanRecord>({
-        dependencies: ['abc', 'def'],
-      });
-      expect(prettyStdout.getMeta(rec)).toEqual(
-        util.styleText('gray', ' (dependencies=abc,def)'),
-      );
-    });
   });
 
   describe('getDetails(rec)', () => {
@@ -106,7 +97,6 @@ describe('logger/pretty-stdout', () => {
       { field: 'packageFile' },
       { field: 'depType' },
       { field: 'dependency' },
-      { field: 'dependencies' },
       { field: 'branch' },
     ])(
       'drops the $field meta string field entirely from details',
@@ -125,7 +115,6 @@ describe('logger/pretty-stdout', () => {
       { field: 'packageFile' },
       { field: 'depType' },
       { field: 'dependency' },
-      { field: 'dependencies' },
       { field: 'branch' },
     ])(
       'drops the $field meta field entirely from details, even when non-string',
