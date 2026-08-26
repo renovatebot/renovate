@@ -2,6 +2,7 @@ import { logger } from '../logger/index.ts';
 import { coerceArray } from './array.ts';
 import * as memCache from './cache/memory/index.ts';
 import type { GitOperationType } from './git/types.ts';
+import { coerceObject } from './object.ts';
 import { parseUrl } from './url.ts';
 
 type LookupStatsData = Record<string, number[]>;
@@ -29,7 +30,7 @@ export function makeTimingReport(data: number[]): TimingStatsReport {
 
 export class LookupStats {
   static write(datasource: string, duration: number): void {
-    const data = memCache.get<LookupStatsData>('lookup-stats') ?? {};
+    const data = coerceObject(memCache.get<LookupStatsData>('lookup-stats'));
     data[datasource] ??= [];
     data[datasource].push(duration);
     memCache.set('lookup-stats', data);
@@ -48,7 +49,7 @@ export class LookupStats {
 
   static getReport(): Record<string, TimingStatsReport> {
     const report: Record<string, TimingStatsReport> = {};
-    const data = memCache.get<LookupStatsData>('lookup-stats') ?? {};
+    const data = coerceObject(memCache.get<LookupStatsData>('lookup-stats'));
     for (const [datasource, durations] of Object.entries(data)) {
       report[datasource] = makeTimingReport(durations);
     }
@@ -577,7 +578,7 @@ function sortObject<T>(obj: Record<string, T>): Record<string, T> {
 
 export class HttpCacheStats {
   static getData(): HttpCacheStatsData {
-    return memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+    return coerceObject(memCache.get<HttpCacheStatsData>('http-cache-stats'));
   }
 
   static read(key: string): HttpCacheHostStatsData {
@@ -590,7 +591,9 @@ export class HttpCacheStats {
   }
 
   static write(key: string, data: HttpCacheHostStatsData): void {
-    const stats = memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+    const stats = coerceObject(
+      memCache.get<HttpCacheStatsData>('http-cache-stats'),
+    );
     stats[key] = data;
     memCache.set('http-cache-stats', stats);
   }
@@ -684,7 +687,9 @@ type ObsoleteCacheStats = Record<
 /* v8 ignore next: temporary code */
 export class ObsoleteCacheHitLogger {
   static getData(): ObsoleteCacheStats {
-    return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};
+    return coerceObject(
+      memCache.get<ObsoleteCacheStats>('obsolete-cache-stats'),
+    );
   }
 
   static write(url: string): void {
@@ -765,8 +770,9 @@ type GitOperationStatsData = Record<GitOperationType, number[]>;
 
 export class GitOperationStats {
   static write(operationType: GitOperationType, duration: number): void {
-    const data =
-      memCache.get<GitOperationStatsData>('git-operations-stats') ?? {};
+    const data = coerceObject(
+      memCache.get<GitOperationStatsData>('git-operations-stats'),
+    );
     data[operationType] ??= [];
     data[operationType].push(duration);
     memCache.set('git-operations-stats', data);
@@ -774,7 +780,9 @@ export class GitOperationStats {
 
   static getReport(): Record<string, TimingStatsReport> {
     const report: Record<string, TimingStatsReport> = {};
-    const data = memCache.get<LookupStatsData>('git-operations-stats') ?? {};
+    const data = coerceObject(
+      memCache.get<LookupStatsData>('git-operations-stats'),
+    );
     for (const [operationType, durations] of Object.entries(data)) {
       report[operationType] = makeTimingReport(durations);
       report[operationType].totalMs = Math.ceil(report[operationType].totalMs);

@@ -42,6 +42,7 @@ import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
+import { coerceObject } from '../object.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
@@ -908,7 +909,7 @@ export async function getFileList(): Promise<string[]> {
 }
 
 export function getBranchList(): string[] {
-  return Object.keys(config.branchCommits ?? {});
+  return Object.keys(coerceObject(config.branchCommits));
 }
 
 export async function isBranchBehindBase(
@@ -1718,7 +1719,7 @@ export async function getCommitTreeSha(
   commitSha: LongCommitSha,
 ): Promise<LongCommitSha> {
   const commitOutput = await git.catFile(['-p', commitSha]);
-  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  const { treeSha } = coerceObject(treeShaRegex.exec(commitOutput)?.groups);
   if (!treeSha) {
     const snippet = commitOutput.split(newlineRegex)[0];
     /* v8 ignore next -- tested, but v8 reports template literal as partial */

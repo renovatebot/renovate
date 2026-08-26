@@ -12,6 +12,7 @@ import type {
   BranchUpgradeCache,
 } from '../../../util/cache/repository/types.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
+import { coerceObject } from '../../../util/object.ts';
 import type {
   BaseBranchMetadata,
   BaseBranchUpdateSummary,
@@ -134,7 +135,7 @@ export function runBranchSummary(config: RenovateConfig): void {
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
-  for (const [branchName, cached] of Object.entries(scan ?? {})) {
+  for (const [branchName, cached] of Object.entries(coerceObject(scan))) {
     baseMetadata.push({ branchName, sha: cached.sha });
   }
 

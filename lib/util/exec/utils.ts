@@ -6,6 +6,7 @@ import {
 } from '@sindresorhus/is';
 import { join } from 'shlex';
 import { getCustomEnv, getUserEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
 import { getChildProcessEnv } from './env.ts';
 import type { CommandWithOptions, ExecOptions } from './types.ts';
 
@@ -19,7 +20,7 @@ export function getChildEnv({
   const userConfiguredEnv = getUserEnv();
 
   const inheritedKeys: string[] = [];
-  for (const [key, val] of Object.entries(extraEnv ?? {})) {
+  for (const [key, val] of Object.entries(coerceObject(extraEnv))) {
     if (isString(val)) {
       inheritedKeys.push(key);
     }

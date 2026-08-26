@@ -19,6 +19,7 @@ import type {
 } from '../../../util/http/types.ts';
 import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
 import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import {
@@ -314,9 +315,9 @@ export function getRegistryRepository(
     registryHost = `https://${registryHost}`;
   }
 
-  const { path, base } =
-    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)
-      ?.groups ?? {};
+  const { path, base } = coerceObject(
+    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)?.groups,
+  );
   if (base && path) {
     registryHost = base;
     dockerRepository = `${trimTrailingSlash(path)}/${dockerRepository}`;
