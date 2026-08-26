@@ -11,15 +11,9 @@ import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
 import { MiseRegistryJson } from './schema.ts';
-import type { MiseRegistryData } from './types.ts';
-
-export interface ToolingDefinition {
-  config: ToolingConfig;
-  misePluginUrl?: string;
-}
+import type { MiseRegistryData, ToolingDefinition } from './types.ts';
 
 export const asdfTooling = upgradeableTooling;
 

@@ -4,13 +4,7 @@ import * as hostRules from '../../../../util/host-rules.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { toBase64 } from '../../../../util/string.ts';
 import { isHttpUrl } from '../../../../util/url.ts';
-import type { YarnRcYmlFile } from './types.ts';
-
-export interface HostRulesResult {
-  additionalNpmrcContent: string[];
-  additionalYarnRcYml?: any;
-}
-
+import type { HostRulesResult, YarnRcYmlFile } from './types.ts';
 export function processHostRules(): HostRulesResult {
   const additionalYarnRcYml: YarnRcYmlFile = { npmRegistries: {} };
 

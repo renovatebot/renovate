@@ -34,23 +34,6 @@ export function prInfo(pr: BbsRestPr): BbsPr {
   };
 }
 
-export interface BitbucketCommitStatus {
-  failed: number;
-  inProgress: number;
-  successful: number;
-}
-
-export type BitbucketBranchState =
-  | 'SUCCESSFUL'
-  | 'FAILED'
-  | 'INPROGRESS'
-  | 'STOPPED';
-
-export interface BitbucketStatus {
-  key: string;
-  state: BitbucketBranchState;
-}
-
 export function isInvalidReviewersResponse(err: BitbucketError): boolean {
   const errors = err?.response?.body?.errors ?? [];
   return (

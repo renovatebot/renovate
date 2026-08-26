@@ -4,7 +4,7 @@ import { logger } from '../../../../logger/index.ts';
 import * as template from '../../../../util/template/index.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
-import type { ValidMatchFields } from '../utils.ts';
+import type { ValidMatchFields } from '../types.ts';
 import { validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,

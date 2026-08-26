@@ -27,3 +27,8 @@ export interface Config {
   /** Work item type for issues; from `azureWorkItemType`, defaults to `Issue`. */
   workItemType: string;
 }
+
+export interface AzureBranchObj {
+  name: string;
+  oldObjectId: string;
+}
