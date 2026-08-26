@@ -191,6 +191,7 @@ describe('modules/versioning/maven/compare', () => {
         ${'1_5ea'}                                      | ${'1_c3b'}
         ${'1_c3b'}                                      | ${'2'}
         ${'17.0.5'}                                     | ${'17.0.5+8'}
+        ${'2026051723231779060202'}                     | ${'2026051723231779060208'}
       `('$x < $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(-1);
         expect(compare(y, x)).toBe(1);
@@ -248,7 +249,7 @@ describe('modules/versioning/maven/compare', () => {
     const zeroToken = {
       prefix: '',
       type: 'TYPE_NUMBER',
-      val: 0,
+      val: 0n,
       isTransition: false,
     };
     const testObj = [
@@ -259,19 +260,19 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: '',
             type: 'TYPE_NUMBER',
-            val: 1,
+            val: 1n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
@@ -282,19 +283,19 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: 'v',
             type: 'TYPE_NUMBER',
-            val: 1,
+            val: 1n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
@@ -311,13 +312,13 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: 'PREFIX_HYPHEN',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
@@ -351,19 +352,19 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: '',
             type: 'TYPE_NUMBER',
-            val: 1,
+            val: 1n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
           {
             isTransition: false,
@@ -386,13 +387,13 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: '',
             type: 'TYPE_NUMBER',
-            val: 1,
+            val: 1n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
@@ -404,7 +405,7 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: 'PREFIX_HYPHEN',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
@@ -415,19 +416,19 @@ describe('modules/versioning/maven/compare', () => {
             isTransition: false,
             prefix: '',
             type: 'TYPE_NUMBER',
-            val: 0,
+            val: 0n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 2,
+            val: 2n,
           },
           {
             isTransition: false,
             prefix: 'PREFIX_DOT',
             type: 'TYPE_NUMBER',
-            val: 3,
+            val: 3n,
           },
         ],
       },
