@@ -638,19 +638,25 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
     });
 
-    it('passes a github.com token as `GH_TOKEN`', async () => {
+    it('prefers a readonly github.com token as `GH_TOKEN`', async () => {
       const execSnapshots = mockExecAll();
       hostRules.add({
         hostType: 'github',
         matchHost: 'api.github.com',
-        token: 'some-token',
+        token: 'write-token',
+      });
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        readOnly: true,
+        token: 'readonly-token',
       });
       mockLockfileRegenerated();
 
       await updateActionsLockfile(makeConfig(), packageFiles);
 
       expect(execSnapshots[0].options?.env).toMatchObject({
-        GH_TOKEN: 'some-token',
+        GH_TOKEN: 'readonly-token',
       });
     });
 
