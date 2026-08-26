@@ -1,4 +1,8 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNumericString,
+  isString,
+} from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -385,8 +389,12 @@ export function extractPackageFile(
           { image: copyFromMatch.groups.image },
           'Skipping alias COPY --from',
         );
-        // oxlint-disable-next-line renovate/no-number-constructor -- must reject strings that aren't entirely numeric (e.g. `0abc`), which parseInt() would silently accept as a stage index
-      } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
+      } else if (isNumericString(copyFromMatch.groups.image)) {
+        logger.debug(
+          { image: copyFromMatch.groups.image },
+          'Skipping index reference COPY --from',
+        );
+      } else {
         const dep = getDep(
           copyFromMatch.groups.image,
           true,
@@ -405,11 +413,6 @@ export function extractPackageFile(
           'Dockerfile COPY --from',
         );
         deps.push(dep);
-      } else {
-        logger.debug(
-          { image: copyFromMatch.groups.image },
-          'Skipping index reference COPY --from',
-        );
       }
     }
 

@@ -53,7 +53,7 @@ export function getPatch(version: string): null | number {
       options,
     );
     /* v8 ignore next -- newVersion always has a patch segment once cleanerVersion is a valid, coercible semver string */
-    return parseInt(newVersion?.split('.')[2] ?? '', 10);
+    return parseInt(coerceString(newVersion).split('.')[2] ?? '', 10);
   }
   return null;
 }
