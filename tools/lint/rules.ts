@@ -6,6 +6,7 @@ import noExecShellOption from './rules/no-exec-shell-option.ts';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.ts';
 import noHostRulesMock from './rules/no-host-rules-mock.ts';
 import noNewUrl from './rules/no-new-url.ts';
+import noNumberConstructor from './rules/no-number-constructor.ts';
 import noRedundantMockReset from './rules/no-redundant-mock-reset.ts';
 import noStatefulGlobalRegex from './rules/no-stateful-global-regex.ts';
 import noToolsImport from './rules/no-tools-import.ts';
@@ -39,6 +40,7 @@ export default definePlugin({
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-host-rules-mock': noHostRulesMock,
     'no-new-url': noNewUrl,
+    'no-number-constructor': noNumberConstructor,
     'no-redundant-mock-reset': noRedundantMockReset,
     'no-stateful-global-regex': noStatefulGlobalRegex,
     'no-tools-import': noToolsImport,
