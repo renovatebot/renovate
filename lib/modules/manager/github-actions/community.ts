@@ -12,28 +12,7 @@ import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
-
-/**
- * Parses a step - or just its `with:` block - into the dependencies it
- * declares. Most actions declare a single one, but a step may yield several.
- */
-export type ActionSchema = z.ZodType<PackageDependency[]>;
-
-export interface CommunityActionConfig {
-  datasource: string;
-  depName?: string;
-  packageName: string;
-  versioning?: string;
-  extractVersion?: string;
-
-  /**
-   * Parses the `with:` block, defaulting to the `version:` input.
-   *
-   * The fields above are applied to every dependency it yields, so a schema
-   * which yields dependencies of more than one kind must set them itself.
-   */
-  withSchema?: ActionSchema;
-}
+import type { ActionSchema, CommunityActionConfig } from './types.ts';
 
 export function actionSchema(
   name: string,

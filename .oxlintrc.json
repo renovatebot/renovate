@@ -243,6 +243,13 @@
       }
     },
     {
+      "files": ["lib/modules/**"],
+      "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
+      "rules": {
+        "renovate/types-location": "error"
+      }
+    },
+    {
       "files": ["lib/util/url.ts"],
       "rules": {
         "renovate/no-new-url": "off"

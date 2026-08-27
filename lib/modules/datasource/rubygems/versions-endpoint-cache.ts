@@ -10,6 +10,7 @@ import { Result } from '../../../util/result.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { copystr } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
+import type { VersionsResult } from './types.ts';
 
 type PackageVersions = Map<string, string[]>;
 
@@ -129,11 +130,6 @@ type VersionLines = z.infer<typeof VersionLines>;
 function isStale(regCache: VersionsEndpointData): boolean {
   return getElapsedMinutes(regCache.syncedAt) >= 15;
 }
-
-export type VersionsResult = Result<
-  string[],
-  'unsupported-api' | 'package-not-found'
->;
 
 export class VersionsEndpointCache {
   private readonly http: Http;

@@ -22,6 +22,7 @@ import preferNullishUtil from './rules/prefer-nullish-util.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
 import testRootDescribe from './rules/test-root-describe.ts';
+import typesLocation from './rules/types-location.ts';
 import v8IgnoreNoCount from './rules/v8-ignore-no-count.ts';
 import v8IgnoreReason from './rules/v8-ignore-reason.ts';
 import validateConfigWarningsAndErrors from './rules/validate-config-warnings-and-errors.ts';
@@ -56,6 +57,7 @@ export default definePlugin({
     'prefer-partial-in-specs': preferPartialInSpecs,
     'require-regex-util': requireRegexUtil,
     'test-root-describe': testRootDescribe,
+    'types-location': typesLocation,
     'v8-ignore-no-count': v8IgnoreNoCount,
     'v8-ignore-reason': v8IgnoreReason,
     'validate-config-warnings-and-errors': validateConfigWarningsAndErrors,

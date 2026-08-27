@@ -1,7 +1,7 @@
 import { isUndefined } from '@sindresorhus/is';
 import { satisfies } from 'semver';
-import type { RegExpVersion } from '../regex/index.ts';
 import { RegExpVersioningApi } from '../regex/index.ts';
+import type { RegExpVersion } from '../regex/types.ts';
 import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'hermit';

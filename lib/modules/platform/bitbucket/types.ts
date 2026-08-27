@@ -90,3 +90,5 @@ export interface BitbucketPrCacheData {
   updated_on: string | null;
   author: string | null;
 }
+
+export type CommentsConfig = Pick<Config, 'repository'>;

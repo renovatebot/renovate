@@ -24,11 +24,14 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
-import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { UsesStep } from './schema.ts';
 import { ActionsLockfile, CommunityActions, Workflow } from './schema.ts';
-import type { LockfileState } from './types.ts';
+import type {
+  DockerReference,
+  LockfileState,
+  RepositoryReference,
+} from './types.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
