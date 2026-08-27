@@ -35,7 +35,7 @@ When Renovate runs in `minimumReleaseAgeBehaviour=timestamp-optional`, Renovate 
 
 This warning serves to inform users about at least one dependency not being able to adhere to the minimum release age due to the configuration.
 
-In cases where this is not desired, you can remap the warning to a lower log level with `logLevelRemap`:
+In cases where this is not desired, you can remap the warning to a lower log level with [`logLevelRemap`](../configuration-options.md#loglevelremap):
 
 ```json
 {
