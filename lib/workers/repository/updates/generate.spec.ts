@@ -921,6 +921,31 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
+    it('preserves literal curly braces from data values in commit message and PR title', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          commitBodyTable: false,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          packageFile: '{{project_template}}/package.json',
+          parentDir: '{{project_template}}',
+          commitMessagePrefix: 'TicketID {{parentDir}}:',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.commitMessage).toBe(
+        'TicketID {{project_template}}: Update dependency some-dep to v1.2.0',
+      );
+      expect(res.prTitle).toBe(
+        'TicketID {{project_template}}: Update dependency some-dep to v1.2.0',
+      );
+    });
+
     it('scopes monorepo commits with nested package files using base directory', () => {
       const branch = [
         {
