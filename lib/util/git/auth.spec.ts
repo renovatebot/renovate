@@ -438,14 +438,14 @@ describe('util/git/auth', () => {
 
     it('prefers readOnly github token for git authentication when available', () => {
       add({
-        hostType: 'github',
-        matchHost: 'api.github.com',
-        token: 'write-token',
-      });
-      add({
         matchHost: 'api.github.com',
         token: 'readonly-token',
         readOnly: true,
+      });
+      add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'write-token',
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',

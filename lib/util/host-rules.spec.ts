@@ -425,6 +425,27 @@ describe('util/host-rules', () => {
         }),
       ).toEqual({ token: 'bbb' });
     });
+
+    it('prefers readOnly rules added before fallback rules', () => {
+      add({
+        matchHost: 'https://api.github.com',
+        token: 'readonly-token',
+        readOnly: true,
+      });
+      add({
+        hostType: 'github',
+        matchHost: 'https://api.github.com',
+        token: 'write-token',
+      });
+
+      expect(
+        find({
+          hostType: 'github',
+          url: 'https://api.github.com/repos/foo/bar/tags',
+          readOnly: true,
+        }),
+      ).toEqual({ token: 'readonly-token' });
+    });
   });
 
   describe('hosts()', () => {
