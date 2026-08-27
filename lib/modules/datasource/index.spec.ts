@@ -350,6 +350,38 @@ describe('modules/datasource/index', () => {
       });
     });
 
+    it('supports legacy datasource objects with a default registry function', async () => {
+      datasources.set(datasource, {
+        id: datasource,
+        customRegistrySupport: true,
+        releaseTimestampSupport: false,
+        sourceUrlSupport: 'none',
+        defaultRegistryUrls: () => ['https://function-registry.com'],
+        getReleases: ({ registryUrl }) =>
+          Promise.resolve(
+            registryUrl === 'https://function-registry.com'
+              ? { releases: [{ version: '2.0.0' }] }
+              : null,
+          ),
+        postprocessRelease: (_config, release) => Promise.resolve(release),
+      });
+      const res = await getPkgReleases({ datasource, packageName });
+      expect(res).toMatchObject({ releases: [{ version: '2.0.0' }] });
+    });
+
+    it('handles legacy datasource objects without default registries', async () => {
+      datasources.set(datasource, {
+        id: datasource,
+        customRegistrySupport: true,
+        releaseTimestampSupport: false,
+        sourceUrlSupport: 'none',
+        defaultRegistryUrls: undefined,
+        getReleases: vi.fn(),
+        postprocessRelease: (_config, release) => Promise.resolve(release),
+      });
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
+    });
+
     // for coverage
     it('undefined defaultRegistryUrls with customRegistrySupport works', async () => {
       datasources.set(datasource, new DummyDatasource4());
