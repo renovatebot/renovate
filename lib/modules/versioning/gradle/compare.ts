@@ -222,7 +222,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
-export type RangeBound = 'inclusive' | 'exclusive';
+type RangeBound = 'inclusive' | 'exclusive';
 
 interface MavenBasedRange {
   leftBound: RangeBound;

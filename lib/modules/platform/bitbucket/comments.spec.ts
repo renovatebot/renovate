@@ -1,11 +1,12 @@
 import * as httpMock from '~test/http-mock.ts';
 import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import * as comments from './comments.ts';
+import type { CommentsConfig } from './types.ts';
 
 const baseUrl = 'https://api.bitbucket.org';
 
 describe('modules/platform/bitbucket/comments', () => {
-  const config: comments.CommentsConfig = { repository: 'some/repo' };
+  const config: CommentsConfig = { repository: 'some/repo' };
 
   beforeEach(() => {
     setBaseUrl(baseUrl);

@@ -46,12 +46,14 @@ function getDistributionUrl(content: string): string | null {
   const match = regEx(/^distributionUrl\s*=\s*(?<distributionUrl>.+)$/m).exec(
     content,
   );
-  return match?.groups?.distributionUrl?.replace(/\\:/g, ':').trim() ?? null;
+  return (
+    match?.groups?.distributionUrl?.replace(regEx(/\\:/g), ':').trim() ?? null
+  );
 }
 
 function getWrapperUrl(content: string): string | null {
   const match = regEx(/^wrapperUrl\s*=\s*(?<wrapperUrl>.+)$/m).exec(content);
-  return match?.groups?.wrapperUrl?.replace(/\\:/g, ':').trim() ?? null;
+  return match?.groups?.wrapperUrl?.replace(regEx(/\\:/g), ':').trim() ?? null;
 }
 
 function constructWrapperUrl(
@@ -124,7 +126,7 @@ async function updateChecksums(
           // Add checksum after distributionUrl
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(distributionUrl\s*=\s*.+)$/m,
+            regEx(/^(distributionUrl\s*=\s*.+)$/m),
             'distributionSha256Sum',
             checksum,
           );
@@ -137,7 +139,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(distributionUrl\s*=\s*.+)$/m,
+            regEx(/^(distributionUrl\s*=\s*.+)$/m),
             'distributionSha256Sum',
             fallbackChecksum,
           );
@@ -182,7 +184,7 @@ async function updateChecksums(
           // Add checksum after wrapperUrl or wrapperVersion
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
+            regEx(/^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
             'wrapperSha256Sum',
             checksum,
           );
@@ -195,7 +197,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
+            regEx(/^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
             'wrapperSha256Sum',
             fallbackChecksum,
           );

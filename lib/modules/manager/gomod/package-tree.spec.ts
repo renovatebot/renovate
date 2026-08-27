@@ -52,6 +52,17 @@ describe('modules/manager/gomod/package-tree', () => {
         parseLocalReplacePaths('// replace example.com/a => ../a\n'),
       ).toEqual([]);
     });
+
+    it('parses bare ../ and ./ replace paths pointing to a parent or current directory', () => {
+      const content = codeBlock`
+        module example.com/e2e
+
+        replace example.com/root => ../
+        replace example.com/sibling => ./
+      `;
+
+      expect(parseLocalReplacePaths(content)).toEqual(['../', './']);
+    });
   });
 
   describe('getGoModulesInTidyOrder', () => {
@@ -80,6 +91,23 @@ describe('modules/manager/gomod/package-tree', () => {
       fs.readLocalFile.mockResolvedValue(null);
 
       expect(await getGoModulesInTidyOrder('shared/go.mod')).toEqual([]);
+    });
+
+    it('traverses bare ../ replace directives pointing to a parent module', async () => {
+      const files: Record<string, string> = {
+        'go.mod': 'module example.com/root\n',
+        'e2e/go.mod': codeBlock`
+          module example.com/e2e
+
+          replace example.com/root => ../
+        `,
+      };
+      scm.getFileList.mockResolvedValue(Object.keys(files));
+      fs.readLocalFile.mockImplementation((f: string) =>
+        Promise.resolve(files[f]),
+      );
+
+      expect(await getGoModulesInTidyOrder('go.mod')).toEqual(['e2e/go.mod']);
     });
   });
 });

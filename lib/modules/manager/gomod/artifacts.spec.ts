@@ -830,6 +830,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -984,6 +985,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1496,6 +1498,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1560,6 +1563,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1624,6 +1628,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1688,6 +1693,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -2408,6 +2414,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -2606,6 +2613,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +

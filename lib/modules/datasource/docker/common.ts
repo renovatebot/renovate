@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -118,9 +118,9 @@ export async function getAuthHeaders(
       }
     } else if (
       googleRegex.test(registryHost) &&
-      typeof rule.username === 'undefined' &&
-      typeof rule.password === 'undefined' &&
-      typeof rule.token === 'undefined'
+      isUndefined(rule.username) &&
+      isUndefined(rule.password) &&
+      isUndefined(rule.token)
     ) {
       logger.once.debug(`hostRules: google auth for ${registryHost}`);
       logger.trace(
@@ -214,7 +214,7 @@ export async function getAuthHeaders(
     ).body;
 
     const token = authResponse.token ?? authResponse.access_token;
-    /* v8 ignore next 4 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
       return null;

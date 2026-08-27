@@ -69,7 +69,13 @@ export function workItemTrackingApi(): Promise<IWorkItemTrackingApi> {
 export async function isHosted(): Promise<boolean> {
   try {
     const { deploymentType } = await azureObj().connect();
-    return deploymentType === DeploymentFlags.Hosted;
+    // `connect()` returns the response body as-is, without running the SDK
+    // deserializer, so enums arrive as their name (`hosted`) instead of their
+    // numeric value. Accept both forms.
+    return (
+      deploymentType === DeploymentFlags.Hosted ||
+      String(deploymentType).toLowerCase() === 'hosted'
+    );
   } catch (err) {
     logger.debug(
       { err },

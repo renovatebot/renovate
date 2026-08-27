@@ -13,6 +13,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { find } from '../../../../util/host-rules.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -26,7 +27,6 @@ import type {
 import { applyGitSource } from '../../util.ts';
 import { type PyProject, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
-
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
@@ -60,7 +60,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        /* v8 ignore next 3 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!dep.packageName) {
           continue;
         }
@@ -363,7 +363,7 @@ async function getUvIndexCredentials(
 
   for (const { name, url } of uv_indexes) {
     const parsedUrl = parseUrl(url);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!parsedUrl) {
       continue;
     }
@@ -375,7 +375,7 @@ async function getUvIndexCredentials(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
 
-    const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+    const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);

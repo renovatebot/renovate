@@ -1,3 +1,4 @@
+import type { DeploymentFlags } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
 import { buildTestJwt } from '~test/jwt-util.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
 
@@ -165,10 +166,26 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(await azure.isHosted()).toBe(true);
     });
 
+    it('returns true when deployment type is the serialized enum name', async () => {
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({
+        deploymentType: 'hosted' as unknown as DeploymentFlags,
+      });
+
+      expect(await azure.isHosted()).toBe(true);
+    });
+
     it('returns false when deployment type is OnPremises', async () => {
       // DeploymentFlags.OnPremises === 2
       vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({
         deploymentType: 2,
+      });
+
+      expect(await azure.isHosted()).toBe(false);
+    });
+
+    it('returns false when deployment type is the on-premises enum name', async () => {
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({
+        deploymentType: 'onPremises' as unknown as DeploymentFlags,
       });
 
       expect(await azure.isHosted()).toBe(false);

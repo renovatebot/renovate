@@ -13,6 +13,7 @@ import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -924,6 +925,15 @@ export async function processBranch(
     if (err.message === MANAGER_LOCKFILE_ERROR) {
       logger.debug('Passing lockfile-error up');
       throw err;
+    }
+    if (err.message === PR_ALREADY_IN_MERGE_QUEUE) {
+      logger.debug('Branch PR is in the merge queue - skipping branch update');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'done',
+        commitSha,
+      };
     }
     /* v8 ignore if -- needs test */
     if (err.message?.includes('space left on device')) {
