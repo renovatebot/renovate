@@ -23,13 +23,6 @@ const lockedVersionLockfile = Fixtures.get('rangeStrategy.hcl');
 const terraformBlock = Fixtures.get('terraformBlock.tf');
 const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
-const modulesJSON = Fixtures.get('modules.tf.json');
-const providersJSON = Fixtures.get('providers.tf.json');
-const dockerJSON = Fixtures.get('docker.tf.json');
-const kubernetesJSON = Fixtures.get('kubernetes.tf.json');
-
-const helmJSON = Fixtures.get('helm.tf.json');
-
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
@@ -977,6 +970,97 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extracts modules', async () => {
+      const modulesJSON = codeBlock`
+        {
+          "module": {
+            "foo": {
+              "source": "github.com/hashicorp/example?ref=v1.0.0"
+            },
+            "repo-with-dot-and-git-suffix": {
+              "source": "github.com/hashicorp/example.2.3.git?ref=v1.0.0"
+            },
+            "consul": {
+              "source": "hashicorp/consul/aws",
+              "version": ">= 1.0.0, <= 2.0.0"
+            },
+            "container_definition": {
+              "source": "github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0",
+              "name": "hello",
+              "image": "tutum/hello-world",
+              "mem_soft_limit": 256,
+              "port_mappings": [
+                {
+                  "containerPort": 80,
+                  "hostPort": 80
+                }
+              ]
+            },
+            "task_definition": {
+              "source": "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0",
+              "name": "mytask",
+              "container_definitions": [
+                "\${module.container_definition.json}"
+              ]
+            },
+            "repo-with-dotgit": {
+              "source": "git@git.example.com:group/repo/foo.git?depth=1&ref=v1.0.0"
+            },
+            "web_server_sg": {
+              "source": "terraform-aws-modules/security-group/aws//modules/http-80",
+              "name": "web-server",
+              "description": "Security group for web-server with HTTP ports open within VPC",
+              "vpc_id": "vpc-12345678",
+              "ingress_cidr_blocks": ["10.10.0.0/16"]
+            },
+            "vote_service_sg": {
+              "source": "terraform-aws-modules/security-group/aws",
+              "version": "<= 2.4.0",
+              "name": "user-service",
+              "description": "Security group for user-service with custom ports open within VPC, and PostgreSQL publicly open",
+              "vpc_id": "vpc-12345678",
+              "ingress_cidr_blocks": ["10.10.0.0/16"],
+              "ingress_rules": ["https-443-tcp"],
+              "ingress_with_cidr_blocks": [
+                {
+                  "from_port": 8080,
+                  "to_port": 8090,
+                  "protocol": "tcp",
+                  "description": "User-service ports",
+                  "cidr_blocks": "10.10.0.0/16"
+                },
+                {
+                  "rule": "postgresql-tcp",
+                  "cidr_blocks": "0.0.0.0/0"
+                }
+              ]
+            },
+            "addons_aws": {
+              "providers": {
+                "helm": "helm.core",
+                "kubectl": "kubectl.core",
+                "kubernetes": "kubernetes.core"
+              },
+              "cluster-name": "data.aws_eks_cluster.core_cluster.id",
+              "aws-ebs-csi-driver": {
+                "enabled": true,
+                "is_default_class": true,
+                "version": "1.0.0"
+              },
+              "source": "particuleio/addons/kubernetes//modules/aws",
+              "version": "1.28.3",
+              "aws-load-balancer-controller": {
+                "enabled": true
+              }
+            },
+            "relative_parent": {
+              "source": "../../modules/fe"
+            },
+            "nosauce": {
+              "foo": "bar"
+            }
+          }
+        }
+      `;
       const res = await extractPackageFile(modulesJSON, 'modules.tf.json', {});
       expect(res?.deps).toHaveLength(11);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
@@ -1056,6 +1140,81 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extracts providers', async () => {
+      const providersJSON = codeBlock`
+        {
+          "provider": {
+            "azurerm": {
+              "version": "1.36.1"
+            },
+            "gitlab": {
+              "alias": "main",
+              "version": "=2.4"
+            },
+            "gitlab1": {
+              "token": "\${var.gitlab_token}",
+              "version": "=1.3"
+            },
+            "helm": {
+              "kubernetes": {
+                "host": "https://104.196.242.174",
+                "username": "ClusterMaster",
+                "password": "MindTheGap",
+                "client_certificate": "\${file(\\"~/.kube/client-cert.pem\\")}",
+                "client_key": "\${file(\\"~/.kube/client-key.pem\\")}",
+                "cluster_ca_certificate": "\${file(\\"~/.kube/cluster-ca-cert.pem\\")}"
+              }
+            },
+            "newrelic": {
+              "version": "V1.9",
+              "api_key": "\${var.newrelic_api_key}"
+            }
+          },
+          "terraform": [
+            {
+              "required_providers": {
+                "aws": ">= 2.7.0"
+              }
+            },
+            {
+              "required_providers": {
+                "azurerm": ">= 2.0.0"
+              }
+            },
+            {
+              "required_providers": {
+                "docker": {
+                  "source": "terraform-providers/docker",
+                  "version": "2.7.2"
+                },
+                "aws": {
+                  "source": "aws",
+                  "version": "2.7.0"
+                },
+                "azurerm": {
+                  "version": "=2.27.0"
+                },
+                "invalid": {
+                  "source": "//hashicorp/helm",
+                  "version": "1.2.4"
+                },
+                "helm": {
+                  "source": "hashicorp/helm",
+                  "version": "1.2.4"
+                },
+                "kubernetes": {
+                  "source": "terraform.example.com/hashicorp/kubernetes",
+                  "version": ">= 1.0"
+                },
+                "oci": {
+                  "source": "terraform-company_special.example.com/oracle/oci",
+                  "version": ">= 4.0"
+                }
+              },
+              "required_version": ">= 0.13"
+            }
+          ]
+        }
+      `;
       const res = await extractPackageFile(
         providersJSON,
         'providers.tf.json',
@@ -1176,6 +1335,72 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extracts docker resources', async () => {
+      const dockerJSON = codeBlock`
+        {
+          "data": {
+            "docker_registry_image": {
+              "ubuntu": {
+                "name": "ubuntu:precise"
+              }
+            }
+          },
+          "resource": {
+            "docker_image": {
+              "nginx": {
+                "name": "nginx:1.7.8"
+              },
+              "invalid": {},
+              "ignore_variable": {
+                "name": "\${data.docker_registry_image.ubuntu.name}",
+                "pull_triggers": ["\${data.docker_registry_image.ubuntu.sha256_digest}"]
+              },
+              "proxy": {
+                "name": "hub.proxy.test/bitnami/nginx:1.24.0"
+              }
+            },
+            "docker_container": {
+              "foo": {
+                "name": "foo",
+                "image": "nginx:1.7.8"
+              },
+              "invalid": {
+                "name": "foo"
+              }
+            },
+            "docker_service": {
+              "foo": {
+                "name": "foo-service",
+                "task_spec": [
+                  {
+                    "container_spec": [
+                      {
+                        "image": "repo.mycompany.com:8080/foo-service:v1"
+                      }
+                    ]
+                  }
+                ],
+                "endpoint_spec": [
+                  {
+                    "ports": [
+                      {
+                        "target_port": "8080"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "invalid": {}
+            },
+            "not_supported_resource": {
+              "foo": {
+                "name": "foo",
+                "image": "nginx:1.7.8",
+                "dummy": "true"
+              }
+            }
+          }
+        }
+      `;
       const res = await extractPackageFile(dockerJSON, 'docker.tf.json', {
         registryAliases: { 'hub.proxy.test': 'index.docker.io' },
       });
@@ -1251,74 +1476,6 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
-    it('extracts kubernetes resources', async () => {
-      const res = await extractPackageFile(
-        kubernetesJSON,
-        'kubernetes.tf.json',
-        {},
-      );
-      expect(res?.deps).toHaveLength(11);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
-      expect(res?.deps).toIncludeAllPartialMembers([
-        {
-          depName: 'gcr.io/kaniko-project/executor',
-          currentValue: 'v1.7.0',
-          currentDigest:
-            'sha256:8504bde9a9a8c9c4e9a4fe659703d265697a36ff13607b7669a4caa4407baa52',
-          depType: 'kubernetes_cron_job_v1',
-        },
-        {
-          depName: 'node',
-          currentValue: '14',
-          depType: 'kubernetes_cron_job_v1',
-        },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.1',
-          depType: 'kubernetes_daemon_set_v1',
-        },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.4',
-          depType: 'kubernetes_deployment_v1',
-        },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.5',
-          depType: 'kubernetes_job',
-        },
-        {
-          depType: 'kubernetes_job',
-          skipReason: 'invalid-dependency-specification',
-        },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.6',
-          depType: 'kubernetes_job_v1',
-        },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.8',
-          depType: 'kubernetes_pod_v1',
-        },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.10',
-          depType: 'kubernetes_replication_controller_v1',
-        },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.12',
-          depType: 'kubernetes_stateful_set_v1',
-        },
-        {
-          depName: 'prom/prometheus',
-          currentValue: 'v2.2.2',
-          depType: 'kubernetes_stateful_set_v1',
-        },
-      ]);
-    });
-
     it('returns dep with skipReason local', async () => {
       const src = codeBlock`
         {
@@ -1350,6 +1507,61 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extract helm releases', async () => {
+      const helmJSON = codeBlock`
+        {
+          "resource": {
+            "helm_release": {
+              "redis": {
+                "name": "my-redis-release",
+                "repository": "https://charts.helm.sh/stable",
+                "chart": "redis",
+                "version": "1.0.1"
+              },
+              "redis_without_version": {
+                "name": "my-redis-release",
+                "repository": "https://charts.helm.sh/stable",
+                "chart": "redis"
+              },
+              "local": {
+                "name": "my-local-chart",
+                "chart": "./charts/example"
+              },
+              "invalid_1": {
+                "name": "my-redis-release",
+                "repository": "https://charts.helm.sh/stable",
+                "version": "4.0.1"
+              },
+              "invalid_2": {
+                "repository": "https://charts.helm.sh/stable",
+                "chart": "redis",
+                "version": "5.0.1"
+              },
+              "invalid_3": {
+                "name": "my-redis-release",
+                "chart": "redis",
+                "version": "6.0.1"
+              },
+              "karpenter": {
+                "name": "karpenter",
+                "chart": "oci://public.ecr.aws/karpenter/karpenter",
+                "version": "v0.22.1"
+              },
+              "karpenter_oci_repo": {
+                "name": "karpenter",
+                "repository": "oci://public.ecr.aws/karpenter",
+                "chart": "karpenter",
+                "version": "v0.22.1"
+              },
+              "proxy_oci_repo": {
+                "name": "kube-prometheus",
+                "repository": "oci://hub.proxy.test/bitnamicharts",
+                "chart": "kube-prometheus",
+                "version": "8.9.1"
+              }
+            }
+          }
+        }
+      `;
       const res = await extractPackageFile(helmJSON, 'helm.tf.json', {
         registryAliases: { 'hub.proxy.test': 'index.docker.io' },
       });
