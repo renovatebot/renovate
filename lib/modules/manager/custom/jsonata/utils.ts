@@ -6,7 +6,11 @@ import * as template from '../../../../util/template/index.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { ValidMatchFields } from '../utils.ts';
-import { checkIsValidDependency, validMatchFields } from '../utils.ts';
+import {
+  checkIsValidDependency,
+  substituteRegistryAliases,
+  validMatchFields,
+} from '../utils.ts';
 import { QueryResultZod } from './schema.ts';
 import type { JSONataManagerTemplates, JsonataExtractConfig } from './types.ts';
 
@@ -89,6 +93,7 @@ export function createDependency(
       updateDependency(field, queryResult[field], dependency);
     }
   }
+  substituteRegistryAliases(dependency, config.registryAliases);
   return dependency;
 }
 
@@ -114,6 +119,5 @@ function updateDependency(
       dependency[field] = value;
       break;
   }
-
   return dependency;
 }
