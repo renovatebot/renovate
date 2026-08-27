@@ -29,7 +29,7 @@ The following configuration options can be used to enable and tune the functiona
 - [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour)
 - [`internalChecksFilter`](../configuration-options.md#internalchecksfilter)
 
-### timestamp-optional warning
+### `minimumReleaseAgeBehaviour=timestamp-optional` warning
 
 When `minimumReleaseAgeBehaviour` is set to `timestamp-optional`, renovate will log a warning, which is then also shown on the Dependency Dashboard.
 
