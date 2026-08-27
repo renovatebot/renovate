@@ -1,5 +1,5 @@
 name: 'Setup Docker'
-description: ''
+description: 'Prepare Docker for multi-platform image builds, freeing disk space on low-capacity runners'
 
 runs:
   using: 'composite'

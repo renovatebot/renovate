@@ -1,7 +1,6 @@
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'perl';
 export const displayName = 'Perl';
@@ -31,8 +30,8 @@ class PerlVersioningApi extends GenericVersioningApi {
 
     const decimalComponents =
       decimalPart
-        .replace(/_/g, '')
-        .match(/.{1,3}/g)
+        .replace(regEx(/_/g), '')
+        .match(regEx(/.{1,3}/g))
         ?.map((value) => {
           let component = value;
           while (component.length < 3) {

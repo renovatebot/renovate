@@ -23,6 +23,7 @@ import type {
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
   | 'global'
@@ -402,6 +403,7 @@ export interface RenovateConfig
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   description?: string | string[];
+  overrideDescription?: string | string[];
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;
@@ -625,7 +627,8 @@ export interface PackageRule
 }
 
 export interface ValidationMessage {
-  topic: string;
+  // Topic is either the known list of topics, or a dynamically generated one
+  topic: ConfigValidationTopic | (string & {});
   message: string;
 }
 

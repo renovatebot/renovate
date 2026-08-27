@@ -10,11 +10,12 @@ import type { GithubReleaseItem } from '../../../../../util/github/graphql/types
 import { toBase64 } from '../../../../../util/string.ts';
 import type { Timestamp } from '../../../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
+import { getChangeLogSourceFor } from './index.ts';
 import {
-  addReleaseNotes,
+  addReleaseNotes as addReleaseNotesRaw,
   getReleaseList,
   getReleaseNotes,
-  getReleaseNotesMd,
+  getReleaseNotesMd as getReleaseNotesMdRaw,
   massageBody,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
@@ -25,6 +26,32 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
+
+/**
+ * Test helpers that supply the `ChangeLogSource` the production code passes in
+ * (derived from `project.type`, mirroring `ChangeLogSource.getChangeLogJSON`).
+ */
+function getReleaseNotesMd(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+): Promise<ChangeLogNotes | null> {
+  return getReleaseNotesMdRaw(
+    project,
+    release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function addReleaseNotes(
+  input: ChangeLogResult | null | undefined,
+  config: BranchUpgradeConfig,
+): Promise<ChangeLogResult | null> {
+  return addReleaseNotesRaw(
+    input,
+    config,
+    getChangeLogSourceFor(input?.project?.type ?? 'github')!,
+  );
+}
 
 const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');

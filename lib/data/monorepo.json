@@ -27,7 +27,7 @@
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
     ],
-    "oxlint": ["oxlint", "eslint-plugin-oxlint"],
+    "oxlint": ["oxlint", "@oxlint/plugins", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
     "solid": [
@@ -491,6 +491,7 @@
     "jetty": "https://github.com/jetty/jetty.project",
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
+    "jsonforms": "https://github.com/eclipsesource/jsonforms",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
     "junior": "https://github.com/getsentry/junior",
     "junit-framework": [

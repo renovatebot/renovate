@@ -1,6 +1,7 @@
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../../config/global.ts';
+import * as dockerVersioning from '../../../../../../modules/versioning/docker/index.ts';
 import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
 import * as githubGraphql from '../../../../../../util/github/graphql/index.ts';
 import type { GithubTagItem } from '../../../../../../util/github/graphql/types.ts';
@@ -249,6 +250,26 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           releases: [{ version: '0.9.0' }],
         }),
       ).toBeNull();
+    });
+
+    it('deduplicates releases which are equal for the versioning in use', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          versioning: dockerVersioning.id,
+          currentVersion: 'v2.2.2',
+          newVersion: 'v2.5.2',
+          releases: [
+            { version: '2.2.2' },
+            { version: '2.3.0' },
+            { version: 'v2.3.0' },
+            { version: '2.5.2' },
+            { version: 'v2.5.2' },
+          ],
+        }),
+      ).toMatchObject({
+        versions: [{ version: 'v2.5.2' }, { version: 'v2.3.0' }],
+      });
     });
 
     it('supports github enterprise and github.com changelog', async () => {

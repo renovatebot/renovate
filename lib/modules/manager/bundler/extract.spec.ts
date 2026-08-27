@@ -301,4 +301,135 @@ describe('modules/manager/bundler/extract', () => {
       ],
     });
   });
+
+  it('ignores a bare source variable that is not defined', async () => {
+    const undefinedSourceGemfile = codeBlock`
+      source undefined_var
+
+      gem 'foo'
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(undefinedSourceGemfile);
+    const res = await extractPackageFile(undefinedSourceGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      registryUrls: [],
+      deps: [{ depName: 'foo' }],
+    });
+  });
+
+  it('ignores an inline gem source with no value', async () => {
+    const emptyInlineSourceGemfile = codeBlock`
+      gem 'foo', require: false, source:
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(emptyInlineSourceGemfile);
+    const res = await extractPackageFile(emptyInlineSourceGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [{ depName: 'foo' }],
+    });
+  });
+
+  it('skips sourceUrl for a non-http git ref in Gemfile', async () => {
+    const sshGitRefGemfile = codeBlock`
+      gem 'foo', git: 'git@github.com:foo/foo.git', tag: 'v1.0.0'
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(sshGitRefGemfile);
+    const res = await extractPackageFile(sshGitRefGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          packageName: 'git@github.com:foo/foo.git',
+          currentValue: 'v1.0.0',
+          datasource: 'git-refs',
+        },
+      ],
+    });
+    expect(res?.deps[0].sourceUrl).toBeUndefined();
+  });
+
+  it('parses a ruby version nested inside a group block', async () => {
+    const rubyInGroupGemfile = codeBlock`
+      group :test do
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInGroupGemfile);
+    const res = await extractPackageFile(rubyInGroupGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('parses a ruby version nested inside a source block', async () => {
+    const rubyInSourceBlockGemfile = codeBlock`
+      source 'https://gems.example.com' do
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInSourceBlockGemfile);
+    const res = await extractPackageFile(rubyInSourceBlockGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('parses a ruby version nested inside a platforms block', async () => {
+    const rubyInPlatformsGemfile = codeBlock`
+      platforms :jruby do
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInPlatformsGemfile);
+    const res = await extractPackageFile(rubyInPlatformsGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('ignores an empty platforms block', async () => {
+    const emptyPlatformsGemfile = codeBlock`
+      gem 'foo'
+      platforms :jruby do
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(emptyPlatformsGemfile);
+    const res = await extractPackageFile(emptyPlatformsGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([{ depName: 'foo' }]);
+  });
+
+  it('parses a ruby version nested inside an if block', async () => {
+    const rubyInIfGemfile = codeBlock`
+      if RUBY_VERSION >= '3.0'
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInIfGemfile);
+    const res = await extractPackageFile(rubyInIfGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('ignores an empty if block', async () => {
+    const emptyIfGemfile = codeBlock`
+      gem 'foo'
+      if RUBY_VERSION >= '3.0'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(emptyIfGemfile);
+    const res = await extractPackageFile(emptyIfGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([{ depName: 'foo' }]);
+  });
 });

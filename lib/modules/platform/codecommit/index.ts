@@ -28,7 +28,6 @@ import type {
   MergePRConfig,
   PlatformParams,
   PlatformResult,
-  Pr,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -36,12 +35,7 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as client from './codecommit-client.ts';
-
-export interface CodeCommitPr extends Pr {
-  body: string;
-  destinationCommit: string;
-  sourceCommit: string;
-}
+import type { CodeCommitPr } from './types.ts';
 
 interface Config {
   repository?: string;

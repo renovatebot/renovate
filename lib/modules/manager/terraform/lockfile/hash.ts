@@ -169,6 +169,28 @@ export class TerraformProviderHash {
     logger.debug(
       `Creating hashes for ${repository}@${version} (${registryURL})`,
     );
+
+    if (
+      registryURL === TerraformProviderDatasource.openTofuRegistryUrl ||
+      registryURL === TerraformProviderDatasource.openTofuApiUrl
+    ) {
+      const packagesHashes =
+        await TerraformProviderHash.terraformDatasource.getProviderPackages(
+          repository,
+          version,
+        );
+      if (packagesHashes?.length) {
+        logger.debug(
+          `Using OpenTofu packages API for ${repository}@${version}`,
+        );
+        // hashes are a logical set which Terraform deduplicates and sorts
+        return deduplicateArray(packagesHashes).sort();
+      }
+      logger.debug(
+        `OpenTofu packages field unavailable for ${repository}@${version}, falling back to zip download`,
+      );
+    }
+
     const builds = await TerraformProviderHash.terraformDatasource.getBuilds(
       registryURL,
       repository,
