@@ -9,7 +9,7 @@ export async function parseHCL(
 ): Promise<TerraformDefinitionFile | null> {
   try {
     if (fileName.endsWith('.tf') || fileName.endsWith('.tofu')) {
-      return await parse(fileName, content);
+      return TerraformDefinitionFile.parse(await parse(fileName, content));
     }
     if (fileName.endsWith('.tf.json') || fileName.endsWith('.tofu.json')) {
       return TerraformDefinitionFile.parse(parseJson(content, fileName));
