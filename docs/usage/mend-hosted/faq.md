@@ -37,7 +37,7 @@ Acceptance is at the discretion of Mend.
 
 ### Enterprise / Mend AppSec users
 
-If you are a paying Mend customer, you have access to control [a number of self-hosted configuration options for Renovate](#enterprise-mend-appsec-users_1).
+If you are a paying Mend customer, you have access to control [a number of self-hosted configuration options for Renovate](#enterprise--mend-appsec-users-environment-variables).
 
 One such variable is `RENOVATE_ALLOWED_COMMANDS`, which allows controlling the [`allowedCommands`](../self-hosted-configuration.md#allowedcommands) that a repository can run.
 By configuring this, you can allow commands to run in your repository.
@@ -65,17 +65,17 @@ In June 2026, Mend allowed all repositories to be able to set environment variab
 
 There are per-plan differences on what can be specified which you can see below.
 
-### Community (Free) users
+### Community (Free) users' environment variables
 
 Community (Free) users can control anything that is [repository config](../configuration-options.md), via environment variables.
 
 This, for instance, allows a more straightforward way to default [`minimumReleaseAge`](../configuration-options.md#minimumreleaseage)
 
-### Community (OSS) users
+### Community (OSS) users' environment variables
 
 Community (OSS) projects have the same access as Community (Free) users.
 
-### Enterprise / Mend AppSec users
+### Enterprise / Mend AppSec users' environment variables
 
 If you are a paying Mend customer, in addition to being able to control repository config, you also have access to control the following environment variables:
 
