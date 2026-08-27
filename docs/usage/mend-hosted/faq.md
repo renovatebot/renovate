@@ -15,7 +15,7 @@ It is recommended to set this between 1.5GB and 2.5GB but may require tweaking a
 
 ## How can I run arbitrary commands through [`postUpgradeTasks`](../configuration-options.md#postupgradetasks)?
 
-As noted [in the `postUpgradeTasks` documentation], a self-hosted administrator must allowlist any arbitrary commands that can run on their deployment.
+As noted [in the `postUpgradeTasks` documentation](../configuration-options.md#postupgradetasks), a self-hosted administrator must allowlist any arbitrary commands that can run on their deployment.
 This is to prevent both an ["insider attack"](../security-and-permissions.md#execution-of-code-insider-attack) and an ["outsider attack"](../security-and-permissions.md#execution-of-code-outsider-attack) that may occur when arbitrary commands execute.
 ../configuration-options.md#toolsettingsnodemaxmemory
 
@@ -35,9 +35,9 @@ Trusted Open Source projects [on the Community (OSS) plan](https://github.com/re
 
 Acceptance is at the discretion of Mend.
 
-### Enterprise / Mend AppSec users
+### Enterprise and Mend AppSec users
 
-If you are a paying Mend customer, you have access to control [a number of self-hosted configuration options for Renovate](#enterprise--mend-appsec-users-environment-variables).
+If you are a paying Mend customer, you have access to control [a number of self-hosted configuration options for Renovate](#enterprise-and-mend-appsec-users-environment-variables).
 
 One such variable is `RENOVATE_ALLOWED_COMMANDS`, which allows controlling the [`allowedCommands`](../self-hosted-configuration.md#allowedcommands) that a repository can run.
 By configuring this, you can allow commands to run in your repository.
@@ -75,7 +75,7 @@ This, for instance, allows a more straightforward way to default [`minimumReleas
 
 Community (OSS) projects have the same access as Community (Free) users.
 
-### Enterprise / Mend AppSec users' environment variables
+### Enterprise and Mend AppSec users' environment variables
 
 If you are a paying Mend customer, in addition to being able to control repository config, you also have access to control the following environment variables:
 
