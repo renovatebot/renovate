@@ -8,18 +8,10 @@ export async function parseHCL(
   fileName: string,
 ): Promise<TerraformDefinitionFile | null> {
   try {
-    if (
-      (fileName.endsWith('.hcl') && !fileName.endsWith('.lock.hcl')) ||
-      fileName.endsWith('.tf') ||
-      fileName.endsWith('.tofu')
-    ) {
+    if (fileName.endsWith('.tf') || fileName.endsWith('.tofu')) {
       return await parse(fileName, content);
     }
-    if (
-      fileName.endsWith('.hcl.json') ||
-      fileName.endsWith('.tf.json') ||
-      fileName.endsWith('.tofu.json')
-    ) {
+    if (fileName.endsWith('.tf.json') || fileName.endsWith('.tofu.json')) {
       return TerraformDefinitionFile.parse(parseJson(content, fileName));
     }
 
