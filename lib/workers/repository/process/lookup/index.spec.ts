@@ -1367,6 +1367,60 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles lockfile-only updates for pinned locked versions', async () => {
+      config.currentValue = '1.2.1';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.updatePinnedDependencies = false;
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBreaking: false,
+          isLockfileUpdate: true,
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.2.1',
+          newVersion: '1.4.1',
+          newVersionAgeInDays: expect.any(Number),
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+          hasAttestation: false,
+        },
+      ]);
+    });
+
+    it('allows lockfile-only selectors to cross versioning compatibility boundaries', async () => {
+      config.currentValue = '1.2.1-alpine';
+      config.lockedVersion = '1.2.1-alpine';
+      config.rangeStrategy = 'update-lockfile';
+      config.versioning = dockerVersioningId;
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toHaveLength(1);
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: '1.2.1-alpine',
+        newVersion: '1.4.1',
+      });
+    });
+
     it('handles the in-range-only strategy and updates lockfile within range', async () => {
       config.currentValue = '^1.2.1';
       config.lockedVersion = '1.2.1';

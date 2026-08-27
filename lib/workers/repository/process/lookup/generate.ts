@@ -56,13 +56,17 @@ export async function generateUpdate(
 
   if (currentValue) {
     try {
-      update.newValue = versioningApi.getNewValue({
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-        allVersions,
-      })!;
+      if (config.isLockfileOnly && rangeStrategy === 'update-lockfile') {
+        update.newValue = currentValue;
+      } else {
+        update.newValue = versioningApi.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+          allVersions,
+        })!;
+      }
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },

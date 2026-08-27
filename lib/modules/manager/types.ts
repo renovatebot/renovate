@@ -172,6 +172,17 @@ export interface PackageDependency<
   sourceUrl?: string | null;
   pinDigests?: boolean;
   currentRawValue?: string;
+  /**
+   * Restrict extracted dependencies to a version range.
+   *
+   * Managers can use this for native selectors which are not Renovate
+   * version ranges but still describe a set of compatible versions.
+   */
+  allowedVersions?: string;
+  /** Whether unstable releases should be excluded from update candidates. */
+  ignoreUnstable?: boolean;
+  /** True when the dependency should only be updated in the lockfile, and the source file should remain untouched. */
+  isLockfileOnly?: boolean;
   major?: { enabled?: boolean };
   prettyDepType?: string;
   newValue?: string;
@@ -282,6 +293,8 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
   updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
+  /** Updated lockfile content that is not yet present on disk. */
+  newLockFileContent?: string;
   config: UpdateArtifactsConfig;
 }
 

@@ -236,6 +236,41 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('refreshes metadata from the updated in-memory lockfile', async () => {
+    const updatedLockFile =
+      '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "new" } }\n';
+    const refreshedLockFile =
+      '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "refreshed" } }\n';
+    fs.readLocalFile.mockResolvedValueOnce(refreshedLockFile);
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '[tools]\nnode = "22"\n',
+      newLockFileContent: updatedLockFile,
+      config,
+    });
+
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'mise.lock',
+      updatedLockFile,
+    );
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: expect.stringContaining('checksum = "refreshed"'),
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: updateToolCmd },
+    ]);
+  });
+
   it('returns artifactError on exec failure with combined output', async () => {
     fs.readLocalFile.mockResolvedValueOnce('existing content');
     const error = new Error('exec error');
@@ -697,7 +732,7 @@ version = "3.10.17"
       expect(res).toEqual({ status: 'already-updated' });
     });
 
-    it('returns unsupported when version does not match', () => {
+    it('updates the lockfile when version changes', () => {
       const res = updateLockedDependency({
         packageFile: 'mise.toml',
         lockFile: 'mise.lock',
@@ -707,7 +742,102 @@ version = "3.10.17"
         newVersion: '22.0.0',
       });
 
-      expect(res).toEqual({ status: 'unsupported' });
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+    });
+
+    it('keeps the package file in the update set for artifact refresh', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        packageFileContent: '[[tools.node]]\nversion = "22"\n',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '22.0.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.toml': '[[tools.node]]\nversion = "22"\n',
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+    });
+
+    it('does not add a null package file to the update set', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        packageFileContent: null as never,
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '22.0.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+      expect(res.files).not.toHaveProperty('mise.toml');
+    });
+
+    it('preserves a vendor prefix in the lockfile version', () => {
+      const javaLockFileContent = `
+[[tools.java]]
+version = 'temurin-25.0.3+9.0.LTS'
+backend = 'core:java'
+`;
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: javaLockFileContent,
+        depName: 'java',
+        currentVersion: '25.0.3+9.0.LTS',
+        newVersion: '25.0.4+8.0.LTS',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining(
+            "version = 'temurin-25.0.4+8.0.LTS'",
+          ),
+        },
+      });
+    });
+
+    it('supports quoted version keys and ignores other nested keys', () => {
+      const quotedKeyLockFileContent = `
+[[tools.node]]
+foo.bar = "ignored"
+"version" = "20.11.0"
+`;
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: quotedKeyLockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.12.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining('"version" = "20.12.0"'),
+        },
+      });
     });
 
     it('returns unsupported when tool not in lock file', () => {
@@ -749,6 +879,36 @@ version = "3.10.17"
       expect(res).toEqual({ status: 'unsupported' });
     });
 
+    it('returns unsupported when the lockfile schema is invalid', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: 'foo = "bar"',
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.12.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported when the lock entry has no array-table AST node', () => {
+      const inlineLockFileContent = `
+tools = { node = [{ version = "20.11.0" }] }
+`;
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: inlineLockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.12.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
     it('returns unsupported when depName is undefined', () => {
       const res = updateLockedDependency({
         packageFile: 'mise.toml',
@@ -757,6 +917,36 @@ version = "3.10.17"
         depName: undefined as never,
         currentVersion: '20.10.0',
         newVersion: '20.11.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported when the lock entry lookup cannot be resolved', () => {
+      vi.spyOn(lockfile, 'getLockedVersion').mockReturnValueOnce('20.11.0');
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'ruby',
+        currentVersion: '3.2.0',
+        newVersion: '3.3.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported when a prefixed lock entry has no short-name match', () => {
+      vi.spyOn(lockfile, 'getLockedVersion').mockReturnValueOnce('20.11.0');
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'core:ruby',
+        currentVersion: '3.2.0',
+        newVersion: '3.3.0',
       });
 
       expect(res).toEqual({ status: 'unsupported' });

@@ -55,6 +55,7 @@ const MiseLockTool = z.object({
     )
     .optional(),
 });
+export type MiseLockTool = z.infer<typeof MiseLockTool>;
 
 export const MiseLockFile = Toml.pipe(
   z.object({

@@ -114,14 +114,16 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'BurntSushi/ripgrep',
         datasource: 'github-releases',
         currentValue: '14.1.1',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
 
-    it('should not set extractVersion if the version has leading v', () => {
+    it('should normalize a leading v in the version', () => {
       expect(createGithubToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
         packageName: 'cli/cli',
         datasource: 'github-releases',
         currentValue: 'v2.64.0',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
 
@@ -158,6 +160,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: '1.0.0',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
 
@@ -168,6 +171,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: 'v1.0.0',
+        extractVersion: '^v?(?<version>.+)',
       });
     });
 
