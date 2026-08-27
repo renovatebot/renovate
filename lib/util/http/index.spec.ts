@@ -66,12 +66,12 @@ describe('util/http/index', () => {
       });
     });
 
-    it('renders unknown template variables as empty string', () => {
+    it('keeps unknown template variables as literal text', () => {
       GlobalConfig.set({ userAgent: 'my-agent/{{unknownVar}}' });
       const options = {};
       applyDefaultHeaders(options);
       expect(options).toMatchObject({
-        headers: { 'user-agent': 'my-agent/' },
+        headers: { 'user-agent': 'my-agent/{{unknownVar}}' },
       });
     });
 
