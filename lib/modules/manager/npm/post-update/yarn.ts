@@ -150,7 +150,6 @@ export async function generateLockFile(
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      CI: 'true',
     };
 
     const commands: (string | CommandWithOptions)[] = [];
@@ -213,7 +212,7 @@ export async function generateLockFile(
       docker: {},
       toolConstraints,
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;

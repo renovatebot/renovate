@@ -132,7 +132,14 @@ export abstract class ChangeLogSource {
     // This extra filter/sort should not be necessary, but better safe than sorry
     const validReleases = [...releases]
       .filter((release) => versioningApi.isVersion(release.version))
-      .sort((a, b) => versioningApi.sortVersions(a.version, b.version));
+      .sort((a, b) => versioningApi.sortVersions(a.version, b.version))
+      // Drop versions equal under this versioning, e.g. the Docker tags
+      // `3.7.12` and `v3.7.12`, else their notes are rendered twice
+      .filter(
+        (release, index, sorted) =>
+          index === sorted.length - 1 ||
+          !versioningApi.equals(release.version, sorted[index + 1].version),
+      );
 
     if (validReleases.length < 2) {
       logger.debug(

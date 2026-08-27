@@ -78,9 +78,11 @@
     "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-number-constructor": "error",
     "renovate/prefer-json-pipe": "error",
     "renovate/prefer-nullish-util": "error",
     "renovate/require-regex-util": "error",
+    "renovate/v8-ignore-no-count": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/validate-config-warnings-and-errors": "error",
     "renovate/zod-schema-naming": "error",

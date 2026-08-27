@@ -51,6 +51,20 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getMeta(rec, false)).toBe(' (repository=a/b) [test]');
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'branch' },
+    ])('ignores a non-string value for the $field meta field', ({ field }) => {
+      const rec = partial<BunyanRecord>({
+        [field]: { count: 1 },
+      });
+      expect(prettyStdout.getMeta(rec)).toBeEmptyString();
+    });
   });
 
   describe('getDetails(rec)', () => {
@@ -71,6 +85,26 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getDetails(rec)).toBeEmptyString();
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'branch' },
+    ])(
+      'expands the $field meta field when its value is not a string',
+      ({ field }) => {
+        const rec = partial<BunyanRecord>({
+          v: 0,
+          [field]: { count: 1 },
+        });
+        expect(prettyStdout.getDetails(rec)).toBe(
+          `       "${field}": {"count": 1}\n`,
+        );
+      },
+    );
 
     it('supports a config', () => {
       const rec = partial<BunyanRecord>({
