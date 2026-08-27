@@ -20,14 +20,15 @@ const NORMALIZE_KEYS = new Set([
   'selector',
 ]);
 
+function flatten(arr: TfLiteral[]): TfLiteral[] {
+  return arr.flatMap((item) =>
+    isArray(item) ? flatten(item) : [normalize(item)],
+  );
+}
+
 function normalize(node: TfLiteral): TfLiteral {
   if (isArray(node)) {
     // Recursively flatten nested arrays
-    function flatten(arr: TfLiteral[]): TfLiteral[] {
-      return arr.flatMap((item) =>
-        isArray(item) ? flatten(item) : [normalize(item)],
-      );
-    }
     return flatten(node);
   }
 
@@ -143,7 +144,9 @@ const KubernetesInstance = tfLiteral.transform((orig) => {
 
 const TerraformResources = z
   .object({
-    helm_release: z.record(z.string(), TerraformHelmRelease).optional(),
+    helm_release: z
+      .record(z.string(), oneOrMany(TerraformHelmRelease))
+      .optional(),
     docker_container: z
       .record(z.string(), oneOrMany(DockerSimpleInstance))
       .optional(),
@@ -155,47 +158,31 @@ const TerraformResources = z
     docker_service: z
       .record(z.string(), oneOrMany(DockerServiceInstance))
       .optional(),
-    kubernetes_cron_job_v1: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
-    kubernetes_cron_job: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
+    kubernetes_cron_job_v1: z.record(z.string(), KubernetesInstance).optional(),
+    kubernetes_cron_job: z.record(z.string(), KubernetesInstance).optional(),
     kubernetes_daemon_set_v1: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
+      .record(z.string(), KubernetesInstance)
       .optional(),
-    kubernetes_daemonset: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
-    kubernetes_deployment: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
+    kubernetes_daemonset: z.record(z.string(), KubernetesInstance).optional(),
+    kubernetes_deployment: z.record(z.string(), KubernetesInstance).optional(),
     kubernetes_deployment_v1: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
+      .record(z.string(), KubernetesInstance)
       .optional(),
-    kubernetes_job: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
-    kubernetes_job_v1: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
-    kubernetes_pod: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
-    kubernetes_pod_v1: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
-      .optional(),
+    kubernetes_job: z.record(z.string(), KubernetesInstance).optional(),
+    kubernetes_job_v1: z.record(z.string(), KubernetesInstance).optional(),
+    kubernetes_pod: z.record(z.string(), KubernetesInstance).optional(),
+    kubernetes_pod_v1: z.record(z.string(), KubernetesInstance).optional(),
     kubernetes_replication_controller: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
+      .record(z.string(), KubernetesInstance)
       .optional(),
     kubernetes_replication_controller_v1: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
+      .record(z.string(), KubernetesInstance)
       .optional(),
     kubernetes_stateful_set: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
+      .record(z.string(), KubernetesInstance)
       .optional(),
     kubernetes_stateful_set_v1: z
-      .record(z.string(), oneOrMany(KubernetesInstance))
+      .record(z.string(), KubernetesInstance)
       .optional(),
     tfe_workspace: z.record(z.string(), TerraformWorkspaceArray).optional(),
   })
@@ -203,7 +190,7 @@ const TerraformResources = z
 
 export type TerraformResources = z.infer<typeof TerraformResources>;
 
-export const TerraformDefinitionFileJSON = z.object({
+export const TerraformDefinitionFile = z.object({
   terraform: oneOrMany(TerraformBlock).optional(),
 
   module: z.record(z.string(), oneOrMany(TerraformModule)).optional(),
@@ -215,6 +202,4 @@ export const TerraformDefinitionFileJSON = z.object({
   provider: z.record(z.string(), oneOrMany(TerraformProvider)).optional(),
 });
 
-export type TerraformDefinitionFileJSON = z.infer<
-  typeof TerraformDefinitionFileJSON
->;
+export type TerraformDefinitionFile = z.infer<typeof TerraformDefinitionFile>;

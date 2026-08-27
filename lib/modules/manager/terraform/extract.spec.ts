@@ -29,8 +29,6 @@ const dockerJSON = Fixtures.get('docker.tf.json');
 const kubernetesJSON = Fixtures.get('kubernetes.tf.json');
 
 const helmJSON = Fixtures.get('helm.tf.json');
-const lockedVersionJSON = Fixtures.get('lockedVersion.tf.json');
-const tfeWorkspaceBlockJSON = Fixtures.get('tfeWorkspace.tf.json');
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
@@ -1424,11 +1422,27 @@ describe('modules/manager/terraform/extract', () => {
       fs.readLocalFile.mockResolvedValueOnce(lockedVersionLockfile);
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
 
-      const res = await extractPackageFile(
-        lockedVersionJSON,
-        'lockedVersion.tf.json',
-        {},
-      );
+      const src = codeBlock`
+      {
+        "terraform": {
+          "required_providers": {
+            "aws": {
+              "source": "aws",
+              "version": "~> 3.0"
+            },
+            "azurerm": {
+              "version": "~> 2.50.0"
+            },
+            "kubernetes": {
+              "source": "terraform.example.com/example/kubernetes",
+              "version": ">= 1.0"
+            }
+          }
+        }
+      }
+      `;
+
+      const res = await extractPackageFile(src, 'lockedVersion.tf.json', {});
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
       expect(res?.deps).toIncludeAllPartialMembers([
@@ -1460,11 +1474,38 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extracts terraform_version for tfe_workspace and ignores missing terraform_version keys', async () => {
-      const res = await extractPackageFile(
-        tfeWorkspaceBlockJSON,
-        'tfeWorkspace.tf.json',
-        {},
-      );
+      const src = codeBlock`
+      {
+        "resource": {
+          "tfe_workspace": {
+            "test_workspace": [
+              {
+                "name": "test-workspace",
+                "organization": "renovate-fixtures",
+                "terraform_version": "1.1.6"
+              },
+              {
+                "name": "test-workspace",
+                "organization": "renovate-fixtures"
+              }
+            ],
+            "workspace_with_block": {
+              "vcs_repo": [
+                {
+                  "identifier": "organization/repository",
+                  "oauth_token_id": "invalidToken"
+                }
+              ],
+              "name": "lifecycle-workspace",
+              "organization": "renovate-fixtures",
+              "terraform_version": "1.1.9"
+            }
+          }
+        }
+      }
+      `;
+
+      const res = await extractPackageFile(src, 'tfeWorkspace.tf.json', {});
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
       expect(res?.deps).toIncludeAllPartialMembers([

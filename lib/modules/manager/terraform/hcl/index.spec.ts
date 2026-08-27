@@ -119,28 +119,27 @@ describe('modules/manager/terraform/hcl/index', () => {
     it('should return flat modules', async () => {
       const modulesTFJSON = codeBlock`
       {
-        module: {
-          foo: {
-            source: 'github.com/hashicorp/example?ref=v1.0.0',
+        "module": {
+          "foo": {
+            "source": "github.com/hashicorp/example?ref=v1.0.0"
           },
-          bar: {
-            source: 'github.com/hashicorp/example?ref=next',
+          "bar": {
+            "source": "github.com/hashicorp/example?ref=next"
           },
-          'repo-with-non-semver-ref': {
-            source:
-              'github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9',
+          "repo-with-non-semver-ref": {
+            "source": "github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9"
           },
-          'repo-with-dot': {
-            source: 'github.com/hashicorp/example.2.3?ref=v1.0.0',
+          "repo-with-dot": {
+            "source": "github.com/hashicorp/example.2.3?ref=v1.0.0"
           },
-          'repo-with-dot-and-git-suffix': {
-            source: 'github.com/hashicorp/example.2.3.git?ref=v1.0.0',
+          "repo-with-dot-and-git-suffix": {
+            "source": "github.com/hashicorp/example.2.3.git?ref=v1.0.0"
           },
-          consul: {
-            source: 'hashicorp/consul/aws',
-            version: '0.1.0',
-          },
-        },
+          "consul": {
+            "source": "hashicorp/consul/aws",
+            "version": "0.1.0"
+          }
+        }
       }
       `;
       const res = await parseHCL(modulesTFJSON, 'file.tf.json');
@@ -186,21 +185,21 @@ describe('modules/manager/terraform/hcl/index', () => {
     it('should return nested terraform block', async () => {
       const lockedVersionJSON = codeBlock`
       {
-        terraform: {
-          required_providers: {
-            aws: {
-              source: 'aws',
-              version: '~> 3.0',
+        "terraform": {
+          "required_providers": {
+            "aws": {
+              "source": "aws",
+              "version": "~> 3.0"
             },
-            azurerm: {
-              version: '~> 2.50.0',
+            "azurerm": {
+              "version": "~> 2.50.0"
             },
-            kubernetes: {
-              source: 'terraform.example.com/example/kubernetes',
-              version: '>= 1.0',
-            },
-          },
-        },
+            "kubernetes": {
+              "source": "terraform.example.com/example/kubernetes",
+              "version": ">= 1.0"
+            }
+          }
+        }
       }
       `;
       const res = await parseHCL(lockedVersionJSON, 'file.tf.json');
@@ -222,40 +221,40 @@ describe('modules/manager/terraform/hcl/index', () => {
     it('should return resource blocks', async () => {
       const resourcesTFJSON = codeBlock`
       {
-        resource: {
-          docker_container: {
-            foo: {
-              name: 'foo',
-              image: 'nginx:1.7.8',
+        "resource": {
+          "docker_container": {
+            "foo": {
+              "name": "foo",
+              "image": "nginx:1.7.8"
             },
-            invalid: {
-              name: 'foo',
-            },
+            "invalid": {
+              "name": "foo"
+            }
           },
-          docker_service: {
-            foo: {
-              name: 'foo-service',
-              task_spec: [
+          "docker_service": {
+            "foo": {
+              "name": "foo-service",
+              "task_spec": [
                 {
-                  container_spec: [
+                  "container_spec": [
                     {
-                      image: 'repo.mycompany.com:8080/foo-service:v1',
-                    },
-                  ],
-                },
+                      "image": "repo.mycompany.com:8080/foo-service:v1"
+                    }
+                  ]
+                }
               ],
-              endpoint_spec: [
+              "endpoint_spec": [
                 {
-                  ports: [
+                  "ports": [
                     {
-                      target_port: '8080',
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        },
+                      "target_port": "8080"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
       }
       `;
       const res = await parseHCL(resourcesTFJSON, 'file.tf.json');
@@ -289,9 +288,9 @@ describe('modules/manager/terraform/hcl/index', () => {
     it('should normalize nested arrays for kubernetes instances', async () => {
       const nestedKube = codeBlock`
       {
-        resource: {
-          kubernetes_deployment: {
-            foo: [[{ metadata: { name: 'nested' } }]]
+        "resource": {
+          "kubernetes_deployment": {
+            "foo": [[{ "metadata": { "name": "nested" } }]]
           }
         }
       }
@@ -317,9 +316,9 @@ describe('modules/manager/terraform/hcl/index', () => {
     it('should wrap single kubernetes instance into array', async () => {
       const singleKube = codeBlock`
       {
-        resource: {
-          kubernetes_deployment: {
-            foo: { metadata: { name: 'single' } }
+        "resource": {
+          "kubernetes_deployment": {
+            "foo": { "metadata": { "name": "single" } }
           }
         }
       }
@@ -340,6 +339,11 @@ describe('modules/manager/terraform/hcl/index', () => {
           },
         },
       });
+    });
+
+    it('should return null for malformed json', async () => {
+      const res = await parseHCL('{ not valid json', 'file.tf.json');
+      expect(res).toBeNil();
     });
   });
 });
