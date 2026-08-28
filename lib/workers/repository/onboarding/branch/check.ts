@@ -181,7 +181,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
       );
     }
     // if we have onboardingAutoCloseAge, and it hasn't yet passed onboardingAutoCloseAge, add a comment
-    // if it /has/ passed, we'll comment this appropriately in `ensureOnboardingPr`, so there doesn't need to be a comment here
+    // if it /has/ passed, we'll comment this appropriately in `ensureOnboarding`, so there doesn't need to be a comment here
     if (
       !onboardingAutoCloseAge ||
       ageOfOnboardingPr <= onboardingAutoCloseAge

@@ -15,7 +15,7 @@ flowchart TB
     J[workers/repository/index.ts, for each repository]
     J --> K[initRepo]
     J --> L[extractDependencies]
-    J --> M[ensureOnboardingPr]
+    J --> M[ensureOnboarding]
     J --> N[updateRepository]
     J --> O[finalize repository]
     end
