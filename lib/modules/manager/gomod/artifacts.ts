@@ -482,6 +482,7 @@ export async function updateArtifacts({
         newGoModContent,
         finalGoModContent,
         updatedDepNames,
+        config,
       );
 
       if (extraDepsNotice) {
