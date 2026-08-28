@@ -222,7 +222,7 @@ export async function renovateRepository(
   AbandonedPackageStats.report();
   GitOperationStats.report();
   const cloned = isCloned();
-  /* v8 ignore next 11 -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
+  /* v8 ignore next -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
   logger.info(
     {
       cloned,

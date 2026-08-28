@@ -316,7 +316,34 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
-        cmd: 'pnpm dedupe --ignore-scripts',
+        cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs dedupe without --recursive for workspaces', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(
+      codeBlock`
+        packages:
+          - pkg-a
+      `,
+    );
+    const postUpdateOptions = ['pnpmDedupe'];
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, postUpdateOptions },
+      upgrades,
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
@@ -524,14 +551,15 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +
           '&& pnpm install --lockfile-only' +
-          '"',
+          "'",
       },
     ]);
   });

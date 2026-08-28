@@ -6,7 +6,6 @@ import type { z } from 'zod/v4';
 import { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../cache/memory/index.ts';
@@ -67,9 +66,7 @@ export function applyDefaultHeaders(options: OptionsInit): void {
   const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
     ...options.headers,
-    'user-agent': compile(userAgentTemplate, {
-      renovateVersion: pkg.version,
-    }),
+    'user-agent': compile(userAgentTemplate, {}),
   };
 }
 
@@ -245,6 +242,8 @@ export abstract class HttpBase<
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
+      this.handleResponse(resolvedUrl, resCopy);
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
@@ -295,6 +294,10 @@ export abstract class HttpBase<
     err: Error,
   ): never {
     throw err;
+  }
+
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
   }
 
   resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {

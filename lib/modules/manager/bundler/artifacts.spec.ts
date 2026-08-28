@@ -285,11 +285,12 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -297,7 +298,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -344,11 +345,12 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.5' +
               ' && ' +
               'install-tool bundler 3.2.1' +
@@ -356,7 +358,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -405,11 +407,12 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.3.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -417,7 +420,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -459,12 +462,13 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e BUNDLE_GEMS___PRIVATE__COM ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -472,7 +476,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });

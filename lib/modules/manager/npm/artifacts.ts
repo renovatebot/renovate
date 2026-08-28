@@ -1,4 +1,5 @@
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
@@ -80,7 +81,7 @@ async function handlePackageManagerUpdates(
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${depName}@${newVersion}`;
+  const cmd = `corepack use ${quote(`${depName}@${newVersion}`)}`;
 
   const nodeConstraints = await getNodeToolConstraint(
     config,

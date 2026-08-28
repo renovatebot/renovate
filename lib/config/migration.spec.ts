@@ -256,6 +256,7 @@ describe('config/migration', () => {
     });
 
     it('migrates packages', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid legacy packages config for migration test
       const config = {
         packages: [
           {
@@ -421,11 +422,13 @@ describe('config/migration', () => {
       let config: TestRenovateConfig;
       let res: MigratedConfig;
 
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid string `extends` for migration test
       config = { extends: ':js-app' } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ extends: ['config:js-app'] });
 
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid string `extends` for migration test
       config = { extends: 'foo' } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
@@ -451,6 +454,7 @@ describe('config/migration', () => {
         extends: ['security:minimumReleaseAgeNpm'],
       });
 
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid legacy unpublishSafe/string extends for migration test
       config = { unpublishSafe: true, extends: 'foo' } as never;
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();

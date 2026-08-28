@@ -154,7 +154,7 @@ export class GerritScm extends DefaultGitScm {
  */
 export function nextPatchSetRef(currentRef: string): string {
   const lastSlash = currentRef.lastIndexOf('/');
-  const patchSet = Number(currentRef.slice(lastSlash + 1));
+  const patchSet = parseInt(currentRef.slice(lastSlash + 1), 10);
   return `${currentRef.slice(0, lastSlash + 1)}${patchSet + 1}`;
 }
 

@@ -1,9 +1,10 @@
 import type { RenovateConfig } from '~test/util.ts';
-import { git, logger, platform, scm } from '~test/util.ts';
+import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { addMeta } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import * as _extractUpdate from './extract-update.ts';
 import { lookup } from './extract-update.ts';
@@ -31,7 +32,7 @@ describe('workers/repository/process/index', () => {
     });
 
     it('processes baseBranchPatterns', async () => {
-      extract.mockResolvedValue({} as never);
+      extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
       config.baseBranchPatterns = ['branch1', 'branch2'];
       scm.branchExists.mockResolvedValueOnce(false);
       scm.branchExists.mockResolvedValueOnce(true);
@@ -125,7 +126,7 @@ describe('workers/repository/process/index', () => {
     });
 
     it('processes baseBranchPatterns dryRun extract', async () => {
-      extract.mockResolvedValue({} as never);
+      extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
       GlobalConfig.set({ dryRun: 'extract' });
       const res = await extractDependencies(config);
       await updateRepo(config, res.branches);
@@ -138,7 +139,7 @@ describe('workers/repository/process/index', () => {
     });
 
     it('finds baseBranches via regular expressions', async () => {
-      extract.mockResolvedValue({} as never);
+      extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
       config.baseBranchPatterns = [
         '/^release\\/.*/i',
         'dev',
@@ -189,7 +190,7 @@ describe('workers/repository/process/index', () => {
     });
 
     it('maps $default to defaultBranch', async () => {
-      extract.mockResolvedValue({} as never);
+      extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
       config.baseBranchPatterns = ['$default'];
       config.defaultBranch = 'master';
       git.getBranchList.mockReturnValue(['dev', 'master']);

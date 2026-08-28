@@ -303,6 +303,8 @@ If possible, Renovate follows the merge strategy set on the platform itself for 
 If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
 If you're happy with the default behavior, you don't need to do anything.
 
+On supported platforms, `automergeStrategy` also applies when using platform-native automerge.
+
 You may choose from these values:
 
 - `auto`, Renovate decides how to merge
@@ -1630,6 +1632,9 @@ The description field can be used inside any configuration object to add a human
 A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
 Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
 
+> [!NOTE]
+> To overwrite descriptions of child presets, use [`overrideDescription`](#overridedescription) in place of `description`.
+
 ## `digest`
 
 Add to this object if you wish to define rules that apply only to PRs that update digests.
@@ -2002,20 +2007,20 @@ Development Bot <dev-bot@my-software-company.com>
 
 ## `gitIgnoredAuthors`
 
-Specify commit authors ignored by Renovate.
-This field accepts [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant strings.
+Specify commit author emails ignored by Renovate.
 
 By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
 If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
-
-Example:
 
 ```json
 {
   "gitIgnoredAuthors": ["some-bot@example.org"]
 }
 ```
+
+`gitIgnoredAuthors` values can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ## `gitLabIgnoreApprovals`
 
@@ -2955,8 +2960,6 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 
 If you enable `automerge` _and_ `minimumReleaseAge`, Renovate Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
 
-It's recommended to also apply `prCreation="not-pending"` and `internalChecksFilter="strict"` to make sure that branches and PRs are only created after the `minimumReleaseAge` has passed.
-
 Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
 This pending check prevents the branch going green to automerge before the time has passed.
 
@@ -3050,6 +3053,19 @@ If you currently have a dependency that is using a malicious version, Renovate w
 If Renovate finds a dependency update available, and that dependency update is found to be malicious, Renovate will skip **any updates to the dependency**, marking it with `skipReason: malicious-update-proposed`, and report this via a warning log.
 
 <!-- markdownlint-enable MD001 -->
+
+## `overrideDescription`
+
+Use `overrideDescription` instead of [`description`](#description) if this config's description should replace, and not be added to, the descriptions collated from the presets which this config extends.
+
+This is useful for a preset which extends many other presets, and where a single line describes them better than one line per preset would.
+For example, `workarounds:all` extends around twenty presets, but its `overrideDescription` means the onboarding PR shows only:
+
+```
+- Apply crowd-sourced workarounds for known problems with packages.
+```
+
+Renovate applies `overrideDescription` when it resolves presets, so the resolved config only ever has a `description`.
 
 ## `packageRules`
 
@@ -4053,6 +4069,8 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
+Where supported, platform-native automerge uses [`automergeStrategy`](#automergestrategy) to select the merge method.
+
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
@@ -4130,6 +4148,13 @@ This is implicitly enabled for major module updates when `gomodUpdateImportPaths
 
 Run `go mod tidy -compat=1.17` after Go module updates.
 
+### `gomodTidyAll`
+
+After running `go mod tidy` on the updated module, also run it on every other `go.mod` which references that module through a local `replace` directive, in dependency order.
+Use this in Go monorepos, where an update to a shared module must also reach the `go.sum` files of the modules which depend on it.
+Implies `gomodTidy`, and needs Go 1.20 or later.
+Avoid combining this with `gomodMassage`, which comments out the relative `replace` directives that this option follows.
+
 ### `gomodTidyE`
 
 Run `go mod tidy -e` after Go module updates.
@@ -4160,7 +4185,7 @@ Run `npm install` commands _twice_ to work around bugs where `npm` generates inv
 
 ### `pnpmDedupe`
 
-Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.
+Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
 
 ### `yarnDedupeFewer`
 

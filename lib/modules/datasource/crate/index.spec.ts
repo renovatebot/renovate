@@ -1,4 +1,5 @@
 import { setTimeout } from 'node:timers/promises';
+import { isUndefined } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
@@ -507,7 +508,7 @@ describe('modules/datasource/crate/index', () => {
         .mockName('clone')
         .mockImplementation(
           async (_registryUrl: string, clonePath: string, opts) => {
-            if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+            if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
               throw new Error(
                 'fatal: dumb http transport does not support shallow capabilities',
               );
@@ -553,7 +554,7 @@ describe('modules/datasource/crate/index', () => {
         .fn()
         .mockName('clone')
         .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-          if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+          if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
             return Promise.reject(
               new Error(
                 'fatal: dumb http transport does not support shallow capabilities',

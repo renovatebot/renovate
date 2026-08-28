@@ -205,6 +205,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIP_CACHE_DIR ' +
           '-e PIP_NO_INPUT ' +
           '-e PIP_KEYRING_PROVIDER ' +
@@ -212,13 +213,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -541,6 +542,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIP_CACHE_DIR ' +
           '-e PIP_NO_INPUT ' +
           '-e PIP_KEYRING_PROVIDER ' +
@@ -548,13 +550,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
-          '"',
+          "'",
       },
     ]);
   });

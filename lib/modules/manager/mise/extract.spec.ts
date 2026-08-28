@@ -468,8 +468,8 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'asdf:rust',
             currentValue: '1.82.0',
-            packageName: 'rust-lang/rust',
-            datasource: 'github-tags',
+            packageName: 'rust',
+            datasource: 'rust-version',
           },
           {
             depName: 'vfox:scala',
@@ -530,6 +530,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.18.21',
             packageName: 'eza',
             datasource: 'crate',
+            versioning: 'semver',
           },
           {
             depName: 'cargo:https://github.com/username/demo1',
@@ -768,14 +769,14 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '1.0.0',
             packageName: 'some/repo',
             datasource: 'github-releases',
-            extractVersion: '^release\\-(?<version>.+)',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
           },
           {
             depName: 'github:other/repo',
             currentValue: '2.0.0',
             packageName: 'other/repo',
             datasource: 'github-releases',
-            extractVersion: '^v(?<version>.+)',
+            extractVersion: '^\\x76(?<version>.+)',
           },
         ],
       });

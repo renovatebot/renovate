@@ -352,7 +352,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       minor: true,
       patch: true,
       digest: true,
-      pinDigest: false,
+      pinDigest: true,
       pin: false,
       replacement: false,
       lockFileMaintenance: false,

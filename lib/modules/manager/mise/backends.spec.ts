@@ -41,6 +41,7 @@ describe('modules/manager/mise/backends', () => {
       expect(createCargoToolConfig('eza', '')).toStrictEqual({
         packageName: 'eza',
         datasource: 'crate',
+        versioning: 'semver',
       });
     });
 
@@ -133,7 +134,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: '1.0.0',
-        extractVersion: '^release\\-(?<version>.+)',
+        extractVersion: '^\\x72elease\\x2d(?<version>.+)',
       });
     });
 
@@ -146,7 +147,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: 'v1.0.0',
-        extractVersion: '^version\\-(?<version>.+)',
+        extractVersion: '^\\x76ersion\\x2d(?<version>.+)',
       });
     });
 
@@ -179,7 +180,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: '1.0.0',
-        extractVersion: '^v1\\.0\\+(?<version>.+)',
+        extractVersion: '^\\x761\\.0\\+(?<version>.+)',
       });
     });
 
@@ -192,7 +193,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: '1.0.0',
-        extractVersion: '^prefix\\[test\\]\\(v\\)(?<version>.+)',
+        extractVersion: '^\\x70refix\\[test\\]\\(v\\)(?<version>.+)',
       });
     });
   });

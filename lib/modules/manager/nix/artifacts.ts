@@ -32,7 +32,7 @@ export async function updateArtifacts({
   );
 
   if (token) {
-    cmd += `--extra-access-tokens github.com=${token} `;
+    cmd += `--extra-access-tokens github.com=${quote(token)} `;
   }
 
   if (config.isLockFileMaintenance) {

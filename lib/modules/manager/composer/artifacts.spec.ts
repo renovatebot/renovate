@@ -803,17 +803,18 @@ describe('modules/manager/composer/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e COMPOSER_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool php 7.3' +
           ' && ' +
           'install-tool composer 1.10.17' +
           ' && ' +
           'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {

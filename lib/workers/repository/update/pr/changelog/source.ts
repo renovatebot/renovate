@@ -3,6 +3,7 @@ import {
   isFalsy,
   isNonEmptyString,
   isNullOrUndefined,
+  isTruthy,
 } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
@@ -12,7 +13,12 @@ import * as packageCache from '../../../../../util/cache/package/index.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { memoize } from '../../../../../util/memoize.ts';
 import { regEx } from '../../../../../util/regex.ts';
-import { parseUrl, trimSlashes } from '../../../../../util/url.ts';
+import {
+  isHttpUrl,
+  joinUrlParts,
+  parseUrl,
+  trimSlashes,
+} from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { slugifyUrl } from './common.ts';
 import { addReleaseNotes } from './release-notes.ts';
@@ -126,7 +132,14 @@ export abstract class ChangeLogSource {
     // This extra filter/sort should not be necessary, but better safe than sorry
     const validReleases = [...releases]
       .filter((release) => versioningApi.isVersion(release.version))
-      .sort((a, b) => versioningApi.sortVersions(a.version, b.version));
+      .sort((a, b) => versioningApi.sortVersions(a.version, b.version))
+      // Drop versions equal under this versioning, e.g. the Docker tags
+      // `3.7.12` and `v3.7.12`, else their notes are rendered twice
+      .filter(
+        (release, index, sorted) =>
+          index === sorted.length - 1 ||
+          !versioningApi.equals(release.version, sorted[index + 1].version),
+      );
 
     if (validReleases.length < 2) {
       logger.debug(
@@ -213,7 +226,7 @@ export abstract class ChangeLogSource {
       versions: changelogReleases,
     };
 
-    res = await addReleaseNotes(res, config);
+    res = await addReleaseNotes(res, config, this);
 
     return res;
   }
@@ -303,5 +316,33 @@ export abstract class ChangeLogSource {
 
   hasValidRepository(repository: string): boolean {
     return repository.split('/').length === 2;
+  }
+
+  /**
+   * Build the URL to the changelog markdown file for the release notes.
+   * Platform sources can override this to match their web UI conventions.
+   */
+  getNotesSourceUrl(
+    baseUrl: string,
+    repository: string,
+    changelogFile: string,
+  ): string {
+    return joinUrlParts(baseUrl, repository, 'blob', 'HEAD', changelogFile);
+  }
+
+  /**
+   * Build the URL pointing to a specific heading within the changelog markdown
+   * file. Platform sources can override this to match their anchor conventions.
+   */
+  getReleaseNotesMdAnchorUrl(notesSourceUrl: string, heading: string): string {
+    const mdHeadingLink = heading
+      .replace(regEx(/[[\]()]/g), ' ')
+      .replace(regEx(/^\s*#*\s*/), '')
+      .split(' ')
+      .filter(isTruthy)
+      .filter((word) => !isHttpUrl(word))
+      .join('-')
+      .replace(regEx(/[^A-Za-z0-9-]/g), '');
+    return `${notesSourceUrl}#${mdHeadingLink}`;
   }
 }

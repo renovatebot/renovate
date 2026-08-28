@@ -37,12 +37,11 @@ function fixSnapshots(snapshots: ExecSnapshots): ExecSnapshots {
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
-
 describe('modules/manager/npm/post-update/yarn', () => {
   const removeDockerContainer = vi.spyOn(docker, 'removeDockerContainer');
 
   beforeEach(() => {
+    util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
     delete process.env.BUILDPACK;
     delete process.env.HTTP_PROXY;
     delete process.env.HTTPS_PROXY;
@@ -905,15 +904,17 @@ describe('modules/manager/npm/post-update/yarn', () => {
       {
         cmd:
           `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/renovatebot/base-image ` +
-          `bash -l -c "` +
+          `bash -l -c '` +
           `install-tool node 16.16.0` +
           ` && ` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
-          `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true` +
+          // the preCommand's own single quotes are POSIX-escaped, since the whole
+          // command is now the single-quoted argument of `bash -l -c`
+          `sed -i '"'"'s/ steps,/ steps.slice(0,1),/'"'"' some-dir/.yarn/cli.js || true` +
           ` && ` +
           `yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts` +
-          `"`,
+          `'`,
         options: { ...options, cwd: 'some-dir' },
       },
     ]);

@@ -1,5 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { regEx } from '../../../../util/regex.ts';
 
 export const coersions: Record<string, (arg: string) => unknown> = {
   boolean: (val: string): boolean => {
@@ -36,6 +37,6 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       throw new Error(`Invalid JSON value: '${val}'`);
     }
   },
-  string: (val: string): string => val.replace(/\\n/g, '\n'),
+  string: (val: string): string => val.replace(regEx(/\\n/g), '\n'),
   integer: parseInt,
 };
