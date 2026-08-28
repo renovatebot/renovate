@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
+import { platform } from '../../../../../modules/platform/index.ts';
 import * as memCache from '../../../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
@@ -498,26 +499,57 @@ export async function addReleaseNotes(
       ? `${repository}:${sourceDirectory}`
       : `${repository}`;
 
+    const shouldTruncateToPlatformLimit = config.fetchChangeLogs === 'pr';
+    const maxBodyLength = shouldTruncateToPlatformLimit
+      ? platform.maxBodyLength()
+      : 0;
+    let fetchedNotesLength = 0;
+
     for (const v of input.versions) {
       let releaseNotes: ChangeLogNotes | null | undefined;
-      const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
-      const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
-      releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
-      releaseNotes ??= await getReleaseNotesMd(input.project, v, source);
-      releaseNotes ??= await getReleaseNotes(input.project, v, config);
 
-      // If there is no release notes, at least try to show the compare URL
-      if (!releaseNotes && v.compare.url) {
+      if (
+        !shouldTruncateToPlatformLimit ||
+        fetchedNotesLength < maxBodyLength
+      ) {
+        const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
+        const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
+        releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
+        releaseNotes ??= await getReleaseNotesMd(input.project, v, source);
+        releaseNotes ??= await getReleaseNotes(input.project, v, config);
+
+        // If there is no release notes, at least try to show the compare URL
+        if (!releaseNotes && v.compare.url) {
+          releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
+        }
+
+        const cacheMinutes = releaseNotesCacheMinutes(v.date);
+        await packageCache.set(
+          cacheNamespace,
+          cacheKey,
+          releaseNotes,
+          cacheMinutes,
+        );
+
+        // when we have received enough changelog content to exceed the platform's limit, we should stop trying to look up more changelog entries, as we fetch newest releases first, so the most recent changelog entries will be visible in the PR
+        if (shouldTruncateToPlatformLimit) {
+          fetchedNotesLength += releaseNotes?.body?.length ?? 0;
+          if (fetchedNotesLength >= maxBodyLength) {
+            logger.debug(
+              {
+                repository,
+                project: input.project,
+                skippingVersionFrom: v.version,
+                maxBodyLength,
+              },
+              `Already fetched enough changelogs to hit the platform PR body limit, skipping version ${v.version} and below`,
+            );
+          }
+        }
+      } else if (v.compare.url) {
         releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
       }
 
-      const cacheMinutes = releaseNotesCacheMinutes(v.date);
-      await packageCache.set(
-        cacheNamespace,
-        cacheKey,
-        releaseNotes,
-        cacheMinutes,
-      );
       output.versions!.push({
         ...v,
         releaseNotes: releaseNotes!,

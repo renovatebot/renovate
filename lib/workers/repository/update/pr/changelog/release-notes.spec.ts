@@ -2,7 +2,8 @@ import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
+import { partial, platform } from '~test/util.ts';
+import * as memCache from '../../../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
 import { clone } from '../../../../../util/clone.ts';
 import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
@@ -519,6 +520,179 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           },
         ],
       });
+    });
+
+    it('stops fetching further release notes once the platform PR body limit is reached for fetchChangeLogs=pr', async () => {
+      platform.maxBodyLength.mockReturnValue(50);
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: '2.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'https://example.com/2.0.0',
+          description: 'a'.repeat(100),
+          name: 'release',
+        },
+      ]);
+      const packageCacheGetSpy = vi.spyOn(packageCache, 'get');
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          // Using a `repositoriesToSkipMdFetching` repository avoids the need
+          // to mock the changelog markdown-file lookup for this test.
+          repository: 'react/react-native',
+          packageName: 'react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '2.0.0',
+            compare: {
+              url: 'https://github.com/react/react-native/compare/1.0.0...2.0.0',
+            },
+          }),
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            compare: {
+              url: 'https://github.com/react/react-native/compare/0.9.0...1.0.0',
+            },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      const res = await addReleaseNotes(
+        input,
+        partial<BranchUpgradeConfig>({ fetchChangeLogs: 'pr' }),
+      );
+
+      expect(res?.hasReleaseNotes).toBeTrue();
+      expect(res?.versions?.[0]?.releaseNotes?.body).toContain('a'.repeat(100));
+      expect(res?.versions?.[1]?.releaseNotes).toEqual({
+        url: 'https://github.com/react/react-native/compare/0.9.0...1.0.0',
+        notesSourceUrl: '',
+      });
+      expect(packageCacheGetSpy).toHaveBeenCalledWith(
+        'changelog-github-notes@v2',
+        'react/react-native:2.0.0',
+      );
+      expect(packageCacheGetSpy).not.toHaveBeenCalledWith(
+        'changelog-github-notes@v2',
+        'react/react-native:1.0.0',
+      );
+    });
+
+    it('skips versions without release notes once over the platform PR body limit, without a compare URL fallback', async () => {
+      memCache.reset();
+      platform.maxBodyLength.mockReturnValue(30);
+      githubReleasesMock.mockResolvedValue([
+        {
+          id: 1,
+          version: '2.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'https://example.com/2.0.0',
+          description: 'a'.repeat(40),
+          name: 'release',
+        },
+      ]);
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          repository: 'react/react-native',
+          packageName: 'react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            // No release notes and no compare URL - still under budget, so
+            // this shouldn't stop further versions being fetched.
+            version: '3.0.0',
+            compare: {},
+          }),
+          partial<ChangeLogRelease>({
+            // Pushes us over the platform's body limit.
+            version: '2.0.0',
+            compare: {
+              url: 'https://github.com/react/react-native/compare/1.0.0...2.0.0',
+            },
+          }),
+          partial<ChangeLogRelease>({
+            // Already over budget, and has no compare URL to fall back to.
+            version: '1.0.0',
+            compare: {},
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      const res = await addReleaseNotes(
+        input,
+        partial<BranchUpgradeConfig>({ fetchChangeLogs: 'pr' }),
+      );
+
+      // Fetched (we were still under budget), but no match was found.
+      expect(res?.versions?.[0]?.releaseNotes).toBeNull();
+      expect(res?.versions?.[1]?.releaseNotes?.body).toContain('a'.repeat(40));
+      // Skipped entirely (already over budget), so never even assigned.
+      expect(res?.versions?.[2]?.releaseNotes).toBeUndefined();
+    });
+
+    it('does not cap fetching by the platform PR body limit for fetchChangeLogs=branch', async () => {
+      platform.maxBodyLength.mockReturnValue(50);
+      githubReleasesMock.mockResolvedValue([
+        {
+          id: 1,
+          version: '2.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'https://example.com/2.0.0',
+          description: 'a'.repeat(100),
+          name: 'release',
+        },
+        {
+          id: 2,
+          version: '1.0.0',
+          releaseTimestamp: '2019-01-01' as Timestamp,
+          url: 'https://example.com/1.0.0',
+          description: 'b'.repeat(100),
+          name: 'release',
+        },
+      ]);
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          // A different `repositoriesToSkipMdFetching` repository to the
+          // previous test, so its cached release list isn't reused here.
+          repository: 'facebook/react-native',
+          packageName: 'react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '2.0.0',
+            compare: {
+              url: 'https://github.com/facebook/react-native/compare/1.0.0...2.0.0',
+            },
+          }),
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            compare: {
+              url: 'https://github.com/facebook/react-native/compare/0.9.0...1.0.0',
+            },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      const res = await addReleaseNotes(
+        input,
+        partial<BranchUpgradeConfig>({ fetchChangeLogs: 'branch' }),
+      );
+
+      expect(res?.versions?.[0]?.releaseNotes?.body).toContain('a'.repeat(100));
+      expect(res?.versions?.[1]?.releaseNotes?.body).toContain('b'.repeat(100));
     });
   });
 
