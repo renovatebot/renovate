@@ -12,6 +12,7 @@ import {
   BUNDLER_INVALID_CREDENTIALS,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -197,7 +198,7 @@ describe('modules/manager/bundler/artifacts', () => {
             ...config,
             updateType: 'patch',
             postUpdateOptions: [
-              ...(config.postUpdateOptions ?? []),
+              ...coerceArray(config.postUpdateOptions),
               'bundlerConservative',
             ],
           },

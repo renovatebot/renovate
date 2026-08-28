@@ -1,6 +1,7 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import type { CustomDatasourceConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as template from '../../../util/template/index.ts';
 import type { GetReleasesConfig } from '../types.ts';
 
@@ -32,7 +33,7 @@ export function massageCustomDatasourceConfig(
   }
   const registryUrl = template.compile(registryUrlTemplate, templateInput);
 
-  const transformTemplates = customDatasource.transformTemplates ?? [];
+  const transformTemplates = coerceArray(customDatasource.transformTemplates);
   const transform: string[] = [];
   for (const transformTemplate of transformTemplates) {
     const templated = template.compile(transformTemplate, templateInput);

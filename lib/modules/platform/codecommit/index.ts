@@ -410,7 +410,7 @@ export async function updatePr({
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
   let cachedPr: CodeCommitPr | undefined = undefined;
-  const cachedPrs = config.prList ?? [];
+  const cachedPrs = coerceArray(config.prList);
   for (const p of cachedPrs) {
     // v8 ignore else -- TODO: add test #40625
     if (p.number === prNo) {

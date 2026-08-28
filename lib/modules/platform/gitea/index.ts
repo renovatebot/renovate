@@ -11,7 +11,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
-import { deduplicateArray } from '../../../util/array.ts';
+import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
@@ -901,7 +901,7 @@ const platform: Platform = {
           );
 
           // Test whether the issues need to be updated
-          const existingLabelIds = (existingIssue.labels ?? []).map(
+          const existingLabelIds = coerceArray(existingIssue.labels).map(
             (label) => label.id,
           );
           if (

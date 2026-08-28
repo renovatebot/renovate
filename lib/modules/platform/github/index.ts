@@ -24,6 +24,7 @@ import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -147,11 +148,11 @@ export async function detectGhe(token: string): Promise<void> {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
     const gheHeaders = coerceObject(gheQueryRes?.headers);
-    const [, gheVersion] =
-      Object.entries(gheHeaders).find(
-        ([k]) => k.toLowerCase() === gheHeaderKey,
-      ) ?? [];
-    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+    const gheVersionHeader = Object.entries(gheHeaders).find(
+      ([k]) => k.toLowerCase() === gheHeaderKey,
+    );
+    platformConfig.gheVersion =
+      semver.valid(gheVersionHeader?.[1] as string) ?? null;
     logger.debug(
       `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`,
     );
@@ -1531,7 +1532,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
-          labels: labels ?? [],
+          labels: coerceArray(labels),
         },
       },
       Issue,
@@ -2349,7 +2350,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
   } catch (err) /* v8 ignore next -- defensive: processing already-parsed alerts does not throw in specs */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
-  return vulnerabilityAlerts ?? [];
+  return coerceArray(vulnerabilityAlerts);
 }
 
 async function pushFiles(

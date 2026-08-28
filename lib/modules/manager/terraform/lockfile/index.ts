@@ -1,5 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import * as p from '../../../../util/promises.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
@@ -55,12 +56,13 @@ async function updateAllLocks(
       const update: ProviderLockUpdate = {
         newVersion,
         newConstraint: lock.constraints,
-        newHashes:
-          (await TerraformProviderHash.createHashes(
+        newHashes: coerceArray(
+          await TerraformProviderHash.createHashes(
             lock.registryUrl,
             lock.packageName,
             newVersion,
-          )) ?? [],
+          ),
+        ),
         ...lock,
       };
       return update;
@@ -205,12 +207,13 @@ export async function updateArtifacts({
           // TODO #22198
           newVersion: newVersion!,
           newConstraint: newConstraint!,
-          newHashes:
-            (await TerraformProviderHash.createHashes(
+          newHashes: coerceArray(
+            await TerraformProviderHash.createHashes(
               registryUrl,
               updateLock.packageName,
               newVersion!,
-            )) ?? /* v8 ignore next: needs test */ [],
+            ),
+          ),
           ...updateLock,
         };
         updates.push(update);

@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
@@ -43,7 +44,7 @@ function reconcilePackageVersions(
 ): PackageVersions {
   for (const line of versionLines) {
     const packageName = copystr(line.packageName);
-    let versions = packageVersions.get(packageName) ?? [];
+    let versions = coerceArray(packageVersions.get(packageName));
 
     const { deletedVersions, addedVersions } = line;
 

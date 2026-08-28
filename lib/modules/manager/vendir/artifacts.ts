@@ -1,5 +1,6 @@
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   getParentDir,
@@ -67,9 +68,9 @@ export async function updateArtifacts({
     const vendorDir = getParentDir(packageFileName);
     const status = await getRepoStatus();
     if (status) {
-      const modifiedFiles = status.modified ?? [];
+      const modifiedFiles = coerceArray(status.modified);
       const notAddedFiles = status.not_added;
-      const deletedFiles = status.deleted ?? [];
+      const deletedFiles = coerceArray(status.deleted);
 
       for (const f of modifiedFiles.concat(notAddedFiles)) {
         const isFileInVendorDir = f.startsWith(vendorDir);

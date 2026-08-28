@@ -12,6 +12,7 @@ import noStatefulGlobalRegex from './rules/no-stateful-global-regex.ts';
 import noToolsImport from './rules/no-tools-import.ts';
 import noUnquotedExecInterpolation from './rules/no-unquoted-exec-interpolation.ts';
 import noUnvalidatedPaginationUrl from './rules/no-unvalidated-pagination-url.ts';
+import preferCoerceArray from './rules/prefer-coerce-array.ts';
 import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.ts';
 import preferFsUtil from './rules/prefer-fs-util.ts';
 import preferIsHelpers from './rules/prefer-is-helpers.ts';
@@ -48,6 +49,7 @@ export default definePlugin({
     'no-tools-import': noToolsImport,
     'no-unquoted-exec-interpolation': noUnquotedExecInterpolation,
     'no-unvalidated-pagination-url': noUnvalidatedPaginationUrl,
+    'prefer-coerce-array': preferCoerceArray,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
     'prefer-fs-util': preferFsUtil,
     'prefer-json-pipe': preferJsonPipe,

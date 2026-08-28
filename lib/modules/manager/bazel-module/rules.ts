@@ -3,6 +3,7 @@ import parseGithubUrl from 'github-url-from-git';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { clone } from '../../../util/clone.ts';
 import { regEx } from '../../../util/regex.ts';
 import { BazelDatasource } from '../../datasource/bazel/index.ts';
@@ -170,7 +171,7 @@ function collectByModule(
 ): BazelModulePackageDep[][] {
   const rulesByModule = new Map<string, BasePackageDep[]>();
   for (const pkgDep of packageDeps) {
-    const bmi = rulesByModule.get(pkgDep.depName) ?? [];
+    const bmi = coerceArray(rulesByModule.get(pkgDep.depName));
     bmi.push(pkgDep);
     rulesByModule.set(pkgDep.depName, bmi);
   }
