@@ -9,6 +9,7 @@ import {
 import { dequal } from 'dequal';
 import { logger } from '../logger/index.ts';
 import { clone } from '../util/clone.ts';
+import { coerceObject } from '../util/object.ts';
 import { regEx } from '../util/regex.ts';
 import { MigrationsService } from './migrations/index.ts';
 import { getOptions } from './options/index.ts';
@@ -226,7 +227,7 @@ export function migrateConfig(
     // @ts-expect-error -- TODO: fix me
     if (isNonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
-        migratedConfig.gradle ?? {},
+        coerceObject(migratedConfig.gradle),
         // @ts-expect-error -- TODO: fix me
         migratedConfig['gradle-lite'],
       );

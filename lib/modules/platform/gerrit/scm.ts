@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as git from '../../../util/git/index.ts';
 import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
@@ -100,7 +101,7 @@ export class GerritScm extends DefaultGitScm {
     const changeId = existingChange?.change_id ?? generateChangeId();
     commit.message = message;
     commit.trailers = [
-      ...(commit.trailers ?? []).filter(
+      ...coerceArray(commit.trailers).filter(
         (trailer) =>
           !trailer.startsWith('Renovate-Branch:') &&
           !trailer.startsWith('Change-Id:'),

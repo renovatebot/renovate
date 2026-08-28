@@ -83,7 +83,7 @@ const goEnv = {
 
 describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
-    delete process.env.GOPATH;
+    vi.stubEnv('GOPATH', undefined);
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

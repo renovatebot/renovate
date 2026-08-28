@@ -3,9 +3,9 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, statLocalFile } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
-import { getRepoStatus } from '../../../util/git/index.ts';
+import { getRepoStatus, isFileModeEnabled } from '../../../util/git/index.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -17,7 +17,29 @@ import {
 } from './utils.ts';
 
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
+const ownerExecutePermission = 0o100;
 const gitExec = withGitEnvironment(['git-tags']);
+
+async function detectExecutable(
+  path: string,
+  canReadFileMode: boolean,
+): Promise<true | undefined> {
+  if (!canReadFileMode) {
+    return undefined;
+  }
+
+  const fileStats = await statLocalFile(path);
+  if (!fileStats?.isFile()) {
+    return undefined;
+  }
+
+  if ((fileStats.mode & ownerExecutePermission) === 0) {
+    return undefined;
+  }
+
+  // Git derives its executable flag from the owner's execute permission.
+  return true;
+}
 
 function buildCommand(
   config: UpdateArtifactsConfig,
@@ -109,6 +131,8 @@ export async function updateArtifacts({
     res.push(...artifactError(packageFileName, msg));
   }
 
+  const canReadFileMode = await isFileModeEnabled();
+
   for (const f of [
     ...status.modified,
     ...status.not_added,
@@ -119,6 +143,7 @@ export async function updateArtifacts({
         type: 'addition',
         path: f,
         contents: await readLocalFile(f),
+        isExecutable: await detectExecutable(f, canReadFileMode),
       },
     };
     if (status.conflicted.includes(f)) {
@@ -154,6 +179,7 @@ export async function updateArtifacts({
         type: 'addition',
         path: f.to,
         contents: await readLocalFile(f.to),
+        isExecutable: await detectExecutable(f.to, canReadFileMode),
       },
     });
   }

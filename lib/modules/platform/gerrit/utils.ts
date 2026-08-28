@@ -1,6 +1,7 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
@@ -113,8 +114,9 @@ export function mapGerritChangeToPr(
     title: change.subject,
     createdAt: convertGerritDateToISO(change.created),
     labels: change.hashtags,
-    reviewers:
-      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
+    reviewers: coerceArray(
+      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!),
+    ),
     bodyStruct: {
       hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
     },
@@ -152,7 +154,7 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {
-  const msg = Array.from(change.messages ?? [])
+  const msg = Array.from(coerceArray(change.messages))
     .reverse()
     .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {

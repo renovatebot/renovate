@@ -3,6 +3,7 @@ import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../../config/global.ts';
 import * as dockerVersioning from '../../../../../../modules/versioning/docker/index.ts';
 import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as packageCache from '../../../../../../util/cache/package/index.ts';
 import * as githubGraphql from '../../../../../../util/github/graphql/index.ts';
 import type { GithubTagItem } from '../../../../../../util/github/graphql/types.ts';
 import * as hostRules from '../../../../../../util/host-rules.ts';
@@ -140,6 +141,27 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           { version: '2.2.2' },
         ],
       });
+    });
+
+    it('fetches releases newest to oldest', async () => {
+      const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+
+      await getChangeLogJSON({
+        ...upgrade,
+      });
+
+      const fetchedPairs = packageCacheSetSpy.mock.calls
+        .filter((call) => call[0] === 'changelog-github-release')
+        .map((call) => {
+          const [, , prev, next] = call[1].split(':');
+          return `${prev}->${next}`;
+        });
+      expect(fetchedPairs).toEqual([
+        '2.4.2->2.5.2',
+        '2.3.0->2.4.2',
+        '2.2.2->2.3.0',
+        '1.0.0->2.2.2',
+      ]);
     });
 
     it('filters unnecessary warns', async () => {
@@ -309,7 +331,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
-      process.env.GITHUB_ENDPOINT = '';
+      vi.stubEnv('GITHUB_ENDPOINT', '');
       expect(
         await getChangeLogJSON({
           ...upgrade,

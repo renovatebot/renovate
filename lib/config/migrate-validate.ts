@@ -1,6 +1,7 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../logger/index.ts';
+import { coerceArray } from '../util/array.ts';
 import * as configMassage from './massage.ts';
 import * as configMigration from './migration.ts';
 import type { RenovateConfig, ValidationMessage } from './types.ts';
@@ -40,9 +41,9 @@ export async function migrateAndValidate(
     if (isNonEmptyArray(errors)) {
       logger.info({ errors }, 'Found renovate config errors');
     }
-    massagedConfig.errors = (config.errors ?? []).concat(errors);
+    massagedConfig.errors = coerceArray(config.errors).concat(errors);
     if (!config.repoIsOnboarded) {
-      massagedConfig.warnings = (config.warnings ?? []).concat(warnings);
+      massagedConfig.warnings = coerceArray(config.warnings).concat(warnings);
     }
     return massagedConfig;
   } catch (err) {

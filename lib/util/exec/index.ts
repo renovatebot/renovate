@@ -81,7 +81,7 @@ async function prepareRawExec(
   sideCarImage: string,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const preCommands = opts.preCommands ?? [];
+  const preCommands = coerceArray(opts.preCommands);
   const customEnvVariables = getCustomEnv();
   const userConfiguredEnv = getUserEnv();
   const { containerbaseDir, binarySource } = GlobalConfig.get();

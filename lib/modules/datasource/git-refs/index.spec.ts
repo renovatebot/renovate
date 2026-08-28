@@ -3,6 +3,7 @@ import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
+import { clearEnv } from '~test/util.ts';
 import * as git from '../../../util/git/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitRefsDatasource } from './index.ts';
@@ -19,8 +20,7 @@ describe('modules/datasource/git-refs/index', () => {
   let gitMock: MockProxy<SimpleGit>;
 
   beforeEach(() => {
-    // clear environment variables
-    process.env = {};
+    clearEnv();
 
     // reset git mock
     gitMock = mock<SimpleGit>({

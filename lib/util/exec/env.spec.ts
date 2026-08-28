@@ -28,13 +28,14 @@ describe('util/exec/env', () => {
   ];
 
   beforeEach(() => {
-    envVars.forEach((env) => {
-      process.env[env] = env;
+    // Clear any ambient value first, so that a forwarded variable which is set
+    // in the surrounding environment cannot leak into the assertions below.
+    basicEnvVars.forEach((env) => {
+      vi.stubEnv(env, undefined);
     });
-  });
-
-  afterEach(() => {
-    envVars.forEach((env) => delete process.env[env]);
+    envVars.forEach((env) => {
+      vi.stubEnv(env, env);
+    });
   });
 
   it('returns default environment variables', () => {
@@ -68,22 +69,22 @@ describe('util/exec/env', () => {
   });
 
   it('static environment variables override the process environment variables', () => {
-    process.env.CI = 'false';
+    vi.stubEnv('CI', 'false');
 
     expect(getChildProcessEnv()).toMatchObject({
       CI: 'true',
     });
 
-    delete process.env.CI;
+    vi.stubEnv('CI', undefined);
   });
 
   it('returns environment variable only if defined', () => {
-    delete process.env.PATH;
+    vi.stubEnv('PATH', undefined);
     expect(getChildProcessEnv()).not.toHaveProperty('PATH');
   });
 
   it('returns custom environment variables if passed and defined', () => {
-    process.env.FOOBAR = 'FOOBAR';
+    vi.stubEnv('FOOBAR', 'FOOBAR');
     expect(getChildProcessEnv(['FOOBAR'])).toMatchObject({
       DOCKER_HOST: 'DOCKER_HOST',
       FOOBAR: 'FOOBAR',
@@ -95,7 +96,7 @@ describe('util/exec/env', () => {
       NO_PROXY: 'NO_PROXY',
       PATH: 'PATH',
     });
-    delete process.env.LANG;
+    vi.stubEnv('LANG', undefined);
   });
 
   describe('getChildProcessEnv when exposeAllEnv=true', () => {
@@ -109,7 +110,7 @@ describe('util/exec/env', () => {
 
     it('static environment variables override the process environment variables', () => {
       GlobalConfig.set({ exposeAllEnv: true });
-      process.env.CI = 'false';
+      vi.stubEnv('CI', 'false');
 
       expect(getChildProcessEnv()).toMatchObject({
         CI: 'true',

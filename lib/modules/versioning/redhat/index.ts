@@ -1,8 +1,7 @@
 import { isUndefined } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'redhat';
 export const displayName = 'Red Hat';

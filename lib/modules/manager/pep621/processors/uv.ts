@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import type {
   ExecOptions,
   ToolConstraint,
@@ -315,8 +316,9 @@ async function getUvExtraIndexUrl(
     .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
-      const configuredIndexUrls =
-        project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      const configuredIndexUrls = coerceArray(
+        project.tool?.uv?.index?.map(({ url }) => url),
+      );
       return (
         registryUrl !== PypiDatasource.defaultURL &&
         !configuredIndexUrls.includes(registryUrl)

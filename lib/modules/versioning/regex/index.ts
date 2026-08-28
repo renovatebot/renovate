@@ -1,22 +1,14 @@
 import { isUndefined } from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type { VersioningApiConstructor } from '../types.ts';
+import type { RegExpVersion } from './types.ts';
 
 export const id = 'regex';
 export const displayName = 'Regular Expression';
 export const urls = [];
 export const supportsRanges = false;
-
-export interface RegExpVersion extends GenericVersion {
-  /**
-   * compatibility, if present, are treated as a compatibility layer: we will
-   * never try to update to a version with a different compatibility.
-   */
-  compatibility: string;
-}
 
 export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   // config is expected to be overridden by a user-specified RegExp value

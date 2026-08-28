@@ -32,17 +32,12 @@ import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { PackageLock } from '../schema.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
-import type { GenerateLockFileResult } from './types.ts';
+import type { GenerateLockFileResult, NpmrcCooldownResult } from './types.ts';
 import {
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
-
-export interface NpmrcCooldownResult {
-  date: DateTime<true>;
-  source: 'before' | 'min-release-age';
-}
 
 export function parseNpmrcCooldownDate(
   npmrcContent: string | null,

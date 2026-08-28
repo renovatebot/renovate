@@ -80,15 +80,8 @@ const datasource = PypiDatasource.id;
 
 describe('modules/datasource/pypi/index', () => {
   describe('getReleases', () => {
-    const OLD_ENV = process.env;
-
     beforeEach(() => {
-      process.env = { ...OLD_ENV };
-      delete process.env.PIP_INDEX_URL;
-    });
-
-    afterEach(() => {
-      process.env = OLD_ENV;
+      vi.stubEnv('PIP_INDEX_URL', undefined);
     });
 
     it('returns null for 404', async () => {

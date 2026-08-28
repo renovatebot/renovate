@@ -1,3 +1,9 @@
+// oxlint-disable renovate/prefer-stub-env -- these tests assert on the *whole*
+// env handed to the child process, so they need `process.env` to hold exactly
+// the fixture and nothing else. `vi.stubEnv()` cannot express that: it refuses
+// to delete `PROD`, `DEV` and `SSR`, setting them to '' instead, and those
+// would then show up in the `exposeAllEnv` expectations. Nothing here stubs,
+// so the two styles are not mixed.
 import { mockDeep } from 'vitest-mock-extended';
 import { exec as cpExec, envMock } from '~test/exec-util.ts';
 import { logger } from '~test/util.ts';
@@ -6,6 +12,7 @@ import type { RepoGlobalConfig } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
 import { setCustomEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
 import * as dockerModule from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs } from './hermit.ts';
@@ -965,7 +972,7 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
-    setCustomEnv(adminConfig.customEnvVariables ?? {});
+    setCustomEnv(coerceObject(adminConfig.customEnvVariables));
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }

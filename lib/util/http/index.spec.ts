@@ -436,16 +436,9 @@ describe('util/http/index', () => {
   });
 
   describe('retry', () => {
-    let NODE_ENV: string | undefined;
-
-    beforeAll(() => {
-      NODE_ENV = process.env.NODE_ENV;
-      delete process.env.NODE_ENV;
+    beforeEach(() => {
+      vi.stubEnv('NODE_ENV', undefined);
       http = new Http('dummy');
-    });
-
-    afterAll(() => {
-      process.env.NODE_ENV = NODE_ENV;
     });
 
     it('works', async () => {

@@ -22,29 +22,25 @@ afterAll(disableInstrumentations);
 
 describe('instrumentation/index', () => {
   let tmpDir: DirectoryResult;
-  const oldEnv = process.env;
 
   beforeEach(async () => {
     tmpDir = await dir({ unsafeCleanup: true });
 
     api.trace.disable(); // clear global components
-    process.env = { ...oldEnv };
 
     // remove any otel env
     for (const key in process.env) {
       if (key.startsWith('OTEL_')) {
-        delete process.env[key];
+        vi.stubEnv(key, undefined);
       }
     }
-    delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
-    delete process.env.RENOVATE_TRACING_FILE_EXPORTER_PATH;
+    vi.stubEnv('RENOVATE_TRACING_CONSOLE_EXPORTER', undefined);
+    vi.stubEnv('RENOVATE_TRACING_FILE_EXPORTER_PATH', undefined);
     // prevent real network calls to cloud metadata endpoints (AWS/GCP/Azure) during tests
-    process.env.RENOVATE_USE_CLOUD_METADATA_SERVICES = 'false';
+    vi.stubEnv('RENOVATE_USE_CLOUD_METADATA_SERVICES', 'false');
   });
 
   afterAll(async () => {
-    process.env = oldEnv; // Restore old environment
-
     await tmpDir.cleanup();
   });
 
@@ -57,7 +53,7 @@ describe('instrumentation/index', () => {
   });
 
   it('activate console logger', () => {
-    process.env.RENOVATE_TRACING_CONSOLE_EXPORTER = 'true';
+    vi.stubEnv('RENOVATE_TRACING_CONSOLE_EXPORTER', 'true');
 
     init();
     const traceProvider = getTracerProvider();
@@ -78,9 +74,9 @@ describe('instrumentation/index', () => {
   });
 
   it('registers OpenTelemetry file exporter if enabled', () => {
-    process.env.RENOVATE_TRACING_FILE_EXPORTER_PATH = upath.join(
-      tmpDir.path,
-      'test-traces.jsonl',
+    vi.stubEnv(
+      'RENOVATE_TRACING_FILE_EXPORTER_PATH',
+      upath.join(tmpDir.path, 'test-traces.jsonl'),
     );
 
     init();
@@ -108,8 +104,8 @@ describe('instrumentation/index', () => {
 
   it('registers GitOperationSpanProcessor, GetDatasourceReleasesSpanProcessor regardless of tracing being enabled', () => {
     // intentionally don't set it
-    delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
-    delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+    vi.stubEnv('RENOVATE_TRACING_CONSOLE_EXPORTER', undefined);
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', undefined);
 
     init();
     const traceProvider = getTracerProvider();
@@ -127,7 +123,7 @@ describe('instrumentation/index', () => {
   });
 
   it('activate remote logger', () => {
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'https://collector.example.com';
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://collector.example.com');
 
     init();
     const traceProvider = getTracerProvider();
@@ -160,8 +156,8 @@ describe('instrumentation/index', () => {
   });
 
   it('activate console logger and remote logger', () => {
-    process.env.RENOVATE_TRACING_CONSOLE_EXPORTER = 'true';
-    process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'https://collector.example.com';
+    vi.stubEnv('RENOVATE_TRACING_CONSOLE_EXPORTER', 'true');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://collector.example.com');
 
     init();
     const traceProvider = getTracerProvider();
@@ -199,7 +195,7 @@ describe('instrumentation/index', () => {
     //
     // Claude Sonnet 4.6 suggests that we instead create an (admittedly brittle) test to validate that this is marked as `__wrapped`.
     it('patches bunyan Logger._emit when tracing is enabled', () => {
-      process.env.RENOVATE_TRACING_CONSOLE_EXPORTER = 'true';
+      vi.stubEnv('RENOVATE_TRACING_CONSOLE_EXPORTER', 'true');
       init();
 
       const mod = bunyan();

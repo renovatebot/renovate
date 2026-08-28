@@ -83,8 +83,8 @@ describe('workers/global/initialize', () => {
 
   describe('configureThirdPartyLibraries()', () => {
     beforeEach(() => {
-      delete process.env.AWS_EC2_METADATA_DISABLED;
-      delete process.env.METADATA_SERVER_DETECTION;
+      vi.stubEnv('AWS_EC2_METADATA_DISABLED', undefined);
+      vi.stubEnv('METADATA_SERVER_DETECTION', undefined);
     });
 
     it('sets env vars when cloud metadata services disabled', async () => {

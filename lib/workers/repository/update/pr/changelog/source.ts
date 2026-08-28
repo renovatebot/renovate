@@ -5,6 +5,7 @@ import {
   isNullOrUndefined,
   isTruthy,
 } from '@sindresorhus/is';
+import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
 import type { Release } from '../../../../../modules/datasource/types.ts';
@@ -90,145 +91,161 @@ export abstract class ChangeLogSource {
   public async getChangeLogJSON(
     config: BranchUpgradeConfig,
   ): Promise<ChangeLogResult | null> {
-    logger.trace(`getChangeLogJSON for ${this.platform}`);
+    return await instrument(
+      `source.getChangeLogJSON(${this.platform})`,
+      async () => {
+        logger.trace(`getChangeLogJSON for ${this.platform}`);
 
-    const versioning = config.versioning!;
-    const currentVersion = config.currentVersion!;
-    const newVersion = config.newVersion!;
-    const sourceUrl = config.sourceUrl!;
-    const packageName = config.packageName!;
-    const depName = config.depName!;
-    const sourceDirectory = config.sourceDirectory;
-    const versioningApi = allVersioning.get(versioning);
+        const versioning = config.versioning!;
+        const currentVersion = config.currentVersion!;
+        const newVersion = config.newVersion!;
+        const sourceUrl = config.sourceUrl!;
+        const packageName = config.packageName!;
+        const depName = config.depName!;
+        const sourceDirectory = config.sourceDirectory;
+        const versioningApi = allVersioning.get(versioning);
 
-    if (this.shouldSkipPackage(config)) {
-      return null;
-    }
+        if (this.shouldSkipPackage(config)) {
+          return null;
+        }
 
-    const baseUrl = this.getBaseUrl(config);
-    const apiBaseUrl = this.getAPIBaseUrl(config);
-    const repository = this.getRepositoryFromUrl(config);
+        const baseUrl = this.getBaseUrl(config);
+        const apiBaseUrl = this.getAPIBaseUrl(config);
+        const repository = this.getRepositoryFromUrl(config);
 
-    const tokenResponse = this.hasValidToken(config);
-    if (!tokenResponse.isValid) {
-      if (tokenResponse.error) {
-        return {
-          error: tokenResponse.error,
-        };
-      }
-      return null;
-    }
+        const tokenResponse = this.hasValidToken(config);
+        if (!tokenResponse.isValid) {
+          if (tokenResponse.error) {
+            return {
+              error: tokenResponse.error,
+            };
+          }
+          return null;
+        }
 
-    if (isFalsy(this.hasValidRepository(repository))) {
-      logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
-      return null;
-    }
+        if (isFalsy(this.hasValidRepository(repository))) {
+          logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
+          return null;
+        }
 
-    const releases = config.releases ?? (await getInRangeReleases(config));
-    if (!releases?.length) {
-      logger.debug('No releases');
-      return null;
-    }
-    // This extra filter/sort should not be necessary, but better safe than sorry
-    const validReleases = [...releases]
-      .filter((release) => versioningApi.isVersion(release.version))
-      .sort((a, b) => versioningApi.sortVersions(a.version, b.version))
-      // Drop versions equal under this versioning, e.g. the Docker tags
-      // `3.7.12` and `v3.7.12`, else their notes are rendered twice
-      .filter(
-        (release, index, sorted) =>
-          index === sorted.length - 1 ||
-          !versioningApi.equals(release.version, sorted[index + 1].version),
-      );
+        const releases = config.releases ?? (await getInRangeReleases(config));
+        if (!releases?.length) {
+          logger.debug('No releases');
+          return null;
+        }
+        // This extra filter/sort should not be necessary, but better safe than sorry
+        const validReleases = [...releases]
+          .filter((release) => versioningApi.isVersion(release.version))
+          .sort((a, b) => versioningApi.sortVersions(a.version, b.version))
+          // Drop versions equal under this versioning, e.g. the Docker tags
+          // `3.7.12` and `v3.7.12`, else their notes are rendered twice
+          .filter(
+            (release, index, sorted) =>
+              index === sorted.length - 1 ||
+              !versioningApi.equals(release.version, sorted[index + 1].version),
+          );
 
-    if (validReleases.length < 2) {
-      logger.debug(
-        `Not enough valid releases for dep ${depName} (${packageName})`,
-      );
-      return null;
-    }
+        if (validReleases.length < 2) {
+          logger.debug(
+            `Not enough valid releases for dep ${depName} (${packageName})`,
+          );
+          return null;
+        }
 
-    const changelogReleases: ChangeLogRelease[] = [];
+        const changelogReleases: ChangeLogRelease[] = [];
 
-    // Check if `v` belongs to the range (currentVersion, newVersion]
-    function inRange(v: string): boolean {
-      return (
-        versioningApi.isGreaterThan(v, currentVersion) &&
-        !versioningApi.isGreaterThan(v, newVersion)
-      );
-    }
-
-    const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
-    for (let i = 1; i < validReleases.length; i += 1) {
-      const prev = validReleases[i - 1];
-      const next = validReleases[i];
-      if (!inRange(next.version)) {
-        continue;
-      }
-      let release = await packageCache.get(
-        this.cacheNamespace,
-        this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
-      );
-      if (!release) {
-        release = {
-          version: next.version,
-          date: next.releaseTimestamp,
-          gitRef: next.gitRef,
-          // put empty changes so that existing templates won't break
-          changes: [],
-          compare: {},
-        };
-        const tags = await getTags();
-        const prevHead = this.getRef(
-          versioningApi,
-          packageName,
-          depName,
-          prev,
-          tags,
-        );
-        const nextHead = this.getRef(
-          versioningApi,
-          packageName,
-          depName,
-          next,
-          tags,
-        );
-        if (isNonEmptyString(prevHead) && isNonEmptyString(nextHead)) {
-          release.compare.url = this.getCompareURL(
-            baseUrl,
-            repository,
-            prevHead,
-            nextHead,
+        // Check if `v` belongs to the range (currentVersion, newVersion]
+        function inRange(v: string): boolean {
+          return (
+            versioningApi.isGreaterThan(v, currentVersion) &&
+            !versioningApi.isGreaterThan(v, newVersion)
           );
         }
-        const cacheMinutes = 55;
-        await packageCache.set(
-          this.cacheNamespace,
-          this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
-          release,
-          cacheMinutes,
-        );
-      }
-      changelogReleases.unshift(release);
-    }
 
-    let res: ChangeLogResult | null = {
-      project: {
-        apiBaseUrl,
-        baseUrl,
-        type: this.platform,
-        repository,
-        sourceUrl,
-        sourceDirectory,
-        packageName,
-        depName,
+        const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
+        // Fetch releases newest-first, matching the order they're shown in the PR body.
+        for (let i = validReleases.length - 1; i >= 1; i -= 1) {
+          const prev = validReleases[i - 1];
+          const next = validReleases[i];
+          if (!inRange(next.version)) {
+            continue;
+          }
+          let release = await packageCache.get(
+            this.cacheNamespace,
+            this.getCacheKey(
+              sourceUrl,
+              packageName,
+              prev.version,
+              next.version,
+            ),
+          );
+          if (!release) {
+            release = {
+              version: next.version,
+              date: next.releaseTimestamp,
+              gitRef: next.gitRef,
+              // put empty changes so that existing templates won't break
+              changes: [],
+              compare: {},
+            };
+            const tags = await getTags();
+            const prevHead = this.getRef(
+              versioningApi,
+              packageName,
+              depName,
+              prev,
+              tags,
+            );
+            const nextHead = this.getRef(
+              versioningApi,
+              packageName,
+              depName,
+              next,
+              tags,
+            );
+            if (isNonEmptyString(prevHead) && isNonEmptyString(nextHead)) {
+              release.compare.url = this.getCompareURL(
+                baseUrl,
+                repository,
+                prevHead,
+                nextHead,
+              );
+            }
+            const cacheMinutes = 55;
+            await packageCache.set(
+              this.cacheNamespace,
+              this.getCacheKey(
+                sourceUrl,
+                packageName,
+                prev.version,
+                next.version,
+              ),
+              release,
+              cacheMinutes,
+            );
+          }
+          changelogReleases.push(release);
+        }
+
+        let res: ChangeLogResult | null = {
+          project: {
+            apiBaseUrl,
+            baseUrl,
+            type: this.platform,
+            repository,
+            sourceUrl,
+            sourceDirectory,
+            packageName,
+            depName,
+          },
+          versions: changelogReleases,
+        };
+
+        res = await addReleaseNotes(res, config, this);
+
+        return res;
       },
-      versions: changelogReleases,
-    };
-
-    res = await addReleaseNotes(res, config, this);
-
-    return res;
+    );
   }
 
   private findTagOfRelease(

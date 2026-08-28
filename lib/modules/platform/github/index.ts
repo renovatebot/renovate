@@ -24,6 +24,7 @@ import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -147,11 +148,11 @@ export async function detectGhe(token: string): Promise<void> {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
     const gheHeaders = coerceObject(gheQueryRes?.headers);
-    const [, gheVersion] =
-      Object.entries(gheHeaders).find(
-        ([k]) => k.toLowerCase() === gheHeaderKey,
-      ) ?? [];
-    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+    const gheVersionHeader = Object.entries(gheHeaders).find(
+      ([k]) => k.toLowerCase() === gheHeaderKey,
+    );
+    platformConfig.gheVersion =
+      semver.valid(gheVersionHeader?.[1] as string) ?? null;
     logger.debug(
       `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`,
     );
@@ -588,10 +589,6 @@ export async function initRepo({
     });
 
     if (res?.errors) {
-      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
-        logger.debug({ res }, 'GraphQL rate limit exceeded.');
-        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
-      }
       logger.debug({ res }, 'Unexpected GraphQL errors');
       throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
@@ -1531,7 +1528,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
-          labels: labels ?? [],
+          labels: coerceArray(labels),
         },
       },
       Issue,
@@ -1540,7 +1537,10 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
     return 'created';
-  } catch (err) /* v8 ignore next -- issue creation failure handling is not mocked in specs */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
@@ -1935,7 +1935,10 @@ async function tryPrAutomerge(
     }
 
     logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
-  } catch (err) /* v8 ignore next: missing test #22198 */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
@@ -2037,6 +2040,9 @@ async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
       result = isNonEmptyObject(res?.data?.repository?.mergeQueue);
     }
   } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.debug(
       { baseBranch, err },
       'Error fetching merge queue status - assuming merge queue is enabled',
@@ -2141,7 +2147,10 @@ export async function reattemptPlatformAutomerge({
     await tryPrAutomerge(number, node_id, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
-  } catch (err) /* v8 ignore next -- defensive: automerge re-attempt failures are logged and swallowed, not simulated in specs */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
@@ -2349,7 +2358,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
   } catch (err) /* v8 ignore next -- defensive: processing already-parsed alerts does not throw in specs */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
-  return vulnerabilityAlerts ?? [];
+  return coerceArray(vulnerabilityAlerts);
 }
 
 async function pushFiles(

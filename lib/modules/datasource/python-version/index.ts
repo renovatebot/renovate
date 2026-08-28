@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
@@ -82,7 +83,7 @@ export class PythonVersionDatasource extends Datasource {
           { err },
           'Rate limited by python.org, using prebuild releases',
         );
-        result.releases.push(...(pythonPrebuildReleases?.releases ?? []));
+        result.releases.push(...coerceArray(pythonPrebuildReleases?.releases));
       } else {
         this.handleGenericErrors(err);
       }
