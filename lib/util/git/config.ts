@@ -5,6 +5,7 @@ import { getEnv } from '../env.ts';
 import type { GitNoVerifyOption } from './types.ts';
 
 let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
+let pushOptions: string[] = [];
 
 export function setNoVerify(value: GitNoVerifyOption[]): void {
   if (!isArray(value, isString)) {
@@ -15,6 +16,19 @@ export function setNoVerify(value: GitNoVerifyOption[]): void {
 
 export function getNoVerify(): GitNoVerifyOption[] {
   return noVerify;
+}
+
+export function setPushOptions(value: string[]): void {
+  if (!isArray(value, isString)) {
+    throw new Error(
+      'config error: gitPushOptions should be an array of strings',
+    );
+  }
+  pushOptions = value;
+}
+
+export function getPushOptions(): string[] {
+  return pushOptions;
 }
 
 export function simpleGitConfig(): Partial<SimpleGitOptions> {
