@@ -155,7 +155,7 @@ function getSpawnStub(args: StubArgs): any {
     unref,
     kill,
     pid,
-    catch: (fn) => fn(new Error('mock')),
+    catch: (fn: (err: Error) => void) => fn(new Error('mock')),
   };
 }
 
