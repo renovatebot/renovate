@@ -1,7 +1,9 @@
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
-import { regEx } from '../../../util/regex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -48,11 +50,6 @@ function determineDatasource(
     packageName: `https://${host}/${repoPath}`,
   };
 }
-
-/** A full commit SHA (git sha1 or sha256). */
-const shaRegex = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i);
-
-const newlineRegex = regEx(/\r?\n/);
 
 /** A trailing ` # <tag>` comment on a manifest line. */
 const commentTagRegex = regEx(/^\s+#\s*(?<tag>\S.*?)\s*$/);
@@ -186,7 +183,7 @@ export function parseApmDependency(
 
   // The optional host prefix is a hostname (so it contains a dot); git host
   // owner names never do, which disambiguates the leading segment.
-  const segments = pathPart.split('/').filter(Boolean);
+  const segments = pathPart.split('/').filter(isTruthy);
   const hasHost = (segments[0] ?? '').includes('.');
   const host = hasHost ? segments[0] : 'github.com';
   const platform = detectPlatform(`https://${host}`);
@@ -217,7 +214,7 @@ export function parseApmDependency(
     autoReplaceStringTemplate,
   };
 
-  if (shaRegex.test(ref)) {
+  if (isLongCommitSha(ref)) {
     const tail = findPinnedTail(entry);
     if (!tail) {
       // Bare SHA with no recoverable tag comment - no version to track.
