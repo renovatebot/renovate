@@ -5,11 +5,14 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { hasKey } from '../../../util/object.ts';
 import { type AsyncResult, Result } from '../../../util/result.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { isDockerDigest } from '../../../util/string-match.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import {
@@ -33,6 +36,7 @@ import {
 } from '../util.ts';
 import {
   DOCKER_HUB,
+  GHCR,
   dockerDatasourceId,
   extractDigestFromResponseBody,
   findHelmSourceUrl,
@@ -54,6 +58,7 @@ import type {
 } from './schema.ts';
 import {
   DockerHubTagsPage,
+  GithubPackageVersion,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
@@ -96,13 +101,16 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'Only supported on Docker Hub: The release timestamp is determined from the `tag_last_pushed` field in the results. **NOTE**: Currently, digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
+    'Supported on Docker Hub and `ghcr.io` (when a GitHub token is configured): on Docker Hub, the release timestamp is determined from the `tag_last_pushed` field in the results, and on `ghcr.io` it is determined from the `created_at` field returned by the GitHub Packages API. **NOTE**: Currently, digests will receive the same release timestamp as the tag they were resolved from, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
 
+  private readonly githubHttp: GithubHttp;
+
   constructor() {
     super(DockerDatasource.id);
+    this.githubHttp = new GithubHttp(DockerDatasource.id);
   }
 
   // TODO: debug why quay throws errors (#9612)
@@ -757,7 +765,7 @@ export class DockerDatasource extends Datasource {
     }
     let page = 0;
     const hostsNeedingAllPages = [
-      'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
+      GHCR, // GHCR sorts from oldest to newest, so we need to get all pages
       'https://quay.io', // Quay sorts from oldest to newest, so we need to get all pages
       'https://cgr.dev', // Chainguard sorts lexically and publishes a tag per build, so current versions sort past the page limit
     ];
@@ -1206,6 +1214,65 @@ export class DockerDatasource extends Datasource {
     );
   }
 
+  private async _getGhcrTags(
+    dockerRepository: string,
+  ): Promise<Release[] | null> {
+    const [owner, ...rest] = dockerRepository.split('/');
+    const packageName = rest.join('/');
+    /* v8 ignore next -- should never happen, ghcr.io repositories are always owner/package */
+    if (!owner || !packageName) {
+      return null;
+    }
+    const encodedPackageName = encodeURIComponent(packageName);
+    const pageLimit = GlobalConfig.get('dockerMaxPages');
+
+    for (const ownerType of ['orgs', 'users'] as const) {
+      const url = `https://api.github.com/${ownerType}/${owner}/packages/container/${encodedPackageName}/versions?per_page=100`;
+      try {
+        const { body: versions } = await this.githubHttp.getJson(
+          url,
+          { paginate: true, pageLimit },
+          LooseArray(GithubPackageVersion),
+        );
+
+        const releases: Release[] = [];
+        for (const { created_at, metadata } of versions) {
+          const releaseTimestamp = asTimestamp(created_at);
+          for (const tag of metadata?.container?.tags ?? []) {
+            const release: Release = { version: tag };
+            if (releaseTimestamp) {
+              release.releaseTimestamp = releaseTimestamp;
+            }
+            releases.push(release);
+          }
+        }
+        return releases;
+      } catch (err) {
+        if (err.statusCode === 404) {
+          // Package isn't owned by an organization - try the next owner type
+          continue;
+        }
+        logger.debug(
+          { dockerRepository, err },
+          'Error fetching GHCR package versions from the GitHub API',
+        );
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  getGhcrTags(dockerRepository: string): Promise<Release[] | null> {
+    return withCache(
+      {
+        namespace: 'datasource-docker-ghcr-tags',
+        key: dockerRepository,
+      },
+      () => this._getGhcrTags(dockerRepository),
+    );
+  }
+
   /**
    * docker.getReleases
    *
@@ -1228,7 +1295,7 @@ export class DockerDatasource extends Datasource {
 
     type TagsResultType = AsyncResult<
       Release[],
-      NonNullable<Error | 'tags-error' | 'dockerhub-error'>
+      NonNullable<Error | 'tags-error' | 'dockerhub-error' | 'ghcr-error'>
     >;
 
     const getTags = (): TagsResultType =>
@@ -1243,11 +1310,30 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
-    const tagsResult =
+    const getGhcrTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this.getGhcrTags(dockerRepository),
+        'ghcr-error' as const,
+      ).catch(getTags);
+
+    // The GitHub Packages API requires a token, unlike anonymous pulls from
+    // ghcr.io itself, so we only use it when one is configured for github.com.
+    const hasGithubToken = !!hostRules.find({
+      hostType: 'github',
+      url: 'https://api.github.com',
+    }).token;
+
+    let tagsResult: TagsResultType;
+    if (
       registryHost === DOCKER_HUB &&
       !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
-        ? getDockerHubTags()
-        : getTags();
+    ) {
+      tagsResult = getDockerHubTags();
+    } else if (registryHost === GHCR && hasGithubToken) {
+      tagsResult = getGhcrTags();
+    } else {
+      tagsResult = getTags();
+    }
 
     const { val: releases, err } = await tagsResult.unwrap();
     if (err instanceof Error) {

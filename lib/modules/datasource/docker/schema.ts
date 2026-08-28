@@ -221,6 +221,24 @@ export const RegistryTagsList = z.object({
 export type RegistryTagsList = z.infer<typeof RegistryTagsList>;
 
 /**
+ * GitHub Packages container version.
+ * https://docs.github.com/en/rest/packages/packages?apiVersion=2022-11-28#list-package-versions-for-a-package-owned-by-an-organization
+ */
+export const GithubPackageVersion = z.object({
+  created_at: z.string().datetime(),
+  metadata: Nullish(
+    z.object({
+      container: Nullish(
+        z.object({
+          tags: LooseArray(z.string()).catch([]),
+        }),
+      ),
+    }),
+  ),
+});
+export type GithubPackageVersion = z.infer<typeof GithubPackageVersion>;
+
+/**
  * Quay registry tags list response (Quay v1 API).
  */
 export const QuayTagsResponse = z.object({

@@ -45,6 +45,8 @@ export const gitRefLabel = 'org.opencontainers.image.revision';
 
 export const DOCKER_HUB = 'https://index.docker.io';
 
+export const GHCR = 'https://ghcr.io';
+
 export function isDockerHost(host: string): boolean {
   const regex = regEx(/(?:^|\.)docker\.io$/);
   return regex.test(host);
