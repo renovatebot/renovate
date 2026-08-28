@@ -53,6 +53,7 @@ import {
   validatePrCache,
 } from './pr-fingerprint.ts';
 import { tryReuseAutoclosedPr } from './pr-reuse.ts';
+import { getPrCreationStatusRequirement } from './status-checks.ts';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
@@ -84,6 +85,7 @@ export interface ResultWithPr {
 export interface ResultWithoutPr {
   type: 'without-pr';
   prBlockedBy: PrBlockedBy;
+  pendingChecksReason?: string;
 }
 
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
@@ -211,6 +213,8 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
+  const statusRequirement = getPrCreationStatusRequirement(config);
+
   if (!existingPr) {
     // Only create a PR if a branch automerge has failed
     if (
@@ -237,14 +241,24 @@ export async function ensurePr(
         logger.debug(`Branch tests failed, so will create PR`);
       } else {
         // Branch should be automerged, so we don't want to create a PR
-        return { type: 'without-pr', prBlockedBy: 'BranchAutomerge' };
+        return {
+          type: 'without-pr',
+          prBlockedBy: 'BranchAutomerge',
+          pendingChecksReason:
+            'Awaiting status checks to pass before branch automerge',
+        };
       }
     }
-    if (config.prCreation === 'status-success') {
+    if (statusRequirement === 'green') {
       logger.debug('Checking branch combined status');
       if ((await getBranchStatus()) !== 'green') {
         logger.debug(`Branch status isn't green - not creating PR`);
-        return { type: 'without-pr', prBlockedBy: 'AwaitingTests' };
+        return {
+          type: 'without-pr',
+          prBlockedBy: 'AwaitingTests',
+          pendingChecksReason:
+            'Awaiting all status checks to pass before PR creation',
+        };
       }
       logger.debug('Branch status success');
     } else if (
@@ -252,7 +266,7 @@ export async function ensurePr(
       dependencyDashboardCheck !== 'approvePr'
     ) {
       return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
-    } else if (config.prCreation === 'not-pending' && !config.forcePr) {
+    } else if (statusRequirement === 'not-pending') {
       logger.debug('Checking branch combined status');
       if ((await getBranchStatus()) === 'yellow') {
         logger.debug(`Branch status is yellow - checking timeout`);
@@ -264,12 +278,16 @@ export async function ensurePr(
             (isNumber(config.prNotPendingHours) &&
               elapsedHours < config.prNotPendingHours))
         ) {
+          const pendingChecksReason = isNumber(config.prNotPendingHours)
+            ? `Awaiting ${config.prNotPendingHours}h status stability before PR creation`
+            : 'Awaiting branch status checks to become non-pending before PR creation';
           logger.debug(
             `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
           return {
             type: 'without-pr',
             prBlockedBy: 'AwaitingTests',
+            pendingChecksReason,
           };
         }
         const prNotPendingHours = String(config.prNotPendingHours);

@@ -432,6 +432,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  dependencyDashboardVerbosePendingChecks?: boolean;
   dependencyDashboardReportAbandonment?: boolean;
   mode?: 'silent' | 'full';
   packageFile?: string;
