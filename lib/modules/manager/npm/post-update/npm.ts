@@ -273,6 +273,18 @@ export async function generateLockFile(
       commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
     }
 
+    // Lock file maintenance recreates the lock file from scratch, and a single
+    // `npm install` can generate a lock file which is out of sync with
+    // package.json, so we need to run the install a second time (#37531).
+    // Skipped if `npmInstallTwice` is configured, as that doubles all install
+    // commands already.
+    if (
+      upgrades.some((upgrade) => upgrade.isLockFileMaintenance) &&
+      !postUpdateOptions?.includes('npmInstallTwice')
+    ) {
+      commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
+    }
+
     // postUpdateOptions
     if (
       config.postUpdateOptions?.includes('npmDedupe') &&
