@@ -14,7 +14,7 @@ import { hasKey } from '../../../util/object.ts';
 import { type AsyncResult, Result } from '../../../util/result.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { isDockerDigest } from '../../../util/string-match.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
+import { type Timestamp, asTimestamp } from '../../../util/timestamp.ts';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -110,7 +110,12 @@ export class DockerDatasource extends Datasource {
 
   constructor() {
     super(DockerDatasource.id);
-    this.githubHttp = new GithubHttp(DockerDatasource.id);
+    // Deliberately not passing a hostType here: `docker` is not in
+    // `GITHUB_API_USING_HOST_TYPES`, so `findMatchingRule` wouldn't fall back
+    // to `github` hostRules, and worse, an unscoped `hostType: 'docker'` rule
+    // (e.g. a global registry username/password) would be sent to
+    // api.github.com instead.
+    this.githubHttp = new GithubHttp();
   }
 
   // TODO: debug why quay throws errors (#9612)
@@ -1214,53 +1219,126 @@ export class DockerDatasource extends Datasource {
     );
   }
 
-  private async _getGhcrTags(
+  /**
+   * Fetches the `created_at` timestamp for as many of `pending` tags as
+   * possible from the GitHub Packages API, stopping early once every tag
+   * has been resolved (or `dockerMaxPages` is reached). Mutates `pending`
+   * (removing resolved tags) and `releaseTimestamps` (adding them) as it
+   * goes.
+   *
+   * Returns `true` if the package exists for this owner type (regardless of
+   * whether every tag was resolved), or `false` if the very first page 404s,
+   * indicating the caller should try the other owner type (org vs user).
+   */
+  private async paginateGhcrVersions(
+    ownerType: 'orgs' | 'users',
+    owner: string,
+    encodedPackageName: string,
     dockerRepository: string,
-  ): Promise<Release[] | null> {
-    const [owner, ...rest] = dockerRepository.split('/');
-    const packageName = rest.join('/');
-    /* v8 ignore next -- should never happen, ghcr.io repositories are always owner/package */
-    if (!owner || !packageName) {
-      return null;
-    }
-    const encodedPackageName = encodeURIComponent(packageName);
-    const pageLimit = GlobalConfig.get('dockerMaxPages');
+    pending: Set<string>,
+    releaseTimestamps: Map<string, Timestamp>,
+  ): Promise<boolean> {
+    const maxPages = GlobalConfig.get('dockerMaxPages');
+    const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
+    let url: string | undefined =
+      `https://api.github.com/${ownerType}/${owner}/packages/container/${encodedPackageName}/versions?per_page=100`;
 
-    for (const ownerType of ['orgs', 'users'] as const) {
-      const url = `https://api.github.com/${ownerType}/${owner}/packages/container/${encodedPackageName}/versions?per_page=100`;
+    for (let page = 0; url && page < maxPages && pending.size; page++) {
+      let res: HttpResponse<GithubPackageVersion[]>;
       try {
-        const { body: versions } = await this.githubHttp.getJson(
+        res = await this.githubHttp.getJson(
           url,
-          { paginate: true, pageLimit },
           LooseArray(GithubPackageVersion),
         );
-
-        const releases: Release[] = [];
-        for (const { created_at, metadata } of versions) {
-          const releaseTimestamp = asTimestamp(created_at);
-          for (const tag of metadata?.container?.tags ?? []) {
-            const release: Release = { version: tag };
-            if (releaseTimestamp) {
-              release.releaseTimestamp = releaseTimestamp;
-            }
-            releases.push(release);
-          }
-        }
-        return releases;
       } catch (err) {
-        if (err.statusCode === 404) {
-          // Package isn't owned by an organization - try the next owner type
-          continue;
+        if (page === 0 && err.statusCode === 404) {
+          return false;
         }
         logger.debug(
           { dockerRepository, err },
           'Error fetching GHCR package versions from the GitHub API',
         );
-        return null;
+        return true;
+      }
+
+      for (const { created_at, metadata } of res.body) {
+        const releaseTimestamp = asTimestamp(created_at);
+        if (!releaseTimestamp) {
+          continue;
+        }
+        for (const tag of metadata?.container?.tags ?? []) {
+          if (pending.delete(tag)) {
+            releaseTimestamps.set(tag, releaseTimestamp);
+          }
+        }
+      }
+
+      const next = parseLinkHeader(res.headers.link)?.next?.url;
+      url = next
+        ? (resolvePaginationUrl(url, next, allowCrossOrigin) ?? undefined)
+        : undefined;
+    }
+
+    return true;
+  }
+
+  /**
+   * ghcr.io tags don't carry a timestamp via the OCI Distribution API or the
+   * Docker Registry HTTP API v2, so we always fetch the authoritative tag
+   * list via the regular registry API first, then make a best-effort
+   * attempt to enrich as many of those tags as possible with a
+   * `releaseTimestamp`, using the (authoritative, as it's set by GHCR
+   * itself, not the image builder) `created_at` field from the GitHub
+   * Packages API. Any tag we can't resolve a timestamp for (e.g. because
+   * it's beyond `dockerMaxPages`) is still returned, just without one.
+   */
+  private async _getGhcrTags(
+    dockerRepository: string,
+  ): Promise<Release[] | null> {
+    const tags = await this.getTags(GHCR, dockerRepository);
+    if (!tags?.length) {
+      return null;
+    }
+
+    const [owner, ...rest] = dockerRepository.split('/');
+    const packageName = rest.join('/');
+    if (!owner || !packageName) {
+      return tags.map((version) => ({ version }));
+    }
+    const encodedPackageName = encodeURIComponent(packageName);
+
+    const pending = new Set(tags);
+    const releaseTimestamps = new Map<string, Timestamp>();
+
+    for (const ownerType of ['orgs', 'users'] as const) {
+      const packageExists = await this.paginateGhcrVersions(
+        ownerType,
+        owner,
+        encodedPackageName,
+        dockerRepository,
+        pending,
+        releaseTimestamps,
+      );
+      if (packageExists) {
+        break;
       }
     }
 
-    return null;
+    if (pending.size) {
+      logger.debug(
+        { dockerRepository, unresolvedTags: [...pending] },
+        'Could not find a GHCR releaseTimestamp for some tags within dockerMaxPages',
+      );
+    }
+
+    return tags.map((version) => {
+      const release: Release = { version };
+      const releaseTimestamp = releaseTimestamps.get(version);
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+      return release;
+    });
   }
 
   getGhcrTags(dockerRepository: string): Promise<Release[] | null> {

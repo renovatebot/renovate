@@ -3395,7 +3395,46 @@ describe('modules/datasource/docker/index', () => {
     it('supports ghcr releaseTimestamp when a GitHub token is configured', async () => {
       hostRules.add({ hostType: 'github', token: 'abc123' });
       httpMock
-        .scope('https://api.github.com')
+        .scope('https://ghcr.io/v2', { badheaders: ['authorization'] })
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:renovatebot/renovate:pull"',
+        })
+        .get('/renovatebot/renovate/tags/list?n=10000')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:renovatebot/renovate:pull"',
+        });
+      httpMock
+        .scope('https://ghcr.io')
+        .get(
+          '/token?service=ghcr.io&scope=repository:renovatebot/renovate:pull',
+        )
+        .times(3)
+        .reply(200, { token: 'xyz' });
+      httpMock
+        .scope('https://ghcr.io/v2', {
+          reqheaders: { authorization: 'Bearer xyz' },
+        })
+        .get('/renovatebot/renovate/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0', '2.0.0', 'latest'] })
+        .get('/renovatebot/renovate/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/renovatebot/renovate/blobs/some-config-digest')
+        .reply(200, { architecture: 'amd64', config: { Labels: {} } });
+      httpMock
+        .scope('https://api.github.com', {
+          reqheaders: { authorization: 'token abc123' },
+        })
         .get(
           '/orgs/renovatebot/packages/container/renovate/versions?per_page=100',
         )
@@ -3409,10 +3448,29 @@ describe('modules/datasource/docker/index', () => {
             metadata: { container: { tags: ['2.0.0', 'latest'] } },
           },
         ]);
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'ghcr.io/renovatebot/renovate',
+      });
+
+      // 'latest' is filtered out by `filterValidVersions`, same as generic tag lookups
+      expect(res?.releases).toEqual([
+        { version: '1.0.0', releaseTimestamp: '2024-01-01T00:00:00.000Z' },
+        { version: '2.0.0', releaseTimestamp: '2024-02-01T00:00:00.000Z' },
+      ]);
+    });
+
+    it('still returns tags (without a releaseTimestamp) when the GitHub Packages API lookup fails', async () => {
+      hostRules.add({ hostType: 'github', token: 'abc123' });
       httpMock
         .scope('https://ghcr.io/v2', { badheaders: ['authorization'] })
         .get('/')
-        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:renovatebot/renovate:pull"',
+        })
+        .get('/renovatebot/renovate/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:renovatebot/renovate:pull"',
@@ -3428,28 +3486,23 @@ describe('modules/datasource/docker/index', () => {
         .scope('https://ghcr.io/v2', {
           reqheaders: { authorization: 'Bearer xyz' },
         })
-        .get('/renovatebot/renovate/manifests/latest')
-        .reply(200, {
-          schemaVersion: 2,
-          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: {
-            digest: 'some-config-digest',
-            mediaType: 'application/vnd.docker.container.image.v1+json',
-          },
-        })
-        .get('/renovatebot/renovate/blobs/some-config-digest')
-        .reply(200, { architecture: 'amd64', config: { Labels: {} } });
+        .get('/renovatebot/renovate/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/renovatebot/renovate/manifests/1.0.0')
+        .reply(200);
+      httpMock
+        .scope('https://api.github.com')
+        .get(
+          '/orgs/renovatebot/packages/container/renovate/versions?per_page=100',
+        )
+        .reply(500);
 
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'ghcr.io/renovatebot/renovate',
       });
 
-      // 'latest' is filtered out by `filterValidVersions`, same as generic tag lookups
-      expect(res?.releases).toEqual([
-        { version: '1.0.0', releaseTimestamp: '2024-01-01T00:00:00.000Z' },
-        { version: '2.0.0', releaseTimestamp: '2024-02-01T00:00:00.000Z' },
-      ]);
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
     });
 
     it('does not use the GitHub Packages API for ghcr when no GitHub token is configured', async () => {
@@ -3497,7 +3550,57 @@ describe('modules/datasource/docker/index', () => {
       hostRules.add({ hostType: 'github', token: 'abc123' });
     });
 
+    /** Mocks the plain OCI registry tag-list lookup that `getGhcrTags` always makes first. */
+    function mockGhcrRegistryTags(
+      dockerRepository: string,
+      tags: string[],
+    ): void {
+      httpMock
+        .scope('https://ghcr.io/v2', { badheaders: ['authorization'] })
+        .get(`/${dockerRepository}/tags/list?n=10000`)
+        .reply(401, '', {
+          'www-authenticate': `Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:${dockerRepository}:pull"`,
+        });
+      httpMock
+        .scope('https://ghcr.io')
+        .get(`/token?service=ghcr.io&scope=repository:${dockerRepository}:pull`)
+        .reply(200, { token: 'xyz' });
+      httpMock
+        .scope('https://ghcr.io/v2', {
+          reqheaders: { authorization: 'Bearer xyz' },
+        })
+        .get(`/${dockerRepository}/tags/list?n=10000`)
+        .reply(200, { tags });
+    }
+
+    it('returns null when the registry has no tags', async () => {
+      httpMock
+        .scope('https://ghcr.io/v2', { badheaders: ['authorization'] })
+        .get('/some-owner/some-image/tags/list?n=10000')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:some-owner/some-image:pull"',
+        });
+      httpMock
+        .scope('https://ghcr.io')
+        .get(
+          '/token?service=ghcr.io&scope=repository:some-owner/some-image:pull',
+        )
+        .reply(200, { token: 'xyz' });
+      httpMock
+        .scope('https://ghcr.io/v2', {
+          reqheaders: { authorization: 'Bearer xyz' },
+        })
+        .get('/some-owner/some-image/tags/list?n=10000')
+        .reply(200, { tags: [] });
+
+      const res = await ds.getGhcrTags('some-owner/some-image');
+
+      expect(res).toBeNull();
+    });
+
     it('falls back to the user endpoint when the package is not owned by an organization', async () => {
+      mockGhcrRegistryTags('some-user/some-image', ['1.0.0']);
       httpMock
         .scope('https://api.github.com')
         .get(
@@ -3521,41 +3624,46 @@ describe('modules/datasource/docker/index', () => {
       ]);
     });
 
-    it('returns null when the package is not found via either endpoint', async () => {
+    it('returns tags without a releaseTimestamp when the package is not found via either endpoint', async () => {
+      mockGhcrRegistryTags('some-owner-a/some-image', ['1.0.0']);
       httpMock
         .scope('https://api.github.com')
         .get(
-          '/orgs/some-owner/packages/container/some-image/versions?per_page=100',
+          '/orgs/some-owner-a/packages/container/some-image/versions?per_page=100',
         )
         .reply(404)
         .get(
-          '/users/some-owner/packages/container/some-image/versions?per_page=100',
+          '/users/some-owner-a/packages/container/some-image/versions?per_page=100',
         )
         .reply(404);
 
-      const res = await ds.getGhcrTags('some-owner/some-image');
+      const res = await ds.getGhcrTags('some-owner-a/some-image');
 
-      expect(res).toBeNull();
+      expect(res).toEqual([{ version: '1.0.0' }]);
     });
 
-    it('returns null and logs debug on unexpected errors', async () => {
+    it('returns tags without a releaseTimestamp and logs debug on unexpected errors', async () => {
+      mockGhcrRegistryTags('some-owner-b/some-image', ['1.0.0']);
       httpMock
         .scope('https://api.github.com')
         .get(
-          '/orgs/some-owner/packages/container/some-image/versions?per_page=100',
+          '/orgs/some-owner-b/packages/container/some-image/versions?per_page=100',
         )
         .reply(500);
 
-      const res = await ds.getGhcrTags('some-owner/some-image');
+      const res = await ds.getGhcrTags('some-owner-b/some-image');
 
-      expect(res).toBeNull();
+      expect(res).toEqual([{ version: '1.0.0' }]);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        expect.objectContaining({ dockerRepository: 'some-owner/some-image' }),
+        expect.objectContaining({
+          dockerRepository: 'some-owner-b/some-image',
+        }),
         'Error fetching GHCR package versions from the GitHub API',
       );
     });
 
     it('encodes nested package names', async () => {
+      mockGhcrRegistryTags('some-org/team/image', ['1.0.0']);
       httpMock
         .scope('https://api.github.com')
         .get(
@@ -3572,6 +3680,63 @@ describe('modules/datasource/docker/index', () => {
 
       expect(res).toEqual([
         { version: '1.0.0', releaseTimestamp: '2024-01-01T00:00:00.000Z' },
+      ]);
+    });
+
+    it('does not call the GitHub Packages API for a single-segment repository', async () => {
+      mockGhcrRegistryTags('some-image', ['1.0.0']);
+
+      const res = await ds.getGhcrTags('some-image');
+
+      expect(res).toEqual([{ version: '1.0.0' }]);
+    });
+
+    it('leaves a tag without a releaseTimestamp when its created_at is out of range', async () => {
+      mockGhcrRegistryTags('some-owner-c/some-image', ['1.0.0', '2.0.0']);
+      httpMock
+        .scope('https://api.github.com')
+        .get(
+          '/orgs/some-owner-c/packages/container/some-image/versions?per_page=100',
+        )
+        .reply(200, [
+          {
+            // Before `asTimestamp`'s year-2000 lower bound, so treated as unresolved
+            created_at: '1990-01-01T00:00:00Z',
+            metadata: { container: { tags: ['1.0.0'] } },
+          },
+          {
+            created_at: '2024-02-01T00:00:00Z',
+            metadata: { container: { tags: ['2.0.0'] } },
+          },
+        ]);
+
+      const res = await ds.getGhcrTags('some-owner-c/some-image');
+
+      expect(res).toEqual([
+        { version: '1.0.0' },
+        { version: '2.0.0', releaseTimestamp: '2024-02-01T00:00:00.000Z' },
+      ]);
+    });
+
+    it('ignores untagged package versions', async () => {
+      mockGhcrRegistryTags('some-owner-d/some-image', ['1.0.0']);
+      httpMock
+        .scope('https://api.github.com')
+        .get(
+          '/orgs/some-owner-d/packages/container/some-image/versions?per_page=100',
+        )
+        .reply(200, [
+          { created_at: '2024-01-01T00:00:00Z', metadata: undefined },
+          {
+            created_at: '2024-02-01T00:00:00Z',
+            metadata: { container: { tags: ['1.0.0'] } },
+          },
+        ]);
+
+      const res = await ds.getGhcrTags('some-owner-d/some-image');
+
+      expect(res).toEqual([
+        { version: '1.0.0', releaseTimestamp: '2024-02-01T00:00:00.000Z' },
       ]);
     });
   });

@@ -42,6 +42,7 @@ export const packageCacheNamespaces = [
   'datasource-docker-architecture',
   'datasource-docker-hub-cache',
   'datasource-docker-digest',
+  'datasource-docker-ghcr-tags',
   'datasource-docker-hub-tags',
   'datasource-docker-imageconfig',
   'datasource-docker-labels',
