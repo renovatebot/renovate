@@ -1,5 +1,8 @@
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider } from '@opentelemetry/api';
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
 import {
   BatchSpanProcessor,
   NodeTracerProvider,
@@ -17,6 +20,13 @@ import {
   init,
   instrument,
 } from './index.ts';
+
+function getOtlpExporter(nodeProvider: NodeTracerProvider): unknown {
+  const spanProcessors = (nodeProvider as any)._activeSpanProcessor
+    ._spanProcessors as { _exporter: unknown }[];
+  // the OTLP exporter is always the last processor registered in these tests
+  return spanProcessors.at(-1)!._exporter;
+}
 
 afterAll(disableInstrumentations);
 
@@ -153,6 +163,113 @@ describe('instrumentation/index', () => {
         ],
       },
     });
+    // defaults to the http/json exporter when no protocol is configured
+    expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(OTLPTraceExporterHttp);
+  });
+
+  it('activate remote logger with grpc protocol', () => {
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://collector.example.com');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_PROTOCOL', 'grpc');
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(nodeProvider).toMatchObject({
+      _activeSpanProcessor: {
+        _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
+          {
+            _exporter: {
+              _delegate: {
+                _transport: {
+                  _parameters: {
+                    address: 'collector.example.com',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+    expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(OTLPTraceExporterGrpc);
+  });
+
+  it('activate remote logger with http/protobuf protocol', () => {
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://collector.example.com');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_PROTOCOL', 'http/protobuf');
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(nodeProvider).toMatchObject({
+      _activeSpanProcessor: {
+        _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
+          {
+            _exporter: {
+              _delegate: {
+                _transport: {
+                  _transport: {
+                    _parameters: {
+                      url: 'https://collector.example.com/v1/traces',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+    expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(
+      OTLPTraceExporterProto,
+    );
+  });
+
+  it('activate remote logger with http/json protocol', () => {
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://collector.example.com');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_PROTOCOL', 'http/json');
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(OTLPTraceExporterHttp);
+  });
+
+  it('takes precedence from the `_TRACES` env var, if set', () => {
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://collector.example.com');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_PROTOCOL', 'http/json');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_TRACES_PROTOCOL', 'http/protobuf');
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(
+      OTLPTraceExporterProto,
+    );
+  });
+
+  it('defaults to http/json protocol if the specified protocol has a typo', () => {
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'https://collector.example.com');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_PROTOCOL', 'http/jayson');
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(OTLPTraceExporterHttp);
   });
 
   it('activate console logger and remote logger', () => {
@@ -188,6 +305,7 @@ describe('instrumentation/index', () => {
         ],
       },
     });
+    expect(getOtlpExporter(nodeProvider)).toBeInstanceOf(OTLPTraceExporterHttp);
   });
 
   describe('BunyanInstrumentation', () => {
