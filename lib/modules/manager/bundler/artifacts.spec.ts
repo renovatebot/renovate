@@ -49,7 +49,7 @@ const updatedGemfileLock = {
 describe('modules/manager/bundler/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      delete process.env.GEM_HOME;
+      vi.stubEnv('GEM_HOME', undefined);
 
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       docker.resetPrefetchedImages();

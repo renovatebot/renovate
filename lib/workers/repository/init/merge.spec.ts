@@ -1025,7 +1025,7 @@ describe('workers/repository/init/merge', () => {
           fs.readLocalFile.mockResolvedValueOnce(
             JSON.stringify(repoFileConfig),
           );
-          process.env[repoStaticConfigFileKey] = 'static_config.json';
+          vi.stubEnv(repoStaticConfigFileKey, 'static_config.json');
           fs.readSystemFile.mockResolvedValueOnce(JSON.stringify(staticConfig));
 
           const got = await mergeRenovateConfig(currentConfig);

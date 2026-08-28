@@ -42,10 +42,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   beforeEach(() => {
     util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    delete process.env.BUILDPACK;
-    delete process.env.HTTP_PROXY;
-    delete process.env.HTTPS_PROXY;
-    delete process.env.RENOVATE_X_YARN_PROXY;
+    vi.stubEnv('BUILDPACK', undefined);
+    vi.stubEnv('HTTP_PROXY', undefined);
+    vi.stubEnv('HTTPS_PROXY', undefined);
+    vi.stubEnv('RENOVATE_X_YARN_PROXY', undefined);
     Fixtures.reset();
     GlobalConfig.set({
       localDir: '.',
@@ -251,9 +251,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('sets http proxy', async () => {
-    process.env.HTTP_PROXY = 'http://proxy';
-    process.env.HTTPS_PROXY = 'http://proxy';
-    process.env.RENOVATE_X_YARN_PROXY = 'true';
+    vi.stubEnv('HTTP_PROXY', 'http://proxy');
+    vi.stubEnv('HTTPS_PROXY', 'http://proxy');
+    vi.stubEnv('RENOVATE_X_YARN_PROXY', 'true');
     GlobalConfig.set({
       localDir: '.',
       allowScripts: true,
@@ -503,7 +503,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -549,7 +549,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports packageManager url corepack', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -598,7 +598,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack on grouping', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -647,7 +647,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports customizing corepack version via config constraints', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
 
     GlobalConfig.set({
       localDir: '.',
@@ -708,7 +708,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses slim yarn instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -747,7 +747,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses devEngine.packageManager(object) instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -786,7 +786,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses devEngine.packageManager(array) instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
