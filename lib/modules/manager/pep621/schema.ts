@@ -168,6 +168,10 @@ const UvConfig = z.object({
       }),
     )
     .optional(),
+  // https://docs.astral.sh/uv/reference/settings/#index-url
+  'index-url': z.string().optional(),
+  // https://docs.astral.sh/uv/reference/settings/#extra-index-url
+  'extra-index-url': z.array(z.string()).optional(),
 });
 
 export const ProjectSection = z.object({
