@@ -196,7 +196,7 @@ function finalizeOnboardingPrBody(
   return finalPrBody + onboardingConfigHashComment;
 }
 
-export async function ensureOnboarding(
+export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
   branches: BranchConfig[],
@@ -204,7 +204,7 @@ export async function ensureOnboarding(
   if (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested) {
     return 'onboarding';
   }
-  logger.debug('ensureOnboarding()');
+  logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
   // TODO #22198
   const onboardingBranch = getInheritedOrGlobal('onboardingBranch')!;

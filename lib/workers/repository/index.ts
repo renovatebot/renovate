@@ -45,7 +45,7 @@ import { finalizeRepo } from './finalize/index.ts';
 import { pruneStaleBranches } from './finalize/prune.ts';
 import { initRepo } from './init/index.ts';
 import { OnboardingState } from './onboarding/common.ts';
-import { ensureOnboarding } from './onboarding/pr/index.ts';
+import { ensureOnboardingPr } from './onboarding/pr/index.ts';
 import type { ExtractResult } from './process/extract-update.ts';
 import { extractDependencies, updateRepo } from './process/index.ts';
 import type { ProcessResult, RepositoryResult } from './result.ts';
@@ -145,7 +145,7 @@ export async function renovateRepository(
         } else {
           res = await instrument(
             'onboarding',
-            () => ensureOnboarding(config, packageFiles, branches),
+            () => ensureOnboardingPr(config, packageFiles, branches),
             {
               attributes: {
                 [ATTR_RENOVATE_SPLIT]: 'onboarding',
