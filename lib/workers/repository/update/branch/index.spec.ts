@@ -205,6 +205,49 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('checks PR automerge after refreshing statuses when not updating out of schedule', async () => {
+      schedule.isScheduledNow.mockImplementation(
+        (_config, scheduleKey) => scheduleKey === 'automergeSchedule',
+      );
+      config.updateNotScheduled = false;
+      config.automerge = true;
+      config.statusCheckNames = {
+        artifactError: null,
+        configValidation: null,
+        mergeConfidence: null,
+        minimumReleaseAge: 'renovate/stability-days',
+      };
+      config.upgrades = partial<BranchUpgradeConfig>([
+        {
+          minimumReleaseAge: '1 day',
+          releaseTimestamp: '2019-01-01' as Timestamp,
+        },
+      ]);
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+        }),
+      );
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+
+      const res = await branchWorker.processBranch(config);
+
+      expect(res).toEqual({
+        branchExists: true,
+        commitSha: null,
+        result: 'automerged',
+      });
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      expect(platform.setBranchStatus.mock.invocationCallOrder[0]).toBeLessThan(
+        prAutomerge.checkAutoMerge.mock.invocationCallOrder[0],
+      );
+    });
+
     it('skips branch for fresh release with minimumReleaseAge', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
