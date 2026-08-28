@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
-import { isNullOrUndefined } from '@sindresorhus/is';
+import { isFunction, isNullOrUndefined } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { join, split } from 'shlex';
 import { instrument } from '../../instrumentation/index.ts';
@@ -136,8 +136,8 @@ export function exec(
     // Suppress execa's internal promise rejection (e.g., from timeout).
     // We handle all exit scenarios via 'exit' and 'error' event listeners below,
     // so the promise rejection would otherwise surface as an unhandledRejection.
-    // v8 ignore next 3 -- execa returns a thenable in production but not in mocked tests
-    if (typeof cp.catch === 'function') {
+    // v8 ignore next -- execa returns a thenable in production but not in mocked tests
+    if (isFunction(cp.catch)) {
       cp.catch(() => undefined);
     }
 
