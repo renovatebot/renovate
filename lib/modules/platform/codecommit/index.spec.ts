@@ -38,8 +38,8 @@ async function reInitRepo(codeCommit: Platform): Promise<void> {
       repositoryId: 'id',
     },
   });
-  process.env.AWS_ACCESS_KEY_ID = 'something';
-  process.env.AWS_SECRET_ACCESS_KEY = 'something';
+  vi.stubEnv('AWS_ACCESS_KEY_ID', 'something');
+  vi.stubEnv('AWS_SECRET_ACCESS_KEY', 'something');
 
   await codeCommit.initRepo({ repository: 'repositoryName' });
 }
@@ -55,9 +55,9 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   beforeEach(() => {
-    delete process.env.AWS_REGION;
-    delete process.env.AWS_ACCESS_KEY_ID;
-    delete process.env.AWS_SECRET_ACCESS_KEY;
+    vi.stubEnv('AWS_REGION', undefined);
+    vi.stubEnv('AWS_ACCESS_KEY_ID', undefined);
+    vi.stubEnv('AWS_SECRET_ACCESS_KEY', undefined);
     codeCommitClient.reset();
     vi.useRealTimers();
   });
@@ -109,7 +109,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('should init with env vars', async () => {
-      process.env.AWS_REGION = 'REGION';
+      vi.stubEnv('AWS_REGION', 'REGION');
       await expect(
         codeCommit.initPlatform({
           username: 'abc',
@@ -187,8 +187,8 @@ describe('modules/platform/codecommit/index', () => {
           repositoryId: 'id',
         },
       });
-      process.env.AWS_ACCESS_KEY_ID = 'something';
-      process.env.AWS_SECRET_ACCESS_KEY = 'something';
+      vi.stubEnv('AWS_ACCESS_KEY_ID', 'something');
+      vi.stubEnv('AWS_SECRET_ACCESS_KEY', 'something');
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' }),
       ).resolves.toEqual({
@@ -200,8 +200,8 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets the right url', () => {
-      process.env.AWS_ACCESS_KEY_ID = '';
-      process.env.AWS_SECRET_ACCESS_KEY = '';
+      vi.stubEnv('AWS_ACCESS_KEY_ID', '');
+      vi.stubEnv('AWS_SECRET_ACCESS_KEY', '');
       expect(
         getCodeCommitUrl(
           {
@@ -216,9 +216,9 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets the eu-central-1 url', () => {
-      process.env.AWS_ACCESS_KEY_ID = '';
-      process.env.AWS_SECRET_ACCESS_KEY = '';
-      process.env.AWS_REGION = 'eu-central-1';
+      vi.stubEnv('AWS_ACCESS_KEY_ID', '');
+      vi.stubEnv('AWS_SECRET_ACCESS_KEY', '');
+      vi.stubEnv('AWS_REGION', 'eu-central-1');
       expect(
         getCodeCommitUrl(
           {
@@ -232,10 +232,10 @@ describe('modules/platform/codecommit/index', () => {
 
     it('gets url with username and token', () => {
       vi.useFakeTimers().setSystemTime(new Date('2020-01-01'));
-      process.env.AWS_ACCESS_KEY_ID = 'access-key-id';
-      process.env.AWS_SECRET_ACCESS_KEY = 'secret-access-key';
-      process.env.AWS_REGION = 'eu-central-1';
-      process.env.AWS_SESSION_TOKEN = '';
+      vi.stubEnv('AWS_ACCESS_KEY_ID', 'access-key-id');
+      vi.stubEnv('AWS_SECRET_ACCESS_KEY', 'secret-access-key');
+      vi.stubEnv('AWS_REGION', 'eu-central-1');
+      vi.stubEnv('AWS_SESSION_TOKEN', '');
       const signer = new aws4.RequestSigner({
         service: 'codecommit',
         host: 'git-codecommit.eu-central-1.amazonaws.com',

@@ -37,16 +37,15 @@ function fixSnapshots(snapshots: ExecSnapshots): ExecSnapshots {
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
-
 describe('modules/manager/npm/post-update/yarn', () => {
   const removeDockerContainer = vi.spyOn(docker, 'removeDockerContainer');
 
   beforeEach(() => {
-    delete process.env.BUILDPACK;
-    delete process.env.HTTP_PROXY;
-    delete process.env.HTTPS_PROXY;
-    delete process.env.RENOVATE_X_YARN_PROXY;
+    util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    vi.stubEnv('BUILDPACK', undefined);
+    vi.stubEnv('HTTP_PROXY', undefined);
+    vi.stubEnv('HTTPS_PROXY', undefined);
+    vi.stubEnv('RENOVATE_X_YARN_PROXY', undefined);
     Fixtures.reset();
     GlobalConfig.set({
       localDir: '.',
@@ -252,9 +251,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('sets http proxy', async () => {
-    process.env.HTTP_PROXY = 'http://proxy';
-    process.env.HTTPS_PROXY = 'http://proxy';
-    process.env.RENOVATE_X_YARN_PROXY = 'true';
+    vi.stubEnv('HTTP_PROXY', 'http://proxy');
+    vi.stubEnv('HTTPS_PROXY', 'http://proxy');
+    vi.stubEnv('RENOVATE_X_YARN_PROXY', 'true');
     GlobalConfig.set({
       localDir: '.',
       allowScripts: true,
@@ -504,7 +503,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -550,7 +549,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports packageManager url corepack', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -599,7 +598,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack on grouping', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -648,7 +647,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports customizing corepack version via config constraints', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
 
     GlobalConfig.set({
       localDir: '.',
@@ -709,7 +708,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses slim yarn instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -748,7 +747,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses devEngine.packageManager(object) instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -787,7 +786,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses devEngine.packageManager(array) instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -905,15 +904,17 @@ describe('modules/manager/npm/post-update/yarn', () => {
       {
         cmd:
           `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/renovatebot/base-image ` +
-          `bash -l -c "` +
+          `bash -l -c '` +
           `install-tool node 16.16.0` +
           ` && ` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
-          `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true` +
+          // the preCommand's own single quotes are POSIX-escaped, since the whole
+          // command is now the single-quoted argument of `bash -l -c`
+          `sed -i '"'"'s/ steps,/ steps.slice(0,1),/'"'"' some-dir/.yarn/cli.js || true` +
           ` && ` +
           `yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts` +
-          `"`,
+          `'`,
         options: { ...options, cwd: 'some-dir' },
       },
     ]);

@@ -743,7 +743,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: (labels ?? []).join(','),
+        labels: coerceArray(labels).join(','),
         squash: config.squash,
       },
     },
@@ -1167,7 +1167,7 @@ export async function ensureIssue({
             body: {
               title,
               description,
-              labels: (labels ?? issue.labels ?? []).join(','),
+              labels: coerceArray(labels ?? issue.labels).join(','),
               confidential: confidential ?? false,
             },
           },
@@ -1179,7 +1179,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: (labels ?? []).join(','),
+          labels: coerceArray(labels).join(','),
           confidential: confidential ?? false,
         },
       });

@@ -1,4 +1,5 @@
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
@@ -11,6 +12,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
@@ -35,8 +37,10 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
   let res: UpdateArtifactsResult[] = [];
-  res.push((await handlePackageManagerUpdates(updateArtifactsConfig)) ?? {});
-  res.push((await updatePnpmWorkspace(updateArtifactsConfig)) ?? {});
+  res.push(
+    coerceObject(await handlePackageManagerUpdates(updateArtifactsConfig)),
+  );
+  res.push(coerceObject(await updatePnpmWorkspace(updateArtifactsConfig)));
 
   res = res.filter(isNonEmptyObject);
   if (res.length === 0) {
@@ -80,7 +84,7 @@ async function handlePackageManagerUpdates(
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${depName}@${newVersion}`;
+  const cmd = `corepack use ${quote(`${depName}@${newVersion}`)}`;
 
   const nodeConstraints = await getNodeToolConstraint(
     config,

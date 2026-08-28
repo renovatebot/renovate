@@ -335,7 +335,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
-      process.env.GITHUB_ENDPOINT = '';
+      vi.stubEnv('GITHUB_ENDPOINT', '');
       expect(
         await getChangeLogJSON({
           ...upgrade,

@@ -1,6 +1,7 @@
 import { isArray, isString } from '@sindresorhus/is';
 import type { Response, SimpleGit } from 'simple-git';
 import { mock } from 'vitest-mock-extended';
+import { clearEnv } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -17,8 +18,7 @@ describe('modules/manager/git-submodules/extract', () => {
     GlobalConfig.set({ localDir: `${import.meta.dirname}/__fixtures__` });
     // clear host rules
     hostRules.clear();
-    // clear environment variables
-    process.env = {};
+    clearEnv();
 
     createSimpleGit.mockImplementation((...args: any[]) => {
       const git = simpleGit(...args);

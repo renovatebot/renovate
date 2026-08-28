@@ -461,15 +461,16 @@ describe('modules/manager/gradle/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q properties' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties' +
+            "'",
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -478,15 +479,16 @@ describe('modules/manager/gradle/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
+            "'",
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',

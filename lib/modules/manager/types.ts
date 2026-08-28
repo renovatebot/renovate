@@ -1,7 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  ToolSettingsOptions,
+  RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
 } from '../../config/types.ts';
@@ -55,7 +55,8 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
+  minimumReleaseAge?: Nullish<string>;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -181,6 +182,13 @@ export interface PackageDependency<
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  /**
+   * The digest for this dependency is managed externally (for instance in a lockfile) instead of alongside the package file's version,
+   * so Renovate must not pin the digest inline.
+   *
+   * As this is due to the package ecossytem/manager in use, this shouldn't be overridable by `packageRules`
+   */
+  digestManagedExternally?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
   currentVersionTimestamp?: string;
@@ -209,6 +217,7 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
    * Whether the package registry has attestation information for the given update.
    *
@@ -416,7 +425,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 
   minimumReleaseAge?: Nullish<string>;
   isLockFileMaintenance?: boolean;

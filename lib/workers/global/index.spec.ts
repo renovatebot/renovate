@@ -44,8 +44,10 @@ describe('workers/global/index', () => {
     logger.getProblems.mockImplementation(() => []);
     logger.logLevel.mockImplementation(() => 'info');
     initPlatform.mockImplementation((input) => Promise.resolve(input));
-    delete process.env.AWS_SECRET_ACCESS_KEY;
-    delete process.env.AWS_SESSION_TOKEN;
+    vi.stubEnv('AWS_SECRET_ACCESS_KEY', undefined);
+    vi.stubEnv('AWS_SESSION_TOKEN', undefined);
+    vi.stubEnv('COREPACK_NPM_TOKEN', undefined);
+    vi.stubEnv('COREPACK_NPM_PASSWORD', undefined);
   });
 
   describe('getRepositoryConfig', () => {
@@ -151,10 +153,12 @@ describe('workers/global/index', () => {
       maintainYarnLock: true,
       foo: 1,
     });
-    process.env.AWS_SECRET_ACCESS_KEY = 'key';
-    process.env.AWS_SESSION_TOKEN = 'token';
+    vi.stubEnv('AWS_SECRET_ACCESS_KEY', 'key');
+    vi.stubEnv('AWS_SESSION_TOKEN', 'token');
+    vi.stubEnv('COREPACK_NPM_TOKEN', 'corepack-token');
+    vi.stubEnv('COREPACK_NPM_PASSWORD', 'corepack-password');
     await expect(globalWorker.start()).resolves.toBe(0);
-    expect(addSecretForSanitizing).toHaveBeenCalledTimes(2);
+    expect(addSecretForSanitizing).toHaveBeenCalledTimes(4);
   });
 
   it('handles zero repos', async () => {
@@ -233,7 +237,7 @@ describe('workers/global/index', () => {
   });
 
   it('exits with zero when warnings are logged', async () => {
-    delete process.env.LOG_LEVEL;
+    vi.stubEnv('LOG_LEVEL', undefined);
     parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
       cacheDir: '/tmp/cache',

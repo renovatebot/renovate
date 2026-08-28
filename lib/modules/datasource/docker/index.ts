@@ -26,7 +26,11 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { isArtifactoryServer } from '../util.ts';
+import {
+  isArtifactoryServer,
+  isCrossOriginPaginationAllowed,
+  resolvePaginationUrl,
+} from '../util.ts';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
@@ -199,7 +203,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    /* v8 ignore next 4 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -250,7 +254,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    /* v8 ignore next 4 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -312,7 +316,7 @@ export class DockerDatasource extends Datasource {
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!manifestResponse) {
       return null;
     }
@@ -604,7 +608,7 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
-          /* v8 ignore next 3 -- should never happen */
+          /* v8 ignore next -- should never happen */
           if (!configResponse) {
             return labels;
           }
@@ -755,11 +759,13 @@ export class DockerDatasource extends Datasource {
     const hostsNeedingAllPages = [
       'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
       'https://quay.io', // Quay sorts from oldest to newest, so we need to get all pages
+      'https://cgr.dev', // Chainguard sorts lexically and publishes a tag per build, so current versions sort past the page limit
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
       : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
+    const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<RegistryTagsList>;
@@ -802,8 +808,20 @@ export class DockerDatasource extends Datasource {
           url = null;
         }
       } else if (linkHeader?.next?.url) {
-        // for the normal case we can still use URL to resolve relative-next
-        url = new URL(linkHeader.next.url, url).href;
+        // Resolve the relative-or-absolute next link, not following cross-origin requests unless explicitly opted in
+        const nextUrl = resolvePaginationUrl(
+          url,
+          linkHeader.next.url,
+          allowCrossOrigin,
+        );
+        if (!nextUrl) {
+          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          logger.once.warn(
+            { registryHost, nextUrl: linkHeader.next.url },
+            'Ignoring cross-origin or invalid Docker registry tags pagination link',
+          );
+        }
+        url = nextUrl;
       } else {
         url = null;
       }
@@ -1125,6 +1143,7 @@ export class DockerDatasource extends Datasource {
 
     const cache = await DockerHubCache.init(dockerRepository);
     const maxPages = GlobalConfig.get('dockerMaxPages');
+    const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {
@@ -1145,7 +1164,17 @@ export class DockerDatasource extends Datasource {
         break;
       }
 
-      url = next;
+      // Only follow the `next` link when it's on the same origin, unless explicitly opted in
+      const nextUrl = resolvePaginationUrl(url, next, allowCrossOrigin);
+      if (!nextUrl) {
+        logger.once.warn(
+          { dockerRepository, nextUrl: next },
+          'Ignoring cross-origin or invalid Docker Hub tags pagination link',
+        );
+        break;
+      }
+
+      url = nextUrl;
     }
 
     await cache.save();
@@ -1241,7 +1270,7 @@ export class DockerDatasource extends Datasource {
       ? 'latest'
       : (findLatestStable(tags) ?? tags.at(-1));
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!latestTag) {
       return ret;
     }
