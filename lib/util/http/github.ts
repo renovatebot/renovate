@@ -20,6 +20,7 @@ import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import * as hostRules from '../host-rules.ts';
 import { maskToken } from '../mask.ts';
+import { coerceObject } from '../object.ts';
 import * as p from '../promises.ts';
 import { range } from '../range.ts';
 import { regEx } from '../regex.ts';
@@ -422,7 +423,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<GithubHttpOptions>,
   ): Promise<HttpResponse<T>> {
-    const httpOptions = options.httpOptions ?? {};
+    const httpOptions = coerceObject(options.httpOptions);
     const resolvedUrl = this.resolveUrl(options.url, httpOptions);
     const opts = {
       ...options,

@@ -214,6 +214,7 @@
         "renovate/no-stateful-global-regex": "error",
         "renovate/no-tools-import": "error",
         "renovate/prefer-coerce-array": "error",
+        "renovate/prefer-coerce-object": "error",
         "renovate/prefer-is-helpers": "error",
         "renovate/prefer-is-object": "error"
       }
