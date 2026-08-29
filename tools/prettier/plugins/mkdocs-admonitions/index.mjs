@@ -153,7 +153,7 @@ function unmaskAdmonitions(ast, placeholders) {
     if (node.type === 'html') {
       const match = PLACEHOLDER_RE.exec(node.value);
       if (match?.groups) {
-        node.value = placeholders[Number(match.groups.index)];
+        node.value = placeholders[parseInt(match.groups.index, 10)];
       }
       return;
     }

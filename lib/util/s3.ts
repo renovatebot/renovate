@@ -1,6 +1,6 @@
 // Singleton S3 instance initialized on-demand.
 import { S3Client } from '@aws-sdk/client-s3';
-import { isUndefined } from '@sindresorhus/is';
+import { isString, isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../config/global.ts';
 import { parseUrl } from './url.ts';
 
@@ -29,7 +29,7 @@ export interface S3UrlParts {
 }
 
 export function parseS3Url(rawUrl: URL | string): S3UrlParts | null {
-  const parsedUrl = typeof rawUrl === 'string' ? parseUrl(rawUrl) : rawUrl;
+  const parsedUrl = isString(rawUrl) ? parseUrl(rawUrl) : rawUrl;
   if (parsedUrl === null) {
     return null;
   }

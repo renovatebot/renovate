@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -300,7 +301,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .spyOn(urlUtil, 'parseUrl')
         .mockImplementation((url) => {
           if (
-            typeof url === 'string' &&
+            isString(url) &&
             url === 'https://repo.maven.apache.org/maven2/org/example/'
           ) {
             return null;
@@ -339,7 +340,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .spyOn(urlUtil, 'parseUrl')
         .mockImplementation((url) => {
           if (
-            typeof url === 'string' &&
+            isString(url) &&
             url === 'https://repo.maven.apache.org/maven2/org/example/example/'
           ) {
             return null;

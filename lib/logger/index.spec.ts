@@ -38,7 +38,7 @@ await init();
 
 describe('logger/index', () => {
   beforeEach(() => {
-    delete process.env.LOG_FILE_LEVEL;
+    vi.stubEnv('LOG_FILE_LEVEL', undefined);
   });
 
   it('inits', () => {
@@ -204,7 +204,7 @@ describe('logger/index', () => {
 
   describe('createDefaultStreams', () => {
     beforeEach(() => {
-      delete process.env.LOG_FILE_FORMAT;
+      vi.stubEnv('LOG_FILE_FORMAT', undefined);
     });
 
     it('creates log file stream', () => {
@@ -230,7 +230,7 @@ describe('logger/index', () => {
       'handles log file stream $logFileLevel level',
       ({ logFileLevel, expectedLogLevel }) => {
         if (logFileLevel !== null) {
-          process.env.LOG_FILE_LEVEL = logFileLevel?.toString();
+          vi.stubEnv('LOG_FILE_LEVEL', logFileLevel?.toString());
         }
 
         const streams = createDefaultStreams(
@@ -257,7 +257,7 @@ describe('logger/index', () => {
     ])(
       'handles log file stream $logFileFormat format',
       ({ logFileFormat, expectedType }) => {
-        process.env.LOG_FILE_FORMAT = logFileFormat;
+        vi.stubEnv('LOG_FILE_FORMAT', logFileFormat);
 
         const streams = createDefaultStreams(
           'info',
@@ -272,7 +272,7 @@ describe('logger/index', () => {
     );
 
     it('writes pretty formatted data synchronously to log file', async () => {
-      process.env.LOG_FILE_FORMAT = 'pretty';
+      vi.stubEnv('LOG_FILE_FORMAT', 'pretty');
 
       const streams = createDefaultStreams(
         'info',

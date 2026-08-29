@@ -118,9 +118,9 @@ export function parseGcv(
 function globToRegex(depName: string): RegExp {
   return regEx(
     depName
-      .replace(/\*/g, '_WC_CHAR_')
-      .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replace(/_WC_CHAR_/g, '.*?'),
+      .replace(regEx(/\*/g), '_WC_CHAR_')
+      .replace(regEx(/[/\-\\^$*+?.()|[\]{}]/g), '\\$&')
+      .replace(regEx(/_WC_CHAR_/g), '.*?'),
   );
 }
 
@@ -180,7 +180,7 @@ export function parsePropsFile(
 
   let startOfLineIdx = 0;
   const isCrLf = input.indexOf('\r\n') > 0;
-  const validGlob = /^[a-zA-Z][-_a-zA-Z0-9.:*]+$/;
+  const validGlob = regEx(/^[a-zA-Z][-_a-zA-Z0-9.:*]+$/);
   for (const line of input.split(newlineRegex)) {
     const lineMatch = propsLineRegex.exec(line);
     if (lineMatch?.groups) {

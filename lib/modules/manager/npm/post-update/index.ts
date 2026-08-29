@@ -26,6 +26,7 @@ import type {
   PostUpdateConfig,
   Upgrade,
 } from '../../types.ts';
+import { artifactErrorMessageFromExecError } from '../../util.ts';
 import {
   NPM_CACHE_DIR,
   PNPM_CACHE_BASE_DIR,
@@ -111,7 +112,7 @@ export function determineLockFileDirs(
   for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
     const packageFile = getPackageFile(p.path);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!packageFile.managerData) {
       continue;
     }
@@ -157,7 +158,7 @@ export async function writeExistingFiles(
         !packageFile.managerData.npmrcFileName)
     ) {
       try {
-        await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
+        await writeLocalFile(npmrcFilename, npmrc.replace(regEx(/\n?$/), '\n'));
       } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
@@ -580,8 +581,7 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         fileName: yarnLock,
-        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+        stderr: artifactErrorMessageFromExecError(res, ''),
       });
     } else {
       const existingContent = await getFile(
@@ -601,7 +601,7 @@ export async function getAdditionalFiles(
         await updateYarnOffline(lockFileDir, updatedArtifacts);
       }
 
-      /* v8 ignore next 7 -- needs test */
+      /* v8 ignore next -- needs test */
       if (upgrades.some(yarn.isYarnUpdate)) {
         existingYarnrcYmlContent = await updateYarnBinary(
           lockFileDir,
@@ -611,7 +611,7 @@ export async function getAdditionalFiles(
       }
     }
     await resetNpmrcContent(lockFileDir, npmrcContent);
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (existingYarnrcYmlContent) {
       // TODO #22198
       await writeLocalFile(yarnRcYmlFilename!, existingYarnrcYmlContent);
@@ -652,8 +652,7 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         fileName: pnpmShrinkwrap,
-        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+        stderr: artifactErrorMessageFromExecError(res, ''),
       });
     } else {
       const existingContent = await getFile(

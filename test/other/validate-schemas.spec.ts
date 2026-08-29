@@ -2,7 +2,21 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { Json } from '../../lib/util/schema-utils/index.ts';
 import { capitalize } from '../../lib/util/string.ts';
-import * as Schemas from '../../tools/schemas/schema.ts';
+import {
+  Abandonments,
+  ChangelogUrls,
+  Monorepo,
+  Replacements,
+  SourceUrls,
+} from '../../tools/schemas/schema.ts';
+
+const Schemas = {
+  Abandonments,
+  ChangelogUrls,
+  Monorepo,
+  Replacements,
+  SourceUrls,
+};
 
 describe('other/validate-schemas', () => {
   it('validate json files in lib/data against their schemas', async () => {

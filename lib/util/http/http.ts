@@ -12,6 +12,7 @@ import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
 import { acquireLock } from '../mutex.ts';
+import { coerceObject } from '../object.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
@@ -22,7 +23,6 @@ import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
 import { fetch, normalize, stream } from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
-
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
 import { getThrottle } from './throttle.ts';
@@ -242,6 +242,8 @@ export abstract class HttpBase<
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
+      this.handleResponse(resolvedUrl, resCopy);
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
@@ -292,6 +294,10 @@ export abstract class HttpBase<
     err: Error,
   ): never {
     throw err;
+  }
+
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
   }
 
   resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
@@ -406,7 +412,7 @@ export abstract class HttpBase<
   }
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
-    const opt = options ?? {};
+    const opt = coerceObject(options);
     return await this.getText(url, {
       headers: {
         Accept: 'text/plain',

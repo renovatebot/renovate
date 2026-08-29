@@ -1,7 +1,7 @@
 import { gt, gte, lt } from '@renovatebot/ruby-semver';
 import { GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator.ts';
-import type { Range } from '../range.ts';
 import { parseRanges, stringifyRanges } from '../range.ts';
+import type { Range } from '../types.ts';
 import { adapt, trimZeroes } from '../version.ts';
 import { replacePart } from './replace.ts';
 
