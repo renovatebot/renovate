@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
@@ -47,7 +48,7 @@ async function createCachedNuGetConfigFile(
   const updatedDepsRegistries: Registry[] = Array.from(
     new Set(
       updatedDeps
-        .flatMap((dep) => dep.registryUrls ?? [])
+        .flatMap((dep) => coerceArray(dep.registryUrls))
         .filter(isNonEmptyString),
     ),
     (url) => ({ url }),

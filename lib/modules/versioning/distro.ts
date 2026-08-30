@@ -1,25 +1,12 @@
 import { DateTime } from 'luxon';
 import dataFiles from '../../data-files.generated.ts';
-
-export interface DistroSchedule {
-  codename: string;
-  series: string;
-  created: string;
-  release?: string;
-  eol?: string;
-  eol_server?: string;
-  eol_esm?: string;
-  eol_lts?: string;
-  eol_elts?: string;
-}
-
-export type DistroDataFile =
-  | 'data/ubuntu-distro-info.json'
-  | 'data/debian-distro-info.json';
-
-export type DistroInfoRecord = Record<string, DistroSchedule>;
-
-export type DistroInfoRecordWithVersion = { version: string } & DistroSchedule;
+import { regEx } from '../../util/regex.ts';
+import type {
+  DistroDataFile,
+  DistroInfoRecord,
+  DistroInfoRecordWithVersion,
+  DistroSchedule,
+} from './types.ts';
 
 // Days to delay new releases
 const delay = 1;
@@ -36,7 +23,7 @@ export class DistroInfo {
 
   constructor(distroJsonKey: DistroDataFile) {
     this._distroInfo = JSON.parse(
-      dataFiles.get(distroJsonKey)!.replace(/v([\d.]+)\b/gm, '$1'),
+      dataFiles.get(distroJsonKey)!.replace(regEx(/v([\d.]+)\b/gm), '$1'),
     );
 
     for (const version of Object.keys(this._distroInfo)) {

@@ -2,7 +2,6 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
@@ -12,19 +11,18 @@ export default async function updateDependency({
 }: UpdateDependencyConfig): Promise<string | null> {
   // TODO: types (#22198)
   const localDir = GlobalConfig.get('localDir');
-  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
-    'git-tags',
-    'git-refs',
-  ]);
+  const authentication = {
+    hostTypes: ['git-tags', 'git-refs'],
+  };
 
   const git = createSimpleGit({
     config: { baseDir: localDir },
-    env: gitSubmoduleAuthEnvironmentVariables,
+    authentication,
   });
   const submoduleGit = createSimpleGit({
     // TODO: types (#22198)
     config: { baseDir: upath.join(localDir, upgrade.depName!) },
-    env: gitSubmoduleAuthEnvironmentVariables,
+    authentication,
   });
 
   try {

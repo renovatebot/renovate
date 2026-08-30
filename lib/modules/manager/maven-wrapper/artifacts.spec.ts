@@ -128,6 +128,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -180,6 +181,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -232,6 +234,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "./":"./" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
           'ghcr.io/renovatebot/base-image' +

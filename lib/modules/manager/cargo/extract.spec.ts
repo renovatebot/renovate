@@ -33,8 +33,8 @@ describe('modules/manager/cargo/extract', () => {
     const config: ExtractConfig = {};
 
     beforeEach(() => {
-      delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
-      delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
+      vi.stubEnv('CARGO_REGISTRIES_PRIVATE_CRATES_INDEX', undefined);
+      vi.stubEnv('CARGO_REGISTRIES_MCORBIN_INDEX', undefined);
 
       hostRules.clear();
       hostRules.add({
@@ -297,10 +297,14 @@ replace-with = "mcorbin"`,
     });
 
     it('extracts registry urls from environment', async () => {
-      process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX =
-        'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git';
-      process.env.CARGO_REGISTRIES_MCORBIN_INDEX =
-        'https://github.com/mcorbin/testregistry';
+      vi.stubEnv(
+        'CARGO_REGISTRIES_PRIVATE_CRATES_INDEX',
+        'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+      );
+      vi.stubEnv(
+        'CARGO_REGISTRIES_MCORBIN_INDEX',
+        'https://github.com/mcorbin/testregistry',
+      );
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -544,6 +548,54 @@ replace-with = "mcorbin"
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].packageName).toBe('boolector');
+    });
+
+    it('keeps the git source as packageName for renamed git dependencies', async () => {
+      const cargotoml = codeBlock`
+        [dependencies]
+        github-tag = { package = "real-crate", git = "https://github.com/foo/bar", tag = "v1.2.3" }
+        gitlab-tag = { package = "real-crate", git = "https://gitlab.com/foo/bar", tag = "v1.2.3" }
+        other-tag = { package = "real-crate", git = "https://gitea.example.com/foo/bar", tag = "v1.2.3" }
+        rev = { package = "real-crate", git = "https://github.com/foo/bar", rev = "abcdef0" }
+        crates-io = { package = "real-crate", version = "0.4.0" }
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'github-tag',
+          datasource: 'github-tags',
+          packageName: 'foo/bar',
+          registryUrls: ['https://github.com'],
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'gitlab-tag',
+          datasource: 'gitlab-tags',
+          packageName: 'foo/bar',
+          registryUrls: ['https://gitlab.com'],
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'other-tag',
+          datasource: 'git-tags',
+          packageName: 'https://gitea.example.com/foo/bar',
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'rev',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/foo/bar',
+          currentDigest: 'abcdef0',
+        },
+        {
+          depName: 'crates-io',
+          datasource: 'crate',
+          packageName: 'real-crate',
+          currentValue: '0.4.0',
+        },
+      ]);
     });
 
     it('extracts locked versions', async () => {

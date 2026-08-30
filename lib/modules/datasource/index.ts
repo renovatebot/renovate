@@ -1,5 +1,10 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
+import {
+  isFunction,
+  isNonEmptyArray,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -192,6 +197,7 @@ async function mergeRegistries(
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
+  let externalHostError: ExternalHostError | undefined;
   let singleRegistry = true;
   const releaseVersioning = versioning.get(config.versioning);
   for (const registryUrl of registryUrls) {
@@ -263,7 +269,14 @@ async function mergeRegistries(
       delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
-        throw err;
+        // Don't abort the merge if another registry already returned releases;
+        // a single rate-limited registry shouldn't discard results we have
+        externalHostError = err;
+        logger.debug(
+          { err, registryUrl },
+          'datasource merge: external host error from registry; continuing so releases from other registries are not discarded',
+        );
+        continue;
       }
 
       lastErr = err;
@@ -272,6 +285,10 @@ async function mergeRegistries(
   }
 
   if (!combinedRes) {
+    if (externalHostError) {
+      throw externalHostError;
+    }
+
     if (lastErr) {
       throw lastErr;
     }
@@ -292,7 +309,7 @@ async function mergeRegistries(
 }
 
 function massageRegistryUrls(registryUrls: string[]): string[] {
-  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+  return registryUrls.filter(isTruthy).map(trimTrailingSlash);
 }
 
 function resolveRegistryUrls(
@@ -319,21 +336,21 @@ function resolveRegistryUrls(
     }
     return isFunction(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
-      : (datasource.defaultRegistryUrls ?? []);
+      : coerceArray(datasource.defaultRegistryUrls);
   }
-  const customUrls = registryUrls?.filter(Boolean);
+  const customUrls = registryUrls?.filter(isTruthy);
   let resolvedUrls: string[] = [];
   if (isNonEmptyArray(customUrls)) {
     resolvedUrls = [...customUrls];
   } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   } else if (isFunction(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   }
   return massageRegistryUrls(resolvedUrls);
 }

@@ -365,7 +365,7 @@ describe('modules/datasource/npm/index', () => {
       .scope('https://registry.from-env.com')
       .get('/foobar')
       .reply(200, npmResponse);
-    process.env.REGISTRY = 'https://registry.from-env.com';
+    vi.stubEnv('REGISTRY', 'https://registry.from-env.com');
     GlobalConfig.set({ exposeAllEnv: true });
 
     const npmrc = 'registry=${REGISTRY}';

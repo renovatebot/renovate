@@ -5,6 +5,7 @@ import type { RegexManagerTemplates } from '../../../modules/manager/custom/rege
 import type { CustomExtractConfig } from '../../../modules/manager/custom/types.ts';
 import { validMatchFields } from '../../../modules/manager/custom/utils.ts';
 import { getEnabledManagersList } from '../../../modules/manager/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { WorkerExtractConfig } from '../../types.ts';
 
 export interface FingerprintExtractConfig {
@@ -43,8 +44,8 @@ function getFilteredManagerConfig(
     npmrc: config.npmrc,
     npmrcMerge: config.npmrcMerge,
     enabled: config.enabled,
-    ignorePaths: config.ignorePaths ?? [],
-    includePaths: config.includePaths ?? [],
+    ignorePaths: coerceArray(config.ignorePaths),
+    includePaths: coerceArray(config.includePaths),
     skipInstalls: config.skipInstalls,
     registryAliases: config.registryAliases,
     fileList: [],
@@ -60,7 +61,7 @@ export function generateFingerprintConfig(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
-      const filteredCustomManagers = (config.customManagers ?? []).filter(
+      const filteredCustomManagers = coerceArray(config.customManagers).filter(
         (mgr) => mgr.customType === manager,
       );
       for (const customManager of filteredCustomManagers) {
