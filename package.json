@@ -356,7 +356,7 @@
     "vitest-mock-extended": "5.1.1",
     "yazl": "3.3.1"
   },
-  "packageManager": "pnpm@11.22.0",
+  "packageManager": "pnpm@11.23.0",
   "files": [
     "dist",
     "renovate-schema.json"
