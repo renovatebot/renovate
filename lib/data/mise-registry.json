@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.8.10 linux-x64 (2026-08-20)"
+    "version": "2026.8.14 linux-x64 (2026-08-26)"
   },
   "tools": {
     "1password": {
@@ -609,6 +609,9 @@
     "cljstyle": {
       "asdf": "abogoyavlensky/asdf-cljstyle",
       "github": "greglook/cljstyle"
+    },
+    "cloc": {
+      "github": "AlDanial/cloc"
     },
     "clojure": {
       "asdf": "mise-plugins/mise-clojure",
@@ -1234,6 +1237,9 @@
       "aqua": "suzuki-shunsuke/ghtkn",
       "github": "suzuki-shunsuke/ghtkn"
     },
+    "ghui": {
+      "npm": "@kitlangton/ghui"
+    },
     "ginkgo": {
       "asdf": "mise-plugins/mise-ginkgo",
       "go": "github.com/onsi/ginkgo/v2/ginkgo"
@@ -1542,6 +1548,9 @@
       "aqua": "sharkdp/hexyl",
       "cargo": "hexyl"
     },
+    "hey-cli": {
+      "github": "basecamp/hey-cli"
+    },
     "hishtory": {
       "asdf": "asdf-community/asdf-hishtory",
       "github": "ddworken/hishtory"
@@ -1586,6 +1595,9 @@
     },
     "hugo-extended": {
       "aqua": "gohugoio/hugo/hugo-extended"
+    },
+    "hugo-extended-withdeploy": {
+      "aqua": "gohugoio/hugo/hugo-extended-withdeploy"
     },
     "hunk": {
       "aqua": "modem-dev/hunk",
@@ -2262,6 +2274,9 @@
     "mprocs": {
       "aqua": "pvolok/dekit"
     },
+    "mr-boxington": {
+      "github": "jdx/mr-boxington"
+    },
     "mssqldef": {
       "aqua": "sqldef/sqldef/mssqldef"
     },
@@ -2483,6 +2498,9 @@
       "aqua": "oras-project/oras",
       "asdf": "bodgit/asdf-oras"
     },
+    "ori": {
+      "aqua": "OpenRouterLabs/ori-releases"
+    },
     "ormolu": {
       "github": "tweag/ormolu"
     },
@@ -2590,6 +2608,9 @@
     "pkl": {
       "aqua": "apple/pkl",
       "asdf": "mise-plugins/asdf-pkl"
+    },
+    "playwright": {
+      "npm": "playwright"
     },
     "please": {
       "aqua": "thought-machine/please",
@@ -3023,6 +3044,11 @@
     "skeema": {
       "aqua": "skeema/skeema"
     },
+    "skim": {
+      "aqua": "skim-rs/skim",
+      "cargo": "skim",
+      "github": "skim-rs/skim"
+    },
     "sloth": {
       "aqua": "slok/sloth",
       "asdf": "slok/asdf-sloth"
@@ -3380,6 +3406,9 @@
     "tfupdate": {
       "aqua": "minamijoyo/tfupdate",
       "asdf": "yuokada/asdf-tfupdate"
+    },
+    "ticker": {
+      "github": "achannarasappa/ticker"
     },
     "tigerbeetle": {
       "github": "tigerbeetle/tigerbeetle"
