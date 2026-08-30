@@ -16,7 +16,7 @@ describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
-      delete process.env.CONTAINERBASE;
+      vi.stubEnv('CONTAINERBASE', undefined);
     });
 
     it('returns false if binarySource is not install', () => {
@@ -30,7 +30,7 @@ describe('util/exec/containerbase', () => {
 
     it('returns false if any unsupported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.CONTAINERBASE = 'true';
+      vi.stubEnv('CONTAINERBASE', 'true');
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
         // @ts-expect-error -- intentionally using invalid constraint names
@@ -41,7 +41,7 @@ describe('util/exec/containerbase', () => {
 
     it('returns true if supported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.CONTAINERBASE = 'true';
+      vi.stubEnv('CONTAINERBASE', 'true');
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       expect(isDynamicInstall(toolConstraints)).toBeTrue();
     });

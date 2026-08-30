@@ -4,8 +4,9 @@ import { regEx } from '../../../util/regex.ts';
 // Taken from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string. Licensed under CC BY 3.0
 // Removed the ^ and $.
 // Made minor and patch versions optional by surrounding them in parentheses followed by a question mark.
-const semverRegex =
-  /(0|[1-9]\d*)(\.(0|[1-9]\d*))?(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/;
+const semverRegex = regEx(
+  /(0|[1-9]\d*)(\.(0|[1-9]\d*))?(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/,
+);
 
 /**
  * This can convert most hashicorp ranges to valid npm syntax

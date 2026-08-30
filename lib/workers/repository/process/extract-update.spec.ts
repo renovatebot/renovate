@@ -13,6 +13,7 @@ import {
   update,
 } from './extract-update.ts';
 import * as _fetch from './fetch.ts';
+import * as _write from './write.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 
@@ -36,6 +37,7 @@ vi.mock('../../../util/cache/repository/index.ts');
 const branchify = vi.mocked(_branchify);
 const repositoryCache = vi.mocked(_repositoryCache);
 const fetch = vi.mocked(_fetch);
+const write = vi.mocked(_write);
 
 describe('workers/repository/process/extract-update', () => {
   const branchSha = fakeSha('123test');
@@ -75,7 +77,6 @@ describe('workers/repository/process/extract-update', () => {
         ],
         packageFiles: undefined,
       });
-      await expect(update(config, res.branches)).resolves.not.toThrow();
     });
 
     it('runs with baseBranchPatterns', async () => {
@@ -431,6 +432,29 @@ describe('workers/repository/process/extract-update', () => {
           );
         });
       });
+    });
+  });
+
+  describe('update()', () => {
+    it('writes the updates', async () => {
+      const config = {};
+      const branches = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          baseBranch: 'base',
+          upgrades: [],
+        },
+      ];
+      write.writeUpdates.mockResolvedValueOnce('automerged');
+
+      const res = await update(config, branches);
+
+      expect(res).toBe('automerged');
+      expect(write.writeUpdates).toHaveBeenCalledExactlyOnceWith(
+        config,
+        branches,
+      );
     });
   });
 

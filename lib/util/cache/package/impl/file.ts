@@ -1,3 +1,4 @@
+import { isObject } from '@sindresorhus/is';
 import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
@@ -139,7 +140,7 @@ export class PackageCacheFile extends PackageCacheBase {
 }
 
 function getMetadataExpiry(metadata: unknown): number | undefined {
-  if (!metadata || typeof metadata !== 'object') {
+  if (!isObject(metadata)) {
     return undefined;
   }
 

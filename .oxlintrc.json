@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
-  "jsPlugins": ["./tools/lint/rules.js"],
+  "jsPlugins": ["./tools/lint/rules.ts"],
   "options": {
     "typeAware": true
   },
@@ -78,19 +78,11 @@
     "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
-    "renovate/logger-static-message": "error",
-    "renovate/no-exec-shell-option": "error",
-    "renovate/no-hardcoded-docs-url": "error",
-    "renovate/no-new-url": "error",
-    "renovate/no-stateful-global-regex": "error",
-    "renovate/no-tools-import": "error",
-    "renovate/no-unquoted-exec-interpolation": "error",
-    "renovate/no-unvalidated-pagination-url": "error",
-    "renovate/prefer-fs-util": "error",
+    "renovate/no-number-constructor": "error",
     "renovate/prefer-json-pipe": "error",
-    "renovate/prefer-luxon": "error",
     "renovate/prefer-nullish-util": "error",
-    "renovate/zod-schema-location": "error",
+    "renovate/require-regex-util": "error",
+    "renovate/v8-ignore-no-count": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/validate-config-warnings-and-errors": "error",
     "renovate/zod-schema-naming": "error",
@@ -203,9 +195,101 @@
   },
   "overrides": [
     {
+      "files": ["**/*.spec.ts", "test/**", "tools/**"],
+      "rules": {
+        "renovate/require-regex-util": "off"
+      }
+    },
+    {
       "files": ["tools/**", "**/*.spec.ts"],
       "rules": {
         "node/no-sync": "error"
+      }
+    },
+    {
+      "files": ["lib/**"],
+      "rules": {
+        "renovate/logger-static-message": "error",
+        "renovate/no-new-url": "error",
+        "renovate/no-stateful-global-regex": "error",
+        "renovate/no-tools-import": "error",
+        "renovate/prefer-coerce-array": "error",
+        "renovate/prefer-coerce-object": "error",
+        "renovate/prefer-is-helpers": "error",
+        "renovate/prefer-is-object": "error"
+      }
+    },
+    {
+      "files": ["lib/**"],
+      "excludeFiles": ["**/*.spec.ts"],
+      "rules": {
+        "renovate/no-exec-shell-option": "error",
+        "renovate/no-hardcoded-docs-url": "error",
+        "renovate/no-unquoted-exec-interpolation": "error",
+        "renovate/prefer-fs-util": "error",
+        "renovate/prefer-luxon": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/datasource/**"],
+      "excludeFiles": ["**/*.spec.ts"],
+      "rules": {
+        "renovate/no-unvalidated-pagination-url": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/**"],
+      "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
+      "rules": {
+        "renovate/zod-schema-location": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/**"],
+      "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
+      "rules": {
+        "renovate/types-location": "error"
+      }
+    },
+    {
+      "files": ["lib/util/url.ts"],
+      "rules": {
+        "renovate/no-new-url": "off"
+      }
+    },
+    {
+      "files": ["lib/util/exec/**"],
+      "rules": {
+        "renovate/no-exec-shell-option": "off"
+      }
+    },
+    {
+      "files": ["lib/config/options/index.ts"],
+      "rules": {
+        "renovate/no-hardcoded-docs-url": "off"
+      }
+    },
+    {
+      "files": [
+        "lib/config-validator.ts",
+        "lib/instrumentation/**",
+        "lib/logger/**",
+        "lib/util/fs/**",
+        "lib/util/git/**",
+        "lib/workers/global/**"
+      ],
+      "rules": {
+        "renovate/prefer-fs-util": "off"
+      }
+    },
+    {
+      "files": [
+        "lib/util/date.ts",
+        "lib/util/pretty-time.ts",
+        "lib/util/timestamp.ts"
+      ],
+      "rules": {
+        "renovate/prefer-luxon": "off"
       }
     },
     {
@@ -228,6 +312,7 @@
         "renovate/prefer-fake-sha-in-specs": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/prefer-partial-in-specs": "error",
+        "renovate/prefer-stub-env": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }

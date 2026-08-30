@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoToolSettingsOptions } from '../../config/types.ts';
@@ -13,6 +13,7 @@ import {
   generateDockerCommand,
   removeDockerContainer,
 } from './docker/index.ts';
+import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
   CommandWithOptions,
@@ -80,7 +81,7 @@ async function prepareRawExec(
   sideCarImage: string,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const preCommands = opts.preCommands ?? [];
+  const preCommands = coerceArray(opts.preCommands);
   const customEnvVariables = getCustomEnv();
   const userConfiguredEnv = getUserEnv();
   const { containerbaseDir, binarySource } = GlobalConfig.get();
@@ -93,11 +94,12 @@ async function prepareRawExec(
 
   let rawOptions = getRawExecOptions(opts);
 
-  let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+  let rawCommands = isString(cmd) ? [cmd] : cmd;
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
     const extraEnv = {
+      ...hardcodedProcessEnv,
       ...opts.extraEnv,
       ...customEnvVariables,
       ...userConfiguredEnv,

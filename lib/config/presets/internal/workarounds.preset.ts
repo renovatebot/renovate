@@ -2,9 +2,6 @@ import type { Preset } from '../types.ts';
 
 export const presets: Record<string, Preset> = {
   all: {
-    description: [
-      'Apply crowd-sourced workarounds for known problems with packages.',
-    ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
       'workarounds:ignoreSpringCloudNumeric',
@@ -27,7 +24,9 @@ export const presets: Record<string, Preset> = {
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
     ],
-    ignoreDeps: [], // Hack to improve onboarding PR description
+    overrideDescription: [
+      'Apply crowd-sourced workarounds for known problems with packages.',
+    ],
   },
   bitnamiDockerImageVersioning: {
     description: 'Use custom regex versioning for bitnami images',

@@ -22,6 +22,57 @@ import {
   getExpectedPrList,
   getExpectedPrListSummary,
 } from '../onboarding/pr/pr-list.ts';
+import type { ReconfigurePrCommentSections } from '../onboarding/pr/types.ts';
+
+// Full reconfigure PR comments list package files before the PR list.
+const SECTION_ORDER = [
+  'PACKAGE FILES',
+  'CONFIG',
+  'BASEBRANCH',
+  'PRLIST',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+// Once the body is summarised, "What to Expect" should render before "Detected Package Files".
+const SUMMARY_SECTION_ORDER = [
+  'PRLIST',
+  'CONFIG',
+  'BASEBRANCH',
+  'PACKAGE FILES',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
+function buildReconfigurePrCommentTemplate(
+  sectionOrder: readonly string[],
+): string {
+  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
+
+  // TODO #22198
+  prCommentTemplate += `
+---
+${sectionOrder.map((section) => `{{${section}}}`).join('\n')}
+`;
+  return prCommentTemplate;
+}
+
+function fillReconfigurePrCommentBody(
+  prCommentTemplate: string,
+  sections: ReconfigurePrCommentSections,
+): string {
+  let prBody = prCommentTemplate;
+  if (sections.packageFiles) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', sections.packageFiles)}\n`;
+  } else {
+    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
+  }
+  prBody = prBody.replace('{{CONFIG}}\n', sections.config);
+  prBody = prBody.replace('{{WARNINGS}}\n', sections.warnings);
+  prBody = prBody.replace('{{ERRORS}}\n', sections.errors);
+  prBody = prBody.replace('{{BASEBRANCH}}\n', sections.baseBranch);
+  prBody = prBody.replace('{{PRLIST}}\n', sections.prList);
+  return prBody;
+}
 
 export async function ensureReconfigurePrComment(
   config: RenovateConfig,
@@ -32,51 +83,54 @@ export async function ensureReconfigurePrComment(
 ): Promise<boolean> {
   logger.debug('ensureReconfigurePrComment()');
   logger.trace({ config });
-  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
 
-  // TODO #22198
-  prCommentTemplate += `
----
-{{PACKAGE FILES}}
-{{CONFIG}}
-{{BASEBRANCH}}
-{{PRLIST}}
-{{WARNINGS}}
-{{ERRORS}}
-`;
-  let prBody = prCommentTemplate;
   const packageFilesDesc = getPackageFilesDesc(packageFiles);
-  if (packageFilesDesc) {
-    prBody = `${prBody.replace('{{PACKAGE FILES}}', packageFilesDesc)}\n`;
-  } else {
-    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
-  }
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     logger.info(`DRY-RUN: Would check branch ${branchName}`);
   } else {
     configDesc = getConfigDesc(config);
   }
-  prBody = prBody.replace('{{CONFIG}}\n', configDesc);
-  prBody = prBody.replace(
-    '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config),
-  );
-  prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
-  prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
+  const warnings =
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config);
+  const errors = getErrors(config);
+  const baseBranchDesc = getBaseBranchDesc(config);
   const prList = getExpectedPrList(config, branches);
-  prBody = prBody.replace('{{PRLIST}}\n', prList);
+
+  let prBody = fillReconfigurePrCommentBody(
+    buildReconfigurePrCommentTemplate(SECTION_ORDER),
+    {
+      packageFiles: packageFilesDesc,
+      config: configDesc,
+      baseBranch: baseBranchDesc,
+      prList,
+      warnings,
+      errors,
+    },
+  );
 
   if (prBody.length > platform.maxBodyLength()) {
     logger.debug(
       'Reconfigure PR body exceeds platform limit, switching to summary PR list and package files',
     );
-    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    const prListSummary = getExpectedPrListSummary(config, branches);
     if (packageFilesDesc) {
-      prBody = prBody.replace(
-        packageFilesDesc,
-        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
+      // "What to Expect" should render before "Detected Package Files" in the summary view,
+      // so rebuild from a template with that section order rather than reordering the rendered body.
+      prBody = fillReconfigurePrCommentBody(
+        buildReconfigurePrCommentTemplate(SUMMARY_SECTION_ORDER),
+        {
+          packageFiles: packageFilesSummary,
+          config: configDesc,
+          baseBranch: baseBranchDesc,
+          prList: prListSummary,
+          warnings,
+          errors,
+        },
       );
+    } else {
+      prBody = prBody.replace(prList, prListSummary);
     }
   }
 

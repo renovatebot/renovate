@@ -6,6 +6,7 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -23,6 +24,7 @@ import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -80,10 +82,11 @@ import {
   enableAutoMergeMutation,
   getIssuesQuery,
   repoInfoQuery,
+  repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
-import { getPrCache, updatePrCache } from './pr.ts';
+import { getPrCache, isPrInMergeQueue, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
@@ -145,11 +148,11 @@ export async function detectGhe(token: string): Promise<void> {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
     const gheHeaders = coerceObject(gheQueryRes?.headers);
-    const [, gheVersion] =
-      Object.entries(gheHeaders).find(
-        ([k]) => k.toLowerCase() === gheHeaderKey,
-      ) ?? [];
-    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
+    const gheVersionHeader = Object.entries(gheHeaders).find(
+      ([k]) => k.toLowerCase() === gheHeaderKey,
+    );
+    platformConfig.gheVersion =
+      semver.valid(gheVersionHeader?.[1] as string) ?? null;
     logger.debug(
       `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`,
     );
@@ -166,7 +169,7 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
+  token = token.replace(regEx(/^ghs_/), 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
@@ -263,14 +266,14 @@ export async function initPlatform({
         matchHost: 'ghcr.io',
         hostType: 'docker',
         username: 'USERNAME',
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       },
     ];
     logger.debug('Adding GitHub token as npm.pkg.github.com Basic token');
     platformResult.hostRules.push({
       matchHost: 'npm.pkg.github.com',
       hostType: 'npm',
-      token: token.replace(/^x-access-token:/, ''),
+      token: token.replace(regEx(/^x-access-token:/), ''),
     });
     const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
     for (const hostType of usernamePasswordHostTypes) {
@@ -281,7 +284,7 @@ export async function initPlatform({
         hostType,
         matchHost: `${hostType}.pkg.github.com`,
         username: renovateUsername,
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       });
     }
   }
@@ -524,6 +527,7 @@ export async function initRepo({
     cloneSubmodules,
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
+    mergeQueueEnabled: {},
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -544,8 +548,8 @@ export async function initRepo({
       // semver not null safe, accepts null and undefined
       semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
     ) {
-      infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
-      infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*autoMergeAllowed\s*\n/), '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
@@ -555,7 +559,19 @@ export async function initRepo({
       semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
     ) {
       infoQuery = infoQuery.replace(
-        /\n\s*hasVulnerabilityAlertsEnabled\s*\n/,
+        regEx(/\n\s*hasVulnerabilityAlertsEnabled\s*\n/),
+        '\n',
+      );
+    }
+
+    // GitHub Enterprise Server <3.12.0 doesn't support merge queues
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+    ) {
+      infoQuery = infoQuery.replace(
+        regEx(/\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/),
         '\n',
       );
     }
@@ -573,10 +589,6 @@ export async function initRepo({
     });
 
     if (res?.errors) {
-      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
-        logger.debug({ res }, 'GraphQL rate limit exceeded.');
-        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
-      }
       logger.debug({ res }, 'Unexpected GraphQL errors');
       throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
@@ -629,6 +641,9 @@ export async function initRepo({
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
     config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
+    config.mergeQueueEnabled[config.defaultBranch] = isNonEmptyObject(
+      repo.mergeQueue,
+    );
 
     const recentIssues = Issue.array()
       .catch([])
@@ -1513,7 +1528,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
-          labels: labels ?? [],
+          labels: coerceArray(labels),
         },
       },
       Issue,
@@ -1522,7 +1537,10 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
     return 'created';
-  } catch (err) /* v8 ignore next -- issue creation failure handling is not mocked in specs */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
@@ -1869,7 +1887,11 @@ async function tryPrAutomerge(
   }
 
   try {
-    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
+    const mergeMethod =
+      (
+        mapMergeStartegy(platformPrOptions.automergeStrategy) ??
+        config.mergeMethod
+      )?.toUpperCase() || 'MERGE';
 
     let commitHeadline: string | undefined;
     let commitBody: string | undefined;
@@ -1913,7 +1935,10 @@ async function tryPrAutomerge(
     }
 
     logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
-  } catch (err) /* v8 ignore next: missing test #22198 */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
@@ -1972,6 +1997,86 @@ export async function createPr({
 
   cachePr(result);
   return result;
+}
+
+async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
+  const cachedResult = config.mergeQueueEnabled[baseBranch];
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+
+  // TODO #22198
+  // semver not null safe, accepts null and undefined
+  if (
+    platformConfig.isGhe &&
+    semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+  ) {
+    // Merge queues are only supported on GHES >=3.12.0
+    config.mergeQueueEnabled[baseBranch] = false;
+    return false;
+  }
+
+  // Assume enabled unless proven otherwise, so the merge queue check is not
+  // skipped by mistake
+  let result = true;
+  try {
+    const res = await githubApi.requestGraphql<{
+      repository: { mergeQueue: { id: string } | null };
+    }>(repoMergeQueueQuery, {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        branch: baseBranch,
+      },
+      readOnly: true,
+      count: 1, // bypass graphql check
+    });
+    if (res?.errors) {
+      logger.debug(
+        { baseBranch, errors: res.errors },
+        'Failed to fetch merge queue status - assuming merge queue is enabled',
+      );
+    } else {
+      result = isNonEmptyObject(res?.data?.repository?.mergeQueue);
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    logger.debug(
+      { baseBranch, err },
+      'Error fetching merge queue status - assuming merge queue is enabled',
+    );
+  }
+
+  config.mergeQueueEnabled[baseBranch] = result;
+  return result;
+}
+
+export async function assertPrNotInMergeQueue(
+  branchName: string,
+  baseBranch?: string,
+): Promise<void> {
+  if (!(await isMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
+    return;
+  }
+
+  const pr = await findPr({ branchName, state: 'open' });
+  if (!pr) {
+    return;
+  }
+
+  if (
+    await isPrInMergeQueue(
+      githubApi,
+      config.repositoryOwner,
+      config.repositoryName,
+      pr.number,
+    )
+  ) {
+    logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
+    throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
+  }
 }
 
 export async function updatePr({
@@ -2042,7 +2147,10 @@ export async function reattemptPlatformAutomerge({
     await tryPrAutomerge(number, node_id, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
-  } catch (err) /* v8 ignore next -- defensive: automerge re-attempt failures are logged and swallowed, not simulated in specs */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
@@ -2092,7 +2200,10 @@ export async function mergePr({
         if (
           isNonEmptyString(body?.message) &&
           (body.message.includes('approving review') ||
-            body.message.includes('code owner review'))
+            body.message.includes('code owner review') ||
+            body.message.includes(
+              'New changes require approval from someone other than the last pusher',
+            ))
         ) {
           logger.debug(
             { response: body },
@@ -2247,7 +2358,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
   } catch (err) /* v8 ignore next -- defensive: processing already-parsed alerts does not throw in specs */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
-  return vulnerabilityAlerts ?? [];
+  return coerceArray(vulnerabilityAlerts);
 }
 
 async function pushFiles(

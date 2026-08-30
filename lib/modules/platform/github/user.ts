@@ -1,3 +1,4 @@
+import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import * as githubHttp from '../../../util/http/github.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
@@ -26,6 +27,9 @@ export async function getAppDetails(token: string): Promise<UserDetails> {
       email: null,
     };
   } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.debug({ err }, 'Error authenticating with GitHub');
     throw new Error('Init: Authentication failure');
   }
