@@ -1,7 +1,17 @@
-import { getDefault } from './defaults.ts';
+import { getConfig, getDefault } from './defaults.ts';
 import type { RenovateOptions } from './types.ts';
 
 describe('config/defaults', () => {
+  describe('getConfig()', () => {
+    it('leaves vulnerabilityAlerts limits unlimited', () => {
+      expect(getConfig().vulnerabilityAlerts).toMatchObject({
+        commitHourlyLimit: 0,
+        prConcurrentLimit: 0,
+        prHourlyLimit: 0,
+      });
+    });
+  });
+
   describe('getDefault()', () => {
     it('returns new instances of arrays when called repeatedly', () => {
       const option: RenovateOptions = {

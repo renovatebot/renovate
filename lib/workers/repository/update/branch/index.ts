@@ -253,8 +253,7 @@ export async function processBranch(
     if (
       !branchExists &&
       isLimitReached('Branches', branchConfig) &&
-      !dependencyDashboardCheck &&
-      !config.isVulnerabilityAlert
+      !dependencyDashboardCheck
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
       return {
@@ -278,8 +277,7 @@ export async function processBranch(
     if (
       !config.rebaseRequested &&
       isLimitReached('HourlyCommits', branchConfig) &&
-      !dependencyDashboardCheck &&
-      !config.isVulnerabilityAlert
+      !dependencyDashboardCheck
     ) {
       logger.debug('Reached hourly commits limit - skipping branch');
       return {

@@ -534,8 +534,7 @@ export async function ensurePr(
       try {
         if (
           !dependencyDashboardCheck &&
-          isLimitReached('ConcurrentPRs', prConfig) &&
-          !config.isVulnerabilityAlert
+          isLimitReached('ConcurrentPRs', prConfig)
         ) {
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };

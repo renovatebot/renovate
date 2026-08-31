@@ -119,7 +119,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
-      it('ignores PR limits on vulnerability alert', async () => {
+      it('applies PR limits to vulnerability alerts too', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
@@ -127,9 +127,8 @@ describe('workers/repository/update/pr/index', () => {
         delete prConfig.prTitle; // for coverage
         const res = await ensurePr(prConfig);
 
-        expect(res).toEqual({ type: 'with-pr', pr });
-        expect(platform.createPr).toHaveBeenCalled();
-        expect(prCache.setPrCache).toHaveBeenCalled();
+        expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'RateLimited' });
+        expect(platform.createPr).not.toHaveBeenCalled();
       });
 
       it('creates rollback PR', async () => {

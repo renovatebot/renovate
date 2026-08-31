@@ -5217,9 +5217,30 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   If you allow Renovate to `automerge` vulnerability fixes, please check if the automerged fix is correct.
 
 !!! note
-  When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+  By default, when Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
   This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
   In short: vulnerability alerts "skip the line".
+
+Renovate skips the line because the `vulnerabilityAlerts` defaults set `commitHourlyLimit`, `prConcurrentLimit` and `prHourlyLimit` to `0`, and `schedule` to `[]`, which all mean "no limit".
+If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set those limits inside the `vulnerabilityAlerts` object:
+
+```json title="Rate limiting vulnerability fix PRs"
+{
+  "vulnerabilityAlerts": {
+    "prConcurrentLimit": 5
+  }
+}
+```
+
+`branchConcurrentLimit` is not in the defaults, because its own `null` default already means "inherit `prConcurrentLimit`".
+
+!!! warning
+  These limits count _all_ of Renovate's branches and PRs in the repository, not only the ones which fix a vulnerability.
+  For example, `"vulnerabilityAlerts": { "prConcurrentLimit": 5 }` means Renovate stops creating vulnerability fix PRs once there are 5 open Renovate PRs in total.
+  Renovate processes vulnerability alerts before other updates, so vulnerability fixes get the first slots.
+
+!!! note
+  Renovate always ignores `prCommitsPerRunLimit` for vulnerability alerts, you can not override this.
 
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 
