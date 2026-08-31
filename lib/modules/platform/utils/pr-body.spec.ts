@@ -40,6 +40,21 @@ describe('modules/platform/utils/pr-body', () => {
       );
     });
 
+    it('keeps a dashboard-linked Configuration heading (when "smart")', () => {
+      const linkedHeading =
+        '### [Configuration](../issues/123 "Dependency Dashboard")';
+      const body = smartTruncate(
+        prBody.replace('### Configuration', linkedHeading),
+        3000,
+      );
+      expect(body.length).toBeLessThanOrEqual(3000);
+      expect(body).toContain('PR body was truncated to here');
+      expect(body).toContain(linkedHeading);
+      expect(body.indexOf('PR body was truncated to here')).toBeLessThan(
+        body.indexOf(linkedHeading),
+      );
+    });
+
     it('truncates content without release notes structure when notice fits', () => {
       const body = smartTruncate('x'.repeat(500), 200);
       expect(body).toHaveLength(200);
