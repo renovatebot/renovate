@@ -38,8 +38,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
-import { coerceNumber } from '../../../../util/number.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
+import { calculateMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import * as template from '../../../../util/template/index.ts';
 import { getCount, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -432,9 +431,7 @@ export async function processBranch(
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        const minimumReleaseAgeMs = isNonEmptyString(upgrade.minimumReleaseAge)
-          ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
-          : 0;
+        const minimumReleaseAgeMs = calculateMinimumReleaseAgeMs(upgrade);
 
         if (minimumReleaseAgeMs) {
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =

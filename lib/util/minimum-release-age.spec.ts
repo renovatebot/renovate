@@ -1,5 +1,8 @@
 import * as _dateUtil from './date.ts';
-import { checkMinimumReleaseAge } from './minimum-release-age.ts';
+import {
+  calculateMinimumReleaseAgeMs,
+  checkMinimumReleaseAge,
+} from './minimum-release-age.ts';
 import { toMs } from './pretty-time.ts';
 import type { Timestamp } from './timestamp.ts';
 
@@ -7,6 +10,38 @@ vi.mock('./date.ts');
 const dateUtil = vi.mocked(_dateUtil);
 
 describe('util/minimum-release-age', () => {
+  describe('.calculateMinimumReleaseAgeMs()', () => {
+    it('returns 0 if minimumReleaseAge is not set', () => {
+      expect(
+        calculateMinimumReleaseAgeMs({ minimumReleaseAgeBuffer: 10 }),
+      ).toBe(0);
+    });
+
+    it('returns minimumReleaseAge if minimumReleaseAgeBuffer is not set', () => {
+      expect(
+        calculateMinimumReleaseAgeMs({ minimumReleaseAge: '3 days' }),
+      ).toBe(toMs('3 days'));
+    });
+
+    it('ignores a negative minimumReleaseAgeBuffer', () => {
+      expect(
+        calculateMinimumReleaseAgeMs({
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeBuffer: -10,
+        }),
+      ).toBe(toMs('3 days'));
+    });
+
+    it('extends minimumReleaseAge by the minimumReleaseAgeBuffer percentage', () => {
+      expect(
+        calculateMinimumReleaseAgeMs({
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeBuffer: 10,
+        }),
+      ).toBe((toMs('3 days') ?? 0) * 1.1);
+    });
+  });
+
   describe('.checkMinimumReleaseAge()', () => {
     it('is not pending if minimumReleaseAge is not set', () => {
       const res = checkMinimumReleaseAge(
@@ -42,6 +77,32 @@ describe('util/minimum-release-age', () => {
       expect(res).toEqual({
         isPending: false,
         minimumReleaseAgeMs: toMs('3 days'),
+        hasTimestamp: true,
+      });
+    });
+
+    it('is pending if the release is older than minimumReleaseAge but within the minimumReleaseAgeBuffer', () => {
+      dateUtil.getElapsedMs.mockReturnValueOnce((toMs('3 days') ?? 0) + 1);
+      const res = checkMinimumReleaseAge(
+        { minimumReleaseAge: '3 days', minimumReleaseAgeBuffer: 10 },
+        '2021-01-01T00:00:00.000Z' as Timestamp,
+      );
+      expect(res).toEqual({
+        isPending: true,
+        minimumReleaseAgeMs: (toMs('3 days') ?? 0) * 1.1,
+        hasTimestamp: true,
+      });
+    });
+
+    it('is not pending if the release is older than minimumReleaseAge plus the minimumReleaseAgeBuffer', () => {
+      dateUtil.getElapsedMs.mockReturnValueOnce(toMs('4 days') ?? 0);
+      const res = checkMinimumReleaseAge(
+        { minimumReleaseAge: '3 days', minimumReleaseAgeBuffer: 10 },
+        '2021-01-01T00:00:00.000Z' as Timestamp,
+      );
+      expect(res).toEqual({
+        isPending: false,
+        minimumReleaseAgeMs: (toMs('3 days') ?? 0) * 1.1,
         hasTimestamp: true,
       });
     });
