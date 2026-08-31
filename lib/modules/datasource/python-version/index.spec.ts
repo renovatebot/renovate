@@ -2,6 +2,7 @@ import { satisfies } from '@renovatebot/pep440';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
@@ -150,7 +151,7 @@ describe('modules/datasource/python-version/index', () => {
           packageName: 'python',
         });
         expect(res?.releases).toHaveLength(2);
-        for (const release of res?.releases ?? []) {
+        for (const release of coerceArray(res?.releases)) {
           expect(release.isStable).toBeTrue();
         }
       });
@@ -173,7 +174,7 @@ describe('modules/datasource/python-version/index', () => {
           packageName: 'python',
         });
         expect(res?.releases).toHaveLength(2);
-        for (const release of res?.releases ?? []) {
+        for (const release of coerceArray(res?.releases)) {
           expect(release.isDeprecated).toBeBoolean();
         }
       });

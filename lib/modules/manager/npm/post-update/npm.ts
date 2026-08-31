@@ -32,17 +32,12 @@ import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { PackageLock } from '../schema.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
-import type { GenerateLockFileResult } from './types.ts';
+import type { GenerateLockFileResult, NpmrcCooldownResult } from './types.ts';
 import {
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
-
-export interface NpmrcCooldownResult {
-  date: DateTime<true>;
-  source: 'before' | 'min-release-age';
-}
 
 export function parseNpmrcCooldownDate(
   npmrcContent: string | null,
@@ -228,7 +223,7 @@ export async function generateLockFile(
       ],
       docker: {},
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;

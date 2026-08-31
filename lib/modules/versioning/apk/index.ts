@@ -1,8 +1,8 @@
 import { isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type { VersioningApi } from '../types.ts';
+import type { ApkVersion } from './types.ts';
 
 export const id = 'apk';
 export const displayName = 'Alpine Package Keeper (APK)';
@@ -19,19 +19,6 @@ const versionRegex = regEx(
 
 // Regex for splitting version strings into alphanumeric parts
 const alphaNumRegex = regEx(/([a-zA-Z]+)|(\d+)/g);
-
-export interface ApkVersion extends GenericVersion {
-  /**
-   * version is the main version part: it defines the version of origin software
-   * that was packaged.
-   */
-  version: string;
-  /**
-   * releaseString is used to distinguish between different versions of packaging for the
-   * same upstream version.
-   */
-  releaseString: string;
-}
 
 class ApkVersioningApi extends GenericVersioningApi {
   /**

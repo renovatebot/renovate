@@ -203,7 +203,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    /* v8 ignore next 4 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -254,7 +254,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    /* v8 ignore next 4 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -316,7 +316,7 @@ export class DockerDatasource extends Datasource {
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!manifestResponse) {
       return null;
     }
@@ -608,7 +608,7 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
-          /* v8 ignore next 3 -- should never happen */
+          /* v8 ignore next -- should never happen */
           if (!configResponse) {
             return labels;
           }
@@ -1270,7 +1270,7 @@ export class DockerDatasource extends Datasource {
       ? 'latest'
       : (findLatestStable(tags) ?? tags.at(-1));
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!latestTag) {
       return ret;
     }

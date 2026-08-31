@@ -16,25 +16,18 @@ const requirementsGitPackages = Fixtures.get('requirements-git-packages.txt');
 
 describe('modules/manager/pip_requirements/extract', () => {
   beforeEach(() => {
-    delete process.env.PIP_TEST_TOKEN;
+    vi.stubEnv('PIP_TEST_TOKEN', undefined);
     GlobalConfig.reset();
   });
 
   afterEach(() => {
-    delete process.env.PIP_TEST_TOKEN;
+    vi.stubEnv('PIP_TEST_TOKEN', undefined);
     GlobalConfig.reset();
   });
 
   describe('extractPackageFile()', () => {
-    const OLD_ENV = process.env;
-
     beforeEach(() => {
-      process.env = { ...OLD_ENV };
-      delete process.env.PIP_INDEX_URL;
-    });
-
-    afterEach(() => {
-      process.env = OLD_ENV;
+      vi.stubEnv('PIP_INDEX_URL', undefined);
     });
 
     it('returns null for empty', () => {
@@ -160,7 +153,7 @@ describe('modules/manager/pip_requirements/extract', () => {
     });
 
     it('should not replace env vars in low trust mode', () => {
-      process.env.PIP_TEST_TOKEN = 'its-a-secret';
+      vi.stubEnv('PIP_TEST_TOKEN', 'its-a-secret');
       const res = extractPackageFile(requirements7);
       expect(res?.additionalRegistryUrls).toEqual([
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
@@ -171,7 +164,7 @@ describe('modules/manager/pip_requirements/extract', () => {
     });
 
     it('should replace env vars in high trust mode', () => {
-      process.env.PIP_TEST_TOKEN = 'its-a-secret';
+      vi.stubEnv('PIP_TEST_TOKEN', 'its-a-secret');
       GlobalConfig.set({ exposeAllEnv: true });
       const res = extractPackageFile(requirements7);
       expect(res?.additionalRegistryUrls).toEqual([

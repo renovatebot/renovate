@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import {
@@ -261,12 +262,12 @@ export const ComposerExtract = z
       {
         depType: 'require',
         req: require,
-        locked: lockfile?.packages ?? [],
+        locked: coerceArray(lockfile?.packages),
       },
       {
         depType: 'require-dev',
         req: requireDev,
-        locked: lockfile?.packagesDev ?? [],
+        locked: coerceArray(lockfile?.packagesDev),
       },
     ];
 

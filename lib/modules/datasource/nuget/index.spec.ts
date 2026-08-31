@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { codeBlock } from 'common-tags';
-import upath from 'upath';
+import type { DirectoryResult } from 'tmp-promise';
+import tmp from 'tmp-promise';
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -121,7 +122,7 @@ const configV3Deprecated = {
 describe('modules/datasource/nuget/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    delete process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN;
+    vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
   });
 
   describe('parseRegistryUrl', () => {
@@ -346,15 +347,18 @@ describe('modules/datasource/nuget/index', () => {
     });
 
     describe('determine source URL from nupkg', () => {
-      beforeEach(() => {
-        GlobalConfig.set({
-          cacheDir: upath.join('/tmp/cache'),
-        });
-        process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS = 'true';
+      // These tests really download the .nupkg to disk, so give them a
+      // throwaway directory instead of a fixed path under the system tmpdir.
+      let cacheDirResult: DirectoryResult;
+
+      beforeEach(async () => {
+        cacheDirResult = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ cacheDir: cacheDirResult.path });
+        vi.stubEnv('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS', 'true');
       });
 
-      afterEach(() => {
-        delete process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS;
+      afterEach(async () => {
+        await cacheDirResult?.cleanup();
       });
 
       it('can determine source URL from nupkg when PackageBaseAddress is missing', async () => {
@@ -979,7 +983,7 @@ describe('modules/datasource/nuget/index', () => {
     });
 
     it('follows cross-origin pagination when the datasource is opted in (v2)', async () => {
-      process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
       httpMock
         .scope('https://www.nuget.org')
         .get(

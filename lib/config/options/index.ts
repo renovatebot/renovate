@@ -459,6 +459,17 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'overrideDescription',
+    description:
+      'Description which replaces the descriptions of any presets which this config extends.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    allowString: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'enabled',
     description: `Enable or disable corresponding functionality.`,
     stage: 'package',
@@ -681,7 +692,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.86.4',
+    default: 'ghcr.io/renovatebot/base-image:13.92.3',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',

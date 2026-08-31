@@ -12,7 +12,7 @@ import { scm } from '../../platform/scm.ts';
 // `[^\s/]` rules out comment lines, and lets this match the single line form as
 // well as the lines inside a `replace (...)` block.
 const localReplace = regEx(
-  /^[^\S\n]*(?:replace[^\S\n]+)?[^\s/]\S*(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(?<localPath>\.{1,2}\/\S+)/gm,
+  /^[^\S\n]*(?:replace[^\S\n]+)?[^\s/]\S*(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(?<localPath>\.{1,2}\/\S*)/gm,
 );
 
 /**
