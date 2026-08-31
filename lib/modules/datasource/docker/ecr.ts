@@ -32,6 +32,8 @@ export async function getECRAuthToken(
       secretAccessKey: opts.password,
       ...(opts.token && { sessionToken: opts.token }),
     };
+  } else if (opts.token) {
+    return opts.token;
   }
 
   const ecr = new ECR(config);

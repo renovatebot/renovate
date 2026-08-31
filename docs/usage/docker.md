@@ -306,6 +306,24 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 }
 ```
 
+##### Using already obtained `token`
+
+If you already obtained a valid token, Renovate can use that as well.
+To make use of this authentication mechanism, specify the `token` and make sure to omit username and password,
+as those would take precedence:
+
+```js title="config.js"
+{
+  hostRules: [
+    {
+      hostType: 'docker',
+      matchHost: '12345612312.dkr.ecr.us-east-1.amazonaws.com',
+      token: process.env.ECR_AUTH_TOKEN,
+    },
+  ];
+}
+```
+
 #### Google Container Registry / Google Artifact Registry
 
 ##### Using Workload Identity
