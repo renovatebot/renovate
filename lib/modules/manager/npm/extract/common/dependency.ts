@@ -85,6 +85,9 @@ export function extractDependency(
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
       dep.versioning = npmVersioningId;
+    } else if (depName === 'bun') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Bun';
     } else {
       dep.skipReason = 'unknown-engines';
     }
@@ -235,6 +238,7 @@ export function getExtractedConstraints(
 ): Partial<Record<ConstraintName, string>> {
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   const constraints: ConstraintName[] = [
+    'bun',
     'node',
     'yarn',
     'npm',
