@@ -1114,7 +1114,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatch({
+      expect(res).toMatchObject({
         extractedConstraints: { bun: '1.4.0' },
         deps: [
           {
