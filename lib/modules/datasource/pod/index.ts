@@ -3,6 +3,7 @@ import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -40,10 +41,7 @@ function releasesGithubUrl(
   },
 ): string {
   const { hostURL, account, repo, useShard, useSpecs } = opts;
-  const prefix =
-    hostURL && hostURL !== 'https://github.com'
-      ? `${hostURL}/api/v3/repos`
-      : 'https://api.github.com/repos';
+  const prefix = `${getApiBaseUrl(hostURL)}repos`;
   const shard = shardParts(packageName).join('/');
   // `Specs` in the pods repo URL is a new requirement for legacy support also allow pod repo URL without `Specs`
   const packageNamePath = useSpecs ? `Specs/${packageName}` : packageName;

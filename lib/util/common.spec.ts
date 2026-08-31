@@ -58,6 +58,8 @@ describe('util/common', () => {
       ${'https://codefloe.com/some-org/some-repo'}                           | ${'forgejo'}
       ${'https://github.com/semantic-release/gitlab'}                        | ${'github'}
       ${'https://github-enterprise.example.com/chalk/chalk'}                 | ${'github'}
+      ${'https://octocorp.ghe.com/chalk/chalk'}                              | ${'github'}
+      ${'https://api.octocorp.ghe.com/repos/chalk/chalk'}                    | ${'github'}
       ${'https://gitlab.com/chalk/chalk'}                                    | ${'gitlab'}
       ${'https://gitlab-enterprise.example.com/chalk/chalk'}                 | ${'gitlab'}
     `('("$url") === $hostType', ({ url, hostType }) => {

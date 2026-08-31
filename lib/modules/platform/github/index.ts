@@ -135,6 +135,10 @@ export function isGHApp(): boolean {
   return !!platformConfig.isGHApp;
 }
 
+function isGheServer(): boolean {
+  return !!platformConfig.isGhe && !platformConfig.isGheCloud;
+}
+
 export async function detectGhe(token: string): Promise<void> {
   const parsedEndpoint = parseUrl(platformConfig.endpoint);
   /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
@@ -145,6 +149,10 @@ export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe = host !== 'api.github.com';
   platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
+    if (platformConfig.isGheCloud) {
+      logger.debug('Detected GitHub Enterprise Cloud');
+      return;
+    }
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
     const gheHeaders = coerceObject(gheQueryRes?.headers);
@@ -189,7 +197,7 @@ export async function initPlatform({
    */
   if (
     isGithubFineGrainedPersonalAccessToken(token) &&
-    platformConfig.isGhe &&
+    isGheServer() &&
     (!platformConfig.gheVersion ||
       semver.lt(platformConfig.gheVersion, '3.10.0'))
   ) {
@@ -544,7 +552,7 @@ export async function initRepo({
     // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     // TODO #22198
     if (
-      platformConfig.isGhe &&
+      isGheServer() &&
       // semver not null safe, accepts null and undefined
       semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
     ) {
@@ -554,7 +562,7 @@ export async function initRepo({
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
     if (
-      platformConfig.isGhe &&
+      isGheServer() &&
       // semver not null safe, accepts null and undefined
       semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
     ) {
@@ -566,7 +574,7 @@ export async function initRepo({
 
     // GitHub Enterprise Server <3.12.0 doesn't support merge queues
     if (
-      platformConfig.isGhe &&
+      isGheServer() &&
       // semver not null safe, accepts null and undefined
       semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
     ) {
@@ -1867,10 +1875,7 @@ async function tryPrAutomerge(
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
   // semver not null safe, accepts null and undefined
-  if (
-    platformConfig.isGhe &&
-    semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
-  ) {
+  if (isGheServer() && semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
     logger.debug(
       { prNumber },
       'GitHub-native automerge: not supported by this GHES version. Use 3.3.0 or newer.',
@@ -2008,7 +2013,7 @@ async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
   // TODO #22198
   // semver not null safe, accepts null and undefined
   if (
-    platformConfig.isGhe &&
+    isGheServer() &&
     semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
   ) {
     // Merge queues are only supported on GHES >=3.12.0

@@ -358,6 +358,33 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       });
     });
 
+    it('uses the GHEC API host for a GHEC changelog', async () => {
+      httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, []);
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'https://api.octocorp.ghe.com/',
+        token: 'abc',
+      });
+      const result = await getChangeLogJSON({
+        ...upgrade,
+        sourceUrl: 'https://octocorp.ghe.com/chalk/chalk',
+      });
+      expect(result).toMatchObject({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.octocorp.ghe.com/',
+          baseUrl: 'https://octocorp.ghe.com/',
+          repository: 'chalk/chalk',
+          sourceUrl: 'https://octocorp.ghe.com/chalk/chalk',
+          type: 'github',
+        },
+      });
+    });
+
     it('works with same version releases but different prefix', async () => {
       const githubTagsMock = vi.spyOn(githubGraphql, 'queryTags');
       githubTagsMock.mockResolvedValue(

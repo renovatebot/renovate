@@ -60,6 +60,48 @@ describe('modules/datasource/bitrise/index', () => {
       });
     });
 
+    it('uses the GHEC API host for a GHEC registry URL', async () => {
+      httpMock
+        .scope('https://api.octocorp.ghe.com/repos/foo/bar/contents/steps')
+        .get('/script')
+        .reply(200, [
+          {
+            type: 'dir',
+            name: '1.0.0',
+            path: 'steps/script/1.0.0',
+          },
+        ])
+        .get('/script/1.0.0/step.yml')
+        .reply(200, {
+          type: 'file',
+          name: 'step.yml',
+          path: 'steps/script/1.0.0/step.yml',
+          encoding: 'base64',
+          content: toBase64(codeBlock`
+          published_at: 2024-03-19T13:54:48.081077+01:00
+          source_code_url: https://octocorp.ghe.com/foo/bar
+          website: https://octocorp.ghe.com/foo/bar
+        `),
+        });
+      await expect(
+        getPkgReleases({
+          datasource: BitriseDatasource.id,
+          packageName: 'script',
+          registryUrls: ['https://octocorp.ghe.com/foo/bar'],
+        }),
+      ).resolves.toEqual({
+        homepage: 'https://bitrise.io/integrations/steps/script',
+        registryUrl: 'https://octocorp.ghe.com/foo/bar',
+        releases: [
+          {
+            releaseTimestamp: '2024-03-19T12:54:48.081Z',
+            sourceUrl: 'https://octocorp.ghe.com/foo/bar',
+            version: '1.0.0',
+          },
+        ],
+      });
+    });
+
     it('returns version and filters out the asset folder', async () => {
       httpMock
         .scope(

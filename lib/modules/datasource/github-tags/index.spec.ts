@@ -33,6 +33,41 @@ describe('modules/datasource/github-tags/index', () => {
       expect(res).toBe('abcdef');
     });
 
+    it('uses the GHEC API host for a GHEC registry', async () => {
+      httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .get(`/repos/${packageName}/commits?per_page=1`)
+        .reply(200, [{ sha: 'abcdef' }]);
+
+      const res = await github.getDigest(
+        {
+          packageName,
+          registryUrl: 'https://octocorp.ghe.com',
+        },
+        undefined,
+      );
+
+      expect(res).toBe('abcdef');
+    });
+
+    it('preserves a legacy GHEC API registry', async () => {
+      const registryUrl = 'https://octocorp.ghe.com/api/v3';
+      httpMock
+        .scope(registryUrl)
+        .get(`/repos/${packageName}/commits?per_page=1`)
+        .reply(200, [{ sha: 'abcdef' }]);
+
+      const res = await github.getDigest(
+        {
+          packageName,
+          registryUrl,
+        },
+        undefined,
+      );
+
+      expect(res).toBe('abcdef');
+    });
+
     it('returns null for missing commit', async () => {
       httpMock
         .scope(githubApiHost)

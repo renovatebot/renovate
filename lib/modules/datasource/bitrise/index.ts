@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
+import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -59,10 +60,7 @@ export class BitriseDatasource extends Datasource {
     };
 
     const massagedPackageName = encodeURIComponent(packageName);
-    const baseApiURL =
-      parsedUrl.resource === 'github.com'
-        ? 'https://api.github.com'
-        : `https://${parsedUrl.resource}/api/v3`;
+    const baseApiURL = getApiBaseUrl(`https://${parsedUrl.resource}`);
     const packageUrl = joinUrlParts(
       baseApiURL,
       'repos',

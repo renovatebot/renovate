@@ -11,6 +11,18 @@ describe('util/github/url', () => {
       const sourceUrl = getSourceUrlBase(undefined);
       expect(sourceUrl).toBe('https://github.com/');
     });
+
+    it('maps the GitHub.com API URL to its source URL', () => {
+      expect(getSourceUrlBase('https://api.github.com')).toBe(
+        'https://github.com/',
+      );
+    });
+
+    it('maps a GHEC API URL to its source URL', () => {
+      expect(getSourceUrlBase('https://api.octocorp.ghe.com')).toBe(
+        'https://octocorp.ghe.com/',
+      );
+    });
   });
 
   describe('getApiBaseUrl', () => {
@@ -25,6 +37,24 @@ describe('util/github/url', () => {
       );
       expect(getApiBaseUrl('https://gh.my-company.com/api/v3/')).toBe(
         'https://gh.my-company.com/api/v3/',
+      );
+    });
+
+    it('maps a GHEC source URL to its API URL', () => {
+      expect(getApiBaseUrl('https://octocorp.ghe.com/')).toBe(
+        'https://api.octocorp.ghe.com/',
+      );
+    });
+
+    it('preserves a GHEC API URL', () => {
+      expect(getApiBaseUrl('https://api.octocorp.ghe.com/')).toBe(
+        'https://api.octocorp.ghe.com/',
+      );
+    });
+
+    it('preserves a legacy GHEC API URL', () => {
+      expect(getApiBaseUrl('https://octocorp.ghe.com/api/v3/')).toBe(
+        'https://octocorp.ghe.com/api/v3/',
       );
     });
   });

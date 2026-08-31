@@ -361,6 +361,35 @@ describe('workers/repository/update/pr/changelog/index', () => {
       });
     });
 
+    it('uses the GHEC API host for a GHEC changelog', async () => {
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
+      httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, []);
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'https://api.octocorp.ghe.com/',
+        token: 'abc',
+      });
+      const result = await getChangeLogJSON({
+        ...upgrade,
+        sourceUrl: 'https://octocorp.ghe.com/chalk/chalk',
+      });
+      expect(result).toMatchObject({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.octocorp.ghe.com/',
+          baseUrl: 'https://octocorp.ghe.com/',
+          repository: 'chalk/chalk',
+          sourceUrl: 'https://octocorp.ghe.com/chalk/chalk',
+          type: 'github',
+        },
+      });
+    });
+
     it('supports github.com and GHES changelog', async () => {
       githubTagsMock.mockRejectedValue([]);
       githubReleasesMock.mockRejectedValue([]);

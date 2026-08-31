@@ -273,6 +273,25 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
+    it('uses the GHEC API host for a GHEC registry URL', async () => {
+      httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .get('/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://octocorp.ghe.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://octocorp.ghe.com/foo/bar',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+
     it('processes real data from GHES with shard without specs', async () => {
       httpMock
         .scope(githubEntApiHost)

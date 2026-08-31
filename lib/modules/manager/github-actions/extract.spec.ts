@@ -136,6 +136,36 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
+    it('uses the GHEC source URL when configured with its API endpoint', async () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://api.octocorp.ghe.com',
+      });
+      const res = await extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml',
+      );
+      expect(res?.deps[0].registryUrls).toEqual([
+        'https://octocorp.ghe.com',
+        'https://github.com',
+      ]);
+    });
+
+    it('uses the GHEC source URL when configured with its legacy API endpoint', async () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://octocorp.ghe.com/api/v3',
+      });
+      const res = await extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml',
+      );
+      expect(res?.deps[0].registryUrls).toEqual([
+        'https://octocorp.ghe.com',
+        'https://github.com',
+      ]);
+    });
+
     it('use github.com only as registry when running against non-GitHub', async () => {
       GlobalConfig.set({
         platform: 'bitbucket',
