@@ -30,8 +30,10 @@ import {
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 
 // Execute 'corepack use' command for npm manager updates
-// This step is necessary because Corepack recommends attaching a hash after the version
-// The hash is generated only after running 'corepack use' and cannot be fetched from the npm registry
+// This step is necessary because Corepack recommends attaching a hash after the
+// version
+// The hash is generated only after running 'corepack use' and cannot be fetched
+// from the npm registry
 export async function updateArtifacts(
   updateArtifactsConfig: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
@@ -70,16 +72,20 @@ async function handlePackageManagerUpdates(
 
   const { currentValue, depName, newVersion } = packageManagerUpdate;
 
-  // Execute 'corepack use' command only if the currentValue already has hash in it
+  // Execute 'corepack use' command only if the currentValue already has hash in
+  // it
   if (!currentValue || !regEx(versionWithHashRegString).test(currentValue)) {
     return null;
   }
 
-  // write old updates before executing corepack update so that they are not removed from package file
+  // write old updates before executing corepack update so that they are not
+  // removed from package file
   await writeLocalFile(packageFileName, existingPackageFileContent);
 
-  // Asumming that corepack only needs to modify the package.json file in the root folder
-  // As it should not be regular practice to have different package managers in different workspaces
+  // Asumming that corepack only needs to modify the package.json file in the
+  // root folder
+  // As it should not be regular practice to have different package managers in
+  // different workspaces
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
@@ -192,9 +198,10 @@ async function updatePnpmWorkspace(
     let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
     // v8 ignore next -- TODO: add test #40625
     const newVersion = upgrade.newVersion ?? upgrade.newValue;
-    // For pnpm overrides with range selectors (e.g. "pkg@<=1.0.0"), depName contains
-    // the full key including the selector. Use packageName (bare package name) for
-    // minimumReleaseAgeExclude entries which require exact versions only.
+    // For pnpm overrides with range selectors (e.g. "pkg@<=1.0.0"), depName
+    // contains the full key including the selector. Use packageName (bare
+    // package name) for minimumReleaseAgeExclude entries which require exact
+    // versions only.
     const excludeDepName = upgrade.packageName ?? upgrade.depName;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
@@ -220,7 +227,8 @@ async function updatePnpmWorkspace(
     } = getMatchedItem(excludeDepName!, excludeNode.items);
 
     if (allExcluded) {
-      // still clean up any malformed entries even when a wildcard covers the package
+      // still clean up any malformed entries even when a wildcard covers the
+      // package
     } else if (malformed && isScalar<string>(matchedItem)) {
       logger.debug(
         { entry: matchedItem.value, excludeDepName, newVersion },
@@ -285,7 +293,8 @@ async function updatePnpmWorkspace(
       updated = true;
     }
 
-    // Remove any malformed entries for the same package left over from the prior bug
+    // Remove any malformed entries for the same package left over from the
+    // prior bug
     for (let i = excludeNode.items.length - 1; i >= 0; i--) {
       const item = excludeNode.items[i];
       if (

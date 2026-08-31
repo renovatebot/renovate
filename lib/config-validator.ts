@@ -174,7 +174,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
     const strict = opts.strict ?? false;
     let filesValidated = 0;
 
-    // without RE2, patterns are checked by RegExp, which accepts syntax RE2 rejects (e.g. lookahead)
+    // without RE2, patterns are checked by RegExp, which accepts syntax RE2
+    // rejects (e.g. lookahead)
     if (regexEngineStatus.type === 'unavailable') {
       logger.warn(
         { err: regexEngineStatus.err },
@@ -302,7 +303,9 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
 
   await program.parseAsync();
 })().catch((e) => {
-  // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
+  // Commander throws an error at the end of Action execution i.e. as part of
+  // the `help` and `version` commands, and so we don't want to return an error
+  // code in this case
   if (
     e instanceof CommanderError &&
     (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')

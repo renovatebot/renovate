@@ -191,7 +191,8 @@ export class BaseGoDatasource {
 
       let packageName = vcsIndicatedModule ?? gitlabModuleName;
 
-      // Detect submodules in monorepos by comparing metadata path and module path
+      // Detect submodules in monorepos by comparing metadata path and module
+      // path
       if (!vcsIndicatedModule && httpsRegExpName && gitlabModuleName) {
         const metadataPath = httpsRegExpName;
         const modulePath = gitlabModuleName;
@@ -201,7 +202,8 @@ export class BaseGoDatasource {
         }
       }
 
-      // If we still don't have a package name, fall back to the metadata URL path
+      // If we still don't have a package name, fall back to the metadata URL
+      // path
       packageName = packageName ?? httpsRegExpName;
 
       return {
@@ -224,7 +226,8 @@ export class BaseGoDatasource {
       ).exec(endpoint)?.groups?.prefix;
 
       let packageName =
-        // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
+        // a .git path indicates a concrete git repository, which can be
+        // different from metadata returned by gitlab
         vcsIndicatedModule ?? trimLeadingSlash(parsedUrl.pathname);
       if (endpointPrefix && endpointPrefix !== 'api/') {
         packageName = packageName.replace(endpointPrefix, '');

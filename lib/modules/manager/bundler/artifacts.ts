@@ -218,7 +218,8 @@ export async function updateArtifacts(
         { err },
         'Gemfile.lock update failed due to missing credentials - skipping branch',
       );
-      // Do not generate these PRs because we don't yet support Bundler authentication
+      // Do not generate these PRs because we don't yet support Bundler
+      // authentication
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }

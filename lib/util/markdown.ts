@@ -9,7 +9,8 @@ export function sanitizeMarkdown(markdown: string): string {
   let res = markdown;
   // Put a zero width space after every # followed by a digit
   res = res.replace(regEx(/(\W)#(\d)/gi), '$1#&#8203;$2');
-  // Put a zero width space after every @ symbol to prevent unintended hyperlinking,
+  // Put a zero width space after every @ symbol to prevent unintended
+  // hyperlinking,
   // but leave code blocks (triple backticks) and inline code spans untouched
   res = res
     .split(regEx(/(```[\s\S]*?```|`[^`\n]*?`)/g))

@@ -290,8 +290,8 @@ export class GithubGraphqlDatasourceFetcher<
       // It's important to call `getCacheStrategy()` after `doShrinkableQuery()`
       // because `doShrinkableQuery()` may change `this.isCacheable`.
       //
-      // Otherwise, cache items for public packages will never be persisted
-      // in long-term cache.
+      // Otherwise, cache items for public packages will never be persisted in
+      // long-term cache.
       isPaginationDone = await this.cacheStrategy().reconcile(resultItems);
 
       hasNextPage = !!queryResult?.pageInfo?.hasNextPage;

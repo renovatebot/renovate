@@ -124,7 +124,8 @@ export class ForgejoPrCache {
     for (const rawItem of rawItems) {
       if (!rawItem) {
         logger.warn('Forgejo PR is empty, throwing temporary error');
-        // Forgejo API sometimes returns empty PRs, so we throw a temporary error
+        // Forgejo API sometimes returns empty PRs, so we throw a temporary
+        // error
         // https://github.com/go-forgejo/forgejo/blob/fcd096231ac2deaefbca10a7db1b9b01f1da93d7/services/convert/pull.go#L34-L52
         throw new Error(TEMPORARY_ERROR);
       }

@@ -3,9 +3,9 @@ import { hash } from './hash.ts';
 import { safeStringify } from './stringify.ts';
 
 // Compute the fingerprint via the prior `safeStringify` + `hash` approach so
-// the new incremental implementation can be asserted byte-identical for
-// inputs that fit in a single V8 string (existing stored fingerprints stay
-// valid across the upgrade).
+// the new incremental implementation can be asserted byte-identical for inputs
+// that fit in a single V8 string (existing stored fingerprints stay valid
+// across the upgrade).
 function legacyFingerprint(input: unknown): string {
   const s = safeStringify(input);
   return s ? hash(s) : '';

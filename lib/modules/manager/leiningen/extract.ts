@@ -228,7 +228,8 @@ export function extractPackageFile(content: string): PackageFileContent {
     // - https://github.com/achin/lein-parent
     ...collectDeps(content, 'coords', registryUrls, vars, {
       nested: false,
-      // The top-level key is 'parent-project', but we skip directly to 'coords'.
+      // The top-level key is 'parent-project', but we skip directly to
+      // 'coords'.
       // So fix the dep type label
       depType: 'parent-project',
     }),

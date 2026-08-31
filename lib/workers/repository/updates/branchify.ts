@@ -88,8 +88,8 @@ export async function branchifyUpgrades(
     : config.branchList;
   // istanbul ignore next
   try {
-    // Here we check if there are updates from the same source repo
-    // that are not grouped into the same branch
+    // Here we check if there are updates from the same source repo that are not
+    // grouped into the same branch
     const branchUpdates: Record<string, Record<string, string>> = {};
     for (const branch of branches) {
       const { sourceUrl, branchName, depName, newVersion } = branch;

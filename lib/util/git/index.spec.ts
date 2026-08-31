@@ -708,7 +708,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         message: 'Test commit',
       });
 
-      // Simulate a new run of Renovate, when running from a fresh localDir, where we've not already cloned anything, as happens when using RENOVATE_REPOSITORY_CACHE=enabled
+      // Simulate a new run of Renovate, when running from a fresh localDir,
+      // where we've not already cloned anything, as happens when using
+      // RENOVATE_REPOSITORY_CACHE=enabled
       const freshDir = await tmp.dir({ unsafeCleanup: true });
       try {
         GlobalConfig.set({ localDir: freshDir.path });
@@ -858,7 +860,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
         'refs/changes/99/99999/1',
         commit!.commitSha,
       );
-      // Reset working tree back to default branch so the file is not present yet
+      // Reset working tree back to default branch so the file is not present
+      // yet
       const local = simpleGit(tmpDir.path);
       await local.checkout(defaultBranch);
 
@@ -1848,7 +1851,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('returns deletions with sha null', async () => {
       const commit = git.getBranchCommit(defaultBranch)!;
       const parentCommit = git.getBranchCommit('develop')!;
-      // Reverse: from default branch back to develop — master_file and file_to_delete are "deleted"
+      // Reverse: from default branch back to develop — master_file and
+      // file_to_delete are "deleted"
       const diff = await git.diffCommitTree(commit, parentCommit);
       expect(diff.length).toBeGreaterThanOrEqual(2);
       const masterFile = diff.find((d) => d.path === 'master_file');
@@ -2006,7 +2010,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
-      // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+      // set up our repo again, so we can initialise it with
+      // `RENOVATE_X_CLEAR_HOOKS`
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
       vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', 'true');
@@ -2059,10 +2064,11 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should work when GIT_CONFIG_COUNT authentication environment variables are configured', async () => {
-      // Self-hosted users can opt into passing GIT_CONFIG_COUNT + GIT_CONFIG_KEY_n
+      // Self-hosted users can opt into passing GIT_CONFIG_COUNT +
+      // GIT_CONFIG_KEY_n
       // + GIT_CONFIG_VALUE_n via customEnvVariables.
-      // simple-git >=3.36.0 blocks git operations when these vars are present unless
-      // allowUnsafeConfigEnvCount is enabled in the simple-git config.
+      // simple-git >=3.36.0 blocks git operations when these vars are present
+      // unless allowUnsafeConfigEnvCount is enabled in the simple-git config.
       vi.stubEnv('GIT_SSH_COMMAND', undefined);
       setCustomEnv({
         GIT_CONFIG_COUNT: '3',
@@ -2095,9 +2101,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('should allow customEnvVariables to override GIT_SSH_COMMAND', async () => {
       // Self-hosted users may inject a custom GIT_SSH_COMMAND via
-      // customEnvVariables to configure SSH authentication (e.g. a
-      // specific identity file). The default 'ssh -o BatchMode=yes'
-      // should be used as a fallback, not as a forced override.
+      // customEnvVariables to configure SSH authentication (e.g. a specific
+      // identity file). The default 'ssh -o BatchMode=yes' should be used as a
+      // fallback, not as a forced override.
       const customSshCommand =
         'ssh -i /path/to/deploy-key -o StrictHostKeyChecking=no';
       setCustomEnv({ GIT_SSH_COMMAND: customSshCommand });
@@ -2136,8 +2142,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should allow process.env GIT_SSH_COMMAND to override the default', async () => {
-      // GIT_SSH_COMMAND is declared in extraEnv, so the key is inherited
-      // from process.env via parentEnv (higher priority than extraEnv).
+      // GIT_SSH_COMMAND is declared in extraEnv, so the key is inherited from
+      // process.env via parentEnv (higher priority than extraEnv).
       vi.stubEnv('GIT_SSH_COMMAND', 'ssh -o SomeHostOption=yes');
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
@@ -2295,8 +2301,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         ).trim();
         expect(upstreamRemote).toBe(upstreamOrigin.path);
 
-        // verify fetch from upstream happened
-        // by checking the `${RENOVATE_FORK_UPSTREAM}/main` branch in the forked repo's remote branches
+        // verify fetch from upstream happened by checking the
+        // `${RENOVATE_FORK_UPSTREAM}/main` branch in the forked repo's remote
+        // branches
         const branches = await tmpGit.branch(['-r']);
         expect(branches.all).toContain(
           `${git.RENOVATE_FORK_UPSTREAM}/${defaultBranch}`,

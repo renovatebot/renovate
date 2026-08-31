@@ -51,7 +51,8 @@ ruleTester.run('no-redundant-mock-reset', rule, {
       code: `afterEach(() => { foo.bar.mockClear(); });`,
       errors: [{ messageId: 'redundantMockReset' }],
     },
-    // the innermost suite function decides: nested `beforeEach` inside `describe`
+    // the innermost suite function decides: nested `beforeEach` inside
+    // `describe`
     {
       code: `describe('suite', () => { beforeEach(() => { vi.resetAllMocks(); }); });`,
       errors: [{ messageId: 'redundantMockReset' }],

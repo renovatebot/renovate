@@ -80,7 +80,8 @@ export function extractPackageFile(
   let parsedContent: Record<string, unknown>[] | HelmDockerImageDependency[];
   try {
     // a parser that allows extracting line numbers would be preferable, with
-    // the current approach we need to match anything we find again during the update
+    // the current approach we need to match anything we find again during the
+    // update
     // TODO: fix me (#9610)
     parsedContent = parseYaml(content) as any;
   } catch (err) {

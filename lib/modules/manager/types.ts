@@ -391,11 +391,14 @@ interface ManagerApiBase extends ModuleApi {
 }
 
 export type ManagerApi = ManagerApiBase &
-  // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
+  // this ensures at compile time that lockFileNames are set when manager has
+  // supportsLockFileMaintenance=true
   (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
     | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
   ) &
-  // this ensures at compile time that lockFileMaintenanceIsDelegatedToPackageManager is set when manager has supportsLockFileMaintenance=true
+  // this ensures at compile time that
+  // lockFileMaintenanceIsDelegatedToPackageManager is set when manager has
+  // supportsLockFileMaintenance=true
   (| {
         supportsLockFileMaintenance: true;
         lockFileMaintenanceIsDelegatedToPackageManager: boolean | string;

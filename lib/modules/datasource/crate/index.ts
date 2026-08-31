@@ -524,7 +524,8 @@ export class CrateDatasource extends Datasource {
       { url, packageName, version: release.version, registryUrl },
       'fetching crate release timestamp',
     );
-    // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
+    // Getting release timestamp could become unnecessary if the manual backfill
+    // of `pubtime` mentioned in
     // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
     const { body: releaseTimestamp } = await this.http.getJson(
       url,

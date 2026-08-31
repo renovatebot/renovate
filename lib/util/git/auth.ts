@@ -37,7 +37,8 @@ export function getGitAuthenticatedEnvironmentVariables(
   const gitConfigCountEnvVariable = environmentVariables.GIT_CONFIG_COUNT;
   let gitConfigCount = 0;
   if (gitConfigCountEnvVariable) {
-    // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
+    // passthrough the gitConfigCountEnvVariable environment variable as start
+    // value of the index count
     gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
@@ -67,9 +68,10 @@ export function getGitAuthenticatedEnvironmentVariables(
     );
   }
 
-  // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
-  // add the two new config key and value to the returnEnvironmentVariables object
-  // increase the CONFIG_COUNT by one for each rule and add it to the object
+  // create a shallow copy of the environmentVariables as base so we don't
+  // modify the input parameter object add the two new config key and value to
+  // the returnEnvironmentVariables object increase the CONFIG_COUNT by one for
+  // each rule and add it to the object
   const newEnvironmentVariables = {
     ...environmentVariables,
   };
@@ -117,8 +119,8 @@ export function getAuthenticationRules(
   let sshPort = insteadUrl.port;
 
   if (hostType === 'bitbucket-server') {
-    // For Bitbucket Server/Data Center, `source` must be `bitbucket-server`
-    // to generate HTTP(s) URLs correctly.
+    // For Bitbucket Server/Data Center, `source` must be `bitbucket-server` to
+    // generate HTTP(s) URLs correctly.
     // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
@@ -128,7 +130,8 @@ export function getAuthenticationRules(
     // v8 ignore next -- TODO: add test #40625
     if (!sshPort || isEmptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
-      // For non-default port, the generated auth config will likely be incorrect.
+      // For non-default port, the generated auth config will likely be
+      // incorrect.
       sshPort = '7999';
     }
   }
@@ -142,7 +145,8 @@ export function getAuthenticationRules(
   url.token = hasUser ? token : `ssh:${token}`;
   authenticationRules.push({
     url: url.toString(protocol),
-    // only edge case, need to stringify ourself because the exact syntax is not supported by the library
+    // only edge case, need to stringify ourself because the exact syntax is not
+    // supported by the library
     // https://github.com/IonicaBizau/git-url-parse/blob/246c9119fb42c2ea1c280028fe77c53eb34c190c/lib/index.js#L246
     insteadOf: `ssh://git@${insteadUrl.resource}${
       sshPort ? `:${sshPort}` : ''
@@ -172,7 +176,8 @@ export function getGitEnvironmentVariables(
 ): ResolvedChildEnv {
   let gitEnvironmentVariables: ResolvedChildEnv = { ...environmentVariables };
 
-  // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
+  // hard-coded logic to use authentication for github.com based on the
+  // githubToken for api.github.com
   const gitHubHostRule = find({
     hostType: 'github',
     url: 'https://api.github.com/',
@@ -186,19 +191,23 @@ export function getGitEnvironmentVariables(
     );
   }
 
-  // Manager-scoped rules are opt-in so unrelated credentials are not exposed to Git.
+  // Manager-scoped rules are opt-in so unrelated credentials are not exposed to
+  // Git.
   const gitAllowedHostTypes = new Set<string>([
     ...PLATFORM_HOST_TYPES,
     ...hostTypes,
   ]);
 
-  // filter rules without `matchHost` and `token` or username and password and github api github rules
+  // filter rules without `matchHost` and `token` or username and password and
+  // github api github rules
   const hostRules = getAll()
     .filter((r) => r.matchHost && (r.token ?? (r.username && r.password)))
     .filter((r) => !gitHubHostRule || !githubApiUrls.has(r.matchHost!));
 
-  // for each hostRule without hostType we add additional authentication variables to the environmentVariables
-  // for each hostRule with hostType we add additional authentication variables to the environmentVariables
+  // for each hostRule without hostType we add additional authentication
+  // variables to the environmentVariables
+  // for each hostRule with hostType we add additional authentication variables
+  // to the environmentVariables
   for (const hostRule of hostRules) {
     if (!hostRule.hostType || gitAllowedHostTypes.has(hostRule.hostType)) {
       gitEnvironmentVariables = addAuthFromHostRule(

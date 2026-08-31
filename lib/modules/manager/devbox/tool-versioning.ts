@@ -28,8 +28,8 @@ export const devboxToolVersioning: ToolVersioning = {
     api: looseVersioning.api,
     id: looseVersioning.id,
   },
-  // Using python versioning due to versions like 1.2beta2
-  // seems odd, but Go does actually follow python versioning rules for the language
+  // Using python versioning due to versions like 1.2beta2 seems odd, but Go
+  // does actually follow python versioning rules for the language
   go: {
     api: pythonVersioning.api,
     id: pythonVersioning.id,

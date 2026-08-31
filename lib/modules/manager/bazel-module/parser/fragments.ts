@@ -54,7 +54,8 @@ export const ExtensionTagFragment = z.object({
   type: z.literal('extensionTag'),
   // The "logical" name of the extension (e.g. `oci` or `maven`).
   extension: z.string(),
-  // The "raw" name of the extension as it appears in the MODULE file (e.g. `maven_01` or `maven`)
+  // The "raw" name of the extension as it appears in the MODULE file (e.g.
+  // `maven_01` or `maven` )
   rawExtension: z.string(),
   tag: z.string(),
   children: LooseRecord(ValueFragments),

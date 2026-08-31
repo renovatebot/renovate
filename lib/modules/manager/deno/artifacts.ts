@@ -110,8 +110,8 @@ export async function updateArtifacts(
 
     // "deno install" don't execute lifecycle scripts of package.json by default
     // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
-    // deno.json(c) could have the `lock.frozen` field
-    // we should always override the `frozen` flag due to if it would be specified true
+    // deno.json(c) could have the `lock.frozen` field we should always override
+    // the `frozen` flag due to if it would be specified true
     let command = 'deno install --frozen=false';
 
     // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web

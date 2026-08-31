@@ -583,7 +583,8 @@ export type MergeStrategy =
   | 'rebase-merge'
   | 'squash';
 
-// This list should be added to as any new unsafe execution commands should be permitted
+// This list should be added to as any new unsafe execution commands should be
+// permitted
 export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'

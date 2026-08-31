@@ -46,7 +46,8 @@ export function isGradleExecutionAllowed(command: string): boolean {
   return true;
 }
 
-// .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
+// .lockfile is gradle default lockfile, /versions.lock is
+// gradle-consistent-versions plugin lockfile
 function isLockFile(fileName: string): boolean {
   return fileName.endsWith('.lockfile') || isGcvLockFile(fileName);
 }
@@ -139,7 +140,8 @@ async function buildUpdateVerificationMetadataCmd(
   }
 
   if ((verifiesChecksums || verifiesSignatures) && !hashTypes.length) {
-    // fallback algorithm for pgp and in case a weak algorithm (md5, sha1) is used for checksums
+    // fallback algorithm for pgp and in case a weak algorithm (md5, sha1) is
+    // used for checksums
     hashTypes.push('sha256');
   }
 

@@ -49,7 +49,8 @@ class ApkVersioningApi extends GenericVersioningApi {
     const minorPatchStr =
       (minor ? `.${minor}` : '') + (patch ? `.${patch}` : '') + extra;
 
-    // For version comparison, we only include the base version + package fix, not prerelease
+    // For version comparison, we only include the base version + package fix,
+    // not prerelease
     const versionStr = major + minorPatchStr + (letter ?? '') + packageFixFull;
 
     let prerelease: string | undefined;
@@ -128,7 +129,8 @@ class ApkVersioningApi extends GenericVersioningApi {
     const release1 = parsed1.releaseString || '';
     const release2 = parsed2.releaseString || '';
 
-    // If one has a release number and the other doesn't, the one with release number is greater
+    // If one has a release number and the other doesn't, the one with release
+    // number is greater
     if (release1 && !release2) {
       return 1;
     }
@@ -344,8 +346,8 @@ class ApkVersioningApi extends GenericVersioningApi {
     currentVersion?: string;
     newVersion: string;
   }): string | null {
-    // APK packages in apko.yaml only use exact versions
-    // currentValue is stored without the = operator for cleaner PR display
+    // APK packages in apko.yaml only use exact versions currentValue is stored
+    // without the = operator for cleaner PR display
     const hasRevision = regEx(/-r\d+$/).test(currentValue);
 
     // If current version has no revision, strip revision from newVersion

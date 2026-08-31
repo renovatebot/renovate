@@ -84,7 +84,8 @@ export function analyseTerragruntModule(
       logger.debug('Terragrunt module contains subdirectory');
     }
     dep.depType = 'gitTags';
-    // We don't want to have leading slash, .git or subdirectory in the repository path
+    // We don't want to have leading slash, .git or subdirectory in the
+    // repository path
     const repositoryPath = pathname
       .replace(regEx(/^\//), '')
       .split('//')[0]

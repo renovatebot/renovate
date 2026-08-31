@@ -2329,7 +2329,8 @@ describe('modules/manager/github-actions/extract', () => {
 
   describe('actions.lock', () => {
     beforeEach(() => {
-      // the lock file is read through the memory cache, which production initialises per repository
+      // the lock file is read through the memory cache, which production
+      // initialises per repository
       memCache.init();
     });
 
@@ -2356,7 +2357,8 @@ describe('modules/manager/github-actions/extract', () => {
         '.github/workflows/ci.yml',
       );
 
-      // `gh actions-lock` strips an inline pin back out, so the lookup must not offer one
+      // `gh actions-lock` strips an inline pin back out, so the lookup must not
+      // offer one
       expect(res?.deps).toMatchObject([
         { depName: 'actions/checkout', digestManagedExternally: true },
         { depName: 'alpine' },
@@ -2414,7 +2416,8 @@ describe('modules/manager/github-actions/extract', () => {
     it('marks a local composite action, which the lockfile does not key', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockfile);
 
-      // composite actions are transitive dependencies of onboarded workflows, so the tool rewrites them too
+      // composite actions are transitive dependencies of onboarded workflows,
+      // so the tool rewrites them too
       const res = await extractPackageFile(
         workflow,
         '.github/actions/build/action.yml',
@@ -2428,7 +2431,8 @@ describe('modules/manager/github-actions/extract', () => {
         "version: 'v0.0.2'\nworkflows: {}",
       );
 
-      // a composite action isn't keyed by `workflows:`, so it's still managed even when that key is missing entirely
+      // a composite action isn't keyed by `workflows:`, so it's still managed
+      // even when that key is missing entirely
       const res = await extractPackageFile(
         workflow,
         '.github/actions/build/action.yml',
@@ -2456,7 +2460,8 @@ describe('modules/manager/github-actions/extract', () => {
         '.github/workflows/ci.yml',
       );
 
-      // `updateActionsLockfile` refuses to regenerate a lockfile it cannot parse, so pinning inline would leave the lockfile stale
+      // `updateActionsLockfile` refuses to regenerate a lockfile it cannot
+      // parse, so pinning inline would leave the lockfile stale
       expect(res?.deps[0].digestManagedExternally).toBe(true);
     });
 

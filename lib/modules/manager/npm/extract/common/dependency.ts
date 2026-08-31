@@ -25,11 +25,11 @@ export function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  // Yarn selective dependency resolutions may nest a path of parent
-  // packages before the target package, e.g. `parent/child` or
-  // `@scope/parent/child`, and any segment (including the last) may carry
-  // a `@range` suffix used to disambiguate which version of that package
-  // to match, e.g. `@cypress/request/qs@~6.14.1`.
+  // Yarn selective dependency resolutions may nest a path of parent packages
+  // before the target package, e.g. `parent/child` or
+  // `@scope/parent/child`, and any segment (including the last) may carry a
+  // `@range` suffix used to disambiguate which version of that package to
+  // match, e.g. `@cypress/request/qs@~6.14.1`.
   const parts = key.split('/');
   const segments: string[] = [];
   for (let i = 0; i < parts.length; i += 1) {

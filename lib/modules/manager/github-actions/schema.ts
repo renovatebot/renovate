@@ -16,7 +16,8 @@ const UsesStep = z.object({
 });
 export type UsesStep = z.infer<typeof UsesStep>;
 
-// A `parallel:` group flattens its (recursively resolved) sub-steps into leaf steps.
+// A `parallel:` group flattens its (recursively resolved) sub-steps into leaf
+// steps.
 // See: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#example-running-steps-in-parallel
 const ParallelStep: z.ZodType<UsesStep[]> = z
   .object({ parallel: LooseArray(z.lazy(() => Step)) })

@@ -141,7 +141,8 @@ describe('modules/datasource/pypi/index', () => {
       // `numpy` shows how far off that can be:
       // - `1.5.1` was released in 2010
       // - `1.5.1` gained a wheel in 2014, which PyPI lists first
-      // - `1.5.0` lists its sdist first, even though a Windows installer was uploaded earlier
+      // - `1.5.0` lists its sdist first, even though a Windows installer was
+      // uploaded earlier
       httpMock.scope(baseUrl).get('/numpy/json').reply(200, numpyResponse);
 
       const res = await getPkgReleases({ datasource, packageName: 'numpy' });
@@ -239,7 +240,8 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
-      // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+      // GoogleAuth is mocked as a class and instantiated with `new`, requires
+      // regular function
       // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementationOnce(function () {
         return partial<InstanceType<typeof _googleAuth>>({
@@ -265,7 +267,8 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
-      // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+      // GoogleAuth is mocked as a class and instantiated with `new`, requires
+      // regular function
       // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementation(function () {
         return partial<InstanceType<typeof _googleAuth>>({
@@ -959,7 +962,8 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
         .reply(200, simpleJson, {
-          // Some registries/proxies relabel or don't emit the exact vendor media type, while still returning a JSON body.
+          // Some registries/proxies relabel or don't emit the exact vendor
+          // media type, while still returning a JSON body.
           'content-type': 'application/json',
         });
       const config = {
@@ -1001,7 +1005,9 @@ describe('modules/datasource/pypi/index', () => {
     });
 
     it('does not retry for a status code which is not `406`', async () => {
-      // only `406` means the registry could not serve any of the negotiated types, so anything else is a real failure rather than a rejected `Accept` header
+      // only `406` means the registry could not serve any of the negotiated
+      // types, so anything else is a real failure rather than a rejected
+      // `Accept` header
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
@@ -1286,7 +1292,8 @@ describe('modules/datasource/pypi/index', () => {
       // `numpy` shows how far off that can be:
       // - `1.5.1` was released in 2010
       // - `1.5.1` gained a wheel in 2014, which PyPI lists first
-      // - `1.5.0` lists its sdist first, even though a Windows installer was uploaded earlier
+      // - `1.5.0` lists its sdist first, even though a Windows installer was
+      // uploaded earlier
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/numpy/')
@@ -1376,7 +1383,9 @@ describe('modules/datasource/pypi/index', () => {
   });
 
   it('keeps versions with a file without data-requires-python under strict constraints filtering', async () => {
-    // if a release's files has at least one `data-requires-python`, and at least one without, we should use the present value, rather than losing both
+    // if a release's files has at least one `data-requires-python`, and at
+    // least one without, we should use the present value, rather than losing
+    // both
     const html = codeBlock`
         <html>
           <body>
@@ -1416,7 +1425,8 @@ describe('modules/datasource/pypi/index', () => {
         'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
-    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires
+    // regular function
     // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({
@@ -1449,7 +1459,8 @@ describe('modules/datasource/pypi/index', () => {
         'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
-    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires
+    // regular function
     // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({

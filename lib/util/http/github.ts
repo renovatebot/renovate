@@ -461,7 +461,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           baseUrl,
           rebasePaginationLinks,
         );
-        // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
+        // Don't follow a cross-origin request, unless we've been explicitly
+        // requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
         if (firstPageUrl.origin === resolvedUrl.origin) {
           let pages: HttpResponse<T>[];
           if (linkHeader?.last?.page) {
@@ -552,7 +553,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
             }
           }
         } else {
-          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          // make sure that users are aware if there are any (potentially
+          // malicious, or misconfigured) pagination links being returned
           logger.once.warn(
             {
               requestHost: resolvedUrl.host,

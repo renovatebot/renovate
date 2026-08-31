@@ -23,7 +23,8 @@ export async function getAppDetails(token: string): Promise<UserDetails> {
       username: appData.data.viewer.login,
       name: appData.data.viewer.login,
       id: appData.data.viewer.databaseId,
-      // When using the GraphQL API, email requires a token with user:email scope
+      // When using the GraphQL API, email requires a token with user:email
+      // scope
       email: null,
     };
   } catch (err) {

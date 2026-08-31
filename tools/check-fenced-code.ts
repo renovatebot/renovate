@@ -93,9 +93,10 @@ function withStubbedEnv<T>(fn: () => Promise<T>): Promise<T> {
   });
 }
 
-// Some docs show a bare object literal instead of a full `module.exports = {...}`
-// config file. At the top of a script/module, `{...}` parses as a block
-// statement rather than an object expression, so wrap it to get the intended value.
+// Some docs show a bare object literal instead of a full
+// `module.exports = {...}` config file. At the top of a script/module, `{...}`
+// parses as a block statement rather than an object expression, so wrap it to
+// get the intended value.
 function toModuleSource(content: string): string {
   const trimmed = content.trim();
   if (
@@ -209,8 +210,10 @@ async function processFile(file: string): Promise<void> {
       const massagedConfig = massageConfig(configuration);
 
       if (!token.info.includes('configType=none')) {
-        // JS config files (`config.js`) are only ever loaded as global/self-hosted
-        // config, so default `js`/`javascript` blocks to `global` unlike `json`/`jsonc`.
+        // JS config files (`config.js`) are only ever loaded as
+        // global/self-hosted
+        // config, so default `js` /`javascript` blocks to `global` unlike
+        // `json` /`jsonc`.
         const defaultConfigType = isJsFamily ? 'global' : 'repo';
         let configType: 'global' | 'repo' = defaultConfigType;
         if (token.info.includes('configType=global')) {
@@ -254,7 +257,8 @@ void (async () => {
   validate = validator.compile(draft7MetaSchema);
 
   GlobalConfig.set({
-    // any environment vars that any repository configuration in the documentation references
+    // any environment vars that any repository configuration in the
+    // documentation references
     allowedEnv: [
       'SOME_ENV_VARIABLE',
       'GONOSUMDB',

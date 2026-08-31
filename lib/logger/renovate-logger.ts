@@ -201,7 +201,8 @@ export class RenovateLogger implements Logger {
     p2?: string,
   ): void {
     if (!this.bunyanLogger) {
-      // defer logging until bunyan logger is initialized, to avoid losing logs during initialization
+      // defer logging until bunyan logger is initialized, to avoid losing logs
+      // during initialization
       this.queue.push(() => this.log(level, p1, p2));
       if (!this.uninitializedWarningFired) {
         // oxlint-disable-next-line no-console -- intentional: display warning when bunyan isn't initialized

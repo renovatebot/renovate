@@ -107,14 +107,17 @@ describe('workers/repository/reconfigure/comment', () => {
         );
 
         const prBody = platform.ensureComment.mock.calls[0][0].content;
-        // the full PR list renders each branch as a `<details>` block, the summary uses a table instead
+        // the full PR list renders each branch as a `<details>` block, the
+        // summary uses a table instead
         expect(prBody).not.toContain('<details>');
         expect(prBody).toContain('| Manager | major |');
-        // the full package files description lists files inline suffixed with the manager,
+        // the full package files description lists files inline suffixed with
+        // the manager,
         // the summary groups them under a manager heading instead
         expect(prBody).not.toContain('`package.json` (npm)');
         expect(prBody).toContain('#### npm\n\n * `package.json`');
-        // in the summary view, "What to Expect" should render before "Detected Package Files"
+        // in the summary view, "What to Expect" should render before "Detected
+        // Package Files"
         expect(prBody.indexOf('### What to Expect')).toBeLessThan(
           prBody.indexOf('### Detected Package Files'),
         );

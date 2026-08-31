@@ -105,7 +105,8 @@ export function matchesContentDescriptor(
       if (matcher === 'regex') {
         versionMatch = regEx(contentVersion).test(dep.currentValue);
       } else {
-        // contentVersion can be an exact version or a gradle-supported version range
+        // contentVersion can be an exact version or a gradle-supported version
+        // range
         versionMatch = gradleVersioning.matches(
           dep.currentValue,
           contentVersion,
@@ -128,7 +129,8 @@ export function matchesContentDescriptor(
   }
 
   if (hasIncludes && hasExcludes) {
-    // if both includes and excludes exist, dep must match include and not match exclude
+    // if both includes and excludes exist, dep must match include and not match
+    // exclude
     return matchesInclude && !matchesExclude;
   }
   if (hasIncludes) {

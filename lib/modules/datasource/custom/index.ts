@@ -95,7 +95,8 @@ export class CustomDatasource extends Datasource {
     _cfg: DigestConfig,
     _newValue?: string,
   ): Promise<string | null> {
-    // Return null here to support setting a digest: value can be provided digest in getReleases
+    // Return null here to support setting a digest: value can be provided
+    // digest in getReleases
     return Promise.resolve(null);
   }
 }

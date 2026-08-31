@@ -14,7 +14,8 @@ export default defineRule({
         if (
           node.callee.type === 'Identifier' &&
           node.callee.name === 'URL' &&
-          // only consider new URL(arg) and not new URL(arg, base) as parseUrl does not allow this
+          // only consider new URL(arg) and not new URL(arg, base) as parseUrl
+          // does not allow this
           node.arguments.length === 1
         ) {
           context.report({ node, messageId: 'noNewUrl' });

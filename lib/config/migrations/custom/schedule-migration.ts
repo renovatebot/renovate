@@ -34,7 +34,8 @@ export class ScheduleMigration extends AbstractMigration {
             // We need to massage short hours first before we can parse it
             schedules[i].replace(shortHoursRegex, '$1:00$2'),
           ).schedules[0];
-          // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
+          // Only migrate if the after time is greater than before, e.g. "after
+          // 10pm and before 5am"
           if (!parsedSchedule?.t_a || !parsedSchedule.t_b) {
             continue;
           }

@@ -70,7 +70,8 @@ const cacheProvider = new PackageHttpCacheProvider({
   writeSchema: CachedMavenXml,
 });
 
-// Release POMs and timestamped snapshot POMs are immutable once published, so we can cache them much longer than mutable metadata files.
+// Release POMs and timestamped snapshot POMs are immutable once published, so
+// we can cache them much longer than mutable metadata files.
 const pomCacheProvider = new PackageHttpCacheProvider({
   namespace: 'datasource-maven:pom-cache-provider',
   softTtlMinutes: 60 * 24 * 28, // 28 days before we'll give it another check, just in case it's updated
@@ -80,7 +81,8 @@ const pomCacheProvider = new PackageHttpCacheProvider({
 });
 
 function selectCacheProvider(url: string): PackageHttpCacheProvider {
-  // Non-timestamped -SNAPSHOT.pom files are mutable; everything else ending in .pom (release POMs and timestamped snapshot POMs) is immutable.
+  // Non-timestamped -SNAPSHOT.pom files are mutable; everything else ending in
+  // .pom (release POMs and timestamped snapshot POMs) is immutable.
   if (url.endsWith('.pom') && !url.endsWith('-SNAPSHOT.pom')) {
     return pomCacheProvider;
   }
@@ -417,12 +419,13 @@ export function getDependencyParts(packageName: string): MavenDependency {
 }
 
 function extractSnapshotVersion(metadata: XmlDocument): string | null {
-  // Parse the maven-metadata.xml for the snapshot version and determine
-  // the fixed version of the latest deployed snapshot.
+  // Parse the maven-metadata.xml for the snapshot version and determine the
+  // fixed version of the latest deployed snapshot.
   // The metadata descriptor can be found at
   // https://maven.apache.org/ref/3.3.3/maven-repository-metadata/repository-metadata.html
   //
-  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build number,
+  // Basically, we need to replace -SNAPSHOT with the artifact timestanp & build
+  // number,
   // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
   const version = metadata
     .descendantWithPath('version')
@@ -433,7 +436,8 @@ function extractSnapshotVersion(metadata: XmlDocument): string | null {
   const build = snapshot?.childNamed('buildNumber')?.val;
 
   // If we weren't able to parse out the required 3 version elements,
-  // return null because we can't determine the fixed version of the latest snapshot.
+  // return null because we can't determine the fixed version of the latest
+  // snapshot.
   if (!version || !timestamp || !build) {
     return null;
   }
@@ -446,8 +450,9 @@ async function getSnapshotFullVersion(
   dependency: MavenDependency,
   repoUrl: string,
 ): Promise<string | null> {
-  // To determine what actual files are available for the snapshot, first we have to fetch and parse
-  // the metadata located at http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
+  // To determine what actual files are available for the snapshot, first we
+  // have to fetch and parse the metadata located at
+  // http://<repo>/<group>/<artifact>/<version-SNAPSHOT>/maven-metadata.xml
   const metadataUrl = getMavenUrl(
     dependency,
     repoUrl,
@@ -479,7 +484,8 @@ export async function createUrlForDependencyPom(
   repoUrl: string,
 ): Promise<string> {
   if (isSnapshotVersion(version)) {
-    // By default, Maven snapshots are deployed to the repository with fixed file names.
+    // By default, Maven snapshots are deployed to the repository with fixed
+    // file names.
     // Resolve the full, actual pom file name for the version.
     const fullVersion = await getSnapshotFullVersion(
       http,
@@ -488,7 +494,8 @@ export async function createUrlForDependencyPom(
       repoUrl,
     );
 
-    // If we were able to resolve the version, use that, otherwise fall back to using -SNAPSHOT
+    // If we were able to resolve the version, use that, otherwise fall back to
+    // using -SNAPSHOT
     if (fullVersion !== null) {
       // TODO: types (#22198)
       return `${version}/${dependency.name}-${fullVersion}.pom`;
@@ -536,8 +543,9 @@ export async function getDependencyInfo(
           .replace(regEx(/^git@github.com\//), 'https://github.com/');
 
         if (result.sourceUrl.startsWith('//')) {
-          // most likely the result of us stripping scm:, git: etc
-          // going with prepending https: here which should result in potential information retrival
+          // most likely the result of us stripping scm:, git: etc going with
+          // prepending https: here which should result in potential information
+          // retrival
           result.sourceUrl = `https:${result.sourceUrl}`;
         }
       }
@@ -570,8 +578,8 @@ export async function getDependencyInfo(
         parent &&
         (!result.sourceUrl || !result.homepage)
       ) {
-        // if we found a parent and are missing some information
-        // trying to get the scm/homepage information from it
+        // if we found a parent and are missing some information trying to get
+        // the scm/homepage information from it
         const [parentGroupId, parentArtifactId, parentVersion] = [
           'groupId',
           'artifactId',

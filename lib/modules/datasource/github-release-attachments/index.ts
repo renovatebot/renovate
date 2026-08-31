@@ -170,7 +170,8 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
         (a: GithubRestAsset) => a.name === checksumAssetName,
       );
 
-      // If the checksum asset is not found in the new release, fall back to the download method
+      // If the checksum asset is not found in the new release, fall back to the
+      // download method
       if (checksumAsset) {
         const releaseFilename = digestAsset.digestedFileName.replace(
           current,

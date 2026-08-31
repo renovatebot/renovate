@@ -22,9 +22,10 @@ export function getExpression(input: string): JsonataExpression | Error {
       (url: string) => detectPlatform(url),
       '<s-:s>',
     );
-    // Wrap the evaluate method to default bindings to {} for concurrent evaluation safety.
-    // This prevents race conditions when the same cached expression is evaluated
-    // concurrently with different data. See #40311 for background.
+    // Wrap the evaluate method to default bindings to {} for concurrent
+    // evaluation safety.
+    // This prevents race conditions when the same cached expression is
+    // evaluated concurrently with different data. See #40311 for background.
     const originalEvaluate = expression.evaluate.bind(expression);
     expression.evaluate = (
       data: unknown,

@@ -84,7 +84,8 @@ export async function postUpgradeCommandsExecutor(
     const dataFileTemplate = upgrade.postUpgradeTasks?.dataFileTemplate;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (isNonEmptyArray(commands)) {
-      // Persist updated files in file system so any executed commands can see them
+      // Persist updated files in file system so any executed commands can see
+      // them
       const previouslyModifiedFiles =
         config.updatedPackageFiles!.concat(updatedArtifacts);
       for (const file of previouslyModifiedFiles) {
@@ -253,7 +254,8 @@ export async function postUpgradeCommandsExecutor(
         ...coerceArray(status.renamed?.map((x) => x.from)),
       ];
 
-      // Check for files which were previously deleted but have been re-added without modification
+      // Check for files which were previously deleted but have been re-added
+      // without modification
       const previouslyDeletedFiles = updatedArtifacts.filter(
         (ua) => ua.type === 'deletion',
       );
@@ -325,7 +327,8 @@ export async function postUpgradeCommandsExecutor(
               }
               updatedArtifacts.push(updatedArtifact);
             }
-            // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
+            // If the file is deleted by a previous post-update command, remove
+            // the deletion from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
               (ua) => !(ua.type === 'deletion' && ua.path === relativePath),
             );
@@ -356,7 +359,8 @@ export async function postUpgradeCommandsExecutor(
                 path: relativePath,
               });
             }
-            // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
+            // If the file is created or modified by a previous post-update
+            // command, remove the modification from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
               (ua) => !(ua.type === 'addition' && ua.path === relativePath),
             );

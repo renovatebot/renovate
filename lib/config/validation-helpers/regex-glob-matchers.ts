@@ -24,8 +24,8 @@ export function check({
     }
     for (const matcher of matchers) {
       // Validate regex pattern
-      // No need to validate if the string is a glob
-      // minimatch allows any string as glob
+      // No need to validate if the string is a glob minimatch allows any string
+      // as glob
       if (isRegexMatch(matcher) && !getRegexPredicate(matcher)) {
         res.push({
           topic: ConfigValidationTopic.Error,

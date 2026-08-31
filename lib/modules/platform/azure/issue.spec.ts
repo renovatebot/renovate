@@ -1229,8 +1229,9 @@ describe('modules/platform/azure/issue', () => {
         }),
       );
 
-      // getIssueList (inside ensureIssue) resolves states once, then ensureIssue
-      // resolves again and must hit the cache rather than re-querying.
+      // getIssueList (inside ensureIssue) resolves states once, then
+      // ensureIssue resolves again and must hit the cache rather than
+      // re-querying.
       await issueService.ensureIssue({
         title: 'Test Issue',
         body: 'New body content',

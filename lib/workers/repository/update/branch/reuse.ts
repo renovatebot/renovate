@@ -74,7 +74,8 @@ export async function shouldReuseExistingBranch(
         result.reuseExistingBranch = true;
         result.isModified = false;
       }
-      // Setting reuseExistingBranch back to undefined means that we'll use the default branch
+      // Setting reuseExistingBranch back to undefined means that we'll use the
+      // default branch
       return result;
     }
     // Don't do anything different, but warn
@@ -83,10 +84,13 @@ export async function shouldReuseExistingBranch(
   }
   logger.debug(`Branch does not need rebasing`);
 
-  // Branches can get in an inconsistent state if "update-lockfile" is used at the same time as other strategies
-  // On the first execution, everything is executed, but if on a second execution the package.json modification is
-  // skipped but the lockfile update is executed, the lockfile will have a different result than if it was executed
-  // along with the changes to the package.json. Thus ending up with an incomplete branch update
+  // Branches can get in an inconsistent state if "update-lockfile" is used at
+  // the same time as other strategies
+  // On the first execution, everything is executed, but if on a second
+  // execution the package.json modification is skipped but the lockfile update
+  // is executed, the lockfile will have a different result than if it was
+  // executed along with the changes to the package.json. Thus ending up with an
+  // incomplete branch update
   // This is why we are skipping branch reuse in this case (#10050)
   const groupedByPackageFile: Record<string, Set<RangeStrategy>> = {};
   for (const upgrade of result.upgrades) {

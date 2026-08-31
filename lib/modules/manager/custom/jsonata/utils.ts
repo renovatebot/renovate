@@ -32,8 +32,10 @@ export async function handleMatching(
       continue;
     }
 
-    // allows empty dep object cause templates can be used to configure the required fields
-    // if some issues arise then the isValidDependency call will catch them later on
+    // allows empty dep object cause templates can be used to configure the
+    // required fields
+    // if some issues arise then the isValidDependency call will catch them
+    // later on
     if (!queryResult || isEmptyArray(queryResult)) {
       logger.debug(
         {

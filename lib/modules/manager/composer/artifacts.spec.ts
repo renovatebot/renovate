@@ -121,7 +121,8 @@ describe('modules/manager/composer/artifacts', () => {
       matchHost: 'api.github.com',
       token: 'ghp_github-token',
     });
-    // This rule should not affect the result the Github rule has priority to avoid breaking changes.
+    // This rule should not affect the result the Github rule has priority to
+    // avoid breaking changes.
     hostRules.add({
       hostType: GitTagsDatasource.id,
       matchHost: 'github.com',

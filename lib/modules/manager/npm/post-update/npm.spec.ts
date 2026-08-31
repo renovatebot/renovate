@@ -358,7 +358,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('package-lock-contents');
-    // since there are no install npm commands, it means we are using the global npm
+    // since there are no install npm commands, it means we are using the global
+    // npm
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',

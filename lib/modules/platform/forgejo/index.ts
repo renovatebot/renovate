@@ -318,8 +318,10 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    // similar to forgejo behaviour- if default merge style is allowed, use this;
-    // else fall back to predefined order. Order chosen to minimize commits - see
+    // similar to forgejo behaviour- if default merge style is allowed, use
+    // this;
+    // else fall back to predefined order. Order chosen to minimize commits -
+    // see
     // https://github.com/renovatebot/renovate/pull/37768 for discussion.
     const preferredOrder: PRMergeMethod[] = [
       ...(repo.default_merge_style ? [repo.default_merge_style] : []),
@@ -601,8 +603,10 @@ const platform: Platform = {
 
       if (platformPrOptions?.usePlatformAutomerge) {
         // Only Forgejo v10.0.0+ support delete_branch_after_merge.
-        // This is required to not have undesired behavior when renovate finds existing branches on next run.
-        // Codeberg usees git versioning like `11.0.1-99-c504062+gitea-1.22.0` so allow any version >= 10.0.0-0.
+        // This is required to not have undesired behavior when renovate finds
+        // existing branches on next run.
+        // Codeberg usees git versioning like `11.0.1-99-c504062+gitea-1.22.0`
+        // so allow any version >= 10.0.0-0.
         if (semver.gte(defaults.version, '10.0.0-0')) {
           try {
             await helper.mergePR(config.repository, gpr.number, {
@@ -645,24 +649,28 @@ const platform: Platform = {
       );
       return pr;
     } catch (err) {
-      // When the user manually deletes a branch from Renovate, the PR remains but is no longer linked to any branch. In
-      // the most recent versions of Forgejo, the PR gets automatically closed when that happens, but older versions do
-      // not handle this properly and keep the PR open. As pushing a branch with the same name resurrects the PR, this
-      // would cause a HTTP 409 conflict error, which we hereby gracefully handle.
+      // When the user manually deletes a branch from Renovate, the PR remains
+      // but is no longer linked to any branch. In the most recent versions of
+      // Forgejo, the PR gets automatically closed when that happens, but older
+      // versions do not handle this properly and keep the PR open. As pushing a
+      // branch with the same name resurrects the PR, this would cause a HTTP
+      // 409 conflict error, which we hereby gracefully handle.
       if (err.statusCode === 409) {
         logger.warn(
           { prTitle: title, sourceBranch },
           'Attempting to gracefully recover from 409 Conflict response in createPr()',
         );
 
-        // Refresh cached PR list and search for pull request with matching information
+        // Refresh cached PR list and search for pull request with matching
+        // information
         ForgejoPrCache.forceSync();
         const pr = await platform.findPr({
           branchName: sourceBranch,
           state: 'open',
         });
 
-        // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
+        // If a valid PR was found, return and gracefully recover from the
+        // error. Otherwise, abort and throw error.
         // v8 ignore else -- TODO: add test #40625
         if (pr?.bodyStruct) {
           if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
@@ -841,7 +849,8 @@ const platform: Platform = {
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
 
-        // If no active issue was found, decide if it shall be skipped, re-opened or updated without state change
+        // If no active issue was found, decide if it shall be skipped,
+        // re-opened or updated without state change
         if (!activeIssue) {
           if (once) {
             logger.debug('Issue already closed - skipping update');
@@ -976,7 +985,8 @@ const platform: Platform = {
         comment = findCommentByContent(commentList, body);
       }
 
-      // Create a new comment if no match has been found, otherwise update if necessary
+      // Create a new comment if no match has been found, otherwise update if
+      // necessary
       if (!comment) {
         comment = await helper.createComment(config.repository, issue, body);
         logger.info(

@@ -421,7 +421,8 @@ export async function getBranchStatusCheck(
       const label = change.labels![context];
       // v8 ignore else -- TODO: add test #40625
       if (label) {
-        // Check for rejected or blocking first, as a label could have both rejected and approved
+        // Check for rejected or blocking first, as a label could have both
+        // rejected and approved
         if (label.rejected || label.blocking) {
           return 'red';
         }

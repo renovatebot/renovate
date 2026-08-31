@@ -1206,7 +1206,8 @@ describe('modules/datasource/docker/index', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Current digest ${currentDigest} relates to architecture `,
       );
-      // Should use the digest from HEAD request (no architecture-specific logic)
+      // Should use the digest from HEAD request (no architecture-specific
+      // logic)
       expect(res).toBe('sha256:some-digest-from-head-request');
     });
 
@@ -1772,7 +1773,8 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
-    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could
+    // also be misconfiguration
     it('does not follow pagination links to a different origin', async () => {
       const tags = ['1.0.0'];
       httpMock
@@ -2032,9 +2034,11 @@ describe('modules/datasource/docker/index', () => {
         .get('/virtual-mirror/library/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/virtual-mirror/library/node/tags/list?n=10000')
-        // Note the Link is incorrect and should be `</virtual-mirror/library/node/tags/list?n=10000&last=10000>; rel="next", `
-        // Artifactory incorrectly returns a next link without the virtual repository name
-        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
+        // Note the Link is incorrect and should be
+        // `</virtual-mirror/library/node/tags/list?n=10000&last=10000>; rel="next", `
+        // Artifactory incorrectly returns a next link without the virtual
+        // repository name this is due to a bug in Artifactory
+        // https://jfrog.atlassian.net/browse/RTFACT-18971
         .reply(
           200,
           { tags: tags1 },
@@ -2116,7 +2120,8 @@ describe('modules/datasource/docker/index', () => {
               authorization: 'Bearer test',
             },
           })
-          // The  tag limit parameter `n` needs to be limited to 1000 for ECR Public
+          // The tag limit parameter `n` needs to be limited to 1000 for ECR
+          // Public
           // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
           .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
           .reply(200, { tags: ['some'] }, {});
@@ -2234,7 +2239,8 @@ describe('modules/datasource/docker/index', () => {
           // fallback auth probe via base /v2/ → 200 (no auth needed)
           .get('/')
           .reply(200)
-          // actual tag fetch → 405 (triggers isECRMaxResultsError retry with n=1000)
+          // actual tag fetch → 405 (triggers isECRMaxResultsError retry with
+          // n=1000)
           .get('/node/tags/list?n=10000')
           .reply(405, maxResultsErrorBody, {
             'Docker-Distribution-Api-Version': 'registry/2.0',
@@ -2591,7 +2597,8 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
-    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could
+    // also be misconfiguration
     it('does not follow Docker Hub tags pagination to a different origin', async () => {
       vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock

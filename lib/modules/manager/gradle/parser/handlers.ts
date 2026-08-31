@@ -174,7 +174,8 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
     return ctx;
   }
 
-  // Special handling: 3 independent dependencies mismatched as groupId, artifactId, version
+  // Special handling: 3 independent dependencies mismatched as groupId,
+  // artifactId, version
   if (
     isDependencyString(groupId) &&
     isDependencyString(artifactId) &&

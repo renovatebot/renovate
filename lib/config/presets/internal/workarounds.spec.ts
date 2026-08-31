@@ -240,7 +240,8 @@ describe('config/presets/internal/workarounds', () => {
   describe('javaLTSVersions', () => {
     const preset = presets.javaLTSVersions;
     const packageRules = preset.packageRules!;
-    // Indices: 0 regex+names, 1 regex+deps, 2 docker major-only+names, 3 docker major-only+deps, 4 liberica
+    // Indices: 0 regex+names, 1 regex+deps, 2 docker major-only+names, 3 docker
+    // major-only+deps, 4 liberica
     const regexPackageRule = packageRules[0];
     const majorOnlyPackageRule = packageRules[2];
     const majorOnlyDepRule = packageRules[3];

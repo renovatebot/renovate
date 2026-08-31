@@ -51,8 +51,10 @@ export async function extractAllDependencies(
     extractionFingerprints: {},
   };
 
-  // Store the fingerprint of all managers which match any file (even if they do not find any dependencies)
-  // The cached result needs to be invalidated if the fingerprint of any matching manager changes
+  // Store the fingerprint of all managers which match any file (even if they do
+  // not find any dependencies)
+  // The cached result needs to be invalidated if the fingerprint of any
+  // matching manager changes
   for (const { manager } of extractList) {
     extractResult.extractionFingerprints[manager] = hashMap.get(manager);
   }
@@ -98,7 +100,8 @@ export async function extractAllDependencies(
   }
   logger.debug(`Found ${fileCount} package file(s)`);
 
-  // If enabledManagers is non-empty, check that each of them has at least one extraction.
+  // If enabledManagers is non-empty, check that each of them has at least one
+  // extraction.
   // If not, log a warning to indicate possible misconfiguration.
   if (isNonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {

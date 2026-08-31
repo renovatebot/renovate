@@ -97,8 +97,8 @@ async function updateArtifactsImpl(
   logger.debug(`cargo.updateArtifacts(${packageFileName})`);
 
   // For standalone package crates, the `Cargo.lock` will be in the same
-  // directory as `Cargo.toml` (ie. a sibling). For cargo workspaces, it
-  // will be further up.
+  // directory as `Cargo.toml` (ie. a sibling). For cargo workspaces, it will be
+  // further up.
   const lockFileName = await findLocalSiblingOrParent(
     packageFileName,
     'Cargo.lock',
@@ -183,8 +183,8 @@ async function updateArtifactsImpl(
 
     // Sometimes `cargo update` will fail when a preceding dependency update
     // causes another dependency to update. In this case we can no longer
-    // reference the dependency by its old version, so we filter it out
-    // and retry recursively.
+    // reference the dependency by its old version, so we filter it out and
+    // retry recursively.
     const newCargoLockContent = await readLocalFile(lockFileName, 'utf8');
     if (
       recursionLimit > 0 &&

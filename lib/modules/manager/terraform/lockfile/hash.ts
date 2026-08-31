@@ -57,12 +57,14 @@ export class TerraformProviderHash {
 
     try {
       for await (const entry of zipFile.eachEntry()) {
-        // Go's ZIP reader preserves the central-directory name bytes instead of decoding CP437 or Unicode path fields.
+        // Go's ZIP reader preserves the central-directory name bytes instead of
+        // decoding CP437 or Unicode path fields.
         const fileName = entry.fileNameRaw
           .toString('latin1')
           .replaceAll('\\', '/');
 
-        // Terraform verifies extracted packages with Go HashDir semantics, which omit directory records.
+        // Terraform verifies extracted packages with Go HashDir semantics,
+        // which omit directory records.
         if (fileName.endsWith('/')) {
           continue;
         }
@@ -200,8 +202,8 @@ export class TerraformProviderHash {
       return null;
     }
 
-    // check if the publisher uses one shasum file for all builds or separate ones
-    // we deduplicate to reduce the number of API calls
+    // check if the publisher uses one shasum file for all builds or separate
+    // ones we deduplicate to reduce the number of API calls
     const shaUrls = deduplicateArray(
       builds.map((build) => build.shasums_url).filter(isNotNullOrUndefined),
     );

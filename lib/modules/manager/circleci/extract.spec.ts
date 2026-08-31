@@ -336,8 +336,8 @@ describe('modules/manager/circleci/extract', () => {
     it('extracts deps from configs with multiple merge keys per mapping', () => {
       // YAML 1.2 rejects a mapping with two `<<` keys as a duplicate key and
       // the entire file is skipped. CircleCI itself parses these files as
-      // YAML 1.1, where merge keys are valid and additive, so Renovate must
-      // do the same to avoid silently missing every dep in the file.
+      // YAML 1.1, where merge keys are valid and additive, so Renovate must do
+      // the same to avoid silently missing every dep in the file.
       const res = extractPackageFile(codeBlock`
         version: 2.1
 

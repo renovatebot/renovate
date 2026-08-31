@@ -61,8 +61,9 @@ export function hasOnboardingBranchChanged(onboardingBranch: string): boolean {
   return true;
 }
 
-// checks if onboarding branch has been modified by user
-// once set to true it stays true as we do not rebase onboarding branches anymore (this feature will be added in future though)
+// checks if onboarding branch has been modified by user once set to true it
+// stays true as we do not rebase onboarding branches anymore (this feature will
+// be added in future though)
 export async function isOnboardingBranchModified(
   onboardingBranch: string,
   defaultBranch: string,

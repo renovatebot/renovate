@@ -186,7 +186,8 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritise contraint definitions, as they're more useful than the
+        // generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }
@@ -202,7 +203,8 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
       temp.properties[name] = {
         type: 'string',
-        // prioritise contraint definitions, as they're more useful than the generated one
+        // prioritise contraint definitions, as they're more useful than the
+        // generated one
         description: description ?? `A constraint for \`${name}\``,
       };
     }
@@ -404,7 +406,8 @@ export async function generateSchema(
         schema.not ??= {
           anyOf: [],
         };
-        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+        // we have to use `anyOf` here with each rule, so any of the properties
+        // can be found in isolation, and will be excluded
         schema.not.anyOf.push({
           required: [o.name],
         });
@@ -417,7 +420,8 @@ export async function generateSchema(
         schema.not ??= {
           anyOf: [],
         };
-        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+        // we have to use `anyOf` here with each rule, so any of the properties
+        // can be found in isolation, and will be excluded
         schema.not.anyOf.push({
           required: [o.name],
         });
@@ -425,7 +429,8 @@ export async function generateSchema(
       return isGlobal;
     }
 
-    // we don't currently have any config options that are hitting this, but to be safe, let's throw an error if we ever hit this
+    // we don't currently have any config options that are hitting this, but to
+    // be safe, let's throw an error if we ever hit this
     throw new Error(`Unhandled case for \`${o.name}\``);
   });
 

@@ -550,7 +550,8 @@ describe('modules/manager/gomod/extract', () => {
           },
         ],
         extractedConstraints: {
-          // NOTE that this is extracted as a range for the whole SemVer minor version
+          // NOTE that this is extracted as a range for the whole SemVer minor
+          // version
           '%goMod': '~1.19.x',
         },
         constraintsVersioning: {
@@ -575,7 +576,8 @@ describe('modules/manager/gomod/extract', () => {
     const constraint = res!.extractedConstraints!['%goMod']!;
 
     it('extracts the expected versioning and constraints', () => {
-      // NOTE that this is not the `go-mod-directive` versioning, as that comes from `constraintsVersioning`
+      // NOTE that this is not the `go-mod-directive` versioning, as that comes
+      // from `constraintsVersioning`
       expect(datasourceVersioningName).toEqual('semver');
       expect(res!.constraintsVersioning).toBeDefined();
       expect(versioningName).toBeDefined();

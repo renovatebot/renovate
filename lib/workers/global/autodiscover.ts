@@ -71,7 +71,8 @@ export async function autodiscoverRepositories(
     );
 
     if (!discovered.length) {
-      // Soft fail (no error thrown) if no accessible repositories match the filter
+      // Soft fail (no error thrown) if no accessible repositories match the
+      // filter
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }

@@ -281,7 +281,8 @@ export class NugetV3Api {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
+      // ignore / silence 404. Seen on proget, if remote connector is used and
+      // package is not yet cached
       if (err instanceof HttpError && err.response?.statusCode === 404) {
         logger.debug(
           { registryUrl, pkgName, pkgVersion: latestStable },

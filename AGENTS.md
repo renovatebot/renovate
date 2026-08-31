@@ -91,6 +91,7 @@ Two discussion categories are available:
 ## Contributing Notes
 
 - PRs require 100% test coverage. Use `/* v8 ignore ... */` sparingly when tests wouldn't prove anything.
+- Do not hard-wrap comments before the 80-column print width: break a comment line only when the next word would not fit within 80 columns (enforced by the `renovate/comment-wrapping` oxlint rule).
 - Do not force push PR branches.
 - Follow the PR template (`.github/pull_request_template.md`). Before running `gh pr create`, read that file in full and use its exact section structure for the PR body — do not substitute a generic Summary/Test plan format.
 - PRs should be raised as a draft PR, and only marked ready once the CLA has been signed, and the user has confirmed that the changes are ready to go

@@ -181,7 +181,8 @@ function formatDate(value: string): string {
     );
   }
 
-  // Bitbucket Cloud sends `UTC` timezone, whereas RFC8594 requires `GMT`, so we can manually work around this to parse correctly
+  // Bitbucket Cloud sends `UTC` timezone, whereas RFC8594 requires `GMT`, so we
+  // can manually work around this to parse correctly
   const httpDate = value.replace(regEx(/ UTC$/), ' GMT');
   return DateTime.fromHTTP(httpDate, { zone: 'utc' }).toISO() ?? value;
 }

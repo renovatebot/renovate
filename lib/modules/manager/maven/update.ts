@@ -74,8 +74,10 @@ export function updateAtPosition(
     upgrade.datasource === 'docker' ||
     upgrade.datasource === 'buildpacks-registry'
   ) {
-    // In contrast to maven dependencies, cloud native buildpacks are not contained in specific version tags.
-    // Instead they are contained in the value of the buildpack tag and we have to update it differently.
+    // In contrast to maven dependencies, cloud native buildpacks are not
+    // contained in specific version tags.
+    // Instead they are contained in the value of the buildpack tag and we have
+    // to update it differently.
     let replacedPart = version;
     if (currentValue) {
       replacedPart = version.replace(currentValue, newValue!);
@@ -153,12 +155,15 @@ export function bumpPackageVersion(
       );
     } else if (currentPrereleaseValue) {
       // Some qualifier which is not a SNAPSHOT is present.
-      // The expected behaviour in this case is unclear and the standard increase will be used.
+      // The expected behaviour in this case is unclear and the standard
+      // increase will be used.
       newPomVersion = semver.inc(currentValue, bumpVersion);
     } else {
       // A release version without any qualifier is present.
-      // Therefore the SNAPSHOT qualifier will be added if a prerelease is requested.
-      // This will do a normal increment, ignoring SNAPSHOT, if a non-prerelease bumpVersion is configured
+      // Therefore the SNAPSHOT qualifier will be added if a prerelease is
+      // requested.
+      // This will do a normal increment, ignoring SNAPSHOT, if a non-prerelease
+      // bumpVersion is configured
       newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
     }
     if (!newPomVersion) {

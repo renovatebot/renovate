@@ -241,7 +241,8 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
     cp.unref();
     return cp.kill(signal);
   } catch {
-    // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
+    // cp is a single node tree, therefore -pid is invalid as there is no such
+    // pgid,
     return false;
   }
 }

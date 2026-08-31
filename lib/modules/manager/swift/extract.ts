@@ -24,8 +24,10 @@ const regExps = {
   exactVersion: regEx(/\.\s*exact\s*\(\s*/),
   exactVersionLabel: regEx(/\s*exact:/),
   traitsLabel: regEx(/\s*traits\s*:/),
-  // This pattern consumes any `traits` content until the next package declaration,
-  // as the traits syntax can be quite complex and does not need to be parsed in detail for package extraction.
+  // This pattern consumes any `traits` content until the next package
+  // declaration,
+  // as the traits syntax can be quite complex and does not need to be parsed in
+  // detail for package extraction.
   traitsConsumeToNextPackage: regEx(/.*\.\s*package\s*\(\s*/),
 };
 

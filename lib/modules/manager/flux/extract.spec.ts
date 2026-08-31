@@ -510,7 +510,8 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
-      // HelmRelease is ignored, only HelmChart itself is processed (-> no duplicates expected)
+      // HelmRelease is ignored, only HelmChart itself is processed (-> no
+      // duplicates expected)
       expect(result).toEqual({
         deps: [
           {
@@ -541,7 +542,8 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
-      // HelmRelease is ignored, only OCIRepository itself is processed (-> no duplicates expected)
+      // HelmRelease is ignored, only OCIRepository itself is processed (-> no
+      // duplicates expected)
       expect(result).toEqual({
         deps: [
           {

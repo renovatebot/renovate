@@ -157,7 +157,8 @@ export async function mergeInheritedConfig(
   // decrypt again, as resolved presets could contain encrypted values
   decryptedConfig = await decryptConfig(resolvedConfig, config.repository);
 
-  // remove global config options once again, as resolved presets could have added some
+  // remove global config options once again, as resolved presets could have
+  // added some
   filteredConfig = removeGlobalConfig(decryptedConfig, true);
   if (!dequal(decryptedConfig, filteredConfig)) {
     logger.debug(

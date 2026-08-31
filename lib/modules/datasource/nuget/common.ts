@@ -20,8 +20,8 @@ export function massageUrl(url: string | null | undefined): string | null {
 
   let resultUrl = url;
 
-  // During `dotnet pack` certain URLs are being URL decoded which may introduce whitespace
-  // and causes Markdown link generation problems.
+  // During `dotnet pack` certain URLs are being URL decoded which may introduce
+  // whitespace and causes Markdown link generation problems.
   resultUrl = resultUrl.replace(urlWhitespaceRe, '%20');
 
   return resultUrl;

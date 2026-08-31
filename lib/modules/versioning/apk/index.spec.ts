@@ -234,7 +234,8 @@ describe('modules/versioning/apk/index', () => {
     });
 
     it('should compare release numbers when version parts are equal', () => {
-      // Both versions have same version and prerelease, different release numbers
+      // Both versions have same version and prerelease, different release
+      // numbers
       expect(apk.sortVersions('2.39.0-r1', '2.39.0-r2')).toBeLessThan(0);
       expect(apk.sortVersions('2.39.0-r2', '2.39.0-r1')).toBeGreaterThan(0);
       // Both have no release number (should be equal)
@@ -356,7 +357,8 @@ describe('modules/versioning/apk/index', () => {
 
   describe('getPatch edge cases', () => {
     it('should return null for versions with _p package fix suffix', () => {
-      // Versions with _p (package fix) suffix have no patch in release array position [2]
+      // Versions with _p (package fix) suffix have no patch in release array
+      // position [2]
       expect(apk.getPatch('6.5_p20250503-r0')).toBe(null);
       expect(apk.getPatch('1.0_p1-r0')).toBe(null);
     });
@@ -445,7 +447,8 @@ describe('modules/versioning/apk/index', () => {
     it('should handle unknown range operators', () => {
       const versions = ['2.39.0-r0', '2.40.0-r0'];
 
-      // Test unknown operators that don't match the regex - these go to exact match lookup
+      // Test unknown operators that don't match the regex - these go to exact
+      // match lookup
       expect(apk.getSatisfyingVersion(versions, '!2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '?2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '*2.39.0-r0')).toBe(null);
@@ -456,7 +459,8 @@ describe('modules/versioning/apk/index', () => {
     it('should handle unhandled range operators that match regex', () => {
       const versions = ['2.39.0-r0', '2.40.0-r0'];
 
-      // These operators match the regex pattern [><=~]+ but are not handled by switch cases
+      // These operators match the regex pattern [><=~]+ but are not handled by
+      // switch cases
       // They hit the fallback return false path
       expect(apk.getSatisfyingVersion(versions, '>>2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '<>2.39.0-r0')).toBe(null);
@@ -467,14 +471,16 @@ describe('modules/versioning/apk/index', () => {
     it('should handle tilde range with invalid target version', () => {
       const versions = ['2.39.0-r0', '2.40.0-r0'];
 
-      // This should trigger the null check in tilde range logic when target parsing fails
+      // This should trigger the null check in tilde range logic when target
+      // parsing fails
       expect(apk.getSatisfyingVersion(versions, '~invalid')).toBe(null);
     });
 
     it('should handle tilde range with invalid version in list', () => {
       const versions = ['2.39.0-r0', 'invalid', '2.40.0-r0'];
 
-      // This should trigger the null check in tilde range logic when version parsing fails
+      // This should trigger the null check in tilde range logic when version
+      // parsing fails
       expect(apk.getSatisfyingVersion(versions, '~2.39.0-r0')).toBe(
         '2.39.0-r0',
       );
@@ -483,7 +489,8 @@ describe('modules/versioning/apk/index', () => {
 
   describe('version comparison edge cases for coverage', () => {
     it('should handle major-only versions without minor/patch', () => {
-      // Test versions without minorPatch to cover the false branch of `if (minorPatch)`
+      // Test versions without minorPatch to cover the false branch of
+      // `if (minorPatch)`
       expect(apk.isValid('1')).toBe(true);
       expect(apk.isValid('42')).toBe(true);
       expect(apk.sortVersions('1', '2')).toBeLessThan(0);

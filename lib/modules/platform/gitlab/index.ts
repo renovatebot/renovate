@@ -598,7 +598,8 @@ async function tryPrAutomerge(
       ];
       const desiredStatus = 'can_be_merged';
       const env = getEnv();
-      // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
+      // The default value of 5 attempts results in max. 13.75 seconds timeout
+      // if no pipeline created.
       const retryTimes = parseInteger(
         env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
@@ -609,7 +610,8 @@ async function tryPrAutomerge(
         250,
       );
 
-      // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
+      // Check for correct merge request status before setting
+      // `merge_when_pipeline_succeeds` to `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
           merge_status?: string;
@@ -663,8 +665,9 @@ async function tryPrAutomerge(
         );
       }
 
-      // Even if Gitlab returns a "merge-able" merge request status, enabling auto-merge sometimes
-      // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
+      // Even if Gitlab returns a "merge-able" merge request status, enabling
+      // auto-merge sometimes returns a 405 Method Not Allowed. It seems to be a
+      // timing issue within Gitlab.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
           if (useMergeTrain) {
@@ -919,7 +922,8 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
 
   if (includeOtherAuthors) {
-    // PR might have been created by anyone, so don't use the cached Renovate MR list
+    // PR might have been created by anyone, so don't use the cached Renovate MR
+    // list
     const response = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
       `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
     );
@@ -1268,7 +1272,8 @@ export async function addReviewers(
   const existingReviewers = mr.reviewers.map((r) => r.username);
   const existingReviewerIDs = mr.reviewers.map((r) => r.id);
 
-  // Figure out which reviewers (of the ones we want to add) are not already on the MR as a reviewer
+  // Figure out which reviewers (of the ones we want to add) are not already on
+  // the MR as a reviewer
   const newReviewers = reviewers.filter((r) => !existingReviewers.includes(r));
 
   // Gather the IDs for all the reviewers we want to add
@@ -1291,8 +1296,8 @@ export async function addReviewers(
     return;
   }
 
-  // Multiple groups may have the same members, so
-  // filter out non-distinct values
+  // Multiple groups may have the same members, so filter out non-distinct
+  // values
   newReviewerIDs = [...new Set(newReviewerIDs)];
 
   try {
@@ -1485,7 +1490,8 @@ export async function expandGroupMembers(
   const expandedReviewersOrAssignees: string[] = [];
   const normalizedReviewersOrAssigneesWithoutEmails: string[] = [];
 
-  // Skip passing user emails to Gitlab API, but include them in the final result
+  // Skip passing user emails to Gitlab API, but include them in the final
+  // result
   for (const reviewerOrAssignee of reviewersOrAssignees) {
     // Resolve GitLab CODEOWNERS role handles (@@developer, @@maintainer,
     // @@owner) to project members instead of treating them as groups

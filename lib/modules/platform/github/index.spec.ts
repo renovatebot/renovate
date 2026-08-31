@@ -1856,7 +1856,8 @@ describe('modules/platform/github/index', () => {
       it('derives cutoff from cached items when lastModified is missing', async () => {
         const scope = httpMock.scope(githubApiHost);
 
-        // Seed cache with multiple items but no lastModified (simulates updateItem usage).
+        // Seed cache with multiple items but no lastModified (simulates
+        // updateItem usage).
         const repoCache = repository.getCache();
         repoCache.platform = {
           github: {
@@ -1901,7 +1902,8 @@ describe('modules/platform/github/index', () => {
           ],
           { link: pageLink(2) },
         );
-        // Page 2 NOT mocked — cutoff derived from max(item.updated_at) = t2 stops sync
+        // Page 2 NOT mocked — cutoff derived from max(item.updated_at) = t2
+        // stops sync
 
         await github.initRepo({
           repository: 'some/repo',
@@ -1931,7 +1933,8 @@ describe('modules/platform/github/index', () => {
         });
         await github.getPrList();
 
-        // Run 2: sync — 100 pages of non-Renovate PRs all newer than lastModified
+        // Run 2: sync — 100 pages of non-Renovate PRs all newer than
+        // lastModified
         initRepoMock(scope, 'some/repo');
         for (let i = 1; i <= 100; i++) {
           scope.get(pagePath(i, 20)).reply(
@@ -2072,7 +2075,8 @@ describe('modules/platform/github/index', () => {
         });
         await github.getPrList();
 
-        // Run 2: sync — oldest on page 1 equals lastModified (t2), must continue
+        // Run 2: sync — oldest on page 1 equals lastModified (t2), must
+        // continue
         initRepoMock(scope, 'some/repo');
         scope
           .get(pagePath(1, 20))
@@ -3979,7 +3983,8 @@ describe('modules/platform/github/index', () => {
         scope
           .post(
             '/repos/some/repo/pulls',
-            // Ensure the `maintainer_can_modify` option is set in the REST API request.
+            // Ensure the `maintainer_can_modify` option is set in the REST API
+            // request.
             (body) => body.maintainer_can_modify === true,
           )
           .reply(200, {
@@ -4003,7 +4008,8 @@ describe('modules/platform/github/index', () => {
         scope
           .post(
             '/repos/some/repo/pulls',
-            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            // Ensure the `maintainer_can_modify` option is `false` in the REST
+            // API request.
             (body) => body.maintainer_can_modify === true,
           )
           .reply(200, {
@@ -4024,7 +4030,8 @@ describe('modules/platform/github/index', () => {
         scope
           .post(
             '/repos/some/repo/pulls',
-            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            // Ensure the `maintainer_can_modify` option is `false` in the REST
+            // API request.
             (body) => body.maintainer_can_modify === false,
           )
           .reply(200, {

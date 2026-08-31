@@ -21,7 +21,8 @@ export async function generatePlatforms(
     const lines = contents.split('\n');
 
     if (platform.experimental) {
-      // make sure that we don't mangle the <h1> of the page, as it is used to infer the page title by Mkdocs
+      // make sure that we don't mangle the <h1> of the page, as it is used to
+      // infer the page title by Mkdocs
       md += lines[0]; // title of the platform
       md += '\n\n';
 

@@ -39,7 +39,8 @@ export async function configMigration(
     const pr = await ensureConfigMigrationPr(config, migratedConfigData);
 
     // only happens incase a migration pr was created by another user
-    // for other cases in which a PR could not be found or created: we log warning and throw error from within the ensureConfigMigrationPr fn
+    // for other cases in which a PR could not be found or created: we log
+    // warning and throw error from within the ensureConfigMigrationPr fn
     if (!pr) {
       return { result: 'add-checkbox' };
     }

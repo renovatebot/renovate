@@ -71,7 +71,8 @@ function infoMock(
       links,
     };
   }
-  // This mimics the behavior of bb-server which does not include the clone property at all
+  // This mimics the behavior of bb-server which does not include the clone
+  // property at all
   // if ssh and https are both turned off
   return {
     id: 1,

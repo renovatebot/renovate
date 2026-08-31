@@ -106,9 +106,11 @@ describe('workers/repository/process/limits', () => {
         partial<BranchConfig>({ branchName: 'foo/test-3' }),
       ]);
 
-      // Should count 2 (test-1 from cache and test-3 from SCM are in current hour)
+      // Should count 2 (test-1 from cache and test-3 from SCM are in current
+      // hour)
       expect(res).toBe(2);
-      // Should call the batched SCM lookup only once, regardless of how many branches are missing from the cache
+      // Should call the batched SCM lookup only once, regardless of how many
+      // branches are missing from the cache
       expect(scm.getAllBranchUpdateDates).toHaveBeenCalledTimes(1);
     });
 

@@ -34,8 +34,11 @@ export const PypiSimpleFile = DeepNullish(
     filename: z.string(),
     'requires-python': z.string().optional(),
     yanked: z.union([z.boolean(), z.string()]).optional().default(false),
-    // `upload-time` is specified by PEP 700, which mandates an ISO 8601 string and lets a server omit the key even at `api-version` 1.1.
-    // A string which `asTimestamp` cannot parse downstream degrades to a missing timestamp; a value of any other type fails validation, and `LooseArray` then drops the file entry.
+    // `upload-time` is specified by PEP 700, which mandates an ISO 8601 string
+    // and lets a server omit the key even at `api-version` 1.1.
+    // A string which `asTimestamp` cannot parse downstream degrades to a
+    // missing timestamp; a value of any other type fails validation, and
+    // `LooseArray` then drops the file entry.
     'upload-time': z.string().optional(),
   }),
 ).transform(

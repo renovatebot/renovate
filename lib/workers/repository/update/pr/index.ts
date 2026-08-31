@@ -105,7 +105,8 @@ export function updatePrDebugData(
   // Add labels to the debug data object.
   // When to add:
   // 1. Add it when a new PR is created, i.e., when debugData is undefined.
-  // 2. Add it if an existing PR already has labels in the debug data, confirming that we can update its labels.
+  // 2. Add it if an existing PR already has labels in the debug data,
+  // confirming that we can update its labels.
   if (!debugData || isArray(debugData.labels)) {
     updatedPrDebugData.labels = labels;
   }
@@ -164,7 +165,8 @@ export async function ensurePr(
   const filteredPrConfig = generatePrBodyFingerprintConfig(config);
   const prBodyFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
-  // If there is a group, it will use the config of the first upgrade in the array
+  // If there is a group, it will use the config of the first upgrade in the
+  // array
   const {
     branchName,
     ignoreTests,
@@ -190,8 +192,8 @@ export async function ensurePr(
     } else if (prCache) {
       logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
-      // skip cache when autoApprove is set, since new commits may have
-      // reset platform approvals (e.g. GitLab's "Remove all approvals" setting)
+      // skip cache when autoApprove is set, since new commits may have reset
+      // platform approvals (e.g. GitLab's "Remove all approvals" setting)
       if (validatePrCache(prCache, prBodyFingerprint) && !config.autoApprove) {
         return { type: 'with-pr', pr: existingPr };
       }
@@ -465,8 +467,10 @@ export async function ensurePr(
         // Divide labels into three categories:
         // i) addLabels: Labels that need to be added
         // ii) removeLabels: Labels that need to be removed
-        // iii) labels: New labels for the PR, replacing the old labels array entirely.
-        // This distinction is necessary because different platforms update labels differently
+        // iii) labels: New labels for the PR, replacing the old labels array
+        // entirely.
+        // This distinction is necessary because different platforms update
+        // labels differently
         // For more details, refer to the updatePr function of each platform.
 
         const [addLabels, removeLabels] = getChangedLabels(

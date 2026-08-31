@@ -76,7 +76,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       return await this.queryReleaseBackend(packageName, registryUrl);
     }
 
-    // Fall back to the standard Provider Registry Protocol for other registries.
+    // Fall back to the standard Provider Registry Protocol for other
+    // registries.
     return await this.queryProviderRegistry(registryUrl, packageName);
   }
 
@@ -419,7 +420,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   private async _getZipHashes(
     zipHashUrl: string,
   ): Promise<string[] | undefined> {
-    // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
+    // The hashes are formatted as the result of sha256sum in plain text, each
+    // line: <hash>\t<filename>
     let rawHashData: string;
     try {
       rawHashData = (await this.http.getText(zipHashUrl)).body;

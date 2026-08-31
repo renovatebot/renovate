@@ -57,7 +57,8 @@ function handleGitDep(
   dep.datasource = GitTagsDatasource.id;
 
   if (nameMatch?.groups) {
-    // if a github.com repository is referenced use github-tags instead of git-tags
+    // if a github.com repository is referenced use github-tags instead of
+    // git-tags
     if (nameMatch.groups.hostname === 'github.com') {
       dep.datasource = GithubTagsDatasource.id;
     } else {
@@ -73,7 +74,8 @@ function handleGitDep(
     // remove leading `git+` from URLs like `git+https://...`
     dep.packageName = source.replace(regEx(/git\+/), '');
 
-    // if version is declared using version appendix `<source url>,v1.2.0`, use it
+    // if version is declared using version appendix `<source url>,v1.2.0`, use
+    // it
     if (nameMatch.groups.version) {
       dep.currentValue = nameMatch.groups.version;
     } else {

@@ -178,7 +178,8 @@ describe('modules/platform/gerrit/scm', () => {
         ],
         prTitle: 'pr title',
       });
-      // For new changes, push should NOT be called - it will be done by createPr()
+      // For new changes, push should NOT be called - it will be done by
+      // createPr()
       expect(git.pushCommit).not.toHaveBeenCalled();
     });
 

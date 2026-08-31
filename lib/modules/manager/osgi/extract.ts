@@ -44,7 +44,8 @@ export function extractPackageFile(
   // OSGi Compendium R8 159.4: bundles entry
   const allBundles = coerceArray(featureModel.bundles);
 
-  // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
+  // The 'execution-environment' key is supported by the Sling/OSGi feature
+  // model implementation
   const execEnvFramework =
     featureModel['execution-environment:JSON|false']?.framework;
   if (!isNullOrUndefined(execEnvFramework)) {
@@ -53,9 +54,9 @@ export function extractPackageFile(
 
   // parse custom sections
   //
-  // Note: we do not support artifact list extensions as defined in
-  // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
-  // supports this
+  // Note: we do not support artifact list extensions as defined in section
+  // 159.7.3 yet. As of 05-12-2022, there is no implementation that supports
+  // this
   for (const [section, value] of Object.entries(featureModel)) {
     logger.trace({ fileName: packageFile, section }, 'Parsing section');
     const customSectionEntries = extractArtifactList(section, value);
@@ -70,12 +71,12 @@ export function extractPackageFile(
       continue;
     }
 
-    // both '/' and ':' are valid separators, but the Maven datasource
-    // expects the separator to be ':'
+    // both '/' and ':' are valid separators, but the Maven datasource expects
+    // the separator to be ':'
     const gav = rawGav.replace(regEx(/\//g), ':');
 
-    // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
-    // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
+    // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers groupId
+    // ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
     const parts = gav.split(':');
     if (parts.length < 3 || parts.length > 5) {
       deps.push({
@@ -132,7 +133,8 @@ function extractArtifactList(
   sectionName: string,
   sectionValue: unknown,
 ): Bundle[] {
-  // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
+  // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model
+  // implementation
   if (sectionName.includes(':ARTIFACTS|') && isArray(sectionValue)) {
     return sectionValue as Bundle[];
   }

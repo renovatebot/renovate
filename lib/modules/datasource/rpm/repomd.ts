@@ -44,7 +44,8 @@ export async function fetchPrimaryGzipUrl(
   const response = await http.getText(repomdUrl.toString());
   const repomdBody = response.body.trimStart();
 
-  // repomd.xml may omit the XML declaration and start directly with the root element
+  // repomd.xml may omit the XML declaration and start directly with the root
+  // element
   if (!(repomdBody.startsWith('<?xml') || repomdBody.startsWith('<repomd'))) {
     logger.debug({ datasource, url: repomdUrl }, 'Invalid response format');
     throw new Error(

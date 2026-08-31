@@ -953,8 +953,8 @@ describe('workers/repository/update/pr/index', () => {
         });
       });
 
-      // compares currentVersion and currentValue separately to
-      // prevent removal false duplicates
+      // compares currentVersion and currentValue separately to prevent removal
+      // false duplicates
       it('stricter de-deuplication of changelogs', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         const upgrade = {
@@ -1091,7 +1091,8 @@ describe('workers/repository/update/pr/index', () => {
             currentVersion: '1.2.3',
             newVersion: '2.3.4',
             releases: [
-              // previous versions between our currentVersion and newVersion have gaps in attestations
+              // previous versions between our currentVersion and newVersion
+              // have gaps in attestations
               { version: '1.2.4', attestation: false },
               { version: '1.3.0', attestation: false },
               { version: '2.0.0', attestation: false },

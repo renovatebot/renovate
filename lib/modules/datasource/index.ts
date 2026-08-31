@@ -215,7 +215,8 @@ async function mergeRegistries(
 
       if (singleRegistry) {
         // This is the second registry
-        // We need to move the registryUrl from the package level to the release level
+        // We need to move the registryUrl from the package level to the release
+        // level
         for (const release of coerceArray(combinedRes.releases)) {
           release.registryUrl ??= combinedRes.registryUrl;
         }
@@ -250,8 +251,8 @@ async function mergeRegistries(
                   tags[tag] = newTag;
                 }
               } else {
-                // Existing tag was not present or not a version
-                // so we can just use the new one
+                // Existing tag was not present or not a version so we can just
+                // use the new one
                 tags[tag] = newTag;
               }
             }
@@ -265,7 +266,8 @@ async function mergeRegistries(
       if (tags) {
         combinedRes.tags = tags;
       }
-      // Remove the registryUrl from the package level when more than one registry
+      // Remove the registryUrl from the package level when more than one
+      // registry
       delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
@@ -447,7 +449,8 @@ function fetchCachedReleases(
   const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${String(
     registryUrls,
   )}`;
-  // By returning a Promise and reusing it, we should only fetch each package at most once
+  // By returning a Promise and reusing it, we should only fetch each package at
+  // most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {

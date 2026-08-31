@@ -114,7 +114,8 @@ export class PdmProcessor extends BasePyProjectProcessor {
         toolConstraints: [pythonConstraint, pdmConstraint],
       };
 
-      // on lockFileMaintenance do not specify any packages and update the complete lock file
+      // on lockFileMaintenance do not specify any packages and update the
+      // complete lock file
       // else only update specific packages
       const cmds: string[] = [];
       if (isLockFileMaintenance) {
@@ -195,7 +196,8 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
         break;
       }
       case depTypes.buildSystemRequires:
-        // build requirements are not locked in the lock files, no need to update.
+        // build requirements are not locked in the lock files, no need to
+        // update.
         // Reference: https://github.com/pdm-project/pdm/discussions/2869
         break;
       default: {

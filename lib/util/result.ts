@@ -6,7 +6,8 @@ import type { Nullish } from '../types/index.ts';
 
 type Val = NonNullable<unknown>;
 
-// ZodSafeParseResult is not exported from zod/v4 public API, derive from safeParse return type
+// ZodSafeParseResult is not exported from zod/v4 public API, derive from
+// safeParse return type
 type ZodSafeParseResult<T> = ReturnType<ZodType<T>['safeParse']>;
 
 interface Ok<T extends Val> {

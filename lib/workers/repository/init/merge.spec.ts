@@ -339,7 +339,8 @@ describe('workers/repository/init/merge', () => {
       fs.readLocalFile.mockResolvedValue('{}');
       migrateAndValidate.migrateAndValidate.mockImplementation((_, c) => {
         // We shouldn't see packageRules here (avoids #14827).
-        // (someday the validation should probably be reworked to know about `sourceUrl` from the repo config, but that day isn't today)
+        // (someday the validation should probably be reworked to know about
+        // `sourceUrl` from the repo config, but that day isn't today)
         expect(c).not.toHaveProperty('packageRules');
         return Promise.resolve({
           ...c,
@@ -596,9 +597,8 @@ describe('workers/repository/init/merge', () => {
       expect(res.packageRules).toMatchObject([
         globalRule,
         globalPresetRule,
-        // ignoredByGlobalRule should not be here
-        // ignoredByEntryRule should not be here
-        // ignoredByRepoRule should not be here
+        // ignoredByGlobalRule should not be here ignoredByEntryRule should not
+        // be here ignoredByRepoRule should not be here
         repoEntryPresetRule,
         repoEntryRule,
         repoFilePresetRule,

@@ -370,7 +370,8 @@ export const PoetryPyProject = Toml.pipe(
       ]) {
         const depName = poetryDep.depName;
         const projectDep = depName && projectDepsByName[depName];
-        // When the same dep exists in project.dependencies or dependency-groups,
+        // When the same dep exists in project.dependencies or
+        // dependency-groups,
         // Poetry just uses the Poetry dep to enrich the project dependency.
         if (projectDep) {
           const mergedDep = deepmerge<PackageDependency>(poetryDep, projectDep);
@@ -380,8 +381,10 @@ export const PoetryPyProject = Toml.pipe(
           if (projectDep.currentValue && poetryDep.currentValue) {
             mergedDep.skipReason = 'invalid-dependency-specification';
           }
-          // When a skipReason is 'unspecified-version', we defer to the other skipReason,
-          // so that 'unspecified-version' only persists if both deps have no version.
+          // When a skipReason is 'unspecified-version', we defer to the other
+          // skipReason,
+          // so that 'unspecified-version' only persists if both deps have no
+          // version.
           if (mergedDep.skipReason === 'unspecified-version') {
             if (poetryDep.skipReason === 'unspecified-version') {
               mergedDep.skipReason = projectDep.skipReason;

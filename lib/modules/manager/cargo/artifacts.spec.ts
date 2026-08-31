@@ -284,8 +284,8 @@ describe('modules/manager/cargo/artifacts', () => {
   it('returns updated Cargo.lock when a preceding dependency triggers an update in a later dependency', async () => {
     // Sometimes `cargo update` will fail when a preceding dependency update
     // causes another dependency to update. In this case we can no longer
-    // reference the dependency by its old version, so we filter it out
-    // and retry recursively.
+    // reference the dependency by its old version, so we filter it out and
+    // retry recursively.
 
     // mock updateArtifacts iter 1
 
@@ -328,7 +328,8 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecSequence([
       // Iter 1: packageDep1Cmd (updates dep1 and dep2)
       { stdout: '', stderr: '' },
-      // Iter 1: packageDep2Cmd (fails to update dep2 - updated by previous command)
+      // Iter 1: packageDep2Cmd (fails to update dep2 - updated by previous
+      // command)
       new ExecError('Exec error', {
         cmd: packageDep2Cmd,
         stdout: '',

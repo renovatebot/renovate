@@ -105,7 +105,9 @@ export function resolveSameOriginUrl(
     return null;
   }
 
-  // If the base URL is HTTPS and the resolved URL is HTTP, but has no port specified, we can assume that the server intended to use HTTPS. This is a common misconfiguration in some registries.
+  // If the base URL is HTTPS and the resolved URL is HTTP, but has no port
+  // specified, we can assume that the server intended to use HTTPS. This is a
+  // common misconfiguration in some registries.
   if (
     base.protocol === 'https:' &&
     resolved.protocol === 'http:' &&

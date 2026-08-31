@@ -52,10 +52,9 @@ export function extractPackageFile(
     const lineMapper = new LineMapper(content, regEx(/^\s*image:/));
 
     // docker-compose v1 places the services at the top level,
-    // docker-compose v2+ places the services within a 'services' key
-    // since docker-compose spec version 1.27, the 'version' key has
-    // become optional and can no longer be used to differentiate
-    // between v1 and v2.
+    // docker-compose v2+ places the services within a 'services' key since
+    // docker-compose spec version 1.27, the 'version' key has become optional
+    // and can no longer be used to differentiate between v1 and v2.
     const services = config.services ?? config;
     const extensions = coerceObject(config.extensions);
 

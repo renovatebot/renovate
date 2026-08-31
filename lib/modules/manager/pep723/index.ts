@@ -8,7 +8,8 @@ export const url = 'https://peps.python.org/pep-0723';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  // Since any Python file can embed PEP 723 metadata, make the feature opt-in, to avoid parsing all Python files.
+  // Since any Python file can embed PEP 723 metadata, make the feature opt-in,
+  // to avoid parsing all Python files.
   managerFilePatterns: [],
 };
 

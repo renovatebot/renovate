@@ -19,7 +19,8 @@ function isVersion(input: string): boolean {
 }
 
 function convertToCaret(item: string): string {
-  // In Cargo, caret versions are used by default, so "1.2.3" actually means ^1.2.3.
+  // In Cargo, caret versions are used by default, so "1.2.3" actually means
+  // ^1.2.3.
   // Similarly, "0.4" actually means ^0.4.
   // See: https://doc.rust-lang.org/stable/cargo/reference/specifying-dependencies.html#caret-requirements
   if (isVersion(item) || isVersion(`${item}.0`) || isVersion(`${item}.0.0`)) {
@@ -104,7 +105,8 @@ function getNewValue({
   if (!currentValue || currentValue === '*') {
     return currentValue;
   }
-  // If the current value is a simple version, bump to fully specified newVersion
+  // If the current value is a simple version, bump to fully specified
+  // newVersion
   if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
     return newVersion;
   }
@@ -150,7 +152,8 @@ function getNewValue({
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {
     const withoutCaret = newCargo.substring(1);
-    // NOTE: We want the number of components in the new version to match the original.
+    // NOTE: We want the number of components in the new version to match the
+    // original.
     // e.g. "5.0" should be updated to "6.0".
     const components = currentValue.split('.').length;
     newCargo = withoutCaret.split('.').slice(0, components).join('.');

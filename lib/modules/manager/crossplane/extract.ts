@@ -14,7 +14,8 @@ export function extractPackageFile(
   packageFile: string,
   extractConfig?: ExtractConfig,
 ): PackageFileContent | null {
-  // avoid parsing the whole file if it doesn't contain any resource having any pkg.crossplane.io/v*
+  // avoid parsing the whole file if it doesn't contain any resource having any
+  // pkg.crossplane.io/v*
   if (
     !regEx(/apiVersion:\s+["']?pkg\.crossplane\.io\/v.+["']?/).test(content)
   ) {
@@ -22,7 +23,8 @@ export function extractPackageFile(
     return null;
   }
 
-  // not try and catching this as failureBehaviour is set to filter and therefore it will not throw
+  // not try and catching this as failureBehaviour is set to filter and
+  // therefore it will not throw
   const list = parseYaml(content, {
     customSchema: XPKG,
     failureBehaviour: 'filter',

@@ -70,7 +70,8 @@ function setGlobalHostRules(config: RenovateConfig): void {
 }
 
 function configureThirdPartyLibraries(config: AllConfig): void {
-  // Not using early return style to make clear what's the criterion to set the variables,
+  // Not using early return style to make clear what's the criterion to set the
+  // variables,
   // especially when there is more stuff added here in the future.
   if (!config.useCloudMetadataServices) {
     logger.debug('Disabling the use of cloud metadata services');

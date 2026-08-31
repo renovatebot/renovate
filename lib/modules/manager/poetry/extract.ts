@@ -42,8 +42,8 @@ export async function extractPackageFile(
       }
       return {
         ...dep,
-        // We use containerbase python as source, as there are a lot docker tags which can cause
-        // issues with poetry versioning.
+        // We use containerbase python as source, as there are a lot docker tags
+        // which can cause issues with poetry versioning.
         packageName: 'containerbase/python-prebuild',
         datasource: GithubReleasesDatasource.id,
         commitMessageTopic: 'Python',

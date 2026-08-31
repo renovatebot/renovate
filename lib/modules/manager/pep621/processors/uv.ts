@@ -113,8 +113,8 @@ export class UvProcessor extends BasePyProjectProcessor {
           }
 
           if (implicitIndexUrls?.length) {
-            // If there are implicit indexes, check them first and fall back
-            // to the default.
+            // If there are implicit indexes, check them first and fall back to
+            // the default.
             dep.registryUrls = implicitIndexUrls.concat(
               dep.registryUrls ?? PypiDatasource.defaultURL,
             );
@@ -207,7 +207,8 @@ export class UvProcessor extends BasePyProjectProcessor {
         toolConstraints: [pythonConstraint, uvConstraint],
       };
 
-      // on lockFileMaintenance do not specify any packages and update the complete lock file
+      // on lockFileMaintenance do not specify any packages and update the
+      // complete lock file
       // else only update specific packages
       let cmd: string;
       if (isLockFileMaintenance) {
@@ -266,7 +267,8 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         break;
       }
       case depTypes.buildSystemRequires:
-        // build requirements are not locked in the lock files, no need to update.
+        // build requirements are not locked in the lock files, no need to
+        // update.
         break;
       default: {
         deps.push(dep.packageName!);
@@ -315,7 +317,8 @@ async function getUvExtraIndexUrl(
     .flatMap((dep) => dep.registryUrls)
     .filter(isString)
     .filter((registryUrl) => {
-      // Check if the registry URL is not the default one and not already configured
+      // Check if the registry URL is not the default one and not already
+      // configured
       const configuredIndexUrls = coerceArray(
         project.tool?.uv?.index?.map(({ url }) => url),
       );
@@ -370,7 +373,8 @@ async function getUvIndexCredentials(
       continue;
     }
 
-    // If no name is provided for the index, authentication information must be passed through alternative methods
+    // If no name is provided for the index, authentication information must be
+    // passed through alternative methods
     if (!name) {
       continue;
     }

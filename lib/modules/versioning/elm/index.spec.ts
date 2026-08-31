@@ -305,7 +305,8 @@ describe('modules/versioning/elm/index', () => {
 
     describe('elm-version range scenarios', () => {
       it('widens elm-version range for new compiler release', () => {
-        // Simulates updating elm-version in package elm.json when new Elm compiler is released
+        // Simulates updating elm-version in package elm.json when new Elm
+        // compiler is released
         expect(
           elm.getNewValue({
             currentValue: '0.19.0 <= v < 0.20.0',

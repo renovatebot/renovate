@@ -74,8 +74,8 @@ export async function getRepositoryConfig(
     const { repository: _repository, ...repositoryEntryConfig } = repository;
 
     // Promote GlobalConfig.OPTIONS keys into repoConfig directly so that
-    // GlobalConfig.set(repoConfig) in the repository worker picks them up
-    // with per-repo overrides before onboarding checks run.
+    // GlobalConfig.set(repoConfig) in the repository worker picks them up with
+    // per-repo overrides before onboarding checks run.
     for (const option of GlobalConfig.OPTIONS) {
       if (option in repositoryEntryConfig) {
         applyGlobalOption(repoConfig, repositoryEntryConfig, option);
@@ -176,7 +176,8 @@ export async function start(): Promise<number> {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
 
-      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
+      // Set allowedHeaders and userAgent in case hostRules headers are
+      // configured in file config
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         userAgent: config.userAgent,
@@ -184,7 +185,8 @@ export async function start(): Promise<number> {
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
+      // Set platform, endpoint, allowedHeaders and userAgent in case local
+      // presets are used
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         platform: config.platform,

@@ -1198,7 +1198,8 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         {
           description: `a constraint that isn't a valid tool is ignored (without being referenced by \`installTools\`)`,
           constraints: {
-            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            // jenkins is a valid value for a constraint, but isn't a valid tool
+            // for Containerbase
             jenkins: '1.566.0',
           },
           installTools: {},
@@ -1207,7 +1208,8 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         {
           description: `a constraint that isn't a valid tool is ignored (when referenced by \`installTools\`)`,
           constraints: {
-            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            // jenkins is a valid value for a constraint, but isn't a valid tool
+            // for Containerbase
             jenkins: '2.541.3',
           },
           // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally uses `jenkins`, which is not a valid ToolName, to test that invalid tools are ignored

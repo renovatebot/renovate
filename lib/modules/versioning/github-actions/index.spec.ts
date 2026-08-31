@@ -506,11 +506,13 @@ describe('modules/versioning/github-actions/index', () => {
           newVersion: 'v8.1.0',
           rangeStrategy: 'replace',
         });
-        // NOTE that this may not actually be valid, depending on whether the Action is using Immutable Tags, which requires full SemVer pinning
+        // NOTE that this may not actually be valid, depending on whether the
+        // Action is using Immutable Tags, which requires full SemVer pinning
         expect(res).toEqual('v8');
       });
 
-      // because this is not a valid case - if there were no versions, we'd not be called
+      // because this is not a valid case - if there were no versions, we'd not
+      // be called
       it.each([
         ['v7', 'v8'],
         ['v7.6.1', 'v8.1.0'],
@@ -524,7 +526,8 @@ describe('modules/versioning/github-actions/index', () => {
             rangeStrategy: 'replace',
             allVersions: new Set(),
           });
-          // NOTE that this may not actually be valid, depending on whether the Action is using Immutable Tags, which requires full SemVer pinning
+          // NOTE that this may not actually be valid, depending on whether the
+          // Action is using Immutable Tags, which requires full SemVer pinning
           expect(res).toEqual(expected);
         },
       );
@@ -598,8 +601,9 @@ describe('modules/versioning/github-actions/index', () => {
       ])(
         'preserves floating major for non-major updates ($description)',
         ({ newVersion, allVersions }) => {
-          // When the user has @v7, they want to track the major. A non-major update
-          // should NOT narrow them to @v7.6 — the floating major should be preserved.
+          // When the user has @v7, they want to track the major. A non-major
+          // update should NOT narrow them to @v7.6 — the floating major should
+          // be preserved.
           const res = githubActions.getNewValue({
             currentValue: 'v7',
             currentVersion: 'v7.0.0',
@@ -643,7 +647,8 @@ describe('modules/versioning/github-actions/index', () => {
         'preserves floating minor for non-major updates ($description)',
         ({ allVersions, expected }) => {
           // When the user has @v7.5, Renovate should stay at the minor level.
-          // It must NOT return v7 (less specific), even if v7 appears in allVersions.
+          // It must NOT return v7 (less specific), even if v7 appears in
+          // allVersions.
           const res = githubActions.getNewValue({
             currentValue: 'v7.5',
             currentVersion: 'v7.5.0',
@@ -694,7 +699,8 @@ describe('modules/versioning/github-actions/index', () => {
       });
 
       describe('if the newVersion is not found in allVersions', () => {
-        // because this is not a valid case - if the newVersion wasn't found in allVersions, how would we have been called?
+        // because this is not a valid case - if the newVersion wasn't found in
+        // allVersions, how would we have been called?
         it('newVersion is returned anyway', () => {
           const res = githubActions.getNewValue({
             currentValue: 'v7',

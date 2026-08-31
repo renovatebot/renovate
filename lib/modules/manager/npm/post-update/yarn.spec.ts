@@ -149,7 +149,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
         );
         expect(res.error).toBeUndefined();
 
-        // there may be other command(s), but checking that at least 1 has it is sufficient
+        // there may be other command(s), but checking that at least 1 has it is
+        // sufficient
         expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
           '--max-old-space-size=2345',
         );
@@ -191,7 +192,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
         );
         expect(res.error).toBeUndefined();
 
-        // there may be other command(s), but checking that at least 1 has it is sufficient
+        // there may be other command(s), but checking that at least 1 has it is
+        // sufficient
         expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
           '--max-old-space-size=2345',
         );
@@ -909,8 +911,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
           ` && ` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
-          // the preCommand's own single quotes are POSIX-escaped, since the whole
-          // command is now the single-quoted argument of `bash -l -c`
+          // the preCommand's own single quotes are POSIX-escaped, since the
+          // whole command is now the single-quoted argument of `bash -l -c`
           `sed -i '"'"'s/ steps,/ steps.slice(0,1),/'"'"' some-dir/.yarn/cli.js || true` +
           ` && ` +
           `yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts` +

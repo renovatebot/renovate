@@ -180,8 +180,8 @@ export class DistroInfo {
 
     for (let i = len; i >= 0; i--) {
       if (this.isReleased(this._sortedInfo[i].version)) {
-        // 'i' holds the latest released version index
-        // compensate for the requested 'n'
+        // 'i' holds the latest released version index compensate for the
+        // requested 'n'
         idx = i - Math.floor(n);
         break;
       }

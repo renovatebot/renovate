@@ -70,7 +70,8 @@ function parseDockerReference(input: string): DockerReference | null {
     return { kind: 'docker', image, digest, originalRef };
   }
 
-  // Find tag: look for first colon after last slash (to avoid matching port in registry)
+  // Find tag: look for first colon after last slash (to avoid matching port in
+  // registry)
   const lastSlashIndex = originalRef.lastIndexOf('/');
   const searchStart = lastSlashIndex === -1 ? 0 : lastSlashIndex + 1;
   const tagParts = splitFirstFrom(originalRef, ':', searchStart);
@@ -143,7 +144,8 @@ export function parseComment(commentBody: string): CommentData {
     return { ratchetExclude: true };
   }
 
-  // We use commentBody (with leading spaces) to get the correct index relative to the comment start
+  // We use commentBody (with leading spaces) to get the correct index relative
+  // to the comment start
   const match = pinTokenRe.exec(commentBody);
   if (match?.groups?.version) {
     return {
@@ -199,7 +201,8 @@ export function parseUsesLine(line: string): ParsedUsesLine | null {
   const indentation = prefix.slice(0, prefix.indexOf('uses'));
 
   // We look for ' #' to determine where the comment starts.
-  // This is a safe heuristic for valid "uses" values which cannot contain spaces.
+  // This is a safe heuristic for valid "uses" values which cannot contain
+  // spaces.
   const commentIndex = remainder.indexOf(' #');
 
   // No comment case

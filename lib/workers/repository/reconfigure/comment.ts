@@ -33,7 +33,8 @@ const SECTION_ORDER = [
   'WARNINGS',
   'ERRORS',
 ] as const;
-// Once the body is summarised, "What to Expect" should render before "Detected Package Files".
+// Once the body is summarised, "What to Expect" should render before "Detected
+// Package Files".
 const SUMMARY_SECTION_ORDER = [
   'PRLIST',
   'CONFIG',
@@ -116,8 +117,10 @@ export async function ensureReconfigurePrComment(
     const prListSummary = getExpectedPrListSummary(config, branches);
     if (packageFilesDesc) {
       const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
-      // "What to Expect" should render before "Detected Package Files" in the summary view,
-      // so rebuild from a template with that section order rather than reordering the rendered body.
+      // "What to Expect" should render before "Detected Package Files" in the
+      // summary view,
+      // so rebuild from a template with that section order rather than
+      // reordering the rendered body.
       prBody = fillReconfigurePrCommentBody(
         buildReconfigurePrCommentTemplate(SUMMARY_SECTION_ORDER),
         {

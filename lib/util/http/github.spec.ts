@@ -334,13 +334,16 @@ describe('util/http/github', () => {
 
     it('rebases GHE Server pagination links', async () => {
       vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', '1');
-      // The origin and base URL which Renovate uses (from its config) to reach GHE:
+      // The origin and base URL which Renovate uses (from its config) to reach
+      // GHE:
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
       setBaseUrl(baseUrl);
-      // The hostname from GHE settings, which users use through their browsers to reach GHE:
+      // The hostname from GHE settings, which users use through their browsers
+      // to reach GHE:
       // https://docs.github.com/en/enterprise-server@3.5/admin/configuration/configuring-network-settings/configuring-a-hostname
       const gheHostname = 'ghe.mycompany.com';
-      // GHE replies to paginated requests with a Link response header whose URLs have this base
+      // GHE replies to paginated requests with a Link response header whose
+      // URLs have this base
       const gheBaseUrl = `https://${gheHostname}/api/v3`;
       const apiUrl = '/some-url?per_page=2';
       httpMock
@@ -408,8 +411,10 @@ describe('util/http/github', () => {
     });
 
     it('does not follow pagination links to a different origin', async () => {
-      // If a misconfigured/malicious host suggests pagination links across origins, ignore them by default
-      // In this case, only the first page of results is fetched, and a warning message is logged
+      // If a misconfigured/malicious host suggests pagination links across
+      // origins, ignore them by default
+      // In this case, only the first page of results is fetched, and a warning
+      // message is logged
       const url = '/some-url?per_page=2';
       httpMock.scope(githubApiHost).get(url).reply(200, ['a', 'b'], {
         link: `<https://attacker.example.com/some-url?per_page=2&page=2>; rel="next", <https://attacker.example.com/some-url?per_page=2&page=3>; rel="last"`,
@@ -445,7 +450,8 @@ describe('util/http/github', () => {
           .get(url)
           .reply(
             code,
-            // nock's reply callback binds `this.req` to the request object, requires regular function
+            // nock's reply callback binds `this.req` to the request object,
+            // requires regular function
             // eslint-disable-next-line prefer-arrow-callback
             function reply() {
               // https://github.com/nock/nock/issues/1979
@@ -562,7 +568,8 @@ describe('util/http/github', () => {
             .get(url)
             .reply(
               code,
-              // nock's reply callback binds `this.req` to the request object, requires regular function
+              // nock's reply callback binds `this.req` to the request object,
+              // requires regular function
               // eslint-disable-next-line prefer-arrow-callback
               function reply() {
                 // https://github.com/nock/nock/issues/1979

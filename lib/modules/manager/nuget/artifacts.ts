@@ -136,9 +136,9 @@ export async function updateArtifacts({
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
-    // It's not that easy though because the questions which
-    // project file to restore how to determine which lock files
-    // have been changed in such cases.
+    // It's not that easy though because the questions which project file to
+    // restore how to determine which lock files have been changed in such
+    // cases.
     logger.debug(
       { packageFileName },
       'Not updating lock file for non project files',
@@ -205,7 +205,8 @@ export async function updateArtifacts({
           },
         });
       }
-      // TODO: else should we return an artifact error if new content is missing?
+      // TODO: else should we return an artifact error if new content is
+      // missing?
     }
 
     return retArray.length > 0 ? retArray : null;

@@ -26,7 +26,8 @@ function parseVersion(input: string): SemVer | null {
   if (v) {
     return v;
   }
-  // Handle major.minor-prerelease format (e.g. v2.2-rc.1) by normalizing to major.minor.0-prerelease
+  // Handle major.minor-prerelease format (e.g. v2.2-rc.1) by normalizing to
+  // major.minor.0-prerelease
   return semver.parse(stripped.replace(regEx(/^(\d+\.\d+)(-.+)$/), '$1.0$2'));
 }
 
@@ -148,7 +149,8 @@ function isGreaterThan(x: string, y: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
-  // if we have a valid floating tag provided, and it's the same as the range, treat it as the same
+  // if we have a valid floating tag provided, and it's the same as the range,
+  // treat it as the same
   if (
     parseVersionCoerced(version) &&
     massageValue(version) === massageValue(range)
@@ -251,7 +253,8 @@ function getNewValue({
     return newVersion;
   }
 
-  // When a minor (i.e. `v1.2`), don't return a less-specific tag (i.e. `v1`), even if it's found in `allVersions`
+  // When a minor (i.e. `v1.2` ), don't return a less-specific tag (i.e. `v1` ),
+  // even if it's found in `allVersions`
   const minLevel = isUndefined(range.minor) ? 'major' : 'minor';
   const [prefix] = currentValue.split(massageValue(currentValue));
   const newParsed = parseVersion(newVersion);
@@ -259,7 +262,8 @@ function getNewValue({
     const newCoerced = parseVersionCoerced(newVersion);
     if (newCoerced) {
       // check that we're not returning a version that doesn't exist
-      // for instance, in the case `v5.5` is tagged, but there's no `v5` (or if it's been deleted)
+      // for instance, in the case `v5.5` is tagged, but there's no `v5` (or if
+      // it's been deleted)
       const shortest = getShortestMatchingVersion(
         prefix,
         newCoerced,
@@ -289,7 +293,9 @@ function getNewValue({
     return `${prefix}${newParsed.major}.${newParsed.minor}`;
   }
 
-  // If a major (i.e. `v7`), and the proposed update is a minor i.e. (`v7.6`), return the existing major version instead of updating to the new minor, as the major should have been re-tagged, too
+  // If a major (i.e. `v7` ), and the proposed update is a minor i.e. (`v7.6`),
+  // return the existing major version instead of updating to the new minor, as
+  // the major should have been re-tagged, too
   if (isUndefined(range.minor) && newParsed.major === range.major) {
     return `${prefix}${newParsed.major}`;
   }

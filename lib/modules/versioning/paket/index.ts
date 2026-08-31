@@ -260,8 +260,8 @@ function widenRange(range: PaketRange, v: NugetVersion): PaketRange {
     return range;
   }
 
-  // The pessimistic operator acts as both bounds, so decompose it into
-  // explicit bounds to widen upwards while keeping the lower bound.
+  // The pessimistic operator acts as both bounds, so decompose it into explicit
+  // bounds to widen upwards while keeping the lower bound.
   const lower: PaketConstraint = {
     operator: fromInclusive ? '>=' : '>',
     version: from,

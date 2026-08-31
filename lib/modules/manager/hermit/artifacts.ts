@@ -166,8 +166,8 @@ async function getUpdateResult(
   );
 
   return [
-    // rename will need to go first, because
-    // it needs to create the new link for the new version
+    // rename will need to go first, because it needs to create the new link for
+    // the new version
     // for the modified links to use
     ...renamed.flat(),
     ...modified.flat(),

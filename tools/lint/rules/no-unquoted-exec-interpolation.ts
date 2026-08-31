@@ -248,8 +248,9 @@ function isCommandContext(
         if (COMMAND_NAME_RE.test(readName(callee.object) ?? '')) {
           return true;
         }
-        // `deps.map(dep => `cmd ${dep.depName}`).join(' ')` — the mapped strings
-        // are commands only if what the chain ends up in is one, so keep walking.
+        // `deps.map(dep => ` cmd ${dep.depName}`).join(' ')` — the mapped
+        // strings are commands only if what the chain ends up in is one, so
+        // keep walking.
         if (ARRAY_METHODS.has(readName(callee) ?? '')) {
           return isCommandContext(parent, parent.parent);
         }
@@ -337,7 +338,8 @@ export default defineRule({
             callee.property.name === 'join'
           ) {
             // Reachable only when nothing in the chain escaped anything. Report
-            // just the inline forms -- `deps.map((d) => d.depName).join(' ')` --
+            // just the inline forms -- `deps.map((d) => d.depName).join(' ')`
+            // --
             // where that is locally visible. A bare identifier is skipped
             // because its elements may already have been escaped as they were
             // added, which is not knowable syntactically; manager/helmv3 builds

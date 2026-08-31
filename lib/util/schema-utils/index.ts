@@ -441,8 +441,10 @@ export const NotCircular = z.unknown().superRefine((val, ctx) => {
 
 const StandardEmail = z.email();
 
-// GitHub/Forgejo apps use addresses like `1234+name[bot]@users.noreply.github.com`.
-// The `[bot]` marker is not valid in the local part per RFC 5322, so we strip it before
+// GitHub/Forgejo apps use addresses like
+// `1234+name[bot]@users.noreply.github.com`.
+// The `[bot]` marker is not valid in the local part per RFC 5322, so we strip
+// it before
 export const EmailAddress = z
   .string()
   .refine(

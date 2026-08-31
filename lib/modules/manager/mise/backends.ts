@@ -28,7 +28,8 @@ export function createAquaToolConfig(
   name: string,
   version: string,
 ): BackendToolingConfig {
-  // mise supports http aqua package type but we cannot determine it from the tool name
+  // mise supports http aqua package type but we cannot determine it from the
+  // tool name
   // An error will be thrown afterwards if the package type is http
   // ref: https://github.com/jdx/mise/blob/d1b9749d8f3e13ef705c1ea471d96c5935b79136/src/aqua/aqua_registry.rs#L39-L45
   return {
@@ -54,7 +55,8 @@ export function createCargoToolConfig(
     return {
       packageName: name,
       datasource: CrateDatasource.id,
-      // A mise tool version is a concrete version, not a Cargo dependency requirement,
+      // A mise tool version is a concrete version, not a Cargo dependency
+      // requirement,
       // so the crate datasource default of cargo versioning does not apply
       versioning: semverVersioning.id,
     };

@@ -6,7 +6,8 @@ import type { UpdateDependencyConfig } from '../types.ts';
 function getNameWithNoVersion(name: string): string {
   // remove version suffixes like /v1 or /v2
   let nameNoVersion = name.replace(regEx(/\/v\d+$/), '');
-  // gopkg.in is a special case where the major version is added with a dot rather than a slash
+  // gopkg.in is a special case where the major version is added with a dot
+  // rather than a slash
   if (nameNoVersion.startsWith('gopkg.in')) {
     nameNoVersion = nameNoVersion.replace(regEx(/\.v\d+$/), '');
   }
@@ -82,7 +83,8 @@ export function updateDependency({
     if (upgrade.updateType === 'digest') {
       // Since the 2024 goproxy datasource changes, newValue and newDigest are
       // both extracted from the same proxy version string and always reference
-      // the same commit, so newValue can be written directly for pseudo-versions.
+      // the same commit, so newValue can be written directly for
+      // pseudo-versions.
       // However, for private modules (GONOPROXY / direct datasource), the proxy
       // has no data and newValue may equal currentValue. In that case, fall
       // through to the bare hash path so that gomodTidy can resolve it.

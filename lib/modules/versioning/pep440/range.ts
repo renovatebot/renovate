@@ -132,8 +132,8 @@ export function getNewValue({
   try {
     ranges = parseCurrentRange(currentValue);
     if (!ranges.length) {
-      // an empty string is an allowed value for PEP440 range
-      // it means get any version
+      // an empty string is an allowed value for PEP440 range it means get any
+      // version
       logger.warn({ currentValue }, 'Empty currentValue');
       return currentValue;
     }
@@ -274,8 +274,8 @@ function parseCurrentRange(currentValue: string): Range[] {
 }
 
 function handleLowerBound(range: Range, newVersion: string): string | null {
-  // used to mark minimum supported version
-  // lower the bound if the new version is lower than current range
+  // used to mark minimum supported version lower the bound if the new version
+  // is lower than current range
   if (['>', '>='].includes(range.operator)) {
     if (lte(newVersion, range.version)) {
       // this looks like a rollback
@@ -293,8 +293,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
   if (range.operator === '<') {
     // if newVersion is that future version
     if (gte(newVersion, range.version)) {
-      // now here things get tricky
-      // we calculate the new future version
+      // now here things get tricky we calculate the new future version
       const precision = getRangePrecision([range]);
       const futureVersion = getFutureVersion(
         precision,
@@ -358,8 +357,7 @@ function updateRangeValue(
 
   let output = handleUpperBound(range, newVersion);
   if (output) {
-    // manged to update upperbound
-    // no need to try anything else
+    // manged to update upperbound no need to try anything else
     return output;
   }
   output = handleLowerBound(range, newVersion);
@@ -507,7 +505,8 @@ function handleReplaceStrategy(
       if (trimZeros) {
         newBase = trimTrailingZeros(newBase);
       }
-      // trim last element of the newBase when new accepted version is out of range.
+      // trim last element of the newBase when new accepted version is out of
+      // range.
       // example: let new bound be >8.2.5 & newVersion be 8.2.5
       // return value will be: >8.2
       if (

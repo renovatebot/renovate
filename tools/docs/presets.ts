@@ -54,7 +54,8 @@ function getPresetDescription(
     return desc;
   }
 
-  // Parameterized preset references like ":semanticCommitType(chore)" will be looked up as `:semanticCommitType` (which is the preset name)
+  // Parameterized preset references like ":semanticCommitType(chore)" will be
+  // looked up as `:semanticCommitType` (which is the preset name)
   const [prefix] = presetRef.split('(');
   if (prefix) {
     desc = descriptions.get(prefix);
@@ -99,7 +100,8 @@ function generateCodeBlock(
           counter++;
           const description = getPresetDescription(presetRef, descriptions);
           annotations.push({ num: counter, ref: presetRef, link, description });
-          // note that we use a trailing `!` to strip the comment from the resulting code block
+          // note that we use a trailing `!` to strip the comment from the
+          // resulting code block
           return `${match[1]}${match[3]} // (${counter})!`;
         }
       }
@@ -167,7 +169,8 @@ edit_url: ${getEditUrl(presetName)}
 }
 
 export async function generatePresets(dist: string): Promise<void> {
-  // Calculate the descriptions for each preset ahead-of-time, as we remove them during generation
+  // Calculate the descriptions for each preset ahead-of-time, as we remove them
+  // during generation
   const descriptions = new Map<string, string>();
   for (const [groupName, presetConfig] of Object.entries(presetGroups)) {
     for (const [presetName, value] of Object.entries(presetConfig)) {

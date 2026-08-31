@@ -137,7 +137,8 @@ describe('util/cache/package/impl/file', () => {
       expect(res).toBeUndefined();
     });
 
-    // TODO: Delete this legacy JSON-wrapper read case once legacy.ts is removed.
+    // TODO: Delete this legacy JSON-wrapper read case once legacy.ts is
+    // removed.
     it('retrieves value from legacy JSON-wrapper payload', async () => {
       const value = await compressToBase64(JSON.stringify(1234));
       const expiry = DateTime.local().plus({ minutes: 5 });

@@ -114,7 +114,8 @@ export const id = 'github';
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
-// GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
+// GitHub's max is 60k but in the hosted app we've observed that content-length
+// is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
 
 export function resetConfigs(): void {
@@ -521,7 +522,8 @@ export async function initRepo({
   cloneSubmodulesFilter,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
-  // config is used by the platform api itself, not necessary for the app layer to know
+  // config is used by the platform api itself, not necessary for the app layer
+  // to know
   config = {
     repository,
     cloneSubmodules,
@@ -541,7 +543,8 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
+    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and
+    // hasIssuesEnabled objects
     // TODO #22198
     if (
       platformConfig.isGhe &&
@@ -552,7 +555,8 @@ export async function initRepo({
       infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
-    // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
+    // GitHub Enterprise Server <3.9.0 doesn't support
+    // hasVulnerabilityAlertsEnabled objects
     if (
       platformConfig.isGhe &&
       // semver not null safe, accepts null and undefined
@@ -627,7 +631,8 @@ export async function initRepo({
     config.defaultBranch = repo.defaultBranchRef.name;
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-    // GitHub allows administrators to block certain types of merge, so we need to check it
+    // GitHub allows administrators to block certain types of merge, so we need
+    // to check it
     if (repo.squashMergeAllowed) {
       config.mergeMethod = 'squash';
     } else if (repo.mergeCommitAllowed) {
@@ -635,7 +640,8 @@ export async function initRepo({
     } else if (repo.rebaseMergeAllowed) {
       config.mergeMethod = 'rebase';
     } else {
-      // This happens if we don't have Administrator read access, it is not a critical error
+      // This happens if we don't have Administrator read access, it is not a
+      // critical error
       logger.debug('Could not find allowed merge methods for repo');
     }
     config.autoMergeAllowed = repo.autoMergeAllowed;
@@ -682,7 +688,8 @@ export async function initRepo({
     logger.debug({ err }, 'Unknown GitHub initRepo error');
     throw err;
   }
-  // This shouldn't be necessary, but occasional strange errors happened until it was added
+  // This shouldn't be necessary, but occasional strange errors happened until
+  // it was added
   config.prList = null;
 
   if (forkToken) {
@@ -997,7 +1004,8 @@ export async function findPr({
   if (includeOtherAuthors) {
     const repo = config.parentRepo ?? config.repository;
     const org = repo?.split('/')[0];
-    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    // PR might have been created by anyone, so don't use the cached Renovate PR
+    // list
     const { body: prList } = await githubApi.getJsonUnchecked<GhRestPr[]>(
       `repos/${repo}/pulls?head=${org}:${branchName}&state=open`,
       { cacheProvider: repoCacheProvider },
@@ -1865,8 +1873,7 @@ async function tryPrAutomerge(
   }
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
-  // TODO #22198
-  // semver not null safe, accepts null and undefined
+  // TODO #22198 semver not null safe, accepts null and undefined
   if (
     platformConfig.isGhe &&
     semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
@@ -1908,7 +1915,8 @@ async function tryPrAutomerge(
         commitBody = automergeCommitMessage.slice(newlineIndex + 1).trim();
       }
 
-      // Add PR number to the commit headline to match the default GitHub behavior
+      // Add PR number to the commit headline to match the default GitHub
+      // behavior
       commitHeadline = `${commitHeadline} (#${prNumber})`;
     }
 
@@ -2005,8 +2013,7 @@ async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
     return cachedResult;
   }
 
-  // TODO #22198
-  // semver not null safe, accepts null and undefined
+  // TODO #22198 semver not null safe, accepts null and undefined
   if (
     platformConfig.isGhe &&
     semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
@@ -2177,8 +2184,8 @@ export async function mergePr({
 
   // v8 ignore else -- TODO: add test #40625
   if (mergeStrategy) {
-    // This path is taken if we have auto-detected the allowed merge types from the repo or
-    // automergeStrategy is configured by user
+    // This path is taken if we have auto-detected the allowed merge types from
+    // the repo or automergeStrategy is configured by user
     options.body.merge_method = mergeStrategy;
     try {
       logger.debug({ options, url }, `mergePr`);
@@ -2374,8 +2381,8 @@ async function pushFiles(
     //    - Force-push and file mode bits are supported (GraphQL can't do this)
     //    - We can use base_tree to send only changed files, avoiding org
     //      ruleset file-path restrictions on unchanged files (#42554)
-    // Reusing the pushed commit/tree SHAs directly does not work because
-    // the branch ref must point to an API-created commit for signing.
+    // Reusing the pushed commit/tree SHAs directly does not work because the
+    // branch ref must point to an API-created commit for signing.
     await pushCommitToRenovateRef(commitSha, branchName);
     const baseTreeSha = await getCommitTreeSha(parentCommitSha);
     const treeItems = await diffCommitTree(parentCommitSha, commitSha);
@@ -2434,8 +2441,8 @@ export async function commitFiles(
   if (!pushResult) {
     return null;
   }
-  // Replace locally created branch with the remotely created one
-  // and return the remote commit SHA
+  // Replace locally created branch with the remotely created one and return the
+  // remote commit SHA
   await git.resetToCommit(commitResult.parentCommitSha);
   const commitSha = await git.fetchBranch(branchName);
   return commitSha;

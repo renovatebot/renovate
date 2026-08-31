@@ -332,7 +332,8 @@ describe('modules/datasource/crate/index', () => {
       });
       expect(res1).not.toBeNull();
 
-      // Second package: config.json should come from memCache (no extra HTTP mock needed)
+      // Second package: config.json should come from memCache (no extra HTTP
+      // mock needed)
       mockCratesApiCallFor('amethyst', Fixtures.get('amethyst.json'));
       httpMock
         .scope(CRATES_IO_REGISTRY_URL_PARSED)

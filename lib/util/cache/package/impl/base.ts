@@ -96,10 +96,12 @@ export abstract class PackageCacheBase {
     key: string,
   ): MaybePromise<void>;
 
-  // The file backend's cleanup can't read a legacy entry's in-payload expiry, so
-  // it overrides this to rewrite the entry as an envelope on read and avoid
-  // purging it. Best-effort: overrides must not throw or change the read result.
-  // TODO: Delete with the legacy decoder once pre-envelope entries have expired.
+  // The file backend's cleanup can't read a legacy entry's in-payload expiry,
+  // so it overrides this to rewrite the entry as an envelope on read and avoid
+  // purging it. Best-effort: overrides must not throw or change the read
+  // result.
+  // TODO: Delete with the legacy decoder once pre-envelope entries have
+  // expired.
   protected upgradeLegacyEntry(
     _namespace: PackageCacheNamespace,
     _key: string,

@@ -244,7 +244,8 @@ export async function updateArtifacts({
     const hasWrapperUpdate = updatedDeps.some(
       (dep) => dep.depName === 'maven-wrapper',
     );
-    // Remember original content properties - we'll restore them after wrapper:wrapper
+    // Remember original content properties - we'll restore them after
+    // wrapper:wrapper
     const hadDistributionChecksum = newPackageFileContent.includes(
       'distributionSha256Sum=',
     );
@@ -274,7 +275,8 @@ export async function updateArtifacts({
       }
     }
 
-    // Delete old maven-wrapper.jar if checksums exist and wrapper:wrapper will run
+    // Delete old maven-wrapper.jar if checksums exist and wrapper:wrapper will
+    // run
     // This prevents checksum validation failure when wrapper:wrapper runs
     if (hasWrapperUpdate && (hadWrapperChecksum || hadDistributionChecksum)) {
       const jarPath = packageFileName.replace(
@@ -291,7 +293,8 @@ export async function updateArtifacts({
       }
     }
 
-    // Strip checksum lines before running wrapper:wrapper to avoid validation failure
+    // Strip checksum lines before running wrapper:wrapper to avoid validation
+    // failure
     // (mvnw would try to validate NEW jar against OLD checksum)
     let contentToWrite = newPackageFileContent;
     if (hasWrapperUpdate && (hadWrapperChecksum || hadDistributionChecksum)) {
@@ -463,8 +466,10 @@ async function createWrapperCommand(
     wrapperFullyQualifiedPath,
   } = getMavenPaths(packageFileName);
 
-  // Use existing distributionType or default to 'script' to preserve JAR-based mode
-  // (prevents Maven 3.3.x from defaulting to only-script which doesn't support checksums)
+  // Use existing distributionType or default to 'script' to preserve JAR-based
+  // mode
+  // (prevents Maven 3.3.x from defaulting to only-script which doesn't support
+  // checksums)
   const type = distributionType ?? 'script';
   const args = `wrapper:wrapper -Dtype=${quote(type)}`;
 

@@ -50,7 +50,8 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   const tableKeyValuePairs: Record<string, Record<string, string>> = {};
   for (const upgrade of config.upgrades) {
     if (upgrade) {
-      // Create a key based on the properties which are significant in the updates table
+      // Create a key based on the properties which are significant in the
+      // updates table
       const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${upgrade.newValue ?? ''}_${upgrade.newVersion ?? ''}_${upgrade.currentValue ?? ''}_${upgrade.currentVersion ?? ''}_${upgrade.updateType}`;
 
       const res: Record<string, string> = {};
@@ -72,8 +73,8 @@ export function getPrUpdatesTable(config: BranchConfig): string {
       }
 
       if (tableKeyValuePairs[key]) {
-        // compare the duplicate upgrades as per their table values
-        // and select one with better values
+        // compare the duplicate upgrades as per their table values and select
+        // one with better values
         tableKeyValuePairs[key] = compareTableValues(
           tableKeyValuePairs[key],
           res,

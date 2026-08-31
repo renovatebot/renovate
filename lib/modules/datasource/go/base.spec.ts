@@ -217,8 +217,8 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('returns null for invalid GitLab EE go-source URL', async () => {
-        // a real host rule cannot match an unparseable URL, so spy to reach
-        // the URL parsing branch
+        // a real host rule cannot match an unparseable URL, so spy to reach the
+        // URL parsing branch
         vi.spyOn(hostRules, 'hostType').mockReturnValueOnce('gitlab');
         httpMock
           .scope('https://my.custom.domain')

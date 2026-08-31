@@ -1,6 +1,7 @@
 import { defineRule } from '@oxlint/plugins';
 
-// Regex used instead of String#includes() to avoid CodeQL's js/incomplete-url-substring-sanitization false positive.
+// Regex used instead of String#includes() to avoid CodeQL's
+// js/incomplete-url-substring-sanitization false positive.
 const DOCS_URL_RE = /https:\/\/docs\.renovatebot\.com/;
 
 export default defineRule({

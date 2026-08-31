@@ -4,7 +4,9 @@ import { JsonTraceSerializer } from '@opentelemetry/otlp-transformer';
 import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
 
 // Taken from https://github.com/open-telemetry/opentelemetry-js/blob/2.10.0/packages/opentelemetry-core/src/ExportResult.ts and inlined, as we don't need to add an unnecessary dependency for this type that doesn't change.
-// A plain object is used instead of a real `enum`, since this repo runs `.ts` files directly via Node's type-stripping, which cannot emit runtime code for `enum`.
+// A plain object is used instead of a real `enum`, since this repo runs `.ts`
+// files directly via Node's type-stripping, which cannot emit runtime code for
+// `enum`.
 export const ExportResultCode = {
   SUCCESS: 0,
   FAILED: 1,

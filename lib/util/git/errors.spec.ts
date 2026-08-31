@@ -14,9 +14,9 @@ const errorMsg = codeBlock`
   error: failed to push some refs to 'https://github.com/foo/bar.git'
 `;
 
-// Real-world GH013 error from a GitHub Push Protection ruleset that
-// restricts writes to files under .github/workflows/. Captured from a
-// self-hosted Renovate run.
+// Real-world GH013 error from a GitHub Push Protection ruleset that restricts
+// writes to files under .github/workflows/. Captured from a self-hosted
+// Renovate run.
 const gh013PushProtectionErr = codeBlock`
   To https://github.com/the-org/example.git
   ! refs/renovate/branches/renovate/go-1.x:refs/renovate/branches/renovate/go-1.x [remote rejected] (push declined due to repository rule violations)
@@ -57,8 +57,8 @@ describe('util/git/errors', () => {
     it('throws a CONFIG_VALIDATION error when GitHub returns GH013', () => {
       const err = new Error(gh013PushProtectionErr);
       // Even when every changed file is under .github/workflows/, which
-      // previously triggered a silent info-level abort, GH013 must be
-      // surfaced so the repository is flagged as failing.
+      // previously triggered a silent info-level abort, GH013 must be surfaced
+      // so the repository is flagged as failing.
       let thrown: any;
       try {
         handleCommitError(err, 'renovate/go-1.x', [workflowFile]);
@@ -76,8 +76,8 @@ describe('util/git/errors', () => {
     });
 
     it('still silently aborts on generic workflow-file push rejection', () => {
-      // Sanity check: non-GH013 workflow rejection should still be
-      // swallowed so we do not regress the existing behaviour where
+      // Sanity check: non-GH013 workflow rejection should still be swallowed so
+      // we do not regress the existing behaviour where
       // App tokens without the `workflows` scope abort quietly.
       const err = new Error(codeBlock`
         remote rejected refs/renovate/branches/foo

@@ -287,7 +287,8 @@ export class BzlmodVersion {
     if (this.prerelease.isLessThan(other.prerelease)) {
       return true;
     }
-    // NOTE: We ignore the build value for precedence comparison per the Semver spec.
+    // NOTE: We ignore the build value for precedence comparison per the Semver
+    // spec.
     // https://semver.org/#spec-item-10
     return false;
   }

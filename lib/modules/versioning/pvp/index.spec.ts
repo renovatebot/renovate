@@ -249,16 +249,16 @@ describe('modules/versioning/pvp/index', () => {
 
   describe('.isStable()', () => {
     it('should consider 0.0.0 stable', () => {
-      // in PVP, stability is not conveyed in the version number
-      // so we consider all versions stable
+      // in PVP, stability is not conveyed in the version number so we consider
+      // all versions stable
       expect(pvp.isStable('0.0.0')).toBeTrue();
     });
   });
 
   describe('.isCompatible()', () => {
     it('should consider 0.0.0 compatible', () => {
-      // in PVP, there is no extra information besides the numbers
-      // so we consider all versions compatible
+      // in PVP, there is no extra information besides the numbers so we
+      // consider all versions compatible
       expect(pvp.isCompatible('0.0.0')).toBeTrue();
     });
   });

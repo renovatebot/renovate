@@ -73,8 +73,7 @@ export class DebianVersioningApi extends GenericVersioningApi {
       return this._distroInfo.getCodenameByVersion(ver);
     }
 
-    // newVersion is [oldold|old|]stable
-    // current value is numeric
+    // newVersion is [oldold|old|]stable current value is numeric
     if (this._rollingReleases.has(newVersion)) {
       // should never `undefined` if it exists
       return this._rollingReleases.schedule(newVersion)!.version;

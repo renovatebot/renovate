@@ -206,8 +206,8 @@ export async function getPreset(
   const massagedConfig = massage.massageConfig(migratedConfig);
   if (presetSources[parsedPreset.presetSource]?.repoHosted) {
     // only presets which are hosted in a repository can contain relative
-    // references, in all other presets they are left as they are and fail
-    // when they are resolved
+    // references, in all other presets they are left as they are and fail when
+    // they are resolved
     canonicalizeRelativePresets(massagedConfig, parsedPreset);
   }
   return massagedConfig;

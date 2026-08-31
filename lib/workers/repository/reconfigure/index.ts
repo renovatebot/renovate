@@ -135,8 +135,8 @@ export async function checkReconfigureBranch(
     );
   }
 
-  // if comment is not added or updated
-  // do not store extractResult in cache so that we re-process the reconfigure branch on next run and do not skip
+  // if comment is not added or updated do not store extractResult in cache so
+  // that we re-process the reconfigure branch on next run and do not skip
   // istanbul ignore if: should rarely happen
   if (!commentEnsured) {
     extractResult = undefined;

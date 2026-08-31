@@ -58,8 +58,9 @@ export const useRepoRuleAssignment = q
   });
 
 // Parser for repository rule calls
-// This parser always creates repo rule call fragments, but they will be filtered
-// during extraction based on whether they correspond to known repo rule variables
+// This parser always creates repo rule call fragments, but they will be
+// filtered during extraction based on whether they correspond to known repo
+// rule variables
 export const repoRuleCall = q
   .sym<Ctx>(regEx(/^[a-zA-Z_]\w*$/), (ctx, token) => {
     return ctx.startRepoRuleCall(token.value, token.offset);

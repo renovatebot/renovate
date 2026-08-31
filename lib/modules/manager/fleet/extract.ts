@@ -121,7 +121,8 @@ function extractFleetFile(
   result.push(extractFleetHelmBlock(doc.helm, config));
 
   if (!isUndefined(doc.targetCustomizations)) {
-    // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
+    // remove version from helm block to allow usage of variables defined in the
+    // global block, but do not create PRs
     // if there is no version defined in the customization.
     const helmBlockContext: FleetHelmBlock = { ...doc.helm };
     delete helmBlockContext.version;

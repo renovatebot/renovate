@@ -417,7 +417,8 @@ export class DockerDatasource extends Datasource {
           err.statusCode >= 500 &&
           err.statusCode < 600
         ) {
-          // querying the digest manifest for a non existent image leads to a 500 statusCode
+          // querying the digest manifest for a non existent image leads to a
+          // 500 statusCode
           return null;
         }
 
@@ -510,7 +511,8 @@ export class DockerDatasource extends Datasource {
     tag: string,
   ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
-    // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is set
+    // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is
+    // set
     if (
       getEnv().RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
       registryHost === DOCKER_HUB
@@ -792,9 +794,11 @@ export class DockerDatasource extends Datasource {
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
       if (isArtifactoryServer(res)) {
-        // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
+        // Artifactory bug: next link comes back without virtual-repo prefix
+        // (RTFACT-18971)
         if (linkHeader?.next?.last) {
-          // parse the current URL, strip any old "last" param, then set the new one
+          // parse the current URL, strip any old "last" param, then set the new
+          // one
           const parsed = parseUrl(url);
           // v8 ignore if: url is always a valid HTTP URL as `ensurePathPrefix`
           if (!parsed) {
@@ -808,14 +812,16 @@ export class DockerDatasource extends Datasource {
           url = null;
         }
       } else if (linkHeader?.next?.url) {
-        // Resolve the relative-or-absolute next link, not following cross-origin requests unless explicitly opted in
+        // Resolve the relative-or-absolute next link, not following
+        // cross-origin requests unless explicitly opted in
         const nextUrl = resolvePaginationUrl(
           url,
           linkHeader.next.url,
           allowCrossOrigin,
         );
         if (!nextUrl) {
-          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          // make sure that users are aware if there are any (potentially
+          // malicious, or misconfigured) pagination links being returned
           logger.once.warn(
             { registryHost, nextUrl: linkHeader.next.url },
             'Ignoring cross-origin or invalid Docker registry tags pagination link',
@@ -839,10 +845,12 @@ export class DockerDatasource extends Datasource {
       let tags: string[] | null;
       if (isQuay) {
         try {
-          // Due to pagination and sorting limits on Quay Docker v2 API implementation we try the Quay v1 API first
+          // Due to pagination and sorting limits on Quay Docker v2 API
+          // implementation we try the Quay v1 API first
           tags = await this.getTagsQuayRegistry(registryHost, dockerRepository);
         } catch (err) {
-          // If we get a 401 Unauthorized error (v1 API requires separate auth for private images), fall back to Docker v2 API
+          // If we get a 401 Unauthorized error (v1 API requires separate auth
+          // for private images), fall back to Docker v2 API
           if (err.statusCode === 401) {
             logger.debug(
               { registryHost, dockerRepository },
@@ -869,8 +877,10 @@ export class DockerDatasource extends Datasource {
         );
         return this.getTags(registryHost, `library/${dockerRepository}`);
       }
-      // JFrog Artifactory - Retry handling when resolving Docker Official Images
-      // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
+      // JFrog Artifactory - Retry handling when resolving Docker Official
+      // Images
+      // These follow the format of
+      // {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
         isArtifactoryServer(err.response) &&
@@ -1047,7 +1057,8 @@ export class DockerDatasource extends Datasource {
             } else if (
               hasKey('docker-content-digest', manifestResponse.headers)
             ) {
-              // TODO: return null if no matching architecture, requires to fetch the config manifest
+              // TODO: return null if no matching architecture, requires to
+              // fetch the config manifest
               // https://github.com/renovatebot/renovate/discussions/22639
               digest = manifestResponse.headers[
                 'docker-content-digest'
@@ -1164,7 +1175,8 @@ export class DockerDatasource extends Datasource {
         break;
       }
 
-      // Only follow the `next` link when it's on the same origin, unless explicitly opted in
+      // Only follow the `next` link when it's on the same origin, unless
+      // explicitly opted in
       const nextUrl = resolvePaginationUrl(url, next, allowCrossOrigin);
       if (!nextUrl) {
         logger.once.warn(
@@ -1188,10 +1200,10 @@ export class DockerDatasource extends Datasource {
         release.releaseTimestamp = releaseTimestamp;
       }
 
-      // Digest is intentionally not propagated — the Docker Hub tag API
-      // returns the manifest-list digest, which would bypass arch-aware
-      // resolution in `getDigest()`. `getDigest()` consults the same cache
-      // as a shortcut when no arch resolution is needed.
+      // Digest is intentionally not propagated — the Docker Hub tag API returns
+      // the manifest-list digest, which would bypass arch-aware resolution in
+      // `getDigest()`. `getDigest()` consults the same cache as a shortcut when
+      // no arch resolution is needed.
       return release;
     });
   }

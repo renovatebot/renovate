@@ -73,8 +73,8 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return true;
   }
 
-  // Repo is onboarded if global config is bypassing onboarding and does not require a
-  // configuration file.
+  // Repo is onboarded if global config is bypassing onboarding and does not
+  // require a configuration file.
   // The repo is considered "not onboarded" if:
   // - An onboarding cache is present, and
   // - The current default branch SHA matches the default SHA found in the cache
@@ -94,8 +94,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   const closedOnboardingPr = await closedPrExists(config);
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
-  // if onboarding cache is present and base branch has not been updated; branch is not onboarded
-  // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
+  // if onboarding cache is present and base branch has not been updated; branch
+  // is not onboarded
+  // if closed pr exists then presence of onboarding cache doesn't matter as we
+  // need to skip onboarding
   if (
     getInheritedOrGlobal('onboarding') &&
     !closedOnboardingPr &&
@@ -107,7 +109,8 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return false;
   }
 
-  // when bot is ran is fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
+  // when bot is ran is fork mode ... do not fetch file using api call instead
+  // use the git.fileList so we get sync first and get the latest config
   // prevents https://github.com/renovatebot/renovate/discussions/37328
   if (cache.configFileName && !config.forkToken) {
     logger.debug('Checking cached config file name');
@@ -180,8 +183,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
         `Determining that the closed onboarding PR was created at \`${closedOnboardingPr.createdAt!}\` was created ${ageOfOnboardingPr.toFixed(2)} days ago`,
       );
     }
-    // if we have onboardingAutoCloseAge, and it hasn't yet passed onboardingAutoCloseAge, add a comment
-    // if it /has/ passed, we'll comment this appropriately in `ensureOnboardingPr`, so there doesn't need to be a comment here
+    // if we have onboardingAutoCloseAge, and it hasn't yet passed
+    // onboardingAutoCloseAge, add a comment
+    // if it /has/ passed, we'll comment this appropriately in
+    // `ensureOnboardingPr`, so there doesn't need to be a comment here
     if (
       !onboardingAutoCloseAge ||
       ageOfOnboardingPr <= onboardingAutoCloseAge

@@ -103,7 +103,8 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     logger.debug(`Found CODEOWNERS file: ${codeOwnersFile}`);
 
     // Get list of modified files in PR
-    // if the commit sha is known, we can directly compare against the parent, otherwise use the branch
+    // if the commit sha is known, we can directly compare against the parent,
+    // otherwise use the branch
     const prFiles = pr.sha
       ? await getBranchFilesFromCommit(pr.sha)
       : await getBranchFiles(pr.sourceBranch);
@@ -134,7 +135,8 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       prFiles
         .map((file) => matchFileToOwners(file, fileOwnerRules))
 
-        // Match file again but this time only with emptyRules, to ensure that files which have no owner set remain owner-less
+        // Match file again but this time only with emptyRules, to ensure that
+        // files which have no owner set remain owner-less
         .map((matchedFile) => {
           const matchEmpty = emptyRules.find((rule) =>
             rule.match(matchedFile.file),
@@ -151,10 +153,14 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         .join(', ')}`,
     );
 
-    // Get list of all matched users and the files they own (reverse keys of fileOwners)
+    // Get list of all matched users and the files they own (reverse keys of
+    // fileOwners)
     const usersWithOwnedFiles = getOwnerList(fileOwners);
 
-    // Calculate a match score for each user. This allows sorting of the final user array in a way that guarantees that users matched with more precise patterns are first and users matched with less precise patterns are last (wildcards)
+    // Calculate a match score for each user. This allows sorting of the final
+    // user array in a way that guarantees that users matched with more precise
+    // patterns are first and users matched with less precise patterns are last
+    // (wildcards)
     const userScore = usersWithOwnedFiles
       .map((userMatch) => ({
         user: userMatch.username,

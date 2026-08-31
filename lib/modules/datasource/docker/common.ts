@@ -75,13 +75,17 @@ export async function getAuthHeaders(
     }
     if (apiCheckResponse.statusCode === 404) {
       logger.debug(`Page Not Found ${apiCheckUrl}`);
-      // throw error up to be caught and potentially retried with library/ prefix
+      // throw error up to be caught and potentially retried with library/
+      // prefix
       throw new Error(PAGE_NOT_FOUND_ERROR);
     }
-    // Some ECR-compatible private registries (e.g. corporate Docker proxies) reject
-    // n>1000 with 405 even on the auth-probe request.  Fall back to probing the base
-    // /v2/ endpoint so getAuthHeaders can still obtain a valid token; the main fetch
-    // loop already retries with n=1000 when it encounters this same error.
+    // Some ECR-compatible private registries (e.g. corporate Docker proxies)
+    // reject
+    // n>1000 with 405 even on the auth-probe request. Fall back to probing the
+    // base
+    // /v2/ endpoint so getAuthHeaders can still obtain a valid token; the main
+    // fetch loop already retries with n=1000 when it encounters this same
+    // error.
     if (isECRMaxResultsResponse(apiCheckResponse)) {
       logger.debug(
         { apiCheckUrl },
@@ -187,7 +191,8 @@ export async function getAuthHeaders(
     // already guarded by above clause
     const authUrl = parseUrl(`${authenticateHeader.params.realm}`)!;
 
-    // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
+    // repo isn't known to server yet, so causing wrong scope
+    // `repository:user/image:pull`
     if (
       isString(authenticateHeader.params.scope) &&
       !apiCheckUrl.endsWith('/v2/')

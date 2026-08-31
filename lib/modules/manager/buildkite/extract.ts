@@ -26,7 +26,8 @@ export function extractPackageFile(
         let skipReason: SkipReason | undefined;
         let repo: string | undefined;
         logger.trace(`Found Buildkite plugin ${depName}`);
-        // Plugins may simply be git repos. If so, we need to parse out the registry.
+        // Plugins may simply be git repos. If so, we need to parse out the
+        // registry.
         const gitPluginMatch = regEx(
           /(ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/,
         ).exec(depName);

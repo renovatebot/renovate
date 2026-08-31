@@ -26,8 +26,9 @@ describe('workers/repository/index', () => {
       process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       vi.mocked(initRepo).mockRejectedValueOnce(new Error('init error'));
       const res = await renovateRepository(config);
-      // this returns `undefined`, as we do not actually process a repository, so no `ProcessResult` is returned
-      // but importantly, no errors are thrown, either
+      // this returns `undefined`, as we do not actually process a repository,
+      // so no `ProcessResult` is returned but importantly, no errors are
+      // thrown, either
       expect(res).toBeUndefined();
     });
   });

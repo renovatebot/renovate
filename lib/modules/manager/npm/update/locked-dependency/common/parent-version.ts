@@ -101,7 +101,8 @@ export async function findFirstParentVersion(
       }
       if (semver.isVersion(constraint)) {
         if (semver.isGreaterThan(constraint, targetVersion)) {
-          // it's not the version we were after - the parent skipped to a higher version
+          // it's not the version we were after - the parent skipped to a higher
+          // version
           logger.debug(
             `${targetDepName} needs ${parentName}@${parentVersion} which uses version "${constraint}" in order to update to greater than ${targetVersion}`,
           );
@@ -111,7 +112,8 @@ export async function findFirstParentVersion(
         // check the range against all versions
         targetVersions.some((version) => semver.matches(version, constraint))
       ) {
-        // the constraint didn't match the version we wanted, but it matches one of the versions higher
+        // the constraint didn't match the version we wanted, but it matches one
+        // of the versions higher
         logger.debug(
           `${targetDepName} needs ${parentName}@${parentVersion} which uses constraint "${constraint}" in order to update to greater than ${targetVersion}`,
         );

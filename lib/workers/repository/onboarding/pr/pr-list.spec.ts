@@ -1098,7 +1098,8 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               branchName: 'ignored',
               isRemediation: true,
             },
-            // although bump is less common, it's a valid `UpdateType`, so is its own column
+            // although bump is less common, it's a valid `UpdateType`, so is
+            // its own column
             {
               manager: 'some-manager',
               sourceUrl: 'https://a',
@@ -1532,7 +1533,8 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         expect(res).toContain('``, (some-manager, patch): `package.json`');
       });
 
-      // for instance, if a GitHub vulnerability alert is triggered, it's based on the datasource+packageName, not the packageFile
+      // for instance, if a GitHub vulnerability alert is triggered, it's based
+      // on the datasource+packageName, not the packageFile
       describe('handles when the packageFile is not set', () => {
         it('on one upgrade', () => {
           const branches: BranchConfig[] = [

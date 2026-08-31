@@ -102,7 +102,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       }
 
       if (module.skipReason) {
-        // the PuppetfileModule skip reason is dominant over the packageDependency skip reason
+        // the PuppetfileModule skip reason is dominant over the
+        // packageDependency skip reason
         packageDependency.skipReason = module.skipReason;
       }
 

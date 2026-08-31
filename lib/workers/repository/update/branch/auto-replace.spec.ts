@@ -221,8 +221,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.datasourceTemplate = 'docker';
       upgrade.matchStringsStrategy = 'combination';
 
-      // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
-      // there's nothing defined in there anymore that it can match
+      // If the new "name" is not added to the matchStrings, the regex matcher
+      // fails to extract from `newContent` as there's nothing defined in there
+      // anymore that it can match
       upgrade.matchStrings = [
         '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
         '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
@@ -1664,8 +1665,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
 
     it('docker: replacement with same digest should not corrupt digest via currentDigestShort', async () => {
       // Regression test for https://github.com/renovatebot/renovate/discussions/38703
-      // When doing a replacement where currentDigest === newDigest, the currentDigestShort
-      // should not be used to incorrectly replace part of the correct digest
+      // When doing a replacement where currentDigest === newDigest, the
+      // currentDigestShort should not be used to incorrectly replace part of
+      // the correct digest
       const dockerfile = codeBlock`
         FROM redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
       `;

@@ -41,7 +41,8 @@ export function generateMermaidGraph(
 ): string {
   const lockFiles = [];
   for (const lockFile of lockFileArgs.keys()) {
-    // TODO: add extra args to the lock file ${extraArgs ? '\n' + extraArgs : ''}
+    // TODO: add extra args to the lock file ${extraArgs ? '\n' + extraArgs :
+    // ''}
     // const extraArgs = pipCompileArgs.extra
     //   ?.map((v) => '--extra=' + v)
     //   .join('\n');

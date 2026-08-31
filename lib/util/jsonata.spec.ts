@@ -45,8 +45,8 @@ describe('util/jsonata', () => {
       });
 
       it('should maintain data isolation when evaluating same expression concurrently', async () => {
-        // Expression that uses $$ to reference the root input
-        // and returns a property that identifies which input it received
+        // Expression that uses $$ to reference the root input and returns a
+        // property that identifies which input it received
         const expression = getExpression('$$.id');
 
         if (expression instanceof Error) {

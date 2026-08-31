@@ -93,7 +93,8 @@ function makeConfig(
     updatedPackageFiles: [
       { type: 'addition', path: packageFileName, contents: 'updated workflow' },
     ],
-    // Mirrors production, where config is resolved against the shipped defaults.
+    // Mirrors production, where config is resolved against the shipped
+    // defaults.
     constraints: getConfig().constraints,
     ...overrides,
   });
@@ -149,7 +150,8 @@ describe('modules/manager/github-actions/artifacts', () => {
     it('does nothing when artifact updates are skipped', async () => {
       const execSnapshots = mockExecAll();
 
-      // `:disableLockFiles` must keep the tool away from the lockfile, as it does for every other manager's artifacts
+      // `:disableLockFiles` must keep the tool away from the lockfile, as it
+      // does for every other manager's artifacts
       const res = await updateActionsLockfile(
         makeConfig({ skipArtifactsUpdate: true }),
         packageFiles,
@@ -264,7 +266,8 @@ describe('modules/manager/github-actions/artifacts', () => {
       const execSnapshots = mockExecAll();
       mockLockfileRegenerated();
 
-      // composite actions are transitive deps of an onboarded workflow, so the tool decides whether anything changes
+      // composite actions are transitive deps of an onboarded workflow, so the
+      // tool decides whether anything changes
       const res = await updateActionsLockfile(
         makeConfig({
           upgrades: [
@@ -285,7 +288,8 @@ describe('modules/manager/github-actions/artifacts', () => {
       const execSnapshots = mockExecAll();
       mockLockfileRegenerated();
 
-      // the lockfile records `OWNER/REPO@REF` pins, and a reusable workflow call is one
+      // the lockfile records `OWNER/REPO@REF` pins, and a reusable workflow
+      // call is one
       const res = await updateActionsLockfile(
         makeConfig({
           upgrades: [{ ...checkoutUpgrade, depType: 'workflow' }],
@@ -320,7 +324,8 @@ describe('modules/manager/github-actions/artifacts', () => {
         .mockResolvedValueOnce('updated workflow');
       mockRepoStatus();
 
-      // a composite action isn't keyed by `workflows:`, so it still runs even when that key is missing entirely
+      // a composite action isn't keyed by `workflows:`, so it still runs even
+      // when that key is missing entirely
       const res = await updateActionsLockfile(
         makeConfig({
           upgrades: [
@@ -388,7 +393,8 @@ describe('modules/manager/github-actions/artifacts', () => {
         twoWorkflows,
       );
 
-      // the whole branch has to be on disk, or the tool rebuilds the lockfile from pre-update content
+      // the whole branch has to be on disk, or the tool rebuilds the lockfile
+      // from pre-update content
       expect(fs.writeLocalFile).toHaveBeenCalledWith(
         packageFileName,
         'updated ci',
@@ -411,7 +417,8 @@ describe('modules/manager/github-actions/artifacts', () => {
               path: packageFileName,
               contents: 'updated workflow',
             },
-            // a branch can group updates from other managers, whose contents can be binary
+            // a branch can group updates from other managers, whose contents
+            // can be binary
             {
               type: 'addition',
               path: 'gradle/wrapper/gradle-wrapper.jar',
@@ -454,7 +461,8 @@ describe('modules/manager/github-actions/artifacts', () => {
         .mockResolvedValueOnce(annotate('release workflow'));
       mockRepoStatus([lockFile, packageFileName, releaseFileName]);
 
-      // the tool re-annotates every onboarded workflow, so an edit to one this branch never touched still has to be committed
+      // the tool re-annotates every onboarded workflow, so an edit to one this
+      // branch never touched still has to be committed
       const res = await updateActionsLockfile(makeConfig(), twoWorkflows);
 
       expect(res.updatedArtifacts).toMatchObject([
@@ -602,7 +610,8 @@ describe('modules/manager/github-actions/artifacts', () => {
       const execSnapshots = mockExecAll();
       mockLockfileRegenerated();
 
-      // the pin has a default which `constraints: {}` cannot remove, since `constraints` is mergeable.
+      // the pin has a default which `constraints: {}` cannot remove, since
+      // `constraints` is mergeable.
       // An empty value is the way to opt out.
       await updateActionsLockfile(
         makeConfig({ constraints: { ghActionsLock: '' } }),
@@ -714,7 +723,8 @@ describe('modules/manager/github-actions/artifacts', () => {
 
       await updateActionsLockfile(makeConfig(), packageFiles);
 
-      // the tool resolves `actions/checkout` against github.com even from a GHES repository, and unauthenticated requests are rate limited hard
+      // the tool resolves `actions/checkout` against github.com even from a
+      // GHES repository, and unauthenticated requests are rate limited hard
       expect(execSnapshots[0].options?.env).toMatchObject({
         GH_HOST: 'github.example.com',
         GH_ENTERPRISE_TOKEN: 'ghes-token',
@@ -795,7 +805,8 @@ describe('modules/manager/github-actions/artifacts', () => {
 
       await updateActionsLockfile(makeConfig(), packageFiles);
 
-      // the configured endpoint isn't a GitHub one, so `gh` still talks to github.com
+      // the configured endpoint isn't a GitHub one, so `gh` still talks to
+      // github.com
       expect(execSnapshots[0].options?.env).toMatchObject({
         GH_TOKEN: 'some-token',
       });

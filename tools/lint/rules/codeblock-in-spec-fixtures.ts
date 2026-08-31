@@ -120,8 +120,8 @@ export default defineRule({
           }
         }
 
-        // only flag literals spanning multiple source lines; multi-line
-        // values built from `\n` escapes are fine (see rule docs above)
+        // only flag literals spanning multiple source lines; multi-line values
+        // built from `\n` escapes are fine (see rule docs above)
         if (!node.quasis.some((quasi) => quasi.value.raw.includes('\n'))) {
           return;
         }

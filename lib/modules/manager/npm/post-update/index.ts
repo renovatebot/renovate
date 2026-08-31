@@ -150,8 +150,8 @@ export async function writeExistingFiles(
     const basedir = upath.dirname(packageFile.packageFile!);
     const npmrc = packageFile.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
-    // Write out the file unless the npmrc came from the workspace
-    // npmrcFilename will be set whenever the file was read from disk during extract
+    // Write out the file unless the npmrc came from the workspace npmrcFilename
+    // will be set whenever the file was read from disk during extract
     if (
       isString(npmrc) &&
       (npmrcFilename === packageFile.managerData.npmrcFileName ||
@@ -250,7 +250,8 @@ export async function writeUpdatedPackageFiles(
     logger.debug('No files found');
     return;
   }
-  // prefer artifact content when it updates the same file (e.g. pnpm-workspace.yaml)
+  // prefer artifact content when it updates the same file (e.g.
+  // pnpm-workspace.yaml)
   const artifactContents = new Map<string, string>();
   if (config.updatedArtifacts) {
     for (const artifact of config.updatedArtifacts) {
@@ -341,8 +342,7 @@ async function updateYarnOffline(
   }
 }
 
-// TODO: move to ./yarn.ts
-// exported for testing
+// TODO: move to ./yarn.ts exported for testing
 export async function updateYarnBinary(
   lockFileDir: string,
   updatedArtifacts: FileChange[],

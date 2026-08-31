@@ -112,7 +112,8 @@ export async function updateLockedDependency(
           status = 'update-failed';
         }
       }
-      // Don't return {} if we're a parent update or else the whole update will fail
+      // Don't return {} if we're a parent update or else the whole update will
+      // fail
       /* v8 ignore next -- too hard to replicate */
       if (isParentUpdate) {
         const files: Record<string, string> = {};
@@ -180,7 +181,8 @@ export async function updateLockedDependency(
               `Update of ${depName} to ${newVersion} already achieved in parent ${parentDepName}@${parentNewVersion}`,
             );
           } else {
-            // Update the parent dependency so that we can update this dependency
+            // Update the parent dependency so that we can update this
+            // dependency
             logger.debug(
               `Update of ${depName} to ${newVersion} can be achieved due to parent ${parentDepName}`,
             );
@@ -192,7 +194,8 @@ export async function updateLockedDependency(
             parentUpdates.push(parentUpdate);
           }
         } else {
-          // For some reason it's not possible to update the parent to a version compatible with our desired dep version
+          // For some reason it's not possible to update the parent to a version
+          // compatible with our desired dep version
           logger.debug(
             `Update of ${depName} to ${newVersion} cannot be achieved due to parent ${parentDepName}`,
           );
@@ -200,7 +203,8 @@ export async function updateLockedDependency(
         }
       } else if (depType) {
         // TODO: `newValue` can probably null
-        // The constraint comes from the package.json file, so we need to update it
+        // The constraint comes from the package.json file, so we need to update
+        // it
         const newValue = semver.getNewValue({
           currentValue: constraint,
           rangeStrategy: 'replace',

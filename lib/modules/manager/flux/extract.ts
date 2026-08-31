@@ -422,7 +422,8 @@ function resolveResourceManifest(
             false,
             registryAliases,
           );
-          // Set currentValue to the tag so the docker datasource can look up the image's new digest
+          // Set currentValue to the tag so the docker datasource can look up
+          // the image's new digest
           combinedDep.currentValue = resource.spec.ref.tag;
 
           const refRange = extractOCIRefTagAndDigestRange(

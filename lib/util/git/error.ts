@@ -152,7 +152,8 @@ export function handleCommitError(
     throw error;
   }
   logger.debug({ err }, 'Unknown error committing files');
-  // We don't know why this happened, so this will cause bubble up to a branch error
+  // We don't know why this happened, so this will cause bubble up to a branch
+  // error
   throw err;
 }
 

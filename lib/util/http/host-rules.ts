@@ -72,7 +72,9 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   const platform = GlobalConfig.get('platform');
   const platformEndpoint = GlobalConfig.get('endpoint');
 
-  // in the case that an API URL is used for GitHub.com, fallback to `github` hostType, and use the `url`'s host to find a `matchHost: api.github.com` (or `matchHost: github.com`)
+  // in the case that an API URL is used for GitHub.com, fallback to `github`
+  // hostType, and use the `url` 's host to find a `matchHost: api.github.com`
+  // (or `matchHost: github.com` )
   if (url.startsWith('https://api.github.com/')) {
     res = {
       ...hostRules.find({

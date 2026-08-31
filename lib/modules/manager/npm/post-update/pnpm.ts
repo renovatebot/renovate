@@ -101,7 +101,9 @@ export async function generateLockFile(
 
     let args = '--lockfile-only';
 
-    // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
+    // If it's not a workspaces project/monorepo, but single project with
+    // unrelated other npm project in source tree (for example, a git
+    // submodule),
     // `--recursive` will install un-wanted project.
     // we should avoid this.
     if (await localPathExists(pnpmWorkspaceFilePath)) {
@@ -112,12 +114,14 @@ export async function generateLockFile(
         logger.debug(
           `Found pnpm workspace with ${pnpmWorkspace.packages.length} package definitions`,
         );
-        // we are in a monorepo, 'pnpm update' needs the '--recursive' flag contrary to 'pnpm install'
+        // we are in a monorepo, 'pnpm update' needs the '--recursive' flag
+        // contrary to 'pnpm install'
         args += ' --recursive';
       }
     }
     if (!GlobalConfig.get('allowScripts')) {
-      // If the admin disallows scripts, then neither scripts nor the pnpmfile should be run
+      // If the admin disallows scripts, then neither scripts nor the pnpmfile
+      // should be run
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     } else if (config.ignoreScripts) {
@@ -208,8 +212,8 @@ export async function getConstraintFromLockFile(
       return null;
     }
     // find matching lockfileVersion and use its constraints
-    // if no match found use lockfileVersion 5
-    // lockfileVersion 5 is the minimum version required to generate the pnpm-lock.yaml file
+    // if no match found use lockfileVersion 5 lockfileVersion 5 is the minimum
+    // version required to generate the pnpm-lock.yaml file
     const { lowerConstraint, upperConstraint } = lockToPnpmVersionMapping.find(
       (m) => m.lockfileVersion === pnpmLock.lockfileVersion,
     ) ?? {

@@ -1,13 +1,14 @@
 // Custom prettier plugin to preserve MkDocs/Material admonitions (!!! / ??? / ???+).
-// Prettier 3.x does not understand this non-standard CommonMark extension
-// and corrupts the indented body by reflowing it into preceding paragraphs.
+// Prettier 3.x does not understand this non-standard CommonMark extension and
+// corrupts the indented body by reflowing it into preceding paragraphs.
 //
 // Strategy: before the built-in markdown parser runs, replace each admonition
 // block with an HTML comment placeholder; after parsing, restore the original
 // text in the resulting html AST nodes. Prettier prints html nodes verbatim.
 //
 // Known limitations:
-//   - Nested admonitions are preserved verbatim (outer block is masked as one unit).
+// - Nested admonitions are preserved verbatim (outer block is masked as one
+// unit).
 import markdownPlugin from 'prettier/plugins/markdown';
 
 const ADMONITION_HEADER =
@@ -20,7 +21,8 @@ const COLLISION_GUARD = 'mkdocs-admonition:';
 // from the masked text — causing a position mismatch and a runtime error.
 // Fix: absorb <!-- prettier-ignore --> into the admonition placeholder so it
 // never precedes a placeholder node in the masked text.
-// Matches both spaced (<!-- prettier-ignore -->) and compact (<!--prettier-ignore-->) forms.
+// Matches both spaced (<!-- prettier-ignore -->) and compact
+// (<!--prettier-ignore-->) forms.
 const PRETTIER_IGNORE_RE = /^<!--\s*prettier-ignore\s*-->$/;
 
 /** @param {string[]} bodyLines */

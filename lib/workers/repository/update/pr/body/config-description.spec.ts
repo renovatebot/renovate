@@ -108,7 +108,8 @@ describe('workers/repository/update/pr/body/config-description', () => {
       expect(res).toContain(expected);
     });
 
-    // because the merging of `force` should have happened before this function, this clarifies that ?
+    // because the merging of `force` should have happened before this function,
+    // this clarifies that ?
     it('does not take into account `force`', () => {
       const res = getPrConfigDescription({
         ...config,

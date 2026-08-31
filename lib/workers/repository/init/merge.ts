@@ -285,11 +285,14 @@ export async function mergeRenovateConfig(
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
   applyNpmrc(decryptedConfig, 'decrypted');
 
-  // NOTE that this should not be used with any other configuration (`resolvedConfig`, etc) below, as they will include addditionally merged configuration
+  // NOTE that this should not be used with any other configuration
+  // (`resolvedConfig`, etc) below, as they will include addditionally merged
+  // configuration
   // Decrypted secrets are sanitised, so should be safe to log
   await logShallowConfig(decryptedConfig, config);
 
-  // Decrypt after resolving in case the preset contains npm authentication instead
+  // Decrypt after resolving in case the preset contains npm authentication
+  // instead
   const { config: configToDecrypt } = await presets.resolveConfigPresets(
     decryptedConfig,
     config,
@@ -449,7 +452,8 @@ export async function tryReadStaticRepoFileConfig(
     staticRepoConfigFile,
   ) as AllConfig;
 
-  // validate and log issues here to preserve context, caller handles migration and full validation.
+  // validate and log issues here to preserve context, caller handles migration
+  // and full validation.
   const { errors, warnings } = await configValidation.validateConfig(
     'repo',
     staticRepoConfig,
@@ -500,7 +504,8 @@ async function logShallowConfig(
   _decryptedConfig: RenovateConfig,
   _config: RepositoryWorkerConfig,
 ): Promise<void> {
-  // make sure we clone the existing config, so we don't modify the existing settings when resolving this in a shallow fashion
+  // make sure we clone the existing config, so we don't modify the existing
+  // settings when resolving this in a shallow fashion
   const decryptedConfig = clone(_decryptedConfig);
   const config = clone(_config);
 

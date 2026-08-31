@@ -174,9 +174,11 @@ describe('util/exec/docker/index', () => {
     it('keeps shell metacharacters inert in the outer command', async () => {
       mockExecAll();
       // A manager quotes untrusted values with shlex before handing them over.
-      // Wrapping the result in double quotes used to leave `$`, backticks and `\`
-      // live in the outer context, so the host shell substituted them before
-      // `docker run` was even reached. The `-c` argument must stay fully literal.
+      // Wrapping the result in double quotes used to leave `$`, backticks and
+      // `\` live in the outer context, so the host shell substituted them
+      // before
+      // `docker run` was even reached. The `-c` argument must stay fully
+      // literal.
       const res = await generateDockerCommand(
         [`echo ${quote('$(touch pwned)')} ${quote('`touch pwned`')}`],
         [],
@@ -184,8 +186,9 @@ describe('util/exec/docker/index', () => {
         'ghcr.io/renovatebot/base-image',
       );
 
-      // What the host actually executes. `printf` stands in for `docker`, so the
-      // arguments it receives are exactly the ones docker would have received.
+      // What the host actually executes. `printf` stands in for `docker`, so
+      // the arguments it receives are exactly the ones docker would have
+      // received.
       const { stdout } = await execa(
         res.replace(/^.*base-image /, `printf '%s\n' `),
         [],

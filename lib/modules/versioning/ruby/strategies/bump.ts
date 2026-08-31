@@ -9,7 +9,8 @@ export default ({ range, to }: { range: string; to: string }): string => {
   const parts = parseRanges(range).map((part): Range => {
     const { operator, version: ver } = part;
     switch (operator) {
-      // Update upper bound (`<` and `<=`) ranges only if the new version violates them
+      // Update upper bound (`<` and `<=` ) ranges only if the new version
+      // violates them
       case LT:
         return gte(to, ver) ? replacePart(part, to) : part;
       case LTE:
@@ -36,7 +37,8 @@ export default ({ range, to }: { range: string; to: string }): string => {
         }
         return part;
       default:
-        // For `=` and lower bound ranges, always keep it stick to the new version.
+        // For `=` and lower bound ranges, always keep it stick to the new
+        // version.
         return replacePart(part, to);
     }
   });

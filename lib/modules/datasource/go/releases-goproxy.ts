@@ -334,7 +334,9 @@ export class GoProxyDatasource extends Datasource {
       {
         namespace: `datasource-${GoProxyDatasource.id}`,
         key: GoProxyDatasource.getVersionedCacheKey(packageName, version),
-        // a module's `go.mod` should /never/ change after it's published. If going via the Go Proxy and the Go Checksum Database, a change in this value will result in build failures.
+        // a module's `go.mod` should /never/ change after it's published. If
+        // going via the Go Proxy and the Go Checksum Database, a change in this
+        // value will result in build failures.
         ttlMinutes: 100 * 24 * 60,
       },
       () => this._retrieveGoDirectiveForModule(baseUrl, packageName, version),
@@ -368,7 +370,8 @@ export class GoProxyDatasource extends Datasource {
       return goDirective;
     }
 
-    // always return it in full SemVer format, which can then be matched on using `semver` or `semver-coerced`
+    // always return it in full SemVer format, which can then be matched on
+    // using `semver` or `semver-coerced`
     const parts = goDirective.split('.');
     if (parts.length === 1) {
       return `${parts[0]}.0.0`;
@@ -431,7 +434,8 @@ export class GoProxyDatasource extends Datasource {
         const res = await this.listVersions(baseUrl, pkg);
 
         // Artifactory returns all versions in any major (past and future),
-        // so starting from v2, we filter them in order to avoid the infinite loop
+        // so starting from v2, we filter them in order to avoid the infinite
+        // loop
         const filteredReleases = res.filter(({ version }) => {
           if (major < 2) {
             return true;

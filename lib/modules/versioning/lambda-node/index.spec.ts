@@ -11,9 +11,11 @@ vi.mock('../../../data-files.generated.ts', async (importOriginal) => {
     dataFiles.get('data/lambda-node-js-schedule.json')!,
   );
 
-  //For this test fixture we're setting `support` to `true` for a specific version to simulate the fact that our datasource
-  //doesn't consistently return a date for support date. Likewise, we're removing a known stable node version from the lambda
-  //schedule to simulate the time period where there's a released LTS version that AWS hasn't released as a Lambda Runtime
+  // For this test fixture we're setting `support` to `true` for a specific
+  // version to simulate the fact that our datasource doesn't consistently
+  // return a date for support date. Likewise, we're removing a known stable
+  // node version from the lambda schedule to simulate the time period where
+  // there's a released LTS version that AWS hasn't released as a Lambda Runtime
   //yet.
   const scheduleWithSupportTrue = JSON.stringify({
     ...lambdaSchedule,

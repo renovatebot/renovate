@@ -31,9 +31,9 @@ function mockDescribeAddonVersionsCommandWithRegion(
       const region = await client.config.region();
       return {
         ...result,
-        // put the client region as nextToken
-        // so that when we assert on the snapshot, we also verify that region from packageName is
-        // passed to aws client.
+        // put the client region as nextToken so that when we assert on the
+        // snapshot, we also verify that region from packageName is passed to
+        // aws client.
         nextToken: region,
       };
     });

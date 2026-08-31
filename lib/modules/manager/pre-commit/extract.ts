@@ -70,7 +70,8 @@ function determineDatasource(
   const hostUrl = `https://${hostname}`;
   const res = find({ url: hostUrl });
   if (isEmptyObject(res)) {
-    // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
+    // 1 check, to possibly prevent 3 failures in combined query of hostType &
+    // url.
     logger.debug(
       { repository, hostUrl },
       'Provided hostname does not match any hostRules. Ignoring',
@@ -197,11 +198,12 @@ function findDependencies(
   const packageDependencies: PackageDependency[] = [];
 
   for (const item of precommitFile.repos) {
-    // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
+    // meta hooks is defined from pre-commit and doesn't support
+    // `additional_dependencies`
     if (item.repo !== 'meta') {
       for (const hook of coerceArray(item.hooks)) {
-        // normally language are not defined in yaml
-        // only support it when it's explicitly defined.
+        // normally language are not defined in yaml only support it when it's
+        // explicitly defined.
         // this avoid to parse hooks from pre-commit-hooks.yaml from git repo
         if (hook.language === 'node') {
           hook.additional_dependencies?.map((req) => {
@@ -232,7 +234,8 @@ function findDependencies(
           });
         } else if (hook.language === 'golang') {
           hook.additional_dependencies?.map((req) => {
-            // Convert dependency into a gomod require line to use the gomod line parser
+            // Convert dependency into a gomod require line to use the gomod
+            // line parser
             const requireLine = `require ${req.replace('@', ' ')}`;
             const dep = parseLine(requireLine);
             if (dep) {

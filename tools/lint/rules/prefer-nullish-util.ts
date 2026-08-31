@@ -40,9 +40,9 @@ export default defineRule({
           return;
         }
         const expectedInner = outer === 'optional' ? 'nullable' : 'optional';
-        // chained: `.nullable().optional()` / `z.nullable(x).optional()`
-        // a non-null `outer` implies a member callee, but that narrowing
-        // happens inside `getCalleeName` and is invisible to the compiler
+        // chained: `.nullable().optional()` / `z.nullable(x).optional()` a
+        // non-null `outer` implies a member callee, but that narrowing happens
+        // inside `getCalleeName` and is invisible to the compiler
         const receiver = (node.callee as ESTree.MemberExpression).object;
         // nested standalone: `z.optional(z.nullable(x))`
         const nested = node.arguments.length === 1 ? node.arguments[0] : null;

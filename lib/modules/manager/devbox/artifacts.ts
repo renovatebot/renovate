@@ -26,7 +26,8 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     toolConstraints: [
-      // we are required to install nix because devbox spawns nix commands internally
+      // we are required to install nix because devbox spawns nix commands
+      // internally
       // https://github.com/renovatebot/renovate/discussions/35382
       // https://github.com/jetify-com/devbox/issues/2585
       {

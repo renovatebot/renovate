@@ -98,7 +98,8 @@ export function initPlatform({
       'Init: You must configure an Azure DevOps token, or a username and password',
     );
   }
-  // TODO: Add a connection check that endpoint/token combination are valid (#9593)
+  // TODO: Add a connection check that endpoint/token combination are valid
+  // (#9593)
   const res = {
     endpoint: ensureTrailingSlash(endpoint),
   };
@@ -145,7 +146,8 @@ export async function getRawFile(
     const versionDescriptor: GitVersionDescriptor = {
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
-    // Try to get file from repo with tag first, if not found, then try with branch #36835
+    // Try to get file from repo with tag first, if not found, then try with
+    // branch #36835
     for (const versionType of [GitVersionType.Tag, GitVersionType.Branch]) {
       versionDescriptor.versionType = versionType;
 
@@ -936,8 +938,10 @@ export function massageMarkdown(input: string): string {
       .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
       // Replace GitHub-style PR links with Azure DevOps format
       .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
-      // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR.
-      // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
+      // Replace GitHub-style PR references (#123) with Azure DevOps format,
+      // needed for text linking config migration PR.
+      // Only match a standalone reference (preceded by start, whitespace or `(`
+      // ) so we don't corrupt
       // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
       .replace(regEx(/(^|[\s(])#(\d+)/g), '$1!$2')
   );
