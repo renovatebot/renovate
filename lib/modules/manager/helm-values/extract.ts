@@ -54,7 +54,7 @@ export function findDependenciesInternal(
 
       let registry = currentItem.registry;
       registry = registry ? `${registry}/` : '';
-      const repository = String(currentItem.repository ?? currentItem.name);
+      const repository = `${currentItem.repository ?? currentItem.name}`;
       const tag = `${currentItem.tag ?? currentItem.version}`;
       packageDependencies.push(
         getHelmDep(registry, repository, tag, registryAliases),
