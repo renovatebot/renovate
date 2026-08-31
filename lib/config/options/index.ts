@@ -2167,9 +2167,9 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'minimumReleaseAgeBuffer',
     description:
-      'Percentage of extra time added to `minimumReleaseAge` before an update is considered stable.',
-    type: 'integer',
-    default: 0,
+      'Extra time added to `minimumReleaseAge` before an update is considered stable.',
+    type: 'string',
+    default: '10 minutes',
   },
   {
     name: 'abandonmentThreshold',

@@ -14,22 +14,25 @@ export interface MinimumReleaseAgeCheckResult {
 
 /**
  * Calculates the effective minimum release age in milliseconds, extended by
- * the `minimumReleaseAgeBuffer` percentage if configured.
+ * the `minimumReleaseAgeBuffer` duration if configured.
  */
 export function calculateMinimumReleaseAgeMs(config: {
   minimumReleaseAge?: string | null;
-  minimumReleaseAgeBuffer?: number | null;
+  minimumReleaseAgeBuffer?: string | null;
 }): number {
   const minimumReleaseAgeMs = isNonEmptyString(config.minimumReleaseAge)
     ? coerceNumber(toMs(config.minimumReleaseAge), 0)
     : 0;
 
-  const bufferPercent = coerceNumber(config.minimumReleaseAgeBuffer, 0);
-  if (!minimumReleaseAgeMs || bufferPercent <= 0) {
-    return minimumReleaseAgeMs;
+  if (!minimumReleaseAgeMs) {
+    return 0;
   }
 
-  return Math.round(minimumReleaseAgeMs * (1 + bufferPercent / 100));
+  const bufferMs = isNonEmptyString(config.minimumReleaseAgeBuffer)
+    ? coerceNumber(toMs(config.minimumReleaseAgeBuffer), 0)
+    : 0;
+
+  return minimumReleaseAgeMs + Math.max(bufferMs, 0);
 }
 
 /**
@@ -42,7 +45,7 @@ export function calculateMinimumReleaseAgeMs(config: {
 export function checkMinimumReleaseAge(
   config: {
     minimumReleaseAge?: string | null;
-    minimumReleaseAgeBuffer?: number | null;
+    minimumReleaseAgeBuffer?: string | null;
     minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour | null;
   },
   releaseTimestamp: Timestamp | null | undefined,
