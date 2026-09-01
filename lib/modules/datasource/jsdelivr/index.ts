@@ -9,6 +9,8 @@ import { Result } from '../../../util/result.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 
 import { Datasource } from '../datasource.ts';
+import { defaultRegistryUrl } from '../npm/common.ts';
+import { NpmDatasource } from '../npm/index.ts';
 import { DigestsConfig, ReleasesConfig } from '../schema.ts';
 import type {
   DigestConfig,
@@ -22,12 +24,25 @@ import { JsDelivrDigestResponse, JsDelivrPackageResponse } from './schema.ts';
 export class JsDelivrDatasource extends Datasource {
   static readonly id = 'jsdelivr';
 
+  private readonly npmDatasource: NpmDatasource;
+
   constructor() {
     super(JsDelivrDatasource.id);
+
+    this.npmDatasource = new NpmDatasource();
   }
 
   override readonly customRegistrySupport = false;
   override readonly defaultRegistryUrls = ['https://data.jsdelivr.com/v1/'];
+
+  private async getNpmReleases(
+    packageName: string,
+  ): Promise<ReleaseResult | null> {
+    return await this.npmDatasource.getReleases({
+      registryUrl: defaultRegistryUrl,
+      packageName,
+    });
+  }
 
   private async _getReleases(
     config: GetReleasesConfig,
@@ -66,6 +81,18 @@ export class JsDelivrDatasource extends Datasource {
     const { type, package: parsedPackageName } = parseJsDelivrPackageName(
       config.packageName,
     );
+
+    if (type === 'npm') {
+      return withCache(
+        {
+          namespace: `datasource-${JsDelivrDatasource.id}`,
+          key: `getReleases:${type}:${parsedPackageName}`,
+          fallback: true,
+        },
+        () => this.getNpmReleases(parsedPackageName),
+      );
+    }
+
     return withCache(
       {
         namespace: `datasource-${JsDelivrDatasource.id}`,

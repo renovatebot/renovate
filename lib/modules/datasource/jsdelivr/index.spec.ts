@@ -3,6 +3,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
+import { NpmDatasource } from '../npm/index.ts';
 import { parseJsDelivrPackageName } from './common.ts';
 import { JsDelivrDatasource } from './index.ts';
 
@@ -22,11 +23,11 @@ function pathForDigest(packageName: string, version: string): string {
 describe('modules/datasource/jsdelivr/index', () => {
   describe('getReleases', () => {
     it('throws for empty result', async () => {
-      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(200, '}');
+      httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(200, '}');
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/foo/bar',
+          packageName: 'gh/foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -34,22 +35,22 @@ describe('modules/datasource/jsdelivr/index', () => {
     it('throws for error', async () => {
       httpMock
         .scope(baseUrl)
-        .get(pathFor('npm/foo/bar'))
+        .get(pathFor('gh/foo/bar'))
         .replyWithError('error');
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/foo/bar',
+          packageName: 'gh/foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for 404', async () => {
-      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(404);
+      httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(404);
       expect(
         await getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/foo/bar',
+          packageName: 'gh/foo/bar',
         }),
       ).toBeNull();
     });
@@ -57,42 +58,42 @@ describe('modules/datasource/jsdelivr/index', () => {
     it('returns null for empty 200 OK', async () => {
       httpMock
         .scope(baseUrl)
-        .get(pathFor('npm/doesnotexist/doesnotexist'))
+        .get(pathFor('gh/doesnotexist/doesnotexist'))
         .reply(200, {});
       expect(
         await getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/doesnotexist/doesnotexist',
+          packageName: 'gh/doesnotexist/doesnotexist',
         }),
       ).toBeNull();
     });
 
     it('throws for 401', async () => {
-      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(401);
+      httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(401);
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/foo/bar',
+          packageName: 'gh/foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('throws for 429', async () => {
-      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(429);
+      httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(429);
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/foo/bar',
+          packageName: 'gh/foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('throws for 5xx', async () => {
-      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(502);
+      httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(502);
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/foo/bar',
+          packageName: 'gh/foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -100,12 +101,12 @@ describe('modules/datasource/jsdelivr/index', () => {
     it('throws for unknown error', async () => {
       httpMock
         .scope(baseUrl)
-        .get(pathFor('npm/foo/bar'))
+        .get(pathFor('gh/foo/bar'))
         .replyWithError('error');
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
-          packageName: 'npm/foo/bar',
+          packageName: 'gh/foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -127,44 +128,55 @@ describe('modules/datasource/jsdelivr/index', () => {
       expect(res?.registryUrl).toBe(baseUrl);
     });
 
-    it('processes real npm data (scoped)', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(pathFor('npm/@popperjs/core'))
-        .reply(200, Fixtures.get('npm_scoped_popperjs_core.json'));
+    it('delegates npm-type packages to NpmDatasource (scoped)', async () => {
+      const releaseResult = {
+        releases: [{ version: '2.11.8' }],
+      };
+      const getReleasesSpy = vi
+        .spyOn(NpmDatasource.prototype, 'getReleases')
+        .mockResolvedValueOnce(releaseResult);
+
       const res = await getPkgReleases({
         datasource: JsDelivrDatasource.id,
         packageName: 'npm/@popperjs/core',
       });
-      expect(res?.tags).toBeNonEmptyObject();
-      expect(res?.tags?.latest).toBe('2.11.8');
-      expect(res?.tags?.beta).toBeUndefined();
 
-      expect(res?.releases).toHaveLength(3);
-      expect(res?.releases[res?.releases.length - 1].version).toBe('2.11.8');
-
-      expect(res?.registryUrl).toBe(baseUrl);
+      expect(res).toEqual(releaseResult);
+      expect(getReleasesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ packageName: '@popperjs/core' }),
+      );
     });
 
-    it('processes real npm data (unscoped)', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(pathFor('npm/jquery'))
-        .reply(200, Fixtures.get('npm_unscoped_jquery.json'));
+    it('delegates npm-type packages to NpmDatasource (unscoped)', async () => {
+      const releaseResult = {
+        releases: [{ version: '4.0.0' }],
+      };
+      const getReleasesSpy = vi
+        .spyOn(NpmDatasource.prototype, 'getReleases')
+        .mockResolvedValueOnce(releaseResult);
+
       const res = await getPkgReleases({
         datasource: JsDelivrDatasource.id,
         packageName: 'npm/jquery',
       });
-      expect(res?.tags).toBeNonEmptyObject();
-      expect(res?.tags?.latest).toBe('4.0.0');
-      expect(res?.tags?.beta).toBe('4.0.0-rc.2');
 
-      expect(res?.releases).toHaveLength(6);
-      expect(res?.releases[res?.releases.length - 1].version).toBe(
-        '4.0.0-beta',
+      expect(res).toEqual(releaseResult);
+      expect(getReleasesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ packageName: 'jquery' }),
+      );
+    });
+
+    it('returns null when NpmDatasource returns null', async () => {
+      vi.spyOn(NpmDatasource.prototype, 'getReleases').mockResolvedValueOnce(
+        null,
       );
 
-      expect(res?.registryUrl).toBe(baseUrl);
+      expect(
+        await getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/does-not-exist',
+        }),
+      ).toBeNull();
     });
   });
 

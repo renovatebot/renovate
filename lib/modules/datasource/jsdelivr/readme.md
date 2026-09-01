@@ -16,3 +16,5 @@ Because the same datasource can serve both kinds of packages, `packageName` must
 | GitHub         | `gh/<owner>/<repo>`   | `gh/jquery/jquery` |
 
 `registryUrl` defaults to `https://data.jsdelivr.com/v1/` and normally does not need to be set.
+
+For `npm`-type packages, release fetching is delegated to the [`npm` datasource](../npm/readme.md) (against the default npm registry) instead of querying jsDelivr's own API, so `registryUrl` has no effect on the release list for `npm`-type packages. Digest lookups always use jsDelivr's API directly, for both `npm` and `gh` types, since neither the `npm` registry nor GitHub expose an equivalent per-file content hash.
