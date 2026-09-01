@@ -241,7 +241,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Bitbucket Server](../modules/platform/bitbucket-server/index.md)
 - [Forgejo](../modules/platform/forgejo/index.md)
 - [Gitea](../modules/platform/gitea/index.md)
-- [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
+- [GitHub.com, GitHub Enterprise Cloud, and GitHub Enterprise Server](../modules/platform/github/index.md)
 - [GitLab](../modules/platform/gitlab/index.md)
 - [SCM-Manager](../modules/platform/scm-manager/index.md)
 
