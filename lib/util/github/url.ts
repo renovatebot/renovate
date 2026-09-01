@@ -4,7 +4,7 @@ const defaultSourceUrlBase = 'https://github.com/';
 const defaultApiBaseUrl = 'https://api.github.com/';
 
 export function getSourceUrlBase(registryUrl: string | undefined): string {
-  // Default to GitHub.com if no GitHub Enterprise Cloud or Server host is specified.
+  // Default to GitHub.com if no GHEC or GHES host is specified.
   return ensureTrailingSlash(registryUrl ?? defaultSourceUrlBase);
 }
 

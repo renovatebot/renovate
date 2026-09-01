@@ -541,7 +541,7 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
+    // GHES <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     // TODO #22198
     if (
       platformConfig.isGhe &&
@@ -552,7 +552,7 @@ export async function initRepo({
       infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
-    // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
+    // GHES <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
     if (
       platformConfig.isGhe &&
       // semver not null safe, accepts null and undefined
@@ -564,7 +564,7 @@ export async function initRepo({
       );
     }
 
-    // GitHub Enterprise Server <3.12.0 doesn't support merge queues
+    // GHES <3.12.0 doesn't support merge queues
     if (
       platformConfig.isGhe &&
       // semver not null safe, accepts null and undefined
@@ -1864,7 +1864,7 @@ async function tryPrAutomerge(
     return;
   }
 
-  // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
+  // If GHES <3.3.0 it doesn't support automerge
   // TODO #22198
   // semver not null safe, accepts null and undefined
   if (

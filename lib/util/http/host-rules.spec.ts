@@ -460,7 +460,7 @@ describe('util/http/host-rules', () => {
 
     hostRules.clear();
 
-    // for instance, if running with GitHub Enterprise Server, this may be set as the default host rule
+    // for instance, if running with GHES, this may be set as the default host rule
     hostRules.add({
       hostType: 'github',
       token: 'token',
