@@ -11,6 +11,7 @@ import type {
 } from '../../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
+  getParentDir,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
@@ -289,7 +290,7 @@ function generateCMD(updatedDeps: Upgrade[]): string {
 }
 
 // PEP 508 normalised package / extra / group names.
-const PEP508_NAME_RE = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$/;
+const PEP508_NAME_RE = regEx(/^[a-zA-Z0-9]([-a-zA-Z0-9._]*[a-zA-Z0-9])?$/);
 
 // Flags that take no value.
 const UV_EXPORT_BOOLEAN_FLAGS = new Set([
@@ -301,19 +302,31 @@ const UV_EXPORT_BOOLEAN_FLAGS = new Set([
   '--no-hashes',
   '--no-header',
   '--all-extras',
+  '--all-groups',
+  '--all-packages',
+  '--no-annotate',
+  '--no-emit-project',
+  '--locked',
+  '--prune',
+  '--no-strip-extras',
+  '--no-strip-markers',
 ]);
 
 // Flags that take a value, mapped to a validation pattern for that value.
 const UV_EXPORT_VALUE_FLAGS: Record<string, RegExp> = {
-  '--python': /^\d+(\.\d+){1,2}$/,
+  '--python': regEx(/^\d+(\.\d+){1,2}$/),
   // Filenames only; no path separators or traversal.
-  '--output-file': /^[a-zA-Z0-9._-]+$/,
+  '--output-file': regEx(/^[-a-zA-Z0-9._]+$/),
   '--no-emit-package': PEP508_NAME_RE,
   '--extra': PEP508_NAME_RE,
   '--group': PEP508_NAME_RE,
   '--only-group': PEP508_NAME_RE,
   '--no-group': PEP508_NAME_RE,
-  '--format': /^(requirements-txt|json)$/,
+  '--package': PEP508_NAME_RE,
+  '--index-strategy': regEx(
+    /^(first-index|unsafe-first-match|unsafe-best-match)$/,
+  ),
+  '--format': regEx(/^requirements-txt$/),
 };
 
 type UvExportParseResult =
@@ -324,13 +337,13 @@ type UvExportParseResult =
 // Parses the `uv export` command from a requirements.txt header.
 function parseUvExportCmd(content: string): UvExportParseResult {
   for (const line of content.split('\n')) {
-    if (!/^#\s+uv export\s/.exec(line)) {
+    if (!regEx(/^#\s+uv export\s/).exec(line)) {
       continue;
     }
 
     // Strip the leading comment marker and split into tokens.
-    const rest = line.replace(/^#\s+uv export\s+/, '').trim();
-    const tokens = rest.split(/\s+/);
+    const rest = line.replace(regEx(/^#\s+uv export\s+/), '').trim();
+    const tokens = rest.split(regEx(/\s+/));
     const safeArgs: string[] = [];
     let outputFile: string | null = null;
     let i = 0;
@@ -401,6 +414,14 @@ async function runUvExport(
     return null;
   }
 
+  if (getParentDir(requirementsFileName) !== getParentDir(packageFileName)) {
+    logger.debug(
+      { requirementsFileName, packageFileName },
+      'uv export: requirements.txt is not in the same directory as pyproject.toml',
+    );
+    return null;
+  }
+
   const existingRequirements = await readLocalFile(
     requirementsFileName,
     'utf8',
@@ -438,7 +459,12 @@ async function runUvExport(
     return null;
   }
 
-  await exec(cmd, execOptions);
+  try {
+    await gitExec(cmd, execOptions);
+  } catch (err) {
+    logger.debug({ err }, 'uv export: failed to run uv export');
+    return null;
+  }
   const newRequirements = await readLocalFile(requirementsFileName, 'utf8');
   if (newRequirements === existingRequirements) {
     logger.debug(`${requirementsFileName} is unchanged`);
