@@ -463,7 +463,7 @@ export async function ensureDependencyDashboard(
     issueBody += '## Deprecations / Replacements\n';
     issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
-      'The following dependencies are either deprecated or have replacements available.\n\n';
+      '> The following dependencies are either deprecated or have replacements available.\n\n';
     issueBody += '| Datasource | Package | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -719,7 +719,7 @@ export function getAbandonedPackagesMd(
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
+  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 

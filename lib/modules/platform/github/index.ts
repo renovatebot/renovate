@@ -2265,7 +2265,7 @@ export function massageMarkdown(input: string): string {
   if (platformConfig.isGhe) {
     return smartTruncate(input, maxBodyLength());
   }
-  const massagedInput = massageMarkdownLinks(input)
+  const linkifiedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with redirect.github.com
     .replace(
       regEx(/href="https?:\/\/github.com\//g),
@@ -2278,14 +2278,15 @@ export function massageMarkdown(input: string): string {
     .replace(
       regEx(/]: https:\/\/github\.com\//g),
       ']: https://redirect.github.com/',
-    )
+    );
+  // Run after truncation so any Note added by smartTruncate() is also converted
+  return smartTruncate(linkifiedInput, maxBodyLength())
     .replaceAll('> ℹ **Note**\n> \n', '> [!NOTE]\n')
     .replaceAll('> ℹ️ **Note**\n> \n', '> [!NOTE]\n')
     .replaceAll('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
     .replaceAll('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
-    .replaceAll('> ❗ **Caution**\n> \n', '> [!CAUTION]\n')
+    .replaceAll('> 🛑 **Caution**\n> \n', '> [!CAUTION]\n')
     .replaceAll('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
-  return smartTruncate(massagedInput, maxBodyLength());
 }
 
 export function maxBodyLength(): number {
