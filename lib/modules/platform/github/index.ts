@@ -1873,7 +1873,7 @@ async function tryPrAutomerge(
   ) {
     logger.debug(
       { prNumber },
-      'GitHub-native automerge: not supported by this GHES version. Use 3.3.0 or newer.',
+      'GitHub-native automerge: not supported by this GitHub Enterprise Server version. Use 3.3.0 or newer.',
     );
     return;
   }
