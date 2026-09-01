@@ -141,7 +141,7 @@ export class JsDelivrDatasource extends Datasource {
     config: DigestConfig,
     newValue: string,
   ): Promise<string | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!newValue) {
       return Promise.resolve(null);
     }
