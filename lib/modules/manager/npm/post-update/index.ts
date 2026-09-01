@@ -112,7 +112,7 @@ export function determineLockFileDirs(
   for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
     const packageFile = getPackageFile(p.path);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!packageFile.managerData) {
       continue;
     }
@@ -601,7 +601,7 @@ export async function getAdditionalFiles(
         await updateYarnOffline(lockFileDir, updatedArtifacts);
       }
 
-      /* v8 ignore next 7 -- needs test */
+      /* v8 ignore next -- needs test */
       if (upgrades.some(yarn.isYarnUpdate)) {
         existingYarnrcYmlContent = await updateYarnBinary(
           lockFileDir,
@@ -611,7 +611,7 @@ export async function getAdditionalFiles(
       }
     }
     await resetNpmrcContent(lockFileDir, npmrcContent);
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (existingYarnrcYmlContent) {
       // TODO #22198
       await writeLocalFile(yarnRcYmlFilename!, existingYarnrcYmlContent);

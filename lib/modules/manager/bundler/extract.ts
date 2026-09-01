@@ -78,7 +78,7 @@ export async function extractPackageFile(
               depTypes,
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + groupLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + groupLineNumber + 1,
               },
             };
             if (repositoryUrl) {
@@ -172,7 +172,8 @@ export async function extractPackageFile(
           if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
-        } else if (gitRefsMatch.repoName) {
+        } else {
+          // we always have repoName, as `gitRefsMatchRegex`'s first group requires either `gitUrl` or `repoName`
           dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;
           dep.sourceUrl = dep.packageName;
         }
@@ -237,7 +238,7 @@ export async function extractPackageFile(
               registryUrls: [repositoryUrl],
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + sourceLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + sourceLineNumber + 1,
               },
             })),
           );
@@ -271,7 +272,7 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + platformsLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + platformsLineNumber + 1,
             },
           })),
         );
@@ -304,7 +305,7 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + ifLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + ifLineNumber + 1,
             },
           })),
         );

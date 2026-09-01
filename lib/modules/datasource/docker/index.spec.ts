@@ -169,10 +169,10 @@ describe('modules/datasource/docker/index', () => {
       username: 'some-username',
       password: 'some-password',
     });
-    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
-    delete process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP;
-    delete process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN;
-    delete process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN;
+    vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', undefined);
+    vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', undefined);
+    vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
+    vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
   });
 
   describe('getDigest', () => {
@@ -1736,7 +1736,7 @@ describe('modules/datasource/docker/index', () => {
 
   describe('getReleases', () => {
     it('returns null if no token', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1808,7 +1808,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('follows cross-origin tags pagination when the datasource is opted in', async () => {
-      process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/node/tags/list?n=10000')
@@ -1842,7 +1842,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('does not opt docker in when only another datasource is opted in', async () => {
-      process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/node/tags/list?n=10000')
@@ -1868,9 +1868,9 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       GlobalConfig.set({ dockerMaxPages: 2 });
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -2494,7 +2494,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2541,7 +2541,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses custom page limit for Docker hub repository tags', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       GlobalConfig.set({ dockerMaxPages: 2 });
       httpMock
         .scope(dockerHubUrl)
@@ -2593,7 +2593,7 @@ describe('modules/datasource/docker/index', () => {
 
     // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
     it('does not follow Docker Hub tags pagination to a different origin', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2633,8 +2633,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('follows cross-origin Docker Hub pagination when the datasource is opted in', async () => {
-      process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2679,7 +2679,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -2708,7 +2708,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2755,7 +2755,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('sets releaseTimestamp on digests from Docker Hub', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2833,7 +2833,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null on error', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2848,7 +2848,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('strips trailing slash from registry', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2875,7 +2875,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null if no auth', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       hostRules.clear();
       httpMock
         .scope(baseUrl)
@@ -3579,7 +3579,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('skips docker hub labels', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
 
       httpMock.scope('https://index.docker.io/v2');
 
@@ -3593,7 +3593,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('does not skip non docker hub registry labels', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
 
       httpMock
         .scope('https://ghcr.io/v2')

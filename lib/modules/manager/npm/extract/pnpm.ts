@@ -16,6 +16,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { parseSingleYaml, parseYaml } from '../../../../util/yaml.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type {
@@ -251,7 +252,7 @@ function getLockedDependencyVersions(
   for (const depType of dependencyTypes) {
     res[depType] = {};
     for (const [pkgName, versionCarrier] of Object.entries(
-      obj[depType] ?? {},
+      coerceObject(obj[depType]),
     )) {
       let version: string;
       if (isObject(versionCarrier)) {

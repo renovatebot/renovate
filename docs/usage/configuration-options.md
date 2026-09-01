@@ -303,6 +303,8 @@ If possible, Renovate follows the merge strategy set on the platform itself for 
 If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
 If you're happy with the default behavior, you don't need to do anything.
 
+On supported platforms, `automergeStrategy` also applies when using platform-native automerge.
+
 You may choose from these values:
 
 - `auto`, Renovate decides how to merge
@@ -1629,6 +1631,9 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.
 A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
 Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
+
+> [!NOTE]
+> To overwrite descriptions of child presets, use [`overrideDescription`](#overridedescription) in place of `description`.
 
 ## `digest`
 
@@ -3049,6 +3054,19 @@ If Renovate finds a dependency update available, and that dependency update is f
 
 <!-- markdownlint-enable MD001 -->
 
+## `overrideDescription`
+
+Use `overrideDescription` instead of [`description`](#description) if this config's description should replace, and not be added to, the descriptions collated from the presets which this config extends.
+
+This is useful for a preset which extends many other presets, and where a single line describes them better than one line per preset would.
+For example, `workarounds:all` extends around twenty presets, but its `overrideDescription` means the onboarding PR shows only:
+
+```
+- Apply crowd-sourced workarounds for known problems with packages.
+```
+
+Renovate applies `overrideDescription` when it resolves presets, so the resolved config only ever has a `description`.
+
 ## `packageRules`
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
@@ -4051,6 +4069,8 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
+Where supported, platform-native automerge uses [`automergeStrategy`](#automergestrategy) to select the merge method.
+
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
@@ -4181,7 +4201,9 @@ Post-upgrade tasks are commands that are executed by Renovate after a dependency
 The intention is to run any other command line tools that would modify existing files or generate new files when a dependency changes.
 
 Post-upgrade tasks are blocked by default for security reasons, so the admin of Renovate needs to choose whether to allow specific commands or any commands to be run - it depends on how much they trust their users in repos.
-In Mend-hosted Renovate apps, commands remain blocked by default but can be allowed on-request for any paying ("Renovate Enterprise" or Mend Appsec) customers or trusted OSS repositories - please reach out if so.
+
+!!! tip
+  In Mend-hosted Renovate apps, commands remain blocked by default, but [depending on your plan](./mend-hosted/faq.md#how-can-i-run-arbitrary-commands-through-postupgradetasks), you have more control over this.
 
 Each command must match at least one of the patterns defined in `allowedCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.

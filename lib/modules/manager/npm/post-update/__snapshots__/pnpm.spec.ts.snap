@@ -7,6 +7,7 @@ exports[`modules/manager/npm/post-update/pnpm > catches errors 1`] = `
     "options": {
       "cwd": "some-dir",
       "env": {
+        "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -32,6 +33,7 @@ exports[`modules/manager/npm/post-update/pnpm > finds pnpm globally 1`] = `
     "options": {
       "cwd": "some-dir",
       "env": {
+        "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -57,6 +59,7 @@ exports[`modules/manager/npm/post-update/pnpm > generates lock files 1`] = `
     "options": {
       "cwd": "some-dir",
       "env": {
+        "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -82,6 +85,7 @@ exports[`modules/manager/npm/post-update/pnpm > performs lock file maintenance 1
     "options": {
       "cwd": "some-dir",
       "env": {
+        "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -107,6 +111,7 @@ exports[`modules/manager/npm/post-update/pnpm > uses the new version if packageM
     "options": {
       "cwd": "some-dir",
       "env": {
+        "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

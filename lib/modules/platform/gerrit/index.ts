@@ -7,6 +7,7 @@ import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import type { VirtualBranch } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -29,7 +30,6 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
-
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
@@ -146,7 +146,7 @@ export async function initRepo({
     repository,
     head: branchInfo.revision,
     config: projectInfo,
-    labels: projectInfo.labels ?? {},
+    labels: coerceObject(projectInfo.labels),
   };
 
   //abandon "open" and "rejected" changes at startup
@@ -382,7 +382,7 @@ export async function getBranchStatus(
     if (hasProblems) {
       return 'red';
     }
-    const hasBlockingLabels = Object.values(change.labels ?? {}).some(
+    const hasBlockingLabels = Object.values(coerceObject(change.labels)).some(
       (label) => label.blocking,
     );
     if (hasBlockingLabels) {

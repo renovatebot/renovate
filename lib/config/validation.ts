@@ -19,6 +19,7 @@ import {
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
+import { coerceArray } from '../util/array.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
@@ -263,7 +264,7 @@ export async function validateConfig(
 
       for (const [key, val] of Object.entries(config)) {
         const currentPath = parentPath ? `${parentPath}.${key}` : key;
-        /* v8 ignore next 7 -- TODO: add test */
+        /* v8 ignore next -- TODO: add test */
         if (key === '__proto__') {
           errors.push({
             topic: ConfigValidationTopic.Security,
@@ -786,7 +787,7 @@ export async function validateConfig(
                 } else if (key === 'env') {
                   const allowedEnvVars =
                     configType === 'global'
-                      ? (config.allowedEnv ?? [])
+                      ? coerceArray(config.allowedEnv)
                       : GlobalConfig.get('allowedEnv');
                   for (const [envVarName, envVarValue] of Object.entries(val)) {
                     if (!isString(envVarValue)) {
@@ -1010,7 +1011,7 @@ export async function validateConfig(
         if (key === 'hostRules' && isArray(val)) {
           const allowedHeaders =
             configType === 'global'
-              ? (config.allowedHeaders ?? [])
+              ? coerceArray(config.allowedHeaders)
               : GlobalConfig.get('allowedHeaders');
           for (const rule of val as HostRule[]) {
             if (isNonEmptyString(rule.matchHost)) {
@@ -1090,7 +1091,7 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: AllConfig,
 ): Promise<void> {
-  /* v8 ignore next 5 -- not testable yet */
+  /* v8 ignore next -- not testable yet */
   if (getDeprecationMessage(key)) {
     warnings.push({
       topic: ConfigValidationTopic.Deprecation,

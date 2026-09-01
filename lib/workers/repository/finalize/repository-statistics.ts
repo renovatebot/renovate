@@ -2,6 +2,7 @@ import type { RenovateConfig } from '../../../config/types.ts';
 import { addBranchStats } from '../../../instrumentation/reporting.ts';
 import { logger } from '../../../logger/index.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import {
   getCache,
   isCacheModified,
@@ -11,6 +12,7 @@ import type {
   BranchUpgradeCache,
 } from '../../../util/cache/repository/types.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
+import { coerceObject } from '../../../util/object.ts';
 import type {
   BaseBranchMetadata,
   BaseBranchUpdateSummary,
@@ -79,7 +81,7 @@ function filterDependencyDashboardData(
     const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
     const { branchName, prNo, prTitle, result, upgrades, prBlockedBy } = branch;
 
-    for (const upgrade of upgrades ?? []) {
+    for (const upgrade of coerceArray(upgrades)) {
       const {
         datasource,
         depName,
@@ -133,14 +135,14 @@ export function runBranchSummary(config: RenovateConfig): void {
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
-  for (const [branchName, cached] of Object.entries(scan ?? {})) {
+  for (const [branchName, cached] of Object.entries(coerceObject(scan))) {
     baseMetadata.push({ branchName, sha: cached.sha });
   }
 
   const branchMetadata: BranchMetadata[] = [];
   const inactiveBranches: string[] = [];
 
-  for (const branch of branches ?? []) {
+  for (const branch of coerceArray(branches)) {
     if (branch.sha) {
       branchMetadata.push(branchCacheToMetadata(branch));
     } else {
@@ -184,7 +186,7 @@ export function getUpdateSummary(branches: BranchCache[]): UpdateSummary {
       };
       summaryByBase.set(baseBranch, entry);
     }
-    for (const upgrade of branch.upgrades ?? []) {
+    for (const upgrade of coerceArray(branch.upgrades)) {
       const { updateType } = upgrade;
       if (updateType) {
         entry.total += 1;

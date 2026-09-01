@@ -35,7 +35,7 @@ vi.hoisted(() => {
   require.cache[require.resolve('fs-extra')] = fsExtraModule as NodeJS.Module;
 });
 vi.mock('fs-extra', () => fixtures.fsExtra());
-vi.mock('../../../util/exec/env.ts', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/git/index.ts', () => mockDeep());
 vi.mock('../../../util/http/index.ts', () => mockDeep());
 vi.mock('../../datasource/index.ts', () => mockDeep());
@@ -573,6 +573,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIPENV_CACHE_DIR ' +
           '-e PIP_CACHE_DIR ' +
           '-e WORKON_HOME ' +
@@ -876,6 +877,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIPENV_CACHE_DIR ' +
           '-e PIP_CACHE_DIR ' +
           '-e WORKON_HOME ' +
@@ -963,6 +965,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIPENV_CACHE_DIR ' +
           '-e PIP_CACHE_DIR ' +
           '-e WORKON_HOME ' +
@@ -1049,6 +1052,7 @@ describe('modules/manager/pipenv/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIPENV_CACHE_DIR ' +
           '-e PIP_CACHE_DIR ' +
           '-e WORKON_HOME ' +

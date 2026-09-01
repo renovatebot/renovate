@@ -67,8 +67,8 @@ export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult> {
-  let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
-  const artifactErrors = [...(config.artifactErrors ?? [])];
+  let updatedArtifacts = [...coerceArray(config.updatedArtifacts)];
+  const artifactErrors = [...coerceArray(config.artifactErrors)];
   const allowedCommands = GlobalConfig.get('allowedCommands');
 
   for (const upgrade of filteredUpgradeCommands) {

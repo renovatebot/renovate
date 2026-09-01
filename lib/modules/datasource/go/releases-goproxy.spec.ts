@@ -100,15 +100,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
       githubQueryReleases.mockResolvedValue([]);
     });
 
-    afterEach(() => {
-      delete process.env.GOPROXY;
-      delete process.env.GONOPROXY;
-      delete process.env.GOPRIVATE;
-      delete process.env.GOINSECURE;
-    });
-
     it('handles direct', async () => {
-      process.env.GOPROXY = 'direct';
+      vi.stubEnv('GOPROXY', 'direct');
 
       githubGetTags.mockResolvedValueOnce({
         releases: [
@@ -132,8 +125,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('skips GONOPROXY and GOPRIVATE packages', async () => {
-      process.env.GOPROXY = baseUrl;
-      process.env.GOPRIVATE = 'github.com/google/*';
+      vi.stubEnv('GOPROXY', baseUrl);
+      vi.stubEnv('GOPRIVATE', 'github.com/google/*');
 
       githubGetTags.mockResolvedValueOnce({
         releases: [
@@ -201,7 +194,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('resolves sourceUrl from goproxy Origin without calling the vanity domain', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/k8s.io/api`)
@@ -246,7 +239,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('prefers the GitHub Release timestamp over the commit timestamp', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/stretchr/testify`)
@@ -296,7 +289,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('keeps the commit timestamp when the GitHub Release is older', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
@@ -337,7 +330,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('matches GitHub Releases of modules in a subdirectory', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/aws/aws-sdk-go-v2/service/s3`)
@@ -375,7 +368,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('matches GitHub Releases of `+incompatible` versions', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/docker/docker`)
@@ -411,7 +404,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('skips GitHub Releases lookup for non-GitHub source URLs', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/bitbucket.org/library/go-lib`)
@@ -440,7 +433,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('handles GitHub Releases fetch errors', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
@@ -470,7 +463,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('handles timestamp fetch errors', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
@@ -509,7 +502,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     `(
       'handles pipe fallback when abortOnError is $abortOnError',
       async ({ abortOnError }: { abortOnError: boolean }) => {
-        process.env.GOPROXY = `https://example.com|${baseUrl}`;
+        vi.stubEnv('GOPROXY', `https://example.com|${baseUrl}`);
         hostRules.add({ abortOnError });
 
         httpMock
@@ -552,7 +545,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     );
 
     it('handles pipe fallback across an empty segment', async () => {
-      process.env.GOPROXY = `https://example.com|,${baseUrl}`;
+      vi.stubEnv('GOPROXY', `https://example.com|,${baseUrl}`);
 
       httpMock
         .scope('https://example.com/github.com/google/btree')
@@ -584,11 +577,12 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('handles comma fallback', async () => {
-      process.env.GOPROXY = [
-        'https://foo.example.com',
-        'https://bar.example.com',
-        baseUrl,
-      ].join(',');
+      vi.stubEnv(
+        'GOPROXY',
+        ['https://foo.example.com', 'https://bar.example.com', baseUrl].join(
+          ',',
+        ),
+      );
 
       httpMock
         .scope('https://foo.example.com/github.com/google/btree')
@@ -634,12 +628,15 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('short-circuits for errors other than 404 or 410', async () => {
-      process.env.GOPROXY = [
-        'https://foo.com',
-        'https://bar.com',
-        'https://baz.com',
-        'direct',
-      ].join(',');
+      vi.stubEnv(
+        'GOPROXY',
+        [
+          'https://foo.com',
+          'https://bar.com',
+          'https://baz.com',
+          'direct',
+        ].join(','),
+      );
 
       httpMock
         .scope('https://foo.com/github.com/foo/bar')
@@ -663,11 +660,10 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('supports "direct" keyword', async () => {
-      process.env.GOPROXY = [
-        'https://foo.com',
-        'https://bar.com',
-        'direct',
-      ].join(',');
+      vi.stubEnv(
+        'GOPROXY',
+        ['https://foo.com', 'https://bar.com', 'direct'].join(','),
+      );
 
       httpMock
         .scope('https://foo.com/github.com/foo/bar')
@@ -701,8 +697,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('supports "off" keyword', async () => {
-      process.env.GOPROXY = ['https://foo.com', 'https://bar.com', 'off'].join(
-        ',',
+      vi.stubEnv(
+        'GOPROXY',
+        ['https://foo.com', 'https://bar.com', 'off'].join(','),
       );
 
       httpMock
@@ -723,7 +720,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('handles soureUrl fetch errors', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/custom.com/lib/btree`)
@@ -760,7 +757,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     `(
       'handles major releases with abortOnError is $abortOnError',
       async ({ abortOnError }: { abortOnError: boolean }) => {
-        process.env.GOPROXY = baseUrl;
+        vi.stubEnv('GOPROXY', baseUrl);
         hostRules.add({ abortOnError });
 
         httpMock
@@ -810,7 +807,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     );
 
     it('handles major releases with 403 status (Artifactory)', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
@@ -858,7 +855,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('handles gopkg.in major releases', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/gopkg.in/yaml`)
@@ -901,7 +898,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('handles gopkg.in major releases from v0', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/gopkg.in/foo`)
@@ -938,7 +935,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('handles baseURL with slash at the end', async () => {
-      process.env.GOPROXY = `${baseUrl}/`;
+      vi.stubEnv('GOPROXY', `${baseUrl}/`);
 
       httpMock
         .scope(`${baseUrl}/gopkg.in/foo`)
@@ -975,7 +972,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('continues if package returns no releases', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
@@ -992,7 +989,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('uses latest if package has no releases', async () => {
-      process.env.GOPROXY = baseUrl;
+      vi.stubEnv('GOPROXY', baseUrl);
 
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)

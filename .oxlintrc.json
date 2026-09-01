@@ -78,9 +78,11 @@
     "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-number-constructor": "error",
     "renovate/prefer-json-pipe": "error",
     "renovate/prefer-nullish-util": "error",
     "renovate/require-regex-util": "error",
+    "renovate/v8-ignore-no-count": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/validate-config-warnings-and-errors": "error",
     "renovate/zod-schema-naming": "error",
@@ -211,6 +213,8 @@
         "renovate/no-new-url": "error",
         "renovate/no-stateful-global-regex": "error",
         "renovate/no-tools-import": "error",
+        "renovate/prefer-coerce-array": "error",
+        "renovate/prefer-coerce-object": "error",
         "renovate/prefer-is-helpers": "error",
         "renovate/prefer-is-object": "error"
       }
@@ -238,6 +242,13 @@
       "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
       "rules": {
         "renovate/zod-schema-location": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/**"],
+      "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
+      "rules": {
+        "renovate/types-location": "error"
       }
     },
     {
@@ -301,6 +312,7 @@
         "renovate/prefer-fake-sha-in-specs": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/prefer-partial-in-specs": "error",
+        "renovate/prefer-stub-env": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }
