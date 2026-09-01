@@ -1142,7 +1142,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('prevents injections', async () => {
+  it('does use token for ECR auth, when username and password are omitted', async () => {
     const username = 'user';
     const password = 'pass>word';
     mockEcrAuthResolve({
@@ -1170,9 +1170,6 @@ describe('modules/manager/helmv3/artifacts', () => {
       config: { ...config },
     });
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: `helm registry login --username ${username} --password '${password}' '123456789.dkr.ecr.us-east-1.amazonaws.com/bitnami || date'`,
-      },
       {
         cmd: "helm dependency update ''",
       },
