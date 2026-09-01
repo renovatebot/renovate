@@ -1,3 +1,5 @@
+import { regEx } from '../../../util/regex.ts';
+
 /**
  * Handles package names for both npm (scoped and unscoped) and gh.
  *
@@ -30,7 +32,7 @@ export function parseJsDelivrPackageName(
 
   // strip version tags.
   const sanitizedParts = parts.map((part) =>
-    part.replace(/@\d+(?:\.\d+)*$/, '').trim(),
+    part.replace(regEx(/@\d+(?:\.\d+)*$/), '').trim(),
   );
 
   // gh/{user}/{repository}

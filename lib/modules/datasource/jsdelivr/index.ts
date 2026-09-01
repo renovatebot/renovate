@@ -5,6 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 
@@ -131,7 +132,7 @@ export class JsDelivrDatasource extends Datasource {
     }
 
     const file = val?.files.find(
-      (file) => file.name.replace(/^\/+/, '') === asset,
+      (file) => file.name.replace(regEx(/^\/+/), '') === asset,
     );
     return file ? `sha256-${file.hash}` : null;
   }
