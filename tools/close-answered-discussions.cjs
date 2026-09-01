@@ -1,5 +1,9 @@
 // Parses the ISO date string and checks it's past the age window
 // Co-authored-by: GPT-4.1 (GitHub Copilot)
+/**
+ * @param {string} dateString
+ * @param {number} daysAgo
+ */
 function isOlderThanDaysAgo(dateString, daysAgo) {
   const parsedDate = new Date(dateString);
   const now = new Date();
@@ -7,6 +11,9 @@ function isOlderThanDaysAgo(dateString, daysAgo) {
   return parsedDate < thresholdDate;
 }
 
+/**
+ * @param {{ github: any, context: any, discussionAnsweredDays: number }} params
+ */
 module.exports = async ({ github, context, discussionAnsweredDays }) => {
   const owner = context.repo.owner;
   const repo = context.repo.repo;
@@ -34,6 +41,7 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
   while (true) {
     // oxlint-disable-next-line no-console
     console.debug({ cursor }, 'Starting query');
+    /** @type {{ repository: any }} */
     const { repository } = await github.graphql(query, { cursor });
 
     // oxlint-disable-next-line no-console
