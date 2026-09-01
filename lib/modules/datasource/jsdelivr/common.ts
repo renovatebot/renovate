@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex.ts';
+import type { JsDelivrParsedPackageName } from './types.ts';
 
 /**
  * Handles package names for both npm (scoped and unscoped) and gh.
@@ -12,14 +13,6 @@ import { regEx } from '../../../util/regex.ts';
  * @param packageName
  * @returns
  */
-
-export type JsDelivrPackageType = 'npm' | 'gh';
-
-export interface JsDelivrParsedPackageName {
-  type: JsDelivrPackageType;
-  package: string;
-  asset: string;
-}
 
 export function parseJsDelivrPackageName(
   packageName: string,
