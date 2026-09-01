@@ -100,7 +100,7 @@ export class GithubGraphqlDatasourceFetcher<
     this.datasourceAdapter = datasourceAdapter;
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
-    this.baseUrl = getApiBaseUrl(registryUrl).replace(regEx(/\/v3\/$/), '/'); // Replace for GHE
+    this.baseUrl = getApiBaseUrl(registryUrl).replace(regEx(/\/v3\/$/), '/'); // Replace for GHES
   }
 
   private getCacheNs(): PackageCacheNamespace {

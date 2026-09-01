@@ -184,7 +184,7 @@ export async function initPlatform({
 
   await detectGhe(token);
   /**
-   * GHE requires version >=3.10 to support fine-grained access tokens
+   * GHES requires version >=3.10 to support fine-grained access tokens
    * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
    */
   if (
@@ -1192,7 +1192,7 @@ export async function getBranchStatus(
     }
   }
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
-  // API is supported in oldest available GHE version 2.19
+  // API is supported in oldest available GHES version 2.19
   try {
     const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
       branchName,
@@ -1873,7 +1873,7 @@ async function tryPrAutomerge(
   ) {
     logger.debug(
       { prNumber },
-      'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+      'GitHub-native automerge: not supported by this GHES version. Use 3.3.0 or newer.',
     );
     return;
   }

@@ -33,7 +33,7 @@ import type {
   RepositoryReference,
 } from './types.ts';
 
-// detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
+// detects if we run against a GitHub Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
 // First on the Enterprise Server, then on GitHub.com
 function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
