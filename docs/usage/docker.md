@@ -313,15 +313,15 @@ To make use of this authentication mechanism, specify the `token` and make sure 
 as those would take precedence:
 
 ```js title="config.js"
-{
+module.exports = {
   hostRules: [
     {
       hostType: 'docker',
       matchHost: '12345612312.dkr.ecr.us-east-1.amazonaws.com',
       token: process.env.ECR_AUTH_TOKEN,
     },
-  ];
-}
+  ],
+};
 ```
 
 #### Google Container Registry / Google Artifact Registry
