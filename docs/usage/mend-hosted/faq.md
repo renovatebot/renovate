@@ -19,7 +19,7 @@ As noted [in the `postUpgradeTasks` documentation](../configuration-options.md#p
 This is to prevent both an ["insider attack"](../security-and-permissions.md#execution-of-code-insider-attack) and an ["outsider attack"](../security-and-permissions.md#execution-of-code-outsider-attack) that may occur when arbitrary commands execute.
 ../configuration-options.md#toolsettingsnodemaxmemory
 
-Often, Renovate is a central service within a company, where there is _some level_ of trust its users.
+Often, Renovate is a central service within a company, where there is _some level_ of trust in its users.
 However, with Mend-hosted Renovate we're hosting a mix of users on the public Internet that we can't necessarily trust.
 
 Although we harden Mend-hosted infrastructure more than a typical Renovate deployment, we still do not allow arbitrary command execution through `postUpgradeTasks`.
