@@ -10,6 +10,7 @@ import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
   FORGEJO_API_USING_HOST_TYPES,
+  GERRIT_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -33,6 +34,7 @@ export function detectPlatform(
   | 'bitbucket'
   | 'bitbucket-server'
   | 'forgejo'
+  | 'gerrit'
   | 'gitea'
   | 'github'
   | 'gitlab'
@@ -52,6 +54,15 @@ export function detectPlatform(
   }
   if (hostname && ['codeberg.org', 'codefloe.com'].includes(hostname)) {
     return 'forgejo';
+  }
+  // Gerrit hosts (before github: review.gerrithub.io includes "github")
+  // Do not treat *.googlesource.com as Gerrit — that is Gitiles, not the REST API.
+  if (
+    hostname &&
+    (hostname === 'review.gerrithub.io' ||
+      (hostname.includes('gerrit') && !hostname.endsWith('.googlesource.com')))
+  ) {
+    return 'gerrit';
   }
   if (
     hostname &&
@@ -84,6 +95,9 @@ export function detectPlatform(
   }
   if (FORGEJO_API_USING_HOST_TYPES.includes(hostType)) {
     return 'forgejo';
+  }
+  if (GERRIT_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'gerrit';
   }
   if (GITEA_API_USING_HOST_TYPES.includes(hostType)) {
     return 'gitea';
