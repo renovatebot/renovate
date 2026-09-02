@@ -107,6 +107,46 @@ describe('workers/repository/process/write', () => {
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
 
+    it('counts vulnerability alert branches separately', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          baseBranch: 'main',
+          branchName: 'regular',
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+        {
+          baseBranch: 'main',
+          branchName: 'vulnerability',
+          isVulnerabilityAlert: true,
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+      ]);
+      repoCache.getCache.mockReturnValueOnce({});
+      branchWorker.processBranch.mockResolvedValue({
+        branchExists: true,
+        result: 'pr-created',
+      });
+      scm.branchExists.mockResolvedValue(false);
+      GlobalConfig.set({ dryRun: 'full' });
+
+      await writeUpdates(config, branches);
+
+      expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(config, [
+        branches[0],
+      ]);
+      expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(config, [
+        branches[1],
+      ]);
+      expect(limits.getConcurrentBranchesCount).toHaveBeenCalledWith([
+        branches[0],
+      ]);
+      expect(limits.getConcurrentBranchesCount).toHaveBeenCalledWith([
+        branches[1],
+      ]);
+    });
+
     it('increments branch counter', async () => {
       const branchName = 'branchName';
       const branches = partial<BranchConfig[]>([

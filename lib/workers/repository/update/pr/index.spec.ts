@@ -119,7 +119,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
-      it('applies PR limits to vulnerability alerts too', async () => {
+      it('aborts PR creation once vulnerability alert limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
@@ -129,6 +129,19 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'RateLimited' });
         expect(platform.createPr).not.toHaveBeenCalled();
+      });
+
+      it('counts vulnerability alert PRs against their own limit', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, isVulnerabilityAlert: true });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(limits.incCountValue).toHaveBeenNthCalledWith(
+          1,
+          'VulnerabilityConcurrentPRs',
+        );
+        expect(limits.incCountValue).toHaveBeenNthCalledWith(2, 'HourlyPRs');
       });
 
       it('creates rollback PR', async () => {

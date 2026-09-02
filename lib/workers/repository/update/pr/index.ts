@@ -550,7 +550,11 @@ export async function ensurePr(
           milestone: config.milestone,
         });
 
-        incCountValue('ConcurrentPRs');
+        incCountValue(
+          config.isVulnerabilityAlert
+            ? 'VulnerabilityConcurrentPRs'
+            : 'ConcurrentPRs',
+        );
         incCountValue('HourlyPRs');
         logger.info(
           { pr: pr?.number, prTitle, labels: pr?.labels },

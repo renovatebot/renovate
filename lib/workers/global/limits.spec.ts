@@ -248,6 +248,65 @@ describe('workers/global/limits', () => {
   });
 
   describe('isLimitReached', () => {
+    it('counts vulnerability alerts against their own budget', () => {
+      setCount('ConcurrentPRs', 5);
+      setCount('Branches', 5);
+      setCount('VulnerabilityConcurrentPRs', 1);
+      setCount('VulnerabilityBranches', 1);
+      const upgrades = partial<BranchUpgradeConfig>([
+        { prConcurrentLimit: 5, branchConcurrentLimit: 5 },
+      ]);
+
+      // the repository-wide budget is spent, but the vulnerability one is not
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      expect(
+        isLimitReached(
+          'ConcurrentPRs',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(false);
+      expect(
+        isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      expect(
+        isLimitReached(
+          'Branches',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(false);
+    });
+
+    it('applies the vulnerability budget once it is spent', () => {
+      setCount('VulnerabilityConcurrentPRs', 5);
+      const upgrades = partial<BranchUpgradeConfig>([{ prConcurrentLimit: 5 }]);
+
+      expect(
+        isLimitReached(
+          'ConcurrentPRs',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(true);
+    });
+
+    it('ignores the hourly PR limit for vulnerability alerts', () => {
+      setCount('HourlyPRs', 5);
+      const upgrades = partial<BranchUpgradeConfig>([
+        { prHourlyLimit: 2, prConcurrentLimit: 0 },
+      ]);
+
+      expect(
+        isLimitReached('ConcurrentPRs', partial<BranchConfig>({ upgrades })),
+      ).toBe(true);
+      expect(
+        isLimitReached(
+          'ConcurrentPRs',
+          partial<BranchConfig>({ upgrades, isVulnerabilityAlert: true }),
+        ),
+      ).toBe(false);
+    });
+
     it('returns false based on concurrent limits', () => {
       setCount('ConcurrentPRs', 1);
       setCount('HourlyPRs', 1);

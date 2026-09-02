@@ -277,7 +277,8 @@ export async function processBranch(
     if (
       !config.rebaseRequested &&
       isLimitReached('HourlyCommits', branchConfig) &&
-      !dependencyDashboardCheck
+      !dependencyDashboardCheck &&
+      !config.isVulnerabilityAlert
     ) {
       logger.debug('Reached hourly commits limit - skipping branch');
       return {

@@ -12,6 +12,7 @@ const limits = new Map<Limit, LimitValue>();
 
 export function resetAllLimits(): void {
   limits.clear();
+  counts.clear();
 }
 
 export function setMaxLimit(key: Limit, val: unknown): void {
@@ -47,7 +48,11 @@ export type CountName =
   | 'ConcurrentPRs'
   | 'HourlyPRs'
   | 'Branches'
-  | 'HourlyCommits';
+  | 'HourlyCommits'
+  | 'VulnerabilityConcurrentPRs'
+  | 'VulnerabilityBranches';
+
+type LimitedCountName = 'ConcurrentPRs' | 'Branches' | 'HourlyCommits';
 
 type BranchLimitName =
   | 'branchConcurrentLimit'
@@ -77,8 +82,19 @@ export function incCountValue(key: CountName, incBy = 1): void {
   counts.set(key, count + incBy);
 }
 
+/**
+ * Vulnerability alerts are counted separately from other updates, so that a
+ * limit set under `vulnerabilityAlerts` is a budget of its own rather than a
+ * share of the repository-wide one.
+ */
+function vulnerabilityCountName(key: 'ConcurrentPRs' | 'Branches'): CountName {
+  return key === 'Branches'
+    ? 'VulnerabilityBranches'
+    : 'VulnerabilityConcurrentPRs';
+}
+
 function handleConcurrentLimits(
-  key: Exclude<CountName, 'HourlyPRs'>,
+  key: LimitedCountName,
   config: BranchConfig,
 ): boolean {
   // Only check hourly commit limit when specifically checking HourlyCommits
@@ -99,24 +115,33 @@ function handleConcurrentLimits(
     return false;
   }
 
-  // calculate the remaining hourly PR limit
-  const hourlyPrLimit = calcLimit(config.upgrades, 'prHourlyLimit');
-  const hourlyPrCount = getCount('HourlyPRs');
+  // vulnerability alerts have no hourly limit of their own, so they keep skipping this one
+  if (!config.isVulnerabilityAlert) {
+    // calculate the remaining hourly PR limit
+    const hourlyPrLimit = calcLimit(config.upgrades, 'prHourlyLimit');
+    const hourlyPrCount = getCount('HourlyPRs');
 
-  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
-  if (hourlyPrLimit && hourlyPrCount >= hourlyPrLimit) {
-    logger.debug({ hourlyPrCount, hourlyPrLimit }, 'Hourly PRs limit reached');
-    return true;
+    // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+    if (hourlyPrLimit && hourlyPrCount >= hourlyPrLimit) {
+      logger.debug(
+        { hourlyPrCount, hourlyPrLimit },
+        'Hourly PRs limit reached',
+      );
+      return true;
+    }
   }
 
   // calculate the branch or PR concurrent limit
   const limitKey =
     key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
   const limitValue = calcLimit(config.upgrades, limitKey);
-  const currentCount = getCount(key);
+  const countName = config.isVulnerabilityAlert
+    ? vulnerabilityCountName(key)
+    : key;
+  const currentCount = getCount(countName);
 
   if (limitValue && currentCount >= limitValue) {
-    logger.debug({ limitKey, currentCount }, `${key} limit reached`);
+    logger.debug({ limitKey, currentCount }, `${countName} limit reached`);
     return true;
   }
 

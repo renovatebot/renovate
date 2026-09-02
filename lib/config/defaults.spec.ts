@@ -3,11 +3,9 @@ import type { RenovateOptions } from './types.ts';
 
 describe('config/defaults', () => {
   describe('getConfig()', () => {
-    it('leaves vulnerabilityAlerts limits unlimited', () => {
+    it('leaves the vulnerabilityAlerts concurrent limit unlimited', () => {
       expect(getConfig().vulnerabilityAlerts).toMatchObject({
-        commitHourlyLimit: 0,
         prConcurrentLimit: 0,
-        prHourlyLimit: 0,
       });
     });
   });
