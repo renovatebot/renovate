@@ -6,7 +6,7 @@ import { SbtPluginDatasource } from '../../datasource/sbt-plugin/index.ts';
 import * as ivyVersioning from '../../versioning/ivy/index.ts';
 
 export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
-export { bumpPackageVersion } from './update.ts';
+export { bumpPackageVersion, updateDependency } from './update.ts';
 
 export const displayName = 'sbt';
 export const url = 'https://www.scala-sbt.org';
