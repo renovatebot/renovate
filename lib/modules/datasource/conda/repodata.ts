@@ -1,4 +1,5 @@
-import { zstdDecompressSync } from 'node:zlib';
+import { pipeline } from 'node:stream/promises';
+import { createZstdDecompress } from 'node:zlib';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
@@ -7,8 +8,8 @@ import { HttpError } from '../../../util/http/index.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { platformsParam } from './common.ts';
-import type { Repodata } from './schema.ts';
-import { RepodataJson } from './schema.ts';
+import { parseRepodataStream } from './repodata-index.ts';
+import type { RepodataIndex } from './types.ts';
 
 /** Subdir holding the builds that work on every platform. */
 const noarch = 'noarch';
@@ -188,14 +189,14 @@ function earliestRelease(found: Release[]): Release {
 async function loadIndex(
   http: Http,
   subdirUrl: string,
-): Promise<Repodata | null> {
+): Promise<RepodataIndex | null> {
   // the `datasource-mem:pkg-fetch:` prefix is what `cleanDatasourceKeys()`
   // sweeps, so a parsed index is released once lookups are done instead of
   // being held until the next repository
   const cacheKey = `datasource-mem:pkg-fetch:conda-repodata:${subdirUrl}`;
   // cache the in-flight promise so concurrent lookups in the same subdir share
   // a single download instead of each fetching the (large) index
-  let index = memCache.get<Promise<Repodata | null>>(cacheKey);
+  let index = memCache.get<Promise<RepodataIndex | null>>(cacheKey);
   if (index === undefined) {
     index = loadRepodata(http, subdirUrl).catch((err) => {
       // a cached rejection would replay the failure to every remaining
@@ -210,49 +211,44 @@ async function loadIndex(
 }
 
 /**
- * Conda channel indexes are large (hundreds of MB uncompressed), so we prefer
+ * Conda channel indexes are large, hundreds of MB uncompressed, so we prefer
  * the zstd-compressed `repodata.json.zst` and fall back to the plain
  * `repodata.json` only when a channel does not publish the compressed variant.
  */
 async function loadRepodata(
   http: Http,
   subdirUrl: string,
-): Promise<Repodata | null> {
-  const raw = await fetchRepodata(http, subdirUrl);
-  if (raw === null) {
+): Promise<RepodataIndex | null> {
+  const index = await fetchIndex(http, subdirUrl);
+  if (index === null) {
     logger.debug({ subdirUrl }, 'conda: channel subdir has no repodata index');
     return null;
   }
 
-  const repodata = RepodataJson.parse(raw);
-  if (!repodata.size) {
+  if (!index.size) {
     logger.once.warn(
       { subdirUrl },
       'conda: repodata index contains no packages',
     );
   }
 
-  return repodata;
+  return index;
 }
 
 /**
- * Returns the raw index document, or `null` when the subdir publishes neither
+ * Returns the index for one subdir, or `null` when the subdir publishes neither
  * the compressed nor the plain variant.
  */
-async function fetchRepodata(
+async function fetchIndex(
   http: Http,
   subdirUrl: string,
-): Promise<string | null> {
-  // this module memoizes the parsed index itself, so there is no point in the
-  // HTTP layer retaining the (large) response body as well
-  const options = { memCache: false };
-
+): Promise<RepodataIndex | null> {
   try {
-    const { body } = await http.getBuffer(
+    return await streamIndex(
+      http,
       joinUrlParts(subdirUrl, 'repodata.json.zst'),
-      options,
+      true,
     );
-    return zstdDecompressSync(body).toString('utf8');
   } catch (err) {
     // a host error will not be cured by asking for a different file, and
     // retrying would only mask the outage
@@ -269,17 +265,42 @@ async function fetchRepodata(
   }
 
   try {
-    const { body } = await http.getBuffer(
+    return await streamIndex(
+      http,
       joinUrlParts(subdirUrl, 'repodata.json'),
-      options,
+      false,
     );
-    return body.toString('utf8');
   } catch (err) {
     if (err instanceof HttpError && err.response?.statusCode === 404) {
       return null;
     }
+    // both variants are unusable, so the channel cannot be read at all - say so
+    // rather than letting the lookup report the subdir as simply having nothing
+    logger.debug(
+      { subdirUrl, err },
+      'conda: could not read the repodata index for this subdir',
+    );
     throw err;
   }
+}
+
+/**
+ * Streams one index document straight into the parser.
+ *
+ * Nothing is buffered whole: an uncompressed `repodata.json` can exceed the
+ * largest string V8 can hold, so reading the response into memory would fail
+ * outright on the biggest channels.
+ */
+function streamIndex(
+  http: Http,
+  url: string,
+  compressed: boolean,
+): Promise<RepodataIndex> {
+  const response = http.stream(url);
+
+  return compressed
+    ? pipeline(response, createZstdDecompress(), parseRepodataStream)
+    : pipeline(response, parseRepodataStream);
 }
 
 function isHostError(err: unknown): boolean {

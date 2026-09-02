@@ -77,3 +77,7 @@ Listing the subdirs as separate `registryUrls` instead cannot express that requi
 A package that moved from platform-specific builds to `noarch` would then keep resolving to the stale builds left behind in its platform subdir, since conda channels never remove old builds.
 
 A platform whose subdir the channel does not publish is ignored rather than treated as empty, so one missing subdir does not hide every version.
+
+!!! tip
+  Downloading an index of this size can take longer than the default request timeout.
+  If a channel logs `ETIMEDOUT` for its `repodata.json`, raise `timeout` in a `hostRules` entry for that host.

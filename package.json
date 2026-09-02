@@ -187,6 +187,7 @@
     "@renovatebot/pgp": "1.3.17",
     "@renovatebot/ruby-semver": "5.0.0",
     "@sindresorhus/is": "8.1.0",
+    "@streamparser/json": "0.0.26",
     "@yarnpkg/core": "4.9.1",
     "@yarnpkg/parsers": "3.1.0",
     "adm-zip": "0.6.0",
