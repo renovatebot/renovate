@@ -29,7 +29,7 @@ function findToken(url: string): string | undefined {
 }
 
 /**
- * `gh` takes the token from a different variable for GitHub Enterprise Server, and has to be told which host to talk to.
+ * `gh` takes the token from a different variable for GitHub Enterprise Cloud with data residency and GitHub Enterprise Server, and has to be told which host to talk to.
  *
  * Public actions are still resolved against github.com from there, so pass a token for both hosts.
  */

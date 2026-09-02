@@ -4,8 +4,9 @@ import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { getSourceUrlBase } from '../../../util/github/url.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { parseUrl } from '../../../util/url.ts';
+import { parseUrl, trimTrailingSlash } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
@@ -33,9 +34,9 @@ import type {
   RepositoryReference,
 } from './types.ts';
 
-// detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
+// Detects if we run against GitHub Enterprise and adds its URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
-// First on the Enterprise Server, then on GitHub.com
+// First on the Enterprise instance, then on GitHub.com
 function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   const endpoint = GlobalConfig.get('endpoint');
   const registryUrls = ['https://github.com'];
@@ -51,7 +52,7 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
       parsedEndpoint.host !== 'api.github.com'
     ) {
       registryUrls.unshift(
-        `${parsedEndpoint.protocol}//${parsedEndpoint.host}`,
+        trimTrailingSlash(getSourceUrlBase(parsedEndpoint.origin)),
       );
       return { registryUrls };
     }

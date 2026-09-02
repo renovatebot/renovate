@@ -84,7 +84,7 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow('Invalid GitHub endpoint URL: https://[invalid');
     });
 
-    it('should throw if using fine-grained token with GHE <3.10', async () => {
+    it('should throw if using fine-grained token with GHES <3.10', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
         .head('/')
@@ -99,7 +99,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if using fine-grained token with GHE unknown version', async () => {
+    it('should throw if using fine-grained token with GHES unknown version', async () => {
       httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
       await expect(
         github.initPlatform({
@@ -111,7 +111,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should support fine-grained token with GHE >=3.10', async () => {
+    it('should support fine-grained token with GHES >=3.10', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
         .head('/')
@@ -208,7 +208,7 @@ describe('modules/platform/github/index', () => {
             );
           });
 
-          it('if on GitHub Enterprise, a warning is not shown', async () => {
+          it('if on GHES, a warning is not shown', async () => {
             httpMock
               .scope('https://ghe.renovatebot.com')
               .head('/')
@@ -222,6 +222,23 @@ describe('modules/platform/github/index', () => {
               token: 'anything',
 
               endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+
+          it('if on GHEC, a warning is not shown', async () => {
+            httpMock
+              .scope('https://api.octocorp.ghe.com')
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+              endpoint: 'https://api.octocorp.ghe.com',
               gitAuthor: undefined,
             });
 
@@ -253,7 +270,7 @@ describe('modules/platform/github/index', () => {
             expect(logger.logger.once.warn).not.toHaveBeenCalled();
           });
 
-          it('if on GitHub Enterprise, a warning is not shown', async () => {
+          it('if on GHES, a warning is not shown', async () => {
             httpMock
               .scope('https://ghe.renovatebot.com')
               .head('/')
@@ -300,7 +317,7 @@ describe('modules/platform/github/index', () => {
           );
         });
 
-        it('if on GitHub Enterprise, a warning is not shown', async () => {
+        it('if on GHES, a warning is not shown', async () => {
           httpMock
             .scope('https://ghe.renovatebot.com')
             .head('/')
@@ -339,7 +356,7 @@ describe('modules/platform/github/index', () => {
           );
         });
 
-        it('if on GitHub Enterprise, a warning is not shown', async () => {
+        it('if on GHES, a warning is not shown', async () => {
           httpMock
             .scope('https://ghe.renovatebot.com')
             .head('/')
@@ -569,26 +586,24 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
-    it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
+    it('should autodetect email/user on GHEC endpoint with GitHub App', async () => {
       httpMock
-        .scope('https://octocorp.ghe.com', {
+        .scope('https://api.octocorp.ghe.com', {
           reqheaders: {
             authorization: 'Bearer ghs_123test',
           },
         })
-        .head('/')
-        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
         .post('/graphql')
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
       expect(
         await github.initPlatform({
-          endpoint: 'https://octocorp.ghe.com',
+          endpoint: 'https://api.octocorp.ghe.com',
           token: 'x-access-token:ghs_123test',
         }),
       ).toEqual({
-        endpoint: 'https://octocorp.ghe.com/',
+        endpoint: 'https://api.octocorp.ghe.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
@@ -596,6 +611,25 @@ describe('modules/platform/github/index', () => {
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@ghe.com',
       ]);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Detected GitHub Enterprise Cloud',
+      );
+    });
+
+    it('should not apply GHES version restrictions to GHEC', async () => {
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://api.octocorp.ghe.com',
+          token: 'github_pat_XXXXXX',
+          username: 'renovate-bot',
+          gitAuthor: 'Renovate Bot <renovate@example.com>',
+        }),
+      ).resolves.toEqual({
+        endpoint: 'https://api.octocorp.ghe.com/',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        renovateUsername: 'renovate-bot',
+        token: 'github_pat_XXXXXX',
+      });
     });
 
     it('should support custom endpoint', async () => {
@@ -4148,7 +4182,7 @@ describe('modules/platform/github/index', () => {
         ]);
       });
 
-      it('should skip automerge if GHE <3.3.0', async () => {
+      it('should skip automerge if GHES <3.3.0', async () => {
         const scope = httpMock
           .scope('https://github.company.com')
           .head('/')
@@ -4176,11 +4210,11 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { prNumber: 123 },
-          'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+          'GitHub-native automerge: not supported by this GHES version. Use 3.3.0 or newer.',
         );
       });
 
-      it('should perform automerge if GHE >=3.3.0', async () => {
+      it('should perform automerge if GHES >=3.3.0', async () => {
         const scope = httpMock
           .scope('https://github.company.com')
           .head('/')
@@ -4962,7 +4996,7 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
-    it('skips merge queue check on GHE <3.12.0', async () => {
+    it('skips merge queue check on GHES <3.12.0', async () => {
       const scope = httpMock
         .scope('https://github.company.com')
         .head('/')
@@ -5376,7 +5410,7 @@ describe('modules/platform/github/index', () => {
       expect(github.massageMarkdown(input)).toMatchSnapshot();
     });
 
-    it('returns not-updated pr body for GHE', async () => {
+    it('returns not-updated pr body for GHES', async () => {
       const scope = httpMock
         .scope('https://github.company.com')
         .head('/')
@@ -5390,6 +5424,26 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initPlatform({
         endpoint: 'https://github.company.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(github.massageMarkdown(input)).toEqual(input);
+    });
+
+    it('returns not-updated pr body for GHEC', async () => {
+      const scope = httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://api.octocorp.ghe.com',
         token: '123test',
       });
       await github.initRepo({ repository: 'some/repo' });

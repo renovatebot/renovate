@@ -294,7 +294,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       });
     });
 
-    it('supports github enterprise and github.com changelog', async () => {
+    it('supports GHES and github.com changelog', async () => {
       hostRules.add({
         hostType: 'github',
         token: 'super_secret',
@@ -325,7 +325,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       });
     });
 
-    it('supports github enterprise and github enterprise changelog', async () => {
+    it('supports GHES and GHES changelog', async () => {
       hostRules.add({
         hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
@@ -355,6 +355,33 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           { version: '2.3.0' },
           { version: '2.2.2' },
         ],
+      });
+    });
+
+    it('uses the GHEC API host for a GHEC changelog', async () => {
+      httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, []);
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'https://api.octocorp.ghe.com/',
+        token: 'abc',
+      });
+      const result = await getChangeLogJSON({
+        ...upgrade,
+        sourceUrl: 'https://octocorp.ghe.com/chalk/chalk',
+      });
+      expect(result).toMatchObject({
+        hasReleaseNotes: true,
+        project: {
+          apiBaseUrl: 'https://api.octocorp.ghe.com/',
+          baseUrl: 'https://octocorp.ghe.com/',
+          repository: 'chalk/chalk',
+          sourceUrl: 'https://octocorp.ghe.com/chalk/chalk',
+          type: 'github',
+        },
       });
     });
 

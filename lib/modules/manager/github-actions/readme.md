@@ -141,7 +141,7 @@ You can also control the `gh` CLI version using `constraints.gh`.
 !!! note
   `gh actions-lock` resolves refs and repository IDs through the GitHub API, so it needs a token.
   Renovate takes the token from the `github` host rule matching your platform endpoint, and passes it as `GH_TOKEN`.
-  On GitHub Enterprise Server Renovate passes that token using `GH_ENTERPRISE_TOKEN` and `GH_HOST`, and additionally passes the token from your `github.com` host rule as `GH_TOKEN`, because public actions are still resolved against `github.com`.
+  On GitHub Enterprise Cloud with data residency and GitHub Enterprise Server, Renovate passes that token using `GH_ENTERPRISE_TOKEN` and `GH_HOST`, and additionally passes the token from your `github.com` host rule as `GH_TOKEN`, because public actions are still resolved against `github.com`.
 
 ### Non-semver refs (branches and feature tags)
 

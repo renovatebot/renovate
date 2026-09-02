@@ -59,7 +59,11 @@ export function detectPlatform(
   ) {
     return 'gitea';
   }
-  if (hostname === 'github.com' || hostname?.includes('github')) {
+  if (
+    hostname === 'github.com' ||
+    hostname?.includes('github') ||
+    hostname?.endsWith('.ghe.com')
+  ) {
     return 'github';
   }
   if (hostname === 'gitlab.com' || hostname?.includes('gitlab')) {

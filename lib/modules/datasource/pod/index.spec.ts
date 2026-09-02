@@ -75,7 +75,7 @@ describe('modules/datasource/pod/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null for 404 Github enterprise', async () => {
+    it('returns null for 404 from GHES', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -96,7 +96,7 @@ describe('modules/datasource/pod/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null for 404 Github enterprise with different url style', async () => {
+    it('returns null for 404 from GHES with different URL style', async () => {
       httpMock
         .scope(githubEntApiHost2)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -254,7 +254,7 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise with shard with specs', async () => {
+    it('processes real data from GHES with shard with specs', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -273,7 +273,26 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise with shard without specs', async () => {
+    it('uses the GHEC API host for a GHEC registry URL', async () => {
+      httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .get('/repos/foo/bar/contents/Specs/a/c/b/foo')
+        .reply(200, [{ name: '1.2.3' }]);
+      const res = await getPkgReleases({
+        ...config,
+        registryUrls: ['https://octocorp.ghe.com/foo/bar'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://octocorp.ghe.com/foo/bar',
+        releases: [
+          {
+            version: '1.2.3',
+          },
+        ],
+      });
+    });
+
+    it('processes real data from GHES with shard without specs', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -294,7 +313,7 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise with specs without shard', async () => {
+    it('processes real data from GHES with specs without shard', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -317,7 +336,7 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise without specs without shard', async () => {
+    it('processes real data from GHES without specs without shard', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')

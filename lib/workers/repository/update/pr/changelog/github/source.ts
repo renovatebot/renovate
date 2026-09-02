@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../../../../config/global.ts';
 import { logger } from '../../../../../../logger/index.ts';
+import { getApiBaseUrl } from '../../../../../../util/github/url.ts';
 import * as hostRules from '../../../../../../util/host-rules.ts';
 import { parseUrl } from '../../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
@@ -11,10 +12,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    const baseUrl = this.getBaseUrl(config);
-    return baseUrl.startsWith('https://github.com/')
-      ? 'https://api.github.com/'
-      : `${baseUrl}api/v3/`;
+    return getApiBaseUrl(this.getBaseUrl(config));
   }
 
   getCompareURL(
@@ -46,9 +44,10 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     const manager = config.manager;
     const packageName = config.packageName;
 
-    const url = sourceUrl.startsWith('https://github.com/')
-      ? 'https://api.github.com/'
-      : sourceUrl;
+    const url =
+      sourceUrl.startsWith('https://github.com/') || host?.endsWith('.ghe.com')
+        ? this.getAPIBaseUrl(config)
+        : sourceUrl;
     const { token } = hostRules.find({
       hostType: 'github',
       url,

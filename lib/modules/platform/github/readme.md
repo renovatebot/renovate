@@ -1,10 +1,10 @@
-# GitHub and GitHub Enterprise Server
+# GitHub and GitHub Enterprise
 
-Most of the information on this page is meant for users who want to self-host Renovate on GitHub or GitHub Enterprise Server.
+Most of the information on this page is meant for users who want to self-host Renovate on GitHub.com, GitHub Enterprise Cloud or GitHub Enterprise Server.
 
 ## Easiest way to run Renovate
 
-For users on GitHub Cloud (`github.com`), the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
+For users on GitHub.com, the easiest way to get started is to install [the Mend Renovate app](https://github.com/marketplace/renovate) from the GitHub marketplace.
 When you use the app, Mend will:
 
 - authenticate the Renovate app to GitHub
@@ -36,6 +36,7 @@ Let Renovate use your PAT by doing _one_ of the following:
 Remember to set `platform=github` somewhere in your Renovate config file.
 
 If you use GitHub Enterprise Server then `endpoint` must point to `https://github-enterprise.example.com/api/v3/`.
+If you use GitHub Enterprise Cloud with data residency then `endpoint` must point to `https://api.SUBDOMAIN.ghe.com/`, where `SUBDOMAIN` is your enterprise's unique subdomain.
 You can choose where you want to set `endpoint`:
 
 - In your `config.js` file
@@ -120,8 +121,8 @@ The slug name of your app with `[bot]` appended
 **`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`** (optional, autodetected if not supplied)
 
 The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
-It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
-A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
+It needs to have the user id _and_ the username followed by the appropriate `users.noreply.` domain: `users.noreply.github.com` for GitHub.com, `users.noreply.ghe.com` for GitHub Enterprise Cloud with data residency, or `users.noreply.HOSTNAME` for GitHub Enterprise Server.
+A way to get the user id of a GitHub App is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `https://api.github.com/users/self-hosted-renovate[bot]` (GitHub.com), `https://api.SUBDOMAIN.ghe.com/users/self-hosted-renovate[bot]` (GitHub Enterprise Cloud with data residency), or `https://HOSTNAME/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
 ## Package Registry Credentials
 

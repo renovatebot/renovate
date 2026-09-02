@@ -550,7 +550,7 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  it('includes flake from GitHub Enterprise', async () => {
+  it('includes flake from GHES', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "flake-utils": {

@@ -51,7 +51,7 @@ See the list of platforms in the [`fetchChangeLogs` config option docs](../confi
 Most Open Source packages are hosted on github.com, which means most changelogs are hosted there too.
 Fetching changelogs from github.com requires a GitHub token because GitHub blocks unauthenticated GraphQL API use.
 
-This means that if you run Renovate on self-hosted GitHub Enterprise Server, or any non-GitHub platform which Renovate supports, then you need to configure a github.com Personal Access Token in Renovate in order to fetch changelogs.
+This means that if you run Renovate on GitHub Enterprise Cloud with data residency, self-hosted GitHub Enterprise Server, or any non-GitHub platform which Renovate supports, then you need to configure a github.com Personal Access Token in Renovate in order to fetch changelogs.
 
 Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
 

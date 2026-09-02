@@ -258,7 +258,7 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toBeDefined();
     });
 
-    it('support ghe', async () => {
+    it('supports GHES', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         registryUrl: 'https://git.enterprise.com',

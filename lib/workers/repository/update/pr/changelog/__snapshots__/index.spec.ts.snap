@@ -60,7 +60,7 @@ exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > filte
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports github enterprise and github enterprise changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports GHES and GHES changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -120,7 +120,7 @@ exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > suppo
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports github enterprise and github.com changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports GHES and github.com changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -180,7 +180,7 @@ exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > suppo
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports github.com and github enterprise changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports github.com and GHES changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {

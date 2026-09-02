@@ -52,7 +52,7 @@ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/ren
 ### Kubernetes
 
 Renovate's official Docker image is compatible with Kubernetes.
-The following is an example manifest of running Renovate against a GitHub Enterprise server.
+The following is an example manifest of running Renovate against GitHub Enterprise Server.
 
 ```yaml title="Kubernetes manifest"
 apiVersion: batch/v1
