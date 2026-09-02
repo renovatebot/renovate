@@ -1,7 +1,9 @@
+import { isString } from '@sindresorhus/is';
 import * as semver from 'semver';
 import type { SemVer } from 'semver-utils';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
 import type { NewValueConfig } from '../types.ts';
 import {
@@ -18,8 +20,8 @@ export function getMajor(version: string): null | number {
   const options = getOptions(version);
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
-    return Number(cleanerVersion.split('.')[0]);
+  if (isString(cleanerVersion)) {
+    return parseInt(cleanerVersion.split('.')[0], 10);
   }
   return null;
 }
@@ -30,8 +32,8 @@ export function getMinor(version: string): null | number {
   const options = getOptions(version);
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
-    return Number(cleanerVersion.split('.')[1]);
+  if (isString(cleanerVersion)) {
+    return parseInt(cleanerVersion.split('.')[1], 10);
   }
   return null;
 }
@@ -43,14 +45,15 @@ export function getPatch(version: string): null | number {
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
 
-  if (typeof cleanerVersion === 'string') {
+  if (isString(cleanerVersion)) {
     const newVersion = semver.valid(
       semver.coerce(cleanedVersion, {
         loose: false,
       }),
       options,
     );
-    return Number(newVersion?.split('.')[2]);
+    /* v8 ignore next -- newVersion always has a patch segment once cleanerVersion is a valid, coercible semver string */
+    return parseInt(coerceString(newVersion).split('.')[2] ?? '', 10);
   }
   return null;
 }
@@ -76,7 +79,7 @@ export function fixParsedRange(range: string): any {
   }
 
   const parsedRange = parseRange(range);
-  const cleanRange = range.replace(/([<=>^~])( )?/g, '');
+  const cleanRange = range.replace(regEx(/([<=>^~])( )?/g), '');
   const splitRange = cleanRange.split(' ');
   const semverRange: SemVer[] = [];
 
@@ -102,6 +105,7 @@ export function fixParsedRange(range: string): any {
           full = `${full}.${patch}`;
         }
       }
+      /* v8 ignore next -- a segment with no operator is only reachable when adjacent to `||`, which always makes `operator` truthy (`'||'`) above; any other bare segment throws earlier at ordValues[i] */
       if (operator) {
         NewSemVer.operator = operator;
         full = range.includes(`${operator} `)
@@ -124,7 +128,7 @@ export function replaceRange({
   newVersion,
 }: NewValueConfig): string {
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const toVersionPatch = getPatch(newVersion);
@@ -171,7 +175,7 @@ export function replaceRange({
       res = `<${toVersionMajor + 1}`;
     }
     if (currentValue.includes('< ')) {
-      res = res.replace(/</g, '< ');
+      res = res.replace(regEx(/</g), '< ');
     }
     return res;
   }
@@ -188,7 +192,7 @@ export function replaceRange({
       res = `>${toVersionMajor}`;
     }
     if (currentValue.includes('> ')) {
-      res = res.replace(/</g, '> ');
+      res = res.replace(regEx(/</g), '> ');
     }
     return res;
   }
@@ -218,7 +222,7 @@ export function widenRange(
   options: semver.Options,
 ): string | null {
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
 
   if (matchesWithOptions(newVersion, currentValue, options)) {
     return currentValue;
@@ -235,7 +239,7 @@ export function widenRange(
     return splitCurrent.join(element.operator) + newValue;
   }
   if (parsedRange.length > 1) {
-    const previousElement = parsedRange[parsedRange.length - 2];
+    const previousElement = parsedRange.at(-2)!;
     if (previousElement.operator === '-') {
       const splitCurrent = currentValue.split('-');
       splitCurrent.pop();
@@ -265,7 +269,7 @@ export function bumpRange(
     );
   }
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
 
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
@@ -315,6 +319,7 @@ export function bumpRange(
       if (x.operator === '||') {
         return x.semver;
       }
+      /* v8 ignore next -- fixParsedRange only ever produces elements with `operator === '||'` (handled above) or a real comparator operator; a falsy, non-`||` operator would have already thrown inside fixParsedRange */
       if (x.operator) {
         const bumpedSubRange = bumpRange(
           {

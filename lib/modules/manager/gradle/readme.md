@@ -16,6 +16,11 @@ As the output of these commands can be very large, any text other than errors (i
 
 ### Dependency verification
 
+Renovate supports [Gradle's dependency verification functionality](https://docs.gradle.org/current/userguide/dependency_verification.html) to ensure that checksums are calculated for your dependencies.
+
+!!! note
+  This requires [your self-hosted administrator to allow the Gradle Wrapper to execute](#executing-the-gradle-wrapper).
+
 If Renovate finds a `gradle/verification-metadata.xml` file and either `<verify-metadata>true</verify-metadata>` or `<verify-signatures>true</verify-signatures>` (or both), it updates the content by using the `./gradlew --write-verification-metadata <hashTypes> dependencies` command.
 Renovate will check the file for existing hash types (like `sha256`) and use them as `<hashTypes>`.
 

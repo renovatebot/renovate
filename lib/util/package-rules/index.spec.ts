@@ -1,4 +1,5 @@
 import { hostRules } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
@@ -766,7 +767,7 @@ describe('util/package-rules/index', () => {
         {
           matchSourceUrls: [
             'https://github.com/foo/bar',
-            'https://github.com/facebook/react',
+            'https://github.com/react/react',
           ],
           // @ts-expect-error -- testing
           x: 1,
@@ -777,7 +778,7 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       packageName: 'a',
       updateType: 'patch' as UpdateType,
-      sourceUrl: 'https://github.com/facebook/react-native',
+      sourceUrl: 'https://github.com/react/react-native',
     };
     const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -862,6 +863,10 @@ describe('util/package-rules/index', () => {
       hostRules.add(hostRule);
     });
 
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
     it('matches matchConfidence', async () => {
       const config: TestConfig = {
         packageRules: [
@@ -944,6 +949,28 @@ describe('util/package-rules/index', () => {
       expect(error.validationMessage).toBe(
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
       );
+    });
+
+    it('uses productLinks.documentation in error message URL', async () => {
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://custom.example.com/' },
+      });
+      hostRules.clear();
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+            // @ts-expect-error -- testing
+            x: 1,
+          },
+        ],
+      };
+
+      await expect(applyPackageRules(config)).rejects.toMatchObject({
+        validationMessage:
+          'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://custom.example.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
+      });
     });
   });
 

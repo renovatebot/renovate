@@ -44,7 +44,7 @@ export class ModuleExtractor extends DependencyExtractor {
       return [];
     }
 
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!isPlainObject(modules)) {
       logger.debug({ modules }, 'Terraform: unexpected `modules` value');
       return [];
@@ -107,8 +107,8 @@ export class ModuleExtractor extends DependencyExtractor {
       if (gitTagsRefMatch.groups.subfolder) {
         logger.debug('Terraform module contains subdirectory');
       }
-      dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
-      dep.packageName = gitTagsRefMatch.groups.url.replace('.git', '');
+      dep.depName = gitTagsRefMatch.groups.path.replace(regEx(/\.git$/), '');
+      dep.packageName = gitTagsRefMatch.groups.url.replace(regEx(/\.git$/), '');
       dep.currentValue = gitTagsRefMatch.groups.tag;
       dep.datasource = GitTagsDatasource.id;
     } else if (source) {

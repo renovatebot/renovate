@@ -5,22 +5,9 @@ import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator.ts';
+import type { Range } from './types.ts';
 
-export interface Range {
-  version: string;
-  operator: string;
-  delimiter: string;
-  /**
-   * If the range is `~>` and immediately followed by `>=`,
-   * the latter range is considered the former's companion
-   * and assigned here instead of being an independent range.
-   *
-   * Example: `'~> 6.2', '>= 6.2.1'`
-   */
-  companion?: Range;
-}
-
-const parse = (range: string): Range => {
+function parse(range: string): Range {
   const regExp = regEx(
     /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/,
   );
@@ -38,7 +25,7 @@ const parse = (range: string): Range => {
     operator: '',
     delimiter: ' ',
   };
-};
+}
 
 /** Wrapper for {@link satisfies} for {@link Range} record. */
 export function satisfiesRange(ver: string, range: Range): boolean {
@@ -47,9 +34,8 @@ export function satisfiesRange(ver: string, range: Range): boolean {
       satisfies(ver, `${range.operator}${range.version}`) &&
       satisfiesRange(ver, range.companion)
     );
-  } else {
-    return satisfies(ver, `${range.operator}${range.version}`);
   }
+  return satisfies(ver, `${range.operator}${range.version}`);
 }
 
 /**
@@ -87,16 +73,15 @@ export function stringifyRanges(ranges: Range[]): string {
     .map((r) => {
       if (r.companion) {
         return `${r.operator}${r.delimiter}${r.version}, ${r.companion.operator}${r.companion.delimiter}${r.companion.version}`;
-      } else {
-        return `${r.operator}${r.delimiter}${r.version}`;
       }
+      return `${r.operator}${r.delimiter}${r.version}`;
     })
     .join(', ');
 }
 
 type GemRequirement = [string, Version];
 
-const ltr = (version: string, range: string): boolean => {
+function ltr(version: string, range: string): boolean {
   const gemVersion = create(version);
   if (!gemVersion) {
     logger.warn({ version }, `Invalid ruby version`);
@@ -127,6 +112,6 @@ const ltr = (version: string, range: string): boolean => {
   });
 
   return results.reduce((accumulator, value) => accumulator && value, true);
-};
+}
 
 export { ltr, parse };

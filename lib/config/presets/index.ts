@@ -10,6 +10,7 @@ import {
 } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import { clone } from '../../util/clone.ts';
 import { regEx } from '../../util/regex.ts';
@@ -22,6 +23,7 @@ import { mergeChildConfig } from '../utils.ts';
 import { removedPresets } from './common.ts';
 import * as internal from './internal/index.ts';
 import { parsePreset } from './parse.ts';
+import { canonicalizeRelativePresets } from './relative.ts';
 import type { Preset, PresetApi } from './types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
@@ -29,17 +31,28 @@ import {
   PRESET_INVALID_JSON,
   PRESET_NOT_FOUND,
   PRESET_PROHIBITED_SUBPRESET,
+  PRESET_RELATIVE_NO_PARENT,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util.ts';
 
-const presetSourceLoaders: Record<string, () => Promise<PresetApi>> = {
-  forgejo: () => import('./forgejo/index.ts'),
-  gitea: () => import('./gitea/index.ts'),
-  github: () => import('./github/index.ts'),
-  gitlab: () => import('./gitlab/index.ts'),
-  http: () => import('./http/index.ts'),
-  local: () => import('./local/index.ts'),
-  npm: () => import('./npm/index.ts'),
+interface PresetSource {
+  load: () => Promise<PresetApi>;
+
+  /**
+   * Whether presets from this source are hosted in a repository, which is what
+   * allows them to reference other presets relatively.
+   */
+  repoHosted: boolean;
+}
+
+const presetSources: Record<string, PresetSource> = {
+  forgejo: { load: () => import('./forgejo/index.ts'), repoHosted: true },
+  gitea: { load: () => import('./gitea/index.ts'), repoHosted: true },
+  github: { load: () => import('./github/index.ts'), repoHosted: true },
+  gitlab: { load: () => import('./gitlab/index.ts'), repoHosted: true },
+  http: { load: () => import('./http/index.ts'), repoHosted: false },
+  local: { load: () => import('./local/index.ts'), repoHosted: true },
+  npm: { load: () => import('./npm/index.ts'), repoHosted: false },
 };
 
 const presetCacheNamespace = 'preset';
@@ -109,8 +122,13 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
+  const parsedPreset = parsePreset(preset);
   const { presetSource, repo, presetPath, presetName, tag, params, rawParams } =
-    parsePreset(preset);
+    parsedPreset;
+
+  if (presetSource === 'relative') {
+    throw new Error(PRESET_RELATIVE_NO_PARENT);
+  }
 
   let presetConfig: Preset | null | undefined;
 
@@ -136,7 +154,7 @@ export async function getPreset(
     }
 
     if (isNullOrUndefined(presetConfig)) {
-      const source = await presetSourceLoaders[presetSource]();
+      const source = await presetSources[presetSource].load();
       presetConfig = await source.getPreset({
         repo,
         presetPath,
@@ -185,7 +203,14 @@ export async function getPreset(
     delete presetConfig.description;
   }
   const { migratedConfig } = migration.migrateConfig(presetConfig);
-  return massage.massageConfig(migratedConfig);
+  const massagedConfig = massage.massageConfig(migratedConfig);
+  if (presetSources[parsedPreset.presetSource]?.repoHosted) {
+    // only presets which are hosted in a repository can contain relative
+    // references, in all other presets they are left as they are and fail
+    // when they are resolved
+    canonicalizeRelativePresets(massagedConfig, parsedPreset);
+  }
+  return massagedConfig;
 }
 
 export interface ResolveConfigPresetsResult {
@@ -218,7 +243,7 @@ export async function resolveConfigPresets(
 
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets ?? [];
+    ignorePresets = coerceArray(inputConfig.ignorePresets);
   }
   logger.trace(
     { config: inputConfig, existingPresets, mergeInternalPresets },
@@ -260,10 +285,6 @@ export async function resolveConfigPresets(
             existingPresets.concat([preset]),
             mergeInternalPresets,
           );
-        if (inputConfig?.ignoreDeps?.length === 0) {
-          delete presetConfig.description;
-        }
-
         config = mergeChildConfig(config, presetConfig);
         allVisitedPresets.merged.add(preset);
 
@@ -283,6 +304,12 @@ export async function resolveConfigPresets(
   config = mergeChildConfig(config, inputConfig);
   delete config.extends;
   delete config.ignorePresets;
+  // Any description of this config replaces the ones collated from its presets.
+  // Check the length, because array options default to an empty array.
+  if (config.overrideDescription?.length) {
+    config.description = config.overrideDescription;
+  }
+  delete config.overrideDescription;
   logger.trace({ config }, `Post-merge resolve config`);
   for (const [key, val] of Object.entries(config) as [
     keyof AllConfig,
@@ -296,7 +323,7 @@ export async function resolveConfigPresets(
         if (isObject(element)) {
           const { config: presetConfig, visitedPresets: visited } =
             await resolveConfigPresets(
-              element as RenovateConfig,
+              element,
               baseConfig,
               ignorePresets,
               existingPresets,
@@ -321,7 +348,7 @@ export async function resolveConfigPresets(
       logger.trace(`Resolving object "${key}"`);
       const { config: presetConfig, visitedPresets: visited } =
         await resolveConfigPresets(
-          val as RenovateConfig,
+          val,
           baseConfig,
           ignorePresets,
           existingPresets,
@@ -383,6 +410,8 @@ async function fetchPreset(
       error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
     } else if (err.message === PRESET_INVALID_JSON) {
       error.validationError = `Preset is invalid JSON (${preset})`;
+    } else if (err.message === PRESET_RELATIVE_NO_PARENT) {
+      error.validationError = `Relative preset reference cannot be resolved (${preset}). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends)`;
     } else {
       error.validationError = `Preset caused unexpected error (${preset})`;
     }

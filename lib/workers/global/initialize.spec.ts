@@ -15,7 +15,9 @@ describe('workers/global/initialize', () => {
     it('throws if invalid version', async () => {
       const config: RenovateConfig = {};
       git.validateGitVersion.mockResolvedValueOnce(false);
-      await expect(globalInitialize(config)).rejects.toThrow();
+      await expect(globalInitialize(config)).rejects.toThrow(
+        'Init: git version needs upgrading',
+      );
     });
 
     it('returns if valid git version', async () => {
@@ -81,8 +83,8 @@ describe('workers/global/initialize', () => {
 
   describe('configureThirdPartyLibraries()', () => {
     beforeEach(() => {
-      delete process.env.AWS_EC2_METADATA_DISABLED;
-      delete process.env.METADATA_SERVER_DETECTION;
+      vi.stubEnv('AWS_EC2_METADATA_DISABLED', undefined);
+      vi.stubEnv('METADATA_SERVER_DETECTION', undefined);
     });
 
     it('sets env vars when cloud metadata services disabled', async () => {

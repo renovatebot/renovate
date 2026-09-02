@@ -8,10 +8,10 @@ import {
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
+import type { StaticTooling } from '../asdf/types.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { BackendToolingConfig } from './backends.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
@@ -27,7 +27,7 @@ import {
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
-import type { ToolingDefinition } from './upgradeable-tooling.ts';
+import type { BackendToolingConfig, ToolingDefinition } from './types.ts';
 import {
   asdfTooling,
   getOrderedMiseRegistryBackends,
@@ -58,12 +58,14 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {
-    deps.push(extractToolEntry(name, toolData));
+    deps.push(extractToolEntry(name, toolData, 'tools'));
   }
 
-  for (const taskData of Object.values(misefile.tasks)) {
-    for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
-      deps.push(extractToolEntry(name, toolData));
+  for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
+    for (const [name, toolData] of Object.entries(
+      coerceObject(taskData.tools),
+    )) {
+      deps.push(extractToolEntry(name, toolData, `task-${taskName}-tools`));
     }
   }
 
@@ -249,7 +251,11 @@ function getConfigFromTooling(
   ); // Ensure null is returned instead of undefined
 }
 
-function extractToolEntry(name: string, toolData: MiseTool): PackageDependency {
+function extractToolEntry(
+  name: string,
+  toolData: MiseTool,
+  depType: string,
+): PackageDependency {
   const version = parseVersion(toolData);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
     name.trim(),
@@ -265,29 +271,33 @@ function extractToolEntry(name: string, toolData: MiseTool): PackageDependency {
     version === null
       ? null
       : getToolConfig(backend, toolName, version, options);
-  return createDependency(depName, version, toolConfig);
+  return createDependency(depName, version, toolConfig, depType);
 }
 
 function createDependency(
   name: string,
   version: string | null,
   config: StaticTooling | BackendToolingConfig | null,
+  depType: string,
 ): PackageDependency {
   if (version === null) {
     return {
       depName: name,
+      depType,
       skipReason: 'unspecified-version',
     };
   }
   if (config === null) {
     return {
       depName: name,
+      depType,
       skipReason: 'unsupported-datasource',
     };
   }
 
   return {
     depName: name,
+    depType,
     currentValue: version,
     // Spread the config last to override other properties
     ...config,

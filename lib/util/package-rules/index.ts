@@ -7,10 +7,11 @@ import type {
 import { mergeChildConfig } from '../../config/utils.ts';
 import { logger } from '../../logger/index.ts';
 import type { StageName } from '../../types/skip-reason.ts';
+import { coerceArray } from '../array.ts';
 import { compile } from '../template/index.ts';
 import matchers from './matchers.ts';
 
-const slugify = _slugify as unknown as typeof _slugify.default;
+const slugify = _slugify;
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -37,7 +38,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
   stageName?: StageName,
 ): Promise<T> {
   let config = { ...inputConfig };
-  const packageRules = config.packageRules ?? [];
+  const packageRules = coerceArray(config.packageRules);
   logger.trace(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`,

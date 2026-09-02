@@ -16,7 +16,7 @@ describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
-      delete process.env.CONTAINERBASE;
+      vi.stubEnv('CONTAINERBASE', undefined);
     });
 
     it('returns false if binarySource is not install', () => {
@@ -30,7 +30,7 @@ describe('util/exec/containerbase', () => {
 
     it('returns false if any unsupported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.CONTAINERBASE = 'true';
+      vi.stubEnv('CONTAINERBASE', 'true');
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
         // @ts-expect-error -- intentionally using invalid constraint names
@@ -41,7 +41,7 @@ describe('util/exec/containerbase', () => {
 
     it('returns true if supported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.CONTAINERBASE = 'true';
+      vi.stubEnv('CONTAINERBASE', 'true');
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       expect(isDynamicInstall(toolConstraints)).toBeTrue();
     });
@@ -110,18 +110,24 @@ describe('util/exec/containerbase', () => {
       expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.0.14');
     });
 
-    it('supports rust docker tags', async () => {
+    it('supports rust release channels', async () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1' },
           { version: '1.65' },
           { version: '1.65.0' },
-          { version: '1.65.0-slim' },
-          { version: '1.65.0-buster' },
-          { version: '1.66' },
         ],
       });
       expect(await resolveConstraint({ toolName: 'rust' })).toBe('1.65.0');
+    });
+
+    it('supports nightly rust release channels', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'nightly' }, { version: 'nightly-2026-06-19' }],
+      });
+      expect(await resolveConstraint({ toolName: 'rust' })).toBe(
+        'nightly-2026-06-19',
+      );
     });
 
     it('throws for unknown tools', async () => {

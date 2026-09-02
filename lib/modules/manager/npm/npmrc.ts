@@ -6,11 +6,7 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-
-export interface NpmrcResult {
-  npmrc: string | undefined;
-  npmrcFileName: string | null;
-}
+import type { NpmrcResult } from './types.ts';
 
 export async function resolveNpmrc(
   packageFile: string,
@@ -30,10 +26,8 @@ export async function resolveNpmrc(
         npmrc = config.npmrc;
       } else {
         npmrc = config.npmrc ?? '';
-        if (npmrc.length) {
-          if (!npmrc.endsWith('\n')) {
-            npmrc += '\n';
-          }
+        if (npmrc.length && !npmrc.endsWith('\n')) {
+          npmrc += '\n';
         }
         if (repoNpmrc?.includes('package-lock')) {
           logger.debug('Stripping package-lock setting from .npmrc');

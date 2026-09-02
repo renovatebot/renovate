@@ -1,4 +1,9 @@
-import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyArray,
+  isNumber,
+  isUndefined,
+} from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import {
@@ -306,7 +311,7 @@ export async function ensurePr(
     const logJSON = upgrade.logJSON;
 
     if (logJSON) {
-      if (typeof logJSON.error === 'undefined') {
+      if (isUndefined(logJSON.error)) {
         if (logJSON.project) {
           upgrade.repoName = logJSON.project.repository;
         }
@@ -485,6 +490,8 @@ export async function ensurePr(
           },
           'PR title changed',
         );
+      } else if (config.autoApprove) {
+        logger.debug({ prTitle }, 'PR approval required');
       } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
@@ -497,11 +504,11 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
         return { type: 'with-pr', pr: existingPr };
-      } else {
-        await platform.updatePr(updatePrConfig);
-        logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
-        setPrCache(branchName, prBodyFingerprint, true);
       }
+      await platform.updatePr(updatePrConfig);
+      logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+      setPrCache(branchName, prBodyFingerprint, true);
+
       return {
         type: 'with-pr',
         pr: {

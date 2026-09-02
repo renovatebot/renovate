@@ -16,6 +16,7 @@ import {
   toolDefinitions,
   toolNames,
 } from '../../lib/util/exec/types.ts';
+import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
@@ -309,6 +310,28 @@ function generateCacheNamespacesList(): string {
   return list;
 }
 
+function generateStatusCheckWhenTable(): string {
+  const option = options.find((o) => o.name === 'statusCheckWhen');
+  const defaults = coerceObject<Record<string, string>>(option?.default);
+
+  const reasoning: Record<string, string> = {
+    artifactError: 'Legacy behavior — only reports artifact failures',
+    configValidation: 'Always reports validation pass/fail',
+    mergeConfidence: 'Always reports confidence level',
+    minimumReleaseAge: 'Always reports stability status',
+  };
+
+  const keys = Object.keys(defaults).sort();
+
+  let table = '\n| Key | Default | Reasoning |\n';
+  table += '| :-- | :-- | :-- |\n';
+  for (const key of keys) {
+    table += `| \`${key}\` | \`${defaults[key]}\` | ${reasoning[key] ?? ''} |\n`;
+  }
+
+  return table;
+}
+
 function generateConfigFileNames(): string {
   // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
   const filenames = getConfigFileNames();
@@ -368,9 +391,12 @@ function generateToolsForInstallTools(): string {
   return output;
 }
 
-export async function generateConfig(dist: string, bot = false): Promise<void> {
+export async function generateConfig(
+  dist: string,
+  globalOnly = false,
+): Promise<void> {
   let configFile = `configuration-options.md`;
-  if (bot) {
+  if (globalOnly) {
     configFile = `self-hosted-configuration.md`;
   }
 
@@ -382,7 +408,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   options
     .filter(
-      (option) => !!option.globalOnly === bot && !managers.has(option.name),
+      (option) =>
+        !!option.globalOnly === globalOnly && !managers.has(option.name),
     )
     .forEach((option) => {
       // TODO: fix types (#22198,#9610)
@@ -441,7 +468,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   let content = configOptionsRaw.join('\n');
 
-  if (bot) {
+  if (globalOnly) {
     content = replaceContent(
       content,
       generateCacheNamespacesList(),
@@ -449,7 +476,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateLockFileTable(),
@@ -457,7 +484,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateConfigFileNames(),
@@ -465,7 +492,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForConstraints(),
@@ -473,7 +500,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateAdditionalConstraints(),
@@ -481,11 +508,19 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForInstallTools(),
       '<!-- installTools-tools-begin -->',
+    );
+  }
+
+  if (!globalOnly) {
+    content = replaceContent(
+      content,
+      generateStatusCheckWhenTable(),
+      '<!-- status-check-when-defaults-begin -->',
     );
   }
 

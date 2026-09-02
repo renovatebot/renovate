@@ -100,6 +100,57 @@ describe('modules/datasource/npm/schema', () => {
     expect(result.time).toEqual({ '1.0.0': '2026-01-23T01:23:37.982Z' });
   });
 
+  it('drops non-string dependencies/devDependencies entries (e.g. old-style nested dependency trees)', () => {
+    const result = CachedPackument.parse({
+      name: 'deep-diff',
+      versions: {
+        '0.1.0': {
+          dependencies: { foo: '^1.0.0', bar: { version: '0.6.4' } },
+          devDependencies: { vows: { version: '0.6.4' } },
+        },
+      },
+    });
+    expect(result.versions).toEqual({
+      '0.1.0': {
+        dependencies: { foo: '^1.0.0' },
+        devDependencies: {},
+      },
+    });
+  });
+
+  it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
+    const result = CachedPackument.parse({
+      homepage: null,
+      versions: { '1.0.0': {} },
+    });
+    expect(result.homepage).toBeUndefined();
+  });
+
+  // https://registry.npmjs.org/jsonfile — homepage: [""]
+  it('drops an invalid package-level `homepage` (e.g. an array)', () => {
+    const result = CachedPackument.parse({
+      homepage: [''],
+      versions: { '1.0.0': {} },
+    });
+    expect(result.homepage).toBeUndefined();
+  });
+
+  // https://registry.npmjs.org/jsonfile — versions 0.0.1 and 1.0.0 have `homepage: [""]`
+  it('drops a non-string `homepage` in a version entry instead of invalidating the whole cached packument', () => {
+    const result = CachedPackument.parse({
+      versions: {
+        '0.0.1': { homepage: [''] },
+        '6.2.1': {
+          homepage: 'https://github.com/jprichardson/node-jsonfile#readme',
+        },
+      },
+    });
+    expect(result.versions?.['0.0.1']?.homepage).toBeUndefined();
+    expect(result.versions?.['6.2.1']?.homepage).toBe(
+      'https://github.com/jprichardson/node-jsonfile#readme',
+    );
+  });
+
   describe('NpmResponseSchema', () => {
     it('parses a full npm registry response and preserves extra version fields', () => {
       const input = {
@@ -157,12 +208,128 @@ describe('modules/datasource/npm/schema', () => {
       };
       const result = NpmResponse.parse(input);
       expect(result.repository).toEqual({
-        url: null,
+        url: undefined,
         directory: 'packages/core',
       });
       expect(result.versions?.['1.0.0']?.repository).toEqual({
-        url: null,
+        url: undefined,
         directory: 'test',
+      });
+    });
+
+    it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: { '1.0.0': {} },
+        homepage: null,
+      };
+      const result = NpmResponse.parse(input);
+      expect(result.homepage).toBeUndefined();
+    });
+
+    // https://registry.npmjs.org/jsonfile — homepage: [""]
+    it('drops an invalid package-level `homepage` (e.g. an array)', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: { '1.0.0': {} },
+        homepage: [''],
+      };
+      const result = NpmResponse.parse(input);
+      expect(result.homepage).toBeUndefined();
+    });
+
+    describe('drops a non-string `homepage` in a version entry instead of invalidating the whole packument', () => {
+      // https://registry.npmjs.org/jsonfile — versions 0.0.1 and 1.0.0 have `homepage: [""]`
+      it('handles `jsonfile`, where affected versions have `homepage: [""]`', () => {
+        const input = {
+          name: 'jsonfile',
+          'dist-tags': { latest: '6.2.1' },
+          homepage: 'https://github.com/jprichardson/node-jsonfile#readme',
+          versions: {
+            '0.0.1': { homepage: [''] },
+            '1.0.0': { homepage: [''] },
+            '6.2.1': {
+              homepage: 'https://github.com/jprichardson/node-jsonfile#readme',
+            },
+          },
+        };
+        const result = NpmResponse.parse(input);
+        expect(result.versions?.['0.0.1']?.homepage).toBeUndefined();
+        expect(result.versions?.['1.0.0']?.homepage).toBeUndefined();
+        expect(result.versions?.['6.2.1']?.homepage).toBe(
+          'https://github.com/jprichardson/node-jsonfile#readme',
+        );
+      });
+
+      // https://registry.npmjs.org/fs-extra — version 0.0.1 has `homepage: ["<url>"]`
+      it('handles `fs-extra`, where affected versions have `homepage: ["<url>"]`', () => {
+        const input = {
+          name: 'fs-extra',
+          'dist-tags': { latest: '11.4.0' },
+          versions: {
+            '0.0.1': {
+              homepage: ['https://github.com/jprichardson/node-fs-extra'],
+            },
+            '11.4.0': {
+              homepage: 'https://github.com/jprichardson/node-fs-extra',
+            },
+          },
+        };
+        const result = NpmResponse.parse(input);
+        expect(result.versions?.['0.0.1']?.homepage).toBeUndefined();
+        expect(result.versions?.['11.4.0']?.homepage).toBe(
+          'https://github.com/jprichardson/node-fs-extra',
+        );
+      });
+    });
+
+    describe('parses a response with an array of objects for the `repository`, and returns the first element', () => {
+      // https://registry.npmjs.org/tmp
+      it('as a package response', () => {
+        const input = {
+          name: 'tmp',
+          versions: {
+            '0.0.4': {
+              repository: [
+                {
+                  url: 'git://github.com/raszi/tmp.git',
+                  type: 'git',
+                },
+              ],
+            },
+          },
+          repository: {
+            url: 'git://github.com/raszi/tmp.git',
+            type: 'git',
+          },
+        };
+        const result = NpmResponse.parse(input);
+        expect(result.repository).toEqual({
+          url: 'git://github.com/raszi/tmp.git',
+        });
+        expect(result.versions?.['0.0.4'].repository).toEqual({
+          url: 'git://github.com/raszi/tmp.git',
+        });
+      });
+
+      // https://registry.npmjs.org/tmp/0.0.4
+      it('as a version response', () => {
+        const input = {
+          name: 'tmp',
+          version: '0.0.4',
+          repository: [
+            {
+              url: 'git://github.com/raszi/tmp.git',
+              type: 'git',
+            },
+          ],
+        };
+        const result = NpmResponse.parse(input);
+        expect(result.repository).toEqual({
+          url: 'git://github.com/raszi/tmp.git',
+        });
       });
     });
   });

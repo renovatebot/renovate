@@ -31,6 +31,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 - Always add unit tests for full code coverage
   - Only use [`v8` comments](https://github.com/AriPerkkio/ast-v8-to-istanbul?tab=readme-ov-file#ignore-hints) for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `v8` comments
+  - Do not add a line count after `next`, for example `next 3`, because V8 does not honor the count and always exempts only the next code block
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
 - Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
@@ -297,11 +298,22 @@ if (end) {
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
   - Use `partial<T>()` from `test/util` if only a partial object is required
+  - Use `fakeSha(seed)` from `test/util` to generate deterministic, valid `LongCommitSha` values in tests
 
 ## Fixtures
 
 Where possible, reduce the test fixture to a size where an inline `codeBlock` is possible to use instead of a separate fixture file.
 Inline `codeBlock`s improve performance plus are more readable.
+
+```ts
+import { codeBlock } from 'common-tags';
+
+const input = codeBlock`
+  line one
+  line two
+`;
+// → 'line one\nline two'
+```
 
 Use the `Fixture` class if loading fixtures from files.
 For example:

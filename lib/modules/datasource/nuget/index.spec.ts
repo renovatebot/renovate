@@ -1,9 +1,11 @@
 import { Readable } from 'node:stream';
-import upath from 'upath';
+import { codeBlock } from 'common-tags';
+import type { DirectoryResult } from 'tmp-promise';
+import tmp from 'tmp-promise';
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { hostRules, logger } from '~test/util.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { id as versioning } from '../../versioning/nuget/index.ts';
@@ -13,7 +15,6 @@ import { NugetDatasource } from './index.ts';
 
 const datasource = NugetDatasource.id;
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/cache/package/index.ts', () => mockDeep());
 
 const packageCache = vi.mocked(_packageCache);
@@ -121,6 +122,7 @@ const configV3Deprecated = {
 describe('modules/datasource/nuget/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
+    vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
   });
 
   describe('parseRegistryUrl', () => {
@@ -154,11 +156,6 @@ describe('modules/datasource/nuget/index', () => {
   });
 
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({});
-    });
-
     it(`can't detect nuget feed version`, async () => {
       const config = {
         datasource,
@@ -350,15 +347,18 @@ describe('modules/datasource/nuget/index', () => {
     });
 
     describe('determine source URL from nupkg', () => {
-      beforeEach(() => {
-        GlobalConfig.set({
-          cacheDir: upath.join('/tmp/cache'),
-        });
-        process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS = 'true';
+      // These tests really download the .nupkg to disk, so give them a
+      // throwaway directory instead of a fixed path under the system tmpdir.
+      let cacheDirResult: DirectoryResult;
+
+      beforeEach(async () => {
+        cacheDirResult = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ cacheDir: cacheDirResult.path });
+        vi.stubEnv('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS', 'true');
       });
 
-      afterEach(() => {
-        delete process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS;
+      afterEach(async () => {
+        await cacheDirResult?.cleanup();
       });
 
       it('can determine source URL from nupkg when PackageBaseAddress is missing', async () => {
@@ -431,6 +431,88 @@ describe('modules/datasource/nuget/index', () => {
           60 * 24 * 7,
         );
         expect(res?.sourceUrl).toBeDefined();
+      });
+
+      it('can determine source URL from nupkg when nuspec endpoint returns 404', async () => {
+        const nugetIndex = codeBlock`
+          {
+            "version": "3.0.0",
+            "resources": [
+              {
+                "@id": "https://some-registry/v3/metadata",
+                "@type": "RegistrationsBaseUrl/3.0.0-beta",
+                "comment": "Get package metadata."
+              },
+              {
+                "@id": "https://some-registry/v3-flatcontainer",
+                "@type": "PackageBaseAddress/3.0.0",
+                "comment": "Base URL of where NuGet packages are stored."
+              }
+            ]
+          }
+        `;
+        const nlogRegistration = codeBlock`
+          {
+            "count": 1,
+            "items": [
+              {
+                "@id": "https://some-registry/v3/metadata/nlog/4.7.3.json",
+                "lower": "4.7.3",
+                "upper": "4.7.3",
+                "count": 1,
+                "items": [
+                  {
+                    "@id": "foo",
+                    "catalogEntry": {
+                      "id": "NLog",
+                      "version": "4.7.3",
+                      "packageContent": "https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        `;
+        httpMock
+          .scope('https://some-registry')
+          .get('/v3/index.json')
+          .twice()
+          .reply(200, nugetIndex)
+          .get('/v3/metadata/nlog/index.json')
+          .reply(200, nlogRegistration)
+          .get('/v3-flatcontainer/nlog/4.7.3/nlog.nuspec')
+          .reply(404)
+          .get('/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg')
+          .reply(200, () => {
+            const readableStream = new Readable();
+            readableStream.push(Fixtures.getBinary('nlog/NLog.4.7.3.nupkg'));
+            readableStream.push(null);
+            return readableStream;
+          });
+        const res = await getPkgReleases({
+          datasource,
+          versioning,
+          packageName: 'NLog',
+          registryUrls: ['https://some-registry/v3/index.json'],
+        });
+
+        expect(logger.logger.debug.mock.calls).toEqual(
+          expect.arrayContaining([
+            [
+              {
+                registryUrl: 'https://some-registry/v3/index.json',
+                pkgName: 'NLog',
+                pkgVersion: '4.7.3',
+              },
+              'package manifest (.nuspec) not found',
+            ],
+            [
+              'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
+            ],
+          ]),
+        );
+        expect(res?.sourceUrl).toBe('https://github.com/NLog/NLog');
       });
 
       it('can handle nupkg without repository metadata', async () => {
@@ -869,16 +951,57 @@ describe('modules/datasource/nuget/index', () => {
         .get(
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
-        .reply(200, pkgListV2Page1of2);
-      httpMock
-        .scope('https://example.org')
-        .get('/')
+        .reply(200, pkgListV2Page1of2)
+        .get('/api/v2/PageTwo')
         .reply(200, pkgListV2Page2of2);
       const res = await getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+    });
+
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    it('does not follow pagination to a different origin (v2)', async () => {
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
+        )
+        .reply(200, Fixtures.get('nunit/v2_paginated_cross_origin.xml'));
+      const res = await getPkgReleases({
+        ...configV2,
+      });
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          feedUrl: 'https://www.nuget.org/api/v2',
+          nextUrl: 'https://attacker.example.com/api/v2/steal',
+        },
+        'Ignoring cross-origin or invalid NuGet feed pagination link',
+      );
+    });
+
+    it('follows cross-origin pagination when the datasource is opted in (v2)', async () => {
+      vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
+        )
+        .reply(200, Fixtures.get('nunit/v2_paginated_cross_origin.xml'));
+      httpMock
+        .scope('https://attacker.example.com')
+        .get('/api/v2/steal')
+        .reply(200, pkgListV2Page2of2);
+      const res = await getPkgReleases({
+        ...configV2,
+      });
+      expect(res?.releases).toEqual([
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+      ]);
+      expect(logger.logger.once.warn).toHaveBeenCalledOnce();
     });
 
     it('should return deprecated', async () => {

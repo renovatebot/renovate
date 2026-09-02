@@ -199,7 +199,7 @@ export class RepologyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -231,13 +231,13 @@ export class RepologyDatasource extends Datasource {
       if (err.message === HOST_DISABLED) {
         logger.trace({ packageName, err }, 'Host disabled');
       } else {
-        logger.warn(
+        logger.once.warn(
           { packageName, err },
           'Repology lookup failed with unexpected error',
         );
       }
 
-      throw new ExternalHostError(err);
+      this.handleGenericErrors(err);
     }
   }
 }

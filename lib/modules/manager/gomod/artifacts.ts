@@ -7,7 +7,6 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
@@ -17,7 +16,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { isValid } from '../../versioning/semver/index.ts';
@@ -28,8 +27,10 @@ import type {
   UpdateArtifactsResult,
 } from '../types.ts';
 import { getExtraDepsNotice } from './artifacts-extra.ts';
+import { getGoModulesInTidyOrder } from './package-tree.ts';
 
 const { major, valid } = semver;
+const gitExec = withGitEnvironment(['go']);
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -65,7 +66,7 @@ function getUpdateImportPathCmds(
 
     .map(
       ({ depName, newMajor }) =>
-        `mod upgrade --mod-name=${depName} -t=${newMajor}`,
+        `mod upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
     );
 
   if (updateImportCommands.length > 0) {
@@ -178,8 +179,9 @@ export async function updateArtifacts({
      * @param match A string representing a golang replace directive block
      * @returns A commented out block with // renovate-replace
      */
-    const blockCommentOut = (match: string): string =>
-      match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    function blockCommentOut(match: string): string {
+      return match.replace(regEx(/(\r?\n)/g), '$1// renovate-replace ');
+    }
 
     // Comment out golang replace directives
     massagedGoMod = massagedGoMod
@@ -212,7 +214,6 @@ export async function updateArtifacts({
         /* v8 ignore next -- TODO: add test */
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
-        ...getGitEnvironmentVariables(['go']),
       },
       docker: {},
       toolConstraints: [
@@ -284,11 +285,15 @@ export async function updateArtifacts({
       tidyOpts += ' -e';
     }
 
+    // dependent modules can only be tidied once the updated module is settled
+    const isGoModTidyAllRequired =
+      config.postUpdateOptions?.includes('gomodTidyAll') === true;
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
+        isGoModTidyAllRequired ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = `mod tidy${modFileFlag}${tidyOpts}`;
@@ -337,6 +342,20 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
+    let dependentModules: string[] = [];
+    if (isGoModTidyAllRequired) {
+      try {
+        dependentModules = await getGoModulesInTidyOrder(goModFileName);
+        for (const dependent of dependentModules) {
+          const dir = upath.relative(goModDir, upath.dirname(dependent));
+          execCommands.push(`${cmd} -C ${quote(dir)} mod tidy${tidyOpts}`);
+        }
+        logger.debug({ dependentModules }, 'go mod tidy commands included');
+      } catch (err) {
+        logger.warn({ err }, 'Failed to find dependent Go modules');
+      }
+    }
+
     if (useGoGenerate) {
       if (goGenerateAllowed) {
         logger.debug('go generate command included');
@@ -348,13 +367,19 @@ export async function updateArtifacts({
       }
     }
 
-    await exec(execCommands, execOptions);
+    await gitExec(execCommands, execOptions);
 
     const status = await getRepoStatus();
+    const dependentFiles = dependentModules.flatMap((f) => [
+      f,
+      f.replace(regEx(/\.mod$/), '.sum'),
+    ]);
+
     if (
       !status.modified.includes(sumFileName) &&
       !status.modified.includes(goModFileName) &&
-      !status.modified.includes(goWorkSumFileName)
+      !status.modified.includes(goWorkSumFileName) &&
+      !dependentFiles.some((f) => status.modified.includes(f))
     ) {
       return null;
     }
@@ -380,6 +405,19 @@ export async function updateArtifacts({
           contents: await readLocalFile(goWorkSumFileName),
         },
       });
+    }
+
+    for (const f of dependentFiles) {
+      if (status.modified.includes(f)) {
+        logger.trace(`Returning updated ${f}`);
+        res.push({
+          file: {
+            type: 'addition',
+            path: f,
+            contents: await readLocalFile(f),
+          },
+        });
+      }
     }
 
     // Include all the .go file import changes
@@ -444,6 +482,7 @@ export async function updateArtifacts({
         newGoModContent,
         finalGoModContent,
         updatedDepNames,
+        config,
       );
 
       if (extraDepsNotice) {

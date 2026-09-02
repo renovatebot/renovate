@@ -9,7 +9,7 @@ Only use these configuration options when you _self-host_ Renovate.
 
 Do _not_ put the self-hosted config options listed on this page in your "repository config" file (`renovate.json` for example), because Renovate will ignore those config options, and may also create a config error issue.
 
-The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
+The config options below _must_ be configured in the admin config, so in either an environment variable, CLI option, or a special file like `config.js`.
 
 !!! note
   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
@@ -82,7 +82,7 @@ This configuration option was formerly known as `allowedPostUpgradeCommands`.
 
 ## `allowedEnv`
 
-Bot administrators can allow users to configure custom environment variables within repo config.
+Administrators can allow users to configure custom environment variables within repo config.
 Only environment variables matching the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
 
 Examples:
@@ -163,15 +163,16 @@ Allowed options:
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
 | `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
+| `pixi`          | Allows running `pixi lock` when updating `pixi.lock` files (`pixi` and `pep621` managers).    |
 
 ## `autodiscover`
 
-When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
+When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the Renovate account can access.
 You can limit which repositories Renovate can access by using the `autodiscoverFilter` config option.
 
 ## `autodiscoverFilter`
 
-You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+You can use this option to filter the list of repositories that the Renovate account can access through `autodiscover`.
 The pattern matches against the organization/repo path.
 
 This option supports an array of minimatch-compatible globs or RE2-compatible regex strings.
@@ -430,7 +431,7 @@ This array will allow you to set the names of the branches you want to rebase/cr
 It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
-Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.
 
 ## `configFileNames`
 
@@ -507,7 +508,7 @@ The process that runs Renovate must have the correct permissions to delete the c
 
 ## `detectGlobalManagerConfig`
 
-The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
+The purpose of this config option is to allow you (as an administrator) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
 
 This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
 
@@ -700,7 +701,7 @@ If you must expose all environment variables to package managers, you can set th
   Always consider the security implications of using `exposeAllEnv`!
   Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
-Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
+Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate runs against.
 Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
@@ -760,7 +761,7 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 This is a private PGP or SSH key for signing Git commits.
 
 For PGP, it should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
-Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
+Replace the newlines with `\n` before adding the resulting single-line value to your self-hosted config.
 
 !!! note
   The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
@@ -801,6 +802,11 @@ Possible values:
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
 
+!!! note
+  On GitHub, `default` and `endpoint` are equivalent: both build the HTTPS URL from the configured endpoint with credentials embedded.
+  `ssh` uses the repository's `sshUrl` and authenticates via SSH key.
+  In fork mode (`forkToken` set with `forkCreation`), `ssh` applies to both the fork's working URL and the upstream URL.
+
 ## `githubTokenWarn`
 
 By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
@@ -830,13 +836,13 @@ Value of `0` means no caching.
 
 ## `ignorePrAuthor`
 
-This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+This is usually needed if someone needs to migrate the account Renovate runs as, including from the Mend Renovate App to self-hosted.
 An additional use case is for GitLab users of project or group access tokens who need to rotate them.
 
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
-You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
+You should only want to enable this if you are changing the account Renovate runs as (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
 
-Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
+Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by Renovate itself.
 
 ## `includeMirrors`
 
@@ -909,7 +915,7 @@ Otherwise, it queries all the supported datasources (check default value).
 Example:
 
 ```js
-modules.exports = {
+module.exports = {
   mergeConfidenceDatasources: ['npm'],
 };
 ```
@@ -941,7 +947,7 @@ Use an empty string to indicate that the preset should be ignored rather than re
 Example:
 
 ```js
-modules.exports = {
+module.exports = {
   migratePresets: {
     '@company': 'local>org/renovate-config',
   },
@@ -957,8 +963,8 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 Only set this to `false` if all three statements are true:
 
-- You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
-- You want to run Renovate on every repository the bot has access to
+- You've configured Renovate entirely on the admin side (e.g. empty `renovate.json` in repositories)
+- You want to run Renovate on every repository Renovate has access to
 - You want to skip all onboarding PRs
 
 ## `onboardingAutoCloseAge`
@@ -1020,7 +1026,7 @@ Otherwise, it will continue as normal.
 
 `optimizeForDisabled` can make initialization quicker in cases where most repositories are disabled, but it uses an extra API call for enabled repositories.
 
-A second, advanced, use also exists when the bot global config has `extends: [":disableRenovate"]`.
+A second, advanced, use also exists when the global config has `extends: [":disableRenovate"]`.
 In that case, Renovate searches the repository config file for any of these configurations:
 
 - `extends: [":enableRenovate"]`
@@ -1102,11 +1108,11 @@ Is this correct? (y/N) y
 
 GnuPG needs to construct a user ID to identify your key.
 
-Real name: Renovate Bot
+Real name: Renovate
 Email address: renovate@whitesourcesoftware.com
 Comment:
 You selected this USER-ID:
-    "Renovate Bot <renovate@whitesourcesoftware.com>"
+    "Renovate <renovate@whitesourcesoftware.com>"
 
 Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
 
@@ -1116,7 +1122,7 @@ public and secret key created and signed.
 
 pub   rsa4096 2021-09-10 [SC]
       794B820F34B34A8DF32AADB20649CEXAMPLEONLY
-uid                      Renovate Bot <renovate@whitesourcesoftware.com>
+uid                      Renovate <renovate@whitesourcesoftware.com>
 sub   rsa4096 2021-09-10 [E]
 ```
 
@@ -1131,7 +1137,7 @@ sub   rsa4096 2021-09-10 [E]
 ```bash
 ❯ gpg --edit-key renovate@whitesourcesoftware.com
 gpg> showpref
-[ultimate] (1). Renovate Bot <renovate@whitesourcesoftware.com>
+[ultimate] (1). Renovate <renovate@whitesourcesoftware.com>
      Cipher: AES256, AES192, AES, 3DES
      AEAD: OCB, EAX
      Digest: SHA512, SHA384, SHA256, SHA224, SHA1
@@ -1155,7 +1161,7 @@ gpg> save
 - Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
 - Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
 
-The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
+The private key should then be added to your Renovate global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
 
 !!! note "Base64 Encoding Support"
@@ -1218,6 +1224,13 @@ Example:
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## `rebaseAllOpenBranches`
+
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of all open PRs.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
+Example: `renovate --rebase-all-open-branches=true renovate-reproductions/checked` will rebase all open PRs in the `renovate-reproductions/checked` repository.
+
 ## `redisPrefix`
 
 If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
@@ -1265,13 +1278,22 @@ Defines how the report is exposed:
 
 ## `repositories`
 
-Elements in the `repositories` array can be an object if you wish to define more settings.
-Example:
+The `repositories` array can contain a mix of repository names, and objects which can override Global and Repo configuration for a specified repository.
+
+For instance:
 
 ```js
-{
-  repositories: [{ repository: 'g/r1', bumpVersion: 'patch' }, 'g/r2'];
-}
+module.exports = {
+  repositories: [
+    // we trust this repository's authors to run `make generate` in some cases
+    {
+      repository: 'g/r1',
+      allowedCommands: ['^make generate$'],
+    },
+    // this repository doesn't get any specific configuration
+    'g/r2',
+  ],
+};
 ```
 
 ## `repositoryCache`
@@ -1343,7 +1365,7 @@ Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.ama
 
 ## `secrets`
 
-Secrets may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+Secrets may be configured by an administrator in `config.js`, which will then make them available for templating within repository configs.
 For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
 
 ```js
@@ -1412,7 +1434,7 @@ Renovate will use the token to discover its username on the platform, including 
 
 ## `variables`
 
-Variables may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+Variables may be configured by an administrator in `config.js`, which will then make them available for templating within repository configs.
 This config option behaves exactly like [secrets](#secrets), except that it won't be masked in the logs.
 For example, to configure a `SOME_VARIABLE` to be accessible by all repositories:
 
@@ -1458,7 +1480,7 @@ By default, Renovate processes each repository that it finds.
 You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
 
 Known use cases consist, among other things, of horizontal scaling setups.
-See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
+See [Scaling Renovate on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

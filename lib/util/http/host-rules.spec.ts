@@ -15,7 +15,7 @@ describe('util/http/host-rules', () => {
   };
 
   beforeEach(() => {
-    delete process.env.HTTP_PROXY;
+    vi.stubEnv('HTTP_PROXY', undefined);
 
     // clean up hostRules
     hostRules.clear();
@@ -54,10 +54,6 @@ describe('util/http/host-rules', () => {
       hostType: 'bitbucket-server',
       token: 'cdef',
     });
-  });
-
-  afterEach(() => {
-    delete process.env.HTTP_PROXY;
   });
 
   it('adds token', () => {
@@ -164,7 +160,7 @@ describe('util/http/host-rules', () => {
   });
 
   it('disables http2', () => {
-    process.env.HTTP_PROXY = 'http://proxy';
+    vi.stubEnv('HTTP_PROXY', 'http://proxy');
     bootstrap();
     hostRules.add({ enableHttp2: true });
 

@@ -44,13 +44,13 @@ metadata:
 spec:
   syncMode: Continuous
   helmCharts:
-  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts
     repositoryName:   oci-vault
-    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartName:        vault
     chartVersion:     0.7.2
-  - repositoryURL:    oci://custom-registry:443/charts/vault-sidecar
+  - repositoryURL:    oci://custom-registry:443/charts
     repositoryName:   oci-custom-vault
-    chartName:        oci://custom-registry:443/charts/vault-sidecar
+    chartName:        vault-sidecar
     chartVersion:     0.5.0
 `;
 const validClusterProfile = codeBlock`
@@ -94,13 +94,13 @@ metadata:
 spec:
   syncMode: Continuous
   helmCharts:
-  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts
     repositoryName:   oci-vault
-    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartName:        vault
     chartVersion:     0.7.2
-  - repositoryURL:    oci://custom-registry:443/charts/vault-sidecar
+  - repositoryURL:    oci://custom-registry:443/charts
     repositoryName:   oci-custom-vault
-    chartName:        oci://custom-registry:443/charts/vault-sidecar
+    chartName:        vault-sidecar
     chartVersion:     0.5.0
 `;
 const validClusterProfileOCI = codeBlock`
@@ -112,9 +112,9 @@ metadata:
 spec:
   syncMode: Continuous
   helmCharts:
-  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts
     repositoryName:   oci-vault
-    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartName:        vault
     chartVersion:     0.7.2
 `;
 const validEventTrigger = codeBlock`
@@ -158,13 +158,13 @@ metadata:
 spec:
   syncMode: Continuous
   helmCharts:
-  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+  - repositoryURL:    oci://registry-1.docker.io/bitnamicharts
     repositoryName:   oci-vault
-    chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+    chartName:        vault
     chartVersion:     0.7.2
-  - repositoryURL:    oci://custom-registry:443/charts/vault-sidecar
+  - repositoryURL:    oci://custom-registry:443/charts
     repositoryName:   oci-custom-vault
-    chartName:        oci://custom-registry:443/charts/vault-sidecar
+    chartName:        vault-sidecar
     chartVersion:     0.5.0
 `;
 const validClusterPromotion = codeBlock`
@@ -192,9 +192,9 @@ metadata:
 spec:
   profileSpec:
     helmCharts:
-    - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+    - repositoryURL:    oci://registry-1.docker.io/bitnamicharts
       repositoryName:   oci-vault
-      chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+      chartName:        vault
       chartVersion:     0.7.2
 `;
 const malformedProfiles = codeBlock`
@@ -427,14 +427,14 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '0.7.2',
             datasource: 'docker',
             depType: 'Profile',
-            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
             depType: 'Profile',
-            depName: 'oci://custom-registry:443/charts/vault-sidecar',
+            depName: 'vault-sidecar',
             packageName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],
@@ -478,14 +478,14 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '0.7.2',
             datasource: 'docker',
             depType: 'ClusterProfile',
-            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
             depType: 'ClusterProfile',
-            depName: 'oci://custom-registry:443/charts/vault-sidecar',
+            depName: 'vault-sidecar',
             packageName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],
@@ -506,7 +506,7 @@ describe('modules/manager/sveltos/extract', () => {
         deps: [
           {
             currentValue: '0.7.2',
-            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            depName: 'vault',
             packageName: 'docker.proxy.test/some/path/bitnamicharts/vault',
             datasource: 'docker',
             depType: 'ClusterProfile',
@@ -544,7 +544,7 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '0.7.2',
             datasource: 'docker',
             depType: 'ClusterPromotion',
-            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
         ],
@@ -585,14 +585,14 @@ describe('modules/manager/sveltos/extract', () => {
             currentValue: '0.7.2',
             datasource: 'docker',
             depType: 'EventTrigger',
-            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
           {
             currentValue: '0.5.0',
             datasource: 'docker',
             depType: 'EventTrigger',
-            depName: 'oci://custom-registry:443/charts/vault-sidecar',
+            depName: 'vault-sidecar',
             packageName: 'custom-registry:443/charts/vault-sidecar',
           },
         ],

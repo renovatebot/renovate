@@ -129,8 +129,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(res.lockFile).toMatchSnapshot('lockFile');
+    expect(execSnapshots).toMatchSnapshot('execSnapshots');
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -425,16 +425,17 @@ describe('modules/manager/npm/post-update/npm', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
           'npm install --package-lock-only --no-audit' +
-          '"',
+          "'",
       },
     ]);
   });

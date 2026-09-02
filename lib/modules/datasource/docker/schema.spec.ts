@@ -6,6 +6,9 @@ import {
   OciHelmConfig,
   OciImageIndexManifest,
   OciImageManifest,
+  QuayTagsResponse,
+  RegistryAuthToken,
+  RegistryTagsList,
 } from './schema.ts';
 
 describe('modules/datasource/docker/schema', () => {
@@ -431,5 +434,49 @@ describe('modules/datasource/docker/schema', () => {
 
   it('throws for invalid manifest', () => {
     expect(() => Manifest.parse({ schemaVersion: 2 })).toThrow(ZodError);
+  });
+
+  it('parses RegistryAuthToken with token field', () => {
+    expect(RegistryAuthToken.parse({ token: 'abc123' })).toEqual({
+      token: 'abc123',
+    });
+  });
+
+  it('parses RegistryAuthToken with access_token field', () => {
+    expect(RegistryAuthToken.parse({ access_token: 'abc123' })).toEqual({
+      access_token: 'abc123',
+    });
+  });
+
+  it('parses RegistryAuthToken with extra fields (lenient)', () => {
+    expect(
+      RegistryAuthToken.parse({ token: 'abc', issued_at: '2024-01-01' }),
+    ).toMatchObject({ token: 'abc' });
+  });
+
+  it('parses RegistryTagsList', () => {
+    expect(RegistryTagsList.parse({ tags: ['1.0', '2.0', 'latest'] })).toEqual({
+      tags: ['1.0', '2.0', 'latest'],
+    });
+  });
+
+  it('parses QuayTagsResponse', () => {
+    expect(
+      QuayTagsResponse.parse({
+        tags: [{ name: '1.0' }, { name: '2.0' }],
+        has_additional: true,
+      }),
+    ).toEqual({
+      tags: [{ name: '1.0' }, { name: '2.0' }],
+      has_additional: true,
+    });
+  });
+
+  it('parses QuayTagsResponse and drops invalid tag entries (LooseArray)', () => {
+    const result = QuayTagsResponse.parse({
+      tags: [{ name: '1.0' }, { invalid: true }, { name: '2.0' }],
+      has_additional: false,
+    });
+    expect(result.tags).toEqual([{ name: '1.0' }, { name: '2.0' }]);
   });
 });

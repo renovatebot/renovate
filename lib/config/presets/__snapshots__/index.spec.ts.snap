@@ -13,6 +13,7 @@ exports[`config/presets/index > getPreset > gets linters 1`] = `
     "packages:tslint",
   ],
   "matchPackageNames": [
+    "@oxlint/**",
     "oxlint",
     "prettier",
     "remark-lint",
@@ -21,11 +22,11 @@ exports[`config/presets/index > getPreset > gets linters 1`] = `
 }
 `;
 
-exports[`config/presets/index > getPreset > handles 404 packages 1`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages > validationError 1`] = `undefined`;
 
-exports[`config/presets/index > getPreset > handles 404 packages 2`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages > validationMessage 1`] = `undefined`;
 
-exports[`config/presets/index > getPreset > handles 404 packages 3`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages > validationSource 1`] = `undefined`;
 
 exports[`config/presets/index > resolveConfigPresets > migrates automerge in presets 1`] = `
 {
@@ -186,6 +187,7 @@ exports[`config/presets/index > resolveConfigPresets > resolves linters 1`] = `
     "stylelint**",
     "codelyzer",
     "/\\btslint\\b/",
+    "@oxlint/**",
     "oxlint",
     "prettier",
     "remark-lint",
@@ -224,6 +226,7 @@ exports[`config/presets/index > resolveConfigPresets > resolves nested groups 1`
         "stylelint**",
         "codelyzer",
         "/\\btslint\\b/",
+        "@oxlint/**",
         "oxlint",
         "prettier",
         "remark-lint",

@@ -3,7 +3,10 @@ import upath from 'upath';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
@@ -13,7 +16,7 @@ import * as rules from './post-update/rules.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
@@ -128,6 +131,30 @@ describe('modules/manager/npm/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
+  it('quotes the corepack package spec', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
+      .mockResolvedValueOnce('{}') // for node constraints
+      .mockResolvedValue('some new content'); // for updated package.json
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [
+        {
+          ...validDepUpdate,
+          depName: 'pnpm; echo hello',
+        },
+      ],
+      newPackageFileContent: 'some content',
+      config: { ...config },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: `corepack use 'pnpm; echo hello@8.15.6'` },
+    ]);
+  });
+
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
@@ -163,16 +190,17 @@ describe('modules/manager/npm/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 20.1.0 ' +
           '&& ' +
           'install-tool corepack 0.29.3 ' +
           '&& ' +
           'corepack use pnpm@8.15.6' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -260,7 +288,7 @@ describe('modules/manager/npm/artifacts', () => {
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -271,7 +299,7 @@ describe('modules/manager/npm/artifacts', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null if the pnpmShrinkwrap file is not found', async () => {
+    it('returns null if the pnpmLockFile file is not found', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.readLocalFile.mockResolvedValueOnce(
@@ -285,7 +313,7 @@ describe('modules/manager/npm/artifacts', () => {
             currentValue: '8.15.5',
             managerData: {
               // to be super explicit it's not set
-              pnpmShrinkwrap: undefined,
+              pnpmLockFile: undefined,
 
               // data from testing in https://github.com/JamieTanna-Mend-testing/pnpm-test-mra-no-workspace/pull/3
               hasPackageManager: false,
@@ -312,7 +340,7 @@ describe('modules/manager/npm/artifacts', () => {
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -338,14 +366,14 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
           {
             ...validDepUpdate,
             depName: '@myorg/fs-alternative',
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -368,7 +396,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -401,7 +429,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -435,7 +463,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
           {
@@ -444,7 +472,7 @@ minimumReleaseAgeExclude:
             depType: 'dependency',
             currentValue: '16.0.9',
             newVersion: '16.0.10',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -483,7 +511,7 @@ minimumReleaseAgeExclude:
             currentValue: '^4.17.15',
             currentVersion: '4.17.21',
             newVersion: '4.17.23',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -514,7 +542,7 @@ minimumReleaseAgeExclude:
             currentValue: '^4.17.15',
             currentVersion: '4.17.21',
             newVersion: '4.17.23',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -551,7 +579,7 @@ minimumReleaseAgeExclude:
             currentVersion: '4.17.21',
             newVersion: '4.17.23',
             newValue: '^4.17.15',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -587,7 +615,7 @@ minimumReleaseAgeExclude:
             depType: 'dependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -622,7 +650,7 @@ minimumReleaseAgeExclude:
             depType: 'devDependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.23',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -658,7 +686,7 @@ minimumReleaseAgeExclude:
             depType: 'dependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -693,7 +721,7 @@ minimumReleaseAgeExclude:
             depType: 'devDependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -702,6 +730,128 @@ minimumReleaseAgeExclude:
       });
       // no updates are needed, as they're at the same version
       expect(res).toBeNull();
+    });
+
+    it('replaces malformed minimumReleaseAgeExclude entries from prior Renovate bug', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - fast-xml-parser@<=5.3.5@5.5.7`,
+      );
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'fast-xml-parser@<=5.3.5',
+            packageName: 'fast-xml-parser',
+            depType: 'pnpm.overrides',
+            currentValue: '5.3.5',
+            newVersion: '5.5.7',
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: `${codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.7
+            `}\n`,
+          },
+        },
+      ]);
+    });
+
+    it('appends to valid minimumReleaseAgeExclude when malformed entry also exists', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - fast-xml-parser@5.5.6
+  - fast-xml-parser@<=5.3.5@5.5.7`,
+      );
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'fast-xml-parser@<=5.3.5',
+            packageName: 'fast-xml-parser',
+            depType: 'pnpm.overrides',
+            currentValue: '5.5.6',
+            newVersion: '5.5.7',
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: `${codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.6 || 5.5.7
+            `}\n`,
+          },
+        },
+      ]);
+    });
+
+    it('uses packageName (bare package name) for pnpm overrides with range selectors', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 4320`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'fast-xml-parser@<=5.3.5',
+            packageName: 'fast-xml-parser',
+            depType: 'pnpm.overrides',
+            currentValue: '5.3.5',
+            newVersion: '5.5.7',
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: `${codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.7
+            `}\n`,
+          },
+        },
+      ]);
     });
 
     it('preserves catalog changes in pnpm-workspace.yaml when adding minimumReleaseAgeExclude', async () => {
@@ -725,7 +875,7 @@ minimumReleaseAgeExclude:
             depType: 'pnpm.catalog.default',
             currentValue: '^3.19.0',
             newVersion: '3.20.0',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -758,7 +908,7 @@ minimumReleaseAgeExclude:
             depName: 'lodash',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
           {
@@ -766,7 +916,7 @@ minimumReleaseAgeExclude:
             depName: 'axios',
             currentValue: '0.21.0',
             newVersion: '0.21.1',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],

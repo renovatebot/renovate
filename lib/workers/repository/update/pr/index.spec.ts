@@ -1308,6 +1308,11 @@ describe('workers/repository/update/pr/index', () => {
         });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { prTitle },
+          'PR approval required',
+        );
       });
     });
   });

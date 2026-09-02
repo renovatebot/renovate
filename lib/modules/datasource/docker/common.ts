@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -19,6 +19,7 @@ import type {
 } from '../../../util/http/types.ts';
 import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
 import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import {
@@ -28,9 +29,10 @@ import {
 } from '../../../util/url.ts';
 import { api as dockerVersioning } from '../../versioning/docker/index.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { ecrRegex, getECRAuthToken } from './ecr.ts';
+import { ecrRegex, getECRAuthToken, isECRMaxResultsResponse } from './ecr.ts';
 import { googleRegex } from './google.ts';
 import type { OciHelmConfig } from './schema.ts';
+import { RegistryAuthToken } from './schema.ts';
 import type { RegistryRepository } from './types.ts';
 
 export const dockerDatasourceId = 'docker';
@@ -76,6 +78,17 @@ export async function getAuthHeaders(
       // throw error up to be caught and potentially retried with library/ prefix
       throw new Error(PAGE_NOT_FOUND_ERROR);
     }
+    // Some ECR-compatible private registries (e.g. corporate Docker proxies) reject
+    // n>1000 with 405 even on the auth-probe request.  Fall back to probing the base
+    // /v2/ endpoint so getAuthHeaders can still obtain a valid token; the main fetch
+    // loop already retries with n=1000 when it encounters this same error.
+    if (isECRMaxResultsResponse(apiCheckResponse)) {
+      logger.debug(
+        { apiCheckUrl },
+        'Registry rejected n>1000 on auth probe; retrying auth check via base /v2/ endpoint',
+      );
+      return getAuthHeaders(http, registryHost, dockerRepository);
+    }
     if (
       apiCheckResponse.statusCode !== 401 ||
       !isNonEmptyString(apiCheckResponse.headers['www-authenticate'])
@@ -106,9 +119,9 @@ export async function getAuthHeaders(
       }
     } else if (
       googleRegex.test(registryHost) &&
-      typeof rule.username === 'undefined' &&
-      typeof rule.password === 'undefined' &&
-      typeof rule.token === 'undefined'
+      isUndefined(rule.username) &&
+      isUndefined(rule.password) &&
+      isUndefined(rule.token)
     ) {
       logger.once.debug(`hostRules: google auth for ${registryHost}`);
       logger.trace(
@@ -198,14 +211,11 @@ export async function getAuthHeaders(
     opts.noAuth = true;
     opts.cacheProvider = memCacheProvider;
     const authResponse = (
-      await http.getJsonUnchecked<{ token?: string; access_token?: string }>(
-        authUrl.href,
-        opts,
-      )
+      await http.getJson(authUrl.href, opts, RegistryAuthToken)
     ).body;
 
     const token = authResponse.token ?? authResponse.access_token;
-    /* v8 ignore next 4 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
       return null;
@@ -216,12 +226,12 @@ export async function getAuthHeaders(
       authorization: `Bearer ${token}`,
     };
   } catch (err) /* istanbul ignore next */ {
-    /* v8 ignore if */
+    /* v8 ignore if -- quay.io errors are swallowed pending #9604, not reproduced in specs */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
       return null;
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- registry auth rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 401) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -230,7 +240,7 @@ export async function getAuthHeaders(
       logger.debug({ err });
       return null;
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- registry permission rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 403) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -242,18 +252,18 @@ export async function getAuthHeaders(
     if (err.name === 'RequestError' && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- Docker Hub rate limiting maps to ExternalHostError, not mocked in specs */
     if (err.statusCode === 429 && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- registry server errors map to ExternalHostError, not mocked in specs */
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
     }
     if (err.message === PAGE_NOT_FOUND_ERROR) {
       throw err;
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- hostRules-disabled host is swallowed silently, not mocked in specs */
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
       return null;
@@ -305,9 +315,9 @@ export function getRegistryRepository(
     registryHost = `https://${registryHost}`;
   }
 
-  const { path, base } =
-    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)
-      ?.groups ?? {};
+  const { path, base } = coerceObject(
+    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)?.groups,
+  );
   if (base && path) {
     registryHost = base;
     dockerRepository = `${trimTrailingSlash(path)}/${dockerRepository}`;

@@ -1,9 +1,13 @@
+import type { Stats } from 'node:fs';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
@@ -29,7 +33,7 @@ const upgrades: Upgrade[] = [
   },
 ];
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
@@ -52,11 +56,6 @@ describe('modules/manager/copier/artifacts', () => {
         renamed: [],
       }),
     );
-  });
-
-  afterEach(() => {
-    fs.readLocalFile.mockClear();
-    git.getRepoStatus.mockClear();
   });
 
   describe('updateArtifacts()', () => {
@@ -441,7 +440,153 @@ describe('modules/manager/copier/artifacts', () => {
       ]);
     });
 
-    it('warns about, but adds conflicts', async () => {
+    it('marks files executable when the owner execute bit is set', async () => {
+      mockExecAll();
+
+      git.isFileModeEnabled.mockResolvedValue(true);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          conflicted: [],
+          modified: ['.copier-answers.yml'],
+          not_added: ['bin/deploy.sh'],
+          deleted: [],
+          renamed: [{ from: 'renamed_old.sh', to: 'renamed_new.sh' }],
+        }),
+      );
+
+      fs.readLocalFile.mockResolvedValueOnce(
+        '_src: https://github.com/foo/bar\n_commit: 1.1.0',
+      );
+      fs.readLocalFile.mockResolvedValueOnce('new script contents');
+      fs.readLocalFile.mockResolvedValueOnce('renamed script contents');
+      fs.statLocalFile.mockImplementation((path) =>
+        Promise.resolve(
+          partial<Stats>({
+            isFile: () => true,
+            mode: path === '.copier-answers.yml' ? 0o644 : 0o744,
+          }),
+        ),
+      );
+
+      const result = await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgrades,
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: '.copier-answers.yml',
+            contents: '_src: https://github.com/foo/bar\n_commit: 1.1.0',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'bin/deploy.sh',
+            contents: 'new script contents',
+            isExecutable: true,
+          },
+        },
+        {
+          file: {
+            type: 'deletion',
+            path: 'renamed_old.sh',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'renamed_new.sh',
+            contents: 'renamed script contents',
+            isExecutable: true,
+          },
+        },
+      ]);
+    });
+
+    it('does not mark files executable if they cannot be inspected', async () => {
+      mockExecAll();
+
+      git.isFileModeEnabled.mockResolvedValue(true);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          conflicted: [],
+          modified: ['.copier-answers.yml'],
+          not_added: ['submodule'],
+          deleted: [],
+          renamed: [],
+        }),
+      );
+
+      fs.readLocalFile.mockResolvedValueOnce(
+        '_src: https://github.com/foo/bar\n_commit: 1.1.0',
+      );
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.statLocalFile.mockImplementation((path) =>
+        Promise.resolve(
+          path === 'submodule'
+            ? partial<Stats>({ isFile: () => false, mode: 0o744 })
+            : null,
+        ),
+      );
+
+      const result = await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgrades,
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: '.copier-answers.yml',
+            contents: '_src: https://github.com/foo/bar\n_commit: 1.1.0',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'submodule',
+            contents: null,
+          },
+        },
+      ]);
+    });
+
+    it('does not inspect file modes when file mode tracking is disabled', async () => {
+      mockExecAll();
+
+      git.isFileModeEnabled.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValueOnce(
+        '_src: https://github.com/foo/bar\n_commit: 1.1.0',
+      );
+
+      const result = await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgrades,
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: '.copier-answers.yml',
+            contents: '_src: https://github.com/foo/bar\n_commit: 1.1.0',
+          },
+        },
+      ]);
+      expect(fs.statLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('reports an error, but adds conflicts', async () => {
       mockExecAll();
 
       git.getRepoStatus.mockResolvedValueOnce(
@@ -475,6 +620,13 @@ describe('modules/manager/copier/artifacts', () => {
         'Updating the Copier template yielded 1 merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * conflict_file.py',
       );
       expect(result).toEqual([
+        {
+          artifactError: {
+            fileName: '.copier-answers.yml',
+            stderr:
+              'Updating the Copier template yielded 1 merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * conflict_file.py',
+          },
+        },
         {
           file: {
             type: 'addition',
