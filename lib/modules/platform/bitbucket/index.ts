@@ -255,9 +255,9 @@ export async function initRepo({
       // Fetch Bitbucket development branch
       const developmentBranch = (
         await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
-          `/2.0/repositories/${repository}/branching-model`,
+          `/2.0/repositories/${repository}/effective-branching-model`,
         )
-      ).body.development?.branch?.name;
+      ).body.development?.name;
 
       if (developmentBranch) {
         mainBranch = developmentBranch;
