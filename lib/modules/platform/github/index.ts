@@ -686,7 +686,7 @@ export async function initRepo({
   config.prList = null;
 
   if (forkToken) {
-    logger.debug('Bot is in fork mode');
+    logger.debug('Renovate is in fork mode');
     if (repo.isFork) {
       logger.debug(
         `Forked repos cannot be processed when running with a forkToken, so this repo will be skipped`,

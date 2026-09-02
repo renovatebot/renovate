@@ -51,7 +51,7 @@ describe('modules/manager/npm/post-update/index', () => {
       {
         packageFile: 'packages/pnpm/package.json',
         managerData: {
-          pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
+          pnpmLockFile: 'packages/pnpm/pnpm-lock.yaml',
         },
       },
     ],
@@ -160,7 +160,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         npmLockDirs: ['package-lock.json', 'randomFolder/package-lock.json'],
-        pnpmShrinkwrapDirs: ['packages/pnpm/pnpm-lock.yaml'],
+        pnpmLockFileDirs: ['packages/pnpm/pnpm-lock.yaml'],
         yarnLockDirs: ['yarn.lock'],
       });
     });
@@ -183,7 +183,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         npmLockDirs: [],
-        pnpmShrinkwrapDirs: [],
+        pnpmLockFileDirs: [],
         yarnLockDirs: ['yarn.lock'],
       });
     });

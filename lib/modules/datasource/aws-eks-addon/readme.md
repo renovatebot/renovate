@@ -4,7 +4,8 @@ This `datasource` returns the addon versions available for use on [AWS EKS](http
 
 - [Amazon EKS add-ons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html)
 - [Available Amazon EKS add-ons from AWS](https://docs.aws.amazon.com/eks/latest/userguide/workloads-add-ons-available-eks.html)
-  See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
+
+See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
 You can also specify different `region` and `profile` for each addon.
 

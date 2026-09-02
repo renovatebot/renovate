@@ -767,6 +767,7 @@
     "trpc": "https://github.com/trpc/trpc",
     "trust-dns": "https://github.com/bluejekyll/trust-dns",
     "tsoa": "https://github.com/lukeautry/tsoa",
+    "tunit": "https://github.com/thomhurst/TUnit",
     "turbo": [
       "https://github.com/vercel/turbo",
       "https://github.com/vercel/turborepo"

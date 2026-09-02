@@ -11,7 +11,7 @@ import type { lazyLoadPackageJson } from './utils.ts';
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
   npmLockDirs: string[];
-  pnpmShrinkwrapDirs: string[];
+  pnpmLockFileDirs: string[];
 }
 
 export interface AdditionalPackageFiles {
