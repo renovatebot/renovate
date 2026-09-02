@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { LooseArray, Nullish } from '../../../util/schema-utils/index.ts';
+import { DeepNullish, LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release } from '../types.ts';
 
@@ -19,10 +19,12 @@ const OrbVersion = z
 
 const OrbPackage = z
   .object({
-    attributes: z.object({
-      is_private: Nullish(z.boolean()),
-      home_url: Nullish(z.string()),
-    }),
+    attributes: DeepNullish(
+      z.object({
+        is_private: z.boolean().optional(),
+        home_url: z.string().optional(),
+      }),
+    ),
     references: z
       .object({
         orb_versions: LooseArray(OrbVersion).catch([]),

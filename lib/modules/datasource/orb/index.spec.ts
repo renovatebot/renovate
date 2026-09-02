@@ -175,8 +175,14 @@ describe('modules/datasource/orb/index', () => {
     });
 
     it('processes home_url', async () => {
-      const data = structuredClone(orbData);
-      data.data[0].attributes.home_url = 'https://google.com';
+      const data: z.input<typeof OrbPackagesResponse> = {
+        data: [
+          {
+            ...orbData.data[0],
+            attributes: { home_url: 'https://google.com' },
+          },
+        ],
+      };
       httpMock
         .scope(baseUrl)
         .get(packagesPath)
