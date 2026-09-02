@@ -683,6 +683,30 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Explicit input',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          input: '{"request":true}',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            input: '{"request":true}',
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
       'Custom environment variables for child',
       {
         processEnv: envMock.basic,
@@ -1197,6 +1221,30 @@ describe('util/exec/index', () => {
     process.env.CONTAINERBASE = 'true';
     await exec('foobar', { preCommands: ['install-pip foobar'] });
     expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
+  });
+
+  it('passes input only to the final command', async () => {
+    process.env = processEnv;
+    const calls: { command: string; input: unknown }[] = [];
+    cpExec.mockImplementation((execCmd, options) => {
+      calls.push({
+        command: asRawCommand(execCmd),
+        input: options.input,
+      });
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    await exec('foobar', {
+      input: 'private manifest',
+      preCommands: ['prepare'],
+    });
+
+    expect(calls).toEqual([
+      { command: 'prepare', input: undefined },
+      { command: 'foobar', input: 'private manifest' },
+    ]);
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {

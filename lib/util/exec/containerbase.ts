@@ -10,6 +10,12 @@ import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
+  apm: {
+    datasource: 'github-releases',
+    packageName: 'microsoft/apm',
+    versioning: 'semver',
+    extractVersion: '^v(?<version>.*)$',
+  },
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
@@ -213,6 +219,12 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     datasource: 'rust-version',
     packageName: 'rust',
     versioning: 'rust-release-channel',
+  },
+  vp: {
+    datasource: 'github-releases',
+    packageName: 'voidzero-dev/vite-plus',
+    extractVersion: '^v(?<version>.*)$',
+    versioning: 'npm',
   },
   uv: {
     datasource: 'pypi',

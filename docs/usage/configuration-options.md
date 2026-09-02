@@ -4183,9 +4183,23 @@ Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `pac
 
 Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once.
 
+During lock file maintenance, Renovate always runs `npm install` twice, even without this option, because regenerating a lock file from scratch is known to need a second pass.
+
 ### `pnpmDedupe`
 
 Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
+
+### `vitePlusSyncVersions`
+
+Use the exact Vite+ release selected for an update to align existing Vite+, Vite+ core, Vitest, and official Vitest provider declarations before regenerating lockfiles.
+Renovate runs Vite+'s non-mutating planner in an isolated temporary directory and validates its proposed manifest changes before applying them.
+Managed version ranges are replaced with the exact versions declared by the selected Vite+ release.
+
+The planner requires Renovate's dynamic tool installation (`binarySource=install` in a Containerbase environment, or `binarySource=docker`).
+Other binary sources leave declarations unchanged and add an artifact notice.
+Vite+ releases created before the planner and checksum contract was introduced are also left unchanged with a notice.
+
+This option is enabled automatically by the `group:vitePlus` preset.
 
 ### `yarnDedupeFewer`
 

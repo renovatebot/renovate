@@ -37,6 +37,7 @@ import {
   rmCache,
   statCacheFile,
   statLocalFile,
+  withSystemTempDir,
   writeLocalFile,
   writeSystemFile,
 } from './index.ts';
@@ -627,6 +628,20 @@ describe('util/fs/index', () => {
       const path = `${tmpDir}/file.txt`;
       await writeSystemFile(path, 'foobar');
       expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
+    });
+  });
+
+  describe('withSystemTempDir', () => {
+    it('creates an isolated directory and removes it afterward', async () => {
+      let createdPath = '';
+      const result = await withSystemTempDir('renovate-test-', async (path) => {
+        createdPath = path;
+        expect(await fs.pathExists(path)).toBeTrue();
+        return 'result';
+      });
+
+      expect(result).toBe('result');
+      expect(await fs.pathExists(createdPath)).toBeFalse();
     });
   });
 
