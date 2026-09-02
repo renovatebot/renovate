@@ -58,7 +58,8 @@ export async function checkOnboardingBranch(
       onboardingBranch!,
       defaultBranch,
     );
-    // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
+    // if onboarding branch is not modified, check if onboarding config has been
+    // changed and rebase if true
     if (!isModified) {
       const commit = await rebaseOnboardingBranch(
         config,

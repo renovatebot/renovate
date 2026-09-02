@@ -107,7 +107,8 @@ function parsePnpmRuntime(runtime: string | undefined): PackageDependency[] {
     return [];
   }
 
-  // `<name>` or `<name>@<version>`, matching pnpm's `packageManager` field syntax
+  // `<name>` or `<name>@<version>`, matching pnpm's `packageManager` field
+  // syntax
   const [name, version] = runtime.split('@');
   const cfg = pnpmRuntimes[name];
   if (!cfg) {

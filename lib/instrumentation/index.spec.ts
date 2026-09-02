@@ -46,7 +46,8 @@ describe('instrumentation/index', () => {
     }
     vi.stubEnv('RENOVATE_TRACING_CONSOLE_EXPORTER', undefined);
     vi.stubEnv('RENOVATE_TRACING_FILE_EXPORTER_PATH', undefined);
-    // prevent real network calls to cloud metadata endpoints (AWS/GCP/Azure) during tests
+    // prevent real network calls to cloud metadata endpoints (AWS/GCP/Azure)
+    // during tests
     vi.stubEnv('RENOVATE_USE_CLOUD_METADATA_SERVICES', 'false');
   });
 
@@ -309,9 +310,13 @@ describe('instrumentation/index', () => {
   });
 
   describe('BunyanInstrumentation', () => {
-    // OpenTelemetry's context propagation currently uses `AsyncLocalStorage`, which does not behave the same way in vitest worker threads as in a real Node.js process, so we cannot write a full end-to-end here to validate the `span_id`, `trace_id` and `trace_flags` are set
+    // OpenTelemetry's context propagation currently uses `AsyncLocalStorage`,
+    // which does not behave the same way in vitest worker threads as in a real
+    // Node.js process, so we cannot write a full end-to-end here to validate
+    // the `span_id`, `trace_id` and `trace_flags` are set
     //
-    // Claude Sonnet 4.6 suggests that we instead create an (admittedly brittle) test to validate that this is marked as `__wrapped`.
+    // Claude Sonnet 4.6 suggests that we instead create an (admittedly brittle)
+    // test to validate that this is marked as `__wrapped`.
     it('patches bunyan Logger._emit when tracing is enabled', () => {
       vi.stubEnv('RENOVATE_TRACING_CONSOLE_EXPORTER', 'true');
       init();

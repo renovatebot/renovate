@@ -110,7 +110,8 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   let isVariable = false;
   let cleanedCurrentFrom = currentFrom;
 
-  // Check if we have a variable in format of "${VARIABLE:-<image>:<defaultVal>@<digest>}"
+  // Check if we have a variable in format of
+  // "${VARIABLE:-<image>:<defaultVal>@<digest>}"
   // If so, remove everything except the image, defaultVal and digest.
   if (cleanedCurrentFrom?.includes(variableMarker)) {
     const defaultValueRegex = regEx(/^\${.+?:-"?(?<value>.*?)"?}$/);
@@ -122,7 +123,8 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     }
 
     if (cleanedCurrentFrom?.includes(variableMarker)) {
-      // If cleanedCurrentFrom contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we do not support this.
+      // If cleanedCurrentFrom contains a variable, after cleaning, e.g.
+      // "$REGISTRY/alpine", we do not support this.
       return {
         skipReason: 'contains-variable',
       };
@@ -178,7 +180,8 @@ export function getDep(
     };
   }
 
-  // Resolve registry aliases first so that we don't need special casing later on:
+  // Resolve registry aliases first so that we don't need special casing later
+  // on:
   for (const [name, value] of Object.entries(coerceObject(registryAliases))) {
     if (currentFrom.startsWith(`${name}/`)) {
       const depName = currentFrom.substring(name.length + 1);

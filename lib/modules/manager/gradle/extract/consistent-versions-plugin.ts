@@ -83,12 +83,14 @@ export function parseGcv(
         depType: lockFileMap.get(propDep)?.depType,
       } satisfies PackageDependency<GradleManagerData>;
       extractedDeps.push(newDep);
-      // Remove from the lockfile map so the same exact lib will not be included in globbing
+      // Remove from the lockfile map so the same exact lib will not be included
+      // in globbing
       lockFileMap.delete(propDep);
     }
   }
 
-  // For each regular expression dep in props file (starting with the longest glob string)...
+  // For each regular expression dep in props file (starting with the longest
+  // glob string)...
   for (const [propDepGlob, propVerAndPos] of propsFileRegexMap) {
     const globRegex = globToRegex(propDepGlob);
     for (const [exactDep, lockVersionAndDepType] of lockFileMap) {
@@ -105,7 +107,8 @@ export function parseGcv(
           sharedVariableName: propDepGlob,
         } satisfies PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
-        // Remove from the lockfile map so the same lib will not be included in more generic globs later
+        // Remove from the lockfile map so the same lib will not be included in
+        // more generic globs later
         lockFileMap.delete(exactDep);
       }
     }
@@ -113,7 +116,8 @@ export function parseGcv(
   return extractedDeps;
 }
 
-// Translate glob syntax to a regex that does the same. Note that we cannot use replaceAll as it does not exist in Node14
+// Translate glob syntax to a regex that does the same. Note that we cannot use
+// replaceAll as it does not exist in Node14
 // Loosely borrowed mapping to regex from https://github.com/palantir/gradle-consistent-versions/blob/develop/src/main/java/com/palantir/gradle/versions/FuzzyPatternResolver.java
 function globToRegex(depName: string): RegExp {
   return regEx(

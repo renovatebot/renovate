@@ -40,7 +40,8 @@ export function getPythonConstraint(
   pyProjectContent: string,
   existingLockFileContent: string,
 ): string | null {
-  // Read Python version from `pyproject.toml` first as it could have been updated
+  // Read Python version from `pyproject.toml` first as it could have been
+  // updated
   const pyprojectPythonConstraint = Result.parse(
     massageToml(pyProjectContent),
     PoetryPyProject.transform(

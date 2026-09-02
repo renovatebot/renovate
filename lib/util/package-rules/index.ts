@@ -44,12 +44,14 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
     `Checking against ${packageRules.length} packageRules`,
   );
   for (const packageRule of packageRules) {
-    // This rule is considered matched if there was at least one positive match and no negative matches
+    // This rule is considered matched if there was at least one positive match
+    // and no negative matches
     if (await matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
       const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
-        // Need to apply groupSlug otherwise the existing one will take precedence
+        // Need to apply groupSlug otherwise the existing one will take
+        // precedence
         toApply.groupSlug = slugify(packageRule.groupName, {
           lower: true,
         });

@@ -2,9 +2,11 @@ import { clone } from '../util/clone.ts';
 import { getOptions } from './options/index.ts';
 import type { AllConfig, RenovateOptions } from './types.ts';
 
-// Use functions instead of direct values to avoid introducing global references.
-// In particular, we want a new array instance every time we request a default array
-// instead of sharing a single instance - mutation of this value could cause serious problems.
+// Use functions instead of direct values to avoid introducing global
+// references.
+// In particular, we want a new array instance every time we request a default
+// array instead of sharing a single instance - mutation of this value could
+// cause serious problems.
 // See https://github.com/mend/renovate-on-prem/issues/290 for an example
 const defaultValueFactories = {
   boolean: () => true,

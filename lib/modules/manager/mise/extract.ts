@@ -145,13 +145,15 @@ function getToolConfig(
 ): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
     case '': {
-      // If the tool name does not specify a backend, it should be a short name or an alias defined by users
+      // If the tool name does not specify a backend, it should be a short name
+      // or an alias defined by users
       const staticResult = getRegistryToolConfig(toolName, version);
       if (staticResult) {
         return staticResult;
       }
 
-      // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
+      // Otherwise, see if we have any known short tool names that are in the
+      // `mise-registry.json` data file
       const backends = getOrderedMiseRegistryBackends(toolName);
 
       // prioritise the github backend as the best source for data
@@ -182,7 +184,8 @@ function getToolConfig(
       }
       return null;
     }
-    // We can specify core, asdf, vfox, aqua backends for tools in the default registry
+    // We can specify core, asdf, vfox, aqua backends for tools in the default
+    // registry
     // e.g. 'core:rust', 'asdf:rust', 'vfox:clang', 'aqua:act'
     case 'core':
       return getConfigFromTooling(miseTooling, toolName, version);

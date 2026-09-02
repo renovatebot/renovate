@@ -22,14 +22,16 @@ export class AwsMachineImageDatasource extends Datasource {
     'The release timestamp is determined from the `CreationDate` field in the results.';
 
   override readonly defaultConfig = {
-    // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
+    // Because AMIs don't follow any versioning scheme, we override
+    // commitMessageExtra to remove the 'v'
     commitMessageExtra: 'to {{{newVersion}}}',
     prBodyColumns: ['Change', 'Image'],
     prBodyDefinitions: {
       Image: '```{{{newDigest}}}```',
     },
     digest: {
-      // Because newDigestShort will allways be 'amazon-' we override to print the name of the AMI
+      // Because newDigestShort will allways be 'amazon-' we override to print
+      // the name of the AMI
       commitMessageExtra: 'to {{{newDigest}}}',
       prBodyColumns: ['Image'],
       prBodyDefinitions: {

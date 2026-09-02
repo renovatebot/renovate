@@ -58,7 +58,8 @@ describe('workers/repository/update/pr/labels', () => {
       // TODO #22198
       const result = prepareLabels({
         labels: ['labelA', null] as never,
-        // an empty space between two commas in an array is categorized as a null value
+        // an empty space between two commas in an array is categorized as a
+        // null value
         addLabels: ['labelB', '', undefined, undefined, undefined] as never,
       });
       expect(result).toBeArrayOfSize(2);

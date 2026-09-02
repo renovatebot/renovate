@@ -305,8 +305,7 @@ export const qTemplateString = q
     return ctx;
   });
 
-// foo = "bar"
-// foo + foo + "${foo}" + "foo" => "barbarbarfoo"
+// foo = "bar" foo + foo + "${foo}" + "foo" => "barbarbarfoo"
 export function qConcatExpr(
   ...matchers: q.QueryBuilder<Ctx, parser.Node>[]
 ): q.QueryBuilder<Ctx, parser.Node> {

@@ -1,4 +1,5 @@
-// Regular Expressions have been copied from, some more work were necessary to make it work:
+// Regular Expressions have been copied from, some more work were necessary to
+// make it work:
 // original rez regex written in python (#11634)
 // version_range_regex = (
 //     # Match a version number (e.g. 1.0.0)
@@ -33,12 +34,13 @@
 //     # Or match a range in ascending order (e.g. 1.0.0+<2.0.0)
 //     "    ^(?P<range_asc>"
 //     "        (?P<range_lower_asc>"
-//     "           (?P<range_lower_asc_prefix>>|>=)?"  # Lower bound is exclusive?
+// " (?P<range_lower_asc_prefix>>|>=)?" # Lower bound is exclusive?
 //     "           (?P<range_lower_asc_version>{version_group})?"
-//     "           (?(range_lower_asc_prefix)|\+)?"  # + only if lower bound is not exclusive
+// " (?(range_lower_asc_prefix)|\+)?" # + only if lower bound is not exclusive
 //     "       )(?P<range_upper_asc>"
-//     "           (?(range_lower_asc_version),?|)"  # , only if lower bound is found
-//     "           (?P<range_upper_asc_prefix><(?={version_group})|<=)"  # <= only if followed by a version group
+// " (?(range_lower_asc_version),?|)" # , only if lower bound is found
+// " (?P<range_upper_asc_prefix><(?={version_group})|<=)" # <= only if followed
+// by a version group
 //     "           (?P<range_upper_asc_version>{version_group})?"
 //     "       )"
 //     "    )$"
@@ -46,12 +48,14 @@
 //     # Or match a range in descending order (e.g. <=2.0.0,1.0.0+)
 //     "    ^(?P<range_desc>"
 //     "        (?P<range_upper_desc>"
-//     "           (?P<range_upper_desc_prefix><|<=)?"  # Upper bound is exclusive?
+// " (?P<range_upper_desc_prefix><|<=)?" # Upper bound is exclusive?
 //     "           (?P<range_upper_desc_version>{version_group})?"
-//     "           (?(range_upper_desc_prefix)|\+)?"  # + only if upper bound is not exclusive
+// " (?(range_upper_desc_prefix)|\+)?" # + only if upper bound is not exclusive
 //     "       )(?P<range_lower_desc>"
-//     "           (?(range_upper_desc_version),|)"  # Comma is not optional because we don't want to recognize something like "<4>3"
-//     "           (?P<range_lower_desc_prefix><(?={version_group})|>=?)"  # >= or > only if followed by a version group
+// " (?(range_upper_desc_version),|)" # Comma is not optional because we don't
+// want to recognize something like "<4>3"
+// " (?P<range_lower_desc_prefix><(?={version_group})|>=?)" # >= or > only if
+// followed by a version group
 //     "           (?P<range_lower_desc_version>{version_group})?"
 //     "       )"
 //     "    )$"

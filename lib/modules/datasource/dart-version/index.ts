@@ -74,7 +74,8 @@ export class DartVersionDatasource extends Datasource {
           version === 'latest' ||
           // skip old svn versions
           svnVersionRegex.test(version) ||
-          // The API response contains a stable version being released as a non-stable
+          // The API response contains a stable version being released as a
+          // non-stable
           // release. So we filter out these releases here.
           (channel !== 'stable' && stableVersionRegex.test(version))
         ) {

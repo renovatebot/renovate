@@ -156,7 +156,8 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     describe('malicious package detection', () => {
-      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behaviour
+      // this follows how the calls should actually work, but as it's heavily
+      // mocked, this may end up changing from actual behaviour
       describe('when using mocks', () => {
         it('skips malicious package updates', async () => {
           const packageFiles: Record<string, PackageFile[]> = {
@@ -204,7 +205,8 @@ describe('workers/repository/process/extract-update', () => {
               appendVulnerabilityPackageRulesMock,
           });
 
-          // the first time, we're checking what updates are available, so don't modify anything
+          // the first time, we're checking what updates are available, so don't
+          // modify anything
           appendVulnerabilityPackageRulesMock.mockImplementationOnce(
             async (
               _config: any,

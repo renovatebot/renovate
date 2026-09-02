@@ -128,8 +128,8 @@ export async function updateArtifacts({
       ? ''
       : ` -modfile=${quote(goModFileBaseName)}`;
 
-  // The "vendor" directory can be next to the go.mod, but also in the parent directory in case
-  // the go workspaces are used.
+  // The "vendor" directory can be next to the go.mod, but also in the parent
+  // directory in case the go workspaces are used.
   const vendorDir = await findLocalSiblingOrParent(goModFileName, 'vendor');
   const vendorModulesFileName = upath.join(vendorDir ?? '', 'modules.txt');
   const useVendor =
@@ -147,8 +147,9 @@ export async function updateArtifacts({
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace
 
-    // replace bracket after comments, so it doesn't break the regex, doing a complex regex causes problems
-    // when there's a comment and ")" after it, the regex will read replace block until comment.. and stop.
+    // replace bracket after comments, so it doesn't break the regex, doing a
+    // complex regex causes problems when there's a comment and ")" after it,
+    // the regex will read replace block until comment.. and stop.
     massagedGoMod = massagedGoMod
       .split('\n')
       .map((line) => {
@@ -247,7 +248,8 @@ export async function updateArtifacts({
     let args = `get${modFileFlag} `;
 
     if (goConstraints && !semver.intersects(goConstraints, `>=1.18`)) {
-      // For Go versions < 1.18, we need to use the -d flag to avoid builds or installs
+      // For Go versions < 1.18, we need to use the -d flag to avoid builds or
+      // installs
       // https://go.dev/doc/go1.18#go-get
       args += `-d `;
     }
@@ -498,8 +500,10 @@ export async function updateArtifacts({
     }
 
     // add all files added when in `go generate` mode.
-    // unfortunately there is not a good way as there is with vendoring or go import path updates to detect this.
-    // Do this at the very very end to ensure we only capture files which would have been explicitly
+    // unfortunately there is not a good way as there is with vendoring or go
+    // import path updates to detect this.
+    // Do this at the very very end to ensure we only capture files which would
+    // have been explicitly
     // modified, added, or deleted from a `go generate` invocation
     if (useGoGenerate && goGenerateAllowed) {
       logger.debug(
@@ -558,12 +562,15 @@ function getGoConstraints(content: string): string | undefined {
   }
 
   // If go.mod doesn't have toolchain directive and has a full go version spec,
-  // for example `go 1.23.6`, pick this version, this doesn't match major.minor version spec.
+  // for example `go 1.23.6`, pick this version, this doesn't match major.minor
+  // version spec.
   //
-  // This is because when go.mod have same version defined in go directive and toolchain directive,
+  // This is because when go.mod have same version defined in go directive and
+  // toolchain directive,
   // go will remove toolchain directive from go.mod.
   //
-  // For example, go will rewrite `go 1.23.5\ntoolchain go1.23.5` to `go 1.23.5` by default,
+  // For example, go will rewrite `go 1.23.5\ntoolchain go1.23.5` to `go 1.23.5`
+  // by default,
   // in this case, the go directive is the toolchain directive.
   const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(content)
     ?.groups?.gover;

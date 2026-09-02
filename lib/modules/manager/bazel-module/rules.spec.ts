@@ -228,7 +228,8 @@ describe('modules/manager/bazel-module/rules', () => {
       bazelModulePackageDepToPackageDependency(localPathOverridePkgDep),
     ];
     // If a registry is specified and a version is not specified for a
-    // single_version_override, it is merely providing a registry URL for the bazel_dep.
+    // single_version_override, it is merely providing a registry URL for the
+    // bazel_dep.
     const expectedBazelDepWithRegistry: PackageDependency[] = [
       deepmerge(bazelDepPkgDep, { registryUrls: [customRegistryUrl] }),
     ];

@@ -606,8 +606,9 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
         depName: 'react',
         newValue: '19.0.0',
       };
-      // In the general case, we do not know whether we should replace the anchor
-      // that an alias is resolved from. We leave this up to the user, e.g. via a
+      // In the general case, we do not know whether we should replace the
+      // anchor that an alias is resolved from. We leave this up to the user,
+      // e.g. via a
       // Regex custom manager.
       const yarnrcYaml = codeBlock`
       __deps:

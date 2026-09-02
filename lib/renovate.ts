@@ -5,7 +5,8 @@ import './punycode.cjs';
 
 void (async (): Promise<void> => {
   // ⚠️ Don't add code before this!
-  // This has to be imported before logger and other libraries which are instrumented.
+  // This has to be imported before logger and other libraries which are
+  // instrumented.
   const otel = await import('./instrumentation/index.ts');
   otel.init();
 

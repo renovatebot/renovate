@@ -29,10 +29,10 @@ function isEmittable(value: unknown, cache: WeakMap<object, boolean>): boolean {
 }
 
 // Walks `value` and emits canonical JSON chunks directly into `h`,
-// matching `safe-stable-stringify` (deterministic mode) byte-for-byte
-// without materializing the full string. Required to avoid V8's max
-// string length when the input is large (e.g. a PR carrying upgrades
-// across hundreds of manifest files).
+// matching `safe-stable-stringify` (deterministic mode) byte-for-byte without
+// materializing the full string. Required to avoid V8's max string length when
+// the input is large (e.g. a PR carrying upgrades across hundreds of manifest
+// files).
 function fingerprintInto(
   h: Hash,
   value: unknown,

@@ -36,7 +36,9 @@ function findToken(url: string): string | undefined {
 function getTokenEnv(): ExtraEnv {
   const githubComEndpoint = 'https://api.github.com/';
   const configuredEndpoint = GlobalConfig.get('endpoint');
-  // The configured endpoint only says where GitHub lives when Renovate is talking to GitHub: workflows mirrored onto another platform still resolve their actions against github.com.
+  // The configured endpoint only says where GitHub lives when Renovate is
+  // talking to GitHub: workflows mirrored onto another platform still resolve
+  // their actions against github.com.
   const endpoint =
     configuredEndpoint && detectPlatform(configuredEndpoint) === 'github'
       ? configuredEndpoint
@@ -144,8 +146,11 @@ export async function updateActionsLockfile(
     ghaPackageFiles.map((file) => file.packageFile),
   );
 
-  // Ensure that in-memory file contents are flushed to disk, so `actions-lock` can run against it.
-  // A branch can group updates from other managers, whose contents may be binary - a Gradle wrapper JAR, say - so only write the workflows which the tool actually reads.
+  // Ensure that in-memory file contents are flushed to disk, so `actions-lock`
+  // can run against it.
+  // A branch can group updates from other managers, whose contents may be
+  // binary - a Gradle wrapper JAR, say - so only write the workflows which the
+  // tool actually reads.
   const writtenContent = new Map<string, string>();
   for (const file of coerceArray(config.updatedPackageFiles)) {
     if (file.type === 'addition' && ghaPackageFilePaths.has(file.path)) {
@@ -160,8 +165,11 @@ export async function updateActionsLockfile(
   const execOptions: ExecOptions = {
     // The tool rescans every workflow, so it runs from the repository root
     cwd: GlobalConfig.get('localDir'),
-    // `extraEnv` is what forwards a variable into the Docker sidecar, but on its own it is only a default: `getChildEnv` lets a same-named variable in Renovate's own environment win.
-    // The token we resolved from the host rules must not be shadowed by an ambient `GH_TOKEN`, so force it as well.
+    // `extraEnv` is what forwards a variable into the Docker sidecar, but on
+    // its own it is only a default: `getChildEnv` lets a same-named variable in
+    // Renovate's own environment win.
+    // The token we resolved from the host rules must not be shadowed by an
+    // ambient `GH_TOKEN`, so force it as well.
     extraEnv: tokenEnv,
     env: tokenEnv,
     toolConstraints: [{ toolName: 'gh', constraint: config.constraints?.gh }],
@@ -169,23 +177,30 @@ export async function updateActionsLockfile(
   };
 
   // `--no-interactive`: we have no terminal to answer prompts with
-  // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
-  // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile updates
+  // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten
+  // as `@v4.2.1`
+  // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile
+  // updates
   const commands = [
     'gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions',
   ];
 
-  // `binarySource=global` means the administrator provisions tooling, so we must not reach into their `gh` install to add or re-pin an extension.
-  // They own the extension version, and `constraints.ghActionsLock` does not apply.
+  // `binarySource=global` means the administrator provisions tooling, so we
+  // must not reach into their `gh` install to add or re-pin an extension.
+  // They own the extension version, and `constraints.ghActionsLock` does not
+  // apply.
   // TODO replace once containerbase/base#7279 is available
   if (GlobalConfig.get('binarySource') === 'global') {
-    // Debug rather than warn: `constraints.ghActionsLock` ships with a default, so we cannot tell an explicit override from the default here, and warning would fire for every repository on this `binarySource`.
+    // Debug rather than warn: `constraints.ghActionsLock` ships with a default,
+    // so we cannot tell an explicit override from the default here, and warning
+    // would fire for every repository on this `binarySource`.
     logger.once.debug(
       { constraint: config.constraints?.ghActionsLock },
       'Not installing the `gh-actions-lock` extension, and ignoring `constraints.ghActionsLock`, because `binarySource=global` leaves tooling to the administrator',
     );
   } else {
-    // `--force` makes an install a no-op when the specified version is already installed
+    // `--force` makes an install a no-op when the specified version is already
+    // installed
     if (config.constraints?.ghActionsLock) {
       commands.unshift(
         `gh extension install ${extensionName} --force --pin ${quote(config.constraints?.ghActionsLock)}`,
@@ -207,7 +222,8 @@ export async function updateActionsLockfile(
       artifactErrors: [
         {
           fileName: actionsLockFile,
-          // an `ExecError` always carries a `stderr`, so fall back to the message rather than rendering an artifact error with nothing in it
+          // an `ExecError` always carries a `stderr`, so fall back to the
+          // message rather than rendering an artifact error with nothing in it
           stderr: artifactErrorMessageFromExecError(err, err.message),
         },
       ],
@@ -225,17 +241,23 @@ export async function updateActionsLockfile(
     });
   }
 
-  // `actions-lock` may annotate workflows being managed with i.e. `# This workflow is managed by gh actions-lock.`, even if there were no updates to that workflow in this branch.
-  // We should diff against Git, rather than against the branch's own updated package files, otherwise those annotations are left behind as uncommitted changes
+  // `actions-lock` may annotate workflows being managed with i.e.
+  // `# This workflow is managed by gh actions-lock.`, even if there were no
+  // updates to that workflow in this branch.
+  // We should diff against Git, rather than against the branch's own updated
+  // package files, otherwise those annotations are left behind as uncommitted
+  // changes
   const status = await getRepoStatus();
   for (const path of status.modified) {
-    // ignore the lockfile, as we've already committed it above, and any file which another manager owns
+    // ignore the lockfile, as we've already committed it above, and any file
+    // which another manager owns
     if (path === actionsLockFile || !ghaPackageFilePaths.has(path)) {
       continue;
     }
 
     const newContent = await readLocalFile(path, 'utf8');
-    // Whatever this branch wrote is committed as a package file update already, so only content which the tool changed on top of it is an artifact
+    // Whatever this branch wrote is committed as a package file update already,
+    // so only content which the tool changed on top of it is an artifact
     if (!newContent || newContent === writtenContent.get(path)) {
       continue;
     }

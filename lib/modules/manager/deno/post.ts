@@ -186,7 +186,8 @@ export function normalizeWorkspace(
   }
 
   // remove nested workspace
-  // if the workspace is a subdirectory of another workspace, the nested is invalid
+  // if the workspace is a subdirectory of another workspace, the nested is
+  // invalid
   const validContexts: typeof workspaceContexts = [];
   const invalidPackageFiles = new Set<string>();
   for (const [i, currentContext] of workspaceContexts.entries()) {
@@ -247,8 +248,8 @@ export function normalizeWorkspace(
 async function applyLockedVersion(
   packageFiles: PackageFile<DenoManagerData>[],
 ): Promise<void> {
-  // apply locked versions from lock files
-  // use cache to avoid reading the same lock file multiple times
+  // apply locked versions from lock files use cache to avoid reading the same
+  // lock file multiple times
   const lockFileCache: Record<string, LockFile> = {};
   for (const pkg of packageFiles) {
     if (!isNonEmptyArray(pkg.lockFiles)) {

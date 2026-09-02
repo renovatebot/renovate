@@ -43,7 +43,8 @@ export function findDepConstraints(
       if (semver.isValid(constraint)) {
         if (semver.matches(currentVersion, constraint)) {
           if (constraint === currentVersion) {
-            // Workaround for old versions of npm which wrote the exact version in requires instead of the constraint
+            // Workaround for old versions of npm which wrote the exact version
+            // in requires instead of the constraint
             requires[depName] = newVersion;
           }
           parents.push({

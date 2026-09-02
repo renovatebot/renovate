@@ -76,8 +76,9 @@ export function shouldUpdateLabels(
   prCurrentLabels: string[] | undefined,
   configuredLabels: string[] | undefined,
 ): boolean {
-  // If the 'labelsInDebugData' field is undefined
-  // it means the PR was created before the update-labels logic was merged, and labels should not be updated.
+  // If the 'labelsInDebugData' field is undefined it means the PR was created
+  // before the update-labels logic was merged, and labels should not be
+  // updated.
   //  Reference: https://github.com/renovatebot/renovate/pull/25340
   if (!isArray(prInitialLabels)) {
     return false;
@@ -88,7 +89,8 @@ export function shouldUpdateLabels(
     return false;
   }
 
-  // If the labels in the PR have been modified by the user, they should not be updated
+  // If the labels in the PR have been modified by the user, they should not be
+  // updated
   if (areLabelsModified(prInitialLabels, coerceArray(prCurrentLabels))) {
     logger.debug('Labels have been modified by user - skipping labels update.');
     return false;

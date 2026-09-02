@@ -36,8 +36,7 @@ function csvToJson(raw) {
     }
 
     if (ver) {
-      // Debian related, example codename "hamm" version is 2.0
-      // change 2.0 -> 2
+      // Debian related, example codename "hamm" version is 2.0 change 2.0 -> 2
       ver = ver.endsWith('.0') ? ver.replace('.0', '') : ver;
       res[`v${ver}`] = obj;
     }

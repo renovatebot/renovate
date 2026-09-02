@@ -50,7 +50,8 @@ export async function generateLoginCmd(
 export function generateHelmEnvs(): ExtraEnv {
   return {
     HELM_EXPERIMENTAL_OCI: '1',
-    // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
+    // set cache and config files to a path in privateCacheDir to prevent file
+    // and credential leakage
     HELM_REGISTRY_CONFIG: `${upath.join(privateCacheDir(), 'registry.json')}`,
     HELM_REPOSITORY_CONFIG: `${upath.join(
       privateCacheDir(),

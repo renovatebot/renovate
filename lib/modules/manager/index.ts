@@ -37,7 +37,8 @@ export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
     const manager =
       managers.get(managerName)! ?? customManagers.get(managerName)!;
     if (manager.detectGlobalConfig) {
-      // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
+      // This should use mergeChildConfig once more than one manager is
+      // supported, but introduces a cyclic dependency
       config = { ...config, ...(await manager.detectGlobalConfig()) };
     }
   }

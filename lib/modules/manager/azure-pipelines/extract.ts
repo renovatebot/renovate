@@ -40,7 +40,8 @@ export function extractRepository(
     const endpoint = GlobalConfig.get('endpoint');
 
     if (platform === 'azure' && endpoint) {
-      // extract the project name if the repository from which the pipline is referencing templates contains the Azure DevOps project name
+      // extract the project name if the repository from which the pipline is
+      // referencing templates contains the Azure DevOps project name
       if (repository.name.includes('/')) {
         const [projectName, repoName] = repository.name.split('/');
         repositoryUrl = joinUrlParts(
@@ -50,7 +51,9 @@ export function extractRepository(
           encodeURIComponent(repoName),
         );
 
-        // if the repository from which the pipline is referencing templates does not contain the Azure DevOps project name, get the project name from the repository containing the pipeline file being process
+        // if the repository from which the pipline is referencing templates
+        // does not contain the Azure DevOps project name, get the project name
+        // from the repository containing the pipeline file being process
       } else if (currentRepository?.includes('/')) {
         const projectName = currentRepository.split('/')[0];
         depName = `${projectName}/${repository.name}`;

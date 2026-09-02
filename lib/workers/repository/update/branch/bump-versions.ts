@@ -57,7 +57,8 @@ async function bumpVersion(
 ): Promise<void> {
   const rawBumpType = config.bumpType ?? 'patch';
 
-  // all log messages should be prefixed with this string to facilitate easier logLevelRemapping
+  // all log messages should be prefixed with this string to facilitate easier
+  // logLevelRemapping
   const bumpVersionsDescr = config.name
     ? `bumpVersions(${config.name})`
     : 'bumpVersions';
@@ -206,7 +207,8 @@ async function bumpVersion(
           return match.replace(version, newVersion);
         });
 
-      // update the file. Add it to the buckets if exists or create a new artifact update
+      // update the file. Add it to the buckets if exists or create a new
+      // artifact update
       if (packageFiles[filePath]) {
         packageFiles[filePath].push({
           type: 'addition',

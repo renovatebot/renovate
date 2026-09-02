@@ -67,8 +67,8 @@ export async function getPrCache(
   const prApiCache = getPrApiCache();
   const isInitial = isEmptyArray(prApiCache.getItems());
 
-  // Snapshot before the loop — reconcile() updates lastModified as it
-  // processes items, so reading it inside the loop would create a moving target.
+  // Snapshot before the loop — reconcile() updates lastModified as it processes
+  // items, so reading it inside the loop would create a moving target.
   // If lastModified is missing but items exist (populated via updateItem()),
   // derive cutoff from the newest cached item.
   let lastModifiedRaw = prApiCache.getLastModified();

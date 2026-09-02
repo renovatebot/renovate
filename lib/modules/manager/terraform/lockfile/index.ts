@@ -50,7 +50,8 @@ async function updateAllLocks(
         lock.constraints,
       );
 
-      // if the new version is the same as the last, signal that no update is needed
+      // if the new version is the same as the last, signal that no update is
+      // needed
       if (!newVersion || newVersion === lock.version) {
         return null;
       }
@@ -164,7 +165,8 @@ export async function updateArtifacts({
 
     const updates: ProviderLockUpdate[] = [];
     if (config.isLockFileMaintenance) {
-      // update all locks in the file during maintenance --> only update version in constraints
+      // update all locks in the file during maintenance --> only update version
+      // in constraints
       const maintenanceUpdates = await updateAllLocks(locks);
       updates.push(...maintenanceUpdates);
     } else {
@@ -200,7 +202,8 @@ export async function updateArtifacts({
           }
         }
 
-        // use registryURL defined in the update and fall back to the one defined in the lockfile
+        // use registryURL defined in the update and fall back to the one
+        // defined in the lockfile
         const registryUrl = registryUrls?.[0] ?? updateLock.registryUrl;
 
         const newConstraint = getNewConstraint(dep, updateLock.constraints);

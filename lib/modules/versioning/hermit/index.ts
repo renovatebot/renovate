@@ -12,7 +12,8 @@ export const urls = [
 export const supportsRanges = false;
 
 export class HermitVersioning extends RegExpVersioningApi {
-  // add <supplement> element to accomondate openjdk versioning defined in JEP322
+  // add <supplement> element to accomondate openjdk versioning defined in
+  // JEP322
   // https://openjdk.org/jeps/322
   static versionRegex =
     '^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(\\.(?<supplement>\\d+))?(_(?<build>\\d+))?([-]?(?<prerelease>[^.+][^+]*))?([+](?<compatibility>[^.-][^+]*))?$';
@@ -119,8 +120,8 @@ export class HermitVersioning extends RegExpVersioningApi {
       return super.isStable(version);
     }
 
-    // channel and the rest should be considered unstable version
-    // as channels are changing values
+    // channel and the rest should be considered unstable version as channels
+    // are changing values
     return false;
   }
 

@@ -61,7 +61,8 @@ export const MetaCpanApiFileSearchResponse = z
     }),
   })
   .transform((data): CpanRelease[] => {
-    // Extract all hits and filter out ones where _source transformed to undefined
+    // Extract all hits and filter out ones where _source transformed to
+    // undefined
     return data.hits.hits
       .map((hit) => hit._source)
       .filter((source) => source !== undefined);

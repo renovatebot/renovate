@@ -441,7 +441,8 @@ export async function processBranch(
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
             upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
 
-          // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
+          // regardless of the value of `minimumReleaseAgeBehaviour`, if there
+          // is a timestamp, we will process it according to `minimumReleaseAge`
           if (upgrade.releaseTimestamp) {
             const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
             if (timeElapsed < minimumReleaseAgeMs) {
@@ -457,7 +458,8 @@ export async function processBranch(
               continue;
             }
           } else {
-            // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
+            // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`,
+            // and there isn't a timestamp, always mark the update as pending
             if (minimumReleaseAgeBehaviour === 'timestamp-required') {
               depNamesWithoutReleaseTimestamp['timestamp-required'].push({
                 depName: upgrade.depName!,
@@ -466,7 +468,8 @@ export async function processBranch(
               config.stabilityStatus = 'yellow';
               continue;
             } else {
-              // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
+              // if there is no timestamp, and we're running in `optional` mode,
+              // we can allow it, but make sure to warn the user
               depNamesWithoutReleaseTimestamp['timestamp-optional'].push({
                 depName: upgrade.depName!,
                 updateType: upgrade.updateType!,
@@ -580,8 +583,9 @@ export async function processBranch(
         result: 'no-work',
       };
     }
-    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
-    // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+    // if the base branch has been changed by user in renovate config, rebase
+    // onto the new baseBranch we have already confirmed earlier that branch
+    // isn't modified, so its safe to use targetBranch here
     else if (
       branchPr?.targetBranch &&
       branchPr.targetBranch !== config.baseBranch
@@ -637,7 +641,9 @@ export async function processBranch(
       config.updatedArtifacts = coerceArray(config.updatedArtifacts).concat(
         additionalFiles.updatedArtifacts,
       );
-      // `gh actions-lock` rewrites the whole lockfile from the workflows on disk, so like the lock files above it runs once here, after every updated package file has been written, rather than per package file.
+      // `gh actions-lock` rewrites the whole lockfile from the workflows on
+      // disk, so like the lock files above it runs once here, after every
+      // updated package file has been written, rather than per package file.
       const actionsLockfile = await updateActionsLockfile(
         config,
         branchConfig.packageFiles,
@@ -681,7 +687,8 @@ export async function processBranch(
         config.artifactErrors = artifactErrors;
       }
 
-      // modifies the file changes in place to allow having a version bump in a packageFile or artifact
+      // modifies the file changes in place to allow having a version bump in a
+      // packageFile or artifact
       await bumpVersions(config);
 
       removeMeta(['dep']);
@@ -708,13 +715,15 @@ export async function processBranch(
           logger.debug('PR has no releaseTimestamp');
         }
       } else if (config.updatedArtifacts?.length && branchPr) {
-        // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
+        // If there are artifacts, no errors, and an existing PR then ensure any
+        // artifacts error comment is removed
         if (GlobalConfig.get('dryRun')) {
           logger.info(
             `DRY-RUN: Would ensure comment removal in PR #${branchPr.number}`,
           );
         } else {
-          // Remove artifacts error comment only if this run has successfully updated artifacts
+          // Remove artifacts error comment only if this run has successfully
+          // updated artifacts
           await ensureCommentRemoval({
             type: 'by-topic',
             number: branchPr.number,
@@ -766,13 +775,14 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
-      // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
-      // baseBranch is not checked out at the start of processBranch() due to pull/16246
+      // Checkout to base branch to ensure that the next branch processing
+      // always starts with git being on the baseBranch baseBranch is not
+      // checked out at the start of processBranch() due to pull/16246
       await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
 
-      // only update artifact status if branch was updated
-      // also do before platform automerge reattempt
+      // only update artifact status if branch was updated also do before
+      // platform automerge reattempt
       if (commitSha) {
         await setArtifactErrorStatus(config);
       }
@@ -812,7 +822,8 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
     }
     await setBranchStatusChecks(config);
-    // new commit means status check are pretty sure pending but maybe not reported yet
+    // new commit means status check are pretty sure pending but maybe not
+    // reported yet
     // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
     if (
@@ -831,9 +842,11 @@ export async function processBranch(
       };
     }
 
-    // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    // skip if we have a non-immediate pr and there is an existing PR,
-    // we want to update the PR and skip the Auto merge since status checks aren't done yet
+    // Try to automerge branch and finish if successful, but only if branch
+    // already existed before this run skip if we have a non-immediate pr and
+    // there is an existing PR,
+    // we want to update the PR and skip the Auto merge since status checks
+    // aren't done yet
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
@@ -954,7 +967,8 @@ export async function processBranch(
     if (err.message === WORKER_FILE_UPDATE_FAILED) {
       logger.warn('Error updating branch: update failure');
     } else if (err.message.startsWith('bundler-')) {
-      // we have already warned inside the bundler artifacts error handling, so just return
+      // we have already warned inside the bundler artifacts error handling, so
+      // just return
       return {
         branchExists: true,
         updatesVerified,
@@ -1049,10 +1063,10 @@ export async function processBranch(
     if (ensurePrResult.type === 'with-pr') {
       const { pr } = ensurePrResult;
       branchPr = pr;
-      // Retry setting branch statuses after PR/MR creation so that
-      // platforms using MR pipelines (e.g. GitLab) have a pipeline to
-      // associate the status with. The earlier call may have been
-      // skipped if no pipeline existed yet.
+      // Retry setting branch statuses after PR/MR creation so that platforms
+      // using MR pipelines (e.g. GitLab) have a pipeline to associate the
+      // status with. The earlier call may have been skipped if no pipeline
+      // existed yet.
       await setBranchStatusChecks(config);
 
       // only update artifact status if branch was updated
@@ -1125,7 +1139,8 @@ export async function processBranch(
 
         if (config.automerge) {
           logger.debug('PR is configured for automerge');
-          // skip automerge if there is a new commit since status checks aren't done yet
+          // skip automerge if there is a new commit since status checks aren't
+          // done yet
           // v8 ignore else -- TODO: add test #40625
           if (config.ignoreTests === true || !commitSha) {
             logger.debug('checking auto-merge');

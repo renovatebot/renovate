@@ -14,14 +14,16 @@ export function processHostRules(): HostRulesResult {
     hostType: 'npm',
   });
   logger.debug(`Found ${npmHostRules.length} npm host rule(s)`);
-  // Include host rules without specific type to mimic the behavior used when determining dependencies with updates.
+  // Include host rules without specific type to mimic the behavior used when
+  // determining dependencies with updates.
   const noTypeHostRules = hostRules
     .getAll()
     .filter((rule) => isNullOrUndefined(rule.hostType));
   logger.debug(
     `Found ${noTypeHostRules.length} host rule(s) without host type`,
   );
-  // Drop duplicates for the same matchHost while prefering the more specific rules with hostType npm.
+  // Drop duplicates for the same matchHost while prefering the more specific
+  // rules with hostType npm.
   const noTypeHostRulesWithoutDuplicates = noTypeHostRules.filter(
     (rule) => !npmHostRules.some((elem) => elem.matchHost === rule.matchHost),
   );
@@ -41,7 +43,8 @@ export function processHostRules(): HostRulesResult {
     }
 
     const matchedHost = hostRule.matchHost;
-    // Should never be necessary as if we have a resolvedHost, there has to be a matchHost
+    // Should never be necessary as if we have a resolvedHost, there has to be a
+    // matchHost
     /* v8 ignore if -- unreachable: a resolvedHost implies matchHost is set (see comment above) */
     if (!matchedHost) {
       logger.debug('Skipping host rule without matchHost');

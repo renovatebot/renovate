@@ -101,8 +101,9 @@ export class GoDatasource extends Datasource {
       return null;
     }
 
-    // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
-    // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
+    // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up
+    // default branch instead ignore v0.0.0 versions to fetch the digest of
+    // default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
       newValue &&
       !GoDatasource.pversionRegexp.test(newValue) &&

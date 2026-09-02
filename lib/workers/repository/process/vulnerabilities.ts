@@ -179,7 +179,8 @@ export class Vulnerabilities {
         .replace(regEx(/[_.-]+/g), '-');
     } else if (ecosystem === 'Go' && packageName === 'go') {
       if (dep.depType !== 'toolchain') {
-        // The `go` directive is source compatibility, not the build toolchain, so we skip it
+        // The `go` directive is source compatibility, not the build toolchain,
+        // so we skip it
         return null;
       }
       osvPackageName = 'stdlib';
@@ -587,7 +588,8 @@ export class Vulnerabilities {
       return null;
     }
 
-    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
+    // we don't know if the dependency has a `versioning` applied to it already,
+    // so we have to use the default for the datasource
     const versioning = getDefaultVersioning(datasource);
 
     logger.debug(

@@ -42,8 +42,9 @@ flake update nixpkgs`;
 const lockfileMaintenanceCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake update`;
-// Under `binarySource=docker` the whole command becomes the single-quoted argument
-// of `bash -l -c`, so the manager's own single quotes are POSIX-escaped as '"'"'.
+// Under `binarySource=docker` the whole command becomes the single-quoted
+// argument of `bash -l -c`, so the manager's own single quotes are
+// POSIX-escaped as '"'"'.
 const updateInputCmdInDocker = `nix \
 --extra-experimental-features '"'"'nix-command flakes'"'"' \
 flake update nixpkgs`;

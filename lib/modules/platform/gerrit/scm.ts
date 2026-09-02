@@ -90,7 +90,8 @@ export class GerritScm extends DefaultGitScm {
       ? [commit.message]
       : commit.message;
 
-    // In Gerrit, the change subject/title is the first line of the commit message
+    // In Gerrit, the change subject/title is the first line of the commit
+    // message
     // v8 ignore else -- TODO: add test #40625
     if (commit.prTitle) {
       const firstMessageLines = message[0].split('\n');

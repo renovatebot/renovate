@@ -32,13 +32,14 @@ export function extractPackageFile(
   const lines = content.split(newlineRegex);
 
   try {
-    // if this is a galaxy.yml file we have to interpret the dependencies differently
+    // if this is a galaxy.yml file we have to interpret the dependencies
+    // differently
     if (galaxyFileNameRegEx.exec(packageFile)) {
       const galaxyDeps = extractCollectionsMetaDataFile(lines);
       deps.push(...galaxyDeps);
     } else {
-      // interpret requirements file
-      // check if new or old format is used and save start lines for collection and roles.
+      // interpret requirements file check if new or old format is used and save
+      // start lines for collection and roles.
       const positions = {
         collections: -1,
         roles: -1,

@@ -29,8 +29,10 @@ function findPackageInResponse(
     return repoPackages;
   }
 
-  // In some cases Repology bundles multiple packages into a single project, which might result in ambiguous results.
-  // We need to do additional filtering by matching allowed package types passed as params with package description.
+  // In some cases Repology bundles multiple packages into a single project,
+  // which might result in ambiguous results.
+  // We need to do additional filtering by matching allowed package types passed
+  // as params with package description.
   // Remaining packages are the one we are looking for
   const packagesWithType = repoPackages.filter((pkg) => {
     for (const pkgType of types) {
@@ -61,10 +63,11 @@ export class RepologyDatasource extends Datasource {
       return res.body;
     } catch (err) {
       if (err.statusCode === 404) {
-        // Return an array here because the api does not return proper http codes
-        // and instead of an 404 error an empty array with code 200 is returned
-        // When querying the resolver 404 is thrown if package could not be resolved
-        // and 403 if the repo is not supported
+        // Return an array here because the api does not return proper http
+        // codes and instead of an 404 error an empty array with code 200 is
+        // returned
+        // When querying the resolver 404 is thrown if package could not be
+        // resolved and 403 if the repo is not supported
         // 403 is handled later because in this case we are trying the API
         return [];
       }
@@ -99,8 +102,8 @@ export class RepologyDatasource extends Datasource {
     registryUrl: string,
     packageName: string,
   ): Promise<RepologyPackage[]> {
-    // Directly query the package via the API. This will only work if `packageName` has the
-    // same name as the repology project
+    // Directly query the package via the API. This will only work if
+    // `packageName` has the same name as the repology project
     const packages = await this.queryPackages(
       joinUrlParts(registryUrl, `api/v1/project`, packageName),
     );
@@ -115,11 +118,12 @@ export class RepologyDatasource extends Datasource {
   ): Promise<RepologyPackage[] | undefined> {
     let response: RepologyPackage[];
     // Try getting the packages from tools/project-by first for type binname and
-    // afterwards for srcname. This needs to be done first, because some packages
-    // resolve to repology projects which have a different name than the package
-    // e.g. `pulseaudio-utils` resolves to project `pulseaudio`, BUT there is also
-    // a project called `pulseaudio-utils` but it does not contain the package we
-    // are looking for.
+    // afterwards for srcname. This needs to be done first, because some
+    // packages resolve to repology projects which have a different name than
+    // the package
+    // e.g. `pulseaudio-utils` resolves to project `pulseaudio`, BUT there is
+    // also a project called `pulseaudio-utils` but it does not contain the
+    // package we are looking for.
     try {
       for (const pkgType of packageTypes) {
         response = await this.queryPackagesViaResolver(
@@ -146,10 +150,11 @@ export class RepologyDatasource extends Datasource {
           'Repology does not support tools/project-by lookups for repository. Will try direct API access now',
         );
 
-        // If the repository is not supported in tools/project-by we try directly accessing the
-        // API. This will support all repositories but requires that the project name is equal to the
-        // package name. This won't be always the case but for a good portion we might be able to resolve
-        // the package this way.
+        // If the repository is not supported in tools/project-by we try
+        // directly accessing the
+        // API. This will support all repositories but requires that the project
+        // name is equal to the package name. This won't be always the case but
+        // for a good portion we might be able to resolve the package this way.
         response = await this.queryPackagesViaAPI(registryUrl, pkgName);
         const pkg = findPackageInResponse(
           response,

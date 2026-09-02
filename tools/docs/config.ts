@@ -171,7 +171,8 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         // previous names should be printed in JSON notation
         el[0] === 'previouslyKnownAs'
       ) {
-        // only show array and object defaults if they are not null and are not empty
+        // only show array and object defaults if they are not null and are not
+        // empty
         if (Object.keys(el[1] ?? []).length === 0) {
           return;
         }
@@ -333,7 +334,8 @@ function generateStatusCheckWhenTable(): string {
 }
 
 function generateConfigFileNames(): string {
-  // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
+  // TODO #10682 #10651 make sure that we include
+  // `getConfigFileNames(platformId)`
   const filenames = getConfigFileNames();
 
   const all = Array.from(new Set(filenames))
@@ -411,7 +413,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       // TODO: fix types (#22198,#9610)
       const el: Record<string, any> = { ...option };
 
-      // Child options are indexed as "parent.optionName"; collect all matching keys
+      // Child options are indexed as "parent.optionName"; collect all matching
+      // keys
       let lookupKeys: string[] = [];
       for (const parent of option.parents ?? []) {
         if (parent !== '.') {
@@ -421,7 +424,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
           }
         }
       }
-      // Fall back to plain name for top-level ## options (e.g. enabled, managerFilePatterns)
+      // Fall back to plain name for top-level ## options (e.g. enabled,
+      // managerFilePatterns)
       if (lookupKeys.length === 0) {
         if (!indexed[option.name]) {
           throw new Error(

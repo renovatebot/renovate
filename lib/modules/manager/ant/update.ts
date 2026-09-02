@@ -17,7 +17,8 @@ export function updateDependency({
   const leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
 
-  // Find the end of the value (closing quote or end of line for .properties files)
+  // Find the end of the value (closing quote or end of line for .properties
+  // files)
   let endIndex: number;
   const quoteChar = leftPart.at(-1);
   if (quoteChar === '"' || quoteChar === "'") {

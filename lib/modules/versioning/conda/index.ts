@@ -86,7 +86,8 @@ function getNewValue({
 
   const normalizedCurrentValue = new VersionSpec(currentValue).toString();
 
-  // it's valid range spec in conda to write `3.12.*`, translate to pep440 `==3.12.*`
+  // it's valid range spec in conda to write `3.12.*`, translate to pep440
+  // `==3.12.*`
   if (regEx(/^(\d+\.)+\*$/).test(normalizedCurrentValue)) {
     const newValue = pep440.api.getNewValue({
       currentValue: `==${normalizedCurrentValue}`,
@@ -206,8 +207,8 @@ export const api = {
 
   getMajor,
   getMinor,
-  // sadly conda version doesn't have a concept of patch version
-  // so we try to use pep440 get a patch version.
+  // sadly conda version doesn't have a concept of patch version so we try to
+  // use pep440 get a patch version.
   getPatch,
 
   isGreaterThan,

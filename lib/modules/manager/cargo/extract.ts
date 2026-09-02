@@ -59,14 +59,16 @@ function extractFromSection(
     if (registryUrls) {
       dep.registryUrls = registryUrls;
     } else {
-      // if we don't have an explicit registry URL check if the default registry has a non-standard url
+      // if we don't have an explicit registry URL check if the default registry
+      // has a non-standard url
       if (cargoRegistries[DEFAULT_REGISTRY_ID]) {
         if (cargoRegistries[DEFAULT_REGISTRY_ID] !== DEFAULT_REGISTRY_URL) {
           dep.registryUrls = [cargoRegistries[DEFAULT_REGISTRY_ID]];
         }
       } else {
-        // we always expect to have DEFAULT_REGISTRY_ID set, if it's not it means the config defines an alternative
-        // registry that we couldn't resolve.
+        // we always expect to have DEFAULT_REGISTRY_ID set, if it's not it
+        // means the config defines an alternative registry that we couldn't
+        // resolve.
         dep.skipReason = 'unknown-registry';
       }
     }

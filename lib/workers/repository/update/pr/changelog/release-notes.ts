@@ -413,12 +413,15 @@ export async function getReleaseNotesMd(
               };
             }
           }
-          // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
+          // Look for version in body - useful for monorepos. First check for
+          // heading with "(yyyy-mm-dd)"
           const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
           if (packageName && heading.search(releasesRegex) !== -1) {
-            // Now check if any line contains both the package name and the version
+            // Now check if any line contains both the package name and the
+            // version
             // Skip Markdown link reference definitions (e.g. `[1.2.3]: https://…/compare/...`)
-            // which Keep-a-Changelog files list at the bottom and would otherwise match every version.
+            // which Keep-a-Changelog files list at the bottom and would
+            // otherwise match every version.
             const linkRefDefRegex = regEx(/^\s*\[[^\]]+\]:\s*\S+/);
             const bodyLines = body.split('\n');
             if (
@@ -531,7 +534,10 @@ export async function addReleaseNotes(
           cacheMinutes,
         );
 
-        // when we have received enough changelog content to exceed the platform's limit, we should stop trying to look up more changelog entries, as we fetch newest releases first, so the most recent changelog entries will be visible in the PR
+        // when we have received enough changelog content to exceed the
+        // platform's limit, we should stop trying to look up more changelog
+        // entries, as we fetch newest releases first, so the most recent
+        // changelog entries will be visible in the PR
         if (shouldTruncateToPlatformLimit) {
           fetchedNotesLength += releaseNotes?.body?.length ?? 0;
           if (fetchedNotesLength >= maxBodyLength) {

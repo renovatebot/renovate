@@ -111,8 +111,11 @@ export function extractReleaseResult(
 
       const dep: Release = { version, gitRef };
 
-      // Packagist's `published-time` reflects when the version was actually published to the registry;
-      // prefer it over `time` (the git tag's `releasedAt`, which could be when the commit that the tag points at was pushed, not the time the release itself was made public to the world), falling back when absent.
+      // Packagist's `published-time` reflects when the version was actually
+      // published to the registry;
+      // prefer it over `time` (the git tag's `releasedAt`, which could be when
+      // the commit that the tag points at was pushed, not the time the release
+      // itself was made public to the world), falling back when absent.
       const releaseTimestamp =
         composerRelease['published-time'] ?? composerRelease.time;
       if (releaseTimestamp) {
@@ -126,7 +129,8 @@ export function extractReleaseResult(
       if (composerRelease.abandoned) {
         dep.isDeprecated = true;
         deprecationMessage ??= getAbandonedMessage(composerRelease.abandoned);
-        // TODO #44060 when `abandoned` is a package name, emit replacementName/replacementVersion to open a replacement PR
+        // TODO #44060 when `abandoned` is a package name, emit
+        // replacementName/replacementVersion to open a replacement PR
       }
 
       releases.push(dep);

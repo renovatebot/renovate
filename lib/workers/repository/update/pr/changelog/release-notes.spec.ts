@@ -607,8 +607,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         }),
         versions: [
           partial<ChangeLogRelease>({
-            // No release notes and no compare URL - still under budget, so
-            // this shouldn't stop further versions being fetched.
+            // No release notes and no compare URL - still under budget, so this
+            // shouldn't stop further versions being fetched.
             version: '3.0.0',
             compare: {},
           }),

@@ -161,7 +161,8 @@ export async function generateLockFile(
         // v8 ignore else -- TODO: add test #40625
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
-          // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+          // The following change causes Yarn 1.x to exit gracefully after
+          // updating the lock file but without installing node_modules
           yarnTool.toolName = 'yarn-slim';
           if (yarnPath) {
             commands.push({
@@ -171,7 +172,8 @@ export async function generateLockFile(
           }
         }
       } else if (isYarnModeAvailable) {
-        // Don't run the link step and only fetch what's necessary to compute an updated lockfile
+        // Don't run the link step and only fetch what's necessary to compute an
+        // updated lockfile
         cmdOptions += ' --mode=update-lockfile';
       }
     }
@@ -251,8 +253,9 @@ export async function generateLockFile(
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       if (isYarn1) {
-        // `yarn upgrade` updates based on the version range specified in the package file
-        // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
+        // `yarn upgrade` updates based on the version range specified in the
+        // package file note - this can hit a yarn bug, see
+        // https://github.com/yarnpkg/yarn/issues/8236
         commands.push(
           `yarn upgrade ${lockUpdates
             .map((update) => update.depName)
@@ -300,10 +303,12 @@ export async function generateLockFile(
       );
 
       // Note: Instead of just deleting the `yarn.lock` file, we just wipe it
-      // and keep an empty lock file. Deleting the lock file could result in different
-      // Yarn semantics. e.g. Yarn 2+ will error when `yarn install` is executed in
-      // a subdirectory which is not part of a Yarn workspace. Yarn suggests to create
-      // an empty lock file if a subdirectory should be treated as its own workspace.
+      // and keep an empty lock file. Deleting the lock file could result in
+      // different
+      // Yarn semantics. e.g. Yarn 2+ will error when `yarn install` is executed
+      // in a subdirectory which is not part of a Yarn workspace. Yarn suggests
+      // to create an empty lock file if a subdirectory should be treated as its
+      // own workspace.
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');

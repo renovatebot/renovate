@@ -24,7 +24,8 @@ export async function resolveGlobalExtends(
   ignorePresets?: string[],
 ): Promise<AllConfig> {
   try {
-    // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
+    // Make a "fake" config to pass to resolveConfigPresets and resolve
+    // globalPresets
     const config = { extends: globalExtends, ignorePresets };
     const { config: resolvedConfig } = await resolveConfigPresets(config);
     return resolvedConfig;
@@ -108,7 +109,8 @@ export async function parseConfigs(
   delete config.privateKeyOld;
 
   if (config.logContext) {
-    // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
+    // This only has an effect if logContext was defined via file or CLI,
+    // otherwise it would already have been detected in env
     setContext(config.logContext);
   }
 
@@ -197,7 +199,8 @@ export async function parseConfigs(
   }
 
   // do not add these secrets to repoSecrets and,
-  //  do not delete the secrets/variables object after applying on global config as it needs to be re-used for repo config
+  // do not delete the secrets/variables object after applying on global config
+  // as it needs to be re-used for repo config
   if (isNonEmptyObject(config.secrets) || isNonEmptyObject(config.variables)) {
     config = applySecretsAndVariablesToConfig({
       config,
@@ -206,7 +209,8 @@ export async function parseConfigs(
       deleteSecrets: false,
       deleteVariables: false,
     });
-    // adding these secrets to the globalSecrets set so that they can be redacted from logs
+    // adding these secrets to the globalSecrets set so that they can be
+    // redacted from logs
     for (const secret of Object.values(config.secrets!)) {
       addSecretForSanitizing(secret, 'global');
     }

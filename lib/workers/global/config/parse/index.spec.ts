@@ -225,7 +225,8 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([['rangeStrategy', 'pin']]);
       // `globalExtends` should be an empty array after merging
       expect(parsedConfig).toContainEntries([['globalExtends', []]]);
-      // `dryRun` from globalExtends should be overwritten with value defined in config file
+      // `dryRun` from globalExtends should be overwritten with value defined in
+      // config file
       expect(parsedConfig).toContainEntries([['dryRun', 'extract']]);
     });
 

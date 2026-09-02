@@ -148,7 +148,8 @@ export class GiteaPrCache {
       state: 'all',
       sort: 'recentupdate',
       // Fetch 100 PRs on the first run to ensure we have the most recent PRs.
-      // Gitea / Forgejo will cap appropriate (50 by default, see `MAX_RESPONSE_ITEMS`).
+      // Gitea / Forgejo will cap appropriate (50 by default, see
+      // `MAX_RESPONSE_ITEMS` ).
       // https://docs.gitea.com/administration/config-cheat-sheet#api-api
       // https://forgejo.org/docs/latest/admin/config-cheat-sheet/#api-api
       limit: this.items.length ? 20 : 100,

@@ -213,10 +213,13 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     describe('if internalChecksFilter=strict, minimumReleaseAge is specified, and the latest release does not have a releaseTimestamp', () => {
       beforeEach(() => {
-        // NOTE that we need to reset the existing test set up to make sure that we call `getElapsedMs` in the right order
+        // NOTE that we need to reset the existing test set up to make sure that
+        // we call `getElapsedMs` in the right order
         // oxlint-disable-next-line renovate/no-redundant-mock-reset -- discards the once-values queued by the outer beforeEach
         dateUtil.getElapsedMs.mockReset();
-        // NOTE that we do NOT want to return 3 days, as we want the first release that has a timestamp (1.0.3) to be within the `minimumReleaseAge=4 days`
+        // NOTE that we do NOT want to return 3 days, as we want the first
+        // release that has a timestamp (1.0.3) to be within the
+        // `minimumReleaseAge=4 days`
         dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
         dateUtil.getElapsedMs.mockReturnValueOnce(toMs('7 days') ?? 0);
         dateUtil.getElapsedMs.mockReturnValueOnce(toMs('9 days') ?? 0);
@@ -346,7 +349,8 @@ describe('workers/repository/process/lookup/filter-checks', () => {
   });
 
   describe('.isMinimumReleaseAgeApplicable()', () => {
-    // Exhaustive by construction, so we get a type error if we add a new UpdateType
+    // Exhaustive by construction, so we get a type error if we add a new
+    // UpdateType
     const expectedByUpdateType: Record<UpdateType, boolean> = {
       major: true,
       minor: true,
@@ -376,7 +380,8 @@ describe('workers/repository/process/lookup/filter-checks', () => {
   });
 
   describe('.isMinimumConfidenceApplicable()', () => {
-    // Exhaustive by construction, so we get a type error if we add a new UpdateType
+    // Exhaustive by construction, so we get a type error if we add a new
+    // UpdateType
     const expectedByUpdateType: Record<UpdateType, boolean> = {
       digest: false,
       pinDigest: false,

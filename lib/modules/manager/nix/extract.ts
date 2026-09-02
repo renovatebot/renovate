@@ -54,12 +54,14 @@ export async function extractPackageFile(
   }
 
   for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
-    // the root input is a magic string for the entrypoint and only references other flake inputs
+    // the root input is a magic string for the entrypoint and only references
+    // other flake inputs
     if (depName === 'root') {
       continue;
     }
 
-    // skip all locked and transitivie nodes as they cannot be updated by regular means
+    // skip all locked and transitivie nodes as they cannot be updated by
+    // regular means
     if (!(depName in rootInputs)) {
       continue;
     }
@@ -85,7 +87,8 @@ export async function extractPackageFile(
       continue;
     }
 
-    // indirect inputs cannot be reliably updated because they depend on the flake registry
+    // indirect inputs cannot be reliably updated because they depend on the
+    // flake registry
     if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
       logger.debug(
         { flakeLockFile, flakeInput },
@@ -112,7 +115,8 @@ export async function extractPackageFile(
       continue;
     }
 
-    // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
+    // if there's a new digest, set the corresponding digest in the lockfile so
+    // confirmations pass
     const currentDigest = config?.currentDigest;
     const newDigest = config?.newDigest;
     if (

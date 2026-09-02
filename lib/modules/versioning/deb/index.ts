@@ -91,8 +91,8 @@ class DebVersioningApi extends GenericVersioningApi {
         continue;
       }
       if (aChar !== bChar) {
-        // Lexicographical comparison
-        // numeric character is treated like end of string (they are part of a new block)
+        // Lexicographical comparison numeric character is treated like end of
+        // string (they are part of a new block)
         const aPriority = characterOrder.indexOf(
           numericChars.includes(aChar) || aChar === '' ? ' ' : aChar,
         );

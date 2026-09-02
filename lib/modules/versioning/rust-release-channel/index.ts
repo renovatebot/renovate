@@ -244,7 +244,8 @@ class RustReleaseChannelVersioning implements VersioningApi {
         return `${newChannel.major}.${newChannel.minor}`;
       }
 
-      // If current had prerelease without number (beta range), create beta range
+      // If current had prerelease without number (beta range), create beta
+      // range
       if (
         currentChannel.prerelease &&
         currentChannel.prerelease.number === undefined
@@ -298,7 +299,8 @@ class RustReleaseChannelVersioning implements VersioningApi {
         return false;
       }
 
-      // If range has no patch, it's a range (e.g., "1.82" matches "1.82.0", "1.82.1", etc.)
+      // If range has no patch, it's a range (e.g., "1.82" matches "1.82.0",
+      // "1.82.1", etc.)
       if (rangeChannel.patch === undefined) {
         return true;
       }
@@ -313,7 +315,8 @@ class RustReleaseChannelVersioning implements VersioningApi {
         return !versionChannel.prerelease;
       }
 
-      // If range has prerelease but no number, it's a range (e.g., "1.83.0-beta" matches all beta versions)
+      // If range has prerelease but no number, it's a range (e.g.,
+      // "1.83.0-beta" matches all beta versions)
       if (rangeChannel.prerelease.number === undefined) {
         return !!versionChannel.prerelease;
       }

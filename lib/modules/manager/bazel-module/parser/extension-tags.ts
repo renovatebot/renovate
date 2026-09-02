@@ -7,7 +7,8 @@ import { crateExtensionPrefix, crateExtensionTags } from './crate.ts';
 import { mavenExtensionPrefix, mavenExtensionTags } from './maven.ts';
 import { ociExtensionPrefix, ociExtensionTags } from './oci.ts';
 
-// In bazel modules an extension tag is (roughly) a "member function application".
+// In bazel modules an extension tag is (roughly) a "member function
+// application".
 // For example:
 //
 //     oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")

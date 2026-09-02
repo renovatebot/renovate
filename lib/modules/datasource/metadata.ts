@@ -137,7 +137,8 @@ export function addMetaData(
     if (isEmptyString(massagedUrl)) {
       delete dep.sourceUrl;
     } else {
-      // parse from github-url-from-git only supports Github URLs as its name implies
+      // parse from github-url-from-git only supports Github URLs as its name
+      // implies
       dep.sourceUrl =
         parse(massagedUrl, {
           extraBaseUrls,

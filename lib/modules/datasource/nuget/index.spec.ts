@@ -961,7 +961,8 @@ describe('modules/datasource/nuget/index', () => {
       expect(res).toMatchSnapshot();
     });
 
-    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could
+    // also be misconfiguration
     it('does not follow pagination to a different origin (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')

@@ -147,10 +147,8 @@ export class HermitDatasource extends Datasource {
     }
 
     // stream down the content of index.json
-    // Note: need to use stream here with
-    // the accept header as octet-stream to
-    // download asset from private github repository
-    // see GithubDoc:
+    // Note: need to use stream here with the accept header as octet-stream to
+    // download asset from private github repository see GithubDoc:
     // https://docs.github.com/en/rest/releases/assets#get-a-release-asset
     const indexContent = await streamToString(
       this.http.stream(asset.url, {

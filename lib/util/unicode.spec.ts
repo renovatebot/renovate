@@ -41,7 +41,8 @@ describe('util/unicode', () => {
     });
 
     it('logs a trace message (not warning) for binary files with hidden unicode characters', () => {
-      // Binary file with null byte (making it binary) followed by 0x200B (zero-width space)
+      // Binary file with null byte (making it binary) followed by 0x200B
+      // (zero-width space)
       const binaryContent = Buffer.from([
         0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x74, 0x65, 0x78,
       ]); // 0xe2 0x80 0x8b is UTF-8 encoding of U+200B (zero-width space)

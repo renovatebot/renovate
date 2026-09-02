@@ -106,7 +106,8 @@ describe('config/options/index', () => {
       allOptions.filter((o) => o.supportsTemplating).map((o) => o.name),
     );
 
-    // Scan source files for template.compile(config.xxx, ...) and compile(config.xxx, ...) patterns
+    // Scan source files for template.compile(config.xxx, ...) and
+    // compile(config.xxx, ...) patterns
     const sourceDir = join(__dirname, '..', '..');
     const sourceFiles = (
       await Promise.all([
@@ -127,7 +128,8 @@ describe('config/options/index', () => {
       while ((match = directPattern.exec(content)) !== null) {
         const name = match[1];
         const option = allOptions.find((o) => o.name === name);
-        // Only include string or array-of-string options (not objects like userStrings)
+        // Only include string or array-of-string options (not objects like
+        // userStrings)
         if (
           option &&
           (option.type === 'string' ||
@@ -138,8 +140,8 @@ describe('config/options/index', () => {
       }
     }
 
-    // Options compiled via array iteration or intermediate variables
-    // that cannot be detected by regex. Keep this list in sync manually.
+    // Options compiled via array iteration or intermediate variables that
+    // cannot be detected by regex. Keep this list in sync manually.
     const indirectlyCompiled = [
       'labels', // labels.map(label => template.compile(label, ...))
       'addLabels', // same pattern as labels

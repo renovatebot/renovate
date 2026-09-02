@@ -41,7 +41,8 @@ describe('modules/manager/bundler/extract', () => {
       fs.readLocalFile.mockResolvedValueOnce(railsGemfileLock);
       const res = await extractPackageFile(railsGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
-      // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
+      // couple of dependency of ruby rails are not present in the lock file.
+      // Filter out those before processing
       expect(
         res?.deps
           .filter((dep) =>

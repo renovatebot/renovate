@@ -89,9 +89,11 @@ export async function generateUpdate(
     // This versioning scheme has breaking awareness
     update.isBreaking = versioningApi.isBreaking(currentVersion, newVersion);
   } else {
-    // This versioning scheme does not have breaking awareness - assume only major updates are breaking
+    // This versioning scheme does not have breaking awareness - assume only
+    // major updates are breaking
     // Updates from, or to, unstable releases should be treated as breaking too.
-    // But we should not add that as default behavior until we stop treating non-LTS versions as unstable first
+    // But we should not add that as default behavior until we stop treating
+    // non-LTS versions as unstable first
     update.isBreaking = update.updateType === 'major';
   }
   const { datasource, packageName, packageRules } = config;

@@ -291,8 +291,9 @@ describe('modules/datasource/deb/index', () => {
       ];
 
       for (let i = 0; i < packages.length; i++) {
-        // first call doesn't include a http head call, since the file doesn't exists locally yet
-        // the package index is downloaded every time since the http head call returns 200
+        // first call doesn't include a http head call, since the file doesn't
+        // exists locally yet the package index is downloaded every time since
+        // the http head call returns 200
         mockHttpCalls(
           'stable',
           'non-free',

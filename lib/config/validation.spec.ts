@@ -40,7 +40,9 @@ describe('config/validation', () => {
       },
     );
 
-    // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
+    // NOTE that this should always refer to a deprecated option, but at some
+    // point, we may have removed them all, so we'll need to think about how to
+    // handle that, at that point
     it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
       const config: RenovateConfig = {
         hostRules: [
@@ -1136,8 +1138,9 @@ describe('config/validation', () => {
       ]);
     });
 
-    // testing if we get all errors at once or not (possible), this does not include customType or managerFilePatterns
-    // since they are common to all custom managers
+    // testing if we get all errors at once or not (possible), this does not
+    // include customType or managerFilePatterns since they are common to all
+    // custom managers
     it('validates all possible regex manager options', async () => {
       const config: RenovateConfig = {
         customManagers: [
@@ -2216,7 +2219,8 @@ describe('config/validation', () => {
       ]);
     });
 
-    // adding this test explicitly because we used to validate the customEnvVariables inside repo config previously
+    // adding this test explicitly because we used to validate the
+    // customEnvVariables inside repo config previously
     it('warns if customEnvVariables are found in repo config', async () => {
       const config = {
         customEnvVariables: {

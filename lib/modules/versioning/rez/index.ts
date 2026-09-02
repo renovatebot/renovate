@@ -153,8 +153,8 @@ function getNewValue({
   }
   const matchAscRange = ascendingRange.exec(currentValue);
   if (pep440Value && matchAscRange?.groups) {
-    // Replace version numbers but keep rez format, otherwise we just end up trying
-    // to convert every single case separately.
+    // Replace version numbers but keep rez format, otherwise we just end up
+    // trying to convert every single case separately.
     const lowerBoundAscCurrent = matchAscRange.groups.range_lower_asc;
     const upperBoundAscCurrent = matchAscRange.groups.range_upper_asc;
     const lowerAscVersionCurrent = matchAscRange.groups.range_lower_asc_version;
@@ -180,8 +180,8 @@ function getNewValue({
   }
   const matchDscRange = descendingRange.exec(currentValue);
   if (pep440Value && matchDscRange?.groups) {
-    // Replace version numbers but keep rez format, otherwise we just end up trying
-    // to convert every single case separately.
+    // Replace version numbers but keep rez format, otherwise we just end up
+    // trying to convert every single case separately.
     const upperBoundDescCurrent = matchDscRange.groups.range_upper_desc;
     const lowerBoundDescCurrent = matchDscRange.groups.range_lower_desc;
     const upperDescVersionCurrent =

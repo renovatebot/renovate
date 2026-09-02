@@ -37,7 +37,8 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
         options.headers.authorization = `${authType} ${options.token}`;
       }
     } else if (options.token.startsWith('x-access-token:')) {
-      // GitHub App installation token — prefix is set by the GitHub platform init
+      // GitHub App installation token — prefix is set by the GitHub platform
+      // init
       const appToken = options.token.replace('x-access-token:', '');
       options.headers.authorization = `Bearer ${appToken}`;
     } else if (
@@ -61,8 +62,8 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       options.hostType &&
       GITLAB_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
-      // GitLab versions earlier than 12.2 only support authentication with
-      // a personal access token, which is 20 characters long.
+      // GitLab versions earlier than 12.2 only support authentication with a
+      // personal access token, which is 20 characters long.
       if (options.token.length === 20) {
         options.headers['Private-token'] = options.token;
       } else {

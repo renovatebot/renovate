@@ -31,7 +31,8 @@ export function extractTFLintPlugin(
     // istanbul ignore else
     if (isString(line)) {
       // `{` will be counted with +1 and `}` with -1.
-      // Therefore if we reach braceCounter == 0 then we found the end of the tflint configuration block.
+      // Therefore if we reach braceCounter == 0 then we found the end of the
+      // tflint configuration block.
       const openBrackets = coerceArray(line.match(regEx(/\{/g))).length;
       const closedBrackets = coerceArray(line.match(regEx(/\}/g))).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;

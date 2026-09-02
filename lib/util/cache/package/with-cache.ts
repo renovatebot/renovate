@@ -95,14 +95,15 @@ export async function withCache<T>(
     const { softTtlMinutes, hardTtlMinutes: resolvedHardTtl } =
       resolveTtlValues(namespace, ttlMinutes);
 
-    // The separation between "soft" and "hard" TTL allows us to treat
-    // data as obsolete according to the "soft" TTL while physically storing it
+    // The separation between "soft" and "hard" TTL allows us to treat data as
+    // obsolete according to the "soft" TTL while physically storing it
     // according to the "hard" TTL.
     //
     // This helps us return obsolete data in case of upstream server errors,
     // which is more useful than throwing exceptions ourselves.
     //
-    // The `fallback` option controls whether this extended TTL behavior is used.
+    // The `fallback` option controls whether this extended TTL behavior is
+    // used.
     // When false, the "soft" just equals the "hard" ttl.
     const hardTtlMinutes = fallback ? resolvedHardTtl : softTtlMinutes;
 

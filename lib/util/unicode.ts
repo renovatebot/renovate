@@ -2,7 +2,8 @@ import { logger } from '../logger/index.ts';
 import { hiddenUnicodeCharactersRegex, toUnicodeEscape } from './regex.ts';
 
 function isBinaryContent(content: Buffer): boolean {
-  // Check for null bytes in the first 8KB - a common indicator of binary content
+  // Check for null bytes in the first 8KB - a common indicator of binary
+  // content
   const sampleSize = Math.min(content.length, 8192);
   for (let i = 0; i < sampleSize; i++) {
     if (content[i] === 0) {

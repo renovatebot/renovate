@@ -36,7 +36,9 @@ describe('modules/manager/github-actions/integration', () => {
       ...baseConfig,
       ...dep,
       currentValue: dep.currentValue ?? undefined,
-      // isGetPkgReleasesConfig() requires a non-empty packageName, even though `extractPackageFile` does not set a `packageName` if it has the same value as `depName`
+      // isGetPkgReleasesConfig() requires a non-empty packageName, even though
+      // `extractPackageFile` does not set a `packageName` if it has the same
+      // value as `depName`
       packageName: dep.packageName ?? dep.depName!,
     };
   }

@@ -3095,8 +3095,8 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'angular/angular';
       config.datasource = GithubTagsDatasource.id;
 
-      // Only mock calls once so that the second invocation results in
-      // no digest being computable.
+      // Only mock calls once so that the second invocation results in no digest
+      // being computable.
       getGithubReleases.mockResolvedValueOnce({ releases: [] });
       getGithubTags.mockResolvedValueOnce({
         releases: [
@@ -3127,7 +3127,8 @@ describe('workers/repository/process/lookup/index', () => {
         config.currentValue = 'v1.0.0';
         config.packageName = 'angular/angular';
         config.pinDigests = true;
-        // for instance, if a lockfile manages the digest instead of the package file
+        // for instance, if a lockfile manages the digest instead of the package
+        // file
         config.digestManagedExternally = true;
         config.datasource = GithubTagsDatasource.id;
 
@@ -3188,8 +3189,8 @@ describe('workers/repository/process/lookup/index', () => {
         config.pinDigests = true;
         config.datasource = GithubTagsDatasource.id;
 
-        // Only mock calls once so that the second invocation results in
-        // no digest being computable.
+        // Only mock calls once so that the second invocation results in no
+        // digest being computable.
         getGithubReleases.mockResolvedValueOnce({ releases: [] });
         getGithubTags.mockResolvedValueOnce({
           releases: [
@@ -3860,7 +3861,8 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('prefers lockedVersion', async () => {
-      // Contrived test to check that lockedVersion is preferred over currentValue
+      // Contrived test to check that lockedVersion is preferred over
+      // currentValue
       config.currentValue = '1.3.0';
       config.lockedVersion = '1.4.1';
       config.rangeStrategy = 'update-lockfile';
@@ -3904,7 +3906,8 @@ describe('workers/repository/process/lookup/index', () => {
       returnJson.name = 'q2';
       // mark latest minor as deprecated
       returnJson.versions['1.4.1'].deprecated = 'true';
-      // make sure latest release isn't the one deprecated as otherwise every release is deprecated
+      // make sure latest release isn't the one deprecated as otherwise every
+      // release is deprecated
       returnJson['dist-tags'].latest = '2.0.3';
       httpMock.scope(npmDefaultRegistryUrl).get('/q2').reply(200, returnJson);
 
@@ -4524,8 +4527,11 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // when using `rangeStrategy=bump`, this makes `currentVersion` resolve to the oldest matching release (v7.0.0)
-    // however, when we're performing a digest update, we want to repoint to the newest version available, so have to ignore what `rangeStrategy` is telling us
+    // when using `rangeStrategy=bump`, this makes `currentVersion` resolve to
+    // the oldest matching release (v7.0.0)
+    // however, when we're performing a digest update, we want to repoint to the
+    // newest version available, so have to ignore what `rangeStrategy` is
+    // telling us
     it('ages a digest update against the newest matching version, not whatever `rangeStrategy` resolves `currentVersion` to', async () => {
       config.currentValue = 'v7';
       config.currentDigest = fakeSha('current');
@@ -4570,8 +4576,13 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // `rangeStrategy=update-lockfile` forces `currentVersion` to `lockedVersion` unconditionally, even though no release actually satisfies the range - so there's no "newest matching version" to age the digest update against.
-    // With no timestamp available, the safe default (with `minimumReleaseAgeBehaviour=timestamp-required`) is to treat it as pending
+    // `rangeStrategy=update-lockfile` forces `currentVersion` to
+    // `lockedVersion` unconditionally, even though no release actually
+    // satisfies the range - so there's no "newest matching version" to age the
+    // digest update against.
+    // With no timestamp available, the safe default (with
+    // `minimumReleaseAgeBehaviour=timestamp-required` ) is to treat it as
+    // pending
     it('marks digest updates as pendingChecks when no release satisfies the current range with `rangeStrategy=update-lockfile`', async () => {
       config.currentValue = '^2.0.0';
       config.lockedVersion = '1.0.0';
@@ -4682,7 +4693,9 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // Deprecated releases are only dispreferred, not unusable - a digest update repointing to one must still be aged against its timestamp, not held forever for lack of one
+    // Deprecated releases are only dispreferred, not unusable - a digest update
+    // repointing to one must still be aged against its timestamp, not held
+    // forever for lack of one
     it('ages digest updates against a deprecated newest matching version when no non-deprecated version matches', async () => {
       config.currentValue = '^1.0.0';
       config.currentDigest = fakeSha('current');
@@ -4721,7 +4734,8 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // `followTag` narrows the candidate versions, so the digest update must be aged against the followed tag's version, not the newest release overall
+    // `followTag` narrows the candidate versions, so the digest update must be
+    // aged against the followed tag's version, not the newest release overall
     it('ages digest updates against the followed tag version when `followTag` is configured', async () => {
       config.currentValue = 'v7';
       config.currentDigest = fakeSha('current');
@@ -4766,7 +4780,8 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // The digest didn't change, so no update is proposed - no age check should run, and no timestamp-optional warn should fire
+    // The digest didn't change, so no update is proposed - no age check should
+    // run, and no timestamp-optional warn should fire
     it('does not warn about missing releaseTimestamps when the digest is unchanged', async () => {
       config.currentValue = 'v7';
       config.currentDigest = fakeSha('current');
@@ -4792,7 +4807,9 @@ describe('workers/repository/process/lookup/index', () => {
       expect(logger.logger.once.warn).not.toHaveBeenCalled();
     });
 
-    // `currentValue` is a range, so unlike `matchUpdateTypes`, which is read from the incoming `config`, matching against `matchCurrentVersion` needs the resolved `currentVersion`
+    // `currentValue` is a range, so unlike `matchUpdateTypes`, which is read
+    // from the incoming `config`, matching against `matchCurrentVersion` needs
+    // the resolved `currentVersion`
     it('respects a minimumReleaseAge packageRule scoped to matchCurrentVersion for digest updates', async () => {
       config.currentValue = '^1.0.0';
       config.currentDigest = fakeSha('current');
@@ -4925,8 +4942,9 @@ describe('workers/repository/process/lookup/index', () => {
           newDigest: fakeSha('new'),
         },
       ]);
-      // A digest update passing un-aged is exactly the event a timestamp-optional
-      // user needs surfaced, so it must warn - just like the version-update path in
+      // A digest update passing un-aged is exactly the event a
+      // timestamp-optional user needs surfaced, so it must warn - just like the
+      // version-update path in
       // filterInternalChecks().
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
@@ -4942,8 +4960,8 @@ describe('workers/repository/process/lookup/index', () => {
       config.minimumReleaseAge = '3 days';
       config.minimumReleaseAgeBehaviour = 'timestamp-required';
       config.internalChecksFilter = 'none';
-      // No releaseTimestamp: under `strict`/`timestamp-required` this would be held
-      // as pending, but `none` opts out of internal checks entirely.
+      // No releaseTimestamp: under `strict` /`timestamp-required` this would be
+      // held as pending, but `none` opts out of internal checks entirely.
       getGithubTags.mockResolvedValueOnce({
         releases: [{ version: 'v7.0.0' }, { version: 'v7.0.1' }],
       });
@@ -4971,7 +4989,9 @@ describe('workers/repository/process/lookup/index', () => {
       );
     });
 
-    // The `pendingChecks` short-circuit is gated on `internalChecksFilter=strict`: under `flexible` the update proceeds, without setting a pending status
+    // The `pendingChecks` short-circuit is gated on
+    // `internalChecksFilter=strict`: under `flexible` the update proceeds,
+    // without setting a pending status
     it('does not mark digest updates as `pendingChecks` under `internalChecksFilter=flexible`, even when `minimumReleaseAge` has not elapsed', async () => {
       config.currentValue = 'v7';
       config.currentDigest = fakeSha('current');
@@ -5086,9 +5106,12 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // `rangeStrategy=bump` makes `currentVersion` (and thus `res.currentVersionTimestamp`) resolve to the oldest
-    // matching release (v7.0.0, which already clears `minimumReleaseAge`), but the ref itself has moved on to
-    // v7.0.1 - which is what actually gets pinned, and hasn't yet cleared `minimumReleaseAge`.
+    // `rangeStrategy=bump` makes `currentVersion` (and thus
+    // `res.currentVersionTimestamp` ) resolve to the oldest matching release
+    // (v7.0.0, which already clears `minimumReleaseAge` ), but the ref itself
+    // has moved on to
+    // v7.0.1 - which is what actually gets pinned, and hasn't yet cleared
+    // `minimumReleaseAge`.
     it('ages a `pinDigest` update against the newest matching version, not whatever `rangeStrategy` resolves `currentVersion` to', async () => {
       config.currentValue = 'v7';
       config.pinDigests = true;
@@ -5134,8 +5157,10 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // Unlike `digest`, an unversioned `currentValue` (e.g. `latest`) is exempt from `minimumReleaseAge` entirely for `pinDigest`:
-    // pinning a ref that already floats to latest is strictly safer, so holding it would only prolong the un-pinned state.
+    // Unlike `digest`, an unversioned `currentValue` (e.g. `latest` ) is exempt
+    // from `minimumReleaseAge` entirely for `pinDigest`:
+    // pinning a ref that already floats to latest is strictly safer, so holding
+    // it would only prolong the un-pinned state.
     it('does not hold `pinDigest` updates for unversioned `currentValue`s (e.g. `latest`)', async () => {
       config.currentValue = 'alpine';
       config.packageName = 'node';
@@ -5164,7 +5189,8 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'pinDigest',
         },
       ]);
-      // Short-circuited: no age check ran, so no "no releaseTimestamp to age against" log noise.
+      // Short-circuited: no age check ran, so no "no releaseTimestamp to age
+      // against" log noise.
       expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
         expect.anything(),
         expect.stringContaining('has no releaseTimestamp to age against'),
@@ -5382,7 +5408,9 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
-    // An unversioned tag like `alpine` has no versioned release to age against. As we're repointing to newer content we apply `minimumReleaseAge`, but as there's no timestamp, this needs to be held
+    // An unversioned tag like `alpine` has no versioned release to age against.
+    // As we're repointing to newer content we apply `minimumReleaseAge`, but as
+    // there's no timestamp, this needs to be held
     it('marks digest updates for unversioned `currentValue`s as `pendingChecks` under `timestamp-required`', async () => {
       config.currentValue = 'alpine';
       config.packageName = 'node';
@@ -5457,7 +5485,9 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // when `config.lockVersion` is set, `res.currentVersion` is implied even for unversioned values (like `alpine`), which means we can't compute a timestamp
+    // when `config.lockVersion` is set, `res.currentVersion` is implied even
+    // for unversioned values (like `alpine` ), which means we can't compute a
+    // timestamp
     it('marks digest updates for unversioned currentValues as pendingChecks when lockedVersion is set', async () => {
       config.currentValue = 'alpine';
       config.lockedVersion = '8.1.0';
@@ -6535,8 +6565,10 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    // gomod pseudo-version updates are relabelled to `updateType=digest` after filterInternalChecks()
-    // has already age-checked them under the version-derived updateType, so digest-scoped rules must be re-applied
+    // gomod pseudo-version updates are relabelled to `updateType=digest` after
+    // filterInternalChecks()
+    // has already age-checked them under the version-derived updateType, so
+    // digest-scoped rules must be re-applied
     it('applies digest-scoped minimumReleaseAge packageRules to gomod pseudo-version updates', async () => {
       config.manager = 'gomod';
       config.datasource = GoDatasource.id;

@@ -113,19 +113,21 @@ export function createSimpleGit({
 }: CreateSimpleGitOptions = {}): SimpleGit {
   const childEnv = getChildEnv({
     extraEnv: {
-      // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+      // Git will prompt for known hosts or passwords, unless we activate
+      // BatchMode.
       // Set as extraEnv (lowest priority) so that process.env and
       // customEnvVariables can override it.
       GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
     },
     env: {
       ...env,
-      // To ensure the simple-git parsers match correctly, we need
-      // to set the `LANG` and `LC_ALL` environment variables to
-      // the `C.UTF-8` locale. See the docs for more details:
+      // To ensure the simple-git parsers match correctly, we need to set the
+      // `LANG` and `LC_ALL` environment variables to the `C.UTF-8` locale. See
+      // the docs for more details:
       // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
       //
-      // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
+      // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle
+      // special characters:
       // https://github.com/renovatebot/renovate/pull/18963
       LANG: 'C.UTF-8',
       LC_ALL: 'C.UTF-8',
@@ -698,7 +700,8 @@ export async function getBranchUpdateDate(
 }
 
 // Return the commit date of every remote branch tip.
-// Uses a a single `git for-each-ref` call, instead of spawning a `git show` per branch
+// Uses a a single `git for-each-ref` call, instead of spawning a `git show` per
+// branch
 export async function getAllBranchUpdateDates(): Promise<
   Record<string, DateTime>
 > {
@@ -708,7 +711,8 @@ export async function getAllBranchUpdateDates(): Promise<
   const raw = await git.raw([
     'for-each-ref',
     '--format=%(refname:short) %(committerdate:iso-strict)',
-    // NOTE that using `origin/` (instead of i.e. `origin/*`) allows us to capture nested branch names
+    // NOTE that using `origin/` (instead of i.e. `origin/*` ) allows us to
+    // capture nested branch names
     'refs/remotes/origin/',
   ]);
   const result: Record<string, DateTime> = {};
@@ -718,7 +722,8 @@ export async function getAllBranchUpdateDates(): Promise<
     .filter(isNonEmptyStringAndNotWhitespace);
   for (const line of lines) {
     const [refShort, isoDate] = line.split(' ');
-    // refs/remotes/origin/HEAD, the default branch for the repo, is shortened to `origin`
+    // refs/remotes/origin/HEAD, the default branch for the repo, is shortened
+    // to `origin`
     if (refShort === 'origin') {
       continue;
     }
@@ -1194,7 +1199,8 @@ export async function mergeToLocal(branchName: string): Promise<void> {
     );
     status = await git.status();
     if (isVirtualBranch(branchName)) {
-      // Virtual branches are already local and tracked as a remote-tracking ref,
+      // Virtual branches are already local and tracked as a remote-tracking
+      // ref,
       // so merge it directly without fetching from origin.
       const ref = remoteBranchRef(branchName);
       logger.debug(
@@ -1427,8 +1433,8 @@ export async function prepareCommit({
           } else {
             contents = file.contents;
           }
-          // some file systems including Windows don't support the mode
-          // so the index should be manually updated after adding the file
+          // some file systems including Windows don't support the mode so the
+          // index should be manually updated after adding the file
           if (file.isSymlink) {
             await fs.symlink(file.contents, upath.join(localDir, fileName));
           } else {
@@ -1764,7 +1770,8 @@ export async function diffCommitTree(
       const { oldMode, newMode, newSha, status, paths } = matchGroups;
       const statusCode = status[0];
       // R has two tab-separated paths (old\tnew); A/M/D/T have one.
-      // C also has two paths but falls through to default (only the target matters).
+      // C also has two paths but falls through to default (only the target
+      // matters).
       const [sourcePath, targetPath] = paths.split('\t');
       switch (statusCode) {
         case 'D':

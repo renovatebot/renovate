@@ -111,7 +111,8 @@ function updatePinInJson(
     return content;
   }
 
-  // Find the enclosing object block (search for the opening brace before identity)
+  // Find the enclosing object block (search for the opening brace before
+  // identity)
   const beforeIdentity = updated.slice(0, identityMatch.index);
   const blockStart = beforeIdentity.lastIndexOf('{');
   /* istanbul ignore if: valid JSON always has enclosing braces */

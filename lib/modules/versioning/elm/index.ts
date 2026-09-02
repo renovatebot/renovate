@@ -198,7 +198,8 @@ function getNewValue({
       return newVersion;
 
     case 'bump': {
-      // Bump the lower bound to the new version, keep upper if it still contains newVersion
+      // Bump the lower bound to the new version, keep upper if it still
+      // contains newVersion
       // Otherwise bump upper to next major of newVersion
       if (matches(newVersion, currentValue)) {
         return `${newVersion} <= v < ${upper}`;

@@ -553,7 +553,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         )
         .reply(200, Buffer.from('fake-maven-distribution-content'));
       mockMavenFileChangedInGit();
-      // Mock readLocalFile to return content after first write (simulates reading back)
+      // Mock readLocalFile to return content after first write (simulates
+      // reading back)
       fs.readLocalFile.mockResolvedValueOnce(
         propertiesWithDistributionChecksumOnly,
       );
@@ -565,7 +566,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         config: { currentValue: '3.9.8', newValue: '3.9.9' },
       });
 
-      // Verify writeLocalFile was called twice (initial write, then checksum update)
+      // Verify writeLocalFile was called twice (initial write, then checksum
+      // update)
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       // Check the second (final) write contains updated checksum
       const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
@@ -712,7 +714,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         config: { currentValue: '3.9.8', newValue: '3.9.9' },
       });
 
-      // writeLocalFile called twice: initial write, then checksum update (even if fetch fails, it still writes)
+      // writeLocalFile called twice: initial write, then checksum update (even
+      // if fetch fails, it still writes)
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       // On fetch failure, checksum is not updated (original value preserved)
       const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
@@ -833,7 +836,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         config: { currentValue: '3.3.1', newValue: '3.3.2' },
       });
 
-      // writeLocalFile called twice: initial write (stripped), then after checksum update
+      // writeLocalFile called twice: initial write (stripped), then after
+      // checksum update
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
       // Should have added the checksum after distributionUrl
@@ -868,7 +872,8 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         config: { currentValue: '3.3.1', newValue: '3.3.2' },
       });
 
-      // writeLocalFile called twice: initial write (stripped), then after checksum update
+      // writeLocalFile called twice: initial write (stripped), then after
+      // checksum update
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
       const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
       // Should have added the checksum after wrapperUrl

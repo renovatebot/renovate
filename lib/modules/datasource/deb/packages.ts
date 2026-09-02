@@ -115,7 +115,8 @@ export async function downloadPackageFile(
   try {
     inReleaseContent = await fetchInReleaseFile(baseSuiteUrl, http);
   } catch (error) {
-    // This is expected to fail for Artifactory if GPG verification is not enabled
+    // This is expected to fail for Artifactory if GPG verification is not
+    // enabled
     logger.debug(
       { url: baseSuiteUrl, err: error },
       'Could not fetch InRelease file',

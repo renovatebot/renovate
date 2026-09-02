@@ -219,8 +219,8 @@ function scanUsages(
       results.set(name, state);
     }
 
-    // The walk descends into every key of every node; children are
-    // re-narrowed by `isNode` when popped off the stack again.
+    // The walk descends into every key of every node; children are re-narrowed
+    // by `isNode` when popped off the stack again.
     for (const key in node) {
       if (key === 'parent') {
         continue;

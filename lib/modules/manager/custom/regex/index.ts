@@ -31,8 +31,8 @@ export function extractPackageFile(
 ): MaybePromise<PackageFileContent | null> {
   let deps: PackageDependency[];
 
-  // till this stage, packageFile is the full path
-  // so we need to extract filename and dir before passing it for template.compile
+  // till this stage, packageFile is the full path so we need to extract
+  // filename and dir before passing it for template.compile
   const packageFileName = upath.basename(packageFile);
   const packageFileDir = upath.dirname(packageFile);
   const packageFileInfo: PackageFileInfo = {

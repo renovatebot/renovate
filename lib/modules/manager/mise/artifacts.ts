@@ -198,8 +198,8 @@ export async function updateArtifacts({
   };
 
   // `mise trust` is only needed on the allowlisted path. In safe mode mise
-  // loads untrusted config without a trust prompt (the config is inert — it
-  // can neither execute code nor inject environment), so the trust step is
+  // loads untrusted config without a trust prompt (the config is inert — it can
+  // neither execute code nor inject environment), so the trust step is
   // unnecessary and is skipped.
   const commands = safeMode
     ? [lockCmd]

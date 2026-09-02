@@ -33,7 +33,8 @@ function createDep(
   }
   dep.currentValue = anApp.version;
 
-  // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
+  // in case of OCI repository, we need a PackageDependency with a
+  // DockerDatasource and a packageName
   if (isOCIRegistry(anApp.chart)) {
     dep.datasource = DockerDatasource.id;
     dep.packageName = removeOCIPrefix(anApp.chart!);

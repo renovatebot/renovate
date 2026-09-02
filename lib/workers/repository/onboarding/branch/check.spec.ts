@@ -121,7 +121,9 @@ describe('workers/repository/onboarding/branch/check', () => {
     it('skips closing comment if onboarding pr is slightly older than onboardingAutoCloseAge', async () => {
       const now = DateTime.now();
       vi.setSystemTime(now.toMillis());
-      // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
+      // we're currently 25 hours ahead of the creation time, which is 1.x days
+      // since the PR was created, which means that an
+      // `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
       const createdAt = now.minus({ hour: 25 });
 
       GlobalConfig.set({ onboardingAutoCloseAge: 1 });

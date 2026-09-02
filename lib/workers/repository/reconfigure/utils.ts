@@ -61,7 +61,8 @@ export async function getReconfigureConfig(
   let configFileParsed: any;
   try {
     configFileParsed = parseJson(configFileRaw, configFileName);
-    // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
+    // no need to confirm renovate field in package.json we already do it in
+    // `detectConfigFile()`
     if (configFileName === 'package.json') {
       configFileParsed = configFileParsed.renovate;
     }

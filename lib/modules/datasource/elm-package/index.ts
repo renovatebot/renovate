@@ -68,7 +68,8 @@ export class ElmPackageDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
-    // Elm packages must be published from GitHub - the package name IS the GitHub repo path
+    // Elm packages must be published from GitHub - the package name IS the
+    // GitHub repo path
     // (e.g., "elm/core" is published from github.com/elm/core)
     // This is enforced by the `elm publish` command
     if (packageName.includes('/')) {

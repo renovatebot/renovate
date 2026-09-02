@@ -5,8 +5,7 @@ import type { NugetPackageDependency, Registry } from '../types.ts';
 import { applyRegistries } from '../util.ts';
 
 // regex for finding
-// #:package Name@Version
-// or
+// #:package Name@Version or
 // #:sdk Name@Version
 const packageRegex = regEx(
   /^#:(?<type>package|sdk)\s+(?<depName>[A-Za-z0-9_.-]+)@(?<currentValue>[0-9][^\s]*)/,

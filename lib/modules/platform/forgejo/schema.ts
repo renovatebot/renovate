@@ -107,7 +107,8 @@ export type PRState = z.infer<typeof PRState>;
 export const IssueState = z.enum(['open', 'closed', 'all']);
 export type IssueState = z.infer<typeof IssueState>;
 
-// Lenient partial repo schema for embedded repo references in PRs (only full_name is read)
+// Lenient partial repo schema for embedded repo references in PRs (only
+// full_name is read)
 const PartialRepo = z.object({
   full_name: z.string(),
 });

@@ -7,7 +7,8 @@ import {
   Yaml,
 } from '../../../util/schema-utils/index.ts';
 
-// pnpm ignores registry URLs containing `${...}` env-var interpolation since v11.5.3
+// pnpm ignores registry URLs containing `${...}` env-var interpolation since
+// v11.5.3
 function hasEnvVar(value: string): boolean {
   return value.includes('${');
 }

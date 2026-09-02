@@ -55,8 +55,7 @@ function convertStabilityModifier(input: string): string {
     '$1.$2',
   );
 
-  // If there is a stability part, npm semver expects the version
-  // to be full
+  // If there is a stability part, npm semver expects the version to be full
   return `${padZeroes(versionParts[0])}-${stability}`;
 }
 
@@ -79,7 +78,8 @@ function calculateSatisfyingVersionIntenal(
   range: string,
   minMode: boolean,
 ): string | null {
-  // Because composer -p versions are considered stable, we have to remove the suffix for the npm.XXX functions.
+  // Because composer -p versions are considered stable, we have to remove the
+  // suffix for the npm.XXX functions.
   const versionsMapped = versions.map((x) => {
     return {
       origianl: x,
@@ -97,7 +97,8 @@ function calculateSatisfyingVersionIntenal(
     return null;
   }
 
-  // After we find the npm versions, we select from them back in the mapping the possible patches.
+  // After we find the npm versions, we select from them back in the mapping the
+  // possible patches.
   const candidates = versionsMapped
     .filter((x) => x.npmVariant === npmVersion)
     .sort((a, b) => (minMode ? 1 : -1) * sortVersions(a.origianl, b.origianl));
@@ -174,7 +175,8 @@ function getMinor(version: string): number | null {
 function getPatch(version: string): number | null {
   const semverVersion = semver.coerce(composer2npm(version));
 
-  // This returns only the numbers without the optional `-pXX` patch version supported by composer. Fixing that would require a bigger
+  // This returns only the numbers without the optional `-pXX` patch version
+  // supported by composer. Fixing that would require a bigger
   // refactoring, because the API supports only numbers.
   return semverVersion ? npm.getPatch(semverVersion) : null;
 }
@@ -194,7 +196,8 @@ function isSingleVersion(input: string): boolean {
 function isStable(version: string): boolean {
   if (version) {
     // Composer considers patches `-pXX` as stable: https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L568 but npm not.
-    // In order to be able to use the standard npm.isStable function, we remove the potential patch version for the check.
+    // In order to be able to use the standard npm.isStable function, we remove
+    // the potential patch version for the check.
     const [withoutPatch] = removeComposerSpecificPatchPart(version);
     return npm.isStable(composer2npm(withoutPatch));
   }
@@ -364,11 +367,14 @@ function sortVersions(a: string, b: string): number {
   const [bWithoutPatch, bContainsPatch] = removeComposerSpecificPatchPart(b);
 
   if (aContainsPatch === bContainsPatch) {
-    // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
+    // If both [a and b] contain patch version or both [a and b] do not contain
+    // patch version, then npm comparison deliveres correct results
     return npm.sortVersions(composer2npm(a), composer2npm(b));
   }
   if (npm.equals(composer2npm(aWithoutPatch), composer2npm(bWithoutPatch))) {
-    // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
+    // If only one [a or b] contains patch version and the parts without patch
+    // versions are equal, then the version with patch is greater (this is the
+    // case where npm comparison fails)
     return aContainsPatch ? 1 : -1;
   }
   // All other cases can be compared correctly by npm

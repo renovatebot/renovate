@@ -121,7 +121,8 @@ export async function initPlatform({
       logger.debug({ err }, 'Unknown error fetching Bitbucket user identity');
     }
   }
-  // TODO: Add a connection check that endpoint/username/password combination are valid (#9594)
+  // TODO: Add a connection check that endpoint/username/password combination
+  // are valid (#9594)
   const platformConfig: PlatformResult = {
     endpoint: endpoint ?? BITBUCKET_PROD_ENDPOINT,
   };
@@ -204,7 +205,8 @@ export async function getRawFile(
 
   let finalBranchOrTag = branchOrTag;
   if (branchOrTag?.includes(pathSeparator)) {
-    // Branch name contains slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
+    // Branch name contains slash, so we have to replace branch name with SHA1
+    // of the head commit; otherwise the API will not work.
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
@@ -354,7 +356,8 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
 
   if (includeOtherAuthors) {
-    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    // PR might have been created by anyone, so don't use the cached Renovate PR
+    // list
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
@@ -659,7 +662,8 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
     return { raw, partDepth };
   });
 
-  // Reassemble parts while replacing collapsible html elements with markdown list
+  // Reassemble parts while replacing collapsible html elements with markdown
+  // list
   return detailsParts
     .map(({ raw, partDepth }) => {
       let t = raw;
@@ -734,7 +738,8 @@ export function addAssignees(
   _prNr: number,
   _assignees: string[],
 ): Promise<void> {
-  // Bitbucket supports "participants" and "reviewers" so does not seem to have the concept of "assignee"
+  // Bitbucket supports "participants" and "reviewers" so does not seem to have
+  // the concept of "assignee"
   logger.warn('Cannot add assignees');
   return Promise.resolve();
 }
@@ -809,7 +814,8 @@ async function sanitizeReviewers(
       'is not a member of this workspace and cannot be added to this pull request';
 
     for (const msg of err.body.error.fields.reviewers) {
-      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+      // Bitbucket returns a 400 if any of the PR reviewer accounts are now
+      // inactive (ie: disabled/suspended)
       if (msg === MSG_MALFORMED_REVIEWERS_LIST) {
         logger.debug(
           { err },
@@ -825,7 +831,8 @@ async function sanitizeReviewers(
             )
           ).body;
 
-          // There are cases where an active user may still not be a member of a workspace
+          // There are cases where an active user may still not be a member of a
+          // workspace
           if (
             reviewerUser.account_status === 'active' &&
             (await isAccountMemberOfWorkspace(reviewer, config.repository))
@@ -833,14 +840,16 @@ async function sanitizeReviewers(
             sanitizedReviewers.push(reviewer);
           }
         }
-        // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
+        // Bitbucket returns a 400 if any of the PR reviewer accounts are no
+        // longer members of this workspace
       } else if (msg.endsWith(MSG_NOT_WORKSPACE_MEMBER)) {
         logger.debug(
           { err },
           'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers',
         );
 
-        // Validate that each previous PR reviewer account is still a member of this workspace
+        // Validate that each previous PR reviewer account is still a member of
+        // this workspace
         for (const reviewer of reviewers) {
           if (await isAccountMemberOfWorkspace(reviewer, config.repository)) {
             sanitizedReviewers.push(reviewer);
@@ -882,7 +891,8 @@ async function isAccountMemberOfWorkspace(
 
     return true;
   } catch (err) {
-    // HTTP 404: User cannot be found, or the user is not a member of this workspace.
+    // HTTP 404: User cannot be found, or the user is not a member of this
+    // workspace.
     if (err.statusCode === 404) {
       logger.debug(
         { err },
@@ -1052,7 +1062,8 @@ export async function updatePr({
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
-  // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
+  // Updating a PR in Bitbucket will clear the reviewers if reviewers is not
+  // present
   const pr = (
     await bitbucketHttp.getJsonUnchecked<PrResponse>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,

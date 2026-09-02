@@ -178,7 +178,8 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     }
     logger.trace({ lockParsed }, 'pnpm lockfile parsed');
 
-    // field lockfileVersion is type string in lockfileVersion = 6 and type number in < 6
+    // field lockfileVersion is type string in lockfileVersion = 6 and type
+    // number in < 6
     const lockfileVersion: number = isNumber(lockParsed.lockfileVersion)
       ? lockParsed.lockfileVersion
       : parseFloat(lockParsed.lockfileVersion);

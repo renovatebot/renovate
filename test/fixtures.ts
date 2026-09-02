@@ -148,7 +148,8 @@ const fsExtraMock = {
   ),
 };
 
-// Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
+// Temporary solution, when all tests will be rewritten to Fixtures mocks can be
+// moved into __mocks__ folder
 export function fsExtra(): any {
   const fs = {
     ...memfs,

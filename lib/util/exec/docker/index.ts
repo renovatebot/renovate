@@ -233,19 +233,20 @@ export async function generateDockerCommand(
   }
 
   const bashCommand = bashCommandParts.join(' && ');
-  // Single-quote the whole `-c` argument rather than hand-escaping `"`. Escaping
-  // only `"` left `\` unhandled, so a value containing `\"` produced a string that
-  // `shlex.split` rejects outright ("Got EOF while in a quoted string"), failing
-  // the update.
+  // Single-quote the whole `-c` argument rather than hand-escaping `"`.
+  // Escaping only `"` left `\` unhandled, so a value containing `\"` produced a
+  // string that
+  // `shlex.split` rejects outright ("Got EOF while in a quoted string"),
+  // failing the update.
   //
   // It also left `$` and backticks live in the outer context, which silently
   // defeats the `quote()` calls the managers apply: their single quotes are not
   // special inside double quotes. That is inert while nothing pairs
-  // `ExecOptions.shell` with `docker` — `rawExec` otherwise splits argv without a
-  // shell — but it made the wrapper one `shell: true` away from turning a quoted
-  // dep name into host-side command substitution, which is how the flux manager
-  // was configured until it moved to `CommandWithOptions`. Being correct here
-  // means that pairing is no longer load-bearing.
+  // `ExecOptions.shell` with `docker` — `rawExec` otherwise splits argv without
+  // a shell — but it made the wrapper one `shell: true` away from turning a
+  // quoted dep name into host-side command substitution, which is how the flux
+  // manager was configured until it moved to `CommandWithOptions`. Being
+  // correct here means that pairing is no longer load-bearing.
   result.push(`bash -l -c ${quote(bashCommand)}`);
 
   return result.join(' ');

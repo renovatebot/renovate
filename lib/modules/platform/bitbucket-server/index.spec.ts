@@ -51,7 +51,8 @@ function repoMock(
   };
 
   if (options.cloneUrl.https || options.cloneUrl.ssh) {
-    // This mimics the behavior of bb-server which does not include the clone property at all
+    // This mimics the behavior of bb-server which does not include the clone
+    // property at all
     // if ssh and https are both turned off
     links.clone = [
       options.cloneUrl.https

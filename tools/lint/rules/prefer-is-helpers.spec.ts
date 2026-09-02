@@ -22,8 +22,8 @@ ruleTester.run('prefer-is-helpers', rule, {
     `is.string(x);`,
     // `isNumber()` also excludes `NaN`, so this isn't a safe rewrite
     `typeof x === 'number';`,
-    // `isObject()` excludes `null` and includes functions, so this isn't a
-    // safe rewrite
+    // `isObject()` excludes `null` and includes functions, so this isn't a safe
+    // rewrite
     `typeof x === 'object';`,
     `x === 'string';`,
     // `+` is not a comparison operator

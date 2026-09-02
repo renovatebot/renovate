@@ -97,9 +97,9 @@ describe('modules/datasource/rust-version/index', () => {
     });
 
     it('ignores blank lines silently (no spurious warning)', async () => {
-      // `manifests.txt` ends with a trailing newline upstream, so the
-      // body's `split('\n')` always yields an empty final element. Also
-      // exercise a whitespace-only line in case upstream introduces one.
+      // `manifests.txt` ends with a trailing newline upstream, so the body's
+      // `split('\n')` always yields an empty final element. Also exercise a
+      // whitespace-only line in case upstream introduces one.
       const manifestsContent =
         'static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml\n\n   \n';
 

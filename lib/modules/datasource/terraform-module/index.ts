@@ -76,7 +76,8 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         return await this.queryTerraformRegistry(registry, repository);
       }
 
-      // Use the standard Module Registry Protocol for other conformant registries.
+      // Use the standard Module Registry Protocol for other conformant
+      // registries.
       return await this.queryModuleRegistry(registry, repository);
     } catch (err) {
       this.handleGenericErrors(err);

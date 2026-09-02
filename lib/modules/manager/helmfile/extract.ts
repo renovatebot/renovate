@@ -39,7 +39,8 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
   let registryData: Record<string, HelmRepository> = {};
-  // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
+  // Record kustomization usage for all deps, since updating artifacts is run on
+  // the helmfile.yaml as a whole.
   let needKustomize = false;
   const docs: Doc[] = parseYaml(content, {
     customSchema: Document,
@@ -48,7 +49,8 @@ export async function extractPackageFile(
   });
 
   for (const doc of docs) {
-    // Always check for repositories in the current document and override the existing ones if any (as YAML does)
+    // Always check for repositories in the current document and override the
+    // existing ones if any (as YAML does)
     if (doc.repositories) {
       registryData = {};
       for (const repo of doc.repositories) {
@@ -133,7 +135,8 @@ export async function extractPackageFile(
           .filter(isString);
       }
 
-      // By definition on helm the chart name should be lowercase letter + number + -
+      // By definition on helm the chart name should be lowercase letter +
+      // number + -
       // However helmfile support templating of that field
       if (
         !isValidChartName(

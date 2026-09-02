@@ -285,7 +285,8 @@ export async function getRepos(): Promise<string[]> {
   let reposRes: ListRepositoriesOutput;
   try {
     reposRes = await client.listRepositories();
-    //todo do we need pagination? maximum number of repos is 1000 without pagination, also the same for free account
+    // todo do we need pagination? maximum number of repos is 1000 without
+    // pagination, also the same for free account
   } catch (err) {
     logger.error({ err }, 'Could not retrieve repositories');
     return [];
@@ -440,8 +441,8 @@ export async function updatePr({
     try {
       await client.updatePrStatus(`${prNo}`, prStatusInput);
     } catch {
-      // safety check
-      // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
+      // safety check do nothing, it's ok to fail sometimes when trying to
+      // update from open to open or from closed to closed.
     }
   }
 }

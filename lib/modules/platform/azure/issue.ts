@@ -75,8 +75,8 @@ export class IssueService {
 
   constructor(config: Config) {
     this.config = config;
-    // Wrapped in `Lazy` so concurrent callers share a single resolution
-    // instead of each firing a duplicate `getWorkItemTypeStates` request.
+    // Wrapped in `Lazy` so concurrent callers share a single resolution instead
+    // of each firing a duplicate `getWorkItemTypeStates` request.
     this.workItemStates = new Lazy(() => this.resolveWorkItemStates());
     // Same reason: resolve the deployment type once per run, not per issue.
     this.hosted = new Lazy(() => azureApi.isHosted());
@@ -350,9 +350,10 @@ export class IssueService {
       // state for the project's process (e.g. `To Do` on Basic, `New`/`Active`
       // on Agile). Passing a hardcoded state fails on processes that lack it.
 
-      // The configured work item type (default `Issue`) only exists in some
-      // processes (Basic, Agile, CMMI) but not others (e.g. Scrum). Creating one
-      // on a process without it returns a 404 that the REST client surfaces as
+      // The configured work item type (default `Issue` ) only exists in some
+      // processes (Basic, Agile, CMMI) but not others (e.g. Scrum). Creating
+      // one on a process without it returns a 404 that the REST client surfaces
+      // as
       // `null`, so check first and log an actionable message instead of failing
       // cryptically.
       const availableTypes = await this.getWorkItemTypeNames(azureApiWit);
@@ -389,9 +390,9 @@ export class IssueService {
         this.config.workItemType,
       );
 
-      // Azure DevOps normally returns the created work item, but the
-      // underlying REST client resolves to `null` instead of throwing for
-      // some responses: a 404, or any 2xx with an empty/non-JSON body (e.g. a
+      // Azure DevOps normally returns the created work item, but the underlying
+      // REST client resolves to `null` instead of throwing for some responses:
+      // a 404, or any 2xx with an empty/non-JSON body (e.g. a
       // 203 sign-in page from an expired token or an SSO/proxy in front of the
       // instance). Guard the result so such a response does not crash the whole
       // run with `Cannot read properties of null (reading 'id')`.

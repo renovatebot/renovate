@@ -88,7 +88,8 @@ describe('workers/repository/changelog/index', () => {
       expect.objectContaining({ groupName: 'fetchChangeLogs is branch' }),
     );
 
-    // When fetchChangeLogs is explicitly set to 'off', no changelogs should be fetched.
+    // When fetchChangeLogs is explicitly set to 'off', no changelogs should be
+    // fetched.
     expect(getChangeLogJSON).not.toHaveBeenCalledWith(
       expect.objectContaining({ groupName: 'fetchChangeLogs is off' }),
     );
@@ -106,7 +107,8 @@ describe('workers/repository/changelog/index', () => {
       expect.objectContaining({ groupName: 'fetchChangeLogs is pr' }),
     );
 
-    // When fetchChangeLogs is explicitly set to 'off', no changelogs should be fetched.
+    // When fetchChangeLogs is explicitly set to 'off', no changelogs should be
+    // fetched.
     expect(getChangeLogJSON).not.toHaveBeenCalledWith(
       expect.objectContaining({ groupName: 'fetchChangeLogs is off' }),
     );

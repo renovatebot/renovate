@@ -61,8 +61,8 @@ describe('docs/documentation', () => {
         return (
           options
             .filter((option) => !option.globalOnly)
-            // Only include top-level options, which have no parents (implicit root) or explicitly define the
-            // root ('.') as their parent.
+            // Only include top-level options, which have no parents (implicit
+            // root) or explicitly define the root ('.') as their parent.
             .filter(
               (option) =>
                 !option.parents ||
@@ -109,7 +109,8 @@ describe('docs/documentation', () => {
           options
             .filter((option) => option.stage !== 'global')
             .filter((option) => !option.globalOnly)
-            // Only include true sub-options: options which have parents but none of those are explicitly the root ('.').
+            // Only include true sub-options: options which have parents but
+            // none of those are explicitly the root ('.').
             .filter(
               (option) =>
                 option.parents &&
@@ -277,8 +278,8 @@ describe('docs/documentation', () => {
           'docs/usage/key-concepts/minimum-release-age.md',
           'utf8',
         );
-        // RE2 (renovate's regex engine) doesn't support lookahead, so bound
-        // the section with plain index lookups instead of `(?=\n### )`.
+        // RE2 (renovate's regex engine) doesn't support lookahead, so bound the
+        // section with plain index lookups instead of `(?=\n### )`.
         const start = regEx(/### Which update types take/).exec(content)?.index;
         let section: string | undefined;
         if (start !== undefined) {

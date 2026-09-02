@@ -136,7 +136,8 @@ export class GetDatasourceReleasesStats {
       memCache.get<GetReleasesDataPoint[]>('get-releases-stats'),
     );
 
-    // Process all datapoints into a hierarchical structure of datasource, registry url, and package name.
+    // Process all datapoints into a hierarchical structure of datasource,
+    // registry url, and package name.
     const durationData: getReleaseStatsInternal<number[]> = {
       stats: [],
       datasources: {},

@@ -173,7 +173,8 @@ function massageContent(content: string, options?: YamlOptions): string {
 function prepareParseOption(options: YamlOptions | undefined): YamlOptions {
   return {
     prettyErrors: true,
-    // if we're removing templates, we can run into the situation where we have duplicate keys
+    // if we're removing templates, we can run into the situation where we have
+    // duplicate keys
     uniqueKeys: !options?.removeTemplates,
     strict: false,
     ...options,

@@ -140,7 +140,8 @@ describe('workers/repository/process/libyear', () => {
       });
     });
 
-    // NOTE that it shouldn't be possible for `updates` to be set when `enabled: false`
+    // NOTE that it shouldn't be possible for `updates` to be set when
+    // `enabled: false`
     it('skips disabled dependencies when calculating libYears', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -172,7 +173,9 @@ describe('workers/repository/process/libyear', () => {
                 datasource: 'npm',
                 currentVersion: '0.1.0',
                 currentVersionTimestamp: '2019-07-01T00:00:00Z',
-                // NOTE that updates shouldn't be set when `enabled: false`, but this clarifies that the existing behaviour is to take that into effect
+                // NOTE that updates shouldn't be set when `enabled: false`, but
+                // this clarifies that the existing behaviour is to take that
+                // into effect
                 updates: [
                   {
                     newVersion: '1.0.0',
@@ -223,7 +226,8 @@ describe('workers/repository/process/libyear', () => {
     });
 
     it('de-duplicates if same dep found in different files', () => {
-      // there are three package files with the same dependency + version but mixed datasources
+      // there are three package files with the same dependency + version but
+      // mixed datasources
       const packageFiles = {
         npm: [
           {

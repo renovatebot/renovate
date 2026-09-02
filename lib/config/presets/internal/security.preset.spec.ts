@@ -52,7 +52,9 @@ describe('config/presets/internal/security.preset', () => {
   it.each(minimumReleaseAgeDatasourceNames)(
     'only exposes datasource %s because it supports release timestamps',
     (datasource) => {
-      // A `minimumReleaseAge` preset only makes sense when the datasource can report a release timestamp, otherwise every update would be held back under the default `minimumReleaseAgeBehaviour`
+      // A `minimumReleaseAge` preset only makes sense when the datasource can
+      // report a release timestamp, otherwise every update would be held back
+      // under the default `minimumReleaseAgeBehaviour`
       expect(getDatasources().get(datasource)).toMatchObject({
         releaseTimestampSupport: true,
       });

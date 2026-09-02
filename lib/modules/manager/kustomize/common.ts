@@ -8,7 +8,8 @@ export function generateHelmEnvs(config: UpdateArtifactsConfig): ExtraEnv {
   const cacheDir = privateCacheDir();
 
   const envs: ExtraEnv = {
-    // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
+    // set cache and config files to a path in privateCacheDir to prevent file
+    // and credential leakage
     HELM_REGISTRY_CONFIG: upath.join(cacheDir, 'registry.json'),
     HELM_REPOSITORY_CONFIG: upath.join(cacheDir, 'repositories.yaml'),
     HELM_REPOSITORY_CACHE: upath.join(cacheDir, 'repositories'),

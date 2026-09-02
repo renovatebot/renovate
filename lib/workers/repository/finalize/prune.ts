@@ -34,7 +34,8 @@ async function cleanUpBranches(
         baseBranch =
           baseBranchRe?.exec(branchName)?.[1] ?? config.defaultBranch!;
       } else {
-        // single base branch: branch name doesn't encode it, use the configured one
+        // single base branch: branch name doesn't encode it, use the configured
+        // one
         baseBranch = config.baseBranches?.[0] ?? config.defaultBranch!;
       }
       const pr = await platform.findPr({

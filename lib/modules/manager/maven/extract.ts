@@ -524,8 +524,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     extractedDeps[name] = [];
   });
 
-  // Construct package-specific prop scopes
-  // and merge them in reverse order,
+  // Construct package-specific prop scopes and merge them in reverse order,
   // which allows inheritance/overriding.
   packageFileNames.forEach((name) => {
     registryUrls[name] = new Set();

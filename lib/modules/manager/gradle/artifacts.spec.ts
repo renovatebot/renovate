@@ -315,7 +315,8 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       ]);
 
-      // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
+      // In win32, gradle.bat will be used and /dev/null redirection isn't used
+      // yet
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'gradlew.bat -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties',

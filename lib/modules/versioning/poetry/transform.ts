@@ -140,7 +140,8 @@ export function poetry2npm(input: string, throwOnUnsupported = false): string {
  */
 export function npm2poetry(range: string): string {
   // apply poetry-style normalizations to versions embedded in range string
-  // (i.e. anything that is not a range operator, potentially surrounded by whitespace)
+  // (i.e. anything that is not a range operator, potentially surrounded by
+  // whitespace)
   const transformedRange = range
     .split(RANGE_COMPARATOR_PATTERN)
     .map((chunk) => semver2poetry(chunk) ?? chunk)

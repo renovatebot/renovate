@@ -81,7 +81,8 @@ export function getExpectedPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
-  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  // Vulnerability alert branches bypass all rate/concurrency limits, so they
+  // shouldn't count towards them.
   const securityBranchCount = branches.filter(
     (b) => b.isVulnerabilityAlert,
   ).length;
@@ -188,7 +189,8 @@ function getBranchUpgradeTypes(branch: BranchConfig): Set<SummaryCategory> {
   return types;
 }
 
-// Sort: default branch (empty string) first, then named branches alphabetically.
+// Sort: default branch (empty string) first, then named branches
+// alphabetically.
 function sortBaseBranches(bases: Iterable<string>): string[] {
   return [...bases].sort((a, b) => {
     if (a === b) {
@@ -214,7 +216,8 @@ function describeSecurityGroup(groupBranches: BranchConfig[]): string {
     .filter((f) => f.file);
   const uniqueManagers = new Set(packageFiles.map((f) => f.manager));
 
-  // Vulnerability alerts can match on datasource + packageName without a specific file (e.g. GitHub vulnerability alerts),
+  // Vulnerability alerts can match on datasource + packageName without a
+  // specific file (e.g. GitHub vulnerability alerts),
   // so we need to handle an absent packageFile
   if (packageFiles.length === 0) {
     const branchManagers = new Set(groupBranches.map((b) => b.manager));
@@ -383,7 +386,8 @@ export function getExpectedPrListSummary(
   const prHourlyLimit = coerceNumber(config.prHourlyLimit);
   const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
   const concurrentLimit = resolveConcurrentLimit(config);
-  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  // Vulnerability alert branches bypass all rate/concurrency limits, so they
+  // shouldn't count towards them.
   const securityCount = Object.keys(stats.securityGroups).length;
 
   if (hasMultipleBaseBranches) {
@@ -447,7 +451,8 @@ export function getExpectedPrListSummary(
 
   prDesc += `\n<small>Note that a single PR can update multiple files and/or managers, so the above rows may not align with the number of PRs being listed above.</small>\n`;
 
-  // provide a summary of the given security updates, as they're likely more important to the user
+  // provide a summary of the given security updates, as they're likely more
+  // important to the user
   if (Object.keys(stats.securityGroups).length) {
     prDesc += `\n**Security updates**:\n\n`;
     for (const groupBranches of Object.values(stats.securityGroups)) {

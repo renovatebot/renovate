@@ -308,7 +308,8 @@ export const ImportMapExtract = Json.pipe(
 }));
 export type ImportMapExtract = z.infer<typeof ImportMapExtract>;
 
-// All object needs passthrough to keep original field of package file and all field should be optional
+// All object needs passthrough to keep original field of package file and all
+// field should be optional
 export const UpdateDenoJsonFile = Jsonc.pipe(
   z
     .object({
@@ -342,7 +343,8 @@ export const UpdateDenoJsonFile = Jsonc.pipe(
 );
 export type UpdateDenoJsonFile = z.infer<typeof UpdateDenoJsonFile>;
 
-// All object needs passthrough to keep original field of package file and all field should be optional
+// All object needs passthrough to keep original field of package file and all
+// field should be optional
 export const UpdateImportMapJsonFile = Json.pipe(
   z
     .object({

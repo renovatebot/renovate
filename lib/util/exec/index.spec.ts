@@ -1078,7 +1078,8 @@ describe('util/exec/index', () => {
     const stderr = 'err';
     cpExec.mockImplementation(
       (): Promise<ExecResult> =>
-        // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
+        // NOTE that this only makes sense as a return value when
+        // `ignoreFailure=true` is set
         Promise.resolve({
           stdout,
           stderr,
@@ -1223,8 +1224,10 @@ describe('util/exec/index', () => {
       (): any => 'asdf',
     );
 
-    // The `removeDockerContainer` function is called once before it's used in the `catch` block.
-    // We want it to fail in the catch block so we can assert the error is wrapped.
+    // The `removeDockerContainer` function is called once before it's used in
+    // the `catch` block.
+    // We want it to fail in the catch block so we can assert the error is
+    // wrapped.
     let calledOnce = false;
     const removeDockerContainerSpy = vi.spyOn(
       dockerModule,
@@ -1460,7 +1463,8 @@ describe('util/exec/index', () => {
         });
       });
 
-      // to provide a bit more safety to users, so they can't specify too little memory for Gradle
+      // to provide a bit more safety to users, so they can't specify too little
+      // memory for Gradle
       describe('a minimum of 512M is enforced', () => {
         it('when global settings are lower than 512M, they are overridden to 512M', () => {
           GlobalConfig.set({

@@ -599,7 +599,8 @@ export async function validateConfig(
                           message,
                         });
                       }
-                      // It's too late to apply any of these options once you already have updates determined
+                      // It's too late to apply any of these options once you
+                      // already have updates determined
                       const preLookupOptions = [
                         'allowedVersions',
                         'extractVersion',
@@ -724,7 +725,8 @@ export async function validateConfig(
                       endPattern.test(pattern)
                     ) {
                       try {
-                        // regEx isn't aware of our !/ prefix but can handle the suffix
+                        // regEx isn't aware of our !/ prefix but can handle the
+                        // suffix
                         regEx(pattern.replace(startPattern, '/'));
                       } catch {
                         errors.push({
@@ -1254,8 +1256,12 @@ async function validateGlobalConfig(
               });
             }
             const { repository: _, ...repoEntryConfig } = subval;
-            // Each repository object entry is validated as its own global config, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
-            // Inherit them (unless the entry sets its own) so that entry-level `env`/`headers` are validated against the allowlists, rather than an empty one.
+            // Each repository object entry is validated as its own global
+            // config, so it does not automatically see the top-level
+            // `allowedEnv` /`allowedHeaders`.
+            // Inherit them (unless the entry sets its own) so that entry-level
+            // `env` /`headers` are validated against the allowlists, rather
+            // than an empty one.
             const subValidation = await validateConfig(
               'global',
               {

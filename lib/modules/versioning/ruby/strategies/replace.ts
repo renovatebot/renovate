@@ -41,8 +41,10 @@ export default ({ range, to }: { range: string; to: string }): string => {
   const parts = parseRanges(range).map((part): Range => {
     if (satisfiesRange(to, part)) {
       // The new version satisfies the range. Keep it as-is.
-      // Note that consecutive `~>` and `>=` parts are combined into one Range object,
-      // therefore both parts are updated if the new version violates one of them.
+      // Note that consecutive `~>` and `>=` parts are combined into one Range
+      // object,
+      // therefore both parts are updated if the new version violates one of
+      // them.
       return part;
     }
 

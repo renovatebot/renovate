@@ -67,13 +67,16 @@ export class NugetV2Api {
         .childrenNamed('link')
         .find((node) => node.attr.rel === 'next');
 
-      // Resolve the relative-or-absolute next link, but only follow it when it stays on the same origin, or if the user has opted in via `RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN`
+      // Resolve the relative-or-absolute next link, but only follow it when it
+      // stays on the same origin, or if the user has opted in via
+      // `RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN`
       const nextHref = nextPkgUrlListLink?.attr.href;
       const nextUrl: string | null = nextHref
         ? resolvePaginationUrl(pkgUrlList, nextHref, allowCrossOrigin)
         : null;
       if (nextHref && !nextUrl) {
-        // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+        // make sure that users are aware if there are any (potentially
+        // malicious, or misconfigured) pagination links being returned
         logger.once.warn(
           { feedUrl, nextUrl: nextHref },
           'Ignoring cross-origin or invalid NuGet feed pagination link',

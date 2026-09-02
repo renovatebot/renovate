@@ -79,7 +79,8 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (updatedDeps?.length !== 1) {
-    // Each answers file (~ packageFileName) has exactly one dependency to update.
+    // Each answers file (~ packageFileName) has exactly one dependency to
+    // update.
     return artifactError(
       packageFileName,
       `Unexpected number of dependencies: ${updatedDeps?.length} (should be 1)`,
@@ -165,8 +166,8 @@ export async function updateArtifacts({
       },
     });
   }
-  // `git status` might detect a rename, which is then not contained
-  // in not_added/deleted. Ensure we respect renames as well if they happen.
+  // `git status` might detect a rename, which is then not contained in
+  // not_added/deleted. Ensure we respect renames as well if they happen.
   for (const f of status.renamed) {
     res.push({
       file: {

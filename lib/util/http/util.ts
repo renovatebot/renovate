@@ -1,8 +1,8 @@
 import { clone } from '../clone.ts';
 import type { HttpResponse } from './types.ts';
 
-// Copying will help to avoid circular structure
-// and mutation of the cached response.
+// Copying will help to avoid circular structure and mutation of the cached
+// response.
 export function copyResponse<T>(
   { statusCode, headers, body, cached }: HttpResponse<T>,
   deep: boolean,

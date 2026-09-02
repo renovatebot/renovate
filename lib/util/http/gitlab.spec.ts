@@ -83,8 +83,10 @@ describe('util/http/gitlab', () => {
   });
 
   it('does not follow pagination links to a different origin', async () => {
-    // If a misconfigured/malicious host suggests pagination links across origins, ignore them by default
-    // In this case, only the first page of results is fetched, and a warning message is logged
+    // If a misconfigured/malicious host suggests pagination links across
+    // origins, ignore them by default
+    // In this case, only the first page of results is fetched, and a warning
+    // message is logged
     httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, ['a'], {
       link: '<https://other.host.com/api/v4/some-url&page=2>; rel="next", <https://other.host.com/api/v4/some-url&page=3>; rel="last"',
     });

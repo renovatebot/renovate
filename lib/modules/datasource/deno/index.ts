@@ -54,7 +54,8 @@ export class DenoDatasource extends Datasource {
       return null;
     }
 
-    // remove third-party prefix if defined. The only internal library is `std` and is available under the same API
+    // remove third-party prefix if defined. The only internal library is `std`
+    // and is available under the same API
     const massagedPackageName = rawPackageName.replace('x/', '');
 
     // https://apiland.deno.dev/v2/modules/postgres
@@ -127,7 +128,8 @@ export class DenoDatasource extends Datasource {
     );
 
     if (cacheModified) {
-      // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
+      // 1 week. Releases at Deno are immutable, therefore we can use a long
+      // term cache here.
       await packageCache.set(
         `datasource-${DenoDatasource.id}`,
         detailsCacheKey,

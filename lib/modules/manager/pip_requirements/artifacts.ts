@@ -23,7 +23,8 @@ import { extrasPattern } from './extract.ts';
 function dependencyAndHashPattern(depName: string): RegExp {
   const escapedDepName = RegExp.escape(depName);
 
-  // extrasPattern covers any whitespace between the dep name and the optional extras specifier,
+  // extrasPattern covers any whitespace between the dep name and the optional
+  // extras specifier,
   // but it does not cover any whitespace in front of the equal signs.
   //
   // Use a non-greedy wildcard for the range pattern; otherwise, we would
@@ -56,8 +57,8 @@ export async function updateArtifacts({
         rewrittenContent,
       );
       if (depAndHashMatch) {
-        // If there's a match, then the regular expression guarantees
-        // that the named subgroup deepConstraint did match as well.
+        // If there's a match, then the regular expression guarantees that the
+        // named subgroup deepConstraint did match as well.
         const depConstraint = depAndHashMatch.groups!.depConstraint;
         cmd.push(`hashin ${quote(depConstraint)} -r ${quote(packageFileName)}`);
       }

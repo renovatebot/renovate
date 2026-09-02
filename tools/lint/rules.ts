@@ -1,5 +1,6 @@
 import { definePlugin } from '@oxlint/plugins';
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.ts';
+import commentWrapping from './rules/comment-wrapping.ts';
 import enforceTsExtension from './rules/enforce-ts-extension.ts';
 import loggerStaticMessage from './rules/logger-static-message.ts';
 import noExecShellOption from './rules/no-exec-shell-option.ts';
@@ -38,6 +39,7 @@ export default definePlugin({
   },
   rules: {
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
+    'comment-wrapping': commentWrapping,
     'enforce-ts-extension': enforceTsExtension,
     'logger-static-message': loggerStaticMessage,
     'no-exec-shell-option': noExecShellOption,

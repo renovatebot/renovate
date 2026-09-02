@@ -113,7 +113,8 @@ function getExecCommand(
   if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
     return `${toolName} ${PUB_GET_COMMAND}`;
   }
-  // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
+  // If there are two updated dependencies and both of them are SDK updates
+  // (Dart and Flutter),
   // we use Flutter over Dart to run `pub get` as it is a Flutter project.
   if (
     depNames.length === 2 &&

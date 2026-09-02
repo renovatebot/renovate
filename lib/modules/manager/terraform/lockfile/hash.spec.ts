@@ -303,7 +303,8 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'zh:1d47d00730fab764bddb6d548fed7e124739b0bcebb9f3b3c6aa247de55fb804',
       'zh:29bff92b4375a35a7729248b3bc5db8991ca1b9ba640fc25b13700e12f99c195',
-      // The hash of a terraform-provider-manifest.json file not fetched by getBuilds
+      // The hash of a terraform-provider-manifest.json file not fetched by
+      // getBuilds
       'zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c',
     ]);
   });

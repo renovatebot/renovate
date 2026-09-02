@@ -175,8 +175,10 @@ export async function extractPackageFile(
     if ((hasFancyRefs && !!lockFiles.npmLock) || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
       // Explanation:
-      //  - npm install --package-lock-only is buggy for transitive deps in file: and npm: references
-      //  - So we set skipInstalls to false if file: or npm: refs are found *and* the user hasn't explicitly set the value already
+      // - npm install --package-lock-only is buggy for transitive deps in file:
+      // and npm: references
+      // - So we set skipInstalls to false if file: or npm: refs are found *and*
+      // the user hasn't explicitly set the value already
       //  - Also, do not skip install if Yarn zero-install is used
       logger.debug('Automatically setting skipInstalls to false');
       skipInstalls = false;
@@ -205,7 +207,8 @@ export async function extractPackageFile(
     }
   }
 
-  // Applied after the yarnrc resolution so pnpm-workspace.yaml wins in pnpm repos
+  // Applied after the yarnrc resolution so pnpm-workspace.yaml wins in pnpm
+  // repos
   applyPnpmWorkspaceRegistries(
     res.deps,
     pnpmWorkspaceRegistries,
@@ -238,7 +241,8 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
-      // pnpm workspace files are their own package file, defined via managerFilePatterns.
+      // pnpm workspace files are their own package file, defined via
+      // managerFilePatterns.
       if (packageFile.endsWith('pnpm-workspace.yaml')) {
         logger.trace(
           { packageFile },

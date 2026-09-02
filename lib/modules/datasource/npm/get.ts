@@ -86,7 +86,8 @@ export async function getDependency(
     });
     const options: HttpOptions = { cacheProvider };
 
-    // set abortOnError for registry.npmjs.org if no hostRule with explicit abortOnError exists
+    // set abortOnError for registry.npmjs.org if no hostRule with explicit
+    // abortOnError exists
     if (
       registryUrl === defaultRegistryUrl &&
       hostRules.find({ url: defaultRegistryUrl })?.abortOnError === undefined

@@ -21,11 +21,15 @@ import { UpdateTypesMatcher } from './update-types.ts';
 const matchers: MatcherApi[] = [];
 export default matchers;
 
-// Each matcher under the same index will use a logical OR, if multiple matchers are applied AND will be used
+// Each matcher under the same index will use a logical OR, if multiple matchers
+// are applied AND will be used
 
-// applyPackageRules evaluates matchers in the order of insertion and returns early on failure.
-// Therefore, when multiple matchers are set in a single packageRule, some may not be checked.
-// Since matchConfidence matcher can abort the run due to unauthenticated use, it should be evaluated first.
+// applyPackageRules evaluates matchers in the order of insertion and returns
+// early on failure.
+// Therefore, when multiple matchers are set in a single packageRule, some may
+// not be checked.
+// Since matchConfidence matcher can abort the run due to unauthenticated use,
+// it should be evaluated first.
 matchers.push(new MergeConfidenceMatcher());
 matchers.push(new RepositoriesMatcher());
 matchers.push(new BaseBranchesMatcher());

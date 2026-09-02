@@ -293,8 +293,10 @@ export async function ensureOnboardingPr(
     const prListSummary = getExpectedPrListSummary(config, branches);
     if (packageFilesDesc) {
       const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
-      // "What to Expect" should render before "Detected Package Files" in the summary view,
-      // so rebuild from a template with that section order rather than reordering the rendered body.
+      // "What to Expect" should render before "Detected Package Files" in the
+      // summary view,
+      // so rebuild from a template with that section order rather than
+      // reordering the rendered body.
       prBody = finalizeOnboardingPrBody(
         fillOnboardingPrBody(
           buildOnboardingPrTemplate(

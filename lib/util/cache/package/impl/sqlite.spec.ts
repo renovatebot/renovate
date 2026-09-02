@@ -88,7 +88,8 @@ describe('util/cache/package/impl/sqlite', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    // TODO: Delete this legacy raw-brotli malformed-entry case once legacy.ts is
+    // TODO: Delete this legacy raw-brotli malformed-entry case once legacy.ts
+    // is
     // removed.
     it('returns undefined for invalid JSON payload', async () => {
       const res = await withSqlite(async (sqlite) => {

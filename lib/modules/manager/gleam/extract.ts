@@ -10,8 +10,8 @@ import { GleamToml } from './schema.ts';
 
 const dependencySections = ['dependencies', 'dev-dependencies'] as const;
 
-// map gleam.toml section keys to standard renovate depType's
-// this allows us to leverage renovate built-in configurations and presets
+// map gleam.toml section keys to standard renovate depType's this allows us to
+// leverage renovate built-in configurations and presets
 function mapSectionKey(sectionKey: string): string {
   switch (sectionKey) {
     case 'dev-dependencies':

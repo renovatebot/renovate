@@ -385,8 +385,8 @@ describe('modules/manager/mix/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    // a broad host rule matching all of hex.pm, as opposed to one scoped to
-    // a specific organization's repo URL
+    // a broad host rule matching all of hex.pm, as opposed to one scoped to a
+    // specific organization's repo URL
     hostRules.add({ matchHost: 'hex.pm', token: 'secret_token' });
 
     // erlang
@@ -403,7 +403,8 @@ describe('modules/manager/mix/artifacts', () => {
       updatedDeps: [
         {
           depName: 'private_package',
-          // organization value as it would be parsed from an attacker-controlled
+          // organization value as it would be parsed from an
+          // attacker-controlled
           // `organization: "..."` field in mix.exs
           packageName: 'private_package:evil --key leaked_or_arbitrary',
         },

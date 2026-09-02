@@ -66,8 +66,8 @@ export abstract class GitDatasource extends Datasource {
     // For annotated tags, git ls-remote returns two entries:
     // 1. The tag object hash: refs/tags/v1.0.0
     // 2. The dereferenced commit hash: refs/tags/v1.0.0^{}
-    // We need to use the dereferenced commit hash (^{}) for annotated tags
-    // to match what `git submodule status` returns (the actual commit hash).
+    // We need to use the dereferenced commit hash (^{}) for annotated tags to
+    // match what `git submodule status` returns (the actual commit hash).
     // This prevents false-positive updates that result in empty commits.
     const dereferencedTags: Record<string, string> = {};
     for (const ref of allRefs) {

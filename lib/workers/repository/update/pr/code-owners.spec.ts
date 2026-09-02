@@ -312,7 +312,8 @@ describe('workers/repository/update/pr/code-owners', () => {
 
         const codeOwners = await codeOwnersForPr(pr);
 
-        // Since we don't simulate the actual group resolution, this will just include the literal string
+        // Since we don't simulate the actual group resolution, this will just
+        // include the literal string
         expect(codeOwners).toEqual([
           '@reviewer-group/content-designers:random',
         ]);

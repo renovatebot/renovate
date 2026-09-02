@@ -27,7 +27,8 @@ describe('workers/repository/onboarding/pr/index', () => {
     const ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE =
       '64fdbed75ebbbf9f5c0eaafadc9793657a6484940dcf33966fbf3f95a4622023';
 
-    // NOTE that if you're intentionally changing the onboarding PR's contents, these hashes will change - update them above
+    // NOTE that if you're intentionally changing the onboarding PR's contents,
+    // these hashes will change - update them above
     describe('generates a consistent hash of the body', () => {
       it('when the rebase checkbox is present', async () => {
         config.onboardingRebaseCheckbox = true;
@@ -147,14 +148,17 @@ describe('workers/repository/onboarding/pr/index', () => {
         );
 
         const prBody = platform.createPr.mock.calls[0][0].prBody;
-        // the full PR list renders each branch as a `<details>` block, the summary uses a table instead
+        // the full PR list renders each branch as a `<details>` block, the
+        // summary uses a table instead
         expect(prBody).not.toContain('<details>');
         expect(prBody).toContain('| Manager | major |');
-        // the full package files description lists files inline suffixed with the manager,
+        // the full package files description lists files inline suffixed with
+        // the manager,
         // the summary groups them under a manager heading instead
         expect(prBody).not.toContain('`package.json` (npm)');
         expect(prBody).toContain('#### npm\n\n * `package.json`');
-        // in the summary view, "What to Expect" should render before "Detected Package Files"
+        // in the summary view, "What to Expect" should render before "Detected
+        // Package Files"
         expect(prBody.indexOf('### What to Expect')).toBeLessThan(
           prBody.indexOf('### Detected Package Files'),
         );
@@ -429,7 +433,8 @@ describe('workers/repository/onboarding/pr/index', () => {
       it('does not comment, when onboarding pr is exactly at onboardingAutoCloseAge', async () => {
         const now = DateTime.now();
         vi.setSystemTime(now.toMillis());
-        // at exactly 1 day ago, which means that an `onboardingAutoCloseAge=1` SHOULD NOT trigger, as it's > 1
+        // at exactly 1 day ago, which means that an `onboardingAutoCloseAge=1`
+        // SHOULD NOT trigger, as it's > 1
         const createdAt = now.minus({ hour: 24 });
 
         config.baseBranch = 'some-branch';
@@ -452,7 +457,9 @@ describe('workers/repository/onboarding/pr/index', () => {
       it('ensures comment, when onboarding pr is partially over onboardingAutoCloseAge', async () => {
         const now = DateTime.now();
         vi.setSystemTime(now.toMillis());
-        // we're currently 1 day and 1 second ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` should trigger, as it's > 1
+        // we're currently 1 day and 1 second ahead of the creation time, which
+        // is 1.x days since the PR was created, which means that an
+        // `onboardingAutoCloseAge=1` should trigger, as it's > 1
         const createdAt = now.minus({ hour: 24, seconds: 1 });
 
         config.baseBranch = 'some-branch';
@@ -479,7 +486,9 @@ describe('workers/repository/onboarding/pr/index', () => {
       it('ensures comment, when onboarding pr is 1 day older than onboardingAutoCloseAge', async () => {
         const now = DateTime.now();
         vi.setSystemTime(now.toMillis());
-        // we're currently 25 hours ahead of the creation time, which is 1.x days since the PR was created, which means that an `onboardingAutoCloseAge=1` should trigger, as it's > 1
+        // we're currently 25 hours ahead of the creation time, which is 1.x
+        // days since the PR was created, which means that an
+        // `onboardingAutoCloseAge=1` should trigger, as it's > 1
         const createdAt = now.minus({ hour: 48 });
 
         config.baseBranch = 'some-branch';

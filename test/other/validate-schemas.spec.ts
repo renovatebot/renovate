@@ -50,8 +50,9 @@ describe('other/validate-schemas', () => {
           await fs.readFile(upath.join(dataFileDir, dataFileName), 'utf8'),
         );
 
-        // validate json data against schema: using parse here instead of safeParse so we throw
-        // this leads to a better error message when the assertion fails
+        // validate json data against schema: using parse here instead of
+        // safeParse so we throw this leads to a better error message when the
+        // assertion fails
         Schemas[schemaName].parse(data);
       }),
     );

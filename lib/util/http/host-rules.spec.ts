@@ -368,7 +368,9 @@ describe('util/http/host-rules', () => {
       token: 'token',
     });
 
-    // in the case that an API URL is used for GitHub.com, auto-detect it as a `hostType=github`, and use the `url`'s host to find a `matchHost: github.com`
+    // in the case that an API URL is used for GitHub.com, auto-detect it as a
+    // `hostType=github`, and use the `url` 's host to find a
+    // `matchHost: github.com`
     {
       const url = 'https://api.github.com/renovatebot/renovate';
 
@@ -386,7 +388,8 @@ describe('util/http/host-rules', () => {
         });
       }
 
-      // in the case a Datasource uses GitHub APIs, but doesn't have an explicit wiring in via GITHUB_API_USING_HOST_TYPES, we should also auto-detect
+      // in the case a Datasource uses GitHub APIs, but doesn't have an explicit
+      // wiring in via GITHUB_API_USING_HOST_TYPES, we should also auto-detect
       // See #30490 #38725
       {
         const url =
@@ -438,7 +441,8 @@ describe('util/http/host-rules', () => {
           token: 'changelogtoken',
         });
 
-        // but if no `hostType` matching, we'll use our `hostType: github` for `github.com`
+        // but if no `hostType` matching, we'll use our `hostType: github` for
+        // `github.com`
         opts = {};
         hostRule = findMatchingRule(url, opts);
         expect(hostRule).toEqual({
@@ -460,7 +464,8 @@ describe('util/http/host-rules', () => {
 
     hostRules.clear();
 
-    // for instance, if running with GitHub Enterprise Server, this may be set as the default host rule
+    // for instance, if running with GitHub Enterprise Server, this may be set
+    // as the default host rule
     hostRules.add({
       hostType: 'github',
       token: 'token',
@@ -603,7 +608,8 @@ describe('util/http/host-rules', () => {
     });
 
     it('no fallback when request targets a different host', () => {
-      // Request targets a different host than the platform endpoint — no fallback
+      // Request targets a different host than the platform endpoint — no
+      // fallback
       const opts = { hostType: 'github-digest' };
       const hostRule = findMatchingRule(
         'https://other-ghe.example.com/api/v3/',

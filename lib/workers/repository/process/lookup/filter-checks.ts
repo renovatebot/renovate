@@ -29,13 +29,15 @@ export function isMinimumReleaseAgeApplicable(
   updateType: UpdateType | undefined,
 ): boolean {
   return (
-    // Possible, but not wanted, as this is intentionally rolling back to a previous (generally older) release to unblock the build
+    // Possible, but not wanted, as this is intentionally rolling back to a
+    // previous (generally older) release to unblock the build
     updateType !== 'rollback' &&
     // Not yet supported: TODO #40288
     updateType !== 'pin' &&
     // Not yet supported: TODO #39400
     updateType !== 'replacement' &&
-    // Not possible, as we delegate to the package manager to perform the required changes to update package(s).
+    // Not possible, as we delegate to the package manager to perform the
+    // required changes to update package(s).
     updateType !== 'lockFileMaintenance' &&
     // Not supported
     updateType !== 'bump' &&
@@ -118,7 +120,8 @@ export async function filterInternalChecks(
       'timestamp-optional': [],
     };
 
-    // iterate through releases from highest to lowest, looking for the first which will pass checks if present
+    // iterate through releases from highest to lowest, looking for the first
+    // which will pass checks if present
     for (let candidateRelease of sortedReleases.reverse()) {
       // merge the release data into dependency config
       let releaseConfig = mergeChildConfig(config, candidateRelease);

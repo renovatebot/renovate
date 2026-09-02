@@ -231,7 +231,8 @@ describe('modules/platform/gitlab/pr-cache', () => {
 
     const res = await GitlabPrCache.getPrs(http, 'repo', 'some-author', false);
 
-    // Items are returned in reverse order by number (updateItems() calls reverse())
+    // Items are returned in reverse order by number (updateItems() calls
+    // reverse())
     expect(res).toMatchObject([
       { number: 2, title: 'title' },
       { number: 1, title: 'title' },

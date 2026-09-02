@@ -11,8 +11,8 @@ export const urls = [];
 export const supportsRanges = false;
 
 export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
-  // config is expected to be overridden by a user-specified RegExp value
-  // sample values:
+  // config is expected to be overridden by a user-specified RegExp value sample
+  // values:
   //
   // * emulates the "semver" configuration:
   //   RegExp('^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<prerelease>.*))?$')
@@ -42,12 +42,13 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       throw error;
     }
 
-    // TODO: should we validate the user has not added extra unsupported
-    // capture groups? (#9717)
+    // TODO: should we validate the user has not added extra unsupported capture
+    // groups? (#9717)
     this._config = regEx(new_config);
   }
 
-  // convenience method for passing a string into a Version given current config.
+  // convenience method for passing a string into a Version given current
+  // config.
   protected _parse(version: string): RegExpVersion | null {
     const groups = this._config?.exec(version)?.groups;
     if (!groups) {

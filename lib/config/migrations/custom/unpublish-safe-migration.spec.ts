@@ -93,7 +93,8 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
   });
 
   it('should not migrate npm:unpublishSafe', async () => {
-    // NOTE that this preset name is now deprecated, but will be handled by `ExtendsMigration` instead of handled in this migration
+    // NOTE that this preset name is now deprecated, but will be handled by
+    // `ExtendsMigration` instead of handled in this migration
 
     await expect(UnpublishSafeMigration).toMigrate(
       {

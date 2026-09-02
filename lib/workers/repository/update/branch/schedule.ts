@@ -178,8 +178,10 @@ export function isScheduledNow(
   // Support a single string but massage to array for processing
   logger.debug(`Checking ${configSchedule.length} schedule(s)`);
 
-  // later is timezone agnostic (as in, it purely relies on the underlying UTC date/time that is stored in the Date),
-  // which means we have to pass it a Date that has an underlying UTC date/time in the same timezone as the schedule
+  // later is timezone agnostic (as in, it purely relies on the underlying UTC
+  // date/time that is stored in the Date),
+  // which means we have to pass it a Date that has an underlying UTC date/time
+  // in the same timezone as the schedule
   const jsNow = now.setZone('utc', { keepLocalTime: true }).toJSDate();
 
   // We run if any schedule matches

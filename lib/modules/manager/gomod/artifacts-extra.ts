@@ -33,9 +33,9 @@ export function getExtraDeps(
     }
 
     let expandedDepName = depName;
-    // NOTE: Right now the only special depType we care about is 'toolchain' because the table
-    // rendering prior to this change was ambiguous with regards to go version vs toolchain
-    // version updates.
+    // NOTE: Right now the only special depType we care about is 'toolchain'
+    // because the table rendering prior to this change was ambiguous with
+    // regards to go version vs toolchain version updates.
     if (depType === 'toolchain') {
       expandedDepName = `${depName} (${depType})`;
     }

@@ -50,7 +50,8 @@ export class FlutterVersionDatasource extends Datasource {
         )
       ).body;
       result.releases = resp.releases
-        // The API response contains a stable version being released as a non-stable
+        // The API response contains a stable version being released as a
+        // non-stable
         // release. And so we filter out these releases here.
         .filter(({ version, channel }) => {
           if (stableVersionRegex.test(version)) {

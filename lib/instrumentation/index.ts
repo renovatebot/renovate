@@ -125,7 +125,8 @@ export function init(): void {
     new HttpInstrumentation({
       /* v8 ignore start -- not easily testable */
       applyCustomAttributesOnSpan: (span, request, response) => {
-        // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
+        // ignore 404 errors when the branch protection of Github could not be
+        // found. This is expected if no rules are configured
         if (
           request instanceof ClientRequest &&
           request.host === `api.github.com` &&
@@ -143,7 +144,8 @@ export function init(): void {
           response.getHeader('docker-distribution-api-version') &&
           response.statusCode === 401
         ) {
-          // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
+          // Docker API test expects 401 with `www-authenticate` header when
+          // registry requires authentication, so ignore this error
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },

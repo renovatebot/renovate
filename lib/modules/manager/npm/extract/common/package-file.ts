@@ -113,7 +113,8 @@ export function extractPackageJson(
                 dep.prettyDepType = depTypes[depName];
                 deps.push(dep);
               } else if (isObject(overridesVal)) {
-                // Older nested object syntax: `parent: { parent: { child: version } }`
+                // Older nested object syntax:
+                // `parent: { parent: { child: version } }`
                 deps.push(
                   ...extractOverrideDepsRec([overridesKey], overridesVal),
                 );

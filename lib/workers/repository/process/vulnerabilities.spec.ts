@@ -192,7 +192,8 @@ describe('workers/repository/process/vulnerabilities', () => {
           },
         ]);
 
-        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because this isn't literally MAL-2025-6794, we don't apply it
+        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because
+        // this isn't literally MAL-2025-6794, we don't apply it
         getVulnerabilitiesMock.mockResolvedValueOnce([
           {
             affected: [
@@ -314,7 +315,8 @@ describe('workers/repository/process/vulnerabilities', () => {
           },
         ]);
 
-        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because this isn't literally MAL-2025-6794, we don't apply it
+        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because
+        // this isn't literally MAL-2025-6794, we don't apply it
         getVulnerabilitiesMock.mockResolvedValueOnce([
           {
             affected: [

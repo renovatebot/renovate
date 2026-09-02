@@ -37,8 +37,8 @@ export class GalaxyCollectionDatasource extends Datasource {
   override readonly releaseTimestampSupport = true;
   override releaseTimestampNote =
     'The release timestamp is determined from the `created_at` field in the results.';
-  // sourceUrl is returned in each release as well as the ReleaseResult
-  // the one present in release result is the sourceUrl of the latest release
+  // sourceUrl is returned in each release as well as the ReleaseResult the one
+  // present in release result is the sourceUrl of the latest release
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The `sourceUrl` is determined from the `repository` field in the results.';
@@ -95,7 +95,8 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     // filter failed versions
     const filteredReleases = enrichedReleases.filter(isTruthy);
-    // extract base information which are only provided on the release from the newest release
+    // extract base information which are only provided on the release from the
+    // newest release
 
     // Find the source URL of the highest version release
     const sourceUrlOfHighestRelease = enrichedReleases.find(

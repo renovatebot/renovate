@@ -62,8 +62,8 @@ function depStringHandler(
   return { ...ctx, deps: [...ctx.deps, dep] };
 }
 
-// Add `skip-reason` for dependencies annotated
-// with "# renovate: ignore" comment
+// Add `skip-reason` for dependencies annotated with "# renovate: ignore"
+// comment
 function depSkipHandler(ctx: Context): Context {
   const dep = ctx.deps.at(-1);
   const deps = ctx.deps.slice(0, -1);

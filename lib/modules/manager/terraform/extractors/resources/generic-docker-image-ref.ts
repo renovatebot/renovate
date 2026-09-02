@@ -51,7 +51,8 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     for (const image_resource_def of image_definitions) {
       const { type, path } = image_resource_def;
       const resourceInstancesMap = typeMap[type];
-      // is there a resource with current looked at type ( `image_resource_def` )
+      // is there a resource with current looked at type ( `image_resource_def`
+      // )
       if (!isNonEmptyObject(resourceInstancesMap)) {
         continue;
       }

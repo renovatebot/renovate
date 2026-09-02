@@ -16,7 +16,8 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
     rawString,
     children: { name, repository, registry, tag, digest },
   }): PackageDependency => {
-    // Note: Validation that this is a rules_img pull call is done in transformRulesImgCalls
+    // Note: Validation that this is a rules_img pull call is done in
+    // transformRulesImgCalls
 
     // Construct the package name
     let packageName = repository.value;
@@ -44,7 +45,8 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
 export function transformRulesImgCalls(fragments: any[]): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
-  // First, collect all use_repo_rule assignments to know which variables are repo rules
+  // First, collect all use_repo_rule assignments to know which variables are
+  // repo rules
   const repoRuleVariables = new Map<
     string,
     { bzlFile: string; ruleName: string }
@@ -64,7 +66,8 @@ export function transformRulesImgCalls(fragments: any[]): PackageDependency[] {
     if (fragment.type === 'repoRuleCall') {
       const functionName = fragment.functionName;
 
-      // Only process if this function name corresponds to a known repo rule variable
+      // Only process if this function name corresponds to a known repo rule
+      // variable
       if (!repoRuleVariables.has(functionName)) {
         continue;
       }
@@ -79,7 +82,8 @@ export function transformRulesImgCalls(fragments: any[]): PackageDependency[] {
         const dep = RulesImgPullCallToDep.parse(fragment);
         deps.push(dep);
       } catch {
-        // If parsing fails, it's not a rules_img pull call or is missing required fields
+        // If parsing fails, it's not a rules_img pull call or is missing
+        // required fields
         continue;
       }
     }

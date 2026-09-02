@@ -20,7 +20,8 @@ describe('util/host-rules', () => {
   });
 
   it('registers every redactedFields entry that is a HostRule field for value-level sanitizing', () => {
-    // exhaustive check for fields of `HostRule`, to introduce a compile-time error when adding a new field to `HostRule`
+    // exhaustive check for fields of `HostRule`, to introduce a compile-time
+    // error when adding a new field to `HostRule`
     const allHostRuleFields: Record<keyof HostRule, true> = {
       authType: true,
       token: true,

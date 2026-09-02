@@ -170,7 +170,8 @@ export async function updateArtifacts({
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${quote(distributionUrl)}`;
       if (newPackageFileContent.includes('distributionSha256Sum=')) {
-        //update checksum in case of distributionSha256Sum in properties then run wrapper
+        // update checksum in case of distributionSha256Sum in properties then
+        // run wrapper
         checksum = await getDistributionChecksum(distributionUrl);
         await writeLocalFile(
           packageFileName,

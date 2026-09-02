@@ -33,7 +33,8 @@ import type {
   RepositoryReference,
 } from './types.ts';
 
-// detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
+// detects if we run against a Github Enterprise Server and adds the URL to the
+// beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
 // First on the Enterprise Server, then on GitHub.com
 function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
@@ -115,7 +116,8 @@ function extractRepositoryAction(
   }
 
   // Extend replaceString to include relevant comment portions:
-  // - Pinned version or ref: include only up to the matched token (truncate trailing text)
+  // - Pinned version or ref: include only up to the matched token (truncate
+  // trailing text)
   // - Ratchet exclude: include the full comment to preserve the marker
   const pinComment =
     commentData.pinnedVersion ??
@@ -407,7 +409,9 @@ async function isManagedByLockfile(packageFile: string): Promise<boolean> {
     case 'missing':
       return false;
     case 'unparseable':
-      // The tool refuses to regenerate a lock file which it cannot parse, so treat everything as managed: pinning inline here would raise a PR which pins the digests the tool owns and leaves the lock file stale.
+      // The tool refuses to regenerate a lock file which it cannot parse, so
+      // treat everything as managed: pinning inline here would raise a PR which
+      // pins the digests the tool owns and leaves the lock file stale.
       return true;
     case 'parsed':
       return isLockfileManaged(packageFile, lockfile.onboardedWorkflows);
@@ -433,7 +437,10 @@ export async function extractPackageFile(
   const res: PackageFileContent = { deps };
 
   if (await isManagedByLockfile(packageFile)) {
-    // Deliberately no `lockFiles`: nothing here goes through `updateArtifacts`, and `matchFileNames` also tests `lockFiles`, so declaring it would make a negated rule such as `!.github/workflows/release.yml` match every workflow through the lock file path.
+    // Deliberately no `lockFiles`: nothing here goes through `updateArtifacts`,
+    // and `matchFileNames` also tests `lockFiles`, so declaring it would make a
+    // negated rule such as `!.github/workflows/release.yml` match every
+    // workflow through the lock file path.
     for (const dep of deps) {
       // The lock file only records `OWNER/REPO@REF` pins, so a `docker://` image in a `uses:` is still ours to pin.
       if (dep.depType === 'action' || dep.depType === 'workflow') {

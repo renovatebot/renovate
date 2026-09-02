@@ -127,7 +127,8 @@ export async function initPlatform({
       'Init: You must configure either a Bitbucket Server password or a HTTP access token, not both',
     );
   }
-  // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
+  // TODO: Add a connection check that endpoint/username/password combination
+  // are valid (#9595)
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
   const platformConfig: PlatformResult = {
@@ -284,7 +285,8 @@ export async function initRepo({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`,
     );
 
-    // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
+    // 204 means empty, 404 means repo not found or missing default branch. repo
+    // must exist here.
     if ([204, 404].includes(branchRes.statusCode)) {
       throw new Error(REPOSITORY_EMPTY);
     }
@@ -428,7 +430,8 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
 
   if (includeOtherAuthors) {
-    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    // PR might have been created by anyone, so don't use the cached Renovate PR
+    // list
     const searchParams: Record<string, string> = {
       state: 'OPEN',
     };
@@ -1291,7 +1294,8 @@ async function tryPrAutomerge(
       { body },
     );
 
-    // enabling auto-merge doesn't increase PR version, so we omit updating the cache
+    // enabling auto-merge doesn't increase PR version, so we omit updating the
+    // cache
     logger.debug({ prNumber }, 'Bitbucket Server-native automerge: success');
   } catch (err) {
     logger.warn({ err, prNumber }, 'Bitbucket Server-native automerge: fail');
@@ -1357,9 +1361,12 @@ export function extractRulesFromCodeOwnersLines(
 
 // Gets active users by name, from a reviewer group
 // Returns an empty array if the group is not found or has no active users
-// As there is no direct API to get group by name, we get all reviewer groups per repo and filter them
-// This is not efficient, but it is the only way to get users from a group by name
-// Supports both repository-scoped and project-scoped groups following the BitBucket server logic described here:
+// As there is no direct API to get group by name, we get all reviewer groups
+// per repo and filter them
+// This is not efficient, but it is the only way to get users from a group by
+// name
+// Supports both repository-scoped and project-scoped groups following the
+// BitBucket server logic described here:
 // https://confluence.atlassian.com/bitbucketserver/code-owners-1296171116.html#Codeowners-Whatifaprojectandrepositorycontainareviewergroupwiththesamename?
 async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
   const allGroups = [];

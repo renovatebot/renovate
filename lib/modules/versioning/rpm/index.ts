@@ -44,11 +44,13 @@ class RpmVersioningApi extends GenericVersioningApi {
     const releaseIndex = remainingVersion.indexOf('-');
     const prereleaseIndex = remainingVersion.indexOf('~');
 
-    // Note: There can be a snapshot if there is no prerelease. Snapshot always beat no snapshot,
+    // Note: There can be a snapshot if there is no prerelease. Snapshot always
+    // beat no snapshot,
     // so if there is 3.12.0-1 vs 3.12.0-1^20231110, the snapshot wins.
-    // The logic below only creates snapshot IF there is a prerleease version. This logic is NOT
-    // correct, but the result is still correct due to the caret being ignored in release, and
-    // release continue comparing
+    // The logic below only creates snapshot IF there is a prerleease version.
+    // This logic is NOT
+    // correct, but the result is still correct due to the caret being ignored
+    // in release, and release continue comparing
     //
     // Note: If there IS a tilde preceding the caret, then snapshot DOES NOT win
     // Example: 3.12.0-1~^20231001 LOSES to 3.12.0-1 and
@@ -58,7 +60,8 @@ class RpmVersioningApi extends GenericVersioningApi {
     if (releaseIndex >= 0) {
       upstreamVersion = remainingVersion.slice(0, releaseIndex);
 
-      // Do NOT splice out prerelease, we need to distinguish if the flag is set or not, regardless if there is a version.
+      // Do NOT splice out prerelease, we need to distinguish if the flag is set
+      // or not, regardless if there is a version.
       // The tilde will get filtered out during regex
       if (prereleaseIndex >= 0) {
         rpmRelease = remainingVersion.slice(releaseIndex, prereleaseIndex);
@@ -179,7 +182,8 @@ class RpmVersioningApi extends GenericVersioningApi {
       return 0;
     }
 
-    // If there is a tilde in a segment past the minimum number of segments, find it
+    // If there is a tilde in a segment past the minimum number of segments,
+    // find it
     if (matchesv1.length > matches && matchesv1[matches].startsWith('~')) {
       return -1;
     }

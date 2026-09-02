@@ -296,8 +296,8 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
 
   describe('getRepoContents', () => {
     it('should call /api/v1/repos/[repo]/contents/[file] endpoint', async () => {
-      // The official API only returns the base64-encoded content, so we strip `contentString`
-      // from our mock to verify base64 decoding.
+      // The official API only returns the base64-encoded content, so we strip
+      // `contentString` from our mock to verify base64 decoding.
       httpMock
         .scope(baseUrl)
         .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
@@ -790,7 +790,8 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       ];
 
       for (const { id, status, expected, created_at } of statuses) {
-        // Add current status ot list of commit statuses, then mock the API to return the whole list
+        // Add current status ot list of commit statuses, then mock the API to
+        // return the whole list
         commitStatuses.push({
           ...mockCommitStatus,
           id,
@@ -804,8 +805,9 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
           )
           .reply(200, commitStatuses);
 
-        // Expect to get the current state back as the worst status, as all previous commit statuses
-        // should be less important than the one which just got added
+        // Expect to get the current state back as the worst status, as all
+        // previous commit statuses should be less important than the one which
+        // just got added
         const res = await getCombinedCommitStatus(
           mockRepo.full_name,
           mockBranch.name,

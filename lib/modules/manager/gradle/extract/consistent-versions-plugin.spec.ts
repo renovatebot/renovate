@@ -116,7 +116,8 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     };
     const res = parseGcv('versions.props', fsMock);
 
-    // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
+    // Each lock dep is only present once, with highest prio for exact prop
+    // match, then globs from longest to shortest
     expect(res).toStrictEqual([
       {
         managerData: {

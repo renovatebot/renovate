@@ -68,7 +68,8 @@ export function finalizeReport(): void {
     const repository = problem.repository;
     delete problem.repository;
 
-    // if the problem can be connected to a repository add it their else add to the root list
+    // if the problem can be connected to a repository add it their else add to
+    // the root list
     if (repository) {
       coerceRepo(repository);
       report.repositories[repository].problems.push(problem);

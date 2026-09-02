@@ -233,8 +233,8 @@ interface MavenBasedRange {
   rightBound: RangeBound;
   rightBoundStr: string;
   rightVal: string | null;
-  // The existence of preferredVal implies the "strictly" keyword "!!"
-  // leading up to preferredVal: "!![preferred version]"
+  // The existence of preferredVal implies the "strictly" keyword "!!" leading
+  // up to preferredVal: "!![preferred version]"
   preferredVal: string | null;
 }
 

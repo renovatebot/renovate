@@ -54,8 +54,8 @@ export function extractPackageFile(
     return null;
   }
 
-  // Image name/tags for services are only eligible for update if they don't
-  // use variables and if the image is not built locally
+  // Image name/tags for services are only eligible for update if they don't use
+  // variables and if the image is not built locally
   const deps = pipelineKeys.flatMap((pipelineKey) =>
     Object.values(coerceObject(config[pipelineKey]))
       .filter((step) => isString(step?.image))

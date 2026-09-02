@@ -215,7 +215,8 @@ function getNewValue({
 
         return `${newPrefixed}.+`;
       }
-      // our new version is shorter than our prefix range so drop our prefix range
+      // our new version is shorter than our prefix range so drop our prefix
+      // range
       return newVersion;
     }
     // our version is already "+" which includes ever version

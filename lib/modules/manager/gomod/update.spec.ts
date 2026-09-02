@@ -516,7 +516,9 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain('github.com/pravesht/gocql/v2 v2.0.0');
     });
 
-    // from #41260, a Go module with a `replace` on the same module (for this example) and a multi-line replace being converted to a single-line `replace`
+    // from #41260, a Go module with a `replace` on the same module (for this
+    // example) and a multi-line replace being converted to a single-line
+    // `replace`
     it('handles replace line with major version update that bumps both sides of the replace', () => {
       const gomod = codeBlock`
         module github.com/walsm232/renovate-gomod-bug-test

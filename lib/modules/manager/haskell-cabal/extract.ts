@@ -148,8 +148,8 @@ export function findDepends(
   const extentLength: number = findExtents(indent + 1, content.slice(ourIdx));
   const extent = content.slice(ourIdx, ourIdx + extentLength);
   const lines = [];
-  // Windows-style line breaks are fine because
-  // carriage returns are before the line feed.
+  // Windows-style line breaks are fine because carriage returns are before the
+  // line feed.
   for (const maybeCommentLine of extent.split('\n')) {
     if (!commentRegex.test(maybeCommentLine)) {
       lines.push(maybeCommentLine);

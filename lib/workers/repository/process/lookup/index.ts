@@ -115,10 +115,13 @@ async function applyMinimumReleaseAgeToDigestUpdate(
   }
 
   if (update.updateType === 'pinDigest' && !currentVersionWasResolved) {
-    // Not `!res.currentVersion` - that's force-set to lockedVersion further down regardless of timestamp resolution.
-    // `pinDigest` doesn't repoint anywhere, unlike `digest` - it just freezes whatever the ref already resolves to.
-    // An unversioned tag (e.g. `latest`) has no versioned release to age against, and holding the pin would only
-    // prolong the less-pinned (less safe) state, so skip the check entirely rather than treating the missing
+    // Not `!res.currentVersion` - that's force-set to lockedVersion further
+    // down regardless of timestamp resolution.
+    // `pinDigest` doesn't repoint anywhere, unlike `digest` - it just freezes
+    // whatever the ref already resolves to.
+    // An unversioned tag (e.g. `latest` ) has no versioned release to age
+    // against, and holding the pin would only prolong the less-pinned (less
+    // safe) state, so skip the check entirely rather than treating the missing
     // timestamp as pending.
     logger.once.debug(
       { depName: config.depName, updateType: update.updateType },
@@ -137,16 +140,20 @@ async function applyMinimumReleaseAgeToDigestUpdate(
   );
   releaseConfig = await applyPackageRules(releaseConfig, 'update-type');
 
-  // Not update.releaseTimestamp - that field means "age of the new release" elsewhere (generate.ts, libyear.ts).
-  // Not res.currentVersionTimestamp either - that tracks whatever rangeStrategy resolves currentVersion to (e.g.
-  // the oldest matching release under `bump`), whereas both `digest` and `pinDigest` reflect whatever the current
-  // value's ref actually resolves to *right now*, which is always the newest matching version.
+  // Not update.releaseTimestamp - that field means "age of the new release"
+  // elsewhere (generate.ts, libyear.ts).
+  // Not res.currentVersionTimestamp either - that tracks whatever rangeStrategy
+  // resolves currentVersion to (e.g.
+  // the oldest matching release under `bump` ), whereas both `digest` and
+  // `pinDigest` reflect whatever the current value's ref actually resolves to
+  // *right now*, which is always the newest matching version.
   const ageCheck = checkMinimumReleaseAge(
     releaseConfig,
     newestMatchingVersionTimestamp,
   );
 
-  // Mirror filterInternalChecks()'s logging so a held/passed digest update is diagnosable.
+  // Mirror filterInternalChecks()'s logging so a held/passed digest update is
+  // diagnosable.
   if (ageCheck.minimumReleaseAgeMs && !ageCheck.hasTimestamp) {
     if (releaseConfig.minimumReleaseAgeBehaviour === 'timestamp-optional') {
       logger.once.warn(
@@ -175,7 +182,8 @@ async function applyMinimumReleaseAgeToDigestUpdate(
       `${update.updateType} update is pending minimumReleaseAge status checks`,
     );
 
-    // internalChecksFilter is read from the unmerged top-level config, like filterInternalChecks().
+    // internalChecksFilter is read from the unmerged top-level config, like
+    // filterInternalChecks().
     if (config.internalChecksFilter === 'strict') {
       update.pendingChecks = true;
     }
@@ -196,9 +204,15 @@ export async function lookupUpdates(
     updates: [],
     warnings: [],
   };
-  // Timestamp of the release a `digest`/`pinDigest` update's current value currently resolves to (the newest version matching it, regardless of `rangeStrategy`), as opposed to `res.currentVersionTimestamp` which tracks whatever the configured rangeStrategy resolves `currentVersion` to (e.g. the oldest for `bump`)
+  // Timestamp of the release a `digest` /`pinDigest` update's current value
+  // currently resolves to (the newest version matching it, regardless of
+  // `rangeStrategy` ), as opposed to `res.currentVersionTimestamp` which tracks
+  // whatever the configured rangeStrategy resolves `currentVersion` to (e.g.
+  // the oldest for `bump` )
   let newestMatchingVersionTimestamp: Timestamp | null | undefined;
-  // The `digest` update for `config.currentDigest` (if one is added), so its age check can run after `newDigest` is fetched and no-op updates are stripped.
+  // The `digest` update for `config.currentDigest` (if one is added), so its
+  // age check can run after `newDigest` is fetched and no-op updates are
+  // stripped.
   let digestUpdate: DigestLikeUpdate | undefined;
 
   try {
@@ -328,7 +342,8 @@ export async function lookupUpdates(
       ]);
 
       const latestVersion = dependency.tags?.latest;
-      // Filter out any results from datasource that don't comply with our versioning
+      // Filter out any results from datasource that don't comply with our
+      // versioning
       let allVersions = dependency.releases.filter((release) =>
         versioningApi.isVersion(release.version),
       );
@@ -498,7 +513,9 @@ export async function lookupUpdates(
           : config.pinDigests &&
             couldApplyMinimumReleaseAgeToDigest(config, 'pinDigest')
       ) {
-        // Resolve from `allVersions` (not `dependency.releases`) so that filters like followTag apply, preferring non-deprecated versions with a fallback - both like the `currentVersion` resolution above.
+        // Resolve from `allVersions` (not `dependency.releases` ) so that
+        // filters like followTag apply, preferring non-deprecated versions with
+        // a fallback - both like the `currentVersion` resolution above.
         const newestMatchingVersion =
           getCurrentVersion(
             compareValue!,
@@ -614,7 +631,8 @@ export async function lookupUpdates(
           }
         }
         if (config.vulnerabilityFixStrategy === 'highest') {
-          // Don't shrink the list of releases - let Renovate use its normal logic
+          // Don't shrink the list of releases - let Renovate use its normal
+          // logic
           logger.once.debug(
             `Using vulnerabilityFixStrategy=highest for ${config.packageName}`,
           );
@@ -684,8 +702,11 @@ export async function lookupUpdates(
         ) {
           update.updateType = 'digest';
 
-          // As this has already been processed by `filterInternalChecks()`, but we're changing the `updateType`, we need to apply the digest-scoped minimumReleaseAge rules.
-          // `currentVersionWasResolved` only matters for `pinDigest`, which `update.updateType` never is here - true is a safe constant.
+          // As this has already been processed by `filterInternalChecks()`, but
+          // we're changing the `updateType`, we need to apply the digest-scoped
+          // minimumReleaseAge rules.
+          // `currentVersionWasResolved` only matters for `pinDigest`, which
+          // `update.updateType` never is here - true is a safe constant.
           await applyMinimumReleaseAgeToDigestUpdate(
             update as DigestLikeUpdate,
             config,
@@ -808,7 +829,8 @@ export async function lookupUpdates(
     if (supportsDigests(config.datasource)) {
       if (config.currentDigest) {
         if (!config.digestOneAndOnly || !res.updates.length) {
-          // digest update - age-checked after the strip below, once newDigest is known
+          // digest update - age-checked after the strip below, once newDigest
+          // is known
           digestUpdate = {
             updateType: 'digest',
             newValue: config.currentValue,
@@ -863,12 +885,14 @@ export async function lookupUpdates(
             lookupName: res.lookupName,
           };
 
-          // #20304 only pass it for replacement updates, otherwise we get wrong or invalid digest
+          // #20304 only pass it for replacement updates, otherwise we get wrong
+          // or invalid digest
           if (update.updateType !== 'replacement') {
             delete getDigestConfig.replacementName;
           }
 
-          // #20304 don't use lookupName and currentDigest when we replace image name
+          // #20304 don't use lookupName and currentDigest when we replace image
+          // name
           if (
             update.updateType === 'replacement' &&
             update.newName !== config.packageName
@@ -878,8 +902,10 @@ export async function lookupUpdates(
             getDigestConfig.replacementName = update.newName;
           }
 
-          // Don't use current releases if replacement changes name, otherwise we use the wrong new digest.
-          // This happens on datasources which return the digest in release info like `github-tags`.
+          // Don't use current releases if replacement changes name, otherwise
+          // we use the wrong new digest.
+          // This happens on datasources which return the digest in release info
+          // like `github-tags`.
           // We can still use it when only version is changing.
           if (
             update.updateType !== 'replacement' ||
@@ -951,7 +977,8 @@ export async function lookupUpdates(
           (update.newDigest &&
             !update.newDigest.startsWith(config.currentDigest!)),
       );
-    // If range strategy specified in config is 'in-range-only', also strip out updates where currentValue !== newValue
+    // If range strategy specified in config is 'in-range-only', also strip out
+    // updates where currentValue !== newValue
     if (config.rangeStrategy === 'in-range-only') {
       res.updates = res.updates.filter(
         (update) => update.newValue === config.currentValue,
@@ -965,8 +992,10 @@ export async function lookupUpdates(
       );
     }
 
-    // If there is a digest update proposed which is in the pending updates for this dependency, ensure that `minimumReleaseAge` is applied.
-    // `currentVersionWasResolved` only matters for `pinDigest`, which `digestUpdate` never is - true is a safe constant.
+    // If there is a digest update proposed which is in the pending updates for
+    // this dependency, ensure that `minimumReleaseAge` is applied.
+    // `currentVersionWasResolved` only matters for `pinDigest`, which
+    // `digestUpdate` never is - true is a safe constant.
     if (digestUpdate && res.updates.includes(digestUpdate)) {
       await applyMinimumReleaseAgeToDigestUpdate(
         digestUpdate,

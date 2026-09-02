@@ -115,7 +115,8 @@ export default defineRule({
           return;
         }
 
-        // Match z.infer<...> — TSQualifiedName where left = zodBinding, right = 'infer'
+        // Match z.infer<...> — TSQualifiedName where left = zodBinding, right =
+        // 'infer'
         const refTypeName = typeAnnotation.typeName;
         if (
           refTypeName.type !== 'TSQualifiedName' ||

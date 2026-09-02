@@ -41,8 +41,7 @@ interface Ctx {
   useScalaVersion?: boolean;
   variableName?: string;
 
-  // Use to contain temporary object name
-  // when parsing anonymous object structs.
+  // Use to contain temporary object name when parsing anonymous object structs.
   // See objectAssignmentMatch.
   currentObjectName?: string;
 }
@@ -61,8 +60,8 @@ const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
   .op(':=')
   .alt(
-    // Dotted symbol. Important to have this first in the `alt` as otherwise
-    // the tree walker will eager parse a simple symbol and stop there.
+    // Dotted symbol. Important to have this first in the `alt` as otherwise the
+    // tree walker will eager parse a simple symbol and stop there.
     q
       // keep the first part of the path in context
       .sym<Ctx>((ctx, { value: currentVarName }) => ({
@@ -166,12 +165,11 @@ const objectFieldMatch = q
     return ctx;
   });
 
-// Parses anonymous objects of the form
-// val {objName} = new {
+// Parses anonymous objects of the form val {objName} = new {
 //   {name} = "{version}"
 // }
-// and introduces a `objName.name` variable with value "{version}"
-// in the context.
+// and introduces a `objName.name` variable with value "{version}" in the
+// context.
 const objectAssignmentMatch = q
   .sym<Ctx>('val')
   .sym((ctx, { value: currentObjectName }) => ({
@@ -211,8 +209,8 @@ const artifactIdMatch = q.alt<Ctx>(
 );
 
 const versionMatch = q.alt<Ctx>(
-  // Dotted symbol. Important to have this first in the `alt` as otherwise
-  // the tree walker will eager parse a simple symbol and stop there.
+  // Dotted symbol. Important to have this first in the `alt` as otherwise the
+  // tree walker will eager parse a simple symbol and stop there.
   q
     .sym<Ctx>((ctx, { value: currentVarName }) => ({ ...ctx, currentVarName }))
     .op('.')

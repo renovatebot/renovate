@@ -5,14 +5,16 @@ describe('modules/manager/bun/utils', () => {
 
   describe('fileMatchesWorkspaces', () => {
     it('should return false when fileName does not start with pwd', () => {
-      // This file path doesn't start with the given pwd, so it should return false.
+      // This file path doesn't start with the given pwd, so it should return
+      // false.
       const fileName = '/another-path/package.json';
       const workspaces = ['**'];
       expect(fileMatchesWorkspaces(pwd, fileName, workspaces)).toBe(false);
     });
 
     it('should correctly evaluate fileName when it starts with pwd', () => {
-      // Here the fileName starts with pwd, so the workspace patterns will be checked.
+      // Here the fileName starts with pwd, so the workspace patterns will be
+      // checked.
       const fileName = '/project/foo/package.json';
       const workspaces = ['foo'];
       expect(fileMatchesWorkspaces(pwd, fileName, workspaces)).toBe(true);

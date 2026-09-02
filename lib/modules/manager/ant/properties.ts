@@ -60,7 +60,8 @@ export function parsePropertiesFile(
 
       // First-definition-wins
       if (!(key in props)) {
-        // fileReplacePosition points to the start of the value in the raw content
+        // fileReplacePosition points to the start of the value in the raw
+        // content
         const lineStart = offset + rawLine.indexOf(line);
         const keyEnd = line.indexOf(separatorMatch[2]);
         const fileReplacePosition = lineStart + keyEnd;
@@ -103,8 +104,8 @@ export function applyProps(
     return dep;
   }
 
-  // After resolveChainedProps, prop.val is either fully resolved or still contains
-  // placeholders (meaning circular or unresolvable)
+  // After resolveChainedProps, prop.val is either fully resolved or still
+  // contains placeholders (meaning circular or unresolvable)
   if (containsPlaceholder(prop.val)) {
     dep.skipReason = 'recursive-placeholder';
     return dep;

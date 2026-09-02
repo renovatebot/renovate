@@ -77,15 +77,18 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       } catch (err) {
         /* v8 ignore start -- CJS fallback not testable in vitest */
 
-        // If the file is .js or .ts, it might be a legacy CJS config (using module.exports)
-        // This usually throws ReferenceError (module is not defined) or SyntaxError
+        // If the file is .js or .ts, it might be a legacy CJS config (using
+        // module.exports)
+        // This usually throws ReferenceError (module is not defined) or
+        // SyntaxError
         if (['.js', '.ts'].includes(upath.extname(file))) {
           const require = createRequire(import.meta.url);
           try {
             tmpConfig = require(absoluteFilePath);
           } catch {
-            // If require also fails (e.g. strict ESM package), throw the original import error
-            // to encourage the user to fix their config format.
+            // If require also fails (e.g. strict ESM package), throw the
+            // original import error to encourage the user to fix their config
+            // format.
             throw err;
           }
         } else {

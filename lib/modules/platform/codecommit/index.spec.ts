@@ -334,7 +334,8 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('checks if nullcheck works for list prs', async () => {
-      // This test expects a clean cache as we want to check the behaviour when an AWS call is made
+      // This test expects a clean cache as we want to check the behaviour when
+      // an AWS call is made
       await reInitRepo(codeCommit);
 
       codeCommitClient.on(ListPullRequestsCommand).resolvesOnce({});

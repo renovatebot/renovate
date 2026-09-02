@@ -77,6 +77,7 @@
     "no-else-return": ["error", { "allowElseIf": false }],
     "unicorn/no-lonely-if": "error",
 
+    "renovate/comment-wrapping": "error",
     "renovate/enforce-ts-extension": "error",
     "renovate/no-number-constructor": "error",
     "renovate/prefer-json-pipe": "error",

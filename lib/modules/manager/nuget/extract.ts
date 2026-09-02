@@ -101,7 +101,8 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
       const version = attr?.Version;
-      // if sdk element is present it will always have the Name field but the Version is an optional field
+      // if sdk element is present it will always have the Name field but the
+      // Version is an optional field
       if (depName && version) {
         results.push({
           depName,

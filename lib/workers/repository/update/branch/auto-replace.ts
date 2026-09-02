@@ -256,8 +256,8 @@ export async function doAutoReplace(
     newName !== depName &&
     (isUndefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
-  // fallback must contain the field being updated, else the replacement is
-  // a no-op for managers where value and digest live in separate tokens
+  // fallback must contain the field being updated, else the replacement is a
+  // no-op for managers where value and digest live in separate tokens
   let replaceString = upgrade.replaceString;
   if (isUndefined(replaceString)) {
     if (valueChanging && digestChanging) {

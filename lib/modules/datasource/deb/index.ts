@@ -64,20 +64,22 @@ export class DebDatasource extends Datasource {
     extractedFile: string,
     _lastTimestamp: Date,
   ): Promise<Record<string, PackageDescription[]>> {
-    // read line by line to avoid high memory consumption as the extracted Packages
-    // files can be multiple MBs in size
+    // read line by line to avoid high memory consumption as the extracted
+    // Packages files can be multiple MBs in size
     const rl = readline.createInterface({
       input: fs.createCacheReadStream(extractedFile),
       terminal: false,
     });
 
     let currentPackage: PackageDescription = {};
-    // A Package Index can contain multiple Versions of the package on private Artifactory (e.g. Jfrog)
+    // A Package Index can contain multiple Versions of the package on private
+    // Artifactory (e.g. Jfrog)
     const allPackages: Record<string, PackageDescription[]> = {};
 
     for await (const line of rl) {
       if (line === '') {
-        // All information of the package are available, add to the list of packages
+        // All information of the package are available, add to the list of
+        // packages
         if (requiredPackageKeys.every((key) => key in currentPackage)) {
           if (!allPackages[currentPackage.Package!]) {
             allPackages[currentPackage.Package!] = [];

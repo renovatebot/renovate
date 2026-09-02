@@ -299,7 +299,8 @@ export async function generateLockFile(
     if (postUpdateOptions?.includes('npmInstallTwice')) {
       logger.debug('Running npm install twice');
       // Run the install command twice to ensure the lock file is up to date
-      // iterate through commands and if any command starts with `npm install`, add it again
+      // iterate through commands and if any command starts with `npm install`,
+      // add it again
       const existingCommands = [...commands];
       commands = [];
       for (const command of existingCommands) {
@@ -342,8 +343,9 @@ export async function generateLockFile(
       'utf8',
     ))!;
 
-    // Massage lockfile counterparts of package.json that were modified
-    // because npm install was called with an explicit version for rangeStrategy=update-lockfile
+    // Massage lockfile counterparts of package.json that were modified because
+    // npm install was called with an explicit version for
+    // rangeStrategy=update-lockfile
     if (lockUpdates.length) {
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
       if (
@@ -427,9 +429,8 @@ export function divideWorkspaceAndRootDeps(
 
       if (isNonEmptyString(workspaceDir)) {
         let workspaceName: string | undefined;
-        // compare workspaceDir to workspace patterns
-        // stop when the first match is found and
-        // add workspaceDir to workspaces set and upgrade object
+        // compare workspaceDir to workspace patterns stop when the first match
+        // is found and add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns) {
           const massagedPattern = (workspacePattern as string).replace(
             regEx(/^\.\//),

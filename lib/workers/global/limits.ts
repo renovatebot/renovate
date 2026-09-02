@@ -103,7 +103,8 @@ function handleConcurrentLimits(
   const hourlyPrLimit = calcLimit(config.upgrades, 'prHourlyLimit');
   const hourlyPrCount = getCount('HourlyPRs');
 
-  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+  // if a limit is defined ( >0 ) and limit reached return true ie. limit has
+  // been reached
   if (hourlyPrLimit && hourlyPrCount >= hourlyPrLimit) {
     logger.debug({ hourlyPrCount, hourlyPrLimit }, 'Hourly PRs limit reached');
     return true;
