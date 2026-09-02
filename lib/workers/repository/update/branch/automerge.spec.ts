@@ -77,12 +77,14 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       config.baseBranch = 'test-branch';
+      config.allowBranchAutomergeBehindBase = undefined;
       platform.getBranchStatus.mockResolvedValueOnce('green');
 
       const res = await tryBranchAutomerge(config);
 
       expect(res).toBe('automerged');
       expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
+      expect(scm.mergeAndPush).toHaveBeenCalledWith(config.branchName, false);
     });
 
     it('returns true if automerge succeeds (dry-run)', async () => {
@@ -91,6 +93,36 @@ describe('workers/repository/update/branch/automerge', () => {
       GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
+    });
+
+    it('returns true if automerge succeeds with allowBehindBase=true and rebaseWhen=never', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
+      config.allowBranchAutomergeBehindBase = true;
+      config.rebaseWhen = 'never';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerged');
+      expect(scm.checkoutBranch).toHaveBeenCalledWith('test-branch');
+      expect(scm.mergeAndPush).toHaveBeenCalledWith(config.branchName, true);
+    });
+
+    it('returns true if automerge succeeds with allowBehindBase=false', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
+      config.allowBranchAutomergeBehindBase = false;
+      config.rebaseWhen = 'conflicted';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerged');
+      expect(scm.checkoutBranch).toHaveBeenCalledWith('test-branch');
+      expect(scm.mergeAndPush).toHaveBeenCalledWith(config.branchName, false);
     });
   });
 });
