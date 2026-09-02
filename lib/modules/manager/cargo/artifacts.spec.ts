@@ -635,23 +635,18 @@ describe('modules/manager/cargo/artifacts', () => {
           env: {
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             GIT_CONFIG_COUNT: '6',
-            GIT_CONFIG_KEY_0:
-              'url.https://ssh:some-token@github.com/.insteadOf',
-            GIT_CONFIG_KEY_1:
-              'url.https://git:some-token@github.com/.insteadOf',
-            GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
-            GIT_CONFIG_KEY_3:
-              'url.https://ssh:some-other-token@gitea.com/.insteadOf',
-            GIT_CONFIG_KEY_4:
-              'url.https://git:some-other-token@gitea.com/.insteadOf',
-            GIT_CONFIG_KEY_5:
-              'url.https://some-other-token@gitea.com/.insteadOf',
+            GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+            GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+            GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
+            GIT_CONFIG_KEY_3: 'url.https://gitea.com/.insteadOf',
+            GIT_CONFIG_KEY_4: 'url.https://gitea.com/.insteadOf',
+            GIT_CONFIG_KEY_5: 'http.https://gitea.com/.extraHeader',
             GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
             GIT_CONFIG_VALUE_1: 'git@github.com:',
-            GIT_CONFIG_VALUE_2: 'https://github.com/',
+            GIT_CONFIG_VALUE_2: 'Authorization: Basic c29tZS10b2tlbjo=',
             GIT_CONFIG_VALUE_3: 'ssh://git@gitea.com/',
             GIT_CONFIG_VALUE_4: 'git@gitea.com:',
-            GIT_CONFIG_VALUE_5: 'https://gitea.com/',
+            GIT_CONFIG_VALUE_5: 'Authorization: Basic c29tZS1vdGhlci10b2tlbjo=',
           },
         },
       },
@@ -708,32 +703,28 @@ describe('modules/manager/cargo/artifacts', () => {
           options: expect.objectContaining({
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '9',
-              GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
+              GIT_CONFIG_KEY_3: 'url.https://github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_4: 'url.https://github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_6:
-                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_7:
-                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+                'http.https://github.enterprise.com/.extraHeader',
+              GIT_CONFIG_KEY_6: 'url.https://gitlab.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_7: 'url.https://gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_8:
-                'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
+                'http.https://gitlab.enterprise.com/.extraHeader',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
-              GIT_CONFIG_VALUE_2: 'https://github.com/',
+              GIT_CONFIG_VALUE_2: 'Authorization: Basic c29tZS10b2tlbjo=',
               GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
               GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
-              GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
+              GIT_CONFIG_VALUE_5:
+                'Authorization: Basic c29tZS1lbnRlcnByaXNlLXRva2VuOg==',
               GIT_CONFIG_VALUE_6: 'ssh://git@gitlab.enterprise.com/',
               GIT_CONFIG_VALUE_7: 'git@gitlab.enterprise.com:',
-              GIT_CONFIG_VALUE_8: 'https://gitlab.enterprise.com/',
+              GIT_CONFIG_VALUE_8:
+                'Authorization: Basic Z2l0bGFiLWNpLXRva2VuOnNvbWUtZ2l0bGFiLXRva2Vu',
             }),
           }),
         }),
@@ -786,14 +777,12 @@ describe('modules/manager/cargo/artifacts', () => {
           options: expect.objectContaining({
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '3',
-              GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
-              GIT_CONFIG_VALUE_2: 'https://github.com/',
+              GIT_CONFIG_VALUE_2: 'Authorization: Basic c29tZS10b2tlbjo=',
             }),
           }),
         }),
@@ -846,23 +835,20 @@ describe('modules/manager/cargo/artifacts', () => {
           options: expect.objectContaining({
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '6',
-              GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
-              GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
+              GIT_CONFIG_KEY_3: 'url.https://github.enterprise.com/.insteadOf',
+              GIT_CONFIG_KEY_4: 'url.https://github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'http.https://github.enterprise.com/.extraHeader',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
-              GIT_CONFIG_VALUE_2: 'https://github.com/',
+              GIT_CONFIG_VALUE_2: 'Authorization: Basic c29tZS10b2tlbjo=',
               GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
               GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
-              GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
+              GIT_CONFIG_VALUE_5:
+                'Authorization: Basic c29tZS1lbnRlcnByaXNlLXRva2VuLWNhcmdvOg==',
             }),
           }),
         }),

@@ -15,12 +15,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -34,15 +34,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://username:password@example.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://username:password@example.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://username:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://example.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
         GIT_CONFIG_VALUE_1: 'git@example.com:',
-        GIT_CONFIG_VALUE_2: 'https://example.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=',
       });
     });
 
@@ -57,12 +54,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -75,12 +72,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -93,15 +90,13 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://x-access-token:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://x-access-token:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2:
+          'Authorization: Basic eC1hY2Nlc3MtdG9rZW46dG9rZW4xMjM0',
       });
     });
 
@@ -118,12 +113,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_3: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
-        GIT_CONFIG_VALUE_3: 'https://github.com/',
+        GIT_CONFIG_VALUE_3: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -141,12 +136,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_3: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
-        GIT_CONFIG_VALUE_3: 'https://github.com/',
+        GIT_CONFIG_VALUE_3: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -160,12 +155,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -182,12 +177,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
         RANDOM_VARIABLE: 'random',
       });
     });
@@ -205,12 +200,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -223,15 +218,13 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://gitlab.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
         GIT_CONFIG_VALUE_1: 'git@gitlab.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.com/',
+        GIT_CONFIG_VALUE_2:
+          'Authorization: Basic Z2l0bGFiLWNpLXRva2VuOnRva2VuMTIzNA==',
       });
     });
 
@@ -243,15 +236,13 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://gitlab-ci-token:token1234@gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://gitlab.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://gitlab.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.com/',
         GIT_CONFIG_VALUE_1: 'git@gitlab.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.com/',
+        GIT_CONFIG_VALUE_2:
+          'Authorization: Basic Z2l0bGFiLWNpLXRva2VuOnRva2VuMTIzNA==',
       });
     });
 
@@ -279,12 +270,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.http://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.http://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.http://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.http://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.http://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.http://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'http://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -297,12 +288,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/org.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/org.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/org.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/org.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/org.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/org.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/org',
         GIT_CONFIG_VALUE_1: 'git@github.com:org',
-        GIT_CONFIG_VALUE_2: 'https://github.com/org',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -319,14 +310,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://ssh:token1234@github.com/org/repo.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git:token1234@github.com/org/repo.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/org/repo.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/org/repo.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/org/repo.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/org/repo.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/org/repo',
         GIT_CONFIG_VALUE_1: 'git@github.com:org/repo',
-        GIT_CONFIG_VALUE_2: 'https://github.com/org/repo',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -343,15 +332,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://ssh:token1234@github.com:89/org/repo.git.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git:token1234@github.com:89/org/repo.git.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://token1234@github.com:89/org/repo.git.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com:89/org/repo.git.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com:89/org/repo.git.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com:89/org/repo.git.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com:89/org/repo.git',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com:89/org/repo.git',
-        GIT_CONFIG_VALUE_2: 'https://github.com:89/org/repo.git',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
 
@@ -368,15 +354,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://ssh:token1234@git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git:token1234@git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://token1234@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://git.mycompany.com/scm/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
-        GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
   });
@@ -398,12 +381,12 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',
       });
     });
 
@@ -422,13 +405,13 @@ describe('util/git/auth', () => {
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_0: 'existing-key',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_3: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'existing-value',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
-        GIT_CONFIG_VALUE_3: 'https://github.com/',
+        GIT_CONFIG_VALUE_3: 'Authorization: Basic dG9rZW4xMjM6',
       });
     });
 
@@ -450,29 +433,25 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '9',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3:
-          'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_4:
-          'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_5:
-          'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_6:
-          'url.https://ssh:token345@github.example.com/.insteadOf',
-        GIT_CONFIG_KEY_7:
-          'url.https://git:token345@github.example.com/.insteadOf',
-        GIT_CONFIG_KEY_8: 'url.https://token345@github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
+        GIT_CONFIG_KEY_3: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_4: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_5: 'http.https://gitlab.example.com/.extraHeader',
+        GIT_CONFIG_KEY_6: 'url.https://github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_7: 'url.https://github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_8: 'http.https://github.example.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',
         GIT_CONFIG_VALUE_3: 'ssh://git@gitlab.example.com/',
         GIT_CONFIG_VALUE_4: 'git@gitlab.example.com:',
-        GIT_CONFIG_VALUE_5: 'https://gitlab.example.com/',
+        GIT_CONFIG_VALUE_5:
+          'Authorization: Basic Z2l0bGFiLWNpLXRva2VuOnRva2VuMjM0',
         GIT_CONFIG_VALUE_6: 'ssh://git@github.example.com/',
         GIT_CONFIG_VALUE_7: 'git@github.example.com:',
-        GIT_CONFIG_VALUE_8: 'https://github.example.com/',
+        GIT_CONFIG_VALUE_8: 'Authorization: Basic dG9rZW4zNDU6',
       });
     });
 
@@ -484,15 +463,13 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://gitlab.example.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
         GIT_CONFIG_VALUE_1: 'git@gitlab.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.example.com/',
+        GIT_CONFIG_VALUE_2:
+          'Authorization: Basic Z2l0bGFiLWNpLXRva2VuOnRva2VuMTIz',
       });
     });
 
@@ -505,15 +482,12 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://user1234:pass1234@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://user1234:pass1234@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://user1234:pass1234@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://gitlab.example.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
         GIT_CONFIG_VALUE_1: 'git@gitlab.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.example.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dXNlcjEyMzQ6cGFzczEyMzQ=',
       });
     });
 
@@ -526,15 +500,13 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://gitlab.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://gitlab.example.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
         GIT_CONFIG_VALUE_1: 'git@gitlab.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitlab.example.com/',
+        GIT_CONFIG_VALUE_2:
+          'Authorization: Basic dXNlciBAIDokIGFiYzphYmMgQCBibHViIHBhc3MwOg==',
       });
     });
 
@@ -573,14 +545,12 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({}, ['custom'])).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://ssh:token123@custom.example.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git:token123@custom.example.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@custom.example.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://custom.example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://custom.example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://custom.example.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@custom.example.com/',
         GIT_CONFIG_VALUE_1: 'git@custom.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://custom.example.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',
       });
     });
 
@@ -601,15 +571,12 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://ssh:token123@git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git:token123@git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://token123@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://git.mycompany.com/scm/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
-        GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',
       });
     });
   });
