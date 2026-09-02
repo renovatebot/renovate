@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
 import { fs } from '~test/util.ts';
+import { logger } from '../../../logger/index.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -566,6 +567,65 @@ describe('modules/manager/pixi/extract', () => {
       ],
       lockFiles: [],
     });
+  });
+
+  it('passes the workspace platforms to a full-url conda channel', async () => {
+    await expect(
+      extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pixi"
+          authors = []
+          channels = ["https://example.com/artifactory/api/conda/conda-virtual"]
+          platforms = ["linux-64", "osx-arm64"]
+
+          [dependencies]
+          python = ">=3.14.5,<3.15"
+          `,
+        'pixi.toml',
+      ),
+    ).resolves.toMatchObject({
+      deps: [
+        {
+          datasource: 'conda',
+          depName: 'python',
+          // the datasource reconciles the subdirs itself, so this stays one
+          // registry URL per channel
+          registryUrls: [
+            'https://example.com/artifactory/api/conda/conda-virtual?platforms=linux-64,osx-arm64',
+          ],
+        },
+      ],
+    });
+  });
+
+  it('warns and only searches noarch when the workspace declares no platforms', async () => {
+    await expect(
+      extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pixi"
+          authors = []
+          channels = ["https://example.com/artifactory/api/conda/conda-virtual"]
+
+          [dependencies]
+          python = ">=3.14.5,<3.15"
+          `,
+        'pixi.toml',
+      ),
+    ).resolves.toMatchObject({
+      deps: [
+        {
+          datasource: 'conda',
+          depName: 'python',
+          // no platforms to satisfy, so the datasource searches `noarch` alone
+          registryUrls: [
+            'https://example.com/artifactory/api/conda/conda-virtual?platforms=',
+          ],
+        },
+      ],
+    });
+    expect(logger.once.warn).toHaveBeenCalled();
   });
 
   it('skip package without channels', async () => {
