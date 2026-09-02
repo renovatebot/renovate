@@ -1104,6 +1104,34 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('extracts bun packageManager', async () => {
+      const pJson = {
+        packageManager: 'bun@1.4.0',
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { bun: '1.4.0' },
+        deps: [
+          {
+            commitMessageTopic: 'Bun',
+            currentValue: '1.4.0',
+            datasource: 'npm',
+            depName: 'bun',
+            depType: 'packageManager',
+            prettyDepType: 'packageManager',
+          },
+        ],
+        managerData: {
+          hasPackageManager: true,
+        },
+      });
+    });
+
     it('sets hasPackageManager to true when devEngines detected in package file', async () => {
       const pJson = {
         devEngines: {
@@ -1422,7 +1450,7 @@ describe('modules/manager/npm/extract/index', () => {
             hasPackageManager: false,
             npmLock: undefined,
             packageJsonName: 'renovate',
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             workspacesPackages: undefined,
             yarnLock: undefined,
             yarnZeroInstall: false,
@@ -1484,7 +1512,7 @@ describe('modules/manager/npm/extract/index', () => {
             },
           ],
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
           },
           packageFile: 'pnpm-workspace.yaml',
         },

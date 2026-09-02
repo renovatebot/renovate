@@ -11,6 +11,7 @@ import {
   exactVersion,
   inclusiveBound,
   lowerBound,
+  matchVersion,
   upperBound,
   versionGroup,
 } from './pattern.ts';
@@ -124,12 +125,30 @@ function sortVersions(a: string, b: string): number {
   return npm.sortVersions(padZeroes(a), padZeroes(b));
 }
 
+function matchVersionPrecision(
+  currentValue: string,
+  newVersion: string,
+): string | null {
+  if (!matchVersion.test(currentValue) || !isVersion(newVersion)) {
+    return null;
+  }
+  const precision = currentValue.split('.').length;
+  return newVersion.split('.').slice(0, precision).join('.');
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
+  const precisionMatchedVersion = matchVersionPrecision(
+    currentValue,
+    newVersion,
+  );
+  if (precisionMatchedVersion) {
+    return precisionMatchedVersion;
+  }
   const pep440Value = pep440.getNewValue({
     currentValue: rez2pep440(currentValue),
     rangeStrategy,

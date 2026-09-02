@@ -1,8 +1,7 @@
 import { regEx } from '../../../util/regex.ts';
+import type { SemVerXRange } from './types.ts';
 
-const SEMVER_X_RANGE = ['*', 'x', 'X', ''] as const;
-type SemVerXRangeArray = typeof SEMVER_X_RANGE;
-export type SemVerXRange = SemVerXRangeArray[number];
+const SEMVER_X_RANGE: readonly SemVerXRange[] = ['*', 'x', 'X', ''];
 
 const RANGE_SEPARATOR = regEx(/(\s+|,|\|\||[()])/);
 const NUMERIC_RELEASE_PART = '(?:0|[1-9]\\d*)';

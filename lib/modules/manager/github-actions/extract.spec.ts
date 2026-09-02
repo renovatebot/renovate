@@ -558,6 +558,79 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('extracts ratchet pinned action in subdirectory', async () => {
+      const res = await extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: actions/cache/restore@b7e8d49f17405cc70c1c120101943203c98d3a4b # ratchet:actions/cache/restore@v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/cache',
+        currentValue: 'v4',
+        currentDigest: 'b7e8d49f17405cc70c1c120101943203c98d3a4b',
+        datasource: 'github-tags',
+        versioning: 'github-actions',
+        replaceString:
+          'actions/cache/restore@b7e8d49f17405cc70c1c120101943203c98d3a4b # ratchet:actions/cache/restore@v4',
+      });
+    });
+
+    it('extracts a reusable workflow call as a workflow', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+        jobs:
+          release:
+            uses: some-org/some-repo/.github/workflows/release.yml@v1.2.3
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'some-org/some-repo',
+          currentValue: 'v1.2.3',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+          depType: 'workflow',
+          replaceString:
+            'some-org/some-repo/.github/workflows/release.yml@v1.2.3',
+          autoReplaceStringTemplate:
+            '{{depName}}/.github/workflows/release.yml@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        },
+      ]);
+    });
+
+    it.each`
+      uses                                                            | depType
+      ${'some-org/some-repo/.github/workflows/release.yml@v1'}        | ${'workflow'}
+      ${'some-org/some-repo/.github/workflows/release.yaml@v1'}       | ${'workflow'}
+      ${'actions/checkout@v4'}                                        | ${'action'}
+      ${'github/codeql-action/init@v3'}                               | ${'action'}
+      ${'some-org/some-repo/.github/workflows/sub/release.yml@v1'}    | ${'action'}
+      ${'some-org/some-repo/.github/workflows@v1'}                    | ${'action'}
+      ${'some-org/some-repo/.github/workflows/release.json@v1'}       | ${'action'}
+      ${'some-org/some-repo/nested/.github/workflows/release.yml@v1'} | ${'action'}
+    `(
+      'gives $uses the depType $depType',
+      async ({ uses, depType }: { uses: string; depType: string }) => {
+        const res = await extractPackageFile(
+          codeBlock`
+          jobs:
+            build:
+              steps:
+                - uses: ${uses}
+          `,
+          '.github/workflows/ci.yml',
+        );
+
+        expect(res?.deps[0]).toMatchObject({ depType });
+      },
+    );
+
     it('disables naked SHA pins without version comment', async () => {
       const res = await extractPackageFile(
         codeBlock`
@@ -2290,6 +2363,23 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       // the lockfile only records `OWNER/REPO@REF` pins, so a `docker://` image is still ours to pin
       expect(res?.deps[1]).not.toHaveProperty('digestManagedExternally');
+    });
+
+    it('marks a reusable workflow call, which the lockfile records too', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          jobs:
+            release:
+              uses: some-org/some-repo/.github/workflows/release.yml@v1
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        { depType: 'workflow', digestManagedExternally: true },
+      ]);
     });
 
     it('leaves a workflow which is not onboarded alone', async () => {

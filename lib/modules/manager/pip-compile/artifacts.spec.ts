@@ -205,6 +205,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIP_CACHE_DIR ' +
           '-e PIP_NO_INPUT ' +
           '-e PIP_KEYRING_PROVIDER ' +
@@ -541,6 +542,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIP_CACHE_DIR ' +
           '-e PIP_NO_INPUT ' +
           '-e PIP_KEYRING_PROVIDER ' +
@@ -560,11 +562,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
   });
 
   describe('constructPipCompileCmd()', () => {
-    afterEach(() => {
-      delete process.env.PIP_INDEX_URL;
-      delete process.env.PIP_EXTRA_INDEX_URL;
-    });
-
     it('throws for garbage', () => {
       expect(() =>
         constructPipCompileCmd(
@@ -600,7 +597,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('does not add --no-emit-index-url when PIP_INDEX_URL has no credentials', () => {
-      process.env.PIP_INDEX_URL = 'https://example.com/pypi/simple';
+      vi.stubEnv('PIP_INDEX_URL', 'https://example.com/pypi/simple');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -609,7 +606,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url when credentials are found in PIP_INDEX_URL', () => {
-      process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
+      vi.stubEnv('PIP_INDEX_URL', 'https://user:pass@example.com/pypi/simple');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -618,8 +615,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url when credentials are found in PIP_EXTRA_INDEX_URL', () => {
-      process.env.PIP_EXTRA_INDEX_URL =
-        'https://user:pass@example.com/pypi/simple';
+      vi.stubEnv(
+        'PIP_EXTRA_INDEX_URL',
+        'https://user:pass@example.com/pypi/simple',
+      );
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -628,7 +627,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url when only a username is found in PIP_INDEX_URL', () => {
-      process.env.PIP_INDEX_URL = 'https://user@example.com/pypi/simple';
+      vi.stubEnv('PIP_INDEX_URL', 'https://user@example.com/pypi/simple');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -637,7 +636,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url when only a username is found in PIP_EXTRA_INDEX_URL', () => {
-      process.env.PIP_EXTRA_INDEX_URL = 'https://user@example.com/pypi/simple';
+      vi.stubEnv('PIP_EXTRA_INDEX_URL', 'https://user@example.com/pypi/simple');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -646,7 +645,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url when only a password is found in PIP_INDEX_URL', () => {
-      process.env.PIP_INDEX_URL = 'https://:pass@example.com/pypi/simple';
+      vi.stubEnv('PIP_INDEX_URL', 'https://:pass@example.com/pypi/simple');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -655,7 +654,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url when only a password is found in PIP_EXTRA_INDEX_URL', () => {
-      process.env.PIP_EXTRA_INDEX_URL = 'https://:pass@example.com/pypi/simple';
+      vi.stubEnv(
+        'PIP_EXTRA_INDEX_URL',
+        'https://:pass@example.com/pypi/simple',
+      );
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -664,7 +666,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url when PIP_INDEX_URL is invalid', () => {
-      process.env.PIP_INDEX_URL = 'invalid-url';
+      vi.stubEnv('PIP_INDEX_URL', 'invalid-url');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -673,7 +675,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url PIP_EXTRA_INDEX_URL is invalid', () => {
-      process.env.PIP_EXTRA_INDEX_URL = 'invalid-url';
+      vi.stubEnv('PIP_EXTRA_INDEX_URL', 'invalid-url');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
@@ -682,8 +684,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('returns --no-emit-index-url only once when its in the header and credentials are present in the environment', () => {
-      process.env.PIP_EXTRA_INDEX_URL =
-        'https://user:pass@example.com/pypi/simple';
+      vi.stubEnv(
+        'PIP_EXTRA_INDEX_URL',
+        'https://user:pass@example.com/pypi/simple',
+      );
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(
@@ -697,7 +701,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
 
     it('allow explicit --emit-index-url', () => {
-      process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
+      vi.stubEnv('PIP_INDEX_URL', 'https://user:pass@example.com/pypi/simple');
       expect(
         constructPipCompileCmd(
           extractHeaderCommand(

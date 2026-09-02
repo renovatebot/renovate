@@ -2,6 +2,8 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
+import type { ParsedRegistries } from './types.ts';
 
 // Subset of the SwiftPM `registries.json` schema we care about. Tolerates
 // extra fields and unknown shapes — only the URL strings are needed.
@@ -12,11 +14,6 @@ const RegistriesJson = z.object({
 
 // SwiftPM's "[default]" key is the special unscoped registry.
 const DEFAULT_KEY = '[default]';
-
-export interface ParsedRegistries {
-  defaultUrl?: string;
-  named: Record<string, string>;
-}
 
 export function parseRegistriesJson(content: string): ParsedRegistries {
   const result: ParsedRegistries = { named: {} };
@@ -43,7 +40,9 @@ export function parseRegistriesJson(content: string): ParsedRegistries {
     return result;
   }
 
-  for (const [key, value] of Object.entries(parsed.data.registries ?? {})) {
+  for (const [key, value] of Object.entries(
+    coerceObject(parsed.data.registries),
+  )) {
     if (key === DEFAULT_KEY) {
       result.defaultUrl = value.url;
     } else {

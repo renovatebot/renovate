@@ -1,7 +1,7 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import { isArray, isNonEmptyArray } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -67,8 +67,8 @@ export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult> {
-  let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
-  const artifactErrors = [...(config.artifactErrors ?? [])];
+  let updatedArtifacts = [...coerceArray(config.updatedArtifacts)];
+  const artifactErrors = [...coerceArray(config.artifactErrors)];
   const allowedCommands = GlobalConfig.get('allowedCommands');
 
   for (const upgrade of filteredUpgradeCommands) {
@@ -91,7 +91,7 @@ export async function postUpgradeCommandsExecutor(
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
-          if (typeof file.contents === 'string') {
+          if (isString(file.contents)) {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;

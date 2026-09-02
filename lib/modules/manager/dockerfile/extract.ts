@@ -1,5 +1,10 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNumericString,
+  isString,
+} from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import * as debianVersioning from '../../versioning/debian/index.ts';
@@ -174,7 +179,7 @@ export function getDep(
   }
 
   // Resolve registry aliases first so that we don't need special casing later on:
-  for (const [name, value] of Object.entries(registryAliases ?? {})) {
+  for (const [name, value] of Object.entries(coerceObject(registryAliases))) {
     if (currentFrom.startsWith(`${name}/`)) {
       const depName = currentFrom.substring(name.length + 1);
       const dep = getDep(`${value}/${depName}`, false);
@@ -329,10 +334,10 @@ export function extractPackageFile(
       args[argMatch.groups.name] = argMatchValue || '';
     }
 
-    const fromRegex = new RegExp(
+    const fromRegex = regEx(
       `^[ \\t]*FROM(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const fromMatch = instruction.match(fromRegex);
     if (fromMatch?.groups?.image) {
       let fromImage = fromMatch.groups.image;
@@ -374,10 +379,10 @@ export function extractPackageFile(
       }
     }
 
-    const copyFromRegex = new RegExp(
+    const copyFromRegex = regEx(
       `^[ \\t]*COPY(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const copyFromMatch = instruction.match(copyFromRegex);
     if (copyFromMatch?.groups?.image) {
       if (stageNames.includes(copyFromMatch.groups.image)) {
@@ -385,7 +390,12 @@ export function extractPackageFile(
           { image: copyFromMatch.groups.image },
           'Skipping alias COPY --from',
         );
-      } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
+      } else if (isNumericString(copyFromMatch.groups.image)) {
+        logger.debug(
+          { image: copyFromMatch.groups.image },
+          'Skipping index reference COPY --from',
+        );
+      } else {
         const dep = getDep(
           copyFromMatch.groups.image,
           true,
@@ -404,11 +414,6 @@ export function extractPackageFile(
           'Dockerfile COPY --from',
         );
         deps.push(dep);
-      } else {
-        logger.debug(
-          { image: copyFromMatch.groups.image },
-          'Skipping index reference COPY --from',
-        );
       }
     }
 

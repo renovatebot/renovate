@@ -11,7 +11,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
-import { deduplicateArray } from '../../../util/array.ts';
+import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
@@ -549,7 +549,7 @@ const platform: Platform = {
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     if (includeOtherAuthors && isString(targetBranch)) {
-      // do not use pr cache as it only fetches prs created by the bot account
+      // do not use pr cache as it only fetches prs created by the Renovate account
       const pr = await helper.getPRByBranch(
         config.repository,
         targetBranch,
@@ -901,7 +901,7 @@ const platform: Platform = {
           );
 
           // Test whether the issues need to be updated
-          const existingLabelIds = (existingIssue.labels ?? []).map(
+          const existingLabelIds = coerceArray(existingIssue.labels).map(
             (label) => label.id,
           );
           if (

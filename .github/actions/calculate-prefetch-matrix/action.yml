@@ -27,7 +27,7 @@ runs:
     - name: Calculate cache keys
       id: cache-keys
       env:
-        HASH: ${{ hashFiles('pnpm-lock.yaml') }}
+        HASH: ${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       shell: bash
       run: |
         echo 'MACOS_KEY=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"

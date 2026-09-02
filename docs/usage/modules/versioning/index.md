@@ -28,7 +28,7 @@ For example, `npm` uses `1.0.0-beta.1` while `pip` uses `1.0.0b1`.
 
 Renovate interprets versions correctly out-of-the-box most of the time.
 But Renovate can't automatically detect **all** versioning schemes.
-So sometimes you need to tell the bot what versioning scheme it should use.
+So sometimes you need to tell Renovate what versioning scheme it should use.
 
 For some ecosystems, automatic version selection works nearly every time (e.g. for npm-compliant managers, use `npm` versioning).
 For other ecosystems such as Docker or GitHub tags, there is no consistent convention for versions, so the default choice may not always work.

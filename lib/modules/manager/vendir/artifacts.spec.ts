@@ -18,7 +18,7 @@ import * as vendir from './index.ts';
 process.env.CONTAINERBASE = 'true';
 
 vi.mock('../../datasource/index.ts', () => mockDeep());
-vi.mock('../../../util/exec/env.ts', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/http/index.ts', () => mockDeep());
 vi.mock('../../../util/fs/index.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
@@ -587,6 +587,7 @@ describe('modules/manager/vendir/artifacts', () => {
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
             '-v "/tmp/cache/containerbase":"/tmp/cache/containerbase" ' +
+            '-e CI ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +

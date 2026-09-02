@@ -12,6 +12,25 @@ You can use common AWS configuration options, for example:
 - Provide credentials via the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables or your `~/.aws/credentials` file
 - Select the profile to use via `AWS_PROFILE` environment variable
 
+You can also provide credentials specifically for this datasource with a `hostRules` entry.
+Set `hostType` to `aws-eks-addon`, `username` to the access key ID, `password` to the secret access key, and optionally `token` to the session token:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "aws-eks-addon",
+      "username": "access-key-id",
+      "password": "secret-access-key",
+      "token": "session-token"
+    }
+  ]
+}
+```
+
+These credentials only apply to AWS EKS Addon lookups.
+When this host rule is absent or incomplete, Renovate uses the default AWS credential provider chain.
+
 Alternatively, you can specify different `region` and `profile` for each addon.
 
 Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on these configuration options.

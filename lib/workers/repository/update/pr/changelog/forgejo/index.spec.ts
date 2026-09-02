@@ -40,7 +40,7 @@ const changelogSource = new ForgejoChangeLogSource();
 describe('workers/repository/update/pr/changelog/forgejo/index', () => {
   beforeAll(() => {
     // TODO: why?
-    delete process.env.GITHUB_ENDPOINT;
+    vi.stubEnv('GITHUB_ENDPOINT', undefined);
   });
 
   describe('getChangeLogJSON', () => {

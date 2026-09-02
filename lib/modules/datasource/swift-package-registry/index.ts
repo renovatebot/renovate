@@ -1,4 +1,5 @@
 import type { HttpOptions } from '../../../util/http/types.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import * as swiftVersioning from '../../versioning/swift/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -31,7 +32,7 @@ export class SwiftPackageRegistryDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- never reached: registryUrl set by hunt strategy */
+    /* v8 ignore next -- never reached: registryUrl set by hunt strategy */
     if (!registryUrl) {
       return null;
     }
@@ -57,7 +58,7 @@ export class SwiftPackageRegistryDatasource extends Datasource {
       }
       const body = parsed.data;
 
-      const entries = Object.entries(body.releases ?? {});
+      const entries = Object.entries(coerceObject(body.releases));
       if (!entries.length) {
         return null;
       }
