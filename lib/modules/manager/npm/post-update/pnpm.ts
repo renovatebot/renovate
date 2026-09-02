@@ -17,6 +17,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
@@ -72,6 +73,8 @@ export async function generateLockFile(
       // pnpm stops reading npm_config_* env vars since v11
       pnpm_config_cache_dir: pnpmConfigCacheDir,
       pnpm_config_store_dir: pnpmConfigStoreDir,
+      // allows pnpm to resolve git-hosted private packages
+      ...getGitEnvironmentVariables(),
     };
 
     const { nodeMaxMemory } = getToolSettingsOptions(config.toolSettings);
