@@ -532,6 +532,7 @@ export async function ensurePr(
       pr = { number: 0 } as never;
     } else {
       try {
+        // for a vulnerability alert this checks the VulnerabilityConcurrentPRs count
         if (
           !dependencyDashboardCheck &&
           isLimitReached('ConcurrentPRs', prConfig)
