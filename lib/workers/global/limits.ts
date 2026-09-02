@@ -52,7 +52,13 @@ export type CountName =
   | 'VulnerabilityConcurrentPRs'
   | 'VulnerabilityBranches';
 
-type LimitedCountName = 'ConcurrentPRs' | 'Branches' | 'HourlyCommits';
+/**
+ * The limits `isLimitReached()` evaluates against a single branch. `Commits` is
+ * excluded because it is global and takes no config, `HourlyPRs` because it is
+ * only ever read while checking one of these, and the `Vulnerability*` counts
+ * because they are picked internally rather than passed in.
+ */
+type BranchLimitCountName = 'ConcurrentPRs' | 'Branches' | 'HourlyCommits';
 
 type BranchLimitName =
   | 'branchConcurrentLimit'
@@ -94,7 +100,7 @@ function vulnerabilityCountName(key: 'ConcurrentPRs' | 'Branches'): CountName {
 }
 
 function handleConcurrentLimits(
-  key: LimitedCountName,
+  key: BranchLimitCountName,
   config: BranchConfig,
 ): boolean {
   // Only check hourly commit limit when specifically checking HourlyCommits
@@ -232,11 +238,11 @@ export function hasMultipleLimits(
 
 export function isLimitReached(limit: 'Commits'): boolean;
 export function isLimitReached(
-  limit: 'Branches' | 'ConcurrentPRs' | 'HourlyCommits',
+  limit: BranchLimitCountName,
   config: BranchConfig,
 ): boolean;
 export function isLimitReached(
-  limit: 'Commits' | 'Branches' | 'ConcurrentPRs' | 'HourlyCommits',
+  limit: 'Commits' | BranchLimitCountName,
   config?: BranchConfig,
 ): boolean {
   if (limit === 'Commits') {
