@@ -2323,7 +2323,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            "hostRules header `unallowedHeader` is not allowed by this bot's `allowedHeaders`.",
+            "hostRules header `unallowedHeader` is not allowed by this Renovate instance's `allowedHeaders`.",
           topic: 'Configuration Error',
         },
       ]);
@@ -2378,7 +2378,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
+            "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
           topic: 'Configuration Error',
         },
       ]);
@@ -2401,7 +2401,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            "Env variable name `randomKey` is not allowed by this bot's `allowedEnv`.",
+            "Env variable name `randomKey` is not allowed by this Renovate instance's `allowedEnv`.",
         },
         {
           message:
@@ -2576,7 +2576,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
+            "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
           topic: 'Configuration Error',
         },
       ]);
@@ -2638,7 +2638,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            "Env variable name `SOME_VAR` is not allowed by this bot's `allowedEnv`.",
+            "Env variable name `SOME_VAR` is not allowed by this Renovate instance's `allowedEnv`.",
           topic: 'Configuration Error',
         },
       ]);
@@ -3158,7 +3158,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            "Env variable name `NOT_ALLOWED` is not allowed by this bot's `allowedEnv`.",
+            "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
         },
       ]);
     });
@@ -3229,7 +3229,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            "hostRules header `Authorization` is not allowed by this bot's `allowedHeaders`.",
+            "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
         },
       ]);
     });
