@@ -40,6 +40,7 @@ const newBaseBranchSha = fakeSha('new_base_sha');
 
 beforeEach(() => {
   config = getConfig();
+  counts.clear();
   repoCache.getCache.mockReturnValue({});
   limits.getConcurrentPrsCount.mockResolvedValue(0);
   limits.getConcurrentBranchesCount.mockResolvedValue(0);
@@ -128,11 +129,18 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: 'pr-created',
       });
-      scm.branchExists.mockResolvedValue(false);
+      // each branch is checked twice: before processing, then after
+      scm.branchExists
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValue(true);
       GlobalConfig.set({ dryRun: 'full' });
 
       await writeUpdates(config, branches);
 
+      expect(counts.get('Branches')).toBe(1);
+      expect(counts.get('VulnerabilityBranches')).toBe(1);
       expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(config, [
         branches[0],
       ]);
