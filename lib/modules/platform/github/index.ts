@@ -186,10 +186,17 @@ export async function initPlatform({
   /**
    * GHE requires version >=3.10 to support fine-grained access tokens
    * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
+   *
+   * This restriction does not apply to GitHub Enterprise Cloud with data
+   * residency (*.ghe.com): it runs on GitHub.com's cloud infrastructure
+   * rather than a versioned on-prem GHES appliance, so it never returns an
+   * `x-github-enterprise-version` header, but it does fully support
+   * fine-grained PATs.
    */
   if (
     isGithubFineGrainedPersonalAccessToken(token) &&
     platformConfig.isGhe &&
+    !platformConfig.isGheCloud &&
     (!platformConfig.gheVersion ||
       semver.lt(platformConfig.gheVersion, '3.10.0'))
   ) {

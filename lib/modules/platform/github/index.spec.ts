@@ -136,6 +136,31 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
+    it('should support fine-grained token on GitHub Enterprise Cloud with data residency (*.ghe.com) even without a version header', async () => {
+      httpMock
+        .scope('https://api.example.ghe.com')
+        .head('/')
+        .reply(200)
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, [{ email: 'user@domain.com' }]);
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://api.example.ghe.com',
+          token: 'github_pat_XXXXXX',
+        }),
+      ).toEqual({
+        endpoint: 'https://api.example.ghe.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: 'github_pat_XXXXXX',
+      });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.com',
+      ]);
+    });
+
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(github.initPlatform({ token: '123test' })).rejects.toThrow(
