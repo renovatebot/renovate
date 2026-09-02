@@ -22,6 +22,7 @@ export interface HostRule {
 
   encrypted?: HostRule;
   hostType?: string;
+  hostTypes?: string[];
   matchHost?: string;
   resolvedHost?: string;
   readOnly?: boolean;
@@ -29,5 +30,10 @@ export interface HostRule {
 
 export type CombinedHostRule = Omit<
   HostRule,
-  'encrypted' | 'hostType' | 'matchHost' | 'resolvedHost' | 'readOnly'
+  | 'encrypted'
+  | 'hostType'
+  | 'hostTypes'
+  | 'matchHost'
+  | 'resolvedHost'
+  | 'readOnly'
 >;
