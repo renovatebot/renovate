@@ -136,6 +136,22 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
+    it('should support fine-grained personal access tokens on GHEC', async () => {
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://api.octocorp.ghe.com',
+          token: 'github_pat_XXXXXX',
+          username: 'renovate-bot',
+          gitAuthor: 'Renovate Bot <renovate@example.com>',
+        }),
+      ).resolves.toEqual({
+        endpoint: 'https://api.octocorp.ghe.com/',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        renovateUsername: 'renovate-bot',
+        token: 'github_pat_XXXXXX',
+      });
+    });
+
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(github.initPlatform({ token: '123test' })).rejects.toThrow(
@@ -616,23 +632,6 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    // Older GHES versions (pre-3.10) do not support fine-grained tokens. This (or any other) version restriction should not be applied to GHEC
-    it('should not apply GHES version restrictions to GHEC', async () => {
-      await expect(
-        github.initPlatform({
-          endpoint: 'https://api.octocorp.ghe.com',
-          token: 'github_pat_XXXXXX',
-          username: 'renovate-bot',
-          gitAuthor: 'Renovate Bot <renovate@example.com>',
-        }),
-      ).resolves.toEqual({
-        endpoint: 'https://api.octocorp.ghe.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
-        renovateUsername: 'renovate-bot',
-        token: 'github_pat_XXXXXX',
-      });
-    });
-
     it('should support custom endpoint', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
@@ -878,6 +877,37 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
       expect(config).toMatchSnapshot();
+    });
+
+    it('queries all version-gated fields if the GHES version is unknown', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200);
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+        username: 'renovate-bot',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+      });
+
+      await github.initRepo({ repository: 'some/repo' });
+
+      expect(httpMock.getTrace()).toContainEqual(
+        expect.objectContaining({
+          graphql: expect.objectContaining({
+            query: expect.objectContaining({
+              repository: expect.objectContaining({
+                autoMergeAllowed: null,
+                hasIssuesEnabled: null,
+                hasVulnerabilityAlertsEnabled: null,
+                mergeQueue: { id: null },
+              }),
+            }),
+          }),
+        }),
+      );
     });
 
     // for coverage
@@ -4258,6 +4288,49 @@ describe('modules/platform/github/index', () => {
         );
       });
 
+      it('should perform automerge if the GHES version is unknown', async () => {
+        const scope = httpMock
+          .scope('https://github.company.com')
+          .head('/')
+          .reply(200)
+          .get('/user')
+          .reply(200, {
+            login: 'renovate-bot',
+          })
+          .get('/user/emails')
+          .reply(200, {})
+          .post('/repos/some/repo/pulls')
+          .reply(200, {
+            number: 123,
+          })
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, [])
+          .post('/graphql')
+          .reply(200, {
+            data: {
+              repository: {
+                defaultBranchRef: {
+                  name: 'main',
+                },
+                nameWithOwner: 'some/repo',
+                autoMergeAllowed: true,
+              },
+            },
+          });
+
+        initRepoMock(scope, 'some/repo');
+        await github.initPlatform({
+          endpoint: 'https://github.company.com',
+          token: '123test',
+        });
+        await github.initRepo({ repository: 'some/repo' });
+        await github.createPr(prConfig);
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'GitHub-native automerge: success...PrNo: 123',
+        );
+      });
+
       it('should set automatic merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);
@@ -5012,6 +5085,28 @@ describe('modules/platform/github/index', () => {
         token: '123test',
       });
       await github.initRepo({ repository: 'some/repo' });
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
+    });
+
+    it('checks the merge queue if the GHES version is unknown', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200)
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope, null);
 
       await expect(
         github.assertPrNotInMergeQueue('somebranch', 'main'),
