@@ -47,6 +47,7 @@ describe('config/validation', () => {
           // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid/removed HostRule property
           {
             dnsCache: true,
+            hostType: 'npm',
           } as HostRule,
         ],
       };
@@ -127,6 +128,7 @@ describe('config/validation', () => {
       const config = {
         hostRules: [
           {
+            hostType: 'npm',
             username: 'user',
             token: 'token',
             password: 'pass',
@@ -2334,6 +2336,7 @@ describe('config/validation', () => {
       const config = {
         hostRules: [
           {
+            hostType: 'npm',
             matchHost: 'https://domain.com/all-versions',
             headers: {
               'X-Auth-Token': 'token',
@@ -2362,6 +2365,7 @@ describe('config/validation', () => {
       const config = {
         hostRules: [
           {
+            hostType: 'npm',
             matchHost: 'https://domain.com/all-versions',
             // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid header value type
             headers: {
@@ -2390,6 +2394,7 @@ describe('config/validation', () => {
       const config = {
         hostRules: [
           {
+            hostType: 'npm',
             matchHost: 'https://domain.com/all-versions',
             headers: {
               'X-Auth-Token': 'token',
@@ -2569,6 +2574,7 @@ describe('config/validation', () => {
       const config = {
         hostRules: [
           {
+            hostType: 'npm',
             matchHost: 'https://domain.com/all-versions',
             headers: {
               'X-Auth-Token': 'token',
@@ -2589,6 +2595,7 @@ describe('config/validation', () => {
       const config = {
         hostRules: [
           {
+            hostType: 'npm',
             matchHost: 'https://domain.com/all-versions',
             headers: {
               'X-Auth-Token': 'token',
@@ -2699,6 +2706,7 @@ describe('config/validation', () => {
           {
             artifactAuth: null,
             concurrentRequestLimit: null,
+            hostType: 'npm',
             httpsCertificate: null,
             httpsPrivateKey: null,
             httpsCertificateAuthority: null,
@@ -3217,6 +3225,7 @@ describe('config/validation', () => {
             repository: 'owner/repo1',
             hostRules: [
               {
+                hostType: 'github',
                 matchHost: 'github.com',
                 headers: { 'X-Custom-Token': 'value' },
               },
@@ -3240,6 +3249,7 @@ describe('config/validation', () => {
             repository: 'owner/repo1',
             hostRules: [
               {
+                hostType: 'github',
                 matchHost: 'github.com',
                 headers: { Authorization: 'Bearer token' },
               },
