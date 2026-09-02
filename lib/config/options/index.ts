@@ -3067,6 +3067,8 @@ const options: Readonly<RenovateOptions>[] = [
       Pending: '{{{displayPending}}}',
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
+      'Lib Year':
+        "{{#if newVersion}}![libYear](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}?slim=true){{/if}}",
       Age: "{{#if newVersion}}![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
 
       Adoption:
@@ -3086,6 +3088,7 @@ const options: Readonly<RenovateOptions>[] = [
     freeChoice: true,
     mergeable: true,
     default: {
+      'Lib Year': '[Lib Year](https://docs.renovatebot.com/merge-confidence/)',
       Age: '[Age](https://docs.renovatebot.com/merge-confidence/)',
       Adoption: '[Adoption](https://docs.renovatebot.com/merge-confidence/)',
       Passing: '[Passing](https://docs.renovatebot.com/merge-confidence/)',
