@@ -2255,20 +2255,47 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('warns once with all hostRules missing hostType', async () => {
+      const config = {
+        hostRules: [
+          { hostType: 'npm', matchHost: 'registry.npmjs.org' },
+          { matchHost: 'registry.example.com' },
+          { hostType: '', matchHost: 'registry.example.org' },
+        ],
+      };
+
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Deprecation Warning',
+          message:
+            'Host rules without a `hostType` are deprecated and will no longer be supported in a future major release. Add a `hostType` to: hostRules[1], hostRules[2].',
+        },
+      ]);
+    });
+
     it('errors if invalid matchHost values in hostRules', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
       const config = {
         hostRules: [
           {
+            hostType: 'github',
             matchHost: '://',
             token: 'token',
           },
           {
+            hostType: 'github',
             matchHost: '',
             token: 'token',
           },
           {
+            hostType: 'github',
             matchHost: undefined,
             token: 'token',
           },

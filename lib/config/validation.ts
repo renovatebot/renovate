@@ -1012,6 +1012,18 @@ export async function validateConfig(
             configType === 'global'
               ? (config.allowedHeaders ?? [])
               : GlobalConfig.get('allowedHeaders');
+          const rulesWithoutHostType: string[] = [];
+          for (const [index, rule] of (val as HostRule[]).entries()) {
+            if (!isNonEmptyString(rule.hostType)) {
+              rulesWithoutHostType.push(`${currentPath}[${index}]`);
+            }
+          }
+          if (isNonEmptyArray(rulesWithoutHostType)) {
+            warnings.push({
+              topic: ConfigValidationTopic.Deprecation,
+              message: `Host rules without a \`hostType\` are deprecated and will no longer be supported in a future major release. Add a \`hostType\` to: ${rulesWithoutHostType.join(', ')}.`,
+            });
+          }
           for (const rule of val as HostRule[]) {
             if (isNonEmptyString(rule.matchHost)) {
               if (
