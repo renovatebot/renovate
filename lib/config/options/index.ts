@@ -1073,7 +1073,8 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'allowCustomCrateRegistries',
-    description: 'Set this to `true` to allow custom crate registries.',
+    description:
+      'Set this to `true` to allow git-cloning custom Cargo registries. This only restricts non-sparse registries.',
     globalOnly: true,
     type: 'boolean',
     default: false,
