@@ -309,8 +309,7 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 ##### Using already obtained `token`
 
 If you already obtained a valid token, Renovate can use that as well.
-To make use of this authentication mechanism, specify the `token` and make sure to omit username and password,
-as those would take precedence:
+To make use of this authentication mechanism, specify the `token` and make sure to omit username and password, as those would take precedence:
 
 ```js title="config.js"
 module.exports = {
