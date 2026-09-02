@@ -103,13 +103,16 @@ import type {
   GhRepo,
   GhRestPr,
   GhRestRepo,
-  GithubEnterpriseServerHost,
   GithubHost,
   LocalRepoConfig,
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
-import { getRepoUrl, warnIfDefaultGitAuthorEmail } from './utils.ts';
+import {
+  getRepoUrl,
+  isGithubEnterpriseServer,
+  warnIfDefaultGitAuthorEmail,
+} from './utils.ts';
 
 export const id = 'github';
 
@@ -139,12 +142,6 @@ function escapeHash(input: string): string {
 
 export function isGHApp(): boolean {
   return !!platformConfig.isGHApp;
-}
-
-function isGithubEnterpriseServer(
-  host: GithubHost,
-): host is GithubEnterpriseServerHost {
-  return host.type === 'ghes';
 }
 
 async function detectGithubHost(
