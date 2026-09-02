@@ -75,6 +75,7 @@ interface User {
 
 let config: Config = {} as any;
 let issueService: IssueService;
+let renovateUserId: string | undefined;
 
 const defaults: {
   endpoint?: string;
@@ -105,7 +106,13 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  return Promise.resolve({ endpoint: defaults.endpoint });
+  const credentials = token
+    ? { token }
+    : { username: username!, password: password! };
+  return azureApi.getAuthenticatedUserId(credentials).then((userId) => {
+    renovateUserId = userId;
+    return res;
+  });
 }
 
 export async function getRepos(): Promise<string[]> {
@@ -266,18 +273,8 @@ export async function initRepo({
 
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
-  const authenticationContext = azureApi.getAuthenticationContext();
-  if (config.prListAuthKey !== authenticationContext.key) {
-    let renovateUserId: string | undefined;
-    if (!config.ignorePrAuthor) {
-      renovateUserId = await azureApi.getAuthenticatedUserId(
-        authenticationContext.credentials,
-      );
-    }
-
-    const azureApiGit = await azureApi.gitApi(
-      authenticationContext.credentials,
-    );
+  if (!config.prList) {
+    const azureApiGit = await azureApi.gitApi();
 
     let prs: GitPullRequest[] = [];
     let fetchedPrs: GitPullRequest[];
@@ -302,7 +299,6 @@ export async function getPrList(): Promise<AzurePr[]> {
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(getRenovatePRFormat);
-    config.prListAuthKey = authenticationContext.key;
     logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
   }
   return config.prList;

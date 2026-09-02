@@ -12,11 +12,8 @@ import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
-import { hash } from '../../../util/hash.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { isProbablyJwt } from '../../../util/http/jwt.ts';
-import { safeStringify } from '../../../util/stringify.ts';
-import type { AuthenticationContext } from './types.ts';
 
 const hostType = 'azure';
 let endpoint: string;
@@ -34,21 +31,8 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   return getPersonalAccessTokenHandler(config.token!, true);
 }
 
-export function getAuthenticationContext(): AuthenticationContext {
-  const credentials = hostRules.find({ hostType, url: endpoint });
-  const key = hash(
-    safeStringify([
-      endpoint,
-      credentials.token,
-      credentials.username,
-      credentials.password,
-    ]),
-  );
-  return { credentials, key };
-}
-
 export function azureObj(credentials?: HostRule): azure.WebApi {
-  const config = credentials ?? getAuthenticationContext().credentials;
+  const config = credentials ?? hostRules.find({ hostType, url: endpoint });
   if (!config.token && !(config.username && config.password)) {
     throw new Error(`No config found for azure`);
   }
