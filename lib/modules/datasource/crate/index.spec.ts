@@ -483,7 +483,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res?.sourceUrl).toBeUndefined();
     });
 
-    it('refuses to clone if allowCustomCrateGitRegistries is not true', async () => {
+    it('refuses to clone custom cloudsmith git registry if allowCustomCrateGitRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
@@ -496,7 +496,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeNull();
     });
 
-    it('clones cloudsmith private registry', async () => {
+    it('clones custom cloudsmith git registry', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
@@ -513,7 +513,20 @@ describe('modules/datasource/crate/index', () => {
       });
     });
 
-    it('clones other private registry with explicit gitTimeout', async () => {
+    it('refuses to clone other custom git registry when allowCustomCrateGitRegistries is not true', async () => {
+      const { mockClone } = setupGitMocks();
+
+      const url = 'https://github.com/mcorbin/testregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalledTimes(0);
+      expect(res).toBeNull();
+    });
+
+    it('clones other custom git registry with explicit gitTimeout', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({
         ...adminConfig,
@@ -530,7 +543,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
     });
 
-    it('clones other private registry', async () => {
+    it('clones other custom git registry', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
@@ -623,8 +636,8 @@ describe('modules/datasource/crate/index', () => {
       expect(result2).toBeNull();
     });
 
-    it('does not clone for sparse registries', async () => {
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
+    it('does not use git-clone to fetch content from sparse registries', async () => {
+      GlobalConfig.set({ ...adminConfig });
       const { mockClone } = setupGitMocks();
 
       const url = 'https://github.com/mcorbin/othertestregistry';
