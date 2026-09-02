@@ -252,7 +252,9 @@ export async function initRepo({
     mainBranch = info.mainbranch;
 
     if (getInheritedOrGlobal('bbUseDevelopmentBranch')) {
-      // Fetch Bitbucket development branch
+      logger.info(
+        "bbUseDevelopmentBranch is true - Checking BitBucket's development branch",
+      );
       const developmentBranch = (
         await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
           `/2.0/repositories/${repository}/effective-branching-model`,
@@ -261,6 +263,9 @@ export async function initRepo({
 
       if (developmentBranch) {
         mainBranch = developmentBranch;
+        logger.info(
+          `${developmentBranch} is BitBucket's development branch - using it as default branch`,
+        );
       }
     }
 
