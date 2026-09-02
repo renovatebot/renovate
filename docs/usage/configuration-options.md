@@ -4183,6 +4183,8 @@ Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `pac
 
 Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once.
 
+During lock file maintenance, Renovate always runs `npm install` twice, even without this option, because regenerating a lock file from scratch is known to need a second pass.
+
 ### `pnpmDedupe`
 
 Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
