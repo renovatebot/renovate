@@ -2,9 +2,11 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import upath from 'upath';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getEnv } from '../../../../util/env.ts';
+import type { ExecError } from '../../../../util/exec/exec-error.ts';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -51,6 +53,7 @@ import type {
   WriteExistingFilesResult,
   YarnRcYmlFile,
 } from './types.ts';
+import { reconcileVitePlusVersions } from './vite-plus.ts';
 import * as yarn from './yarn.ts';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
@@ -417,6 +420,29 @@ export async function getAdditionalFiles(
     (await scm.branchExists(config.branchName))
   ) {
     logger.debug('Skipping lockFileMaintenance update');
+    return { artifactErrors, artifactNotices, updatedArtifacts };
+  }
+  try {
+    artifactNotices.push(
+      ...(await reconcileVitePlusVersions(config, packageFiles)),
+    );
+  } catch (err) {
+    if (
+      err instanceof ExternalHostError ||
+      (err instanceof Error && err.message === TEMPORARY_ERROR)
+    ) {
+      throw err;
+    }
+    const message =
+      err instanceof Error ? err.message : 'Unknown Vite+ reconciliation error';
+    logger.warn({ err }, 'Vite+ version reconciliation failed');
+    artifactErrors.push({
+      fileName: 'vite-plus',
+      stderr: artifactErrorMessageFromExecError(
+        err as Partial<ExecError>,
+        message,
+      ),
+    });
     return { artifactErrors, artifactNotices, updatedArtifacts };
   }
   const dirs = determineLockFileDirs(config, packageFiles);

@@ -221,9 +221,10 @@ export function exec(
     });
 
     function rejectInfo(): ExecErrorData {
+      const { input: _input, ...safeOptions } = opts;
       return {
         cmd: cp.spawnargs.join(' '),
-        options: opts,
+        options: safeOptions,
         stdout: stringify(stdout, opts.outputWriters?.stdout),
         stderr: stringify(stderr, opts.outputWriters?.stderr),
       };

@@ -155,6 +155,9 @@ export const toolDefinitions = [
   {
     name: 'vendir',
   },
+  {
+    name: 'vp',
+  },
 ] as const satisfies ConstraintDefinition[];
 
 /**
@@ -346,6 +349,7 @@ export interface ExecOptions {
   ignoreStdout?: boolean;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
+  input?: string | Buffer | undefined;
   timeout?: number | undefined;
   shell?: boolean | string | undefined;
 }

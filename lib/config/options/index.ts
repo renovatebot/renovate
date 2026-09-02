@@ -2801,6 +2801,7 @@ const options: Readonly<RenovateOptions>[] = [
       'npmDedupe',
       'npmInstallTwice',
       'pnpmDedupe',
+      'vitePlusSyncVersions',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
     ],

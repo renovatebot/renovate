@@ -290,6 +290,26 @@ describe('util/exec/common', () => {
       );
     });
 
+    it('does not retain stdin input in command errors', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      const error = await exec(
+        cmd,
+        partial<RawExecOptions>({ input: 'private manifest', timeout: 5 }),
+      ).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ExecError);
+      expect((error as ExecError).options).toEqual({ timeout: 5 });
+    });
+
     it('does not throw if an error occurs, but we specify ignoreFailure=true', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
