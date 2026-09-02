@@ -40,6 +40,10 @@ export async function generateUpdate(
     update.newDigest = release.newDigest;
   }
   // istanbul ignore if
+  if (release.gitRefType !== undefined) {
+    update.gitRefType = release.gitRefType;
+  }
+  // istanbul ignore if
   if (release.releaseTimestamp) {
     update.releaseTimestamp = release.releaseTimestamp;
     update.newVersionAgeInDays = getElapsedDays(release.releaseTimestamp);
