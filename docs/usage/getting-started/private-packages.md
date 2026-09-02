@@ -31,7 +31,7 @@ There are four times in Renovate's behavior when it may need credentials:
 Renovate supports config presets, including those which are private.
 
 Although npm presets were the first type supported, they are now deprecated and it is recommend that all users migrate to git-hosted "local" presets instead.
-However if you do still use them, private modules should work if you configure `hostRules` (recommended) or `npmrc` including token credentials in your bot global config.
+However if you do still use them, private modules should work if you configure `hostRules` (recommended) or `npmrc` including token credentials in your global self-hosted config.
 It is strongly recommended not to use private modules on a private registry and a warning will be logged if that is found.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.
 
@@ -147,7 +147,7 @@ When Renovate creates Pull Requests, its default behavior is to locate and embed
 These release notes are fetched from the source repository of packages and not from the registries themselves, so if they are private then they will require different credentials.
 
 When it comes to open source, most packages host their source on `github.com` in public repositories.
-GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
+GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or your deployment will get rate limited quickly.
 It can be confusing for people who host their own source code privately to be asked to configure a `github.com` token but without it changelogs for most open source packages will be blocked.
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
@@ -231,13 +231,13 @@ If you need to configure per-repository credentials then you can also configure 
 
 The recommended approaches in order of preference are:
 
-1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
+1. **Self-hosted hostRules**: Configure a hostRules entry in your self-hosted `config.js` with the `hostType`, `matchHost` and `token` specified
 1. **The Mend Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
 1. **The Mend Renovate App with a private registry**: Add an plaintext `npmrc` plus an encrypted `npmToken` in config
 
 These approaches are described in full below.
 
-#### Add hostRule to bots config
+#### Add hostRule to self-hosted config
 
 Define `hostRules` like this:
 
@@ -603,7 +603,7 @@ The solution to this is that you should break your presets into public and priva
 ### Encrypting secrets
 
 It is strongly recommended that you avoid committing secrets to repositories, including private ones, and this includes secrets needed by Renovate to access private modules.
-The preferred approach to secrets is that the bot administrator configures them as `hostRules` which are then applied to all repositories which the bot accesses.
+The preferred approach to secrets is that the administrator configures them as `hostRules` which are then applied to all repositories which Renovate accesses.
 
 !!! warning "Store secrets for your Mend-hosted app via the web UI"
   Mend no longer supports putting encrypted secrets in the Renovate config file on your repository.
@@ -639,9 +639,9 @@ The Mend Renovate App does not run using GitHub Actions, but such secrets would 
 - The app would be granted access to _all_ the repository/org secrets, not just the ones you want
 - If Renovate wants access to such secrets, it would need to ask for them from every user, not just the ones who want to use this approach (GitHub does not support the concept of optional permissions for Apps, so people do not have the option to decline)
 
-## Admin/Bot config vs User/Repository config for Self-hosted users
+## Admin config vs User/Repository config for Self-hosted users
 
-"Admin/Bot config" refers to the config which the Renovate Bot administrator provides at bot startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
+"Admin config" refers to the config which the Renovate administrator provides at startup, e.g. using environment variables, CLI parameters, or the `config.js` configuration file.
 User/Repository config refers to the in-repository config file which defaults to `renovate.json` but has a large number of alternative filenames supported.
 
 If there is a need to supply custom rules for certain repository, it can still be done using the `config.js` file and the `repositories` array.
@@ -656,7 +656,7 @@ For instructions on this, see the above section on encrypting secrets for the Me
 - Configure the app to run with `privateKey` set to the private key you generated above
 
 !!! note
-  Encrypted values can't be used in the "Admin/Bot config".
+  Encrypted values can't be used in the "Admin config".
 
 ### hostRules configuration using environment variables
 

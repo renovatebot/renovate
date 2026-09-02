@@ -19,6 +19,7 @@ import {
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
+import { coerceArray } from '../util/array.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
@@ -786,7 +787,7 @@ export async function validateConfig(
                 } else if (key === 'env') {
                   const allowedEnvVars =
                     configType === 'global'
-                      ? (config.allowedEnv ?? [])
+                      ? coerceArray(config.allowedEnv)
                       : GlobalConfig.get('allowedEnv');
                   for (const [envVarName, envVarValue] of Object.entries(val)) {
                     if (!isString(envVarValue)) {
@@ -798,7 +799,7 @@ export async function validateConfig(
                     if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
-                        message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
+                        message: `Env variable name \`${envVarName}\` is not allowed by this Renovate instance's \`allowedEnv\`.`,
                       });
                     }
                   }
@@ -1010,7 +1011,7 @@ export async function validateConfig(
         if (key === 'hostRules' && isArray(val)) {
           const allowedHeaders =
             configType === 'global'
-              ? (config.allowedHeaders ?? [])
+              ? coerceArray(config.allowedHeaders)
               : GlobalConfig.get('allowedHeaders');
           for (const rule of val as HostRule[]) {
             if (isNonEmptyString(rule.matchHost)) {
@@ -1044,7 +1045,7 @@ export async function validateConfig(
               if (!matchRegexOrGlobList(header, allowedHeaders)) {
                 errors.push({
                   topic: ConfigValidationTopic.Error,
-                  message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
+                  message: `hostRules header \`${header}\` is not allowed by this Renovate instance's \`allowedHeaders\`.`,
                 });
               }
             }

@@ -3,6 +3,7 @@ import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import * as semver from '../../versioning/semver/index.ts';
@@ -179,7 +180,7 @@ export async function extractPackageFile(
       return null;
     }
 
-    for (const depName of Object.keys(manifest.tools ?? {})) {
+    for (const depName of Object.keys(coerceObject(manifest.tools))) {
       const tool = manifest.tools[depName];
       const currentValue = tool.version;
       const dep: NugetPackageDependency = {

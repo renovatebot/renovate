@@ -1,17 +1,7 @@
 import dataFiles from '../../../data-files.generated.ts';
 import { regEx } from '../../../util/regex.ts';
 import { isStable } from '../node/index.ts';
-
-interface LambdaSchedule {
-  cycle: string;
-
-  /**
-   * Either `true` if currently in support or a string indicating the date at which support will end
-   */
-  support: true | string;
-}
-
-export type LambdaData = Record<string, LambdaSchedule>;
+import type { LambdaData, LambdaSchedule } from './types.ts';
 
 const lambdaSchedule: LambdaData = JSON.parse(
   dataFiles.get('data/lambda-node-js-schedule.json')!,

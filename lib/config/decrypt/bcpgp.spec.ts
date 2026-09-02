@@ -34,11 +34,11 @@ describe('config/decrypt/bcpgp', () => {
       config = {};
       GlobalConfig.reset();
       setPrivateKeys(undefined, undefined);
-      delete process.env.RENOVATE_X_PGP_RUNTIME;
+      vi.stubEnv('RENOVATE_X_PGP_RUNTIME', undefined);
     });
 
     it('returns null for invalid key', async () => {
-      process.env.RENOVATE_X_PGP_RUNTIME = 'invalid-runtime';
+      vi.stubEnv('RENOVATE_X_PGP_RUNTIME', 'invalid-runtime');
       expect(
         await tryDecryptBcPgp(
           'invalid-key',
@@ -52,7 +52,7 @@ describe('config/decrypt/bcpgp', () => {
     });
 
     it('works broken PGP message', async () => {
-      process.env.RENOVATE_X_PGP_RUNTIME = 'wasm-dotnet';
+      vi.stubEnv('RENOVATE_X_PGP_RUNTIME', 'wasm-dotnet');
       expect(
         await tryDecryptBcPgp(
           privateKey,
@@ -72,7 +72,7 @@ describe('config/decrypt/bcpgp', () => {
     it('fails with ECC and AEAD (wasm-dotnet', async () => {
       // not supported by bouncycastle C# implementation
       // https://github.com/bcgit/bc-csharp/issues/497
-      process.env.RENOVATE_X_PGP_RUNTIME = 'wasm-dotnet';
+      vi.stubEnv('RENOVATE_X_PGP_RUNTIME', 'wasm-dotnet');
       expect(
         await tryDecryptBcPgp(
           privateKeyEcc,

@@ -26,11 +26,8 @@ export interface PagedResult<T = any> {
 }
 
 export interface RepoBranchingModel {
-  development: {
+  development?: {
     name: string;
-    branch?: {
-      name: string;
-    };
   };
 }
 
@@ -90,3 +87,5 @@ export interface BitbucketPrCacheData {
   updated_on: string | null;
   author: string | null;
 }
+
+export type CommentsConfig = Pick<Config, 'repository'>;

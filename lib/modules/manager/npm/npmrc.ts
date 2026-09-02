@@ -6,11 +6,7 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-
-export interface NpmrcResult {
-  npmrc: string | undefined;
-  npmrcFileName: string | null;
-}
+import type { NpmrcResult } from './types.ts';
 
 export async function resolveNpmrc(
   packageFile: string,

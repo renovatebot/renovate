@@ -214,6 +214,8 @@
         "renovate/no-new-url": "error",
         "renovate/no-stateful-global-regex": "error",
         "renovate/no-tools-import": "error",
+        "renovate/prefer-coerce-array": "error",
+        "renovate/prefer-coerce-object": "error",
         "renovate/prefer-is-helpers": "error",
         "renovate/prefer-is-object": "error"
       }
@@ -241,6 +243,13 @@
       "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
       "rules": {
         "renovate/zod-schema-location": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/**"],
+      "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
+      "rules": {
+        "renovate/types-location": "error"
       }
     },
     {
@@ -304,6 +313,7 @@
         "renovate/prefer-fake-sha-in-specs": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/prefer-partial-in-specs": "error",
+        "renovate/prefer-stub-env": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }
@@ -389,7 +399,6 @@
     "**/.venv/",
     "tools/mkdocs/docs",
     "tools/mkdocs/site",
-    ".github/workflows/**/*.js",
     ".worktrees/**/*",
     ".markdownlint-cli2.mjs",
     "tools/mkdocs/.cache",

@@ -33,8 +33,8 @@ describe('modules/manager/cargo/extract', () => {
     const config: ExtractConfig = {};
 
     beforeEach(() => {
-      delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
-      delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
+      vi.stubEnv('CARGO_REGISTRIES_PRIVATE_CRATES_INDEX', undefined);
+      vi.stubEnv('CARGO_REGISTRIES_MCORBIN_INDEX', undefined);
 
       hostRules.clear();
       hostRules.add({
@@ -297,10 +297,14 @@ replace-with = "mcorbin"`,
     });
 
     it('extracts registry urls from environment', async () => {
-      process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX =
-        'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git';
-      process.env.CARGO_REGISTRIES_MCORBIN_INDEX =
-        'https://github.com/mcorbin/testregistry';
+      vi.stubEnv(
+        'CARGO_REGISTRIES_PRIVATE_CRATES_INDEX',
+        'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+      );
+      vi.stubEnv(
+        'CARGO_REGISTRIES_MCORBIN_INDEX',
+        'https://github.com/mcorbin/testregistry',
+      );
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });

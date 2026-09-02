@@ -66,6 +66,8 @@ import type {
   BbsRestPr,
   BbsRestRepo,
   BbsRestUserRef,
+  BitbucketCommitStatus,
+  BitbucketStatus,
 } from './types.ts';
 import * as utils from './utils.ts';
 import {
@@ -483,7 +485,7 @@ export async function refreshPr(number: number): Promise<void> {
 async function getStatus(
   branchName: string,
   memCache = true,
-): Promise<utils.BitbucketCommitStatus> {
+): Promise<BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
   /* v8 ignore next: temporary code */
@@ -492,7 +494,7 @@ async function getStatus(
     : { memCache: false };
 
   return (
-    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
+    await bitbucketServerHttp.getJsonUnchecked<BitbucketCommitStatus>(
       // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       opts,
@@ -534,7 +536,7 @@ export async function getBranchStatus(
 async function getStatusCheck(
   branchName: string,
   memCache = true,
-): Promise<utils.BitbucketStatus[]> {
+): Promise<BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
   const opts: BitbucketServerHttpOptions = { paginate: true };
@@ -546,7 +548,7 @@ async function getStatusCheck(
   }
 
   return (
-    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketStatus[]>(
+    await bitbucketServerHttp.getJsonUnchecked<BitbucketStatus[]>(
       `./rest/build-status/1.0/commits/${branchCommit!}`,
       opts,
     )

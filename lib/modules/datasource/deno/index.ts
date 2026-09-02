@@ -3,6 +3,7 @@ import pMap from 'p-map';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as semanticVersioning from '../../versioning/semver/index.ts';
@@ -82,11 +83,12 @@ export class DenoDatasource extends Datasource {
     moduleAPIURL: string,
   ): Promise<ReleaseResult> {
     const detailsCacheKey = `details:${moduleAPIURL}`;
-    const releasesCache: Record<string, Release> =
-      (await packageCache.get(
+    const releasesCache: Record<string, Release> = coerceObject(
+      await packageCache.get(
         `datasource-${DenoDatasource.id}`,
         detailsCacheKey,
-      )) ?? {};
+      ),
+    );
     let cacheModified = false;
 
     const {

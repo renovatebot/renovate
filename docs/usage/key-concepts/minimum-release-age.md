@@ -29,6 +29,25 @@ The following configuration options can be used to enable and tune the functiona
 - [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour)
 - [`internalChecksFilter`](../configuration-options.md#internalchecksfilter)
 
+### `minimumReleaseAgeBehaviour=timestamp-optional` warning
+
+When Renovate runs with `minimumReleaseAgeBehaviour=timestamp-optional`, Renovate will log a warning, which is then also shown on the Dependency Dashboard.
+
+This warning serves to inform users about at least one dependency not being able to adhere to the minimum release age due to the configuration.
+
+In cases where this is not desired, you can remap the warning to a lower log level with [`logLevelRemap`](../configuration-options.md#loglevelremap):
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/Some .+ did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding/",
+      "newLogLevel": "info"
+    }
+  ]
+}
+```
+
 ## FAQs
 
 ### Where does the release timestamp need to be set?

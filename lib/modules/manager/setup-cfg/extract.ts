@@ -2,20 +2,23 @@
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { logger } from '../../../logger/index.ts';
 import type { MaybePromise } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 function getSectionName(str: string): string {
-  const [, sectionName] =
-    regEx(/^\[\s*(?<sectionName>[^\s]+)\s*]\s*$/).exec(str) ?? [];
+  const [, sectionName] = coerceArray(
+    regEx(/^\[\s*(?<sectionName>[^\s]+)\s*]\s*$/).exec(str),
+  );
   return sectionName;
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] =
-    regEx(/^(?<sectionRecord>[^\s]+)\s*=/).exec(str) ?? [];
+  const [, sectionRecord] = coerceArray(
+    regEx(/^(?<sectionRecord>[^\s]+)\s*=/).exec(str),
+  );
   return sectionRecord;
 }
 

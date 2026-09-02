@@ -2,6 +2,7 @@ import { isArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import json5 from 'json5';
 import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import type {
@@ -41,7 +42,7 @@ export function extractPackageFile(
   }
 
   // OSGi Compendium R8 159.4: bundles entry
-  const allBundles = featureModel.bundles ?? [];
+  const allBundles = coerceArray(featureModel.bundles);
 
   // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
   const execEnvFramework =

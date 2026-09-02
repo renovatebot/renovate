@@ -342,9 +342,9 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         })
-        .get('/2.0/repositories/some/repo/branching-model')
+        .get('/2.0/repositories/some/repo/effective-branching-model')
         .reply(200, {
-          development: { name: 'develop', branch: { name: 'develop' } },
+          development: { name: 'develop' },
         });
 
       const res = await bitbucket.initRepo({
@@ -366,10 +366,8 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         })
-        .get('/2.0/repositories/some/repo/branching-model')
-        .reply(200, {
-          development: { name: 'develop' },
-        });
+        .get('/2.0/repositories/some/repo/effective-branching-model')
+        .reply(200, {});
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',

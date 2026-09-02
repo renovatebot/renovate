@@ -20,7 +20,7 @@ describe('util/http/gitlab', () => {
   beforeEach(() => {
     gitlabApi = new GitlabHttp();
     setBaseUrl(`${gitlabApiHost}/api/v4/`);
-    delete process.env.GITLAB_IGNORE_REPO_URL;
+    vi.stubEnv('GITLAB_IGNORE_REPO_URL', undefined);
 
     hostRules.add({
       hostType: 'gitlab',
@@ -61,7 +61,7 @@ describe('util/http/gitlab', () => {
   });
 
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
-    process.env.GITLAB_IGNORE_REPO_URL = 'true';
+    vi.stubEnv('GITLAB_IGNORE_REPO_URL', 'true');
     setBaseUrl(`${selfHostedUrl}/api/v4/`);
 
     httpMock
@@ -182,16 +182,10 @@ describe('util/http/gitlab', () => {
   });
 
   describe('handles 409 errors', () => {
-    let NODE_ENV: string | undefined;
-
-    beforeAll(() => {
+    beforeEach(() => {
       // Unset NODE_ENV so that we can test the retry logic
-      NODE_ENV = process.env.NODE_ENV;
-      delete process.env.NODE_ENV;
-    });
-
-    afterAll(() => {
-      process.env.NODE_ENV = NODE_ENV;
+      vi.stubEnv('NODE_ENV', undefined);
+      gitlabApi = new GitlabHttp();
     });
 
     it('retries the request on resource lock', async () => {
@@ -222,16 +216,10 @@ describe('util/http/gitlab', () => {
   });
 
   describe('handles 400 source_branch errors', () => {
-    let NODE_ENV: string | undefined;
-
-    beforeAll(() => {
+    beforeEach(() => {
       // Unset NODE_ENV so that we can test the retry logic
-      NODE_ENV = process.env.NODE_ENV;
-      delete process.env.NODE_ENV;
-    });
-
-    afterAll(() => {
-      process.env.NODE_ENV = NODE_ENV;
+      vi.stubEnv('NODE_ENV', undefined);
+      gitlabApi = new GitlabHttp();
     });
 
     it('retries the request when source branch does not yet exist', async () => {

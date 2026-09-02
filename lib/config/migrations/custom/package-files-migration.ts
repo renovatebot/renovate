@@ -1,4 +1,5 @@
 import { isArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import type { PackageRule } from '../../types.ts';
 import { AbstractMigration } from '../base/abstract-migration.ts';
 
@@ -7,7 +8,7 @@ export class PackageFilesMigration extends AbstractMigration {
   override readonly propertyName = 'packageFiles';
 
   override run(value: unknown): void {
-    const packageRules: PackageRule[] = this.get('packageRules') ?? [];
+    const packageRules: PackageRule[] = coerceArray(this.get('packageRules'));
     // v8 ignore else -- TODO: add test #40625
     if (isArray(value)) {
       const fileList: string[] = [];
