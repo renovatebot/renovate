@@ -171,6 +171,6 @@ export const presets: Record<string, Preset> = {
   },
   vitePlus: {
     description: 'All Vite+ related packages',
-    extends: ['monorepo:vitePlus', 'monorepo:vitest'],
+    extends: ['monorepo:vite-plus', 'monorepo:vitest'],
   },
 };

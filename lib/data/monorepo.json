@@ -791,7 +791,7 @@
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
     "vanilla-extract": "https://github.com/vanilla-extract-css/vanilla-extract",
     "visx": "https://github.com/airbnb/visx",
-    "vitePlus": "https://github.com/voidzero-dev/vite-plus",
+    "vite-plus": "https://github.com/voidzero-dev/vite-plus",
     "vitest": "https://github.com/vitest-dev/vitest",
     "vstest": "https://github.com/microsoft/vstest",
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],
