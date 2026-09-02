@@ -59,7 +59,11 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-vi.mock('../../../config/migration.ts');
+// only `migrateConfig` needs mocking
+vi.mock('../../../config/migration.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof _migrate>()),
+  migrateConfig: vi.fn(),
+}));
 vi.mock('../../../config/migrate-validate.ts');
 
 describe('workers/repository/init/merge', () => {
