@@ -1,4 +1,4 @@
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { ExecError } from '../../../../util/exec/exec-error.ts';
 import { exec } from '../../../../util/exec/index.ts';
@@ -31,6 +31,18 @@ function packageJson(vitePlus: string, coverage: string): string {
 function aliasedPackageJson(vitePlus: string, vite: string): string {
   return `${JSON.stringify({
     devDependencies: { 'vite-plus': vitePlus, vite },
+  })}\n`;
+}
+
+function aliasedVitePlusPackageJson(
+  vitePlus: string,
+  coverage: string,
+): string {
+  return `${JSON.stringify({
+    devDependencies: {
+      vp: `npm:vite-plus@${vitePlus}`,
+      '@vitest/coverage-v8': coverage,
+    },
   })}\n`;
 }
 
@@ -161,6 +173,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     expect(execOptions).toMatchObject({
       docker: {},
       maxBuffer: 33 * 1024 * 1024,
+      redactOutput: true,
       toolConstraints: [
         {
           toolName: 'node',
@@ -189,6 +202,40 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
       prettyNewVersion: 'v0.3.0',
       updateType: 'minor',
     });
+  });
+
+  it('recognizes an aliased Vite+ dependency by its package name', async () => {
+    const base = aliasedVitePlusPackageJson('0.2.0', '4.0.0');
+    const proposed = aliasedVitePlusPackageJson('0.3.0', '4.0.0');
+    const aligned = aliasedVitePlusPackageJson('0.3.0', '4.1.11');
+    const updateConfig = config(proposed);
+    updateConfig.upgrades[0].depName = 'vp';
+    updateConfig.upgrades[0].packageName = 'vite-plus';
+    const files = packageFiles();
+    files.npm![0].deps![0].depName = 'vp';
+    files.npm![0].deps![0].packageName = 'vite-plus';
+    mockFiles({ 'package.json': base });
+    mockPlan((request) => validPlan(request, aligned));
+
+    await reconcileVitePlusVersions(updateConfig, files);
+
+    expect(execMock).toHaveBeenCalledOnce();
+    expect(
+      additionContents(updateConfig.updatedPackageFiles?.[0] as FileAddition),
+    ).toBe(aligned);
+  });
+
+  it('does not treat a custom package aliased as vite-plus as Vite+', async () => {
+    const proposed = packageJson('0.3.0', '4.0.0');
+    const updateConfig = config(proposed);
+    updateConfig.upgrades[0].packageName = '@scope/vite-plus-fork';
+    const files = packageFiles();
+    files.npm![0].deps![0].packageName = '@scope/vite-plus-fork';
+
+    await reconcileVitePlusVersions(updateConfig, files);
+
+    expect(execMock).not.toHaveBeenCalled();
+    expect(getFileMock).not.toHaveBeenCalled();
   });
 
   it('groups a workspace by package path when it has no lockfile metadata', async () => {
@@ -238,6 +285,36 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
 
     expect(updateConfig.updatedPackageFiles).toEqual([]);
     expect(updateConfig.upgrades).toEqual([]);
+  });
+
+  it('keeps a range-to-exact pin when the resolved version is unchanged', async () => {
+    const base = packageJson('0.3.0', '^4.1.0');
+    const proposed = packageJson('0.3.0', '4.2.0');
+    const aligned = packageJson('0.3.0', '4.1.11');
+    const updateConfig = config(proposed, '@vitest/coverage-v8', '4.2.0');
+    updateConfig.upgrades[0].currentVersion = '4.1.11';
+    updateConfig.upgrades[0].currentValue = '^4.1.0';
+    const files = packageFiles();
+    files.npm![0].deps![0].currentVersion = '0.3.0';
+    files.npm![0].deps![0].lockedVersion = '0.3.0';
+    files.npm![0].deps![1].currentVersion = '4.1.11';
+    files.npm![0].deps![1].lockedVersion = '4.1.11';
+    mockFiles({ 'package.json': base });
+    mockPlan((request) => validPlan(request, aligned));
+
+    await reconcileVitePlusVersions(updateConfig, files);
+
+    expect(updateConfig.upgrades).toHaveLength(1);
+    expect(updateConfig.upgrades[0]).toMatchObject({
+      currentValue: '^4.1.0',
+      isBreaking: false,
+      newValue: '4.1.11',
+      newVersion: '4.1.11',
+      updateType: 'pin',
+    });
+    expect(
+      additionContents(updateConfig.updatedPackageFiles?.[0] as FileAddition),
+    ).toBe(aligned);
   });
 
   it('writes a reversion when reusing a branch with stale manifest content', async () => {
@@ -615,6 +692,11 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
       before: 'npm:@voidzero-dev/vite-plus-core@0.2.0',
       after: 'npm:@voidzero-dev/vite-plus-core@latest',
     },
+    {
+      name: 'replaces a non-version alias target',
+      before: 'npm:@voidzero-dev/vite-plus-core@latest',
+      after: 'npm:@voidzero-dev/vite-plus-core@0.3.0',
+    },
   ])('rejects a plan that $name', async ({ before, after }) => {
     const base = aliasedPackageJson('0.2.0', before);
     const proposed = aliasedPackageJson('0.3.0', before);
@@ -627,6 +709,25 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     await expect(
       reconcileVitePlusVersions(updateConfig, packageFiles()),
     ).rejects.toThrow('unsupported manifest change at devDependencies.vite');
+  });
+
+  it.each([
+    { name: 'workspace protocol', value: 'workspace:*' },
+    { name: 'catalog protocol', value: 'catalog:' },
+    { name: 'dependency reference', value: '$vitest' },
+    { name: 'distribution tag', value: 'latest' },
+  ])('rejects replacing a $name with an exact version', async ({ value }) => {
+    const base = packageJson('0.2.0', value);
+    const proposed = packageJson('0.3.0', value);
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': base });
+    mockPlan((request) => validPlan(request, packageJson('0.3.0', '4.1.11')));
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toThrow(
+      'unsupported manifest change at devDependencies.@vitest/coverage-v8',
+    );
   });
 
   it('rejects an unexpected version inside a managed npm alias', async () => {
@@ -1033,14 +1134,37 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     });
   });
 
-  it('propagates unrelated planner failures', async () => {
+  it('does not expose planner output through unrelated failures', async () => {
     const proposed = packageJson('0.3.0', '4.0.0');
     const updateConfig = config(proposed);
     mockFiles({ 'package.json': packageJson('0.2.0', '4.0.0') });
-    execMock.mockRejectedValueOnce(new Error('planner crashed'));
+    const secret = 'private-yarn-token';
+    execMock.mockRejectedValueOnce(
+      new ExecError(`Command failed: ${secret}`, {
+        cmd: 'vp sync-versions --json',
+        options: {},
+        stderr: secret,
+        stdout: secret,
+      }),
+    );
 
     await expect(
       reconcileVitePlusVersions(updateConfig, packageFiles()),
-    ).rejects.toThrow('planner crashed');
+    ).rejects.toThrow('Vite+ planner execution failed');
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { workspace: '.', vitePlusVersion: '0.3.0' },
+      'Vite+ planner execution failed',
+    );
+  });
+
+  it('normalizes unexpected planner failures', async () => {
+    const proposed = packageJson('0.3.0', '4.0.0');
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': packageJson('0.2.0', '4.0.0') });
+    execMock.mockRejectedValueOnce(new Error('unexpected failure'));
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toThrow('Vite+ planner execution failed');
   });
 });

@@ -18,6 +18,7 @@ import { parseSingleYaml } from '../../../../util/yaml.ts';
 import * as npmVersioning from '../../../versioning/npm/index.ts';
 import type {
   ArtifactNotice,
+  PackageDependency,
   PackageFile,
   PostUpdateConfig,
   Upgrade,
@@ -138,6 +139,12 @@ function isVitestPackage(packageName: string): boolean {
   return packageName === 'vitest' || packageName.startsWith('@vitest/');
 }
 
+function effectivePackageName(
+  dependency: Pick<PackageDependency, 'depName' | 'packageName'>,
+): string | undefined {
+  return dependency.packageName ?? dependency.depName;
+}
+
 function getWorkspaceRoot(
   packageFile: Partial<PackageFile<NpmManagerData>>,
 ): string | undefined {
@@ -200,7 +207,7 @@ function getRelevantUpgrades(
 ): Upgrade<NpmManagerData>[] {
   return coerceArray(config.upgrades).filter(
     (upgrade) =>
-      isManagedPackage(upgrade.packageName ?? upgrade.depName) &&
+      isManagedPackage(effectivePackageName(upgrade)) &&
       getUpgradeRoot(upgrade, packageRootByPath) === workspace.root,
   );
 }
@@ -238,13 +245,18 @@ function resolveVitePlusVersion(
   upgrades: Upgrade<NpmManagerData>[],
 ): string {
   const upgradedVersions = upgrades
-    .filter((upgrade) => upgrade.depName === VITE_PLUS_PACKAGE_NAME)
+    .filter(
+      (upgrade) => effectivePackageName(upgrade) === VITE_PLUS_PACKAGE_NAME,
+    )
     .map((upgrade) => exactVersion(upgrade.newVersion))
     .filter((version): version is string => version !== undefined);
 
   const installedVersions = workspace.packageFiles.flatMap((packageFile) =>
     coerceArray(packageFile.deps)
-      .filter((dependency) => dependency.depName === VITE_PLUS_PACKAGE_NAME)
+      .filter(
+        (dependency) =>
+          effectivePackageName(dependency) === VITE_PLUS_PACKAGE_NAME,
+      )
       .map(
         (dependency) =>
           exactVersion(dependency.lockedVersion) ??
@@ -456,6 +468,7 @@ function dependencyVersionChange(
       !afterAlias ||
       beforeAlias.packageName !== afterAlias.packageName ||
       !isManagedPackage(afterAlias.packageName) ||
+      !npmVersioning.isValid(beforeAlias.version) ||
       !npmVersioning.isVersion(afterAlias.version)
     ) {
       return undefined;
@@ -468,6 +481,7 @@ function dependencyVersionChange(
 
   if (
     !isManagedPackage(declaredPackageName) ||
+    !npmVersioning.isValid(before) ||
     !npmVersioning.isVersion(after)
   ) {
     return undefined;
@@ -669,7 +683,7 @@ function updateUpgradeMetadata(
 ): void {
   const noOpUpgrades = new Set<Upgrade<NpmManagerData>>();
   for (const upgrade of upgrades as MutableUpgrade[]) {
-    const packageName = upgrade.packageName ?? upgrade.depName;
+    const packageName = effectivePackageName(upgrade);
     const version =
       packageName === VITE_PLUS_PACKAGE_NAME ||
       packageName === VITE_PLUS_CORE_PACKAGE_NAME
@@ -685,8 +699,13 @@ function updateUpgradeMetadata(
     upgrade.newMajor = npmVersioning.api.getMajor(version)!;
     upgrade.newMinor = npmVersioning.api.getMinor(version)!;
     upgrade.newPatch = npmVersioning.api.getPatch(version)!;
-    if (upgrade.currentVersion === version) {
+    if (upgrade.currentValue === version) {
       noOpUpgrades.add(upgrade);
+      continue;
+    }
+    if (upgrade.currentVersion === version) {
+      upgrade.updateType = 'pin';
+      upgrade.isBreaking = false;
       continue;
     }
     if (
@@ -739,6 +758,7 @@ async function runPlanner(
         docker: {},
         input: request,
         maxBuffer: MAX_PLAN_BYTES,
+        redactOutput: true,
         toolConstraints: plannerToolConstraints(vitePlusVersion),
       },
     ).catch((error: unknown) => {
@@ -749,7 +769,11 @@ async function runPlanner(
         );
         return null;
       }
-      throw error;
+      logger.debug(
+        { workspace: workspace.root, vitePlusVersion },
+        'Vite+ planner execution failed',
+      );
+      throw new Error('Vite+ planner execution failed');
     });
     if (!result) {
       return undefined;
@@ -785,7 +809,8 @@ export async function reconcileVitePlusVersions(
     if (
       !workspace.packageFiles.some((packageFile) =>
         packageFile.deps?.some(
-          (dependency) => dependency.depName === VITE_PLUS_PACKAGE_NAME,
+          (dependency) =>
+            effectivePackageName(dependency) === VITE_PLUS_PACKAGE_NAME,
         ),
       )
     ) {
