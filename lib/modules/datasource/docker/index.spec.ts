@@ -3,13 +3,16 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import * as _googleAuth from 'google-auth-library';
+import { dir as tmpDir } from 'tmp-promise';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
+import { DOCKER_HUB } from './common.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
 
@@ -1770,70 +1773,6 @@ describe('modules/datasource/docker/index', () => {
       };
       const res = await getPkgReleases(config);
       expect(res?.releases).toHaveLength(1);
-    });
-
-    // Covers the `cacheable` guard: private registries are not cached at all
-    // by default, so a failed lookup cannot be replayed from the cache.
-    it('does not cache failed tag lookups for private registries by default', async () => {
-      httpMock
-        .scope('https://registry.company.com/v2')
-        .get('/cache-private-tags/tags/list?n=10000')
-        .reply(200, '', {})
-        .get('/cache-private-tags/tags/list?n=10000')
-        .reply(403);
-
-      httpMock
-        .scope('https://registry.company.com/v2')
-        .get('/cache-private-tags/tags/list?n=10000')
-        .reply(200, '', {})
-        .get('/cache-private-tags/tags/list?n=10000')
-        .reply(200, { tags: ['1.0.0'] }, {})
-        .get('/')
-        .reply(200)
-        .get('/cache-private-tags/manifests/1.0.0')
-        .reply(200);
-
-      const config = {
-        datasource: DockerDatasource.id,
-        packageName: 'cache-private-tags',
-        registryUrls: ['https://registry.company.com'],
-      };
-
-      expect(await getPkgReleases(config)).toBeNull();
-      expect((await getPkgReleases(config))?.releases).toHaveLength(1);
-    });
-
-    // Distinct from the test above: here caching *is* active, so this covers
-    // `withCache` skipping writes of the `undefined` returned by a failed lookup.
-    it('does not cache failed tag lookups when cachePrivatePackages is enabled', async () => {
-      GlobalConfig.set({ cachePrivatePackages: true });
-
-      httpMock
-        .scope('https://registry.company.com/v2')
-        .get('/cache-private-tags-opt-in/tags/list?n=10000')
-        .reply(200, '', {})
-        .get('/cache-private-tags-opt-in/tags/list?n=10000')
-        .reply(403);
-
-      httpMock
-        .scope('https://registry.company.com/v2')
-        .get('/cache-private-tags-opt-in/tags/list?n=10000')
-        .reply(200, '', {})
-        .get('/cache-private-tags-opt-in/tags/list?n=10000')
-        .reply(200, { tags: ['1.0.0'] }, {})
-        .get('/')
-        .reply(200)
-        .get('/cache-private-tags-opt-in/manifests/1.0.0')
-        .reply(200);
-
-      const config = {
-        datasource: DockerDatasource.id,
-        packageName: 'cache-private-tags-opt-in',
-        registryUrls: ['https://registry.company.com'],
-      };
-
-      expect(await getPkgReleases(config)).toBeNull();
-      expect((await getPkgReleases(config))?.releases).toHaveLength(1);
     });
 
     // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
@@ -3687,6 +3626,103 @@ describe('modules/datasource/docker/index', () => {
             'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
         },
       );
+    });
+  });
+  describe('getTags caching', () => {
+    let dirResult: Awaited<ReturnType<typeof tmpDir>>;
+
+    beforeEach(async () => {
+      dirResult = await tmpDir({ unsafeCleanup: true });
+      // Unlike in with-cache.spec.ts, here we explicitly _don't_ configure
+      // `memCache` because it memoizes GET responses. This would stop subsequent
+      // lookups from actually exercising the package cache.
+      await packageCache.init({ cacheDir: dirResult.path });
+    });
+
+    afterEach(async () => {
+      await packageCache.cleanup({});
+      await dirResult.cleanup();
+    });
+
+    it('caches tags for Docker Hub', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {})
+        // The mock replies below should never be reached if caching works
+        // as expected.
+        // They are marked as optional to avoid 'unused HTTP mocks' errors.
+        .get('/library/node/tags/list?n=10000')
+        .optionally()
+        .reply(200, '', {})
+        .get('/library/node/tags/list?n=10000')
+        .optionally()
+        .reply(200, { tags: ['9.9.9'] }, {});
+
+      const ds = new DockerDatasource();
+
+      expect(await ds.getTags(DOCKER_HUB, 'library/node')).toEqual(['1.0.0']);
+      expect(httpMock.getTrace()).toHaveLength(2);
+
+      // Second call pulls from the cache which was hydrated by the first call,
+      // resulting in no additional requests to the HTTP mock.
+      expect(await ds.getTags(DOCKER_HUB, 'library/node')).toEqual(['1.0.0']);
+      expect(httpMock.getTrace()).toHaveLength(2);
+    });
+
+    it('does not cache tags for a private registry', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {})
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0', '2.0.0'] }, {});
+
+      const ds = new DockerDatasource();
+
+      expect(await ds.getTags('https://registry.company.com', 'node')).toEqual([
+        '1.0.0',
+      ]);
+      expect(httpMock.getTrace()).toHaveLength(2);
+
+      expect(await ds.getTags('https://registry.company.com', 'node')).toEqual([
+        '1.0.0',
+        '2.0.0',
+      ]);
+      expect(httpMock.getTrace()).toHaveLength(4);
+    });
+
+    it('does not cache failed lookups when cachePrivatePackages is enabled', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(403) // Failed auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {}) // Auth probe
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {});
+
+      const ds = new DockerDatasource();
+
+      expect(
+        await ds.getTags('https://registry.company.com', 'node'),
+      ).toBeUndefined();
+      expect(httpMock.getTrace()).toHaveLength(1);
+
+      // The previous auth error (`undefined`) didn't get cached, so the second
+      // lookup hits the mock as expected.
+      expect(await ds.getTags('https://registry.company.com', 'node')).toEqual([
+        '1.0.0',
+      ]);
+      expect(httpMock.getTrace()).toHaveLength(3);
     });
   });
 });
