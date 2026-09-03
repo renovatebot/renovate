@@ -85,7 +85,6 @@ describe('modules/datasource/java-version/index', () => {
           { version: '16.0.2+7' },
         ],
       });
-      expect(res?.releases).toHaveLength(3);
     });
 
     it('processes real data (jre)', async () => {
@@ -100,7 +99,6 @@ describe('modules/datasource/java-version/index', () => {
       expect(res).toMatchObject({
         releases: [{ version: '8.0.302+8' }, { version: '11.0.12+7' }],
       });
-      expect(res?.releases).toHaveLength(2);
     });
 
     it('processes real data (jre,windows,x64)', async () => {

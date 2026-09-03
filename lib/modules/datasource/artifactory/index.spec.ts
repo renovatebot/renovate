@@ -33,7 +33,6 @@ describe('modules/datasource/artifactory/index', () => {
         datasource,
         packageName: testLookupName,
       });
-      expect(res?.releases).toHaveLength(4);
       expect(res).toEqual({
         registryUrl: 'https://jfrog.company.com/artifactory',
         releases: [
@@ -67,7 +66,6 @@ describe('modules/datasource/artifactory/index', () => {
         datasource,
         packageName: testLookupName,
       });
-      expect(res?.releases).toHaveLength(4);
       expect(res).toEqual({
         registryUrl: 'https://jfrog.company.com/artifactory',
         releases: [
@@ -109,7 +107,6 @@ describe('modules/datasource/artifactory/index', () => {
         datasource,
         packageName: testLookupName,
       });
-      expect(res?.releases).toHaveLength(5);
       expect(res).toEqual({
         releases: [
           {

@@ -162,7 +162,6 @@ describe('modules/datasource/helm/index', () => {
         packageName: 'ambassador',
         registryUrls: ['https://example-repository.com'],
       });
-      expect(releases).not.toBeNull();
       expect(releases).toMatchObject({
         releases: [
           {

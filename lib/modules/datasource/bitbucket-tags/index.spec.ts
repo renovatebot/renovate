@@ -53,7 +53,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         ],
         sourceUrl: 'https://bitbucket.org/some/dep2',
       });
-      expect(res?.releases).toHaveLength(3);
     });
   });
 

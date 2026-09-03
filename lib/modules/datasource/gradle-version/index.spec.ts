@@ -360,8 +360,6 @@ describe('modules/datasource/gradle-version/index', () => {
           },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(300);
       expect(
         res?.releases.filter(({ isDeprecated }) => isDeprecated),
       ).toHaveLength(1);
@@ -690,7 +688,6 @@ describe('modules/datasource/gradle-version/index', () => {
           { version: '7.0-rc-1', registryUrl: 'https://foo.bar' },
         ],
       });
-      expect(res).not.toBeNull();
     });
 
     it('handles empty releases', async () => {

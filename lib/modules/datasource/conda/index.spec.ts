@@ -163,7 +163,6 @@ describe('modules/datasource/conda/index', () => {
           { version: '6.2.5' },
         ],
       });
-      expect(res?.releases).toHaveLength(94);
     });
 
     it('returns null without registryUrl', async () => {

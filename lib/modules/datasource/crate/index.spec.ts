@@ -346,8 +346,6 @@ describe('modules/datasource/crate/index', () => {
           { version: '0.2.51', versionOrig: '0.2.51+metadata' },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('processes real data: amethyst', async () => {
@@ -388,8 +386,6 @@ describe('modules/datasource/crate/index', () => {
           { version: '0.10.1', isDeprecated: true },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('processes real data: sentry', async () => {
@@ -414,8 +410,6 @@ describe('modules/datasource/crate/index', () => {
           { version: '0.1.2', releaseTimestamp: '2016-05-29T18:29:40.000Z' },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('uses cached registry config for subsequent packages', async () => {
@@ -476,8 +470,6 @@ describe('modules/datasource/crate/index', () => {
           'https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg',
         releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('clones other private registry with explicit gitTimeout', async () => {
@@ -511,8 +503,6 @@ describe('modules/datasource/crate/index', () => {
         dependencyUrl: 'https://github.com/mcorbin/testregistry/mypkg',
         releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('clones once then reuses the cache', async () => {

@@ -228,8 +228,6 @@ describe('modules/datasource/hex/index', () => {
           },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('process public repo without auth', async () => {
@@ -265,8 +263,6 @@ describe('modules/datasource/hex/index', () => {
           { version: '2.5.2' },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('extracts depreceated info', async () => {

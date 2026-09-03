@@ -179,7 +179,6 @@ describe('modules/datasource/flutter-version/index', () => {
           },
         ],
       });
-      expect(res?.releases).toHaveLength(31);
     });
   });
 });

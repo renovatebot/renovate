@@ -177,9 +177,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           { version: '1.2.1' },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
-      expect(res?.releases).toHaveLength(3);
     });
 
     it('returns null but matches automation hub URL', async () => {
@@ -227,9 +224,6 @@ describe('modules/datasource/galaxy-collection/index', () => {
           { version: '1.2.1' },
         ],
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
-      expect(res?.releases).toHaveLength(3);
     });
   });
 

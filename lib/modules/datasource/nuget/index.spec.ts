@@ -660,7 +660,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3Multiple,
       });
-      expect(res).not.toBeNull();
       expect(res).toEqual({
         releases: [
           {
@@ -894,7 +893,6 @@ describe('modules/datasource/nuget/index', () => {
         sourceUrl: 'https://github.com/nunit/nunit',
         homepage: 'https://nunit.org/',
       });
-      expect(res?.releases).toHaveLength(45);
     });
 
     it('returns null for unknown error in getReleasesFromV3Feed (v3)', async () => {
@@ -950,7 +948,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).not.toBeNull();
       expect(res).toEqual({
         releases: [
           {
@@ -1140,7 +1137,6 @@ describe('modules/datasource/nuget/index', () => {
         homepage: 'https://nunit.org/',
         registryUrl: 'https://api.nuget.org/v3/index.json',
       });
-      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('captures release notes', async () => {
@@ -1221,7 +1217,6 @@ describe('modules/datasource/nuget/index', () => {
         ...configV3,
         packageName: 'nlog',
       });
-      expect(res).not.toBeNull();
       expect(res).toEqual({
         releases: [
           {
@@ -1855,7 +1850,6 @@ describe('modules/datasource/nuget/index', () => {
         homepage: 'https://nlog-project.org/',
         registryUrl: 'https://api.nuget.org/v3/index.json',
       });
-      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) feed is not a nuget.org', async () => {
@@ -1882,7 +1876,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3NotNugetOrg,
       });
-      expect(res).not.toBeNull();
       expect(res).toEqual({
         releases: [
           {
@@ -2070,7 +2063,6 @@ describe('modules/datasource/nuget/index', () => {
         sourceUrl: 'https://nunit.org/',
         registryUrl: 'https://myprivatefeed/index.json',
       });
-      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) nuspec fetch error', async () => {
@@ -2086,7 +2078,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).not.toBeNull();
       expect(res).toMatchObject({
         releases: [
           { version: '2.5.7.10213' },
@@ -2153,7 +2144,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).not.toBeNull();
       expect(res).toMatchObject({
         releases: [
           { version: '2.5.7.10213' },
@@ -2217,7 +2207,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res).not.toBeNull();
       expect(res).toMatchObject({
         releases: [
           {
@@ -3167,7 +3156,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res).not.toBeNull();
       expect(res).toMatchObject({
         releases: [
           {
@@ -3314,7 +3302,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res).not.toBeNull();
       expect(res).toEqual({
         registryUrl: 'https://www.nuget.org/api/v2',
         releases: [
@@ -3355,7 +3342,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res).not.toBeNull();
       expect(res).toEqual({
         registryUrl: 'https://www.nuget.org/api/v2',
         releases: [
@@ -3428,7 +3414,6 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3Deprecated,
       });
-      expect(res).not.toBeNull();
       expect(res).toMatchObject({
         deprecationMessage: 'The package `ProxyKit` is deprecated.',
         releases: [

@@ -58,7 +58,6 @@ describe('modules/datasource/gitlab-packages/index', () => {
           },
         ],
       });
-      expect(res?.releases).toHaveLength(3);
     });
 
     it('returns conan package from custom registry', async () => {

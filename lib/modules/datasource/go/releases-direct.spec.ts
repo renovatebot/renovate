@@ -136,8 +136,6 @@ describe('modules/datasource/go/releases-direct', () => {
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://gitlab.com/golang/text',
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('support gitea', async () => {
@@ -228,8 +226,6 @@ describe('modules/datasource/go/releases-direct', () => {
         ],
         sourceUrl: null,
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('support self hosted gitlab private repositories', async () => {
@@ -250,8 +246,6 @@ describe('modules/datasource/go/releases-direct', () => {
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://my.custom.domain/golang/myrepo',
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('support bitbucket tags', async () => {
@@ -275,8 +269,6 @@ describe('modules/datasource/go/releases-direct', () => {
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://bitbucket.org/golang/text',
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('support ghe', async () => {
@@ -356,8 +348,6 @@ describe('modules/datasource/go/releases-direct', () => {
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://gitlab.com/group/subgroup/repo',
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('works for nested modules on github', async () => {

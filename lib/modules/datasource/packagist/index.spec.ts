@@ -296,7 +296,6 @@ describe('modules/datasource/packagist/index', () => {
           { version: '3.8.1' },
         ],
       });
-      expect(res).not.toBeNull();
     });
 
     it('supports older sha1 hashes', async () => {
@@ -399,7 +398,6 @@ describe('modules/datasource/packagist/index', () => {
         registryUrl: 'https://composer.renovatebot.com/composer/lazy',
         releases: [{ version: '5.3.4' }, { version: '7.0.0-beta.1' }],
       });
-      expect(res).not.toBeNull();
     });
 
     it('supports provider-includes', async () => {
@@ -452,7 +450,6 @@ describe('modules/datasource/packagist/index', () => {
           { version: '1.5.1' },
         ],
       });
-      expect(res).not.toBeNull();
     });
 
     it('handles provider-includes miss', async () => {
@@ -541,7 +538,6 @@ describe('modules/datasource/packagist/index', () => {
           { version: '1.5.1' },
         ],
       });
-      expect(res).not.toBeNull();
     });
 
     it('supports providers without a hash', async () => {
@@ -578,7 +574,6 @@ describe('modules/datasource/packagist/index', () => {
           { version: '1.5.1' },
         ],
       });
-      expect(res).not.toBeNull();
     });
 
     it('handles providers miss', async () => {

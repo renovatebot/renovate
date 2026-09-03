@@ -372,7 +372,6 @@ describe('modules/datasource/node-version/index', () => {
           },
         ],
       });
-      expect(res?.releases).toHaveLength(64);
     });
   });
 });

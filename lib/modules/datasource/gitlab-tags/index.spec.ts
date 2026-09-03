@@ -50,7 +50,6 @@ describe('modules/datasource/gitlab-tags/index', () => {
         ],
         sourceUrl: 'https://gitlab.company.com/some/dep2',
       });
-      expect(res?.releases).toHaveLength(3);
     });
 
     it('returns tags from custom registry in sub path', async () => {
@@ -97,7 +96,6 @@ describe('modules/datasource/gitlab-tags/index', () => {
         ],
         sourceUrl: 'https://my.company.com/gitlab/some/dep2',
       });
-      expect(res?.releases).toHaveLength(3);
     });
 
     it('returns tags with default registry', async () => {
@@ -124,7 +122,6 @@ describe('modules/datasource/gitlab-tags/index', () => {
         ],
         sourceUrl: 'https://gitlab.com/some/dep2',
       });
-      expect(res?.releases).toHaveLength(2);
     });
   });
 

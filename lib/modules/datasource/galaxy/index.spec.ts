@@ -101,8 +101,6 @@ describe('modules/datasource/galaxy/index', () => {
         ],
         sourceUrl: 'https://github.com/yatesr/ansible-timezone',
       });
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
     });
 
     it('handles multiple results when one user matches exactly', async () => {
