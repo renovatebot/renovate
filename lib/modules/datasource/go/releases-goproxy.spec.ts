@@ -719,6 +719,45 @@ describe('modules/datasource/go/releases-goproxy', () => {
       expect(res).toBeNull();
     });
 
+    // this is incorrect behaviour we're documenting to fix in a follow-up
+    // a `,`-separated GOPROXY entry should only fall back to the next entry on 404/410, and otherwise propagate the error. Instead
+    // the loop silently stops and `null` is returned, which then gets cached as a "no releases found" result.
+    it('silently swallows a non-404/410 HTTP error from the primary proxy', async () => {
+      vi.stubEnv('GOPROXY', `${baseUrl},direct`);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(500);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toBeNull();
+      expect(githubGetTags).not.toHaveBeenCalled();
+      expect(githubGetReleases).not.toHaveBeenCalled();
+    });
+
+    // this is incorrect behaviour we're documenting to fix in a follow-up
+    // a network-level error (no HTTP status code at all) is treated the same as any other non-404/410 error.
+    it('silently swallows a network error from the primary proxy', async () => {
+      vi.stubEnv('GOPROXY', `${baseUrl},direct`);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toBeNull();
+      expect(githubGetTags).not.toHaveBeenCalled();
+      expect(githubGetReleases).not.toHaveBeenCalled();
+    });
+
     it('handles soureUrl fetch errors', async () => {
       vi.stubEnv('GOPROXY', baseUrl);
 
