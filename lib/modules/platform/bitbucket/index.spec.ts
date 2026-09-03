@@ -345,6 +345,10 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/effective-branching-model')
         .reply(200, {
           development: { name: 'develop' },
+        })
+        .get('/2.0/repositories/some/repo/refs/branches?q=name="develop"')
+        .reply(200, {
+          values: [{ name: 'develop' }],
         });
 
       const res = await bitbucket.initRepo({
@@ -368,6 +372,34 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .get('/2.0/repositories/some/repo/effective-branching-model')
         .reply(200, {});
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+      });
+
+      expect(res.defaultBranch).toBe('master');
+    });
+
+    it('enabled: falls back to mainbranch if development branch does not exist as an actual branch', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/repo/effective-branching-model')
+        .reply(200, {
+          development: { name: 'develop' },
+        })
+        .get('/2.0/repositories/some/repo/refs/branches?q=name="develop"')
+        .reply(200, {
+          values: [],
+        });
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
