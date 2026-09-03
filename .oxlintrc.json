@@ -193,11 +193,11 @@
     "vitest/no-restricted-matchers": [
       "error",
       {
-        "toMatchSnapshot": "Prefer explicit assertions; use toMatchInlineSnapshot for huge strings so the expected value stays visible in the test file.",
-        "toThrowErrorMatchingSnapshot": "Prefer toThrow with a message; use toThrowErrorMatchingInlineSnapshot for huge error messages.",
-        "rejects.toThrowErrorMatchingSnapshot": "Prefer rejects.toThrow with a message; use rejects.toThrowErrorMatchingInlineSnapshot for huge error messages.",
-        "resolves.toMatchSnapshot": "Prefer explicit assertions; use toMatchInlineSnapshot for huge strings so the expected value stays visible in the test file.",
-        "toMatchFileSnapshot": "Prefer explicit assertions; use toMatchInlineSnapshot for huge strings so the expected value stays visible in the test file."
+        "toMatchSnapshot": "Use explicit assertions such as toEqual, toMatchObject or toBe so the expected value stays visible in the test file.",
+        "toThrowErrorMatchingSnapshot": "Use toThrow with the expected message.",
+        "rejects.toThrowErrorMatchingSnapshot": "Use rejects.toThrow with the expected message.",
+        "resolves.toMatchSnapshot": "Use explicit assertions such as resolves.toEqual or resolves.toMatchObject so the expected value stays visible in the test file.",
+        "toMatchFileSnapshot": "Use explicit assertions such as toEqual, toMatchObject or toBe so the expected value stays visible in the test file."
       }
     ],
     "vitest/no-standalone-expect": "error",
