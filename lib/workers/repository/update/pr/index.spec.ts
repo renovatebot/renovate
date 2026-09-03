@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -1069,12 +1070,12 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [
                 {
                   prBodyNotes: [
-                    `> :stop_sign: **Caution**
->
-> bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
-> Verify that release 2.3.4 was published by the expected author.
-
-`,
+                    codeBlock`
+                      > 🛑 **Caution**
+                      >
+                      > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
+                      > Verify that release 2.3.4 was published by the expected author.
+                    `,
                   ],
                 },
               ],
