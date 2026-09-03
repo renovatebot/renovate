@@ -274,7 +274,7 @@ export async function initRepo({
             `${developmentBranch} is BitBucket's development branch - using it as default branch`,
           );
         } else {
-          logger.debug(
+          logger.warn(
             `BitBucket's development branch '${developmentBranch}' does not exist as a branch - keeping '${mainBranch}' as default branch`,
           );
         }
