@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -31,21 +32,21 @@ describe('workers/repository/onboarding/pr/config-description', () => {
         'this is Docker-only',
       ];
       const res = getConfigDesc(config, packageFiles);
-      expect(res).toMatchInlineSnapshot(`
-        "
-        ### Configuration Summary
+      expect(res).toBe(
+        `\n${`${codeBlock`
+            ### Configuration Summary
 
-        Based on the default config's presets, Renovate will:
+            Based on the default config's presets, Renovate will:
 
-          - Start dependency updates only once this onboarding PR is merged
-          - description 1
-          - description two
-          - something else
-          - this is Docker-only
+              - Start dependency updates only once this onboarding PR is merged
+              - description 1
+              - description two
+              - something else
+              - this is Docker-only
 
-        ---
-        "
-      `);
+            ---
+          `}`}\n`,
+      );
       expect(res.indexOf('Docker-only')).not.toBe(-1);
     });
 
@@ -55,18 +56,18 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];
       const res = getConfigDesc(config);
-      expect(res).toMatchInlineSnapshot(`
-        "
-        ### Configuration Summary
+      expect(res).toBe(
+        `\n${`${codeBlock`
+            ### Configuration Summary
 
-        Based on the default config's presets, Renovate will:
+            Based on the default config's presets, Renovate will:
 
-          - Start dependency updates only once this onboarding PR is merged
-          - Run Renovate on following schedule: before 5am
+              - Start dependency updates only once this onboarding PR is merged
+              - Run Renovate on following schedule: before 5am
 
-        ---
-        "
-      `);
+            ---
+          `}`}\n`,
+      );
     });
 
     it('include retry/refresh checkbox message only if onboardingRebaseCheckbox is true', () => {
@@ -75,18 +76,18 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
       config.onboardingRebaseCheckbox = true;
       const res = getConfigDesc(config);
-      expect(res).toMatchInlineSnapshot(`
-        "
-        ### Configuration Summary
+      expect(res).toBe(
+        `\n${`${codeBlock`
+            ### Configuration Summary
 
-        Based on the default config's presets, Renovate will:
+            Based on the default config's presets, Renovate will:
 
-          - Start dependency updates only once this onboarding PR is merged
-          - Run Renovate on following schedule: before 5am
+              - Start dependency updates only once this onboarding PR is merged
+              - Run Renovate on following schedule: before 5am
 
-        ---
-        "
-      `);
+            ---
+          `}`}\n`,
+      );
     });
   });
 });
