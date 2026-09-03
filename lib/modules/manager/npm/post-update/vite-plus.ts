@@ -664,7 +664,7 @@ async function runPlanner(
 
   return withSystemTempDir('renovate-vp-', async (workingDirectory) => {
     const result = await exec(
-      [{ command: ['vp', 'sync-versions', '--plan-json'] }],
+      [{ command: ['vp', 'sync-versions', '--json'] }],
       {
         cwd: workingDirectory,
         docker: {},

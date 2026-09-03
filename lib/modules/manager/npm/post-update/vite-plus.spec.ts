@@ -151,9 +151,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     expect(execMock).toHaveBeenCalledOnce();
     const [commands, options] = execMock.mock.calls[0];
     const execOptions = options!;
-    expect(commands).toEqual([
-      { command: ['vp', 'sync-versions', '--plan-json'] },
-    ]);
+    expect(commands).toEqual([{ command: ['vp', 'sync-versions', '--json'] }]);
     expect(execOptions).toMatchObject({
       docker: {},
       maxBuffer: 33 * 1024 * 1024,
