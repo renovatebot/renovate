@@ -1556,6 +1556,270 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
+    it('matches a host-qualified name on its trailing name', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'exampleChart-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some old body',
+        },
+        {
+          id: 2,
+          version: 'exampleChart-1.0.1',
+          releaseTimestamp: '2020-01-02' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'some.registry/some/charts/exampleChart',
+          depName: 'some.registry/some/charts/exampleChart',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 2,
+        tag: 'exampleChart-1.0.1',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('matches a host-qualified name on its unqualified name', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'charts/podinfo-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'ghcr.io/charts/podinfo',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 1,
+        tag: 'charts/podinfo-1.0.0',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('matches a host-qualified name with a port', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'exampleChart-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'some.registry:5000/some/charts/exampleChart',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 1,
+        tag: 'exampleChart-1.0.0',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('matches a localhost-qualified name with a port', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'exampleChart-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'localhost:5000/charts/exampleChart',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 1,
+        tag: 'exampleChart-1.0.0',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('does not match an unrelated tag for a name with a trailing slash', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: '_1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'some.registry/charts/exampleChart/',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('does not match a scoped npm package on its trailing name', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'node-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: '@types/node',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('does not treat regex characters in the name as wildcards', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'depXjs-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'dep.js',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when neither packageName nor depName is set', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'dep-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
     it('fallback to extractVersion', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {

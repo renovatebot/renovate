@@ -396,7 +396,38 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('does not run npm install four times for lock file maintenance with npmInstallTwice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValue('{}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions: ['npmInstallTwice'] },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
   });
 
   it('works for docker mode', async () => {
@@ -434,6 +465,8 @@ describe('modules/manager/npm/post-update/npm', () => {
           '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
+          'npm install --package-lock-only --no-audit ' +
+          '&& ' +
           'npm install --package-lock-only --no-audit' +
           "'",
       },
@@ -463,6 +496,9 @@ describe('modules/manager/npm/post-update/npm', () => {
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
     ]);
   });
 
@@ -485,6 +521,9 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },

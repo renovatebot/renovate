@@ -104,12 +104,12 @@ export async function detectPnpmWorkspaces(
 
   for (const p of packageFiles) {
     const { packageFile, managerData } = p;
-    const pnpmShrinkwrap = managerData?.pnpmShrinkwrap;
+    const pnpmLockFile = managerData?.pnpmLockFile;
 
-    // check if pnpmShrinkwrap-file has already been provided
-    if (pnpmShrinkwrap) {
+    // check if pnpmLockFile-file has already been provided
+    if (pnpmLockFile) {
       logger.trace(
-        { packageFile, pnpmShrinkwrap },
+        { packageFile, pnpmLockFile },
         'Found an existing pnpm shrinkwrap file; skipping pnpm monorepo check.',
       );
       continue;
@@ -149,7 +149,7 @@ export async function detectPnpmWorkspaces(
 
     if (isPackageInWorkspace) {
       p.managerData ??= {};
-      p.managerData.pnpmShrinkwrap = lockFilePath;
+      p.managerData.pnpmLockFile = lockFilePath;
     } else {
       logger.trace(
         { packageFile, workspaceYamlPath },
@@ -299,17 +299,17 @@ export async function extractPnpmWorkspaceFile(
   const { registry, registries } = workspaceFile;
   applyPnpmWorkspaceRegistries(deps, registries, registry);
 
-  let pnpmShrinkwrap;
+  let pnpmLockFile;
   const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
 
   if (await readLocalFile(filePath, 'utf8')) {
-    pnpmShrinkwrap = filePath;
+    pnpmLockFile = filePath;
   }
 
   return {
     deps,
     managerData: {
-      pnpmShrinkwrap,
+      pnpmLockFile,
     },
   };
 }

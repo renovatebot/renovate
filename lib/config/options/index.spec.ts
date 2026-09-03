@@ -202,4 +202,16 @@ describe('config/options/index', () => {
       });
     }
   });
+
+  describe('every option with requiresCheckAtTrustBoundary', () => {
+    it('has remembered to implement their checks', () => {
+      // if this test fails after you've added `requiresCheckAtTrustBoundary` to a config option, make sure you've implemented the checks, and then update the list below:
+      const enforced = ['env', 'hostRules'];
+      const flagged = getOptions()
+        .filter((option) => option.requiresCheckAtTrustBoundary)
+        .map((option) => option.name)
+        .sort();
+      expect(flagged).toEqual([...enforced].sort());
+    });
+  });
 });
