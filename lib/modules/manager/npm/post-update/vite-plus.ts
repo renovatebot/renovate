@@ -36,11 +36,14 @@ const VITE_PLUS_NODE_CONSTRAINT = '^20.19.0 || ^22.18.0 || >=24.11.0';
 const VP_SYNC_VERSIONS_UNAVAILABLE =
   'CONTAINERBASE_VP_SYNC_VERSIONS_UNAVAILABLE';
 const overrideParentDelimiter = regEx(/[^ |@]>/);
+const npmAliasPattern = regEx(
+  /^npm:(?<packageName>(?:@[^/]+\/)?[^@]+)@(?<version>.+)$/,
+);
 
 const Replacement = z
   .object({
     path: z.string().min(1),
-    kind: z.enum(['packageJson', 'pnpmWorkspace']),
+    kind: z.enum(['packageJson', 'pnpmWorkspace', 'yarnRc']),
     before: z.string().max(MAX_MANIFEST_BYTES),
     after: z.string().max(MAX_MANIFEST_BYTES),
   })
@@ -78,6 +81,16 @@ interface WorkspacePackageFiles {
 interface ValidationState {
   changedValues: number;
   vitestVersion?: string;
+}
+
+interface NpmAlias {
+  packageName: string;
+  version: string;
+}
+
+interface DependencyVersionChange {
+  packageName: string;
+  version: string;
 }
 
 interface MutableUpgrade extends Upgrade<NpmManagerData> {
@@ -187,7 +200,7 @@ function getRelevantUpgrades(
 ): Upgrade<NpmManagerData>[] {
   return coerceArray(config.upgrades).filter(
     (upgrade) =>
-      isManagedPackage(upgrade.depName) &&
+      isManagedPackage(upgrade.packageName ?? upgrade.depName) &&
       getUpgradeRoot(upgrade, packageRootByPath) === workspace.root,
   );
 }
@@ -294,6 +307,8 @@ async function collectManifestSnapshots(
   for (const packageFile of workspace.packageFiles) {
     if (packageFile.packageFile?.endsWith('package.json')) {
       paths.set(packageFile.packageFile, 'packageJson');
+    } else if (packageFile.packageFile?.endsWith('.yarnrc.yml')) {
+      paths.set(packageFile.packageFile, 'yarnRc');
     }
   }
   const pnpmWorkspacePath = upath.join(
@@ -391,15 +406,73 @@ function dependencyNameForPath(
     return undefined;
   }
 
-  if (path.length === 2 && ['catalog', 'overrides'].includes(path[0])) {
-    return path[0] === 'overrides'
-      ? extractOverrideTargetName(path[1])
-      : path[1];
+  if (path.length === 2 && path[0] === 'catalog') {
+    return path[1];
   }
   if (path.length === 3 && path[0] === 'catalogs') {
     return path[2];
   }
+  if (
+    kind === 'pnpmWorkspace' &&
+    path.length === 2 &&
+    path[0] === 'overrides'
+  ) {
+    return extractOverrideTargetName(path[1]);
+  }
   return undefined;
+}
+
+function parseNpmAlias(value: string): NpmAlias | undefined {
+  const match = npmAliasPattern.exec(value);
+  if (!match?.groups) {
+    return undefined;
+  }
+  return {
+    packageName: match.groups.packageName,
+    version: match.groups.version,
+  };
+}
+
+function dependencyVersionChange(
+  kind: ManifestKind,
+  path: readonly string[],
+  before: unknown,
+  after: unknown,
+): DependencyVersionChange | undefined {
+  if (!isString(before) || !isString(after)) {
+    return undefined;
+  }
+
+  const declaredPackageName = dependencyNameForPath(kind, path);
+  if (!declaredPackageName) {
+    return undefined;
+  }
+
+  const beforeAlias = parseNpmAlias(before);
+  const afterAlias = parseNpmAlias(after);
+  if (beforeAlias || afterAlias) {
+    if (
+      !beforeAlias ||
+      !afterAlias ||
+      beforeAlias.packageName !== afterAlias.packageName ||
+      !isManagedPackage(afterAlias.packageName) ||
+      !npmVersioning.isVersion(afterAlias.version)
+    ) {
+      return undefined;
+    }
+    return {
+      packageName: afterAlias.packageName,
+      version: afterAlias.version,
+    };
+  }
+
+  if (
+    !isManagedPackage(declaredPackageName) ||
+    !npmVersioning.isVersion(after)
+  ) {
+    return undefined;
+  }
+  return { packageName: declaredPackageName, version: after };
 }
 
 function validateChangedValue(
@@ -410,23 +483,18 @@ function validateChangedValue(
   vitePlusVersion: string,
   state: ValidationState,
 ): void {
-  const packageName = dependencyNameForPath(kind, path);
-  if (
-    !packageName ||
-    !isManagedPackage(packageName) ||
-    !isString(before) ||
-    !isString(after) ||
-    !npmVersioning.isVersion(after)
-  ) {
+  const change = dependencyVersionChange(kind, path, before, after);
+  if (!change) {
     throw new Error(
       `Vite+ attempted an unsupported manifest change at ${path.join('.')}`,
     );
   }
+  const { packageName, version } = change;
 
   if (
     (packageName === VITE_PLUS_PACKAGE_NAME ||
       packageName === VITE_PLUS_CORE_PACKAGE_NAME) &&
-    after !== vitePlusVersion
+    version !== vitePlusVersion
   ) {
     throw new Error(
       `Vite+ returned an unexpected Vite+ version for ${packageName}`,
@@ -434,8 +502,8 @@ function validateChangedValue(
   }
 
   if (isVitestPackage(packageName)) {
-    state.vitestVersion ??= after;
-    if (state.vitestVersion !== after) {
+    state.vitestVersion ??= version;
+    if (state.vitestVersion !== version) {
       throw new Error('Vite+ returned inconsistent Vitest ecosystem versions');
     }
   }
@@ -601,9 +669,10 @@ function updateUpgradeMetadata(
 ): void {
   const noOpUpgrades = new Set<Upgrade<NpmManagerData>>();
   for (const upgrade of upgrades as MutableUpgrade[]) {
+    const packageName = upgrade.packageName ?? upgrade.depName;
     const version =
-      upgrade.depName === VITE_PLUS_PACKAGE_NAME ||
-      upgrade.depName === VITE_PLUS_CORE_PACKAGE_NAME
+      packageName === VITE_PLUS_PACKAGE_NAME ||
+      packageName === VITE_PLUS_CORE_PACKAGE_NAME
         ? vitePlusVersion
         : vitestVersion;
     if (!version) {
