@@ -60,7 +60,22 @@ describe('modules/manager/npm/utils', () => {
         version: '1.0.0',
       };
       const lockFileComposed = composeLockFile(lockFile, '  ');
-      expect(lockFileComposed).toMatchSnapshot();
+      expect(lockFileComposed).toMatchInlineSnapshot(`
+        "{
+          "lockfileVersion": 2,
+          "name": "lockfile-parsing",
+          "packages": {
+            "": {
+              "license": "ISC",
+              "name": "lockfile-parsing",
+              "version": "1.0.0"
+            }
+          },
+          "requires": true,
+          "version": "1.0.0"
+        }
+        "
+      `);
     });
 
     it('adds trailing newline to match npms behavior and avoid diffs', () => {
