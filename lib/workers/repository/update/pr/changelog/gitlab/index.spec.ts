@@ -262,7 +262,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         matchHost: 'https://gitlab-enterprise.example.com/',
         token: 'abc',
       });
-      process.env.GITHUB_ENDPOINT = '';
+      vi.stubEnv('GITHUB_ENDPOINT', '');
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -295,7 +295,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         matchHost: 'https://git.test.com/',
         token: 'abc',
       });
-      process.env.GITHUB_ENDPOINT = '';
+      vi.stubEnv('GITHUB_ENDPOINT', '');
       expect(
         await getChangeLogJSON({
           ...upgrade,

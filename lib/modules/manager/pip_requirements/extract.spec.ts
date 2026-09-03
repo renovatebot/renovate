@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { extractPackageFile } from './index.ts';
@@ -15,25 +16,18 @@ const requirementsGitPackages = Fixtures.get('requirements-git-packages.txt');
 
 describe('modules/manager/pip_requirements/extract', () => {
   beforeEach(() => {
-    delete process.env.PIP_TEST_TOKEN;
+    vi.stubEnv('PIP_TEST_TOKEN', undefined);
     GlobalConfig.reset();
   });
 
   afterEach(() => {
-    delete process.env.PIP_TEST_TOKEN;
+    vi.stubEnv('PIP_TEST_TOKEN', undefined);
     GlobalConfig.reset();
   });
 
   describe('extractPackageFile()', () => {
-    const OLD_ENV = process.env;
-
     beforeEach(() => {
-      process.env = { ...OLD_ENV };
-      delete process.env.PIP_INDEX_URL;
-    });
-
-    afterEach(() => {
-      process.env = OLD_ENV;
+      vi.stubEnv('PIP_INDEX_URL', undefined);
     });
 
     it('returns null for empty', () => {
@@ -48,8 +42,10 @@ describe('modules/manager/pip_requirements/extract', () => {
     });
 
     it('extracts dependencies with --index-url short code', () => {
-      const requirements = `-i http://example.com/private-pypi/
-some-package==0.3.1`;
+      const requirements = codeBlock`
+        -i http://example.com/private-pypi/
+        some-package==0.3.1
+      `;
 
       const res = extractPackageFile(requirements);
 
@@ -66,8 +62,10 @@ some-package==0.3.1`;
     });
 
     it('extracts --requirement short code option', () => {
-      const requirements = `-r base.txt
-some-package==0.3.1`;
+      const requirements = codeBlock`
+        -r base.txt
+        some-package==0.3.1
+      `;
 
       const res = extractPackageFile(requirements);
 
@@ -77,8 +75,10 @@ some-package==0.3.1`;
     });
 
     it('extracts --constraints short code option', () => {
-      const requirements = `-c constrain.txt
-some-package==0.3.1`;
+      const requirements = codeBlock`
+        -c constrain.txt
+        some-package==0.3.1
+      `;
 
       const res = extractPackageFile(requirements);
 
@@ -153,7 +153,7 @@ some-package==0.3.1`;
     });
 
     it('should not replace env vars in low trust mode', () => {
-      process.env.PIP_TEST_TOKEN = 'its-a-secret';
+      vi.stubEnv('PIP_TEST_TOKEN', 'its-a-secret');
       const res = extractPackageFile(requirements7);
       expect(res?.additionalRegistryUrls).toEqual([
         'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
@@ -164,7 +164,7 @@ some-package==0.3.1`;
     });
 
     it('should replace env vars in high trust mode', () => {
-      process.env.PIP_TEST_TOKEN = 'its-a-secret';
+      vi.stubEnv('PIP_TEST_TOKEN', 'its-a-secret');
       GlobalConfig.set({ exposeAllEnv: true });
       const res = extractPackageFile(requirements7);
       expect(res?.additionalRegistryUrls).toEqual([

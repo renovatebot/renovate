@@ -9,16 +9,19 @@ import { logger } from '../../../logger/index.ts';
 import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import { get } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { detectSemanticCommits } from '../../../util/git/semantic.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
+import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
 
-const upper = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.substring(1);
+function upper(str: string): string {
+  return str.charAt(0).toUpperCase() + str.substring(1);
+}
 
 export function sanitizeDepName(depName: string): string {
   return depName
@@ -98,7 +101,7 @@ export async function flattenUpdates(
         packagePath.splice(-1, 1);
       }
       if (packagePath.length > 0) {
-        packageFileConfig.parentDir = packagePath[packagePath.length - 1];
+        packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';
@@ -112,6 +115,17 @@ export async function flattenUpdates(
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates!) {
+            if (
+              update.updateType === 'replacement' &&
+              update.newName &&
+              replacementAlreadyExists(packageFile.deps, dep, update.newName)
+            ) {
+              logger.debug(
+                { fileName: packageFile.packageFile },
+                `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile.packageFile}`,
+              );
+              continue;
+            }
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
             if (updateConfig.updateType) {
@@ -196,7 +210,7 @@ export async function flattenUpdates(
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles ?? []) {
+        for (const lockFile of coerceArray(packageFileConfig.lockFiles)) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]

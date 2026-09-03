@@ -35,7 +35,7 @@ function execSnapshot(
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
       const val = v
-        .replace(regEx(/\\(\w)/g), '/$1')
+        .replace(regEx(/\\(?<char>\w)/g), '/$<char>')
         .replace(regEx(/^[A-Z]:\//), '/') // replace windows paths
         .replace(regEx(/"[A-Z]:\//g), '"/') // replace windows paths
         .replace(cwd, '/root/project');
@@ -75,6 +75,7 @@ export function mockExecSequence(execResults: ExecResult[]): ExecSnapshots {
 }
 
 const basicEnvMock = {
+  CI: 'true',
   HTTP_PROXY: 'http://example.com',
   HTTPS_PROXY: 'https://example.com',
   NO_PROXY: 'localhost',
@@ -100,9 +101,3 @@ export const envMock = {
   full: fullEnvMock,
   filtered: filteredEnvMock,
 };
-
-// reset exec mock, otherwise there can be some left over from previous test
-beforeEach(() => {
-  // maybe not mocked
-  exec.mockReset?.();
-});

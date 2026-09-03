@@ -75,7 +75,7 @@ export interface NpmLockFiles {
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
+  pnpmLockFile?: string;
   npmLock?: string;
 }
 
@@ -85,4 +85,9 @@ export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
   parents?: string[];
   yarnZeroInstall?: boolean;
   workspacesPackages?: string[] | string;
+}
+
+export interface NpmrcResult {
+  npmrc: string | undefined;
+  npmrcFileName: string | null;
 }

@@ -1,22 +1,20 @@
 import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
+import { codeBlock } from 'common-tags';
 import * as _googleAuth from 'google-auth-library';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
 
-const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
@@ -27,10 +25,130 @@ const gcrUrl = 'https://eu.gcr.io/v2';
 const garUrl = 'https://europe-docker.pkg.dev/v2';
 const dockerHubUrl = 'https://hub.docker.com/v2/repositories';
 const amazonHosts = [
-  { host: '123456789.dkr.ecr.us-east-1.amazonaws.com' },
-  { host: '123456789.dkr.ecr-fips.us-east-1.amazonaws.com' },
-  { host: '123456789.dkr-ecr.us-east-1.on.aws' },
-  { host: '123456789.dkr-ecr-fips.us-east-1.on.aws' },
+  // partition: aws
+  { host: '123456789.dkr.ecr.us-east-1.amazonaws.com', region: 'us-east-1' },
+  {
+    host: '123456789.dkr.ecr-fips.us-east-1.amazonaws.com',
+    region: 'us-east-1',
+  },
+  { host: '123456789.dkr-ecr.us-east-1.on.aws', region: 'us-east-1' },
+  { host: '123456789.dkr-ecr-fips.us-east-1.on.aws', region: 'us-east-1' },
+  // partition: aws-cn
+  {
+    host: '123456789.dkr.ecr.cn-north-1.amazonaws.com.cn',
+    region: 'cn-north-1',
+  },
+  {
+    host: '123456789.dkr.ecr-fips.cn-north-1.amazonaws.com.cn',
+    region: 'cn-north-1',
+  },
+  {
+    host: '123456789.dkr-ecr.cn-north-1.on.amazonwebservices.com.cn',
+    region: 'cn-north-1',
+  },
+  {
+    host: '123456789.dkr-ecr-fips.cn-north-1.on.amazonwebservices.com.cn',
+    region: 'cn-north-1',
+  },
+  // partition: aws-eusc
+  {
+    host: '123456789.dkr.ecr.eusc-de-east-1.amazonaws.eu',
+    region: 'eusc-de-east-1',
+  },
+  {
+    host: '123456789.dkr.ecr-fips.eusc-de-east-1.amazonaws.eu',
+    region: 'eusc-de-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr.eusc-de-east-1.on.amazonwebservices.eu',
+    region: 'eusc-de-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr-fips.eusc-de-east-1.on.amazonwebservices.eu',
+    region: 'eusc-de-east-1',
+  },
+  // partition: aws-iso
+  {
+    host: '123456789.dkr.ecr.us-iso-east-1.c2s.ic.gov',
+    region: 'us-iso-east-1',
+  },
+  {
+    host: '123456789.dkr.ecr-fips.us-iso-east-1.c2s.ic.gov',
+    region: 'us-iso-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr.us-iso-east-1.on.aws.ic.gov',
+    region: 'us-iso-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr-fips.us-iso-east-1.on.aws.ic.gov',
+    region: 'us-iso-east-1',
+  },
+  // partition: aws-iso-b
+  {
+    host: '123456789.dkr.ecr.us-isob-east-1.sc2s.sgov.gov',
+    region: 'us-isob-east-1',
+  },
+  {
+    host: '123456789.dkr.ecr-fips.us-isob-east-1.sc2s.sgov.gov',
+    region: 'us-isob-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr.us-isob-east-1.on.aws.scloud',
+    region: 'us-isob-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr-fips.us-isob-east-1.on.aws.scloud',
+    region: 'us-isob-east-1',
+  },
+  // partition: aws-iso-e
+  {
+    host: '123456789.dkr.ecr.eu-isoe-west-1.scloud.adc-e.uk',
+    region: 'eu-isoe-west-1',
+  },
+  {
+    host: '123456789.dkr.ecr-fips.eu-isoe-west-1.cloud.adc-e.uk',
+    region: 'eu-isoe-west-1',
+  },
+  {
+    host: '123456789.dkr-ecr.eu-isoe-west-1.on.cloud-aws.adc-e.uk',
+    region: 'eu-isoe-west-1',
+  },
+  {
+    host: '123456789.dkr-ecr-fips.eu-isoe-west-1.on.cloud-aws.adc-e.uk',
+    region: 'eu-isoe-west-1',
+  },
+  // partition: aws-iso-f
+  {
+    host: '123456789.dkr.ecr.us-isof-east-1.csp.hci.ic.gov',
+    region: 'us-isof-east-1',
+  },
+  {
+    host: '123456789.dkr.ecr-fips.us-isof-east-1.csp.hci.ic.gov',
+    region: 'us-isof-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr.us-isof-east-1.on.aws.hci.ic.gov',
+    region: 'us-isof-east-1',
+  },
+  {
+    host: '123456789.dkr-ecr-fips.us-isof-east-1.on.aws.hci.ic.gov',
+    region: 'us-isof-east-1',
+  },
+  // partition: aws-us-gov
+  {
+    host: '123456789.dkr.ecr.us-gov-east-1.amazonaws.com',
+    region: 'us-gov-east-1',
+  },
+  {
+    host: '123456789.dkr.ecr-fips.us-gov-east-1.amazonaws.com',
+    region: 'us-gov-east-1',
+  },
+  { host: '123456789.dkr-ecr.us-gov-east-1.on.aws', region: 'us-gov-east-1' },
+  {
+    host: '123456789.dkr-ecr-fips.us-gov-east-1.on.aws',
+    region: 'us-gov-east-1',
+  },
 ];
 
 function mockEcrAuthResolve(
@@ -47,12 +165,14 @@ describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
     ecrMock.reset();
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'some-username',
       password: 'some-password',
     });
-    hostRules.hosts.mockReturnValue([]);
-    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
+    vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', undefined);
+    vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', undefined);
+    vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
+    vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
   });
 
   describe('getDigest', () => {
@@ -103,7 +223,7 @@ describe('modules/datasource/docker/index', () => {
         )
         .reply(200, { token: 'some-token' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -128,24 +248,26 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/some-new-value')
         .reply(
           200,
-          `{
-          "signatures": [
-             {
-                "header": {
-                   "jwk": {
-                      "crv": "P-256",
-                      "kid": "DB2X:GSG2:72H3:AE3R:KCMI:Y77E:W7TF:ERHK:V5HR:JJ2Y:YMS6:HFGJ",
-                      "kty": "EC",
-                      "x": "jyr9-xZBorSC9fhqNsmfU_Ud31wbaZ-bVGz0HmySvbQ",
-                      "y": "vkE6qZCCvYRWjSUwgAOvibQx_s8FipYkAiHS0VnAFNs"
-                   },
-                   "alg": "ES256"
-                },
-                "signature": "yUXzEiPzg_SlQlqGW43H6oMgYuz30zSkj2qauQc_kbyI9RQHucYAKs_lBSFaQdDrtgW-1iDZSP9eExKP8ANSyA",
-                "protected": "eyJmb3JtYXRMZW5ndGgiOjgzMDAsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAxOC0wMi0wNVQxNDoyMDoxOVoifQ"
-             }
-          ]
-       }`,
+          codeBlock`
+            {
+                      "signatures": [
+                         {
+                            "header": {
+                               "jwk": {
+                                  "crv": "P-256",
+                                  "kid": "DB2X:GSG2:72H3:AE3R:KCMI:Y77E:W7TF:ERHK:V5HR:JJ2Y:YMS6:HFGJ",
+                                  "kty": "EC",
+                                  "x": "jyr9-xZBorSC9fhqNsmfU_Ud31wbaZ-bVGz0HmySvbQ",
+                                  "y": "vkE6qZCCvYRWjSUwgAOvibQx_s8FipYkAiHS0VnAFNs"
+                               },
+                               "alg": "ES256"
+                            },
+                            "signature": "yUXzEiPzg_SlQlqGW43H6oMgYuz30zSkj2qauQc_kbyI9RQHucYAKs_lBSFaQdDrtgW-1iDZSP9eExKP8ANSyA",
+                            "protected": "eyJmb3JtYXRMZW5ndGgiOjgzMDAsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAxOC0wMi0wNVQxNDoyMDoxOVoifQ"
+                         }
+                      ]
+                   }
+          `,
           {
             'content-type': 'text/plain',
           },
@@ -173,7 +295,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200)
         .head('/library/some-dep/manifests/latest')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
-      hostRules.find.mockReturnValue({ insecureRegistry: true });
+      hostRules.clear();
+      hostRules.add({ insecureRegistry: true });
       const res = await getDigest({
         datasource: 'docker',
         packageName: 'some-dep',
@@ -249,7 +372,7 @@ describe('modules/datasource/docker/index', () => {
 
     it.each(amazonHosts)(
       'passes credentials to ECR client for host $host',
-      async ({ host }) => {
+      async ({ host, region }) => {
         httpMock
           .scope(`https://${host}/v2`)
           .get('/')
@@ -276,7 +399,7 @@ describe('modules/datasource/docker/index', () => {
         ).toBe('some-digest');
 
         const ecr = ecrMock.call(0).thisValue as ECRClient;
-        expect(await ecr.config.region()).toBe('us-east-1');
+        expect(await ecr.config.region()).toBe(region);
         expect(await ecr.config.credentials()).toEqual({
           $source: {
             CREDENTIALS_CODE: 'e',
@@ -289,7 +412,7 @@ describe('modules/datasource/docker/index', () => {
 
     it.each(amazonHosts)(
       'passes session token to ECR client for host $host',
-      async ({ host }) => {
+      async ({ host, region }) => {
         httpMock
           .scope(`https://${host}/v2`)
           .get('/')
@@ -301,7 +424,8 @@ describe('modules/datasource/docker/index', () => {
           .matchHeader('authorization', 'Basic test_token')
           .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-        hostRules.find.mockReturnValue({
+        hostRules.clear();
+        hostRules.add({
           username: 'some-username',
           password: 'some-password',
           token: 'some-session-token',
@@ -322,7 +446,7 @@ describe('modules/datasource/docker/index', () => {
         ).toBe('some-digest');
 
         const ecr = ecrMock.call(0).thisValue as ECRClient;
-        expect(await ecr.config.region()).toBe('us-east-1');
+        expect(await ecr.config.region()).toBe(region);
         expect(await ecr.config.credentials()).toEqual({
           $source: {
             CREDENTIALS_CODE: 'e',
@@ -386,7 +510,7 @@ describe('modules/datasource/docker/index', () => {
     it.each(amazonHosts)(
       'continues without token if ECR authentication fails for host $host',
       async ({ host }) => {
-        hostRules.find.mockReturnValue({});
+        hostRules.clear();
         httpMock.scope(`https://${host}/v2`).get('/').reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         });
@@ -416,7 +540,8 @@ describe('modules/datasource/docker/index', () => {
           .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
           .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-        hostRules.find.mockReturnValue({
+        hostRules.clear();
+        hostRules.add({
           username: 'AWS',
           password: 'some-password',
         });
@@ -456,7 +581,7 @@ describe('modules/datasource/docker/index', () => {
         ),
       );
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -491,7 +616,7 @@ describe('modules/datasource/docker/index', () => {
         ),
       );
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -581,7 +706,7 @@ describe('modules/datasource/docker/index', () => {
         .head('/google.com/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -603,7 +728,7 @@ describe('modules/datasource/docker/index', () => {
         .head('/some-project/some-repo/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -617,7 +742,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('continues without token if Google ADC fails for gcr', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock.scope(gcrUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
@@ -641,7 +766,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('continues without token if Google ADC fails for gar', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock.scope(garUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
@@ -1434,7 +1559,7 @@ describe('modules/datasource/docker/index', () => {
           'docker-content-digest': newDigest,
         });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -1537,7 +1662,7 @@ describe('modules/datasource/docker/index', () => {
           'docker-content-digest': newDigest,
         });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -1611,7 +1736,7 @@ describe('modules/datasource/docker/index', () => {
 
   describe('getReleases', () => {
     it('returns null if no token', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1633,21 +1758,11 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/node/tags/list?n=10000')
-        .reply(
-          200,
-          { tags },
-          {
-            link: '<https://api.github.com/user/9287/repos?page=3&per_page=1000>; rel="next", ',
-          },
-        )
+        .reply(200, { tags }, {})
         .get('/')
         .reply(200)
-        .get('/node/manifests/latest')
+        .get('/node/manifests/1.0.0')
         .reply(200);
-      httpMock
-        .scope('https://api.github.com')
-        .get('/user/9287/repos?page=3&per_page=1000')
-        .reply(200, { tags: ['latest'] }, {});
       const config = {
         datasource: DockerDatasource.id,
         packageName: 'node',
@@ -1657,9 +1772,105 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    it('does not follow pagination links to a different origin', async () => {
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags },
+          {
+            link: '<https://attacker.example.com/v2/steal/tags/list?n=10000>; rel="next", ',
+          },
+        )
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/1.0.0')
+        .reply(200);
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+        registryUrls: ['https://registry.company.com'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(1);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          registryHost: 'https://registry.company.com',
+          nextUrl: 'https://attacker.example.com/v2/steal/tags/list?n=10000',
+        },
+        'Ignoring cross-origin or invalid Docker registry tags pagination link',
+      );
+    });
+
+    it('follows cross-origin tags pagination when the datasource is opted in', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          {
+            link: '<https://mirror.example.com/v2/node/tags/list?n=10000&last=1.0.0>; rel="next", ',
+          },
+        )
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/2.0.0')
+        .reply(200);
+      httpMock
+        .scope('https://mirror.example.com/v2')
+        .get('/node/tags/list?n=10000&last=1.0.0')
+        .reply(200, { tags: ['2.0.0'] }, {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+        registryUrls: ['https://registry.company.com'],
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+      ]);
+      expect(logger.logger.once.warn).toHaveBeenCalledOnce();
+    });
+
+    it('does not opt docker in when only another datasource is opted in', async () => {
+      vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          {
+            link: '<https://attacker.example.com/v2/steal/tags/list?n=10000>; rel="next", ',
+          },
+        )
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/1.0.0')
+        .reply(200);
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+        registryUrls: ['https://registry.company.com'],
+      });
+      expect(res?.releases).toHaveLength(1);
+    });
+
     it('uses custom max pages', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       GlobalConfig.set({ dockerMaxPages: 2 });
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -2283,6 +2494,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2329,6 +2541,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses custom page limit for Docker hub repository tags', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       GlobalConfig.set({ dockerMaxPages: 2 });
       httpMock
         .scope(dockerHubUrl)
@@ -2378,7 +2591,95 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    it('does not follow Docker Hub tags pagination to a different origin', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: 'https://attacker.example.com/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+          results: [
+            {
+              id: 5,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          dockerRepository: 'library/node',
+          nextUrl:
+            'https://attacker.example.com/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+        },
+        'Ignoring cross-origin or invalid Docker Hub tags pagination link',
+      );
+    });
+
+    it('follows cross-origin Docker Hub pagination when the datasource is opted in', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 2,
+          next: 'https://mirror.example.com/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+          results: [
+            {
+              id: 1,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+            },
+          ],
+        });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get(
+          '/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+        )
+        .reply(200, {
+          count: 2,
+          next: null,
+          results: [
+            {
+              id: 2,
+              last_updated: '2022-01-01T00:00:00.000Z',
+              name: '2.0.0',
+              tag_last_pushed: '2022-01-01T00:00:00.000Z',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+      ]);
+      expect(logger.logger.once.warn).toHaveBeenCalledOnce();
+    });
+
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -2407,6 +2708,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2453,6 +2755,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('sets releaseTimestamp on digests from Docker Hub', async () => {
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2530,7 +2833,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null on error', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2545,7 +2848,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('strips trailing slash from registry', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2572,8 +2875,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null if no auth', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
-      hostRules.find.mockReturnValue({});
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
+      hostRules.clear();
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -3185,6 +3488,60 @@ describe('modules/datasource/docker/index', () => {
       );
     });
 
+    it('uses descriptor annotations for docker hub library images', async () => {
+      httpMock
+        .scope('https://index.docker.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/library/convertigo/manifests/8.4.3')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: [
+            {
+              digest: 'sha256:attestation',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'unknown',
+                os: 'unknown',
+              },
+              annotations: {
+                'vnd.docker.reference.type': 'attestation-manifest',
+              },
+            },
+            {
+              digest: 'sha256:amd64',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+              annotations: {
+                'org.opencontainers.image.source':
+                  'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+                'org.opencontainers.image.revision':
+                  '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+                'org.opencontainers.image.version': '8.4.3',
+              },
+            },
+          ],
+        });
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'library/convertigo',
+          '8.4.3',
+        ),
+      ).toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+        'org.opencontainers.image.revision':
+          '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+        'org.opencontainers.image.version': '8.4.3',
+      });
+    });
+
     it('uses annotations for docker hub', async () => {
       httpMock
         .scope('https://index.docker.io/v2')
@@ -3222,7 +3579,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('skips docker hub labels', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
 
       httpMock.scope('https://index.docker.io/v2');
 
@@ -3236,7 +3593,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('does not skip non docker hub registry labels', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
 
       httpMock
         .scope('https://ghcr.io/v2')

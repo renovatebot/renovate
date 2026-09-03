@@ -28,16 +28,10 @@ const pyproject12toml = Fixtures.get('pyproject.12.toml');
 describe('modules/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
-    const OLD_ENV = process.env;
 
     beforeEach(() => {
       filename = '';
-      process.env = { ...OLD_ENV };
-      delete process.env.PIP_INDEX_URL;
-    });
-
-    afterEach(() => {
-      process.env = OLD_ENV;
+      vi.stubEnv('PIP_INDEX_URL', undefined);
     });
 
     it('returns null for empty', async () => {

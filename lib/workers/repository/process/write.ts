@@ -144,11 +144,21 @@ export async function writeUpdates(
       .join(', ')}`,
   );
 
-  const concurrentPrsCount = await getConcurrentPrsCount(config, branches);
-  setCount('ConcurrentPRs', concurrentPrsCount);
+  // vulnerability alerts are counted separately so that they get their own limit budget
+  const vulnerabilityBranches = branches.filter((b) => b.isVulnerabilityAlert);
+  const otherBranches = branches.filter((b) => !b.isVulnerabilityAlert);
 
-  const concurrentBranchesCount = await getConcurrentBranchesCount(branches);
-  setCount('Branches', concurrentBranchesCount);
+  setCount('ConcurrentPRs', await getConcurrentPrsCount(config, otherBranches));
+  setCount(
+    'VulnerabilityConcurrentPRs',
+    await getConcurrentPrsCount(config, vulnerabilityBranches),
+  );
+
+  setCount('Branches', await getConcurrentBranchesCount(otherBranches));
+  setCount(
+    'VulnerabilityBranches',
+    await getConcurrentBranchesCount(vulnerabilityBranches),
+  );
 
   const prsThisHourCount = await getPrHourlyCount(config);
   setCount('HourlyPRs', prsThisHourCount);
@@ -206,7 +216,9 @@ export async function writeUpdates(
           return 'automerged';
         }
         if (!branchExisted && (await scm.branchExists(branch.branchName))) {
-          incCountValue('Branches');
+          incCountValue(
+            branch.isVulnerabilityAlert ? 'VulnerabilityBranches' : 'Branches',
+          );
         }
       },
       {

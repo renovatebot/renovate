@@ -1,8 +1,8 @@
 import type { MockInstance } from 'vitest';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
-import type { RequiredConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import * as env from './env.ts';
 import type { ParseConfigOptions } from './types.ts';
 
@@ -35,7 +35,7 @@ describe('workers/global/config/parse/env', () => {
       );
     });
 
-    delete process.env.RENOVATE_CONFIG_MIGRATION;
+    vi.stubEnv('RENOVATE_CONFIG_MIGRATION', undefined);
 
     it('supports list single', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a' };
@@ -88,7 +88,7 @@ describe('workers/global/config/parse/env', () => {
       expect(res).toMatchObject({ hostRules: [{ foo: 'bar' }] });
     });
 
-    test.each`
+    it.each`
       envArg                                           | config
       ${{ RENOVATE_RECREATE_CLOSED: 'true' }}          | ${{ recreateWhen: 'always' }}
       ${{ RENOVATE_RECREATE_CLOSED: 'false' }}         | ${{ recreateWhen: 'auto' }}
@@ -402,7 +402,7 @@ describe('workers/global/config/parse/env', () => {
       if (envName === '') {
         continue;
       }
-      const existing = envNameToOptions.get(envName) ?? [];
+      const existing = coerceArray(envNameToOptions.get(envName));
       existing.push(option.name);
       envNameToOptions.set(envName, existing);
     }
@@ -464,7 +464,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean true', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'true' as RequiredConfig,
+        RENOVATE_REQUIRE_CONFIG: 'true',
       };
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('required');
@@ -472,7 +472,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean false', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'false' as RequiredConfig,
+        RENOVATE_REQUIRE_CONFIG: 'false',
       };
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('optional');

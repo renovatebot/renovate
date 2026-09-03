@@ -129,8 +129,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(res.lockFile).toMatchSnapshot('lockFile');
+    expect(execSnapshots).toMatchSnapshot('execSnapshots');
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -396,7 +396,38 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('does not run npm install four times for lock file maintenance with npmInstallTwice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValue('{}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions: ['npmInstallTwice'] },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
   });
 
   it('works for docker mode', async () => {
@@ -425,16 +456,19 @@ describe('modules/manager/npm/post-update/npm', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
+          'npm install --package-lock-only --no-audit ' +
+          '&& ' +
           'npm install --package-lock-only --no-audit' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -462,6 +496,9 @@ describe('modules/manager/npm/post-update/npm', () => {
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
     ]);
   });
 
@@ -484,6 +521,9 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },

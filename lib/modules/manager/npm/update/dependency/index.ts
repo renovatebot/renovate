@@ -1,7 +1,7 @@
 import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../../../../../logger/index.ts';
-import { escapeRegExp, regEx } from '../../../../../util/regex.ts';
+import { regEx } from '../../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../../util/string.ts';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types.ts';
 import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
@@ -83,7 +83,7 @@ function replaceAsString(
   const searchString = `"${oldValue}"`;
   let newString = `"${newValue}"`;
 
-  const escapedDepName = escapeRegExp(depName);
+  const escapedDepName = RegExp.escape(depName);
   const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
   const match = patchRe.exec(oldValue);
   if (match && depType === 'resolutions') {
@@ -176,7 +176,10 @@ export function updateDependency({
     } else {
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
-    if (oldVersion === newValue) {
+    if (
+      oldVersion === newValue &&
+      (!upgrade.newName || upgrade.newName === depName)
+    ) {
       logger.trace('Version is already updated');
       return fileContent;
     }
@@ -203,7 +206,7 @@ export function updateDependency({
         newValue!,
         overrideDepParents,
       );
-      if (upgrade.newName) {
+      if (upgrade.newName && upgrade.newName !== depName) {
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent,
@@ -254,7 +257,7 @@ export function updateDependency({
           // TODO #22198
           newValue!,
         );
-        if (upgrade.newName) {
+        if (upgrade.newName && upgrade.newName !== depName) {
           if (depKey === `**/${depName}`) {
             // handles the case where a replacement is in a resolution
             upgrade.newName = `**/${upgrade.newName}`;
@@ -301,7 +304,7 @@ function overrideDepPosition(
   overrideDepName: string;
 } {
   // get override dep position when its nested in an object
-  const lastParent = parents[parents.length - 1];
+  const lastParent = parents.at(-1);
   let overrideDep: OverrideDependency = overrideBlock;
   for (const parent of parents) {
     // v8 ignore else -- TODO: add test #40625

@@ -5,6 +5,7 @@ import {
   REPOSITORY_BLOCKED,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
@@ -89,7 +90,7 @@ export function getMergeMethod(
 export const API_PATH = '/api/v1';
 
 export const DRAFT_PREFIX = 'WIP: ';
-const reconfigurePrRegex = regEx(/reconfigure$/g);
+const reconfigurePrRegex = regEx(/reconfigure$/);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
   if (!data) {
@@ -124,7 +125,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title = title.substring(DRAFT_PREFIX.length);
     isDraft = true;
   }
-  const labels = (data?.labels ?? []).map((l) => l.name);
+  const labels = coerceArray(data?.labels).map((l) => l.name);
 
   return {
     labels,

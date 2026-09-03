@@ -767,7 +767,7 @@ describe('util/package-rules/index', () => {
         {
           matchSourceUrls: [
             'https://github.com/foo/bar',
-            'https://github.com/facebook/react',
+            'https://github.com/react/react',
           ],
           // @ts-expect-error -- testing
           x: 1,
@@ -778,7 +778,7 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       packageName: 'a',
       updateType: 'patch' as UpdateType,
-      sourceUrl: 'https://github.com/facebook/react-native',
+      sourceUrl: 'https://github.com/react/react-native',
     };
     const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -1529,5 +1529,57 @@ describe('util/package-rules/index', () => {
     };
     const res = await applyPackageRules(config);
     expect(res.sourceUrl).toBe('https://github.com/hashicorp/aws');
+  });
+
+  describe('packageRules array handling', () => {
+    it('returns the input packageRules array without re-cloning it', async () => {
+      const config: TestConfig = {
+        packageName: 'a',
+        packageRules: [
+          {
+            matchPackageNames: ['a'],
+            // @ts-expect-error -- testing
+            x: 2,
+          },
+        ],
+      };
+      const res = await applyPackageRules(config);
+      expect(res.x).toBe(2);
+      expect(res.packageRules).toBe(config.packageRules);
+    });
+
+    it('does not add a packageRules key when the input has none', async () => {
+      const config: PackageRuleInputConfig = { packageName: 'a' };
+      const res = await applyPackageRules(config);
+      expect(res.packageRules).toBeUndefined();
+    });
+
+    it('keeps an empty packageRules array', async () => {
+      const config: PackageRuleInputConfig = {
+        packageName: 'a',
+        packageRules: [],
+      };
+      const res = await applyPackageRules(config);
+      expect(res.packageRules).toBe(config.packageRules);
+    });
+
+    it('appends nested packageRules carried by an applied rule', async () => {
+      const nestedRule = {
+        matchPackageNames: ['b'],
+        y: 3,
+      };
+      const config: TestConfig = {
+        packageName: 'a',
+        packageRules: [
+          {
+            matchPackageNames: ['a'],
+            packageRules: [nestedRule],
+          },
+        ],
+      };
+      const res = await applyPackageRules(config);
+      expect(res.packageRules).toHaveLength(2);
+      expect(res.packageRules![1]).toEqual(nestedRule);
+    });
   });
 });

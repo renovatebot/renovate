@@ -11,6 +11,7 @@ import type {
   GithubHttpOptions,
 } from '../../http/github.ts';
 import type { HttpResponse } from '../../http/types.ts';
+import { regEx } from '../../regex.ts';
 import { getApiBaseUrl } from '../url.ts';
 import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy.ts';
 import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy.ts';
@@ -24,6 +25,18 @@ import type {
   GithubPackageConfig,
   RawQueryResponse,
 } from './types.ts';
+
+/**
+ * Page sizes to try, from the largest to the smallest.
+ *
+ * Repositories with many tags can exceed the GitHub GraphQL execution
+ * timeout even for small page sizes, hence the low floor.
+ *
+ * @see https://github.com/renovatebot/renovate/discussions/45248
+ */
+const pageSizes = [100, 50, 25, 10, 5] as const;
+
+type PageSize = (typeof pageSizes)[number];
 
 /**
  * We know empirically that certain type of GraphQL errors
@@ -65,7 +78,7 @@ export class GithubGraphqlDatasourceFetcher<
   private readonly repoOwner: string;
   private readonly repoName: string;
 
-  private itemsPerQuery: 100 | 50 | 25 = 100;
+  private itemsPerQuery: PageSize = pageSizes[0];
 
   private queryCount = 0;
 
@@ -87,7 +100,7 @@ export class GithubGraphqlDatasourceFetcher<
     this.datasourceAdapter = datasourceAdapter;
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
-    this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
+    this.baseUrl = getApiBaseUrl(registryUrl).replace(regEx(/\/v3\/$/), '/'); // Replace for GHE
   }
 
   private getCacheNs(): PackageCacheNamespace {
@@ -139,11 +152,10 @@ export class GithubGraphqlDatasourceFetcher<
         const { message } = errors[0];
         const err = new Error(message);
         return [null, err];
-      } else {
-        const errorInstances = errors.map(({ message }) => new Error(message));
-        const err = new AggregateError(errorInstances);
-        return [null, err];
       }
+      const errorInstances = errors.map(({ message }) => new Error(message));
+      const err = new AggregateError(errorInstances);
+      return [null, err];
     }
 
     if (!data) {
@@ -176,17 +188,13 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   private shrinkPageSize(): boolean {
-    if (this.itemsPerQuery === 100) {
-      this.itemsPerQuery = 50;
-      return true;
+    const nextIdx = pageSizes.indexOf(this.itemsPerQuery) + 1;
+    if (nextIdx >= pageSizes.length) {
+      return false;
     }
 
-    if (this.itemsPerQuery === 50) {
-      this.itemsPerQuery = 25;
-      return true;
-    }
-
-    return false;
+    this.itemsPerQuery = pageSizes[nextIdx];
+    return true;
   }
 
   private hasReachedQueryLimit(): boolean {

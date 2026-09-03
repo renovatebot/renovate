@@ -6,6 +6,7 @@ import {
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types.ts';
 import {
@@ -43,11 +44,11 @@ async function findPipfileSourceUrlsWithCredentials(
 ): Promise<URL[]> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
 
-  return (
+  return coerceArray(
     pipfile?.registryUrls
       ?.map(parseUrl)
       .filter(isUrlInstance)
-      .filter((url) => isNonEmptyStringAndNotWhitespace(url.username)) ?? []
+      .filter((url) => isNonEmptyStringAndNotWhitespace(url.username)),
   );
 }
 
@@ -63,7 +64,7 @@ export function extractEnvironmentVariableName(
 }
 
 export function addExtraEnvVariable(
-  extraEnv: ExtraEnv<unknown>,
+  extraEnv: ExtraEnv,
   environmentVariableName: string,
   environmentValue: string,
 ): void {
@@ -91,7 +92,7 @@ export function addExtraEnvVariable(
 async function addCredentialsForSourceUrls(
   newPipfileContent: string,
   pipfileName: string,
-  extraEnv: ExtraEnv<unknown>,
+  extraEnv: ExtraEnv,
 ): Promise<void> {
   const sourceUrls = await findPipfileSourceUrlsWithCredentials(
     newPipfileContent,

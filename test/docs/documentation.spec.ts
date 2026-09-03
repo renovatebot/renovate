@@ -1,8 +1,10 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../../lib/config/options/index.ts';
+import type { UpdateType } from '../../lib/config/types.ts';
 import { regEx } from '../../lib/util/regex.ts';
 import { templateHelperNames } from '../../lib/util/template/index.ts';
+import { isMinimumReleaseAgeApplicable } from '../../lib/workers/repository/process/lookup/filter-checks.ts';
 
 const options = getOptions();
 const markdownGlob = '{docs,lib}/**/*.md';
@@ -44,7 +46,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/configuration-options.md', () => {
       async function getConfigHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches
           .map((match) =>
             match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
@@ -93,7 +95,7 @@ describe('docs/documentation', () => {
       async function getConfigSubHeaders(file: string): Promise<string[]> {
         const postUpdateValues = getPostUpdateOptionsValues();
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        const matches = content.match(/\n### (?:.*?)\n/g) ?? [];
         return matches
           .map((match) =>
             match.substring(5, match.length - 1).replace(/^`|`$/g, ''),
@@ -184,7 +186,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/self-hosted-configuration.md', () => {
       async function getSelfHostedHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches.map((match) =>
           match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
         );
@@ -217,7 +219,7 @@ describe('docs/documentation', () => {
         file: string,
       ): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(4, match.length - 1));
       }
 
@@ -241,7 +243,7 @@ describe('docs/documentation', () => {
         string[]
       > {
         const content = await fs.readFile(`docs/usage/templates.md`, 'utf8');
-        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        const matches = content.match(/\n### (?:.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(5, match.length - 1));
       }
 
@@ -258,6 +260,50 @@ describe('docs/documentation', () => {
         expect(additionalHandlebarsHelpers).toEqual(
           templateHelperNames.toSorted(),
         );
+      });
+    });
+
+    describe('docs/usage/key-concepts/minimum-release-age.md', () => {
+      const supportEmoji: Record<string, boolean> = {
+        '✅': true,
+        '🟡': true,
+        '❌': false,
+      };
+
+      async function getUpdateTypeSupportTable(): Promise<
+        Record<string, boolean>
+      > {
+        const content = await fs.readFile(
+          'docs/usage/key-concepts/minimum-release-age.md',
+          'utf8',
+        );
+        // RE2 (renovate's regex engine) doesn't support lookahead, so bound
+        // the section with plain index lookups instead of `(?=\n### )`.
+        const start = regEx(/### Which update types take/).exec(content)?.index;
+        let section: string | undefined;
+        if (start !== undefined) {
+          const end = content.indexOf('\n### ', start + 1);
+          section = content.slice(start, end === -1 ? undefined : end);
+        }
+        const rows =
+          section?.matchAll(
+            /^\|\s*`(?<updateType>\w+)`\s*\|\s*(?<emoji>[^\s|]+)\s*\|/gm,
+          ) ?? [];
+        const table: Record<string, boolean> = {};
+        for (const row of rows) {
+          const { updateType, emoji } = row.groups!;
+          table[updateType] = supportEmoji[emoji];
+        }
+        return table;
+      }
+
+      it('matches isMinimumReleaseAgeApplicable() for every documented update type', async () => {
+        const table = await getUpdateTypeSupportTable();
+        for (const [updateType, docsSupport] of Object.entries(table)) {
+          expect(isMinimumReleaseAgeApplicable(updateType as UpdateType)).toBe(
+            docsSupport,
+          );
+        }
       });
     });
   });

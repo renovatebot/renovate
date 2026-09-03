@@ -122,7 +122,7 @@ export async function downloadHttpProtocol(
     }
   }
 
-  const fetchResult = await Result.wrap<HttpResponse, Error>(
+  const fetchResult = await Result.wrap<HttpResponse>(
     http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
@@ -195,9 +195,8 @@ export async function downloadHttpProtocol(
             }
           }
           return Result.err({ type: 'maven-central-temporary-error', err });
-        } else {
-          return Result.err({ type: 'temporary-error' });
         }
+        return Result.err({ type: 'temporary-error' });
       }
 
       if (isConnectionError(err)) {
@@ -577,7 +576,7 @@ export async function getDependencyInfo(
           'groupId',
           'artifactId',
           'version',
-        ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+        ].map((k) => parent.valueWithPath(k)?.replace(regEx(/\s+/g), ''));
         if (parentGroupId && parentArtifactId && parentVersion) {
           const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
           const parentDependency = getDependencyParts(parentDisplayId);
