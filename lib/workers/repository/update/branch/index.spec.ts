@@ -288,6 +288,49 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
+    it.each([
+      ['a forced rebase', {}, true],
+      ['Dashboard Rebase All', { dependencyDashboardRebaseAllOpen: true }],
+      ['Dashboard Approve All', { dependencyDashboardAllPending: true }],
+      [
+        'Dashboard Open All Rate-Limited',
+        { dependencyDashboardAllRateLimited: true },
+      ],
+      [
+        'Dashboard Open All Awaiting Schedule',
+        { dependencyDashboardAllAwaitingSchedule: true },
+      ],
+    ])(
+      'does not use automerge-only path outside schedule when %s is active',
+      async (_description, overrides, forceRebase = false) => {
+        schedule.isScheduledNow.mockImplementation(
+          (_config, scheduleKey) => scheduleKey === 'automergeSchedule',
+        );
+        config.updateNotScheduled = false;
+        config.automerge = true;
+        Object.assign(config, overrides);
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            number: 5,
+            state: 'open',
+          }),
+        );
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+
+        await branchWorker.processBranch(config, forceRebase);
+
+        expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+        expect(scm.checkoutBranch).toHaveBeenCalledWith(config.baseBranch);
+      },
+    );
+
     it('skips branch for fresh release with minimumReleaseAge', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
