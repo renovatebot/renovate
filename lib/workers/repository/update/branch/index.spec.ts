@@ -205,12 +205,13 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('checks PR automerge after refreshing statuses when not updating out of schedule', async () => {
+    it('checks PR automerge even when not updating out of schedule and rebaseWhen=never', async () => {
       schedule.isScheduledNow.mockImplementation(
         (_config, scheduleKey) => scheduleKey === 'automergeSchedule',
       );
       config.updateNotScheduled = false;
       config.automerge = true;
+      config.rebaseWhen = 'never';
       config.statusCheckNames = {
         artifactError: null,
         configValidation: null,
