@@ -4,6 +4,7 @@ import {
   isNumber,
   isUndefined,
 } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import {
@@ -28,7 +29,7 @@ import {
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getElapsedHours } from '../../../../util/date.ts';
-import { stripEmojis } from '../../../../util/emoji.ts';
+import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
 import { memoize } from '../../../../util/memoize.ts';
@@ -145,13 +146,14 @@ function addPullRequestNoteIfAttestationHasBeenLost(
   ) {
     upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
-      [
-        '> :stop_sign: **Caution**',
-        '>',
-        `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
-        `> Verify that release ${newVersion} was published by the expected author.`,
-        '\n',
-      ].join('\n'),
+      emojify(
+        codeBlock`
+          > :stop_sign: **Caution**
+          >
+          > ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
+          > Verify that release ${newVersion} was published by the expected author.
+        `,
+      ),
     );
   }
 }
@@ -334,13 +336,14 @@ export async function ensurePr(
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes.push(
-          [
-            '> :exclamation: **Important**',
-            '> ',
-            '> Release Notes retrieval for this PR were skipped because no github.com credentials were available. ',
-            '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
-            '\n',
-          ].join('\n'),
+          emojify(
+            codeBlock`
+              > :exclamation: **Important**
+              >
+              > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+              > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+            `,
+          ),
         );
       }
     }
