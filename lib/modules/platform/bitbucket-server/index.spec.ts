@@ -821,7 +821,9 @@ describe('modules/platform/bitbucket-server/index', () => {
     describe('addAssignees()', () => {
       it('does not throw', async () => {
         await initRepo();
-        expect(await bitbucket.addAssignees(3, ['some'])).toBeUndefined();
+        await expect(
+          bitbucket.addAssignees(3, ['some']),
+        ).resolves.toBeUndefined();
       });
     });
 
@@ -839,7 +841,9 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.addReviewers(5, ['name'])).toBeUndefined();
+        await expect(
+          bitbucket.addReviewers(5, ['name']),
+        ).resolves.toBeUndefined();
       });
 
       it('sends the reviewer name as a reviewer', async () => {
@@ -1249,7 +1253,9 @@ describe('modules/platform/bitbucket-server/index', () => {
 
     describe('deleteLAbel()', () => {
       it('does not throw', async () => {
-        expect(await bitbucket.deleteLabel(5, 'renovate')).toBeUndefined();
+        await expect(
+          bitbucket.deleteLabel(5, 'renovate'),
+        ).resolves.toBeUndefined();
       });
     });
 
@@ -1713,7 +1719,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             isLastPage: true,
             values: [prMock(url, 'SOME', 'repo')],
           });
-        expect(await bitbucket.getPrList()).toMatchObject([
+        await expect(bitbucket.getPrList()).resolves.toMatchObject([
           {
             number: 5,
             sourceBranch: 'userName1/pullRequest5',
@@ -2159,7 +2165,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(5)).toMatchObject({
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject({
           number: 5,
           sourceBranch: 'userName1/pullRequest5',
           state: 'open',
@@ -2189,11 +2195,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           title: 'title',
         };
 
-        expect(await bitbucket.getPr(3)).toMatchObject(expectedPr);
+        await expect(bitbucket.getPr(3)).resolves.toMatchObject(expectedPr);
 
-        expect(await bitbucket.getPr(5)).toMatchObject(expectedPr);
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject(expectedPr);
 
-        expect(await bitbucket.getPr(5)).toMatchObject(expectedPr);
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject(expectedPr);
       });
 
       it('gets a closed PR', async () => {
@@ -2211,7 +2217,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             toRef: {},
           });
 
-        expect(await bitbucket.getPr(5)).toMatchObject({
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject({
           state: 'merged',
         });
       });
