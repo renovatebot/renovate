@@ -202,23 +202,23 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({});
     });
 
-    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
-      // used when registering rules for a repository before `GlobalConfig` reflects it, i.e. a `repositories[]` entry's own `allowedHeaders` override
+    it('does not filter a trusted rule against allowedHeaders', () => {
+      // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - mirrors `allowedEnv`'s exemption of the admin's own `env`
+      GlobalConfig.reset();
+
       add(
         {
           matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
+          headers: { Authorization: 'from-admin' },
         },
-        { allowedHeaders: ['Authorization'] },
+        { trusted: true },
       );
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { Authorization: 'from-admin' },
+        trustedHeaderNames: ['Authorization'],
       });
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['X-Dropped'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -284,29 +284,6 @@ describe('util/host-rules', () => {
         "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
       );
     });
-
-    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
-      expect(
-        filterAllowedHeaders(
-          [
-            {
-              matchHost: 'registry.example.com',
-              headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
-            },
-          ],
-          ['Authorization'],
-        ),
-      ).toEqual([
-        {
-          matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin' },
-        },
-      ]);
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['X-Dropped'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
-    });
   });
 
   describe('find()', () => {
@@ -317,6 +294,21 @@ describe('util/host-rules', () => {
     it('warns and returns empty for bad search', () => {
       // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(find({ abc: 'def' } as any)).toEqual({});
+    });
+
+    it('returns a truly empty object for no match, not one with an undefined trustedHeaderNames', () => {
+      // `toEqual({})` alone would not catch this: it ignores `undefined`-valued properties, but callers elsewhere use `Object.keys(...).length`/`isNonEmptyObject` to detect an empty result
+      add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-From-Admin': 'yes' },
+        },
+        { trusted: true },
+      );
+
+      expect(
+        Object.keys(find({ url: 'https://unrelated.example.com' })),
+      ).toEqual([]);
     });
 
     it('needs exact host matches', () => {
@@ -562,6 +554,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         token: 'from-admin',
         headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        trustedHeaderNames: ['X-From-Admin'],
       });
     });
 
@@ -583,6 +576,7 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'from-admin' },
+        trustedHeaderNames: ['X-Custom'],
       });
     });
 
@@ -623,9 +617,11 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other': 'yes' },
+        trustedHeaderNames: ['X-Other'],
       });
       expect(find({ url: 'https://trusted.example.com' })).toEqual({
         headers: { 'X-Api-Key': 'secret' },
+        trustedHeaderNames: ['X-Api-Key'],
       });
     });
 
@@ -649,6 +645,7 @@ describe('util/host-rules', () => {
       // the repo's narrower rule masks its own broader one, but cannot mask the admin's
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other-Repo-Header': 'yes', 'X-From-Admin': 'yes' },
+        trustedHeaderNames: ['X-From-Admin'],
       });
     });
 
@@ -669,6 +666,7 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'from-repo', 'X-Other-Admin-Header': 'yes' },
+        trustedHeaderNames: ['X-Other-Admin-Header'],
       });
     });
 
