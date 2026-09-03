@@ -275,7 +275,8 @@ export async function initRepo({
           );
         } else {
           logger.warn(
-            `BitBucket's development branch '${developmentBranch}' does not exist as a branch - keeping '${mainBranch}' as default branch`,
+            { developmentBranch, mainBranch },
+            `BitBucket's development branch does not exist as a branch - keeping default branch`,
           );
         }
       }
