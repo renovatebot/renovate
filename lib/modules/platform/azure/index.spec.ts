@@ -1160,6 +1160,61 @@ describe('modules/platform/azure/index', () => {
         expect(pr).toMatchSnapshot();
       });
 
+      it.each`
+        bypassReason       | expectedReason
+        ${undefined}       | ${'Auto-merge by Renovate'}
+        ${'custom reason'} | ${'custom reason'}
+      `(
+        'should bypass policies with reason "$expectedReason"',
+        async ({ bypassReason, expectedReason }) => {
+          GlobalConfig.set({
+            azureBypassPolicy: true,
+            azureBypassPolicyReason: bypassReason,
+          });
+          await initRepo({ repository: 'some/repo' });
+          const prResult = {
+            pullRequestId: 456,
+            title: 'The Title',
+            createdBy: { id: '123' },
+          };
+          const updateFn = vi.fn().mockResolvedValue(prResult);
+          azureApi.gitApi.mockResolvedValueOnce(
+            partial<IGitApi>({
+              createPullRequest: vi.fn().mockResolvedValue(prResult),
+              createPullRequestLabel: vi.fn().mockResolvedValue({}),
+              updatePullRequest: updateFn,
+            }),
+          );
+
+          await azure.createPr({
+            sourceBranch: 'some-branch',
+            targetBranch: 'dev',
+            prTitle: 'The Title',
+            prBody: 'Hello world',
+            labels: [],
+            platformPrOptions: {
+              automergeStrategy: 'squash',
+              usePlatformAutomerge: true,
+            },
+          });
+
+          expect(updateFn).toHaveBeenCalledExactlyOnceWith(
+            {
+              autoCompleteSetBy: { id: '123' },
+              completionOptions: {
+                mergeStrategy: GitPullRequestMergeStrategy.Squash,
+                deleteSourceBranch: true,
+                mergeCommitMessage: 'The Title',
+                bypassPolicy: true,
+                bypassReason: expectedReason,
+              },
+            },
+            '1',
+            456,
+          );
+        },
+      );
+
       it('should only call getMergeMethod once per run when automergeStrategy is auto', async () => {
         await initRepo({ repository: 'some/repo' });
         const prResult = [

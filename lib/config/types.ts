@@ -241,6 +241,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowShellExecutorForPostUpgradeCommands?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
+  azureBypassPolicy?: boolean;
+  azureBypassPolicyReason?: string;
   binarySource?: BinarySource;
   cacheDir?: string;
   cacheHardTtlMinutes?: number;

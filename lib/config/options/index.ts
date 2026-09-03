@@ -1438,6 +1438,24 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'azureBypassPolicy',
+    description:
+      'Set to `true` to bypass branch policies when Azure DevOps platform automerge completes a PR.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    supportedPlatforms: ['azure'],
+  },
+  {
+    name: 'azureBypassPolicyReason',
+    description:
+      'The reason recorded on the PR when Renovate bypasses branch policies to complete it.',
+    type: 'string',
+    default: 'Auto-merge by Renovate',
+    globalOnly: true,
+    supportedPlatforms: ['azure'],
+  },
+  {
     name: 'azureWorkItemId',
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
