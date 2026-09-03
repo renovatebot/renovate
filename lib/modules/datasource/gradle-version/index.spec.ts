@@ -33,55 +33,54 @@ describe('modules/datasource/gradle-version/index', () => {
         homepage: 'https://gradle.org',
         sourceUrl: 'https://github.com/gradle/gradle',
         registryUrl: 'https://services.gradle.org/versions/all',
-        releases: expect.any(Array),
-      });
-      expect(res?.releases).toHaveLength(300);
-      expect(res?.releases.slice(0, 2)).toEqual([
-        {
-          version: '0.7',
-          gitRef: 'v0.7.0',
-          releaseTimestamp: '2009-07-20T06:50:13.000Z',
-        },
-        {
-          version: '0.8',
-          gitRef: 'v0.8.0',
-          releaseTimestamp: '2009-09-28T12:01:59.000Z',
-        },
-      ]);
-      // the only broken release of the fixture
-      expect(res?.releases[11]).toEqual({
-        version: '1.0-milestone-4',
-        gitRef: 'v1.0.0-M4',
-        isDeprecated: true,
-        releaseTimestamp: '2011-07-28T08:38:22.000Z',
-      });
-      // milestone version with a letter suffix
-      expect(res?.releases[15]).toEqual({
-        version: '1.0-milestone-8a',
-        gitRef: 'v1.0.0-M8a',
-        releaseTimestamp: '2012-02-20T17:53:57.000Z',
-      });
-      // release candidate, followed by the final release of the same version
-      expect(res?.releases[18]).toEqual({
-        version: '1.0-rc-1',
-        gitRef: 'v1.0.0-RC1',
-        releaseTimestamp: '2012-04-11T11:13:24.000Z',
-      });
-      expect(res?.releases[21]).toEqual({
-        version: '1.0',
-        gitRef: 'v1.0.0',
-        releaseTimestamp: '2012-06-12T00:56:21.000Z',
-      });
-      // patch version
-      expect(res?.releases[295]).toEqual({
-        version: '6.8.3',
-        gitRef: 'v6.8.3',
-        releaseTimestamp: '2021-02-22T16:13:28.000Z',
-      });
-      expect(res?.releases[299]).toEqual({
-        version: '7.0-rc-1',
-        gitRef: 'v7.0.0-RC1',
-        releaseTimestamp: '2021-03-23T01:02:30.000Z',
+        releases: [
+          {
+            version: '0.7',
+            gitRef: 'v0.7.0',
+            releaseTimestamp: '2009-07-20T06:50:13.000Z',
+          },
+          {
+            version: '0.8',
+            gitRef: 'v0.8.0',
+            releaseTimestamp: '2009-09-28T12:01:59.000Z',
+          },
+          {
+            version: '0.9-rc-1',
+            gitRef: 'v0.9.0-RC1',
+            releaseTimestamp: '2010-08-03T21:04:33.000Z',
+          },
+          {
+            version: '0.9.1',
+            gitRef: 'v0.9.1',
+            releaseTimestamp: '2011-01-02T00:40:57.000Z',
+          },
+          {
+            version: '1.0-milestone-4',
+            gitRef: 'v1.0.0-M4',
+            isDeprecated: true,
+            releaseTimestamp: '2011-07-28T08:38:22.000Z',
+          },
+          {
+            version: '1.0-milestone-8a',
+            gitRef: 'v1.0.0-M8a',
+            releaseTimestamp: '2012-02-20T17:53:57.000Z',
+          },
+          {
+            version: '6.8.3',
+            gitRef: 'v6.8.3',
+            releaseTimestamp: '2021-02-22T16:13:28.000Z',
+          },
+          {
+            version: '7.0-milestone-3',
+            gitRef: 'v7.0.0-M3',
+            releaseTimestamp: '2021-03-13T01:03:21.000Z',
+          },
+          {
+            version: '7.0-rc-1',
+            gitRef: 'v7.0.0-RC1',
+            releaseTimestamp: '2021-03-23T01:02:30.000Z',
+          },
+        ],
       });
     });
 
@@ -103,53 +102,73 @@ describe('modules/datasource/gradle-version/index', () => {
       expect(res).toEqual({
         homepage: 'https://gradle.org',
         sourceUrl: 'https://github.com/gradle/gradle',
-        releases: expect.any(Array),
-      });
-      expect(res?.releases).toHaveLength(302);
-      expect(res?.releases[0]).toEqual({
-        version: '0.7',
-        gitRef: 'v0.7.0',
-        registryUrl: 'https://foo.bar',
-        releaseTimestamp: '2009-07-20T06:50:13.000Z',
-      });
-      expect(res?.releases[11]).toEqual({
-        version: '1.0-milestone-4',
-        gitRef: 'v1.0.0-M4',
-        isDeprecated: true,
-        registryUrl: 'https://foo.bar',
-        releaseTimestamp: '2011-07-28T08:38:22.000Z',
-      });
-      // the two releases of the second registry are merged in, keeping their
-      // own registryUrl and lacking a release timestamp
-      expect(res?.releases.slice(21, 25)).toEqual([
-        {
-          version: '1.0',
-          gitRef: 'v1.0.0',
-          registryUrl: 'https://foo.bar',
-          releaseTimestamp: '2012-06-12T00:56:21.000Z',
-        },
-        {
-          version: '1.0.1',
-          gitRef: 'v1.0.1',
-          registryUrl: 'http://baz.qux',
-        },
-        {
-          version: '1.0.2',
-          gitRef: 'v1.0.2',
-          registryUrl: 'http://baz.qux',
-        },
-        {
-          version: '1.1-rc-1',
-          gitRef: 'v1.1.0-RC1',
-          registryUrl: 'https://foo.bar',
-          releaseTimestamp: '2012-07-24T13:44:04.000Z',
-        },
-      ]);
-      expect(res?.releases[301]).toEqual({
-        version: '7.0-rc-1',
-        gitRef: 'v7.0.0-RC1',
-        registryUrl: 'https://foo.bar',
-        releaseTimestamp: '2021-03-23T01:02:30.000Z',
+        releases: [
+          {
+            version: '0.7',
+            gitRef: 'v0.7.0',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2009-07-20T06:50:13.000Z',
+          },
+          {
+            version: '0.8',
+            gitRef: 'v0.8.0',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2009-09-28T12:01:59.000Z',
+          },
+          {
+            version: '0.9-rc-1',
+            gitRef: 'v0.9.0-RC1',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2010-08-03T21:04:33.000Z',
+          },
+          {
+            version: '0.9.1',
+            gitRef: 'v0.9.1',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2011-01-02T00:40:57.000Z',
+          },
+          {
+            version: '1.0-milestone-4',
+            gitRef: 'v1.0.0-M4',
+            isDeprecated: true,
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2011-07-28T08:38:22.000Z',
+          },
+          {
+            version: '1.0-milestone-8a',
+            gitRef: 'v1.0.0-M8a',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2012-02-20T17:53:57.000Z',
+          },
+          {
+            version: '1.0.1',
+            gitRef: 'v1.0.1',
+            registryUrl: 'http://baz.qux',
+          },
+          {
+            version: '1.0.2',
+            gitRef: 'v1.0.2',
+            registryUrl: 'http://baz.qux',
+          },
+          {
+            version: '6.8.3',
+            gitRef: 'v6.8.3',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2021-02-22T16:13:28.000Z',
+          },
+          {
+            version: '7.0-milestone-3',
+            gitRef: 'v7.0.0-M3',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2021-03-13T01:03:21.000Z',
+          },
+          {
+            version: '7.0-rc-1',
+            gitRef: 'v7.0.0-RC1',
+            registryUrl: 'https://foo.bar',
+            releaseTimestamp: '2021-03-23T01:02:30.000Z',
+          },
+        ],
       });
     });
 

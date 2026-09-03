@@ -253,7 +253,7 @@ describe('modules/manager/gomod/update', () => {
     it('replaces multiline', () => {
       const upgrade = {
         depName: 'github.com/fatih/color',
-        managerData: { lineNumber: 8, multiLine: true },
+        managerData: { lineNumber: 5, multiLine: true },
         newValue: 'v1.8.0',
         depType: 'require',
       };
@@ -269,7 +269,7 @@ describe('modules/manager/gomod/update', () => {
     it('replaces quoted multiline', () => {
       const upgrade = {
         depName: 'gopkg.in/src-d/go-billy.v4',
-        managerData: { lineNumber: 57, multiLine: true },
+        managerData: { lineNumber: 9, multiLine: true },
         newValue: 'v4.8.0',
         depType: 'require',
       };
@@ -287,7 +287,7 @@ describe('modules/manager/gomod/update', () => {
     it('replaces major multiline', () => {
       const upgrade = {
         depName: 'github.com/emirpasic/gods',
-        managerData: { lineNumber: 7, multiLine: true },
+        managerData: { lineNumber: 4, multiLine: true },
         currentValue: 'v1.9.0',
         newValue: 'v2.0.0',
         newMajor: 2,
@@ -306,7 +306,7 @@ describe('modules/manager/gomod/update', () => {
     it('bumps major multiline', () => {
       const upgrade = {
         depName: 'github.com/src-d/gcfg/v2',
-        managerData: { lineNumber: 47, multiLine: true },
+        managerData: { lineNumber: 7, multiLine: true },
         currentValue: 'v2.3.0',
         newValue: 'v3.0.0',
         newMajor: 3,
@@ -325,7 +325,7 @@ describe('modules/manager/gomod/update', () => {
     it('bumps major v0 > v1 multiline', () => {
       const upgrade = {
         depName: 'golang.org/x/text',
-        managerData: { lineNumber: 56, multiLine: true },
+        managerData: { lineNumber: 8, multiLine: true },
         currentValue: 'v0.3.0',
         newValue: 'v1.0.0',
         newMajor: 1,
@@ -344,7 +344,7 @@ describe('modules/manager/gomod/update', () => {
     it('update multiline digest', () => {
       const upgrade = {
         depName: 'github.com/spf13/jwalterweatherman',
-        managerData: { lineNumber: 43, multiLine: true },
+        managerData: { lineNumber: 6, multiLine: true },
         updateType: 'digest' as UpdateType,
         currentDigest: '14d3d4c51834',
         newDigest: '123456123456abcdef',
@@ -363,7 +363,7 @@ describe('modules/manager/gomod/update', () => {
     it('skips already-updated multiline digest', () => {
       const upgrade = {
         depName: 'github.com/spf13/jwalterweatherman',
-        managerData: { lineNumber: 43, multiLine: true },
+        managerData: { lineNumber: 6, multiLine: true },
         updateType: 'digest' as UpdateType,
         currentDigest: 'abcdefabcdef',
         newDigest: '14d3d4c51834000000',
@@ -436,7 +436,7 @@ describe('modules/manager/gomod/update', () => {
     it('handles multiline mismatch', () => {
       const upgrade = {
         depName: 'github.com/fatih/color',
-        managerData: { lineNumber: 8 },
+        managerData: { lineNumber: 5 },
         newValue: 'v1.8.0',
         depType: 'require',
       };
