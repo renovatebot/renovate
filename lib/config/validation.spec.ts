@@ -2324,7 +2324,7 @@ describe('config/validation', () => {
         {
           message:
             "hostRules header `unallowedHeader` is not allowed by this Renovate instance's `allowedHeaders`.",
-          topic: 'Configuration Error',
+          topic: 'Config security error',
         },
       ]);
     });
@@ -2379,7 +2379,70 @@ describe('config/validation', () => {
         {
           message:
             "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
+          topic: 'Config security error',
+        },
+      ]);
+    });
+
+    it('reports nested `env` with values not in `allowedEnv` as a configuration error', async () => {
+      // only top-level `env` is ever applied, so a nested copy must not be escalated to a security error - which callers treat as always fatal
+      GlobalConfig.set({ allowedEnv: [] });
+
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            env: { SOME_VAR: 'some_value' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
           topic: 'Configuration Error',
+          message:
+            "Env variable name `SOME_VAR` is not allowed by this Renovate instance's `allowedEnv`.",
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'The "env" object can only be configured at the top level of a config but was found inside "packageRules[0]"',
+        },
+      ]);
+    });
+
+    it('reports nested `hostRules[].headers` with values not in `allowedHeaders` as a configuration error', async () => {
+      GlobalConfig.set({ allowedHeaders: [] });
+
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            hostRules: [
+              {
+                matchHost: 'https://domain.com',
+                headers: { 'X-Auth-Token': 'token' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
         },
       ]);
     });
@@ -2577,7 +2640,7 @@ describe('config/validation', () => {
         {
           message:
             "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
-          topic: 'Configuration Error',
+          topic: 'Config security error',
         },
       ]);
       expect(warnings).toBeEmptyArray();
@@ -2639,7 +2702,7 @@ describe('config/validation', () => {
         {
           message:
             "Env variable name `SOME_VAR` is not allowed by this Renovate instance's `allowedEnv`.",
-          topic: 'Configuration Error',
+          topic: 'Config security error',
         },
       ]);
       expect(warnings).toBeEmptyArray();
@@ -3173,6 +3236,58 @@ describe('config/validation', () => {
             env: { PATH: '/home/ubuntu/bin' },
           },
         ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('allows `env` within `force` inside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        force: { env: { PATH: '/home/ubuntu/bin' } },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('reports `env` within `force` outside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        force: { env: { NOT_ALLOWED: 'value' } },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Config security error',
+          message:
+            "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+        },
+      ]);
+    });
+
+    it('allows hostRules `headers` within `force` inside the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        force: {
+          hostRules: [
+            {
+              matchHost: 'https://domain.com/all-versions',
+              headers: { 'X-Custom-Token': 'token' },
+            },
+          ],
+        },
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'global',

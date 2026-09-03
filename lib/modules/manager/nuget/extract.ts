@@ -78,7 +78,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
       currentValue = currentValue
         ?.trim()
-        ?.replace(regEx(/^\$\((\w+)\)$/), (match, key) => {
+        ?.replace(regEx(/^\$\((?<key>\w+)\)$/), (match, key) => {
           sharedVariableName = key;
           const val = vars.get(key);
           if (val) {

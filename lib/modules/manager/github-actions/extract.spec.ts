@@ -8,53 +8,6 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const runnerTestWorkflowMacos = codeBlock`
-jobs:
-  test1:
-     runs-on: \${{ env.RUNNER }}
-  test2:
-      runs-on: abc-123
-  test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-      runs-on: macos-15-intel
-  test6:
-      runs-on: macos-26-intel
-`;
-
-const runnerTestWorkflowUbuntu = codeBlock`
-jobs:
-  test1:
-    runs-on: ubuntu-latest
-  test2:
-    runs-on:
-      ubuntu-22.04
-  test3:
-     runs-on:
-       group: ubuntu-runners
-       labels: ubuntu-20.04-16core
-  test4:
-      runs-on: ubuntu-22.04-arm
-`;
-
-const runnerTestWorkflowWindows = codeBlock`
-jobs:
-  test1:
-    runs-on: |
-      windows-2019
-  test2:
-    runs-on: >
-      windows-2022
-  test3:
-    runs-on: [windows-2022, selfhosted]
-  test4:
-      runs-on: windows-11-arm
-  test5:
-      runs-on: windows-2025
-`;
-
 describe('modules/manager/github-actions/extract', () => {
   beforeEach(() => {
     GlobalConfig.reset();
@@ -778,6 +731,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple macos action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowMacos = codeBlock`
+      jobs:
+        test1:
+           runs-on: \${{ env.RUNNER }}
+        test2:
+            runs-on: abc-123
+        test3:
+          runs-on: "macos-12-large"
+        test4:
+          runs-on: 'macos-latest'
+        test5:
+            runs-on: macos-15-intel
+        test6:
+            runs-on: macos-26-intel
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowMacos,
         'workflow.yml',
@@ -824,6 +792,20 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowUbuntu = codeBlock`
+      jobs:
+        test1:
+          runs-on: ubuntu-latest
+        test2:
+          runs-on:
+            ubuntu-22.04
+        test3:
+           runs-on:
+             group: ubuntu-runners
+             labels: ubuntu-20.04-16core
+        test4:
+            runs-on: ubuntu-22.04-arm
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowUbuntu,
         'workflow.yml',
@@ -862,6 +844,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple windows action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowWindows = codeBlock`
+      jobs:
+        test1:
+          runs-on: |
+            windows-2019
+        test2:
+          runs-on: >
+            windows-2022
+        test3:
+          runs-on: [windows-2022, selfhosted]
+        test4:
+            runs-on: windows-11-arm
+        test5:
+            runs-on: windows-2025
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowWindows,
         'workflow.yml',
