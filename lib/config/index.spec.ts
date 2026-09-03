@@ -26,7 +26,11 @@ describe('config/index', () => {
       expect(config.foo).toBe('bar');
       expect(config.rangeStrategy).toBe('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
-      expect(config.lockFileMaintenance).toMatchSnapshot();
+      expect(config.lockFileMaintenance).toMatchObject({
+        branchTopic: 'lock-file-maintenance',
+        enabled: false,
+        schedule: ['on monday'],
+      });
     });
 
     it('merges packageRules', () => {
@@ -66,7 +70,10 @@ describe('config/index', () => {
         },
       };
       const config = mergeChildConfig(parentConfig, childConfig);
-      expect(config.constraints).toMatchSnapshot();
+      expect(config.constraints).toEqual({
+        node: '<15',
+        npm: '^6.0.0',
+      });
       expect(config.constraints.node).toBe('<15');
     });
 

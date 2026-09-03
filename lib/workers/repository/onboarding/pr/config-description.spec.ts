@@ -31,7 +31,21 @@ describe('workers/repository/onboarding/pr/config-description', () => {
         'this is Docker-only',
       ];
       const res = getConfigDesc(config, packageFiles);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ### Configuration Summary
+
+        Based on the default config's presets, Renovate will:
+
+          - Start dependency updates only once this onboarding PR is merged
+          - description 1
+          - description two
+          - something else
+          - this is Docker-only
+
+        ---
+        "
+      `);
       expect(res.indexOf('Docker-only')).not.toBe(-1);
     });
 
@@ -61,7 +75,18 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
       config.onboardingRebaseCheckbox = true;
       const res = getConfigDesc(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ### Configuration Summary
+
+        Based on the default config's presets, Renovate will:
+
+          - Start dependency updates only once this onboarding PR is merged
+          - Run Renovate on following schedule: before 5am
+
+        ---
+        "
+      `);
     });
   });
 });
