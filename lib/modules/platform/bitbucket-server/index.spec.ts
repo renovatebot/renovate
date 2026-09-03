@@ -2591,19 +2591,20 @@ describe('modules/platform/bitbucket-server/index', () => {
           Followed by some information.
           <!-- followed by some more comments -->
         `);
-        expect(prBody).toMatchInlineSnapshot(`
-          "---
+        expect(prBody).toBe(
+          `${codeBlock`
+            ---
 
-          - [ ] If you want to rebase/retry this PR, click this checkbox
-          - [ ] <a href="/some/link">Update renovate/renovate to 16.1.2</a>
+            - [ ] If you want to rebase/retry this PR, click this checkbox
+            - [ ] <a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
-          ---
+            ---
 
-          Empty comment.
+            Empty comment.
 
-          Followed by some information.
-          "
-        `);
+            Followed by some information.
+          `}\n`,
+        );
       });
 
       it('resizes mend.io merge confidence badges', () => {

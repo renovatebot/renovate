@@ -175,7 +175,7 @@ describe('modules/platform/azure/azure-helper', () => {
         'repository',
         './myFilePath/test',
       );
-      expect(res).toMatchInlineSnapshot(`"{"hello"= "test"}"`);
+      expect(res).toBe('{"hello"= "test"}');
     });
 
     it('should return null because the file is not readable', async () => {

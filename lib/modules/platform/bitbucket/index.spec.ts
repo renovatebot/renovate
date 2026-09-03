@@ -1605,17 +1605,9 @@ describe('modules/platform/bitbucket/index', () => {
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
         '\n\n</details>\n\n</blockquote>\n</details>';
 
-      expect(bitbucket.massageMarkdown(prBody)).toMatchInlineSnapshot(`
-        " - **foo**
-
-
-        	 - \`text\`
-
-
-
-
-        "
-      `);
+      expect(bitbucket.massageMarkdown(prBody)).toBe(
+        ' - **foo**\n\n\n\t - `text`\n\n\n\n\n',
+      );
     });
 
     it('updates pull request url links', () => {

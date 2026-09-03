@@ -1,5 +1,6 @@
 // TODO fix mocks
 import _timers from 'node:timers/promises';
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -4093,18 +4094,19 @@ These updates have all been created already. To force a retry/rebase of any, cli
 
     it('returns updated pr body', async () => {
       await initFakePlatform('13.4.0');
-      expect(gitlab.massageMarkdown(prBody)).toMatchInlineSnapshot(`
-        "https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
+      expect(gitlab.massageMarkdown(prBody)).toBe(
+        `${codeBlock`
+          https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
 
-          Merge Requests are the best, here are some MRs.
+            Merge Requests are the best, here are some MRs.
 
-          ## Open
+            ## Open
 
-        These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.
+          These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.
 
-         - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
-        "
-      `);
+           - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
+        `}\n`,
+      );
       expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
         expect.any(String),
         expect.any(Number),
