@@ -563,6 +563,7 @@ export async function ensureDependencyDashboard(
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
+    'unpend',
   );
   issueBody += getBranchesListMd(
     branches,

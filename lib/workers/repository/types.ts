@@ -12,6 +12,7 @@ export type DependencyDashboardListItemType =
   | 'recreate'
   | 'retry'
   | 'unlimit'
+  | 'unpend'
   | 'unschedule';
 
 /**
