@@ -453,11 +453,6 @@ describe('modules/manager/bundler/extract', () => {
           depTypes: ['test'],
         },
       ]);
-      expect(
-        res?.deps.every(
-          (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
-        ),
-      ).toBeTrue();
     });
 
     it('parse mastodon Gemfile', async () => {
@@ -1203,11 +1198,6 @@ describe('modules/manager/bundler/extract', () => {
           depTypes: ['production'],
         },
       ]);
-      expect(
-        res?.deps.every(
-          (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
-        ),
-      ).toBeTrue();
     });
   });
 
@@ -2519,11 +2509,6 @@ describe('modules/manager/bundler/extract', () => {
         lockedVersion: '4.0.3',
       },
     ]);
-    expect(
-      res?.deps.every(
-        (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
-      ),
-    ).toBeTrue();
   });
 
   it('parse source blocks in Gemfile', async () => {
@@ -2596,20 +2581,25 @@ describe('modules/manager/bundler/extract', () => {
       sourceBlockWithNewLinesGemfile,
       'Gemfile',
     );
-    expect(res).toMatchObject({
+    expect(res).toEqual({
       registryUrls: [],
       deps: [
         {
           depName: 'rubocop',
+          datasource: 'rubygems',
           lockedVersion: '0.68.1',
+          managerData: { lineNumber: 3 },
           registryUrls: ['https://rubygems.org'],
         },
         {
           depName: 'brakeman',
+          datasource: 'rubygems',
           lockedVersion: '4.4.0',
+          managerData: { lineNumber: 5 },
           registryUrls: ['https://rubygems.org'],
         },
       ],
+      lockFiles: ['Gemfile.lock'],
     });
   });
 
