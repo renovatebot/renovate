@@ -541,31 +541,6 @@ export async function processBranch(
       }
     }
 
-    if (
-      !config.isScheduledNow &&
-      !dependencyDashboardCheck &&
-      config.updateNotScheduled === false &&
-      !config.rebaseRequested &&
-      config.automerge &&
-      branchPr
-    ) {
-      await setBranchStatusChecks(config);
-      logger.debug('checking auto-merge');
-      const prAutomergeResult = await checkAutoMerge(branchPr, config);
-      if (prAutomergeResult?.automerged) {
-        return {
-          branchExists,
-          result: 'automerged',
-          commitSha,
-        };
-      }
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'update-not-scheduled',
-      };
-    }
-
     let userRebaseRequested =
       dependencyDashboardCheck === 'rebase' ||
       !!config.dependencyDashboardRebaseAllOpen ||
@@ -597,6 +572,28 @@ export async function processBranch(
       logger.debug(
         'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
       );
+    } else if (
+      !config.isScheduledNow &&
+      !dependencyDashboardCheck &&
+      config.updateNotScheduled === false &&
+      config.automerge &&
+      branchPr
+    ) {
+      await setBranchStatusChecks(config);
+      logger.debug('checking auto-merge');
+      const prAutomergeResult = await checkAutoMerge(branchPr, config);
+      if (prAutomergeResult?.automerged) {
+        return {
+          branchExists,
+          result: 'automerged',
+          commitSha,
+        };
+      }
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'update-not-scheduled',
+      };
     } else if (
       branchExists &&
       config.rebaseWhen === 'never' &&
