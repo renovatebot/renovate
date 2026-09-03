@@ -1570,6 +1570,18 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('throws for invalid', () => {
       expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
     });
+
+    it('defaults to "Renovate" when undefined', async () => {
+      git.setGitAuthor(undefined);
+      await git.writeGitAuthor();
+      const local = simpleGit(tmpDir.path);
+      expect((await local.raw(['config', 'user.name'])).trim()).toBe(
+        'Renovate',
+      );
+      expect((await local.raw(['config', 'user.email'])).trim()).toBe(
+        'renovate@whitesourcesoftware.com',
+      );
+    });
   });
 
   describe('isBranchConflicted', () => {

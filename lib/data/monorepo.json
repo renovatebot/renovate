@@ -767,6 +767,7 @@
     "trpc": "https://github.com/trpc/trpc",
     "trust-dns": "https://github.com/bluejekyll/trust-dns",
     "tsoa": "https://github.com/lukeautry/tsoa",
+    "tunit": "https://github.com/thomhurst/TUnit",
     "turbo": [
       "https://github.com/vercel/turbo",
       "https://github.com/vercel/turborepo"
@@ -791,6 +792,7 @@
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
     "vanilla-extract": "https://github.com/vanilla-extract-css/vanilla-extract",
     "visx": "https://github.com/airbnb/visx",
+    "vite-plus": "https://github.com/voidzero-dev/vite-plus",
     "vitest": "https://github.com/vitest-dev/vitest",
     "vstest": "https://github.com/microsoft/vstest",
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],

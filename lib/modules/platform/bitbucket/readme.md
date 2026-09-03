@@ -12,7 +12,7 @@ When you use the app, Mend will:
 - maintain and update the Renovate version used
 
 If you self-host Renovate you must do the things listed above yourself.
-Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
+Self-hosting is meant for users with advanced use cases, or who want to be in full control of Renovate and the environment it runs in.
 We recommend most users install the Mend app.
 
 Read the [Security and Permissions](../../../security-and-permissions.md) page to learn about the Security and Permissions needed for the Mend app.
@@ -21,8 +21,8 @@ After you installed the hosted app, please read the [reading list](../../../read
 
 ## Authentication
 
-First, [create an API token](https://support.atlassian.com/bitbucket-cloud/docs/create-an-api-token/) for the bot account.
-Give the bot API token the following permission scopes:
+First, [create an API token](https://support.atlassian.com/bitbucket-cloud/docs/create-an-api-token/) for the Renovate account.
+Give the API token the following permission scopes:
 
 | Permission                                                                                                               | Scope                |
 | ------------------------------------------------------------------------------------------------------------------------ | -------------------- |
@@ -33,7 +33,7 @@ Give the bot API token the following permission scopes:
 | [`read:user:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-user-bitbucket)                 | User: Read           |
 | [`read:workspace:bitbucket`](https://developer.atlassian.com/cloud/bitbucket/rest/intro/#read-workspace-bitbucket)       | Workspace: Read      |
 
-The bot also needs to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the bot user to it.
+Renovate also needs to validate the workspace membership status of pull-request reviewers, for that, [create a new user group](https://support.atlassian.com/bitbucket-cloud/docs/organize-workspace-members-into-groups/) in the workspace with the **Create repositories** permission and add the Renovate user to it.
 
 Let Renovate use your API token by doing _one_ of the following:
 
@@ -43,7 +43,7 @@ Let Renovate use your API token by doing _one_ of the following:
 
 Remember to:
 
-- Set the `username` for the bot account, which is your Atlassian account email. You can find your email through "Personal Bitbucket settings" on the "Email aliases" page for your account
+- Set the `username` for the Renovate account, which is your Atlassian account email. You can find your email through "Personal Bitbucket settings" on the "Email aliases" page for your account
 - Set `platform=bitbucket` somewhere in your Renovate config file
 
 ## Unsupported platform features/concepts

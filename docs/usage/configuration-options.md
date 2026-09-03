@@ -499,7 +499,7 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
 
 !!! note
   This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
-  If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
+  If you wish to change that too, you need to also configure the field `onboardingBranch` in your global self-hosted config.
 
 ## `branchPrefixOld`
 
@@ -878,7 +878,7 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
 Renovate only performs `configMigration` on `.json` and `.json5` files.
 
-We're adding new features to Renovate bot often.
+We're adding new features to Renovate often.
 Often you can keep using your Renovate config and use the new features right away.
 But sometimes you need to update your Renovate configuration.
 To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
@@ -1596,7 +1596,7 @@ The Dependency Dashboard categories are only used to visually organize updates w
 ## `dependencyDashboardLabels`
 
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
-It is pointless to edit the labels, as Renovate bot restores the labels on each run.
+It is pointless to edit the labels, as Renovate restores the labels on each run.
 
 ## `dependencyDashboardOSVVulnerabilitySummary`
 
@@ -1764,7 +1764,7 @@ This option allows users to specify explicit environment variables values.
 It is valid only as a top-level configuration option and not, for example, within `packageRules`.
 
 !!! warning
-  The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
+  The administrator of your Renovate deployment must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
 
 Behavior:
 
@@ -2024,7 +2024,7 @@ For more details on the syntax and supported patterns, see Renovate's [string pa
 
 ## `gitLabIgnoreApprovals`
 
-Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Ignore the default project level approval(s), so that Renovate can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
@@ -2177,7 +2177,7 @@ To match specific ports you have to add a protocol to `matchHost`:
 
 !!! note
   Disabling a host is only 100% effective if added to self-hosted config.
-  Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
+  Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same Renovate deployment has successfully queried for the same dependency recently.
 
 ### `hostRules.abortIgnoreStatusCodes`
 
@@ -2344,9 +2344,9 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
 By default, all headers starting with "X-" are allowed.
 
-A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
+A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
+`headers` value(s) configured in the self-hosted configuration's `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
 
 For example:
 
@@ -2617,7 +2617,7 @@ Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
 If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
 
-1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
+1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your admin configuration
 1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the supportedManagers listed in the table above)
 
 ## `ignoreTests`
@@ -2848,7 +2848,7 @@ We do not want Renovate to parse every YAML file in every repository, just in ca
 Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
 Because the array is empty, you as user must tell Renovate which directories/files to check.
 
-Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess.
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using non-standard filenames.
 For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
 This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
 Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
@@ -3013,7 +3013,7 @@ See [Private npm module support](./getting-started/private-packages.md) for deta
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
 In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
-A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
+A use case for the latter is if you are a Renovate admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
@@ -4183,6 +4183,8 @@ Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `pac
 
 Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once.
 
+During lock file maintenance, Renovate always runs `npm install` twice, even without this option, because regenerating a lock file from scratch is known to need a second pass.
+
 ### `pnpmDedupe`
 
 Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
@@ -4479,7 +4481,7 @@ What may happen if you don't set a `prHourlyLimit`:
 
 The above may cause:
 
-- Renovate bot's PRs to overwhelm your CI systems
+- Renovate's PRs to overwhelm your CI systems
 - a lot of test runs, because branches are rebased each time you merge a PR
 
 To prevent these problems you can set `prHourlyLimit` to a value like `1` or `2`.
@@ -4926,7 +4928,7 @@ When this option is set, Renovate won't attempt to update artifacts such as lock
 
 ## `skipInstalls`
 
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
+By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install.
 If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 

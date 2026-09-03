@@ -391,9 +391,12 @@ function generateToolsForInstallTools(): string {
   return output;
 }
 
-export async function generateConfig(dist: string, bot = false): Promise<void> {
+export async function generateConfig(
+  dist: string,
+  globalOnly = false,
+): Promise<void> {
   let configFile = `configuration-options.md`;
-  if (bot) {
+  if (globalOnly) {
     configFile = `self-hosted-configuration.md`;
   }
 
@@ -405,7 +408,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   options
     .filter(
-      (option) => !!option.globalOnly === bot && !managers.has(option.name),
+      (option) =>
+        !!option.globalOnly === globalOnly && !managers.has(option.name),
     )
     .forEach((option) => {
       // TODO: fix types (#22198,#9610)
@@ -464,7 +468,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   let content = configOptionsRaw.join('\n');
 
-  if (bot) {
+  if (globalOnly) {
     content = replaceContent(
       content,
       generateCacheNamespacesList(),
@@ -472,7 +476,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateLockFileTable(),
@@ -480,7 +484,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateConfigFileNames(),
@@ -488,7 +492,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForConstraints(),
@@ -496,7 +500,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateAdditionalConstraints(),
@@ -504,7 +508,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForInstallTools(),
@@ -512,7 +516,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateStatusCheckWhenTable(),

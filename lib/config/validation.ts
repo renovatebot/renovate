@@ -799,7 +799,7 @@ export async function validateConfig(
                     if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
-                        message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
+                        message: `Env variable name \`${envVarName}\` is not allowed by this Renovate instance's \`allowedEnv\`.`,
                       });
                     }
                   }
@@ -1045,7 +1045,7 @@ export async function validateConfig(
               if (!matchRegexOrGlobList(header, allowedHeaders)) {
                 errors.push({
                   topic: ConfigValidationTopic.Error,
-                  message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
+                  message: `hostRules header \`${header}\` is not allowed by this Renovate instance's \`allowedHeaders\`.`,
                 });
               }
             }
