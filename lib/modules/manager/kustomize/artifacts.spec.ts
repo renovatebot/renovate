@@ -560,17 +560,18 @@ describe('modules/manager/kustomize/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e HELM_REGISTRY_CONFIG ' +
           '-e HELM_REPOSITORY_CONFIG ' +
           '-e HELM_REPOSITORY_CACHE ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool helm 3.17.0' +
           ' && ' +
           'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example' +
-          '"',
+          "'",
       },
     ]);
   });

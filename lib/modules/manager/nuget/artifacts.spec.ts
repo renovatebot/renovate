@@ -372,16 +372,17 @@ describe('modules/manager/nuget/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e NUGET_PACKAGES ' +
           '-e MSBUILDDISABLENODEREUSE ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool dotnet 7.0.100' +
           ' && ' +
           'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config' +
-          '"',
+          "'",
         options: {
           env: {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',

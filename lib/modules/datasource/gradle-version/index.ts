@@ -31,7 +31,7 @@ export class GradleVersionDatasource extends Datasource {
   private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -92,7 +92,7 @@ export class GradleVersionDatasource extends Datasource {
    */
   private static getGitRef(version: string): string {
     const [versionPart, typePart, unstablePart] = version.split(
-      regEx(/-([a-z]+)-/),
+      regEx(/-(?<type>[a-z]+)-/),
     );
 
     let suffix = '';

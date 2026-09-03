@@ -38,10 +38,10 @@ export async function extractPackageFile(
     repositoryUrl?: string,
     trimGroupLine = false,
   ): Promise<void> {
-    const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line);
+    const groupMatch = regEx(/^group\s+(?<groups>.*?)\s+do/).exec(line);
     if (groupMatch) {
-      const depTypes = groupMatch[1]
-        .split(',')
+      const depTypes = groupMatch
+        .groups!.groups.split(',')
         .map((group) => group.trim())
         .map((group) => group.replace(regEx(/^:/), ''));
 
@@ -78,7 +78,7 @@ export async function extractPackageFile(
               depTypes,
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + groupLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + groupLineNumber + 1,
               },
             };
             if (repositoryUrl) {
@@ -170,9 +170,10 @@ export async function extractPackageFile(
           dep.packageName = gitUrl;
 
           if (isHttpUrl(gitUrl)) {
-            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+            dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
-        } else if (gitRefsMatch.repoName) {
+        } else {
+          // we always have repoName, as `gitRefsMatchRegex`'s first group requires either `gitUrl` or `repoName`
           dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;
           dep.sourceUrl = dep.packageName;
         }
@@ -237,14 +238,14 @@ export async function extractPackageFile(
               registryUrls: [repositoryUrl],
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + sourceLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + sourceLineNumber + 1,
               },
             })),
           );
         }
       }
     }
-    const platformsMatch = regEx(/^platforms\s+(.*?)\s+do/).test(line);
+    const platformsMatch = regEx(/^platforms\s+(?:.*?)\s+do/).test(line);
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -271,13 +272,13 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + platformsLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + platformsLineNumber + 1,
             },
           })),
         );
       }
     }
-    const ifMatch = regEx(/^if\s+(.*?)/).test(line);
+    const ifMatch = regEx(/^if\s+(?:.*?)/).test(line);
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';
@@ -304,7 +305,7 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + ifLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + ifLineNumber + 1,
             },
           })),
         );

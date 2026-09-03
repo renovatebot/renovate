@@ -64,17 +64,17 @@ export function poetry2semver(
   const parts = [releaseParts.map((num) => num.toString()).join('.')];
   if (pre !== null) {
     // trim leading zeros from valid numbers
-    pre.number = pre.number.replace(regEx(/^0+(\d+)/), '$1');
+    pre.number = pre.number.replace(regEx(/^0+(?<digits>\d+)/), '$<digits>');
     parts.push(`-${pre.letter}.${pre.number}`);
   }
   if (post !== null) {
     // trim leading zeros from valid numbers
-    post.number = post.number.replace(regEx(/^0+(\d+)/), '$1');
+    post.number = post.number.replace(regEx(/^0+(?<digits>\d+)/), '$<digits>');
     parts.push(`-${post.letter}.${post.number}`);
   }
   if (dev !== null) {
     // trim leading zeros from valid numbers
-    dev.number = dev.number.replace(regEx(/^0+(\d+)/), '$1');
+    dev.number = dev.number.replace(regEx(/^0+(?<digits>\d+)/), '$<digits>');
     parts.push(`-${dev.letter}.${dev.number}`);
   }
 
@@ -119,7 +119,7 @@ export function poetry2npm(input: string, throwOnUnsupported = false): string {
   const transformed = chunks
     .map((chunk) => poetry2semver(chunk, false) ?? chunk)
     .join('')
-    .replace(/===/, '=');
+    .replace(regEx(/===/), '=');
   if (throwOnUnsupported) {
     const isUnsupported = transformed
       .split(regEx(/\s+/))
@@ -159,5 +159,5 @@ export function npm2poetry(range: string): string {
       res.splice(i, 2, newValue);
     }
   }
-  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/g, ' || ');
+  return res.join(', ').replace(regEx(/\s*,?\s*\|\|\s*,?\s*/g), ' || ');
 }

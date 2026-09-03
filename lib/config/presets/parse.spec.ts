@@ -1,4 +1,5 @@
-import { parsePreset } from './parse.ts';
+import { isRelativePresetReference, parsePreset } from './parse.ts';
+import { PRESET_INVALID } from './util.ts';
 
 describe('config/presets/parse', () => {
   describe('parsePreset', () => {
@@ -563,6 +564,198 @@ describe('config/presets/parse', () => {
         presetPath: undefined,
         presetSource: 'http',
       });
+    });
+
+    it.each`
+      input                | presetName
+      ${'./foo'}           | ${'./foo'}
+      ${'./foo/bar'}       | ${'./foo/bar'}
+      ${'./foo.json5'}     | ${'./foo.json5'}
+      ${'../foo'}          | ${'../foo'}
+      ${'../../foo/bar'}   | ${'../../foo/bar'}
+      ${'./foo/../bar'}    | ${'./foo/../bar'}
+      ${'./a/../b'}        | ${'./a/../b'}
+      ${'/foo'}            | ${'/foo'}
+      ${'/foo/bar-baz.js'} | ${'/foo/bar-baz.js'}
+    `('parses relative preset $input', ({ input, presetName }) => {
+      expect(parsePreset(input as string)).toEqual({
+        repo: '',
+        params: undefined,
+        rawParams: undefined,
+        presetName,
+        presetPath: undefined,
+        presetSource: 'relative',
+        tag: undefined,
+      });
+    });
+
+    it('parses relative preset with params', () => {
+      expect(parsePreset('./foo/bar(param1, param2)')).toEqual({
+        repo: '',
+        params: ['param1', 'param2'],
+        rawParams: 'param1, param2',
+        presetName: './foo/bar',
+        presetPath: undefined,
+        presetSource: 'relative',
+        tag: undefined,
+      });
+    });
+
+    it('parses relative preset with params which contain a hash', () => {
+      expect(parsePreset('./foo(p#1)')).toEqual({
+        repo: '',
+        params: ['p#1'],
+        rawParams: 'p#1',
+        presetName: './foo',
+        presetPath: undefined,
+        presetSource: 'relative',
+        tag: undefined,
+      });
+    });
+
+    it('parses relative preset with params which contain a sub-expression', () => {
+      expect(parsePreset('./group({{ lower (env.TEAM) }})')).toEqual({
+        repo: '',
+        params: ['{{ lower (env.TEAM) }}'],
+        rawParams: '{{ lower (env.TEAM) }}',
+        presetName: './group',
+        presetPath: undefined,
+        presetSource: 'relative',
+        tag: undefined,
+      });
+    });
+
+    it('parses relative preset with empty params', () => {
+      expect(parsePreset('./foo()')).toEqual({
+        repo: '',
+        params: [''],
+        rawParams: '',
+        presetName: './foo',
+        presetPath: undefined,
+        presetSource: 'relative',
+        tag: undefined,
+      });
+    });
+
+    it.each`
+      input                 | reason
+      ${'./foo#v1'}         | ${'tag'}
+      ${'./foo(p1)#v1'}     | ${'tag after params'}
+      ${'./foo(p1'}         | ${'unclosed params'}
+      ${'./foo//bar'}       | ${'double slash'}
+      ${'./'}               | ${'no path'}
+      ${'/'}                | ${'no path'}
+      ${'./foo/'}           | ${'trailing slash'}
+      ${'../'}              | ${'no path'}
+      ${'/foo bar'}         | ${'space'}
+      ${'./.'}              | ${'final segment names a directory'}
+      ${'./..'}             | ${'final segment names a directory'}
+      ${'./a/..'}           | ${'final segment names a directory'}
+      ${'../a/..'}          | ${'final segment names a directory'}
+      ${'.././.'}           | ${'final segment names a directory'}
+      ${'/a/..'}            | ${'final segment names a directory'}
+      ${'./foo:bar'}        | ${'sub-preset'}
+      ${'./group(eslint))'} | ${'stray closing parenthesis in params'}
+      ${'./foo(a)(b)'}      | ${'two parameter lists'}
+      ${'./foo((a)'}        | ${'unclosed parenthesis in params'}
+      ${'local>./x'}        | ${'local source prefix'}
+      ${'github>../x'}      | ${'github source prefix'}
+      ${'npm>./x'}          | ${'npm source prefix'}
+      ${'local>npm>./x'}    | ${'chained source prefixes'}
+    `('throws for invalid relative preset $input ($reason)', ({ input }) => {
+      expect(() => parsePreset(input as string)).toThrow(PRESET_INVALID);
+    });
+
+    it.each`
+      input   | repo
+      ${'.'}  | ${'renovate-config-.'}
+      ${'..'} | ${'renovate-config-..'}
+    `('keeps npm fallback for $input', ({ input, repo }) => {
+      expect(parsePreset(input as string)).toEqual({
+        repo,
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+        tag: undefined,
+      });
+    });
+
+    it.each`
+      input           | repo
+      ${'npm>foo'}    | ${'renovate-config-foo'}
+      ${'npm>@myorg'} | ${'@myorg/renovate-config'}
+    `('parses npm preset $input', ({ input, repo }) => {
+      expect(parsePreset(input as string)).toEqual({
+        repo,
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+        tag: undefined,
+      });
+    });
+
+    it('parses scoped npm preset with explicit `npm>` prefix', () => {
+      expect(parsePreset('npm>@myorg/renovate-config')).toEqual({
+        repo: '@myorg/renovate-config',
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+        tag: undefined,
+      });
+    });
+
+    it.each`
+      input               | presetSource | repo
+      ${'npm>owner/repo'} | ${'local'}   | ${'owner/repo'}
+      ${'local>npm>foo'}  | ${'local'}   | ${'foo'}
+      ${'github>npm>foo'} | ${'github'}  | ${'foo'}
+    `(
+      'keeps legacy handling of $input',
+      ({ input, presetSource, repo }: Record<string, string>) => {
+        expect(parsePreset(input)).toEqual({
+          repo,
+          params: undefined,
+          rawParams: undefined,
+          presetName: 'default',
+          presetPath: undefined,
+          presetSource,
+          tag: undefined,
+        });
+      },
+    );
+
+    it('keeps legacy handling of `npm>` presets with a path', () => {
+      expect(parsePreset('npm>owner/repo//path/name')).toEqual({
+        repo: 'owner/repo',
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'name',
+        presetPath: 'path',
+        presetSource: 'local',
+        tag: undefined,
+      });
+    });
+  });
+
+  describe('isRelativePresetReference', () => {
+    it.each`
+      input                      | expected
+      ${'./foo'}                 | ${true}
+      ${'../foo'}                | ${true}
+      ${'/foo'}                  | ${true}
+      ${'.'}                     | ${false}
+      ${'..'}                    | ${false}
+      ${'github>a/b'}            | ${false}
+      ${'config:best-practices'} | ${false}
+      ${'a/b'}                   | ${false}
+    `('returns $expected for $input', ({ input, expected }) => {
+      expect(isRelativePresetReference(input as string)).toBe(expected);
     });
   });
 });

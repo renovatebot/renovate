@@ -320,6 +320,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+            '-e CI ' +
             '-e HELM_EXPERIMENTAL_OCI ' +
             '-e HELM_REGISTRY_CONFIG ' +
             '-e HELM_REPOSITORY_CONFIG ' +
@@ -327,7 +328,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool helm v3.7.2' +
             ' && ' +
             'install-tool helmfile 0.151.0' +
@@ -335,7 +336,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             'install-tool kustomize 5.0.0' +
             ' && ' +
             'helmfile deps -f helmfile.yaml' +
-            '"',
+            "'",
         },
       ],
     },

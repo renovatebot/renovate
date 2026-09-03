@@ -2,6 +2,7 @@ import type { MockInstance } from 'vitest';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import * as env from './env.ts';
 import type { ParseConfigOptions } from './types.ts';
 
@@ -34,7 +35,7 @@ describe('workers/global/config/parse/env', () => {
       );
     });
 
-    delete process.env.RENOVATE_CONFIG_MIGRATION;
+    vi.stubEnv('RENOVATE_CONFIG_MIGRATION', undefined);
 
     it('supports list single', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a' };
@@ -401,7 +402,7 @@ describe('workers/global/config/parse/env', () => {
       if (envName === '') {
         continue;
       }
-      const existing = envNameToOptions.get(envName) ?? [];
+      const existing = coerceArray(envNameToOptions.get(envName));
       existing.push(option.name);
       envNameToOptions.set(envName, existing);
     }

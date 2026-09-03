@@ -6,18 +6,14 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseNpmrc, renderNpmrc } from './npmrc-parser.ts';
 import type {
   NpmrcDocument,
   NpmrcLine,
   NpmrcLineEnding,
+  NpmrcResult,
   NpmrcSettingLine,
-} from './npmrc-parser.ts';
-import { parseNpmrc, renderNpmrc } from './npmrc-parser.ts';
-
-export interface NpmrcResult {
-  npmrc: string | undefined;
-  npmrcFileName: string | null;
-}
+} from './types.ts';
 
 interface SanitizedRepoNpmrc {
   content: string;
@@ -33,7 +29,7 @@ const environmentVariableReferenceRegex = regEx(
 );
 
 function containsEnvironmentVariableReference(value: unknown): boolean {
-  if (typeof value !== 'string') {
+  if (!isString(value)) {
     return false;
   }
 

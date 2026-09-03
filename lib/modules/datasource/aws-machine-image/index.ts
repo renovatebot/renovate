@@ -1,6 +1,7 @@
 import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -95,7 +96,7 @@ export class AwsMachineImageDatasource extends Datasource {
     const amiFilterCmd = this.getAmiFilterCommand(amiFilter);
     const ec2Client = this.getEC2Client(clientConfig);
     const matchingImages = await ec2Client.send(amiFilterCmd);
-    matchingImages.Images = matchingImages.Images ?? [];
+    matchingImages.Images = coerceArray(matchingImages.Images);
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate
         ? Date.parse(image1.CreationDate)

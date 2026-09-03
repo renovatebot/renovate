@@ -56,6 +56,8 @@ export type RepositoryResult =
   | 'done'
   /** Renovate performed branch-based automerge on one branch during its run */
   | 'automerged'
+  /** the repository is not yet onboarded, and its onboarding PR was processed during this run */
+  | 'onboarding'
   // common set of errors
   | (typeof SystemErrors)[number]
   | (typeof RepositoryErrors)[number]

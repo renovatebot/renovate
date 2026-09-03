@@ -1,5 +1,5 @@
-import type { NpmrcSectionLine, NpmrcSettingLine } from './npmrc-parser.ts';
 import { parseNpmrc, renderNpmrc } from './npmrc-parser.ts';
+import type { NpmrcSectionLine, NpmrcSettingLine } from './types.ts';
 
 function parseSetting(line: string): NpmrcSettingLine {
   const [parsedLine] = parseNpmrc(line).lines;

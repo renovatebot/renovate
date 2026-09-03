@@ -1,38 +1,12 @@
+import { isString } from '@sindresorhus/is';
 import ini from 'ini';
 import { regEx } from '../../../util/regex.ts';
-
-export type NpmrcLineEnding = '\n' | '\r\n' | '\r' | '';
-type DetectedNpmrcLineEnding = Exclude<NpmrcLineEnding, ''>;
-
-interface NpmrcBaseLine {
-  raw: string;
-  lineEnding: NpmrcLineEnding;
-}
-
-export interface NpmrcSettingLine extends NpmrcBaseLine {
-  type: 'setting';
-  section: string | null;
-  key: string;
-  isArray: boolean;
-  value: unknown;
-}
-
-export interface NpmrcSectionLine extends NpmrcBaseLine {
-  type: 'section';
-  name: string;
-}
-
-export interface NpmrcOtherLine extends NpmrcBaseLine {
-  type: 'other';
-}
-
-export type NpmrcLine = NpmrcSettingLine | NpmrcSectionLine | NpmrcOtherLine;
-
-export interface NpmrcDocument {
-  lines: NpmrcLine[];
-  detectedLineEnding: DetectedNpmrcLineEnding | null;
-  trailingLineEnding: NpmrcLineEnding;
-}
+import type {
+  DetectedNpmrcLineEnding,
+  NpmrcDocument,
+  NpmrcLine,
+  NpmrcLineEnding,
+} from './types.ts';
 
 /**
  * Follow `ini.parse`: indented section-like lines are settings, not sections.
@@ -93,7 +67,7 @@ function parseNpmrcLine(
   const rawSectionName = npmrcSectionRegex.exec(raw)?.groups?.section;
   if (rawSectionName !== undefined) {
     const sectionName = decodeNpmrcText(rawSectionName);
-    if (typeof sectionName !== 'string') {
+    if (!isString(sectionName)) {
       return { type: 'other', raw, lineEnding };
     }
 
@@ -111,7 +85,7 @@ function parseNpmrcLine(
   }
 
   const decodedKey = decodeNpmrcText(setting.key);
-  if (typeof decodedKey !== 'string') {
+  if (!isString(decodedKey)) {
     return { type: 'other', raw, lineEnding };
   }
 
@@ -137,7 +111,7 @@ export function parseNpmrc(content: string): NpmrcDocument {
   const lines: NpmrcLine[] = [];
   let detectedLineEnding: DetectedNpmrcLineEnding | null = null;
   let section: string | null = null;
-  const parts = content.split(regEx(/(\r\n|\r|\n)/));
+  const parts = content.split(regEx(/(?<lineEnding>\r\n|\r|\n)/));
 
   for (let index = 0; index < parts.length; index += 2) {
     const raw = parts[index];

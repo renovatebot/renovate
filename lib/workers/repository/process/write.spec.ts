@@ -40,6 +40,7 @@ const newBaseBranchSha = fakeSha('new_base_sha');
 
 beforeEach(() => {
   config = getConfig();
+  counts.clear();
   repoCache.getCache.mockReturnValue({});
   limits.getConcurrentPrsCount.mockResolvedValue(0);
   limits.getConcurrentBranchesCount.mockResolvedValue(0);
@@ -105,6 +106,53 @@ describe('workers/repository/process/write', () => {
       const res = await writeUpdates(config, branches);
       expect(res).toBe('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
+    });
+
+    it('counts vulnerability alert branches separately', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          baseBranch: 'main',
+          branchName: 'regular',
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+        {
+          baseBranch: 'main',
+          branchName: 'vulnerability',
+          isVulnerabilityAlert: true,
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+      ]);
+      repoCache.getCache.mockReturnValueOnce({});
+      branchWorker.processBranch.mockResolvedValue({
+        branchExists: true,
+        result: 'pr-created',
+      });
+      // each branch is checked twice: before processing, then after
+      scm.branchExists
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValue(true);
+      GlobalConfig.set({ dryRun: 'full' });
+
+      await writeUpdates(config, branches);
+
+      expect(counts.get('Branches')).toBe(1);
+      expect(counts.get('VulnerabilityBranches')).toBe(1);
+      expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(config, [
+        branches[0],
+      ]);
+      expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(config, [
+        branches[1],
+      ]);
+      expect(limits.getConcurrentBranchesCount).toHaveBeenCalledWith([
+        branches[0],
+      ]);
+      expect(limits.getConcurrentBranchesCount).toHaveBeenCalledWith([
+        branches[1],
+      ]);
     });
 
     it('increments branch counter', async () => {
