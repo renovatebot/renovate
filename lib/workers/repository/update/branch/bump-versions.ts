@@ -59,8 +59,8 @@ export async function bumpVersions(config: BranchConfig): Promise<void> {
 function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
   const seen = new Set<string>();
   const bumpVersions: BumpVersionConfig[] = [];
-  for (const upgrade of config.upgrades ?? []) {
-    for (const bumpVersionConfig of upgrade.bumpVersions ?? []) {
+  for (const upgrade of coerceArray(config.upgrades)) {
+    for (const bumpVersionConfig of coerceArray(upgrade.bumpVersions)) {
       const key = safeStringify(bumpVersionConfig);
       if (!seen.has(key)) {
         seen.add(key);
@@ -70,7 +70,7 @@ function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
   }
 
   if (!bumpVersions.length) {
-    bumpVersions.push(...(config.bumpVersions ?? []));
+    bumpVersions.push(...coerceArray(config.bumpVersions));
   }
 
   return bumpVersions;
