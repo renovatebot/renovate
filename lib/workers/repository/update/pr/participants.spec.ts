@@ -13,6 +13,7 @@ vi.mock('./code-owners.ts');
 const codeOwners = vi.mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {
+  // oxlint-disable-next-line renovate/prefer-partial-in-specs -- assigneesSampleSize/reviewersSampleSize intentionally set to null, which the type does not allow, to simulate an unset value
   const config: RenovateConfig = {
     assignees: ['a', 'b', '@c'],
     reviewers: ['x', 'y', '@z'],

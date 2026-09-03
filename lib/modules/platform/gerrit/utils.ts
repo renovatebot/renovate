@@ -1,6 +1,7 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
@@ -34,6 +35,7 @@ export function getGerritRepoUrl(
   repository: string,
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
+  username: string,
 ): string {
   const endpointUrl = parseUrl(endpoint);
   if (!endpointUrl) {
@@ -42,15 +44,15 @@ export function getGerritRepoUrl(
 
   const url =
     gitUrl === 'ssh'
-      ? createSshUrl(endpointUrl, repository)
+      ? createSshUrl(endpointUrl, repository, username)
       : createHttpUrl(endpointUrl, endpoint, repository);
   logger.trace({ url }, 'using URL based on configured endpoint');
 
   return url;
 }
 
-function createSshUrl(url: URL, repository: string): string {
-  return `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+function createSshUrl(url: URL, repository: string, username: string): string {
+  return `ssh://${username}@${url.hostname}:${DEFAULT_SSH_PORT}/${repository}`;
 }
 
 function createHttpUrl(url: URL, endpoint: string, repository: string): string {
@@ -112,8 +114,9 @@ export function mapGerritChangeToPr(
     title: change.subject,
     createdAt: convertGerritDateToISO(change.created),
     labels: change.hashtags,
-    reviewers:
-      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
+    reviewers: coerceArray(
+      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!),
+    ),
     bodyStruct: {
       hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
     },
@@ -138,12 +141,12 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
   let sourceBranch: string | undefined = undefined;
 
   if (change.current_revision) {
-    const re = regEx(/^Renovate-Branch: (.+)$/m);
+    const re = regEx(/^Renovate-Branch: (?<branch>.+)$/m);
     const currentRevision = change.revisions![change.current_revision];
     const message = currentRevision.commit_with_footers;
     // v8 ignore else -- TODO: add test #40625
     if (message) {
-      sourceBranch = re.exec(message)?.[1];
+      sourceBranch = re.exec(message)?.groups?.branch;
     }
   }
 
@@ -151,12 +154,12 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {
-  const msg = Array.from(change.messages ?? [])
+  const msg = Array.from(coerceArray(change.messages))
     .reverse()
     .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {
     // Gerrit adds a "Patch Set X:" prefix to comments
-    return msg.message.replace(/^Patch Set \d+:\n\n/, '');
+    return msg.message.replace(regEx(/^Patch Set \d+:\n\n/), '');
   }
   return undefined;
 }
@@ -173,7 +176,7 @@ export function mapBranchStatusToLabel(
     case 'red':
       return Math.min(...numbers);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- only reachable for the artificial 'UNKNOWN' state, which callers never pass */
   return label.default_value;
 }
 

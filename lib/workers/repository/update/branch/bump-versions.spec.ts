@@ -9,7 +9,7 @@ vi.mock('../../../../util/fs/index.ts');
 describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {
     it('should be noop if bumpVersions is undefined', async () => {
-      const config = {} as BranchConfig;
+      const config = partial<BranchConfig>();
       await bumpVersions(config);
 
       expect(config).toEqual({});
@@ -498,8 +498,12 @@ describe('workers/repository/update/branch/bump-versions', () => {
       await bumpVersions(config);
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { file: 'foo-bar' },
-        'bumpVersions(foo): Could not read file: an error',
+        {
+          file: 'foo-bar',
+          bumpVersionsDescr: 'bumpVersions(foo)',
+          err: new Error('an error'),
+        },
+        'bumpVersions: Could not read file',
       );
       expect(config).toMatchObject({
         updatedPackageFiles: [

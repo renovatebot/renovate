@@ -6,13 +6,13 @@ import type { z } from 'zod/v4';
 import { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
 import { acquireLock } from '../mutex.ts';
+import { coerceObject } from '../object.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
@@ -23,7 +23,6 @@ import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
 import { fetch, normalize, stream } from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
-
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
 import { getThrottle } from './throttle.ts';
@@ -67,9 +66,7 @@ export function applyDefaultHeaders(options: OptionsInit): void {
   const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
     ...options.headers,
-    'user-agent': compile(userAgentTemplate, {
-      renovateVersion: pkg.version,
-    }),
+    'user-agent': compile(userAgentTemplate, {}),
   };
 }
 
@@ -107,11 +104,11 @@ export abstract class HttpBase<
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'text' },
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
@@ -245,6 +242,8 @@ export abstract class HttpBase<
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
+      this.handleResponse(resolvedUrl, resCopy);
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
@@ -297,6 +296,10 @@ export abstract class HttpBase<
     throw err;
   }
 
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
+  }
+
   resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     let url = requestUrl;
 
@@ -341,10 +344,7 @@ export abstract class HttpBase<
     }) as Promise<HttpResponse<never>>;
   }
 
-  getText(
-    url: string | URL,
-    options: HttpOptions = {},
-  ): Promise<HttpResponse<string>> {
+  getText(url: string | URL, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request(url, { ...options, responseType: 'text' });
   }
 
@@ -412,7 +412,7 @@ export abstract class HttpBase<
   }
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
-    const opt = options ?? {};
+    const opt = coerceObject(options);
     return await this.getText(url, {
       headers: {
         Accept: 'text/plain',

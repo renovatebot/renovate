@@ -12,13 +12,13 @@ import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
 import { massageConfig } from './config/massage.ts';
 import { migrateConfig } from './config/migration.ts';
-import type { RenovateConfig } from './config/types.ts';
+import type { AllConfig, RenovateConfig } from './config/types.ts';
 import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
 import { getEnv } from './util/env.ts';
 import { add as addHostRule } from './util/host-rules.ts';
-import { regEx } from './util/regex.ts';
+import { regEx, regexEngineStatus } from './util/regex.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
@@ -42,6 +42,7 @@ async function partiallyGlobalInitialize(): Promise<void> {
   GlobalConfig.set(globalConfig);
 
   if (globalConfig.hostRules) {
+    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so `addHostRule` drops them here too, with a WARN, rather than leave them to be silently discarded at request time
     for (const hostRule of globalConfig.hostRules) {
       addHostRule(hostRule);
     }
@@ -56,8 +57,15 @@ async function validate(
   isPreset = false,
 ): Promise<void> {
   if (config.hostRules) {
+    // `allowedHeaders` enforces the checks regardless of whether it's global self-hosted administrator config, or repo config
+    // a global config file being validated brings its own `allowedHeaders`, and should be validated against it, like a real run would after parsing it
+    const allowedHeaders =
+      configType === 'global'
+        ? ((config as AllConfig).allowedHeaders ??
+          GlobalConfig.get('allowedHeaders'))
+        : GlobalConfig.get('allowedHeaders');
     for (const hostRule of config.hostRules) {
-      addHostRule(hostRule);
+      addHostRule(hostRule, { allowedHeaders });
     }
   }
   const { isMigrated, migratedConfig } = migrateConfig(config);
@@ -94,6 +102,7 @@ async function validate(
           );
       })
       .join('\n');
+    // oxlint-disable-next-line renovate/logger-static-message -- the multi-line, colorized diff must be interpolated to stay readable; as a metadata field it is JSON-escaped onto one line
     logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {
       returnVal = 1;
@@ -172,6 +181,18 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
   program.action(async (files, opts) => {
     const strict = opts.strict ?? false;
     let filesValidated = 0;
+
+    // without RE2, patterns are checked by RegExp, which accepts syntax RE2 rejects (e.g. lookahead)
+    if (regexEngineStatus.type === 'unavailable') {
+      logger.warn(
+        { err: regexEngineStatus.err },
+        'RE2 not usable, falling back to RegExp: regex validation may be inaccurate',
+      );
+    } else if (regexEngineStatus.type === 'ignored') {
+      logger.debug(
+        'RE2 ignored via RENOVATE_X_IGNORE_RE2: regex validation may be inaccurate',
+      );
+    }
 
     if (files.length) {
       let isGlobalConfig = true;
@@ -289,14 +310,12 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
 
   await program.parseAsync();
 })().catch((e) => {
-  if (e instanceof CommanderError) {
-    // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
-    if (
-      e.code === 'commander.helpDisplayed' ||
-      e.code === 'commander.version'
-    ) {
-      return;
-    }
+  // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
+  if (
+    e instanceof CommanderError &&
+    (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')
+  ) {
+    return;
   }
 
   // oxlint-disable-next-line no-console -- intentional: display critical error on CLI

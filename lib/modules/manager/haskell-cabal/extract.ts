@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex.ts';
+import type { CabalDependency } from './types.ts';
 
 const buildDependsRegex = regEx(
   /(?<buildDependsFieldName>build-depends[ \t]*:)/i,
@@ -38,12 +39,6 @@ export function countPackageNameLength(input: string): number | null {
     return null;
   }
   return idx;
-}
-
-export interface CabalDependency {
-  packageName: string;
-  currentValue: string;
-  replaceString: string;
 }
 
 /**

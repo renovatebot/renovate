@@ -1,9 +1,75 @@
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import {
+  type RenovateConfig,
+  type UpdateType,
+  UpdateTypesOptions,
+} from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
+import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
-import type { BranchConfig } from '../../../types.ts';
+import { calcLimit } from '../../../global/limits.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+
+/**
+ * The different categories of dependency updates to output, when providing the summary view.
+ *
+ * - `security`: if the upgrade is driven by a vulnerability alert
+ * - `${updateType}`: if it's set. I.e. `major`
+ * - `lockfileUpdate` when `isLockfileUpdate` is true, without an `updateType`
+ * - `other`: otherwise
+ */
+type SummaryCategory = UpdateType | 'security' | 'other';
+
+/** Priority order when rendering the `SummaryCategory`s in the summary view.
+ *
+ * NOTE that this is not exhaustive - this is only the priority order for rendering, and other categories, such as `other` are placed after.
+ */
+const SUMMARY_CATEGORY_PRIORITY_ORDER: readonly SummaryCategory[] = [
+  'security',
+  ...UpdateTypesOptions,
+  // ... anything else
+];
+
+interface ConcurrentLimit {
+  limit: number;
+  key: 'prConcurrentLimit' | 'branchConcurrentLimit';
+}
+
+/**
+ * Resolves the concurrent limit that governs how many of the expected Pull Requests can be open at once,
+ * reusing the same `calcLimit()` used to enforce these limits (see `lib/workers/global/limits.ts`).
+ *
+ * `branchConcurrentLimit` only takes priority when it's been explicitly configured (it's `null` by default,
+ * in which case `calcLimit()` silently inherits the value of `prConcurrentLimit`) and is actually more
+ * restrictive - otherwise we'd misattribute the limit to a setting the user never touched.
+ */
+function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
+  const configAsUpgrade: BranchUpgradeConfig = {
+    branchName: '',
+    manager: '',
+    prConcurrentLimit: config.prConcurrentLimit,
+    branchConcurrentLimit: config.branchConcurrentLimit,
+  };
+  const prConcurrentLimit = calcLimit([configAsUpgrade], 'prConcurrentLimit');
+  const branchConcurrentLimit = calcLimit(
+    [configAsUpgrade],
+    'branchConcurrentLimit',
+  );
+
+  if (
+    typeof config.branchConcurrentLimit === 'number' &&
+    branchConcurrentLimit > 0 &&
+    (prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit)
+  ) {
+    return {
+      limit: branchConcurrentLimit,
+      key: 'branchConcurrentLimit',
+    };
+  }
+
+  return { limit: prConcurrentLimit, key: 'prConcurrentLimit' };
+}
 
 export function getExpectedPrList(
   config: RenovateConfig,
@@ -15,15 +81,31 @@ export function getExpectedPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
-  prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
-  prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
+  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  const securityBranchCount = branches.filter(
+    (b) => b.isVulnerabilityAlert,
+  ).length;
+  const throttledBranchCount = branches.length - securityBranchCount;
+
+  const { limit: concurrentLimit, key: concurrentLimitKey } =
+    resolveConcurrentLimit(config);
+  if (concurrentLimit > 0 && concurrentLimit < throttledBranchCount) {
+    const securityNote =
+      securityBranchCount > 0
+        ? `, plus ${securityBranchCount} security update Pull Request${securityBranchCount > 1 ? 's' : ''} which ${securityBranchCount > 1 ? 'are' : 'is'} not subject to this limit`
+        : '';
+    prDesc += `With your current configuration, Renovate will create ${concurrentLimit} Pull Request${concurrentLimit > 1 ? 's' : ''}, up to a maximum of ${branches.length} over time (see [docs for \`${concurrentLimitKey}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimitKey.toLowerCase()}))${securityNote}:\n\n`;
+  } else {
+    prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
+    prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
+  }
 
   for (const branch of branches) {
-    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
+    const prTitleRe = regEx(/@(?<scope>[a-z]+\/[a-z]+)/);
     // TODO #22198
     prDesc += `<details>\n<summary>${branch.prTitle!.replace(
       prTitleRe,
-      '@&#8203;$1',
+      '@&#8203;$<scope>',
     )}</summary>\n\n`;
     if (branch.schedule?.length) {
       prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
@@ -63,25 +145,398 @@ export function getExpectedPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
-  // TODO: type (#22198)
-  const prHourlyLimit = config.prHourlyLimit!;
-  const commitHourlyLimit = config.commitHourlyLimit!;
+  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
+  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const securityBypassNote =
+    securityBranchCount > 0
+      ? ` Security update Pull Request${securityBranchCount > 1 ? 's are' : ' is'} not subject to this limit and will be created straight away.`
+      : '';
   if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
-    commitHourlyLimit < branches.length
+    commitHourlyLimit < throttledBranchCount
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See docs for \`commitHourlyLimit\` for details.\n\n`,
+      `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#commithourlylimit) for details.${securityBypassNote}\n\n`,
     );
   } else if (
     prHourlyLimit > 0 &&
     prHourlyLimit < 5 &&
-    prHourlyLimit < branches.length
+    prHourlyLimit < throttledBranchCount
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.\n\n`,
+      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.${securityBypassNote}\n\n`,
     );
   }
   return prDesc;
+}
+
+function getBranchUpgradeTypes(branch: BranchConfig): Set<SummaryCategory> {
+  if (branch.isVulnerabilityAlert) {
+    return new Set(['security']);
+  }
+  const types = new Set<SummaryCategory>();
+  for (const upgrade of branch.upgrades) {
+    if (upgrade.updateType) {
+      types.add(upgrade.updateType);
+    } else if (upgrade.isLockfileUpdate) {
+      types.add('lockfileUpdate');
+    } else {
+      types.add('other');
+    }
+  }
+  return types;
+}
+
+// Sort: default branch (empty string) first, then named branches alphabetically.
+function sortBaseBranches(bases: Iterable<string>): string[] {
+  return [...bases].sort((a, b) => {
+    if (a === b) {
+      /* v8 ignore next -- base branches are unique Record keys; equal comparison cannot occur */
+      return 0;
+    }
+    if (a === '') {
+      return -1;
+    }
+    if (b === '') {
+      return 1;
+    }
+    return a.localeCompare(b);
+  });
+}
+
+function describeSecurityGroup(groupBranches: BranchConfig[]): string {
+  const firstUpgrade = groupBranches[0].upgrades[0];
+  const depName = firstUpgrade?.depName ?? groupBranches[0].prTitle ?? '';
+  const updateType = firstUpgrade?.updateType ?? 'unknown';
+  const packageFiles = groupBranches
+    .map((b) => ({ file: b.packageFile ?? '', manager: b.manager }))
+    .filter((f) => f.file);
+  const uniqueManagers = new Set(packageFiles.map((f) => f.manager));
+
+  // Vulnerability alerts can match on datasource + packageName without a specific file (e.g. GitHub vulnerability alerts),
+  // so we need to handle an absent packageFile
+  if (packageFiles.length === 0) {
+    const branchManagers = new Set(groupBranches.map((b) => b.manager));
+    if (branchManagers.size === 1) {
+      return `- \`${depName}\`, (${[...branchManagers][0]}, ${updateType})\n`;
+    }
+
+    return `- \`${depName}\`, (${updateType}): ${[...branchManagers].sort().join(', ')}\n`;
+  }
+
+  if (packageFiles.length === 1) {
+    const file = packageFiles[0].file;
+    const [manager] = uniqueManagers;
+    return `- \`${depName}\`, (${manager}, ${updateType}): \`${file}\`\n`;
+  }
+
+  if (uniqueManagers.size === 1) {
+    const manager = [...uniqueManagers][0];
+    const fileLines = packageFiles
+      .map(({ file }) => `  - \`${file}\`\n`)
+      .join('');
+    return `- \`${depName}\`, (${manager}, ${updateType}):\n${fileLines}`;
+  }
+
+  const fileLines = packageFiles
+    .map(({ file, manager }) => `  - \`${file}\` (${manager})\n`)
+    .join('');
+  return `- \`${depName}\`, (${updateType}):\n${fileLines}`;
+}
+
+interface BranchStats {
+  // PR count per base branch, deduplicated by branchName.
+  prCountByBase: Record<string, number>;
+  // base -> manager -> type -> count, deduplicated by branchName+manager+type.
+  tableStats: Record<
+    string,
+    Record<string, Partial<Record<SummaryCategory, number>>>
+  >;
+  // All upgrade types seen anywhere — drives the table columns.
+  presentCategories: Set<SummaryCategory>;
+  // Security branches grouped by branchName.
+  securityGroups: Record<string, BranchConfig[]>;
+  prCount: number;
+}
+
+function collectBranchStats(branches: BranchConfig[]): BranchStats {
+  const prCountByBase: Record<string, number> = {};
+  const tableStats: Record<
+    string,
+    Record<string, Partial<Record<SummaryCategory, number>>>
+  > = {};
+  const presentTypes = new Set<SummaryCategory>();
+  const securityGroups: Record<string, BranchConfig[]> = {};
+  const seenPrs = new Set<string>();
+  const seenTableKeys = new Set<string>();
+
+  for (const branch of branches) {
+    const base = branch.baseBranch ?? '';
+    const { manager, branchName } = branch;
+    const branchTypes = getBranchUpgradeTypes(branch);
+
+    for (const type of branchTypes) {
+      presentTypes.add(type);
+    }
+
+    if (!seenPrs.has(branchName)) {
+      seenPrs.add(branchName);
+      prCountByBase[base] = (prCountByBase[base] ?? 0) + 1;
+    }
+
+    tableStats[base] ??= {};
+    const baseStats = tableStats[base];
+    baseStats[manager] ??= {};
+    const managerStats = baseStats[manager];
+    for (const type of branchTypes) {
+      const key = `${branchName}:${manager}:${type}`;
+      if (seenTableKeys.has(key)) {
+        continue;
+      }
+      seenTableKeys.add(key);
+      managerStats[type] ??= 0;
+      managerStats[type]++;
+    }
+
+    if (branch.isVulnerabilityAlert) {
+      securityGroups[branchName] ??= [];
+      securityGroups[branchName].push(branch);
+    }
+  }
+
+  return {
+    prCountByBase,
+    tableStats,
+    presentCategories: presentTypes,
+    securityGroups,
+    prCount: seenPrs.size,
+  };
+}
+
+function getCategoryColumns(
+  presentTypes: Set<SummaryCategory>,
+): SummaryCategory[] {
+  const cols: SummaryCategory[] = SUMMARY_CATEGORY_PRIORITY_ORDER.filter((t) =>
+    presentTypes.has(t),
+  );
+  // Append any present types not in the standard display order
+  // (e.g. lockfileUpdate, bump).
+  for (const t of presentTypes) {
+    if (t !== 'other' && !cols.includes(t)) {
+      cols.push(t);
+    }
+  }
+
+  if (presentTypes.has('other')) {
+    cols.push('other');
+  }
+
+  return cols;
+}
+
+function categoriesToColumnHeaders(cols: readonly string[]): string {
+  /* v8 ignore next -- branches always have at least one upgrade, so cols is never empty in practice */
+  if (cols.length === 0) {
+    return '';
+  }
+  return ` | ${cols.join(' | ')}`;
+}
+
+function renderRowCounts(
+  typeColumns: readonly SummaryCategory[],
+  typeCounts: Partial<Record<SummaryCategory, number>>,
+): string {
+  return categoriesToColumnHeaders(
+    typeColumns.map((t) => `${typeCounts[t] ?? 0}`),
+  );
+}
+
+function sumCategoryCounts(
+  rows: Partial<Record<SummaryCategory, number>>[],
+  categoryColumns: readonly SummaryCategory[],
+): Partial<Record<SummaryCategory, number>> {
+  const sum: Partial<Record<SummaryCategory, number>> = {};
+  for (const categoryCounts of rows) {
+    for (const category of categoryColumns) {
+      sum[category] = (sum[category] ?? 0) + (categoryCounts[category] ?? 0);
+    }
+  }
+  return sum;
+}
+
+export function getExpectedPrListSummary(
+  config: RenovateConfig,
+  branches: BranchConfig[],
+): string {
+  logger.debug('getExpectedPrListSummary()');
+  logger.trace({ config });
+  let prDesc = `\n### What to Expect\n\n`;
+  if (!branches.length) {
+    return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
+  }
+
+  const stats = collectBranchStats(branches);
+  const sortedBases = sortBaseBranches(Object.keys(stats.prCountByBase));
+  const hasMultipleBaseBranches = sortedBases.length > 1;
+
+  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
+  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const concurrentLimit = resolveConcurrentLimit(config);
+  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  const securityCount = Object.keys(stats.securityGroups).length;
+
+  if (hasMultipleBaseBranches) {
+    let total = 0;
+    const parts = sortedBases.map((base) => {
+      const count = stats.prCountByBase[base];
+      total += count;
+      const label = base ? `the \`${base}\` branch` : 'the default branch';
+      return `${count} Pull Request${count > 1 ? 's' : ''} to ${label}`;
+    });
+    const limitsNotice = determineLimitsNotice(
+      concurrentLimit,
+      prHourlyLimit,
+      commitHourlyLimit,
+      total - securityCount,
+      securityCount,
+    );
+    prDesc += `With your current configuration, Renovate will create ${parts.join(' and ')}${limitsNotice}:\n\n`;
+  } else {
+    const limitsNotice = determineLimitsNotice(
+      concurrentLimit,
+      prHourlyLimit,
+      commitHourlyLimit,
+      stats.prCount - securityCount,
+      securityCount,
+    );
+    prDesc += `With your current configuration, Renovate will create ${stats.prCount} Pull Request${stats.prCount > 1 ? 's' : ''}${limitsNotice}:\n\n`;
+  }
+
+  const categoryColumns = getCategoryColumns(stats.presentCategories);
+  if (hasMultipleBaseBranches) {
+    prDesc += `| Branch | Manager${categoriesToColumnHeaders(categoryColumns)} |\n`;
+    prDesc += `| --- | ---${categoryColumns.map(() => ' | ---').join('')} |\n`;
+    for (const base of sortedBases) {
+      const label = base || '$default';
+      for (const [manager, typeCounts] of Object.entries(
+        stats.tableStats[base],
+      )) {
+        prDesc += `| ${label} | ${manager}${renderRowCounts(categoryColumns, typeCounts)} |\n`;
+      }
+    }
+    const sumRow = sumCategoryCounts(
+      Object.values(stats.tableStats).flatMap((b) => Object.values(b)),
+      categoryColumns,
+    );
+    prDesc += `| **Total** | ${renderRowCounts(categoryColumns, sumRow)} |\n`;
+  } else {
+    prDesc += `| Manager${categoriesToColumnHeaders(categoryColumns)} |\n`;
+    prDesc += `| ---${categoryColumns.map(() => ' | ---').join('')} |\n`;
+    for (const [manager, typeCounts] of Object.entries(
+      stats.tableStats[sortedBases[0]],
+    )) {
+      prDesc += `| ${manager}${renderRowCounts(categoryColumns, typeCounts)} |\n`;
+    }
+    const sumRow = sumCategoryCounts(
+      Object.values(stats.tableStats[sortedBases[0]]),
+      categoryColumns,
+    );
+    prDesc += `| **Total**${renderRowCounts(categoryColumns, sumRow)} |\n`;
+  }
+
+  prDesc += `\n<small>Note that a single PR can update multiple files and/or managers, so the above rows may not align with the number of PRs being listed above.</small>\n`;
+
+  // provide a summary of the given security updates, as they're likely more important to the user
+  if (Object.keys(stats.securityGroups).length) {
+    prDesc += `\n**Security updates**:\n\n`;
+    for (const groupBranches of Object.values(stats.securityGroups)) {
+      prDesc += describeSecurityGroup(groupBranches);
+    }
+  }
+
+  const throttledPrCount = stats.prCount - securityCount;
+  const securityBypassNote =
+    securityCount > 0
+      ? ` Security update Pull Request${securityCount > 1 ? 's are' : ' is'} not subject to this limit and will be created straight away.`
+      : '';
+
+  if (concurrentLimit.limit > 0 && concurrentLimit.limit < throttledPrCount) {
+    const notice =
+      concurrentLimit.key === 'branchConcurrentLimit'
+        ? `Renovate will only work on ${concurrentLimit.limit} branch${concurrentLimit.limit > 1 ? 'es' : ''} at a time, so not all Pull Requests will be opened straight away`
+        : `Renovate will only keep ${concurrentLimit.limit} Pull Request${concurrentLimit.limit > 1 ? 's' : ''} open at a time, so not all of the above will be opened straight away`;
+    prDesc += emojify(
+      `\n\n:children_crossing: ${notice}. See [docs for \`${concurrentLimit.key}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimit.key.toLowerCase()}) for details.${securityBypassNote}\n\n`,
+    );
+  }
+
+  if (
+    commitHourlyLimit > 0 &&
+    commitHourlyLimit < 5 &&
+    commitHourlyLimit < throttledPrCount
+  ) {
+    prDesc += emojify(
+      `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#commithourlylimit) for details.${securityBypassNote}\n\n`,
+    );
+  } else if (
+    prHourlyLimit > 0 &&
+    prHourlyLimit < 5 &&
+    prHourlyLimit < throttledPrCount
+  ) {
+    prDesc += emojify(
+      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.${securityBypassNote}\n\n`,
+    );
+  }
+  return prDesc;
+}
+
+function determineLimitsNotice(
+  concurrentLimit: ConcurrentLimit,
+  prHourlyLimit: number,
+  commitHourlyLimit: number,
+  prCount: number,
+  securityCount: number,
+): string {
+  const clauses: string[] = [];
+
+  if (concurrentLimit.limit > 0 && concurrentLimit.limit < prCount) {
+    clauses.push(
+      concurrentLimit.key === 'branchConcurrentLimit'
+        ? `a maximum of ${concurrentLimit.limit} branch${concurrentLimit.limit > 1 ? 'es' : ''} open at a time`
+        : `a maximum of ${concurrentLimit.limit} Pull Request${concurrentLimit.limit > 1 ? 's' : ''} open at a time`,
+    );
+  }
+
+  if (
+    commitHourlyLimit > 0 &&
+    commitHourlyLimit < 5 &&
+    commitHourlyLimit < prCount
+  ) {
+    clauses.push(
+      `a maximum of ${commitHourlyLimit} PR${commitHourlyLimit > 1 ? 's' : ''}/rebase${commitHourlyLimit > 1 ? 's' : ''} per hour`,
+    );
+  } else if (
+    prHourlyLimit > 0 &&
+    prHourlyLimit < 5 &&
+    prHourlyLimit < prCount
+  ) {
+    clauses.push(
+      `a maximum of ${prHourlyLimit} PR${prHourlyLimit > 1 ? 's' : ''} per hour`,
+    );
+  }
+
+  if (!clauses.length) {
+    if (commitHourlyLimit === 0 && prHourlyLimit === 0) {
+      return ' (with no configured maximum of PRs per hour)';
+    }
+    return '';
+  }
+
+  const securityNote =
+    securityCount > 0
+      ? `, plus ${securityCount} security update${securityCount > 1 ? 's' : ''} which ${securityCount > 1 ? "aren't" : "isn't"} subject to these limits`
+      : '';
+
+  return emojify(` (at ${clauses.join(' and ')}${securityNote})`);
 }

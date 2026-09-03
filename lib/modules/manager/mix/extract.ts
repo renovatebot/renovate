@@ -11,7 +11,7 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
-  /{:(?<app>\w+)(\s*,\s*"(?<requirement>[^"]+)")?(\s*,\s*(?<opts>[^}]+))?}/gm,
+  /{:(?<app>\w+)(?:\s*,\s*"(?<requirement>[^"]+)")?(?:\s*,\s*(?<opts>[^}]+))?}/gm,
 );
 const gitRegexp = regEx(/git:\s*"(?<value>[^"]+)"/);
 const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
@@ -24,7 +24,7 @@ const lockedVersionRegExp = regEx(
 );
 const hexRegexp = regEx(/hex:\s*(?:"(?<strValue>[^"]+)"|:(?<atomValue>\w+))/);
 const onlyValueRegexp = regEx(/only:\s*(?<only>\[[^\]]*\]|:\w+)/);
-const onlyEnvironmentsRegexp = regEx(/:(\w+)/gm);
+const onlyEnvironmentsRegexp = regEx(/:(?<env>\w+)/gm);
 
 export async function extractPackageFile(
   content: string,
@@ -42,9 +42,8 @@ export async function extractPackageFile(
         depBuffer += `${contentArr[lineNumber]}\n`;
         lineNumber += 1;
       } while (contentArr[lineNumber].trim() !== 'end');
-      let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
-      while (depMatchGroups) {
-        const { app, requirement, opts } = depMatchGroups;
+      for (const depMatch of depBuffer.matchAll(depMatchRegExp)) {
+        const { app, requirement, opts } = depMatch.groups!;
         const github = githubRegexp.exec(opts)?.groups?.value;
         const git = gitRegexp.exec(opts)?.groups?.value;
         const ref = refRegexp.exec(opts)?.groups?.value;
@@ -55,10 +54,9 @@ export async function extractPackageFile(
 
         const onlyValue = onlyValueRegexp.exec(opts)?.groups?.only;
         const onlyEnvironments = [];
-        let match;
         if (onlyValue) {
-          while ((match = onlyEnvironmentsRegexp.exec(onlyValue)) !== null) {
-            onlyEnvironments.push(match[1]);
+          for (const match of onlyValue.matchAll(onlyEnvironmentsRegexp)) {
+            onlyEnvironments.push(match.groups!.env);
           }
         }
 
@@ -94,7 +92,6 @@ export async function extractPackageFile(
 
         deps.set(app, dep);
         logger.trace({ dep }, `setting ${app}`);
-        depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       }
     }
   }

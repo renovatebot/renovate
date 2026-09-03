@@ -233,9 +233,9 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
         const version =
           splitted.length === 3
             ? {
-                major: Number(splitted[0]),
-                minor: Number(splitted[1]),
-                patch: Number(splitted[2]),
+                major: parseInt(splitted[0], 10),
+                minor: parseInt(splitted[1], 10),
+                patch: parseInt(splitted[2], 10),
               }
             : null;
 

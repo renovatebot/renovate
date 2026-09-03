@@ -1,33 +1,34 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import {
   BUNDLER_INVALID_CREDENTIALS,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
-import * as _bundlerHostRules from './host-rules.ts';
 import { updateArtifacts } from './index.ts';
 
 const datasource = vi.mocked(_datasource);
-const bundlerHostRules = vi.mocked(_bundlerHostRules);
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-vi.mock('./host-rules.ts');
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -49,10 +50,9 @@ const updatedGemfileLock = {
 describe('modules/manager/bundler/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      delete process.env.GEM_HOME;
+      vi.stubEnv('GEM_HOME', undefined);
 
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
-      bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
       docker.resetPrefetchedImages();
 
       GlobalConfig.set(adminConfig);
@@ -198,7 +198,7 @@ describe('modules/manager/bundler/artifacts', () => {
             ...config,
             updateType: 'patch',
             postUpdateOptions: [
-              ...(config.postUpdateOptions ?? []),
+              ...coerceArray(config.postUpdateOptions),
               'bundlerConservative',
             ],
           },
@@ -286,11 +286,12 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -298,7 +299,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -345,11 +346,12 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.5' +
               ' && ' +
               'install-tool bundler 3.2.1' +
@@ -357,7 +359,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -406,11 +408,12 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.3.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -418,7 +421,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -431,18 +434,12 @@ describe('modules/manager/bundler/artifacts', () => {
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
         });
-        bundlerHostRules.findAllAuthenticatable.mockReturnValue([
-          {
-            hostType: 'bundler',
-            matchHost: 'gems-private.com',
-            resolvedHost: 'gems-private.com',
-            username: 'some-user',
-            password: 'some-password',
-          },
-        ]);
-        bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
-          'some-user:some-password',
-        );
+        hostRules.add({
+          hostType: 'rubygems',
+          matchHost: 'gems-private.com',
+          username: 'some-user',
+          password: 'some-password',
+        });
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
@@ -466,12 +463,13 @@ describe('modules/manager/bundler/artifacts', () => {
               'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
               '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
               '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e CI ' +
               '-e BUNDLE_GEMS___PRIVATE__COM ' +
               '-e GEM_HOME ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -479,7 +477,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });

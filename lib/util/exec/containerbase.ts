@@ -4,10 +4,18 @@ import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
+import { coerceArray } from '../array.ts';
 import { getEnv } from '../env.ts';
+import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
+  apm: {
+    datasource: 'github-releases',
+    packageName: 'microsoft/apm',
+    versioning: 'semver',
+    extractVersion: '^v(?<version>.*)$',
+  },
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
@@ -77,6 +85,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
   flux: {
     datasource: 'github-releases',
     packageName: 'fluxcd/flux2',
+    versioning: 'semver',
+  },
+  gh: {
+    datasource: 'github-releases',
+    packageName: 'cli/cli',
     versioning: 'semver',
   },
   gleam: {
@@ -289,10 +302,8 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (isString(latest)) {
-    if (versioningApi.isGreaterThan(version, latest)) {
-      return false;
-    }
+  if (isString(latest) && versioningApi.isGreaterThan(version, latest)) {
+    return false;
   }
   return true;
 }
@@ -313,7 +324,7 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint.replace(/^=+/, '').trim();
+        return constraint.replace(regEx(/^=+/), '').trim();
       }
     } else {
       logger.warn(
@@ -325,7 +336,7 @@ export async function resolveConstraint(
   }
 
   const pkgReleases = await getPkgReleases(toolConfig);
-  const releases = pkgReleases?.releases ?? [];
+  const releases = coerceArray(pkgReleases?.releases);
 
   if (!releases?.length) {
     logger.warn({ toolConfig }, 'No tool releases found.');

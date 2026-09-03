@@ -1,7 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
@@ -103,7 +103,7 @@ function updatePinInJson(
 
   // Find the pin block by its unique identity value
   const identityPattern = regEx(
-    `"identity"\\s*:\\s*"${escapeRegExp(pin.identity)}"`,
+    `"identity"\\s*:\\s*"${RegExp.escape(pin.identity)}"`,
   );
   const identityMatch = identityPattern.exec(updated);
   /* istanbul ignore if: identity always exists after JSON parse + matchPinForDep */
@@ -141,13 +141,13 @@ function updatePinInJson(
   let pinBlock = updated.slice(blockStart, blockEnd);
 
   // Replace version within the pin block
-  const versionPattern = regEx(/("version"\s*:\s*)"[^"]*"/);
-  pinBlock = pinBlock.replace(versionPattern, `$1"${newVersion}"`);
+  const versionPattern = regEx(/(?<prefix>"version"\s*:\s*)"[^"]*"/);
+  pinBlock = pinBlock.replace(versionPattern, `$<prefix>"${newVersion}"`);
 
   // Replace revision within the pin block if we have a new one
   if (newRevision) {
-    const revisionPattern = regEx(/("revision"\s*:\s*)"[^"]*"/);
-    pinBlock = pinBlock.replace(revisionPattern, `$1"${newRevision}"`);
+    const revisionPattern = regEx(/(?<prefix>"revision"\s*:\s*)"[^"]*"/);
+    pinBlock = pinBlock.replace(revisionPattern, `$<prefix>"${newRevision}"`);
   }
 
   updated = updated.slice(0, blockStart) + pinBlock + updated.slice(blockEnd);

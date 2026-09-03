@@ -1,5 +1,6 @@
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
@@ -7,8 +8,6 @@ import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import type { PlatformResult, RepoParams } from '../types.ts';
 import * as bitbucket from './index.ts';
 import type { PrTask } from './schema.ts';
-
-vi.mock('../../../util/host-rules.ts');
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -20,14 +19,14 @@ const pr = {
   summary: { raw: 'summary' },
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
+  draft: false,
 };
 
 describe('modules/platform/bitbucket/index', () => {
   beforeEach(() => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    hostRules.clear();
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'abc',
       password: '123',
     });
@@ -80,7 +79,11 @@ describe('modules/platform/bitbucket/index', () => {
       });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
+        {
+          endpoint: 'endpoint',
+          defaultEndpoint: 'https://api.bitbucket.org/',
+        },
+        'Init: Bitbucket Cloud endpoint should generally be the default but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
     });
 
@@ -256,7 +259,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('works with only API token', async () => {
       hostRules.clear();
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         password: 'ATATIAMACONTAINERTOKEN3407361359',
       });
       httpMock
@@ -280,7 +283,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('works with only access token', async () => {
       hostRules.clear();
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         token: 'abc',
       });
       httpMock
@@ -339,9 +342,9 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         })
-        .get('/2.0/repositories/some/repo/branching-model')
+        .get('/2.0/repositories/some/repo/effective-branching-model')
         .reply(200, {
-          development: { name: 'develop', branch: { name: 'develop' } },
+          development: { name: 'develop' },
         });
 
       const res = await bitbucket.initRepo({
@@ -363,10 +366,8 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         })
-        .get('/2.0/repositories/some/repo/branching-model')
-        .reply(200, {
-          development: { name: 'develop' },
-        });
+        .get('/2.0/repositories/some/repo/effective-branching-model')
+        .reply(200, {});
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
@@ -588,225 +589,41 @@ describe('modules/platform/bitbucket/index', () => {
   });
 
   describe('findIssue()', () => {
-    it('does not throw', async () => {
-      httpMock.scope(baseUrl).get('/2.0/user').reply(200, { uuid: '12345' });
-      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.uuid%3D%2212345%22',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        });
-      expect(await bitbucket.findIssue('title')).toMatchSnapshot();
-    });
-
-    it('returns null if no issues', async () => {
-      const scope = await initRepoMock(
-        {
-          repository: 'some/empty',
-        },
-        { has_issues: true },
-      );
-      scope
-        .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [],
-        });
+    it('returns null as issues are unsupported', async () => {
+      await initRepoMock();
       expect(await bitbucket.findIssue('title')).toBeNull();
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Bitbucket Cloud has removed its issue tracker',
+        ),
+      );
     });
   });
 
   describe('ensureIssue()', () => {
-    it('updates existing issues', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        })
-        .put('/2.0/repositories/some/repo/issues/25')
-        .reply(200)
-        .put('/2.0/repositories/some/repo/issues/26')
-        .reply(200);
+    it('returns null as issues are unsupported', async () => {
+      await initRepoMock();
       expect(
         await bitbucket.ensureIssue({ title: 'title', body: 'body' }),
-      ).toBe('updated');
-    });
-
-    it('creates new issue', async () => {
-      const scope = await initRepoMock(
-        { repository: 'some/empty' },
-        { has_issues: true },
-      );
-      scope
-        .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, { values: [] })
-        .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, { values: [] })
-        .post('/2.0/repositories/some/empty/issues')
-        .reply(200);
-      expect(
-        await bitbucket.ensureIssue({
-          title: 'title',
-          reuseTitle: 'old-title',
-          body: 'body',
-        }),
-      ).toBe('created');
-    });
-
-    it('noop for existing issue', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        })
-        .put('/2.0/repositories/some/repo/issues/26')
-        .reply(200);
-      expect(
-        await bitbucket.ensureIssue({
-          title: 'title',
-          body: '\n content \n',
-        }),
       ).toBeNull();
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { title: 'title' },
+        'Cannot ensure issue',
+      );
     });
   });
 
   describe('ensureIssueClosing()', () => {
-    it('does not throw for disabled issues', async () => {
-      await initRepoMock({ repository: 'some/repo' }, { has_issues: false });
-      await expect(bitbucket.ensureIssueClosing('title')).toResolve();
-    });
-
-    it('closes issue', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        })
-        .put('/2.0/repositories/some/repo/issues/25')
-        .reply(200)
-        .put('/2.0/repositories/some/repo/issues/26')
-        .reply(200);
+    it('does not throw as issues are unsupported', async () => {
+      await initRepoMock();
       await expect(bitbucket.ensureIssueClosing('title')).toResolve();
     });
   });
 
   describe('getIssueList()', () => {
-    it('returns empty array for disabled issues', async () => {
-      await initRepoMock({ repository: 'some/repo' }, { has_issues: false });
+    it('returns empty array as issues are unsupported', async () => {
+      await initRepoMock();
       expect(await bitbucket.getIssueList()).toEqual([]);
-    });
-
-    it('get issues', async () => {
-      httpMock.scope(baseUrl).get('/2.0/user').reply(200, { uuid: '12345' });
-      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get('/2.0/repositories/some/repo/issues')
-        .query({
-          q: '(state = "new" OR state = "open") AND reporter.uuid="12345"',
-        })
-        .reply(200, {
-          values: [
-            {
-              id: 25,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-            {
-              id: 26,
-              title: 'title',
-              kind: 'task',
-              content: { raw: 'content' },
-            },
-          ],
-        });
-      const issues = await bitbucket.getIssueList();
-
-      expect(issues).toHaveLength(2);
-      expect(issues).toMatchSnapshot();
-    });
-
-    it('does not throw', async () => {
-      const scope = await initRepoMock({}, { has_issues: true });
-      scope
-        .get('/2.0/repositories/some/repo/issues')
-        .query({
-          q: '(state = "new" OR state = "open")',
-        })
-        .reply(500, {});
-      const issues = await bitbucket.getIssueList();
-
-      expect(issues).toHaveLength(0);
     });
   });
 
@@ -1174,6 +991,36 @@ describe('modules/platform/bitbucket/index', () => {
         platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
+        draftPR: false,
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('posts draft PR', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
+        )
+        .reply(200, {
+          values: [],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: true,
+        },
+        draftPR: true,
       });
       expect(pr?.number).toBe(5);
     });

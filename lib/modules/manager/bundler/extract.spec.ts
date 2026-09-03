@@ -21,15 +21,6 @@ const rubyCIGemfile = Fixtures.get('Gemfile.rubyci');
 const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
 const gitlabFossGemfile = Fixtures.get('Gemfile.gitlab-foss');
 const sourceBlockGemfile = Fixtures.get('Gemfile.sourceBlock');
-const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
-  'Gemfile.sourceBlockWithNewLines.lock',
-);
-const sourceBlockWithNewLinesGemfile = Fixtures.get(
-  'Gemfile.sourceBlockWithNewLines',
-);
-const sourceBlockWithGroupsGemfile = Fixtures.get(
-  'Gemfile.sourceBlockWithGroups',
-);
 
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -120,6 +111,46 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parse source blocks with spaces in Gemfile', async () => {
+    const sourceBlockWithNewLinesGemfileLock = codeBlock`
+      GEM
+        remote: https://rubygems.org/
+        specs:
+          ast (2.4.0)
+          brakeman (4.4.0)
+          jaro_winkler (1.5.4)
+          parallel (1.19.1)
+          parser (2.7.0.2)
+            ast (~> 2.4.0)
+          rainbow (3.0.0)
+          rubocop (0.68.1)
+            jaro_winkler (~> 1.5.1)
+            parallel (~> 1.10)
+            parser (>= 2.5, != 2.5.1.1)
+            rainbow (>= 2.2.2, < 4.0)
+            ruby-progressbar (~> 1.7)
+            unicode-display_width (>= 1.4.0, < 1.6)
+          ruby-progressbar (1.10.1)
+          unicode-display_width (1.5.0)
+
+      PLATFORMS
+        ruby
+
+      DEPENDENCIES
+        brakeman!
+        rubocop!
+
+      BUNDLED WITH
+         1.16.6
+    `;
+    const sourceBlockWithNewLinesGemfile = codeBlock`
+      # frozen_string_literal: true
+
+      source 'https://rubygems.org' do
+        gem 'rubocop'
+
+        gem 'brakeman'
+      end
+    `;
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithNewLinesGemfileLock);
     const res = await extractPackageFile(
       sourceBlockWithNewLinesGemfile,
@@ -130,6 +161,20 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parses source blocks with groups in Gemfile', async () => {
+    const sourceBlockWithGroupsGemfile = codeBlock`
+      source 'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/' do
+        gem 'sfn_my_dep1', "~> 1"
+        gem 'sfn_my_dep2', "~> 1"
+
+        group :test, :development do
+          gem 'internal_test_gem', "~> 1"
+        end
+
+        group :production do
+          gem 'internal_production_gem', "~> 1"
+        end
+      end
+    `;
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithGroupsGemfile);
     const res = await extractPackageFile(
       sourceBlockWithGroupsGemfile,
@@ -300,5 +345,136 @@ describe('modules/manager/bundler/extract', () => {
         },
       ],
     });
+  });
+
+  it('ignores a bare source variable that is not defined', async () => {
+    const undefinedSourceGemfile = codeBlock`
+      source undefined_var
+
+      gem 'foo'
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(undefinedSourceGemfile);
+    const res = await extractPackageFile(undefinedSourceGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      registryUrls: [],
+      deps: [{ depName: 'foo' }],
+    });
+  });
+
+  it('ignores an inline gem source with no value', async () => {
+    const emptyInlineSourceGemfile = codeBlock`
+      gem 'foo', require: false, source:
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(emptyInlineSourceGemfile);
+    const res = await extractPackageFile(emptyInlineSourceGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [{ depName: 'foo' }],
+    });
+  });
+
+  it('skips sourceUrl for a non-http git ref in Gemfile', async () => {
+    const sshGitRefGemfile = codeBlock`
+      gem 'foo', git: 'git@github.com:foo/foo.git', tag: 'v1.0.0'
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(sshGitRefGemfile);
+    const res = await extractPackageFile(sshGitRefGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          packageName: 'git@github.com:foo/foo.git',
+          currentValue: 'v1.0.0',
+          datasource: 'git-refs',
+        },
+      ],
+    });
+    expect(res?.deps[0].sourceUrl).toBeUndefined();
+  });
+
+  it('parses a ruby version nested inside a group block', async () => {
+    const rubyInGroupGemfile = codeBlock`
+      group :test do
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInGroupGemfile);
+    const res = await extractPackageFile(rubyInGroupGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('parses a ruby version nested inside a source block', async () => {
+    const rubyInSourceBlockGemfile = codeBlock`
+      source 'https://gems.example.com' do
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInSourceBlockGemfile);
+    const res = await extractPackageFile(rubyInSourceBlockGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('parses a ruby version nested inside a platforms block', async () => {
+    const rubyInPlatformsGemfile = codeBlock`
+      platforms :jruby do
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInPlatformsGemfile);
+    const res = await extractPackageFile(rubyInPlatformsGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('ignores an empty platforms block', async () => {
+    const emptyPlatformsGemfile = codeBlock`
+      gem 'foo'
+      platforms :jruby do
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(emptyPlatformsGemfile);
+    const res = await extractPackageFile(emptyPlatformsGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([{ depName: 'foo' }]);
+  });
+
+  it('parses a ruby version nested inside an if block', async () => {
+    const rubyInIfGemfile = codeBlock`
+      if RUBY_VERSION >= '3.0'
+        ruby '2.7.1'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(rubyInIfGemfile);
+    const res = await extractPackageFile(rubyInIfGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([
+      { depName: 'ruby', currentValue: '2.7.1' },
+    ]);
+    expect(res?.deps[0].managerData?.lineNumber).toBeNaN();
+  });
+
+  it('ignores an empty if block', async () => {
+    const emptyIfGemfile = codeBlock`
+      gem 'foo'
+      if RUBY_VERSION >= '3.0'
+      end
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(emptyIfGemfile);
+    const res = await extractPackageFile(emptyIfGemfile, 'Gemfile');
+    expect(res?.deps).toMatchObject([{ depName: 'foo' }]);
   });
 });

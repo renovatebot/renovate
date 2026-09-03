@@ -82,7 +82,7 @@ export default defineConfig(() =>
   mergeConfig(
     {
       resolve: { tsconfigPaths: true },
-      oxc: { include: /\.([cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
+      oxc: { include: /\.(?:[cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
@@ -94,6 +94,7 @@ export default defineConfig(() =>
         ],
         reporters,
         mockReset: true,
+        unstubEnvs: true,
         coverage: {
           provider: 'v8',
           skipFull: !ci,
@@ -132,6 +133,8 @@ export default defineConfig(() =>
           'dist/**/*',
           'tools/docs/test/**/*.test.mjs',
           '.worktrees/**/*',
+          '.claude/worktrees/**/*',
+          '.pnpm-store/**/*',
         ],
       },
     }),

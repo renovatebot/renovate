@@ -1,7 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
-import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages.ts';
+import {
+  CONFIG_VALIDATION,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+} from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import * as _packageCache from '../../util/cache/package/index.ts';
@@ -244,15 +247,38 @@ describe('config/presets/index', () => {
     it('works with valid', async () => {
       // @ts-expect-error -- invalid config
       config.foo = 1;
-      config.ignoreDeps = [];
       config.extends = [':pinVersions'];
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
+        description: [
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
+        ],
         foo: 1,
-        ignoreDeps: [],
         rangeStrategy: 'pin',
       });
       expect(res.rangeStrategy).toBe('pin');
+    });
+
+    it('replaces preset descriptions with overrideDescription', async () => {
+      config.overrideDescription = ['Pin everything.'];
+      config.extends = [':pinVersions'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        description: ['Pin everything.'],
+        rangeStrategy: 'pin',
+      });
+    });
+
+    it('ignores empty overrideDescription', async () => {
+      config.overrideDescription = [];
+      config.extends = [':pinVersions'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        description: [
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
+        ],
+        rangeStrategy: 'pin',
+      });
     });
 
     it('throws if valid and invalid', async () => {
@@ -303,6 +329,24 @@ describe('config/presets/index', () => {
       });
     });
 
+    it('resolves pin GitHub Action digests to SemVer', async () => {
+      config.extends = ['helpers:pinGitHubActionDigestsToSemver'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+
+      expect(res.packageRules).toEqual([
+        {
+          matchDepTypes: ['action', 'workflow'],
+          pinDigests: true,
+        },
+        {
+          matchDepTypes: ['action', 'workflow'],
+          extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
+          versioning:
+            'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
+        },
+      ]);
+    });
+
     it('resolves eslint', async () => {
       config.extends = ['packages:eslint'];
       const { config: res } = await presets.resolveConfigPresets(config);
@@ -316,7 +360,7 @@ describe('config/presets/index', () => {
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(22);
+      expect(res.matchPackageNames).toHaveLength(23);
     });
 
     it('resolves nested groups', async () => {
@@ -325,7 +369,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(22);
+      expect(rule.matchPackageNames).toHaveLength(23);
     });
 
     it('migrates automerge in presets', async () => {
@@ -607,6 +651,148 @@ describe('config/presets/index', () => {
       await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
         PLATFORM_RATE_LIMIT_EXCEEDED,
       );
+    });
+
+    describe('relative presets', () => {
+      it('resolves a relative preset against its parent', async () => {
+        config.extends = ['github>some/repo#v1.0.0'];
+        gitHub.getPreset.mockResolvedValueOnce({
+          extends: ['./system/registries'],
+        });
+        gitHub.getPreset.mockResolvedValueOnce({ prCreation: 'not-pending' });
+
+        const { config: res } = await presets.resolveConfigPresets(config);
+
+        expect(res).toEqual({ prCreation: 'not-pending' });
+        expect(gitHub.getPreset).toHaveBeenCalledWith({
+          repo: 'some/repo',
+          presetPath: 'system',
+          presetName: 'registries',
+          tag: 'v1.0.0',
+        });
+      });
+
+      it('terminates on self-referencing relative presets', async () => {
+        config.extends = ['github>some/repo#v1.0.0'];
+        gitHub.getPreset.mockResolvedValue({
+          extends: ['./default'],
+          prCreation: 'not-pending',
+        });
+
+        const { config: res } = await presets.resolveConfigPresets(config);
+
+        expect(res).toEqual({ prCreation: 'not-pending' });
+        expect(gitHub.getPreset).toHaveBeenCalledTimes(1);
+      });
+
+      it('fetches the root default preset only once', async () => {
+        config.extends = ['github>some/repo#v1.0.0'];
+        gitHub.getPreset.mockImplementation(({ presetPath, presetName }) => {
+          if (presetPath === 'group' && presetName === 'a') {
+            return Promise.resolve({ extends: ['/default'] });
+          }
+          return Promise.resolve({
+            extends: ['./group/a'],
+            packageRules: [{ matchManagers: ['npm'], automerge: true }],
+          });
+        });
+
+        const { config: res } = await presets.resolveConfigPresets(config);
+
+        expect(res).toEqual({
+          packageRules: [{ matchManagers: ['npm'], automerge: true }],
+        });
+        expect(gitHub.getPreset).toHaveBeenCalledTimes(2);
+      });
+
+      it('resolves relative presets which use params', async () => {
+        config.extends = ['github>some/repo#v1.0.0(argA)'];
+        gitHub.getPreset.mockResolvedValueOnce({
+          extends: ['./{{arg0}}'],
+        });
+        gitHub.getPreset.mockResolvedValueOnce({ prCreation: 'not-pending' });
+
+        const { config: res } = await presets.resolveConfigPresets(config);
+
+        expect(res).toEqual({ prCreation: 'not-pending' });
+        expect(gitHub.getPreset).toHaveBeenCalledWith({
+          repo: 'some/repo',
+          presetPath: undefined,
+          presetName: 'argA',
+          tag: 'v1.0.0',
+        });
+      });
+
+      it('throws if a relative preset has no parent preset', async () => {
+        config.extends = ['./x'];
+
+        await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+          expect.objectContaining({
+            message: CONFIG_VALIDATION,
+            validationError:
+              'Relative preset reference cannot be resolved (./x). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends)',
+          }),
+        );
+      });
+
+      it('throws if a relative preset resolves outside of its repository', async () => {
+        config.extends = ['github>some/repo#v1.0.0'];
+        gitHub.getPreset.mockResolvedValueOnce({
+          extends: ['github>other/repo#v2.0.0'],
+        });
+        gitHub.getPreset.mockResolvedValueOnce({ extends: ['../x'] });
+
+        await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+          expect.objectContaining({
+            message: CONFIG_VALIDATION,
+            validationError:
+              'Relative preset reference cannot be resolved (../x). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends). Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
+          }),
+        );
+      });
+
+      it('throws if a relative preset is used by an unsupported preset source', async () => {
+        config.extends = ['github>some/repo#v1.0.0'];
+        gitHub.getPreset.mockResolvedValueOnce({
+          extends: ['somepackage:webapp'],
+        });
+        npm.getPreset.mockResolvedValueOnce({ extends: ['./x'] });
+
+        await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+          expect.objectContaining({
+            message: CONFIG_VALIDATION,
+            validationError:
+              'Relative preset reference cannot be resolved (./x). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends). Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
+          }),
+        );
+      });
+
+      it('resolves relative ignorePresets of a preset', async () => {
+        config.extends = ['github>some/repo#v1.0.0'];
+        gitHub.getPreset.mockResolvedValueOnce({
+          extends: ['./optional'],
+          ignorePresets: ['./optional'],
+          prCreation: 'not-pending',
+        });
+
+        const { config: res } = await presets.resolveConfigPresets(config);
+
+        expect(res).toEqual({ prCreation: 'not-pending' });
+        expect(gitHub.getPreset).toHaveBeenCalledTimes(1);
+      });
+
+      it('allows ignorePresets to neutralize a broken relative preset', async () => {
+        config.extends = ['github>some/repo#v1.0.0'];
+        config.ignorePresets = ['../oops'];
+        gitHub.getPreset.mockResolvedValueOnce({
+          extends: ['../oops'],
+          prCreation: 'not-pending',
+        });
+
+        const { config: res } = await presets.resolveConfigPresets(config);
+
+        expect(res).toEqual({ prCreation: 'not-pending' });
+      });
     });
 
     describe('when using mergeInternalPresets=true', () => {
@@ -1217,6 +1403,10 @@ describe('config/presets/index', () => {
   });
 
   describe('getPreset', () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
     it('does not use cache for internal presets', async () => {
       const memCacheGetSpy = vi.spyOn(memCache, 'get');
       expect(await presets.getPreset(':dependencyDashboard', {})).toBeDefined();
@@ -1303,7 +1493,7 @@ describe('config/presets/index', () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(4);
+      expect(res.matchPackageNames).toHaveLength(5);
       expect(res.extends).toHaveLength(5);
     });
 
@@ -1410,6 +1600,37 @@ describe('config/presets/index', () => {
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBeUndefined();
       expect(e!.validationMessage).toBeUndefined();
+    });
+
+    it('canonicalizes relative presets', async () => {
+      gitHub.getPreset.mockResolvedValueOnce({
+        extends: ['./system/registries', 'github>other/repo'],
+        packageRules: [{ extends: ['./rules/docker'] }],
+      });
+
+      const res = await presets.getPreset('github>some/repo#v1.0.0', {});
+
+      expect(res).toEqual({
+        extends: [
+          'github>some/repo//system/registries#v1.0.0',
+          'github>other/repo',
+        ],
+        packageRules: [{ extends: ['github>some/repo//rules/docker#v1.0.0'] }],
+      });
+    });
+
+    it('leaves relative presets of npm presets unchanged', async () => {
+      npm.getPreset.mockResolvedValueOnce({
+        extends: ['./system/registries'],
+        ignorePresets: ['./optional'],
+      });
+
+      const res = await presets.getPreset('somepackage:webapp', {});
+
+      expect(res).toEqual({
+        extends: ['./system/registries'],
+        ignorePresets: ['./optional'],
+      });
     });
 
     it('handles preset not found', async () => {
