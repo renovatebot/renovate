@@ -244,15 +244,31 @@ export function sanitizeValue(
   return value;
 }
 
-const urlRe = regEx(/[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi);
-const urlCredRe = regEx(/\/\/[^@]+@/g);
+const urlRe = regEx(/[a-z]{3,9}:\/\/[^\s<>"']+/gi);
+const urlCredRe = regEx(/\/\/[^/?#\s]+@/g);
+const urlQuerySecretRe = regEx(
+  /([?&](?:[a-z0-9]+[-_])*(?:access[-_]?token|api[-_]?key|client[-_]?secret|secret[-_]?key|token|key|secret)(?:[-_][a-z0-9]+)*=)[^&#\s]*/gi,
+);
 const dataUriCredRe = regEx(/^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i);
+
+function sanitizeUrl(url: string): string {
+  const sanitizedUrl = url.replace(urlCredRe, '//**redacted**@');
+  const queryStart = sanitizedUrl.indexOf('?');
+  if (queryStart === -1) {
+    return sanitizedUrl;
+  }
+
+  const fragmentStart = sanitizedUrl.indexOf('#', queryStart);
+  const queryEnd = fragmentStart === -1 ? sanitizedUrl.length : fragmentStart;
+  const query = sanitizedUrl
+    .slice(queryStart, queryEnd)
+    .replace(urlQuerySecretRe, '$1**redacted**');
+  return `${sanitizedUrl.slice(0, queryStart)}${query}${sanitizedUrl.slice(queryEnd)}`;
+}
 
 export function sanitizeUrls(text: string): string {
   return text
-    .replace(urlRe, (url) => {
-      return url.replace(urlCredRe, '//**redacted**@');
-    })
+    .replace(urlRe, sanitizeUrl)
     .replace(dataUriCredRe, '$1**redacted**');
 }
 

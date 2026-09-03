@@ -9,16 +9,19 @@ describe('logger/utils', () => {
   });
 
   it.each`
-    input                                                                 | output
-    ${' https://somepw@domain.com/gitlab/org/repo?go-get'}                | ${' https://**redacted**@domain.com/gitlab/org/repo?go-get'}
-    ${'https://someuser:somepw@domain.com'}                               | ${'https://**redacted**@domain.com'}
-    ${'https://someuser:pass%word_with-speci(a)l&chars@domain.com'}       | ${'https://**redacted**@domain.com'}
-    ${'https://someuser:@domain.com'}                                     | ${'https://**redacted**@domain.com'}
-    ${'redis://:somepw@172.32.11.71:6379/0'}                              | ${'redis://**redacted**@172.32.11.71:6379/0'}
-    ${'some text with\r\n url: https://somepw@domain.com\nand some more'} | ${'some text with\r\n url: https://**redacted**@domain.com\nand some more'}
-    ${'[git://domain.com](git://pw@domain.com)'}                          | ${'[git://domain.com](git://**redacted**@domain.com)'}
-    ${'data:text/vnd-example;foo=bar;base64,R0lGODdh'}                    | ${'data:text/vnd-example;**redacted**'}
-    ${'user@domain.com'}                                                  | ${'user@domain.com'}
+    input                                                                                                                   | output
+    ${' https://somepw@domain.com/gitlab/org/repo?go-get'}                                                                  | ${' https://**redacted**@domain.com/gitlab/org/repo?go-get'}
+    ${'https://someuser:somepw@domain.com'}                                                                                 | ${'https://**redacted**@domain.com'}
+    ${'https://someuser:pass%word_with-speci(a)l&chars@domain.com'}                                                         | ${'https://**redacted**@domain.com'}
+    ${'https://someuser:@domain.com'}                                                                                       | ${'https://**redacted**@domain.com'}
+    ${'redis://:somepw@172.32.11.71:6379/0'}                                                                                | ${'redis://**redacted**@172.32.11.71:6379/0'}
+    ${'HTTP error for https://user:password@example.com/api?token=token-value&key=key-value&secret=secret-value&view=full'} | ${'HTTP error for https://**redacted**@example.com/api?token=**redacted**&key=**redacted**&secret=**redacted**&view=full'}
+    ${'https://example.com/api?access_token=token-value&api-key=key-value&client_secret=secret-value#response'}             | ${'https://example.com/api?access_token=**redacted**&api-key=**redacted**&client_secret=**redacted**#response'}
+    ${'https://example.com/search?monkey=banana&page=2&sort=name'}                                                          | ${'https://example.com/search?monkey=banana&page=2&sort=name'}
+    ${'some text with\r\n url: https://somepw@domain.com\nand some more'}                                                   | ${'some text with\r\n url: https://**redacted**@domain.com\nand some more'}
+    ${'[git://domain.com](git://pw@domain.com)'}                                                                            | ${'[git://domain.com](git://**redacted**@domain.com)'}
+    ${'data:text/vnd-example;foo=bar;base64,R0lGODdh'}                                                                      | ${'data:text/vnd-example;**redacted**'}
+    ${'user@domain.com'}                                                                                                    | ${'user@domain.com'}
   `('sanitizeValue("$input") == "$output"', ({ input, output }) => {
     expect(sanitizeValue(input)).toBe(output);
   });
