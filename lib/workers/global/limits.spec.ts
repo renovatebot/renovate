@@ -278,6 +278,38 @@ describe('workers/global/limits', () => {
       ).toBe(false);
     });
 
+    it('applies vulnerabilityAlerts.branchConcurrentLimit to vulnerability branches', () => {
+      setCount('VulnerabilityBranches', 2);
+      setCount('VulnerabilityConcurrentPRs', 2);
+      // a lower branchConcurrentLimit blocks branches while PRs are still allowed
+      const upgrades = partial<BranchUpgradeConfig>([
+        { branchConcurrentLimit: 2, prConcurrentLimit: 10 },
+      ]);
+      const config = partial<BranchConfig>({
+        upgrades,
+        isVulnerabilityAlert: true,
+      });
+
+      expect(isLimitReached('Branches', config)).toBe(true);
+      expect(isLimitReached('ConcurrentPRs', config)).toBe(false);
+    });
+
+    it('inherits vulnerabilityAlerts.prConcurrentLimit when branchConcurrentLimit is null', () => {
+      const upgrades = partial<BranchUpgradeConfig>([
+        { branchConcurrentLimit: null, prConcurrentLimit: 3 },
+      ]);
+      const config = partial<BranchConfig>({
+        upgrades,
+        isVulnerabilityAlert: true,
+      });
+
+      setCount('VulnerabilityBranches', 2);
+      expect(isLimitReached('Branches', config)).toBe(false);
+
+      setCount('VulnerabilityBranches', 3);
+      expect(isLimitReached('Branches', config)).toBe(true);
+    });
+
     it('applies the vulnerability budget once it is spent', () => {
       setCount('VulnerabilityConcurrentPRs', 5);
       const upgrades = partial<BranchUpgradeConfig>([{ prConcurrentLimit: 5 }]);
