@@ -1593,9 +1593,10 @@ describe('workers/repository/process/vulnerabilities', () => {
       const dep = packageFiles.maven[0].deps[0];
       const lookupConfig = partial<LookupUpdateConfig>({
         ...config,
+        abandonmentThreshold: config.abandonmentThreshold ?? undefined,
         manager: 'maven',
         packageName: dep.depName,
-        currentValue: dep.currentValue,
+        currentValue: dep.currentValue!,
         datasource: dep.datasource,
         versioning: 'maven',
       });
