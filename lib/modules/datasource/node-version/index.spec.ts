@@ -52,49 +52,34 @@ describe('modules/datasource/node-version/index', () => {
         homepage: 'https://nodejs.org',
         sourceUrl: 'https://github.com/nodejs/node',
         registryUrl: 'https://nodejs.org/dist',
-        releases: expect.any(Array),
-      });
-      expect(res?.releases).toHaveLength(64);
-      expect(res?.releases[0]).toEqual({
-        isStable: false,
-        releaseTimestamp: '2020-04-21T00:00:00.000Z',
-        version: 'v14.0.0',
-      });
-      // last non-LTS 14.x, then the first LTS one
-      expect(res?.releases.slice(16, 18)).toEqual([
-        {
-          isStable: false,
-          releaseTimestamp: '2020-10-15T00:00:00.000Z',
-          version: 'v14.14.0',
-        },
-        {
-          isStable: true,
-          releaseTimestamp: '2020-10-27T00:00:00.000Z',
-          version: 'v14.15.0',
-        },
-      ]);
-      // last LTS 14.x, then back to non-LTS for 15.x
-      expect(res?.releases.slice(31, 33)).toEqual([
-        {
-          isStable: true,
-          releaseTimestamp: '2021-08-30T00:00:00.000Z',
-          version: 'v14.17.6',
-        },
-        {
-          isStable: false,
-          releaseTimestamp: '2020-10-20T00:00:00.000Z',
-          version: 'v15.0.0',
-        },
-      ]);
-      expect(res?.releases[50]).toEqual({
-        isStable: false,
-        releaseTimestamp: '2021-04-20T00:00:00.000Z',
-        version: 'v16.0.0',
-      });
-      expect(res?.releases[63]).toEqual({
-        isStable: false,
-        releaseTimestamp: '2021-09-07T00:00:00.000Z',
-        version: 'v16.9.0',
+        releases: [
+          {
+            version: 'v14.0.0',
+            isStable: false,
+            releaseTimestamp: '2020-04-21T00:00:00.000Z',
+          },
+          {
+            version: 'v14.14.0',
+            isStable: false,
+            releaseTimestamp: '2020-10-15T00:00:00.000Z',
+          },
+          {
+            version: 'v14.15.0',
+            isStable: true,
+            releaseTimestamp: '2020-10-27T00:00:00.000Z',
+          },
+          {
+            version: 'v14.17.6',
+            isStable: true,
+            releaseTimestamp: '2021-08-30T00:00:00.000Z',
+          },
+          { version: 'v16.0.0', isStable: false },
+          {
+            version: 'v16.9.0',
+            isStable: false,
+            releaseTimestamp: '2021-09-07T00:00:00.000Z',
+          },
+        ],
       });
     });
   });

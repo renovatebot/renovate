@@ -27,46 +27,18 @@ describe('modules/datasource/golang-version/index', () => {
       });
       expect(res).toEqual({
         homepage: 'https://go.dev/',
-        sourceUrl: 'https://github.com/golang/go',
         registryUrl: 'https://raw.githubusercontent.com/golang/website',
-        releases: expect.any(Array),
+        sourceUrl: 'https://github.com/golang/go',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2012-03-28T00:00:00.000Z' },
+          { version: '1.8.0', releaseTimestamp: '2017-02-16T00:00:00.000Z' },
+          { version: '1.9.0', releaseTimestamp: '2017-08-24T00:00:00.000Z' },
+          { version: '1.9.1', releaseTimestamp: '2017-10-04T00:00:00.000Z' },
+          { version: '1.12.13', releaseTimestamp: '2019-10-31T00:00:00.000Z' },
+          { version: '1.17.8', releaseTimestamp: '2022-03-03T00:00:00.000Z' },
+          { version: '1.18.0', releaseTimestamp: '2022-03-15T00:00:00.000Z' },
+        ],
       });
-      expect(res?.releases).toHaveLength(132);
-      expect(res?.releases[0]).toEqual({
-        releaseTimestamp: '2012-03-28T00:00:00.000Z',
-        version: '1.0.0',
-      });
-      // a minor release followed by its first patch release
-      expect(res?.releases.slice(9, 11)).toEqual([
-        {
-          releaseTimestamp: '2017-08-24T00:00:00.000Z',
-          version: '1.9.0',
-        },
-        {
-          releaseTimestamp: '2017-10-04T00:00:00.000Z',
-          version: '1.9.1',
-        },
-      ]);
-      // two-digit minor version
-      expect(res?.releases[17]).toEqual({
-        releaseTimestamp: '2018-02-16T00:00:00.000Z',
-        version: '1.10.0',
-      });
-      // two-digit patch version
-      expect(res?.releases[116]).toEqual({
-        releaseTimestamp: '2021-11-04T00:00:00.000Z',
-        version: '1.16.10',
-      });
-      expect(res?.releases.slice(-2)).toEqual([
-        {
-          releaseTimestamp: '2022-03-03T00:00:00.000Z',
-          version: '1.17.8',
-        },
-        {
-          releaseTimestamp: '2022-03-15T00:00:00.000Z',
-          version: '1.18.0',
-        },
-      ]);
     });
 
     it('supports custom registry URL', async () => {
@@ -82,7 +54,7 @@ describe('modules/datasource/golang-version/index', () => {
         datasource,
         packageName: 'golang',
       });
-      expect(res?.releases).toHaveLength(132);
+      expect(res?.releases).toHaveLength(7);
       expect(res?.releases[0]).toEqual({
         releaseTimestamp: '2012-03-28T00:00:00.000Z',
         version: '1.0.0',

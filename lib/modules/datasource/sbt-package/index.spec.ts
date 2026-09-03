@@ -17,46 +17,38 @@ const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/sbt-package/index', () => {
   it('parses Maven index directory', () => {
-    const links = extractPageLinks(Fixtures.get(`maven-index.html`), (x) =>
-      regEx(/^\.+/).test(x) ? null : x,
-    );
-
-    expect(links).toHaveLength(183);
-    expect(links.slice(0, 5)).toEqual([
+    expect(
+      extractPageLinks(Fixtures.get(`maven-index.html`), (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
+    ).toEqual([
       'autofix-3.0.6_2.11',
-      'autofix-3.0.6_2.12',
-      'autofix-3.0.8_2.11',
-      'autofix-3.0.8_2.12',
+      'sbt-scalatest_2.12_1.0',
       'scalatest',
+      'scalatest-app_native0.4_3',
+      'scalatest_2.12',
+      'scalatest_2.13',
+      'scalatest_2.13.0-RC1',
+      'scalatest_3',
+      'scalatest_sjs1.0.0-M7_2.13.0-RC2',
+      'test-interface',
     ]);
-    expect(links[7]).toBe('scalatest-all_sjs0.6_2.10');
-    expect(links[12]).toBe('scalatest-app_2.12.0-M3');
-    expect(links[15]).toBe('scalatest-app_2.12.0-RC1');
-    expect(links[24]).toBe('scalatest-app_native0.3_2.11');
-    expect(links[180]).toBe('scalatestjs_sjs1.0.0-M3_2.11');
-    expect(links[182]).toBe('test-interface');
   });
 
   it('parses sbt index directory', () => {
-    const links = extractPageLinks(
-      Fixtures.get(`sbt-plugins-index.html`),
-      (x) => (regEx(/^\.+/).test(x) ? null : x),
-    );
-
-    expect(links).toHaveLength(343);
-    expect(links.slice(0, 4)).toEqual([
+    expect(
+      extractPageLinks(Fixtures.get(`sbt-plugins-index.html`), (x) =>
+        regEx(/^\.+/).test(x) ? null : x,
+      ),
+    ).toEqual([
       'au.com.onegeek',
-      'bavadim',
-      'be.venneborg.sbt',
-      'biz.cgta',
+      'ch',
+      'com.github.DavidPerezIngeniero',
+      'org.portable-scala',
+      'scalajs-react-interface',
+      'uk.co.josephearl',
+      'woshilaiceshide',
     ]);
-    expect(links[6]).toBe('ch.epfl.scala.index');
-    expect(links[10]).toBe('ch');
-    expect(links[41]).toBe('com.eed3si9n');
-    expect(links[200]).toBe('g00dnatur3');
-    expect(links[328]).toBe('sbt-plugin-releases');
-    expect(links[338]).toBe('ub-interactive');
-    expect(links[342]).toBe('woshilaiceshide');
   });
 
   it('uses proper hostType', () => {

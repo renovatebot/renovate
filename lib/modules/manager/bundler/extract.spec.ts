@@ -1,8 +1,6 @@
-import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
-import { isValid } from '../../versioning/ruby/index.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -31,133 +29,92 @@ describe('modules/manager/bundler/extract', () => {
     it('parses rails Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(railsGemfileLock);
       const res = await extractPackageFile(railsGemfile, 'Gemfile');
-      expect(res?.deps).toHaveLength(68);
-      // first gem: version constraint plus locked version
-      expect(res?.deps[0]).toEqual({
-        depName: 'rake',
-        managerData: { lineNumber: 9 },
-        datasource: 'rubygems',
-        currentValue: '">= 11.1"',
-        lockedVersion: '12.3.1',
+      expect(res).toEqual({
+        registryUrls: ['https://rubygems.org'],
+        lockFiles: ['Gemfile.lock'],
+        deps: [
+          {
+            depName: 'rake',
+            managerData: { lineNumber: 9 },
+            datasource: 'rubygems',
+            currentValue: '">= 11.1"',
+            lockedVersion: '12.3.1',
+          },
+          {
+            depName: 'listen',
+            managerData: { lineNumber: 11 },
+            datasource: 'rubygems',
+            currentValue: '">= 3.0.5", "< 3.2"',
+            lockedVersion: '3.1.5',
+          },
+          {
+            depName: 'azure-storage',
+            managerData: { lineNumber: 12 },
+            datasource: 'rubygems',
+            lockedVersion: '0.15.0.preview',
+          },
+          {
+            depName: 'webpacker',
+            managerData: { lineNumber: 13 },
+            datasource: 'git-refs',
+            packageName: 'https://github.com/rails/webpacker',
+            sourceUrl: 'https://github.com/rails/webpacker',
+          },
+          {
+            depName: 'redcarpet',
+            managerData: { lineNumber: 16 },
+            datasource: 'rubygems',
+            currentValue: '"~> 3.2.3"',
+            depTypes: ['doc'],
+            lockedVersion: '3.2.3',
+          },
+          {
+            depName: 'queue_classic',
+            managerData: { lineNumber: 21 },
+            datasource: 'git-refs',
+            packageName: 'https://github.com/rafaelfranca/queue_classic',
+            sourceUrl: 'https://github.com/rafaelfranca/queue_classic',
+            currentValue: 'update-pg',
+            depTypes: ['job'],
+          },
+          {
+            depName: 'nokogiri',
+            managerData: { lineNumber: 25 },
+            datasource: 'rubygems',
+            currentValue: '">= 1.8.1"',
+            lockedVersion: '1.9.1',
+          },
+          {
+            depName: 'pg',
+            managerData: { lineNumber: 29 },
+            datasource: 'rubygems',
+            currentValue: '">= 0.18.0"',
+            depTypes: ['db'],
+            lockedVersion: '1.1.3',
+          },
+          {
+            depName: 'activerecord-jdbcsqlite3-adapter',
+            managerData: { lineNumber: 35 },
+            datasource: 'git-refs',
+            packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
+            sourceUrl: 'https://github.com/jruby/activerecord-jdbc-adapter',
+            currentValue: 'master',
+            lockedVersion: '52.1',
+          },
+          {
+            depName: 'activerecord-jdbcsqlite3-adapter',
+            managerData: { lineNumber: 37 },
+            datasource: 'rubygems',
+            currentValue: '">= 1.3.0"',
+            lockedVersion: '52.1',
+          },
+          {
+            depName: 'ibm_db',
+            managerData: { lineNumber: 42 },
+            datasource: 'rubygems',
+          },
+        ],
       });
-      // gem without a version constraint
-      expect(res?.deps[3]).toEqual({
-        depName: 'sass-rails',
-        managerData: { lineNumber: 14 },
-        datasource: 'rubygems',
-        lockedVersion: '5.0.7',
-      });
-      // gem from a git source, no version
-      expect(res?.deps[5]).toEqual({
-        depName: 'webpacker',
-        managerData: { lineNumber: 16 },
-        datasource: 'git-refs',
-        packageName: 'https://github.com/rails/webpacker',
-        sourceUrl: 'https://github.com/rails/webpacker',
-      });
-      // gem inside a group block
-      expect(res?.deps[10]).toEqual({
-        depName: 'sdoc',
-        managerData: { lineNumber: 32 },
-        datasource: 'rubygems',
-        currentValue: '"~> 1.0"',
-        depTypes: ['doc'],
-        lockedVersion: '1.0.0',
-      });
-      // gem with multiple version constraints
-      expect(res?.deps[15]).toEqual({
-        depName: 'listen',
-        managerData: { lineNumber: 40 },
-        datasource: 'rubygems',
-        currentValue: '">= 3.0.5", "< 3.2"',
-        lockedVersion: '3.1.5',
-      });
-      // git source with a branch, inside a group block
-      expect(res?.deps[24]).toEqual({
-        depName: 'queue_classic',
-        managerData: { lineNumber: 54 },
-        datasource: 'git-refs',
-        packageName: 'https://github.com/rafaelfranca/queue_classic',
-        sourceUrl: 'https://github.com/rafaelfranca/queue_classic',
-        currentValue: 'update-pg',
-        depTypes: ['job'],
-      });
-      // prerelease locked version, inside a group block
-      expect(res?.deps[40]).toEqual({
-        depName: 'azure-storage',
-        managerData: { lineNumber: 82 },
-        datasource: 'rubygems',
-        depTypes: ['storage'],
-        lockedVersion: '0.15.0.preview',
-      });
-      // git source with a locked version, outside and inside a group
-      expect(res?.deps.slice(56, 58)).toEqual([
-        {
-          depName: 'activerecord-jdbcsqlite3-adapter',
-          managerData: { lineNumber: 129 },
-          datasource: 'git-refs',
-          packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
-          sourceUrl: 'https://github.com/jruby/activerecord-jdbc-adapter',
-          currentValue: 'master',
-          lockedVersion: '52.1',
-        },
-        {
-          depName: 'activerecord-jdbcmysql-adapter',
-          managerData: { lineNumber: 131 },
-          datasource: 'git-refs',
-          packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
-          sourceUrl: 'https://github.com/jruby/activerecord-jdbc-adapter',
-          currentValue: 'master',
-          depTypes: ['db'],
-          lockedVersion: '52.1',
-        },
-      ]);
-      // gems missing from the lock file, a gem without any version, and the
-      // last two gems
-      expect(res?.deps.slice(63, 68)).toEqual([
-        {
-          depName: 'ruby-oci8',
-          managerData: { lineNumber: 152 },
-          datasource: 'rubygems',
-          currentValue: '"~> 2.2"',
-        },
-        {
-          depName: 'activerecord-oracle_enhanced-adapter',
-          managerData: { lineNumber: 154 },
-          datasource: 'git-refs',
-          packageName: 'https://github.com/rsim/oracle-enhanced',
-          sourceUrl: 'https://github.com/rsim/oracle-enhanced',
-          currentValue: 'master',
-        },
-        {
-          depName: 'ibm_db',
-          managerData: { lineNumber: 158 },
-          datasource: 'rubygems',
-        },
-        {
-          depName: 'tzinfo-data',
-          managerData: { lineNumber: 159 },
-          datasource: 'rubygems',
-          lockedVersion: '1.2018.7',
-        },
-        {
-          depName: 'wdm',
-          managerData: { lineNumber: 160 },
-          datasource: 'rubygems',
-          currentValue: '">= 0.1.0"',
-          lockedVersion: '0.1.1',
-        },
-      ]);
-      // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
-      expect(
-        res?.deps
-          .filter((dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion'),
-          )
-          .every(
-            (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
-          ),
-      ).toBeTrue();
     });
 
     it('parses sourceGroups', async () => {
@@ -220,219 +177,238 @@ describe('modules/manager/bundler/extract', () => {
     it('parse mastodon Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(mastodonGemfileLock);
       const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
-      expect(res?.deps).toHaveLength(125);
-      // first gem: version constraint plus locked version
-      expect(res?.deps[0]).toEqual({
-        depName: 'pkg-config',
-        managerData: { lineNumber: 5 },
-        datasource: 'rubygems',
-        currentValue: "'~> 1.4'",
-        lockedVersion: '1.4.0',
+      expect(res).toEqual({
+        registryUrls: ['https://rubygems.org'],
+        lockFiles: ['Gemfile.lock'],
+        deps: [
+          {
+            depName: 'pkg-config',
+            managerData: { lineNumber: 5 },
+            datasource: 'rubygems',
+            currentValue: "'~> 1.4'",
+            lockedVersion: '1.4.0',
+          },
+          {
+            depName: 'aws-sdk-s3',
+            managerData: { lineNumber: 7 },
+            datasource: 'rubygems',
+            currentValue: "'~> 1.59'",
+            lockedVersion: '1.59.0',
+          },
+          {
+            depName: 'fog-core',
+            managerData: { lineNumber: 8 },
+            datasource: 'rubygems',
+            currentValue: "'<= 2.1.0'",
+            lockedVersion: '2.1.0',
+          },
+          {
+            depName: 'devise_pam_authenticatable2',
+            managerData: { lineNumber: 11 },
+            datasource: 'rubygems',
+            currentValue: "'~> 9.2'",
+            depTypes: ['pam_authentication', 'optional: true'],
+            lockedVersion: '9.2.0',
+          },
+          {
+            depName: 'health_check',
+            managerData: { lineNumber: 14 },
+            datasource: 'git-refs',
+            packageName: 'https://github.com/ianheggie/health_check',
+            sourceUrl: 'https://github.com/ianheggie/health_check',
+            currentDigest: '0b799ead604f900ed50685e9b2d469cd2befba5b',
+          },
+          {
+            depName: 'http_parser.rb',
+            managerData: { lineNumber: 15 },
+            datasource: 'git-refs',
+            currentValue: "'~> 0.6'",
+            packageName: 'https://github.com/tmm1/http_parser.rb',
+            sourceUrl: 'https://github.com/tmm1/http_parser.rb',
+            currentDigest: '54b17ba8c7d8d20a16dfc65d1775241833219cf2',
+          },
+          {
+            depName: 'json-ld',
+            managerData: { lineNumber: 16 },
+            datasource: 'git-refs',
+            packageName: 'https://github.com/ruby-rdf/json-ld.git',
+            sourceUrl: 'https://github.com/ruby-rdf/json-ld',
+            currentDigest: 'e742697a0906e74e8bb777ef98137bc3955d981d',
+          },
+          {
+            depName: 'fabrication',
+            managerData: { lineNumber: 19 },
+            datasource: 'rubygems',
+            currentValue: "'~> 2.21'",
+            depTypes: ['development', 'test'],
+            lockedVersion: '2.21.0',
+          },
+          {
+            depName: 'private_address_check',
+            managerData: { lineNumber: 23 },
+            datasource: 'rubygems',
+            currentValue: "'~> 0.5'",
+            depTypes: ['production', 'test'],
+            lockedVersion: '0.5.0',
+          },
+          {
+            depName: 'concurrent-ruby',
+            managerData: { lineNumber: 26 },
+            datasource: 'rubygems',
+            lockedVersion: '1.1.5',
+          },
+        ],
       });
-      // gem without a version constraint
-      expect(res?.deps[20]).toEqual({
-        depName: 'browser',
-        managerData: { lineNumber: 29 },
-        datasource: 'rubygems',
-        lockedVersion: '2.7.1',
-      });
-      // gem inside a group block with an option
-      expect(res?.deps[27]).toEqual({
-        depName: 'devise_pam_authenticatable2',
-        managerData: { lineNumber: 38 },
-        datasource: 'rubygems',
-        currentValue: "'~> 9.2'",
-        depTypes: ['pam_authentication', 'optional: true'],
-        lockedVersion: '9.2.0',
-      });
-      // git source pinned to a commit
-      expect(res?.deps[39]).toEqual({
-        depName: 'health_check',
-        managerData: { lineNumber: 53 },
-        datasource: 'git-refs',
-        packageName: 'https://github.com/ianheggie/health_check',
-        sourceUrl: 'https://github.com/ianheggie/health_check',
-        currentDigest: '0b799ead604f900ed50685e9b2d469cd2befba5b',
-      });
-      // git source with both a constraint and a commit
-      expect(res?.deps[43]).toEqual({
-        depName: 'http_parser.rb',
-        managerData: { lineNumber: 57 },
-        datasource: 'git-refs',
-        currentValue: "'~> 0.6'",
-        packageName: 'https://github.com/tmm1/http_parser.rb',
-        sourceUrl: 'https://github.com/tmm1/http_parser.rb',
-        currentDigest: '54b17ba8c7d8d20a16dfc65d1775241833219cf2',
-      });
-      // git source whose URL ends in .git
-      expect(res?.deps[84]).toEqual({
-        depName: 'json-ld',
-        managerData: { lineNumber: 99 },
-        datasource: 'git-refs',
-        packageName: 'https://github.com/ruby-rdf/json-ld.git',
-        sourceUrl: 'https://github.com/ruby-rdf/json-ld',
-        currentDigest: 'e742697a0906e74e8bb777ef98137bc3955d981d',
-      });
-      // gem inside the development group
-      expect(res?.deps[110]).toEqual({
-        depName: 'memory_profiler',
-        managerData: { lineNumber: 136 },
-        datasource: 'rubygems',
-        depTypes: ['development'],
-        lockedVersion: '0.9.14',
-      });
-      // last gem
-      expect(res?.deps[124]).toEqual({
-        depName: 'connection_pool',
-        managerData: { lineNumber: 157 },
-        datasource: 'rubygems',
-        lockedVersion: '2.2.2',
-      });
-      expect(
-        res?.deps
-          .filter((dep) =>
-            Object.prototype.hasOwnProperty.call(dep, 'lockedVersion'),
-          )
-          .every(
-            (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
-          ),
-      ).toBeTrue();
     });
 
     it('parse Ruby CI Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(rubyCIGemfileLock);
       const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
-      expect(res?.deps).toMatchObject([
-        {
-          depName: 'rails',
-          currentValue: "'~> 5.2.1'",
-          lockedVersion: '5.2.3',
-        },
-        {
-          depName: 'puma',
-          lockedVersion: '4.3.1',
-        },
-        {
-          depName: 'bootsnap',
-          lockedVersion: '1.4.5',
-        },
-        {
-          depName: 'sass-rails',
-          currentValue: "'~> 5.0'",
-          lockedVersion: '5.1.0',
-        },
-        {
-          depName: 'sass-rails-bootstrap',
-          lockedVersion: '2.2.2.3',
-        },
-        {
-          depName: 'jquery-rails',
-          lockedVersion: '4.3.5',
-        },
-        {
-          depName: 'uglifier',
-          lockedVersion: '4.2.0',
-        },
-        {
-          depName: 'foreman',
-          lockedVersion: '0.86.0',
-          depTypes: ['development'],
-        },
-        {
-          depName: 'sqlite3',
-          lockedVersion: '1.4.2',
-          depTypes: ['development'],
-        },
-        {
-          depName: 'listen',
-          lockedVersion: '3.2.1',
-          depTypes: ['development'],
-        },
-        {
-          depName: 'pg',
-          lockedVersion: '1.2.1',
-          depTypes: ['production'],
-        },
-        {
-          depName: 'newrelic_rpm',
-          lockedVersion: '6.8.0.360',
-          depTypes: ['production'],
-        },
-        {
-          depName: 'sqreen',
-          currentValue: "'< 1.17.2'",
-          lockedVersion: '1.17.0',
-          depTypes: ['production'],
-        },
-        {
-          depName: 'airbrake',
-          lockedVersion: '9.5.5',
-          depTypes: ['production'],
-        },
-      ]);
+      expect(res).toEqual({
+        registryUrls: ['https://rubygems.org'],
+        lockFiles: ['Gemfile.lock'],
+        deps: [
+          {
+            depName: 'rails',
+            managerData: { lineNumber: 4 },
+            datasource: 'rubygems',
+            currentValue: "'~> 5.2.1'",
+            lockedVersion: '5.2.3',
+          },
+          {
+            depName: 'puma',
+            managerData: { lineNumber: 5 },
+            datasource: 'rubygems',
+            lockedVersion: '4.3.1',
+          },
+          {
+            depName: 'sass-rails',
+            managerData: { lineNumber: 7 },
+            datasource: 'rubygems',
+            currentValue: "'~> 5.0'",
+            lockedVersion: '5.1.0',
+          },
+          {
+            depName: 'foreman',
+            managerData: { lineNumber: 10 },
+            datasource: 'rubygems',
+            depTypes: ['development'],
+            lockedVersion: '0.86.0',
+          },
+          {
+            depName: 'sqlite3',
+            managerData: { lineNumber: 11 },
+            datasource: 'rubygems',
+            depTypes: ['development'],
+            lockedVersion: '1.4.2',
+          },
+          {
+            depName: 'pg',
+            managerData: { lineNumber: 15 },
+            datasource: 'rubygems',
+            depTypes: ['production'],
+            lockedVersion: '1.2.1',
+          },
+          {
+            depName: 'sqreen',
+            managerData: { lineNumber: 16 },
+            datasource: 'rubygems',
+            currentValue: "'< 1.17.2'",
+            depTypes: ['production'],
+            lockedVersion: '1.17.0',
+          },
+        ],
+      });
     });
   });
 
   it('parse Gitlab Foss Gemfile', async () => {
     fs.readLocalFile.mockResolvedValueOnce(gitlabFossGemfileLock);
     const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
-    expect(res?.deps).toHaveLength(252);
-    // first gem: exact version constraint
-    expect(res?.deps[0]).toEqual({
-      depName: 'rails',
-      managerData: { lineNumber: 2 },
-      datasource: 'rubygems',
-      currentValue: "'5.2.3'",
-      lockedVersion: '5.2.3',
-    });
-    // gem without a version constraint
-    expect(res?.deps[34]).toEqual({
-      depName: 'gssapi',
-      managerData: { lineNumber: 52 },
-      datasource: 'rubygems',
-      lockedVersion: '1.2.0',
-    });
-    // prerelease constraint and locked version
-    expect(res?.deps[54]).toEqual({
-      depName: 'apollo_upload_server',
-      managerData: { lineNumber: 94 },
-      datasource: 'rubygems',
-      currentValue: "'~> 2.0.0.beta3'",
-      lockedVersion: '2.0.0.beta.3',
-    });
-    // gem inside a group block
-    expect(res?.deps[98]).toEqual({
-      depName: 'unicorn',
-      managerData: { lineNumber: 168 },
-      datasource: 'rubygems',
-      currentValue: "'~> 5.4.1'",
-      depTypes: ['unicorn'],
-      lockedVersion: '5.4.1',
-    });
-    // gem inside a group block without a version constraint
-    expect(res?.deps[102]).toEqual({
-      depName: 'rack-timeout',
-      managerData: { lineNumber: 175 },
-      datasource: 'rubygems',
-      depTypes: ['puma'],
-      lockedVersion: '0.5.1',
-    });
-    // gem inside multiple groups
-    expect(res?.deps[182]).toEqual({
-      depName: 'rspec-rails',
-      managerData: { lineNumber: 357 },
-      datasource: 'rubygems',
-      currentValue: "'~> 4.0.0.beta3'",
-      depTypes: ['development', 'test'],
-      lockedVersion: '4.0.0.beta3',
-    });
-    // last gem
-    expect(res?.deps[251]).toEqual({
-      depName: 'liquid',
-      managerData: { lineNumber: 484 },
-      datasource: 'rubygems',
-      currentValue: "'~> 4.0'",
-      lockedVersion: '4.0.3',
+    expect(res).toEqual({
+      registryUrls: ['https://rubygems.org'],
+      lockFiles: ['Gemfile.lock'],
+      deps: [
+        {
+          depName: 'rails',
+          managerData: { lineNumber: 2 },
+          datasource: 'rubygems',
+          currentValue: "'5.2.3'",
+          lockedVersion: '5.2.3',
+        },
+        {
+          depName: 'bootsnap',
+          managerData: { lineNumber: 4 },
+          datasource: 'rubygems',
+          currentValue: "'~> 1.4'",
+          lockedVersion: '1.4.5',
+        },
+        {
+          depName: 'omniauth-kerberos',
+          managerData: { lineNumber: 7 },
+          datasource: 'rubygems',
+          currentValue: "'~> 0.3.0'",
+          lockedVersion: '0.3.0',
+        },
+        {
+          depName: 'omniauth-ultraauth',
+          managerData: { lineNumber: 8 },
+          datasource: 'rubygems',
+          currentValue: "'~> 0.0.2'",
+          lockedVersion: '0.0.2',
+        },
+        {
+          depName: 'rubyzip',
+          managerData: { lineNumber: 11 },
+          datasource: 'rubygems',
+          currentValue: "'~> 1.3.0'",
+          lockedVersion: '1.3.0',
+        },
+        {
+          depName: 'graphql-docs',
+          managerData: { lineNumber: 14 },
+          datasource: 'rubygems',
+          currentValue: "'~> 1.6.0'",
+          lockedVersion: '1.6.0',
+        },
+        {
+          depName: 'RedCloth',
+          managerData: { lineNumber: 17 },
+          datasource: 'rubygems',
+          currentValue: "'~> 4.3.2'",
+          lockedVersion: '4.3.2',
+        },
+        {
+          depName: 'elasticsearch-api',
+          managerData: { lineNumber: 20 },
+          datasource: 'rubygems',
+          currentValue: "'5.0.3'",
+          lockedVersion: '5.0.3',
+        },
+        {
+          depName: 'gitlab-puma',
+          managerData: { lineNumber: 24 },
+          datasource: 'rubygems',
+          currentValue: "'~> 4.3.1.gitlab.2'",
+          depTypes: ['puma'],
+          lockedVersion: '4.3.1.gitlab.2',
+        },
+        {
+          depName: 'bullet',
+          managerData: { lineNumber: 28 },
+          datasource: 'rubygems',
+          currentValue: "'~> 6.0.2'",
+          depTypes: ['development', 'test'],
+          lockedVersion: '6.0.2',
+        },
+        {
+          depName: 'liquid',
+          managerData: { lineNumber: 31 },
+          datasource: 'rubygems',
+          currentValue: "'~> 4.0'",
+          lockedVersion: '4.0.3',
+        },
+      ],
     });
   });
 

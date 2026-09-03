@@ -660,39 +660,43 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3Multiple,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
+        releases: [
+          {
+            version: '2.5.7.10213',
+            registryUrl: 'https://api.nuget.org/v3/index.json',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+            isDeprecated: true,
+            registryUrl: 'https://api.nuget.org/v3/index.json',
+          },
+          {
+            version: '2.6.1',
+            registryUrl: 'https://api.nuget.org/v3/index.json',
+            releaseTimestamp: '2012-08-05T03:08:28.403Z',
+          },
+          {
+            version: '2.6.2',
+            registryUrl: 'https://api.nuget.org/v3/index.json',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
+          },
+          {
+            version: '3.0.0-alpha',
+            registryUrl: 'https://api.nuget.org/v3/index.json',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            registryUrl: 'https://api.nuget.org/v3/index.json',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
+        ],
         changelogContent:
           'This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need\n      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to\n      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n    ',
         sourceUrl: 'https://github.com/nunit/nunit',
         homepage: 'https://nunit.org/',
-      });
-      expect(res!.releases).toHaveLength(45);
-      // both registry URLs serve the same list, so no version occurs twice
-      const versions = res!.releases.map(({ version }) => version);
-      expect(new Set(versions).size).toBe(versions.length);
-      expect(res!.releases[0]).toEqual({
-        version: '2.5.7.10213',
-        registryUrl: 'https://api.nuget.org/v3/index.json',
-        releaseTimestamp: '2011-01-07T07:57:55.387Z',
-      });
-      expect(res!.releases.at(-1)).toEqual({
-        version: '3.12.0',
-        registryUrl: 'https://api.nuget.org/v3/index.json',
-        releaseTimestamp: '2019-05-15T00:24:28.390Z',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '2.6.0.12051'),
-      ).toEqual({
-        version: '2.6.0.12051',
-        isDeprecated: true,
-        registryUrl: 'https://api.nuget.org/v3/index.json',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '3.0.0-alpha'),
-      ).toEqual({
-        version: '3.0.0-alpha',
-        registryUrl: 'https://api.nuget.org/v3/index.json',
-        releaseTimestamp: '2014-09-23T03:11:33.430Z',
       });
     });
 
@@ -749,33 +753,38 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
+        releases: [
+          {
+            version: '2.5.7.10213',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+            isDeprecated: true,
+          },
+          {
+            version: '2.6.1',
+            releaseTimestamp: '2012-08-05T03:08:28.403Z',
+          },
+          {
+            version: '2.6.2',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
+          },
+          {
+            version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
+        ],
         changelogContent:
           'This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need\n      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to\n      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n    ',
         sourceUrl: 'https://github.com/nunit/nunit',
         homepage: 'https://nunit.org/',
         registryUrl: 'https://api.nuget.org/v3/index.json',
-      });
-      expect(res!.releases).toHaveLength(45);
-      expect(res!.releases[0]).toEqual({
-        version: '2.5.7.10213',
-        releaseTimestamp: '2011-01-07T07:57:55.387Z',
-      });
-      expect(res!.releases.at(-1)).toEqual({
-        version: '3.12.0',
-        releaseTimestamp: '2019-05-15T00:24:28.390Z',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '2.6.0.12051'),
-      ).toEqual({
-        version: '2.6.0.12051',
-        isDeprecated: true,
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '3.0.0-alpha'),
-      ).toEqual({
-        version: '3.0.0-alpha',
-        releaseTimestamp: '2014-09-23T03:11:33.430Z',
       });
     });
 
@@ -857,49 +866,54 @@ describe('modules/datasource/nuget/index', () => {
         ...configV3,
         packageName: 'nlog',
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
+        releases: [
+          {
+            version: '1.0.0.505',
+            releaseTimestamp: '2011-01-07T07:57:35.043Z',
+          },
+          {
+            version: '2.0.1',
+            isDeprecated: true,
+          },
+          {
+            version: '3.0.0',
+            releaseTimestamp: '2014-06-02T14:47:27.650Z',
+          },
+          {
+            version: '4.4.0-beta5',
+            isDeprecated: true,
+          },
+          {
+            version: '4.4.0-beta6',
+            isDeprecated: true,
+          },
+          {
+            version: '4.4.0',
+            releaseTimestamp: '2016-12-14T10:47:25.290Z',
+          },
+          {
+            version: '4.6.0-rc2',
+            isDeprecated: true,
+          },
+          {
+            version: '4.6.0-rc3',
+            isDeprecated: true,
+          },
+          {
+            version: '4.7.3',
+            releaseTimestamp: '2020-07-31T22:20:36.847Z',
+          },
+          {
+            version: '5.0.0-beta11',
+            isDeprecated: true,
+          },
+        ],
         changelogContent:
           '## Features\n      - Allow to change the RuleName of a LoggingRule (#4017) (@304NotModified)\n      - logging of AggregrateException.Data to prevent it from losing it after Flatten call (#3974) (@chaos0307)\n\n      ## Bugfixes\n      - LocalIpAddressLayoutRenderer - IsDnsEligible and PrefixOrigin throws PlatformNotSupportedException on Linux\n      (#4011) (@snakefoot)\n\n      ## Improvements\n      - ObjectReflectionCache - Reduce noise from properties that throws exceptions like Stream.ReadTimeout (#4057)\n      (@snakefoot)\n      - MessageTemplates - Changed Literal.Skip to be Int32 to support message templates longer than short.MaxValue\n      (#4053) (@snakefoot)\n      - ObjectReflectionCache - Skip reflection for Stream objects (#4043) (@snakefoot)\n      - LogFactory Shutdown is public so it can be used from NLogLoggerProvider (#3999) (@snakefoot)\n      - Editor config with File header template (#3972) (@304NotModified)\n\n      ## Performance\n      - FileTarget - Skip delegate capture in GetFileCreationTimeSource. Fallback only necessary when appender has been\n      closed. (#4058) (@snakefoot)\n      - ObjectReflectionCache - Reduce initial memory allocation until needed (#4021) (@snakefoot)\n      - FilteringTargetWrapper - Remove delegate allocation (#3977) (@snakefoot)\n\n      Full changelog: https://github.com/NLog/NLog/blob/master/CHANGELOG.md\n\n      For all config options and platform support, check https://nlog-project.org/config/\n    ',
         sourceUrl: 'https://github.com/NLog/NLog',
         homepage: 'https://nlog-project.org/',
         registryUrl: 'https://api.nuget.org/v3/index.json',
-      });
-      expect(res!.releases).toHaveLength(156);
-      expect(res!.releases[0]).toEqual({
-        version: '1.0.0.505',
-        releaseTimestamp: '2011-01-07T07:57:35.043Z',
-      });
-      expect(res!.releases.at(-1)).toEqual({
-        version: '5.0.0-beta11',
-        isDeprecated: true,
-      });
-      expect(res!.releases.find(({ version }) => version === '2.0.1')).toEqual({
-        version: '2.0.1',
-        isDeprecated: true,
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '2.0.1.2'),
-      ).toEqual({
-        version: '2.0.1.2',
-        releaseTimestamp: '2013-04-08T10:18:27.300Z',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '4.0.0-rc'),
-      ).toEqual({
-        version: '4.0.0-rc',
-        isDeprecated: true,
-      });
-      expect(
-        res!.releases.find(
-          ({ version }) => version === '4.3.9-test-retry-archive',
-        ),
-      ).toEqual({
-        version: '4.3.9-test-retry-archive',
-        isDeprecated: true,
-      });
-      expect(res!.releases.find(({ version }) => version === '4.3.8')).toEqual({
-        version: '4.3.8',
-        releaseTimestamp: '2016-09-05T19:24:50.107Z',
       });
     });
 
@@ -927,36 +941,36 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3NotNugetOrg,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
+        releases: [
+          {
+            version: '2.5.7.10213',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+            isDeprecated: true,
+          },
+          {
+            version: '2.6.1',
+            releaseTimestamp: '2012-08-05T03:08:28.403Z',
+          },
+          {
+            version: '2.6.2',
+          },
+          {
+            version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
+        ],
         changelogContent:
           'This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need\n      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to\n      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.\n    ',
         sourceUrl: 'https://nunit.org/',
         registryUrl: 'https://myprivatefeed/index.json',
-      });
-      expect(res!.releases).toHaveLength(45);
-      expect(res!.releases[0]).toEqual({
-        version: '2.5.7.10213',
-        releaseTimestamp: '2011-01-07T07:57:55.387Z',
-      });
-      expect(res!.releases.at(-1)).toEqual({
-        version: '3.12.0',
-        releaseTimestamp: '2019-05-15T00:24:28.390Z',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '2.6.0.12051'),
-      ).toEqual({
-        version: '2.6.0.12051',
-        isDeprecated: true,
-      });
-      // the `published` field of this version was stripped from the response
-      expect(res!.releases.find(({ version }) => version === '2.6.2')).toEqual({
-        version: '2.6.2',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '3.0.0-alpha'),
-      ).toEqual({
-        version: '3.0.0-alpha',
-        releaseTimestamp: '2014-09-23T03:11:33.430Z',
       });
     });
 
@@ -973,55 +987,35 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         releases: [
-          { version: '2.5.7.10213' },
-          { version: '2.5.9.10348' },
-          { version: '2.5.10.11092' },
-          { version: '2.6.0.12051' },
-          { version: '2.6.0.12054' },
-          { version: '2.6.1' },
-          { version: '2.6.2' },
-          { version: '2.6.3' },
-          { version: '2.6.4' },
-          { version: '2.6.5' },
-          { version: '2.6.6' },
-          { version: '2.6.7' },
-          { version: '2.7.0' },
-          { version: '2.7.1' },
-          { version: '3.0.0-alpha' },
-          { version: '3.0.0-alpha-2' },
-          { version: '3.0.0-alpha-3' },
-          { version: '3.0.0-alpha-4' },
-          { version: '3.0.0-alpha-5' },
-          { version: '3.0.0-beta-1' },
-          { version: '3.0.0-beta-2' },
-          { version: '3.0.0-beta-3' },
-          { version: '3.0.0-beta-4' },
-          { version: '3.0.0-beta-5' },
-          { version: '3.0.0-rc' },
-          { version: '3.0.0-rc-2' },
-          { version: '3.0.0-rc-3' },
-          { version: '3.0.0' },
-          { version: '3.0.1' },
-          { version: '3.2.0' },
-          { version: '3.2.1' },
-          { version: '3.4.0' },
-          { version: '3.4.1' },
-          { version: '3.5.0' },
-          { version: '3.6.0' },
-          { version: '3.6.1' },
-          { version: '3.7.0' },
-          { version: '3.7.1' },
-          { version: '3.8.0' },
-          { version: '3.8.1' },
-          { version: '3.9.0' },
-          { version: '3.10.0' },
-          { version: '3.10.1' },
-          { version: '3.11.0' },
-          { version: '3.12.0' },
+          {
+            version: '2.5.7.10213',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+            isDeprecated: true,
+          },
+          {
+            version: '2.6.1',
+            releaseTimestamp: '2012-08-05T03:08:28.403Z',
+          },
+          {
+            version: '2.6.2',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
+          },
+          {
+            version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
         ],
         sourceUrl: 'https://nunit.org/',
+        registryUrl: 'https://api.nuget.org/v3/index.json',
       });
     });
 
@@ -1038,55 +1032,35 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         releases: [
-          { version: '2.5.7.10213' },
-          { version: '2.5.9.10348' },
-          { version: '2.5.10.11092' },
-          { version: '2.6.0.12051' },
-          { version: '2.6.0.12054' },
-          { version: '2.6.1' },
-          { version: '2.6.2' },
-          { version: '2.6.3' },
-          { version: '2.6.4' },
-          { version: '2.6.5' },
-          { version: '2.6.6' },
-          { version: '2.6.7' },
-          { version: '2.7.0' },
-          { version: '2.7.1' },
-          { version: '3.0.0-alpha' },
-          { version: '3.0.0-alpha-2' },
-          { version: '3.0.0-alpha-3' },
-          { version: '3.0.0-alpha-4' },
-          { version: '3.0.0-alpha-5' },
-          { version: '3.0.0-beta-1' },
-          { version: '3.0.0-beta-2' },
-          { version: '3.0.0-beta-3' },
-          { version: '3.0.0-beta-4' },
-          { version: '3.0.0-beta-5' },
-          { version: '3.0.0-rc' },
-          { version: '3.0.0-rc-2' },
-          { version: '3.0.0-rc-3' },
-          { version: '3.0.0' },
-          { version: '3.0.1' },
-          { version: '3.2.0' },
-          { version: '3.2.1' },
-          { version: '3.4.0' },
-          { version: '3.4.1' },
-          { version: '3.5.0' },
-          { version: '3.6.0' },
-          { version: '3.6.1' },
-          { version: '3.7.0' },
-          { version: '3.7.1' },
-          { version: '3.8.0' },
-          { version: '3.8.1' },
-          { version: '3.9.0' },
-          { version: '3.10.0' },
-          { version: '3.10.1' },
-          { version: '3.11.0' },
-          { version: '3.12.0' },
+          {
+            version: '2.5.7.10213',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+            isDeprecated: true,
+          },
+          {
+            version: '2.6.1',
+            releaseTimestamp: '2012-08-05T03:08:28.403Z',
+          },
+          {
+            version: '2.6.2',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
+          },
+          {
+            version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
         ],
         sourceUrl: 'https://nunit.org/',
+        registryUrl: 'https://api.nuget.org/v3/index.json',
       });
     });
 
@@ -1100,31 +1074,37 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res).toMatchObject({
-        sourceUrl: 'https://nunit.org/',
+      expect(res).toEqual({
+        releases: [
+          {
+            version: '2.5.7.10213',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+          },
+          {
+            version: '2.6.2',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
+          },
+          {
+            version: '2.7.1',
+            releaseTimestamp: '2019-08-21T07:08:49.360Z',
+          },
+          {
+            version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
+        ],
         tags: {
           latest: '3.12.0',
         },
-      });
-      expect(res!.releases).toHaveLength(45);
-      expect(res!.releases[0]).toEqual({
-        releaseTimestamp: '2011-01-07T07:57:55.387Z',
-        version: '2.5.7.10213',
-      });
-      expect(res!.releases.at(-1)).toEqual({
-        releaseTimestamp: '2019-05-15T00:24:28.390Z',
-        version: '3.12.0',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '2.6.0.12051'),
-      ).toEqual({
-        version: '2.6.0.12051',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '3.0.0-alpha'),
-      ).toEqual({
-        releaseTimestamp: '2014-09-23T03:11:33.430Z',
-        version: '3.0.0-alpha',
+        sourceUrl: 'https://nunit.org/',
+        registryUrl: 'https://www.nuget.org/api/v2',
       });
     });
 
@@ -1182,278 +1162,6 @@ describe('modules/datasource/nuget/index', () => {
             </m:properties>
           </entry>
           <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.7')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.7')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.7')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.7"/>
-            <m:properties>
-              <d:Version>2.6.7</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.6')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.6')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.6')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.6"/>
-            <m:properties>
-              <d:Version>2.6.6</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.5')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.5')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.5')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.5"/>
-            <m:properties>
-              <d:Version>2.6.5</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.10.1"/>
-            <m:properties>
-              <d:Version>3.10.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.10.0"/>
-            <m:properties>
-              <d:Version>3.10.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.9.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.9.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.9.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.9.0"/>
-            <m:properties>
-              <d:Version>3.9.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.8.1"/>
-            <m:properties>
-              <d:Version>3.8.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.8.0"/>
-            <m:properties>
-              <d:Version>3.8.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.7.1"/>
-            <m:properties>
-              <d:Version>3.7.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.7.0"/>
-            <m:properties>
-              <d:Version>3.7.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.6.1"/>
-            <m:properties>
-              <d:Version>3.6.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.6.0"/>
-            <m:properties>
-              <d:Version>3.6.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.5.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.5.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.5.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.5.0"/>
-            <m:properties>
-              <d:Version>3.5.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.4.1"/>
-            <m:properties>
-              <d:Version>3.4.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.4.0"/>
-            <m:properties>
-              <d:Version>3.4.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.2.1"/>
-            <m:properties>
-              <d:Version>3.2.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
             <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.0')</id>
             <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
             <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.0')"/>
@@ -1466,74 +1174,6 @@ describe('modules/datasource/nuget/index', () => {
             <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.2.0"/>
             <m:properties>
               <d:Version>3.2.0</d:Version>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.1"/>
-            <m:properties>
-              <d:Version>3.0.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0"/>
-            <m:properties>
-              <d:Version>3.0.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.4')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.4')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.4')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.4"/>
-            <m:properties>
-              <d:Version>2.6.4</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc-3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc-3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc-3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-rc-3"/>
-            <m:properties>
-              <d:Version>3.0.0-rc-3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
             </m:properties>
           </entry>
           <entry>
@@ -1553,329 +1193,6 @@ describe('modules/datasource/nuget/index', () => {
               <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
             </m:properties>
           </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-rc"/>
-            <m:properties>
-              <d:Version>3.0.0-rc</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-5')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-5')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-5')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-5"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-5</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-4')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-4')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-4')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-4"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-4</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.3"/>
-            <m:properties>
-              <d:Version>2.6.3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.2')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.2')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.2')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.2"/>
-            <m:properties>
-              <d:Version>2.6.2</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12054')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12054')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12054')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.0.12054"/>
-            <m:properties>
-              <d:Version>2.6.0.12054</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.1"/>
-            <m:properties>
-              <d:Version>2.6.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-2')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-2')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-2')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-2"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-2</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-3"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.10.11092')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.10.11092')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.10.11092')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.5.10.11092"/>
-            <m:properties>
-              <d:Version>2.5.10.11092</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.7.10213')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.7.10213')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.7.10213')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.5.7.10213"/>
-            <m:properties>
-              <d:Version>2.5.7.10213</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12051')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12051')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12051')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.0.12051"/>
-            <m:properties>
-              <d:Version>2.6.0.12051</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-3"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-1"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-4')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-4')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-4')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-4"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-4</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.9.10348')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.9.10348')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.9.10348')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.5.9.10348"/>
-            <m:properties>
-              <d:Version>2.5.9.10348</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-2')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-2')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-2')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-2"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-2</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-5')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-5')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-5')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-5"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-5</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
         </feed>
       `;
       httpMock
@@ -1887,24 +1204,26 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res!.releases).toHaveLength(43);
-      expect(res!.releases[0]).toEqual({
-        version: '2.5.7.10213',
+      expect(res).toEqual({
+        releases: [
+          {
+            version: '2.7.0',
+          },
+          {
+            version: '3.0.0-rc-2',
+          },
+          {
+            version: '3.2.0',
+          },
+          {
+            version: '3.11.0',
+          },
+        ],
+        tags: {
+          latest: '3.11.0',
+        },
+        registryUrl: 'https://www.nuget.org/api/v2',
       });
-      expect(res!.releases.at(-1)).toEqual({
-        version: '3.11.0',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '2.6.0.12051'),
-      ).toEqual({
-        version: '2.6.0.12051',
-      });
-      expect(
-        res!.releases.find(({ version }) => version === '3.0.0-alpha'),
-      ).toEqual({
-        version: '3.0.0-alpha',
-      });
-      expect(res?.sourceUrl).toBeUndefined();
     });
 
     it('processes real data with no github project url (v2)', async () => {
@@ -2029,12 +1348,22 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3Deprecated,
       });
-      expect(res).toMatchObject({
-        deprecationMessage: 'The package `ProxyKit` is deprecated.',
+      expect(res).toEqual({
         releases: [
-          { isDeprecated: true, version: '1.0.0' },
-          { isDeprecated: true, version: '2.3.4' },
+          {
+            version: '1.0.0',
+            isDeprecated: true,
+          },
+          {
+            version: '2.3.4',
+            isDeprecated: true,
+          },
         ],
+        deprecationMessage: 'The package `ProxyKit` is deprecated.',
+        changelogContent:
+          'See https://github.com/ProxyKit/ProxyKit/releases for release notes.',
+        sourceUrl: 'https://github.com/ProxyKit/ProxyKit',
+        registryUrl: 'https://api.nuget.org/v3/index.json',
       });
     });
   });

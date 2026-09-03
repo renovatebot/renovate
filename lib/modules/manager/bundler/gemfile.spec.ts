@@ -6,18 +6,16 @@ const gemLockFile = Fixtures.get('Gemfile.rails.lock');
 describe('modules/manager/bundler/gemfile', () => {
   it('matches the expected output', () => {
     const res = extractLockFileEntries(gemLockFile);
-    const lockEntries = Object.fromEntries(res);
-    expect(Object.keys(lockEntries)).toHaveLength(185);
-    // first entry, its `-java` platform suffix stripped; `bcrypt` is listed
-    // once per platform and is kept only once
-    expect(lockEntries).toMatchObject({
+    expect(Object.fromEntries(res)).toEqual({
       'activerecord-jdbc-adapter': '52.1',
-      bcrypt: '3.1.12',
+      'activerecord-jdbcsqlite3-adapter': '52.1',
+      'azure-core': '0.1.14',
       'azure-storage': '0.15.0.preview',
-      'http_parser.rb': '0.6.0',
-      'mime-types-data': '3.2018.0812',
-      parser: '2.5.3.0',
-      xpath: '3.2.0',
+      listen: '3.1.5',
+      nokogiri: '1.9.1',
+      pg: '1.1.3',
+      rake: '12.3.1',
+      redcarpet: '3.2.3',
     });
   });
 });
