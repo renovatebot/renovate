@@ -102,7 +102,100 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           packageName: 'azure-cli-monitor',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        releases: [
+          {
+            releaseTimestamp: '2017-04-03T16:55:08.000Z',
+            version: '0.0.1',
+          },
+          {
+            releaseTimestamp: '2017-04-17T20:32:30.000Z',
+            version: '0.0.2',
+          },
+          {
+            releaseTimestamp: '2017-04-28T21:18:47.000Z',
+            version: '0.0.3',
+          },
+          {
+            releaseTimestamp: '2017-05-09T21:36:51.000Z',
+            version: '0.0.4',
+          },
+          {
+            releaseTimestamp: '2017-05-30T23:13:49.000Z',
+            version: '0.0.5',
+          },
+          {
+            releaseTimestamp: '2017-06-13T22:20:58.000Z',
+            version: '0.0.6',
+          },
+          {
+            releaseTimestamp: '2017-06-21T22:12:36.000Z',
+            version: '0.0.7',
+          },
+          {
+            releaseTimestamp: '2017-07-07T16:22:24.000Z',
+            version: '0.0.8',
+          },
+          {
+            releaseTimestamp: '2017-08-28T20:14:31.000Z',
+            version: '0.0.9',
+          },
+          {
+            releaseTimestamp: '2017-09-22T23:47:54.000Z',
+            version: '0.0.10',
+          },
+          {
+            releaseTimestamp: '2017-10-24T02:14:07.000Z',
+            version: '0.0.11',
+          },
+          {
+            releaseTimestamp: '2017-11-14T18:31:57.000Z',
+            version: '0.0.12',
+          },
+          {
+            releaseTimestamp: '2017-12-05T18:57:54.000Z',
+            version: '0.0.13',
+          },
+          {
+            releaseTimestamp: '2018-01-05T21:26:03.000Z',
+            version: '0.0.14',
+          },
+          {
+            releaseTimestamp: '2018-01-17T18:36:39.000Z',
+            version: '0.1.0',
+          },
+          {
+            releaseTimestamp: '2018-01-31T18:05:22.000Z',
+            version: '0.1.1',
+          },
+          {
+            releaseTimestamp: '2018-02-13T18:17:52.000Z',
+            version: '0.1.2',
+          },
+          {
+            releaseTimestamp: '2018-03-13T17:08:20.000Z',
+            version: '0.1.3',
+          },
+          {
+            releaseTimestamp: '2018-03-27T17:55:25.000Z',
+            version: '0.1.4',
+          },
+          {
+            releaseTimestamp: '2018-04-10T17:25:47.000Z',
+            version: '0.1.5',
+          },
+          {
+            isDeprecated: true,
+            releaseTimestamp: '2018-05-07T17:59:09.000Z',
+            version: '0.1.6',
+          },
+          {
+            releaseTimestamp: '2018-05-22T17:25:23.000Z',
+            version: '0.1.7',
+          },
+        ],
+        sourceUrl: 'https://github.com/Azure/azure-cli',
+      });
     });
 
     it('uses the earliest upload_time of the files of a version', async () => {
@@ -470,7 +563,14 @@ describe('modules/datasource/pypi/index', () => {
           packageName: 'doit',
           constraintsFiltering: 'strict',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        releases: [
+          { version: '0.4.0' },
+          { version: '0.4.1' },
+          { version: '0.30.3' },
+          { version: '0.31.0' },
+        ],
+      });
     });
 
     it('keeps versions with a file without requires_python under strict constraints filtering', async () => {
@@ -511,7 +611,21 @@ describe('modules/datasource/pypi/index', () => {
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        releases: [
+          { version: '0.1.2' },
+          { version: '0.1.3' },
+          { version: '0.1.4' },
+          { version: '0.2.0' },
+          { version: '0.2.1' },
+          { version: '0.2.2' },
+          { version: '0.3.0' },
+          { version: '0.4.0' },
+          { version: '0.4.1' },
+          { version: '0.4.2' },
+          { version: '0.5.0', isDeprecated: true },
+        ],
+      });
     });
 
     it('process data from +simple endpoint', async () => {
@@ -529,7 +643,22 @@ describe('modules/datasource/pypi/index', () => {
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        registryUrl: 'https://some.registry.org/+simple',
+        releases: [
+          { version: '0.1.2' },
+          { version: '0.1.3' },
+          { version: '0.1.4' },
+          { version: '0.2.0' },
+          { version: '0.2.1' },
+          { version: '0.2.2' },
+          { version: '0.3.0' },
+          { version: '0.4.0' },
+          { version: '0.4.1' },
+          { version: '0.4.2' },
+          { version: '0.5.0' },
+        ],
+      });
     });
 
     it('sets private simple if authorization provided', async () => {
@@ -607,7 +736,9 @@ describe('modules/datasource/pypi/index', () => {
           constraints: { python: '2.7' },
           packageName: 'image-collector',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        releases: [{ version: '0.0.5' }],
+      });
     });
 
     it('process data from simple endpoint with mixed-case characters', async () => {
@@ -870,7 +1001,16 @@ describe('modules/datasource/pypi/index', () => {
           packageName: 'dj-database-url',
           constraintsFiltering: 'strict',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        releases: [
+          { version: '0.1.2' },
+          { version: '0.1.3' },
+          { version: '0.1.4' },
+          { version: '0.2.0' },
+          { version: '0.2.1' },
+          { version: '0.2.2' },
+        ],
+      });
     });
 
     it('parses JSON-based Simple API response', async () => {
@@ -1496,6 +1636,32 @@ describe('modules/datasource/pypi/index', () => {
         constraints: { python: '2.7' },
         packageName: 'azure-cli-monitor',
       }),
-    ).toMatchSnapshot();
+    ).toMatchObject({
+      registryUrl: 'https://pypi.org/simple',
+      releases: [
+        { version: '0.0.1' },
+        { version: '0.0.2' },
+        { version: '0.0.3' },
+        { version: '0.0.4' },
+        { version: '0.0.5' },
+        { version: '0.0.6' },
+        { version: '0.0.7' },
+        { version: '0.0.8' },
+        { version: '0.0.9' },
+        { version: '0.0.10' },
+        { version: '0.0.11' },
+        { version: '0.0.12' },
+        { version: '0.0.13' },
+        { version: '0.0.14' },
+        { version: '0.1.0' },
+        { version: '0.1.1' },
+        { version: '0.1.2' },
+        { version: '0.1.3' },
+        { version: '0.1.4' },
+        { version: '0.1.5' },
+        { version: '0.1.6' },
+        { version: '0.1.7' },
+      ],
+    });
   });
 });
