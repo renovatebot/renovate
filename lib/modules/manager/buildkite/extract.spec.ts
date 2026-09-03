@@ -23,7 +23,6 @@ describe('modules/manager/buildkite/extract', () => {
           packageName: 'abc/detect-clowns-buildkite-plugin',
         },
       ]);
-      expect(res).toHaveLength(1);
     });
 
     it('extracts multiple plugins in same file', () => {
@@ -61,7 +60,6 @@ describe('modules/manager/buildkite/extract', () => {
           packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
         },
       ]);
-      expect(res).toHaveLength(2);
     });
 
     it('adds skipReason', () => {
@@ -95,7 +93,6 @@ describe('modules/manager/buildkite/extract', () => {
           skipReason: 'invalid-dependency-specification',
         },
       ]);
-      expect(res).toHaveLength(2);
     });
 
     it('extracts arrays of plugins', () => {
@@ -142,7 +139,6 @@ describe('modules/manager/buildkite/extract', () => {
           packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
         },
       ]);
-      expect(res).toHaveLength(4);
     });
 
     it('extracts git-based plugins', () => {
@@ -168,7 +164,6 @@ describe('modules/manager/buildkite/extract', () => {
           registryUrls: ['https://github.company.com'],
         },
       ]);
-      expect(res).toHaveLength(2);
     });
 
     it('extracts git-based plugin with .git at the end of its name', () => {

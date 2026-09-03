@@ -173,7 +173,6 @@ describe('modules/manager/helm-values/extract', () => {
           depName: 'docker.io/bitnami/harbor-core',
         },
       ]);
-      expect(result?.deps).toHaveLength(5);
     });
 
     it('extract data from file with multiple documents', () => {

@@ -47,7 +47,6 @@ describe('modules/manager/pip_requirements/extract', () => {
         },
       ]);
       expect(res?.registryUrls).toEqual(['http://example.com/private-pypi/']);
-      expect(res?.deps).toHaveLength(4);
     });
 
     it('extracts dependencies with --index-url short code', () => {
@@ -105,7 +104,6 @@ describe('modules/manager/pip_requirements/extract', () => {
         { currentValue: '==2.4.5', depName: 'psycopg2' },
         { currentValue: '==0.1.2', depName: 'wsgiref' },
       ]);
-      expect(res).toHaveLength(5);
     });
 
     it('handles comments and commands', () => {
@@ -121,7 +119,6 @@ describe('modules/manager/pip_requirements/extract', () => {
         { currentValue: '==2.4.5', depName: 'psycopg2' },
         { currentValue: '==0.1.2', depName: 'wsgiref' },
       ]);
-      expect(res).toHaveLength(5);
     });
 
     it('handles extras and complex index url', () => {
@@ -134,7 +131,6 @@ describe('modules/manager/pip_requirements/extract', () => {
       expect(res?.registryUrls).toEqual([
         'https://artifactory.company.com/artifactory/api/pypi/python/simple',
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('handles extra index url', () => {
@@ -153,7 +149,6 @@ describe('modules/manager/pip_requirements/extract', () => {
       expect(res?.additionalRegistryUrls).toEqual([
         'http://example.com/private-pypi/',
       ]);
-      expect(res?.deps).toHaveLength(6);
     });
 
     it('handles extra index url and defaults without index to config', () => {
@@ -222,7 +217,6 @@ describe('modules/manager/pip_requirements/extract', () => {
         { currentValue: '==0.22.1', depName: 'bgg' },
         { currentValue: '==2016.1.8', depName: 'html2text' },
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('should handle package with extras and no version specifiers', () => {

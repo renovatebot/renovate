@@ -74,7 +74,6 @@ describe('modules/manager/nuget/extract', () => {
           depType: 'nuget',
         },
       ]);
-      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts package file version', async () => {
@@ -146,7 +145,6 @@ describe('modules/manager/nuget/extract', () => {
           sharedVariableName: 'AutofacVersion',
         },
       ]);
-      expect(res?.deps).toHaveLength(23);
     });
 
     it('extracts msbuild sdk from the Sdk attr of Project element', async () => {
@@ -362,7 +360,6 @@ describe('modules/manager/nuget/extract', () => {
         { currentValue: '4.5.0', depName: 'Autofac' },
         { currentValue: '2.0.0', depName: 'Roslynator.Analyzers' },
       ]);
-      expect(res?.deps).toHaveLength(22);
     });
 
     it('extracts ContainerBaseImage', async () => {

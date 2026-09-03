@@ -31,7 +31,6 @@ describe('modules/manager/travis/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(2);
     });
 
     it('should handle invalid YAML', () => {

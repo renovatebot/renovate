@@ -25,7 +25,6 @@ describe('modules/manager/cloudbuild/extract', () => {
           depName: 'gcr.io/cloud-builders/kubectl',
         },
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
   });
 });

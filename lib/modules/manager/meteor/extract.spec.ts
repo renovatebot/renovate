@@ -46,7 +46,6 @@ describe('modules/manager/meteor/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(6);
     });
   });
 });

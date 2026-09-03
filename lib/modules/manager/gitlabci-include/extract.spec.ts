@@ -29,7 +29,6 @@ describe('modules/manager/gitlabci-include/extract', () => {
           depType: 'repository',
         },
       ]);
-      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts multiple include blocks', () => {
@@ -54,7 +53,6 @@ describe('modules/manager/gitlabci-include/extract', () => {
           skipReason: 'unspecified-version',
         },
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('extracts multiple embedded include blocks', () => {

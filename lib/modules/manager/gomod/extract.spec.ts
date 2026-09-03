@@ -80,7 +80,6 @@ describe('modules/manager/gomod/extract', () => {
           depType: 'require',
         },
       ]);
-      expect(res).toHaveLength(12);
       expect(res?.filter((e) => e.depType === 'require')).toHaveLength(9);
       expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(2);
@@ -414,7 +413,6 @@ describe('modules/manager/gomod/extract', () => {
           depType: 'indirect',
         },
       ]);
-      expect(res).toHaveLength(59);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(0);
       expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
     });

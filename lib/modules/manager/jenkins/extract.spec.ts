@@ -39,7 +39,6 @@ describe('modules/manager/jenkins/extract', () => {
         { currentValue: '4.2.0', depName: 'git', skipReason: 'ignored' },
         { currentValue: '3.3.1', depName: 'git-client', skipReason: 'ignored' },
       ]);
-      expect(res?.deps).toHaveLength(6);
     });
 
     it('extracts multiple image lines in yaml format', () => {
@@ -74,7 +73,6 @@ describe('modules/manager/jenkins/extract', () => {
           skipReason: 'unsupported-version',
         },
       ]);
-      expect(res?.deps).toHaveLength(8);
     });
   });
 });

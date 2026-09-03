@@ -88,7 +88,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(8);
     expect(res?.deps.find((dep) => dep.depName === 'yarn')?.versioning).toBe(
       'semver',
     );
@@ -153,7 +152,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
     expect(
       res?.deps.find(
         (dep) => dep.depName === 'openresty/headers-more-nginx-module',
@@ -223,7 +221,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
     expect(
       res?.deps.find((dep) => dep.depName === 'gradle')?.registryUrls,
     ).toEqual(['http://registry.gradle.com/']);
@@ -293,7 +290,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(2);
     expect(
       res?.deps.find((dep) => dep.depName === 'nodejs/node')?.versioning,
     ).toBe('node');
@@ -329,7 +325,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts indentation: maintains indentation value if whitespace or empty', async () => {
@@ -415,7 +410,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy and non standard capture groups', async () => {
@@ -437,7 +431,6 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res?.deps).toHaveLength(1);
     expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
     expect(res).toMatchObject({
       deps: [
@@ -475,7 +468,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy and registry url', async () => {
@@ -505,7 +497,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy: sets replaceString when current version group present', async () => {
@@ -593,7 +584,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with combination strategy and empty file', async () => {
@@ -636,7 +626,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with recursive strategy and multiple matches', async () => {
@@ -668,7 +657,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(2);
   });
 
   it('extracts with recursive strategy and multiple layers', async () => {
@@ -696,7 +684,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(1);
   });
 
   it('extracts with recursive strategy and fail because of not sufficient regexes', async () => {
@@ -770,7 +757,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(4);
   });
 
   it('extracts with recursive strategy and without depName', async () => {

@@ -193,7 +193,6 @@ describe('modules/manager/tekton/extract', () => {
           depType: 'tekton-step-image',
         },
       ]);
-      expect(result?.deps).toHaveLength(40);
     });
 
     it('extracts deps from a file in annotations', () => {

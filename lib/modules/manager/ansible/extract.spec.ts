@@ -21,7 +21,6 @@ describe('modules/manager/ansible/extract', () => {
         { depName: 'ubuntu', currentValue: '14.04' },
         { depName: 'ubuntu', currentValue: '14.04' },
       ]);
-      expect(res?.deps).toHaveLength(9);
     });
 
     it('extracts multiple image lines from docker_service', () => {
@@ -32,7 +31,6 @@ describe('modules/manager/ansible/extract', () => {
         { depName: 'sameersbn/redis', currentValue: '4.0.9-1' },
         { depName: 'registry', currentValue: '2.6.2' },
       ]);
-      expect(res?.deps).toHaveLength(4);
     });
 
     it('extracts image and replaces registry', () => {

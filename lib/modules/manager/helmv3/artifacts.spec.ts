@@ -186,7 +186,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
@@ -220,7 +219,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
@@ -263,7 +261,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(3);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -671,7 +668,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(4);
     expect(execSnapshots).toMatchObject([
       { cmd: 'helm repo add stable http://the_stable_url --force-update' },
       { cmd: 'helm repo add repo1 https://the_repo1_url --force-update' },
@@ -723,7 +719,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(3);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -779,7 +774,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(5);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm registry login --username test --password aPassword registry.example.com',
@@ -837,7 +831,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(3);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm registry login --username registryUser --password password registry.gitlab.com',
@@ -1131,7 +1124,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(2);
     expect(
       execSnapshots.filter((value) =>
         value.cmd.startsWith('helm repo add repo1'),
@@ -1183,7 +1175,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(3);
     expect(
       execSnapshots.filter(
         (value) =>

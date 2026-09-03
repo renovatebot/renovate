@@ -25,7 +25,6 @@ describe('modules/manager/bazel/extract', () => {
 
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
-      expect(res?.deps).toHaveLength(18);
       expect(res?.deps).toEqual([
         {
           currentValue: 'v1.0.5',
@@ -343,7 +342,6 @@ describe('modules/manager/bazel/extract', () => {
         `,
       );
 
-      expect(res?.deps).toHaveLength(2);
       expect(res?.deps).toMatchObject([
         {
           currentValue: 'v1.1.2',

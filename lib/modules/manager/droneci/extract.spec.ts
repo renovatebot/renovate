@@ -82,7 +82,6 @@ describe('modules/manager/droneci/extract', () => {
             "'amd64/node\\\n            :10.0.0\\\n            @sha256:36adc17e9cceab32179d3314da9cb9c737ffb11f0de4e688f407ad6d9ca32201'",
         },
       ]);
-      expect(res?.deps).toHaveLength(6);
     });
   });
 

@@ -84,7 +84,6 @@ describe('modules/manager/gitlabci/extract', () => {
           deps: [{ depName: 'alpine', currentValue: '3.11', depType: 'image' }],
         },
       ]);
-      expect(res).toHaveLength(3);
 
       const deps = res?.map((entry) => entry.deps).flat();
       expect(deps).toHaveLength(5);
@@ -117,7 +116,6 @@ describe('modules/manager/gitlabci/extract', () => {
           ],
         },
       ]);
-      expect(res).toHaveLength(1);
       expect(res?.[0].deps).toHaveLength(3);
     });
 
@@ -185,7 +183,6 @@ describe('modules/manager/gitlabci/extract', () => {
           ],
         },
       ]);
-      expect(res).toHaveLength(1);
       expect(res?.[0].deps).toHaveLength(10);
     });
 
@@ -229,7 +226,6 @@ describe('modules/manager/gitlabci/extract', () => {
           ],
         },
       ]);
-      expect(res).toHaveLength(1);
 
       const deps: PackageDependency[] = [];
       res?.forEach((e) => {
@@ -270,7 +266,6 @@ describe('modules/manager/gitlabci/extract', () => {
           ],
         },
       ]);
-      expect(res).toHaveLength(1);
 
       const deps: PackageDependency[] = [];
       res?.forEach((e) => {

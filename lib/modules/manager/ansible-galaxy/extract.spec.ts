@@ -91,7 +91,6 @@ describe('modules/manager/ansible-galaxy/extract', () => {
           packageName: 'git://github.com/org/re.po.git',
         },
       ]);
-      expect(res?.deps).toHaveLength(12);
     });
 
     it('extracts dependencies from a not beautified requirements file', () => {
@@ -112,7 +111,6 @@ describe('modules/manager/ansible-galaxy/extract', () => {
           packageName: 'git@gitlab.company.com:mygroup/ansible-base.git',
         },
       ]);
-      expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts dependencies from requirements.yml with a space at the end of line', () => {
@@ -237,7 +235,6 @@ describe('modules/manager/ansible-galaxy/extract', () => {
           currentValue: '2.9.0',
         },
       ]);
-      expect(res?.deps).toHaveLength(14);
       expect(res?.deps.filter((value) => value.skipReason)).toHaveLength(6);
     });
 
@@ -261,7 +258,6 @@ describe('modules/manager/ansible-galaxy/extract', () => {
           currentValue: '2.9.0',
         },
       ]);
-      expect(res?.deps).toHaveLength(4);
     });
 
     it('check galaxy definition file', () => {
@@ -281,7 +277,6 @@ describe('modules/manager/ansible-galaxy/extract', () => {
         },
         { depName: 'community.windows_quoted', currentValue: '>=1.0.0,<2.0.0' },
       ]);
-      expect(res?.deps).toHaveLength(10);
     });
   });
 

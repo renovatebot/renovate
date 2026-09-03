@@ -131,7 +131,6 @@ describe('modules/manager/cargo/extract', () => {
         { depName: 'js_relative_import', skipReason: 'path-dependency' },
         { depName: 'web-sys', currentValue: '0.3.14' },
       ]);
-      expect(res?.deps).toHaveLength(20);
     });
 
     it('extracts multiple dependencies advanced', async () => {
@@ -247,7 +246,6 @@ describe('modules/manager/cargo/extract', () => {
           depType: 'build-dependencies',
         },
       ]);
-      expect(res?.deps).toHaveLength(18 + 6 + 1);
     });
 
     it('handles inline tables', async () => {
@@ -270,7 +268,6 @@ describe('modules/manager/cargo/extract', () => {
         { depName: 'dep5', currentValue: '3.2.1' },
         { depName: 'dep6', skipReason: 'invalid-dependency-specification' },
       ]);
-      expect(res?.deps).toHaveLength(8);
     });
 
     it('handles standard tables', async () => {
@@ -291,7 +288,6 @@ describe('modules/manager/cargo/extract', () => {
         { depName: 'dep5', skipReason: 'path-dependency' },
         { depName: 'dep7', skipReason: 'invalid-dependency-specification' },
       ]);
-      expect(res?.deps).toHaveLength(6);
     });
 
     it('extracts platform specific dependencies', async () => {
@@ -318,7 +314,6 @@ describe('modules/manager/cargo/extract', () => {
           target: 'cfg(target_arch = "wasm32")',
         },
       ]);
-      expect(res?.deps).toHaveLength(4);
     });
 
     it('extracts registry urls from .cargo/config.toml', async () => {
@@ -341,7 +336,6 @@ describe('modules/manager/cargo/extract', () => {
         },
         { depName: 'tokio', currentValue: '0.2' },
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
@@ -364,7 +358,6 @@ describe('modules/manager/cargo/extract', () => {
         },
         { depName: 'tokio', currentValue: '0.2' },
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('extracts overridden registry indexes from .cargo/config.toml', async () => {
@@ -668,7 +661,6 @@ tokio = { version = "1.21.1" }`;
           skipReason: 'unknown-registry',
         },
       ]);
-      expect(res?.deps).toHaveLength(1);
     });
 
     it('fails to parse cargo config with invalid TOML', async () => {
@@ -689,7 +681,6 @@ tokio = { version = "1.21.1" }`;
         },
         { depName: 'tokio', currentValue: '0.2' },
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('ignore cargo config registries with missing index', async () => {
@@ -710,7 +701,6 @@ tokio = { version = "1.21.1" }`;
         },
         { depName: 'tokio', currentValue: '0.2' },
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('ignore cargo config source replaced registries with missing index', async () => {
@@ -831,7 +821,6 @@ replace-with = "mcorbin"
           packageName: 'boolector',
         },
       ]);
-      expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].packageName).toBe('boolector');
     });
 
