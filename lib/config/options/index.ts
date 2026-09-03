@@ -17,7 +17,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'allowedHeaders',
     description:
-      'List of allowed patterns for header names in repository hostRules config.',
+      'List of allowed patterns for header names in hostRules config.',
     type: 'array',
     default: ['X-*'],
     subType: 'string',
@@ -658,6 +658,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Environment variables that Renovate uses when executing package manager commands.',
     type: 'object',
     default: {},
+    requiresCheckAtTrustBoundary: true,
   },
   {
     name: 'customDatasources',
@@ -2389,6 +2390,7 @@ const options: Readonly<RenovateOptions>[] = [
       branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
       vulnerabilityFixStrategy: 'lowest',
+      prConcurrentLimit: 0,
     },
     mergeable: true,
     cli: false,
@@ -2841,6 +2843,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'repository',
     cli: true,
     mergeable: true,
+    requiresCheckAtTrustBoundary: true,
   },
   {
     name: 'hostType',

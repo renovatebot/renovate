@@ -18,7 +18,7 @@ module.exports = async ({ github, context, core }) => {
   // #45439, which unintentionally closed discussion #40885).
   // Matches: closes #123, fixes #123, closes: #123, etc.
   const closingPattern =
-    /(closes|fixes|resolves|fixed|closed|resolved):?\s+#(\d+)/gi;
+    /(?:closes|fixes|resolves|fixed|closed|resolved):?\s+#(?<number>\d+)/gi;
 
   // Collect every closing-keyword reference, keeping one example
   // line per source for the error report.
@@ -29,7 +29,7 @@ module.exports = async ({ github, context, core }) => {
    */
   function collect(text, source) {
     for (const match of text.matchAll(closingPattern)) {
-      const number = match[2];
+      const number = match[1];
       if (!references.has(number)) {
         const line = text.slice(0, match.index).split('\n').length;
         const lineText = text.split('\n')[line - 1].trim();

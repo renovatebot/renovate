@@ -1113,7 +1113,7 @@ describe('modules/manager/kustomize/extract', () => {
         const sample: any = {
           currentValue: version,
         };
-        if (regEx(/(?:github\.com)(:|\/)/).test(url)) {
+        if (regEx(/(?:github\.com)(?::|\/)/).test(url)) {
           sample.depName = project;
           sample.datasource = GithubTagsDatasource.id;
         } else {

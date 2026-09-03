@@ -534,7 +534,7 @@ Renovate tried to run on this repository, but found these problems.
 
 The following updates await pending status checks. To force their creation now, click on a checkbox below.
 
- - [ ] <!-- approvePr-branch=branchName1 -->pr1
+ - [ ] <!-- unpend-branch=branchName1 -->pr1
 
 ## Detected Dependencies
 
@@ -556,7 +556,7 @@ platform is github
 
 The following updates await pending status checks. To force their creation now, click on a checkbox below.
 
- - [ ] <!-- approvePr-branch=branchName1 -->pr1
+ - [ ] <!-- unpend-branch=branchName1 -->pr1
 
 ## Detected Dependencies
 

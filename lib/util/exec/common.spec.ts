@@ -155,7 +155,6 @@ function getSpawnStub(args: StubArgs): any {
     unref,
     kill,
     pid,
-    catch: (fn: (err: Error) => void) => fn(new Error('mock')),
   };
 }
 
@@ -360,10 +359,6 @@ describe('util/exec/common', () => {
         exitCode: 1,
       });
 
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { outputRedacted: true },
-        'execa promise rejection suppressed',
-      );
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         {
           command: 'ls -l',
@@ -376,7 +371,7 @@ describe('util/exec/common', () => {
       expect(execa).toHaveBeenCalledWith(
         'ls',
         ['-l'],
-        expect.not.objectContaining({ redactOutput: true }),
+        expect.objectContaining({ reject: false }),
       );
     });
 
