@@ -132,7 +132,7 @@ describe('workers/global/config/parse/env', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_TOKEN: 'github.com token',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         hostRules: [],
         token: 'github.com token',
       });
@@ -142,7 +142,7 @@ describe('workers/global/config/parse/env', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         endpoint: 'a ghe endpoint',
         hostRules: [],
       });
@@ -154,7 +154,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         endpoint: 'a ghe endpoint',
         hostRules: [
           {
@@ -224,7 +224,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         endpoint: 'a ghe endpoint',
         hostRules: [],
         token: 'a ghe token',
@@ -236,7 +236,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_PLATFORM: 'gitlab',
         RENOVATE_TOKEN: 'a gitlab.com token',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         hostRules: [],
         platform: 'gitlab',
         token: 'a gitlab.com token',
@@ -249,7 +249,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_TOKEN: 'a gitlab token',
         RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         endpoint: 'a gitlab endpoint',
         hostRules: [],
         platform: 'gitlab',
@@ -263,7 +263,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_TOKEN: 'an Azure DevOps token',
         RENOVATE_ENDPOINT: 'an Azure DevOps endpoint',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         endpoint: 'an Azure DevOps endpoint',
         hostRules: [],
         platform: 'azure',
@@ -278,7 +278,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         endpoint: 'a bitbucket endpoint',
         hostRules: [],
         password: 'app-password',
@@ -294,7 +294,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         endpoint: 'a bitbucket endpoint',
         hostRules: [],
         password: 'app-password',
