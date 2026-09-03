@@ -51,7 +51,6 @@ describe('config/migrate-validate', () => {
         { ...config, repoIsOnboarded: true },
         input,
       );
-      expect(res.warnings).toBeUndefined();
       expect(res).toEqual({
         errors: [],
       });

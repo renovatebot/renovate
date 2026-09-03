@@ -70,7 +70,6 @@ describe('workers/global/config/parse/file', () => {
       expect(res).toEqual({
         rangeStrategy: 'bump',
       });
-      expect(res.rangeStrategy).toBe('bump');
     });
 
     it('warns if config is invalid', async () => {

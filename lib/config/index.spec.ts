@@ -74,7 +74,6 @@ describe('config/index', () => {
         node: '<15',
         npm: '^6.0.0',
       });
-      expect(config.constraints.node).toBe('<15');
     });
 
     it('merges forced options', () => {

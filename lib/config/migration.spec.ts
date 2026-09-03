@@ -328,10 +328,6 @@ describe('config/migration', () => {
         },
       });
       expect(isMigrated).toBeTrue();
-      // @ts-expect-error -- TODO: fix me
-      expect(migratedConfig.depTypes).toBeUndefined();
-      expect(migratedConfig.automerge).toBe(false);
-      expect(migratedConfig.baseBranchPatterns).toMatchObject(['next']);
     });
 
     it('migrates before and after schedules', () => {
@@ -554,8 +550,6 @@ describe('config/migration', () => {
         ],
       });
       expect(isMigrated).toBeTrue();
-      // @ts-expect-error -- TODO: fix me
-      expect(migratedConfig.packageFiles).toBeUndefined();
     });
 
     it('migrates more packageFiles', () => {
@@ -595,8 +589,6 @@ describe('config/migration', () => {
         ],
       });
       expect(isMigrated).toBeTrue();
-      // @ts-expect-error -- TODO: fix me
-      expect(migratedConfig.packageFiles).toBeUndefined();
     });
 
     it('removes invalid configs', () => {

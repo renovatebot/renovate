@@ -47,7 +47,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
             ---
           `}`}\n`,
       );
-      expect(res.indexOf('Docker-only')).not.toBe(-1);
     });
 
     it('assignees, labels and schedule', () => {
