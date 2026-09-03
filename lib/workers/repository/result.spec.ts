@@ -17,5 +17,19 @@ describe('workers/repository/result', () => {
       const result = processResult(config, 'done');
       expect(result).not.toBeNil();
     });
+
+    it('reports an onboarding repository', () => {
+      config.repoIsActivated = false;
+      config.repoIsOnboarded = false;
+
+      const result = processResult(config, 'onboarding');
+
+      expect(result).toEqual({
+        res: 'onboarding',
+        status: 'onboarding',
+        enabled: true,
+        onboarded: false,
+      });
+    });
   });
 });

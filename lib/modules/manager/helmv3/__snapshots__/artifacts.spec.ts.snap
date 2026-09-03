@@ -7,6 +7,7 @@ exports[`modules/manager/helmv3/artifacts > alias name is picked, when repositor
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -31,6 +32,7 @@ exports[`modules/manager/helmv3/artifacts > alias name is picked, when repositor
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -60,6 +62,7 @@ exports[`modules/manager/helmv3/artifacts > do not add registryAliases to reposi
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -84,6 +87,7 @@ exports[`modules/manager/helmv3/artifacts > do not add registryAliases to reposi
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -108,6 +112,7 @@ exports[`modules/manager/helmv3/artifacts > do not add registryAliases to reposi
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -137,6 +142,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -161,6 +167,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -185,6 +192,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -214,6 +222,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -238,6 +247,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -262,6 +272,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -286,6 +297,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -310,6 +322,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -339,6 +352,7 @@ exports[`modules/manager/helmv3/artifacts > returns null if unchanged 1`] = `
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -363,6 +377,7 @@ exports[`modules/manager/helmv3/artifacts > returns null if unchanged 1`] = `
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -392,6 +407,7 @@ exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock 1`] = `
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -416,6 +432,7 @@ exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock 1`] = `
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -445,6 +462,7 @@ exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock for lockf
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -469,6 +487,7 @@ exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock for lockf
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -502,10 +521,11 @@ exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock with dock
     "options": {},
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool helm v3.7.2 && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update '"''"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CI -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool helm v3.7.2 && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update '"''"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
@@ -536,6 +556,7 @@ exports[`modules/manager/helmv3/artifacts > sets repositories from registryAlias
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -560,6 +581,7 @@ exports[`modules/manager/helmv3/artifacts > sets repositories from registryAlias
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -584,6 +606,7 @@ exports[`modules/manager/helmv3/artifacts > sets repositories from registryAlias
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -608,6 +631,7 @@ exports[`modules/manager/helmv3/artifacts > sets repositories from registryAlias
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",
         "HELM_REPOSITORY_CACHE": "/tmp/renovate/cache/__renovate-private-cache/repositories",
@@ -641,10 +665,11 @@ exports[`modules/manager/helmv3/artifacts > sets repositories from registryAlias
     "options": {},
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool helm v3.7.2 && helm repo add stable http://the_stable_url --force-update && helm repo add repo1 https://the_repo1_url --force-update && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update '"''"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CI -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool helm v3.7.2 && helm repo add stable http://the_stable_url --force-update && helm repo add repo1 https://the_repo1_url --force-update && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update '"''"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "env": {
+        "CI": "true",
         "CONTAINERBASE_CACHE_DIR": "/tmp/renovate/cache/containerbase",
         "HELM_EXPERIMENTAL_OCI": "1",
         "HELM_REGISTRY_CONFIG": "/tmp/renovate/cache/__renovate-private-cache/registry.json",

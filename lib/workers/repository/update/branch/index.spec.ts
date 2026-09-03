@@ -616,6 +616,28 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('does not skip branch if branch edited without an open PR but rebase requested', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      config.dependencyDashboardChecks = { 'renovate/some-branch': 'rebase' };
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha: expect.any(String),
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith('User has requested rebase');
+    });
+
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,

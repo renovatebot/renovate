@@ -94,6 +94,7 @@ export default defineConfig(() =>
         ],
         reporters,
         mockReset: true,
+        unstubEnvs: true,
         coverage: {
           provider: 'v8',
           skipFull: !ci,
@@ -133,6 +134,7 @@ export default defineConfig(() =>
           'tools/docs/test/**/*.test.mjs',
           '.worktrees/**/*',
           '.claude/worktrees/**/*',
+          '.pnpm-store/**/*',
         ],
       },
     }),

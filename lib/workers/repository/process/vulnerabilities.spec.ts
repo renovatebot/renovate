@@ -4,7 +4,9 @@ import { mockFn } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import type { PackageRuleInputConfig } from '../../../config/types.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
@@ -1280,10 +1282,103 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['golang-version'],
           matchPackageNames: ['go'],
           matchCurrentVersion: '1.23.6',
+          matchDepTypes: ['toolchain'],
           allowedVersions: '>= 1.23.8',
           isVulnerabilityAlert: true,
         },
       ]);
+    });
+
+    it('does not apply go stdlib toolchain remediation to the module go directive', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'golang',
+                currentValue: '1.26.0',
+                datasource: 'golang-version',
+                versioning: 'go-mod-directive',
+              },
+              {
+                depName: 'go',
+                depType: 'toolchain',
+                currentValue: '1.26.5',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GO-2026-0001',
+          modified: '',
+          aliases: ['CVE-2026-0001'],
+          affected: [
+            {
+              package: {
+                name: 'stdlib',
+                ecosystem: 'Go',
+                purl: 'pkg:golang/stdlib',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '1.26.0' }, { fixed: '1.26.6' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['golang-version'],
+          matchPackageNames: ['go'],
+          matchCurrentVersion: '1.26.5',
+          matchDepTypes: ['toolchain'],
+          allowedVersions: '>= 1.26.6',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+
+      const toolchainDep: PackageRuleInputConfig & {
+        allowedVersions?: string;
+      } = await applyPackageRules({
+        packageRules: config.packageRules,
+        depName: 'go',
+        packageName: 'go',
+        depType: 'toolchain',
+        currentValue: '1.26.5',
+        datasource: 'golang-version',
+        versioning: 'semver',
+      });
+      expect(toolchainDep.allowedVersions).toBe('>= 1.26.6');
+      expect(toolchainDep.isVulnerabilityAlert).toBe(true);
+
+      const golangDep: PackageRuleInputConfig & { allowedVersions?: string } =
+        await applyPackageRules({
+          packageRules: config.packageRules,
+          depName: 'go',
+          packageName: 'go',
+          depType: 'golang',
+          currentValue: '1.26.0',
+          datasource: 'golang-version',
+          versioning: 'go-mod-directive',
+        });
+      expect(golangDep.allowedVersions).toBeUndefined();
+      expect(golangDep.isVulnerabilityAlert).toBeUndefined();
     });
 
     it('skips vulnerability lookup for go module directive', async () => {
@@ -1309,6 +1404,42 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
 
       expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('does not scope npm remediation rules by depType', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                depType: 'dependencies',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules?.[0]).not.toHaveProperty('matchDepTypes');
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '>= 4.17.11',
+          isVulnerabilityAlert: true,
+        },
+      ]);
     });
 
     it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {

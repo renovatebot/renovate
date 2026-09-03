@@ -1,4 +1,5 @@
 import { isArray, isNonEmptyObject, isObject } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import type { PackageRule } from '../../types.ts';
 import { AbstractMigration } from '../base/abstract-migration.ts';
 
@@ -13,7 +14,7 @@ export class DepTypesMigration extends AbstractMigration {
     /^(?:(?:d|devD|optionalD|peerD)ependencies|engines|depTypes)$/;
 
   override run(value: unknown, key: string): void {
-    const packageRules: PackageRule[] = this.get('packageRules') ?? [];
+    const packageRules: PackageRule[] = coerceArray(this.get('packageRules'));
     if (isNonEmptyObject(value) && !isArray(value)) {
       packageRules.push({
         matchDepTypes: [key],

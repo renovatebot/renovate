@@ -10,11 +10,13 @@ export function sanitizeMarkdown(markdown: string): string {
   // Put a zero width space after every # followed by a digit
   res = res.replace(regEx(/(\W)#(\d)/gi), '$1#&#8203;$2');
   // Put a zero width space after every @ symbol to prevent unintended hyperlinking,
-  // but leave code blocks (triple backticks) and inline code spans untouched
+  // but leave URLs, code blocks (triple backticks), and inline code spans untouched
   res = res
-    .split(regEx(/(```[\s\S]*?```|`[^`\n]*?`)/g))
+    .split(regEx(/(```[\s\S]*?```|`[^`\n]*?`|https?:\/\/[^\s<]+)/gi))
     .map((part) =>
-      part.startsWith('`') ? part : part.replace(regEx(/@/g), '@&#8203;'),
+      part.startsWith('`') || regEx(/^https?:\/\//i).test(part)
+        ? part
+        : part.replace(regEx(/@/g), '@&#8203;'),
     )
     .join('');
   res = res.replace(regEx(/([a-z]@)&#8203;/gi), '$1');

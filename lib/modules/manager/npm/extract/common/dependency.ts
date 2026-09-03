@@ -1,6 +1,7 @@
 import { isString } from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { logger } from '../../../../../logger/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
 import type { ConstraintName } from '../../../../../util/exec/types.ts';
 import { isConstraintName } from '../../../../../util/exec/types.ts';
 import { regEx } from '../../../../../util/regex.ts';
@@ -42,8 +43,9 @@ export function parseDepName(depType: string, key: string): string {
   }
 
   const lastSegment = segments.at(-1);
-  const [, depName] =
-    regEx(/^((?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? '') ?? [];
+  const [, depName] = coerceArray(
+    regEx(/^((?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? ''),
+  );
   return depName;
 }
 
@@ -83,6 +85,9 @@ export function extractDependency(
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
       dep.versioning = npmVersioningId;
+    } else if (depName === 'bun') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Bun';
     } else {
       dep.skipReason = 'unknown-engines';
     }
@@ -233,6 +238,7 @@ export function getExtractedConstraints(
 ): Partial<Record<ConstraintName, string>> {
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   const constraints: ConstraintName[] = [
+    'bun',
     'node',
     'yarn',
     'npm',

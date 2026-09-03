@@ -700,7 +700,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          pnpmLockFile: 'pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -739,7 +739,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         packageFile: 'package.json',
       },
     ]);
@@ -760,7 +760,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          pnpmLockFile: 'pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '9.15.3',
@@ -799,7 +799,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         packageFile: 'pnpm-workspace.yaml',
       },
     ]);
@@ -821,7 +821,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
+          pnpmLockFile: 'subfolder/pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -860,7 +860,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['subfolder/pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'subfolder/pnpm-lock.yaml' },
         packageFile: 'subfolder/package.json',
       },
     ]);
@@ -882,7 +882,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     const packageFiles = [
       {
         managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
+          pnpmLockFile: 'subfolder/pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -892,7 +892,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       },
       {
         managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
+          pnpmLockFile: 'subfolder/pnpm-lock.yaml',
         },
         extractedConstraints: {
           pnpm: '>=6.0.0',
@@ -918,7 +918,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
         extractedConstraints: { pnpm: '>=6.0.0' },
         deps: [],
         lockFiles: ['subfolder/pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'subfolder/pnpm-lock.yaml' },
         packageFile: 'subfolder/package.json',
       },
       {
@@ -938,7 +938,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
           },
         ],
         lockFiles: ['subfolder/pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        managerData: { pnpmLockFile: 'subfolder/pnpm-lock.yaml' },
         packageFile: 'subfolder/workspace-package/package.json',
       },
     ]);
