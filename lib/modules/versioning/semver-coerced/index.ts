@@ -23,11 +23,11 @@ function isStable(version: string): boolean {
     return false;
   }
 
-  const minor = m.groups.minor ?? '.0';
-  const patch = m.groups.patch ?? '.0';
-  const others = m.groups.others ?? '';
+  const minor = coerceString(m.groups.minor, '.0');
+  const patch = coerceString(m.groups.patch, '.0');
+  const others = coerceString(m.groups.others);
   const fixed = `${m.groups.major}${minor}${patch}${others}`.replace(
-    /(^|\.)0+(?=\d)/g,
+    regEx(/(^|\.)0+(?=\d)/g),
     '$1',
   );
 
