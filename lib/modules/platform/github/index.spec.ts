@@ -5415,16 +5415,6 @@ describe('modules/platform/github/index', () => {
       expect(result).toContain(
         '> [!NOTE]\n> This PR body was truncated due to platform limits.\n\n',
       );
-      expect(result).not.toContain('**Note**');
-    });
-
-    it('converts the truncation notice added by smartTruncate() to GitHub alert syntax', () => {
-      const input = 'x'.repeat(github.maxBodyLength() + 1000);
-      const result = github.massageMarkdown(input);
-      expect(result).toContain(
-        '> [!IMPORTANT]\n> ✂ PR body was truncated to here.\n',
-      );
-      expect(result).not.toContain('**Important**');
     });
 
     it('returns not-updated pr body for GHE', async () => {

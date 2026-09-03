@@ -19,7 +19,7 @@ export function smartTruncate(input: string, len: number): string {
     `> :information_source: **Note**\n> \n> This PR body was truncated due to platform limits.\n\n`,
   );
   const truncationNotice = emojify(
-    `\n\n> :exclamation: **Important**\n> \n> :scissors: PR body was truncated to here.\n`,
+    `\n\n> :scissors: **Note**\n> \n> PR body was truncated to here.\n`,
   );
   const truncatedInput = note + input;
 
