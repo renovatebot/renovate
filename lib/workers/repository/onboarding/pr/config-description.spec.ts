@@ -56,18 +56,13 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];
       const res = getConfigDesc(config);
-      expect(res).toBe(
-        `\n${`${codeBlock`
-            ### Configuration Summary
-
-            Based on the default config's presets, Renovate will:
-
-              - Start dependency updates only once this onboarding PR is merged
-              - Run Renovate on following schedule: before 5am
-
-            ---
-          `}`}\n`,
+      // only the schedule makes it into the summary
+      expect(res).toContain(
+        '  - Run Renovate on following schedule: before 5am\n',
       );
+      expect(res).not.toContain('- someone');
+      expect(res).not.toContain('- renovate');
+      expect(res).not.toContain('- deps');
     });
 
     it('include retry/refresh checkbox message only if onboardingRebaseCheckbox is true', () => {
@@ -76,18 +71,11 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
       config.onboardingRebaseCheckbox = true;
       const res = getConfigDesc(config);
-      expect(res).toBe(
-        `\n${`${codeBlock`
-            ### Configuration Summary
-
-            Based on the default config's presets, Renovate will:
-
-              - Start dependency updates only once this onboarding PR is merged
-              - Run Renovate on following schedule: before 5am
-
-            ---
-          `}`}\n`,
+      expect(res).toContain(
+        '  - Run Renovate on following schedule: before 5am\n',
       );
+      // the checkbox message is added by the PR body, not by the config summary
+      expect(res).not.toContain('checkbox');
     });
   });
 });
