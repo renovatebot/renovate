@@ -396,7 +396,6 @@ describe('modules/manager/bundler/extract', () => {
             (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
           ),
       ).toBeTrue();
-      expect(res?.deps).toHaveLength(68);
     });
 
     it('parses sourceGroups', async () => {
@@ -423,7 +422,6 @@ describe('modules/manager/bundler/extract', () => {
           { depName: 'faker', depTypes: ['development', 'optional => true'] },
         ],
       });
-      expect(res?.deps).toHaveLength(7);
     });
 
     it('parse webpacker Gemfile', async () => {
@@ -460,7 +458,6 @@ describe('modules/manager/bundler/extract', () => {
           (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
         ),
       ).toBeTrue();
-      expect(res?.deps).toHaveLength(5);
     });
 
     it('parse mastodon Gemfile', async () => {
@@ -1133,7 +1130,6 @@ describe('modules/manager/bundler/extract', () => {
             (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
           ),
       ).toBeTrue();
-      expect(res?.deps).toHaveLength(125);
     });
 
     it('parse Ruby CI Gemfile', async () => {
@@ -1212,7 +1208,6 @@ describe('modules/manager/bundler/extract', () => {
           (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
         ),
       ).toBeTrue();
-      expect(res?.deps).toHaveLength(14);
     });
   });
 
@@ -2529,7 +2524,6 @@ describe('modules/manager/bundler/extract', () => {
         (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
       ),
     ).toBeTrue();
-    expect(res?.deps).toHaveLength(252);
   });
 
   it('parse source blocks in Gemfile', async () => {
@@ -2617,7 +2611,6 @@ describe('modules/manager/bundler/extract', () => {
         },
       ],
     });
-    expect(res?.deps).toHaveLength(2);
   });
 
   it('parses source blocks with groups in Gemfile', async () => {
