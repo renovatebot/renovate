@@ -3555,7 +3555,6 @@ describe('modules/platform/gitlab/index', () => {
         number: 12345,
         title: 'do something',
       });
-      expect(pr?.title).toBe('do something');
     });
 
     it('removes deprecated draft prefix from returned title', async () => {
@@ -3583,7 +3582,6 @@ describe('modules/platform/gitlab/index', () => {
         number: 12345,
         title: 'do something',
       });
-      expect(pr?.title).toBe('do something');
     });
 
     it('returns the mergeable PR', async () => {
