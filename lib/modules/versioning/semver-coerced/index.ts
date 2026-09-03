@@ -28,8 +28,8 @@ function isStable(version: string): boolean {
   const patch = coerceString(m.groups.patch, '.0');
   const others = coerceString(m.groups.others);
   const fixed = `${m.groups.major}${minor}${patch}${others}`.replace(
-    regEx(/(^|\.)0+(\d)/g),
-    '$1$2',
+    regEx(/(?<prefix>^|\.)0+(?<digit>\d)/g),
+    '$<prefix>$<digit>',
   );
 
   return stable.is(fixed);
