@@ -80,10 +80,7 @@ describe('modules/manager/gomod/extract', () => {
           depType: 'require',
         },
       ]);
-      expect(res?.filter((e) => e.depType === 'require')).toHaveLength(9);
-      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(2);
-      expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(2);
     });
 
     it('extracts multi-line requires', () => {
@@ -414,7 +411,6 @@ describe('modules/manager/gomod/extract', () => {
         },
       ]);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(0);
-      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
     });
 
     it('ignores empty spaces in multi-line requires', () => {

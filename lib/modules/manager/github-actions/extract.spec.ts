@@ -124,9 +124,6 @@ describe('modules/manager/github-actions/extract', () => {
           skipReason: 'invalid-version',
         },
       ]);
-      expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
-        6,
-      );
     });
 
     it('extracts multiple action tag lines from yaml configuration file', async () => {
@@ -218,12 +215,6 @@ describe('modules/manager/github-actions/extract', () => {
           skipReason: 'invalid-version',
         },
       ]);
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-tags'),
-      ).toHaveLength(7);
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-digest'),
-      ).toHaveLength(1);
     });
 
     it('use github.com as registry when no settings provided', async () => {

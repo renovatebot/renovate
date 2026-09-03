@@ -29,7 +29,6 @@ describe('modules/manager/helmsman/extract', () => {
     it('extract deps', () => {
       const fileName = 'helmsman.yaml';
       const result = extractPackageFile(multiDepFile, fileName, {});
-      expect(result?.deps.filter((value) => value.skipReason)).toHaveLength(5);
       expect(result).toEqual({
         deps: [
           {

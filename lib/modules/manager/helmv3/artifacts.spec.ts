@@ -1124,18 +1124,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(
-      execSnapshots.filter((value) =>
-        value.cmd.startsWith('helm repo add repo1'),
-      ),
-    ).toBeArrayOfSize(1);
-    expect(
-      execSnapshots.filter((value) =>
-        value.cmd.includes(
-          'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
-        ),
-      ),
-    ).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo1 https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update --username basicUser --password secret',
@@ -1175,20 +1163,6 @@ describe('modules/manager/helmv3/artifacts', () => {
         },
       },
     ]);
-    expect(
-      execSnapshots.filter(
-        (value) =>
-          value.cmd.startsWith('helm repo add jetstack') && // alias
-          value.cmd.includes('https://charts.jetstack.io'),
-      ),
-    ).toBeArrayOfSize(1);
-    expect(
-      execSnapshots.filter(
-        (value) =>
-          value.cmd.startsWith('helm repo add nginx') && // falling back to name
-          value.cmd.includes('https://kubernetes.github.io/ingress-nginx'),
-      ),
-    ).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add jetstack https://charts.jetstack.io --force-update',

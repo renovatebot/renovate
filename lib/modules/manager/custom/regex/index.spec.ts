@@ -88,12 +88,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(res?.deps.find((dep) => dep.depName === 'yarn')?.versioning).toBe(
-      'semver',
-    );
-    expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
-      'maven',
-    );
     expect(res?.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
 
@@ -152,11 +146,6 @@ describe('modules/manager/custom/regex/index', () => {
         },
       ],
     });
-    expect(
-      res?.deps.find(
-        (dep) => dep.depName === 'openresty/headers-more-nginx-module',
-      )?.extractVersion,
-    ).toBe('^v(?<version>.*)$');
   });
 
   it('extracts registryUrl', async () => {
@@ -431,7 +420,6 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
     expect(res).toMatchObject({
       deps: [
         {

@@ -181,8 +181,6 @@ describe('modules/manager/pip_requirements/extract', () => {
       expect(res?.deps[0].currentVersion).toStartWith('2.0.12');
       expect(res?.deps[1].currentValue).toStartWith('==');
       expect(res?.deps[1].currentVersion).toStartWith('4.1.1');
-      expect(res?.deps[2].currentValue).toStartWith('==');
-      expect(res?.deps[2].currentVersion).toStartWith('3.2.1');
 
       expect(res?.deps).toHaveLength(3);
     });

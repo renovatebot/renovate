@@ -25,7 +25,6 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result?.deps[0]?.currentValue).toBeString();
       expect(result).toEqual({
         datasource: 'helm',
         deps: [

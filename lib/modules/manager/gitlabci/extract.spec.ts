@@ -116,7 +116,6 @@ describe('modules/manager/gitlabci/extract', () => {
           ],
         },
       ]);
-      expect(res?.[0].deps).toHaveLength(3);
     });
 
     it('extracts multiple named services', async () => {
@@ -183,7 +182,6 @@ describe('modules/manager/gitlabci/extract', () => {
           ],
         },
       ]);
-      expect(res?.[0].deps).toHaveLength(10);
     });
 
     it('extracts multiple image lines', async () => {

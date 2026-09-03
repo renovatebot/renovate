@@ -821,7 +821,6 @@ replace-with = "mcorbin"
           packageName: 'boolector',
         },
       ]);
-      expect(res?.deps[0].packageName).toBe('boolector');
     });
 
     it('keeps the git source as packageName for renamed git dependencies', async () => {
