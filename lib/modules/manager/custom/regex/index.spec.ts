@@ -43,52 +43,59 @@ describe('modules/manager/custom/regex/index', () => {
           currentValue: '6.2',
           datasource: 'gradle-version',
           versioning: 'maven',
+          depType: 'final',
         },
         {
           depName: 'nodejs/node',
           currentValue: '10.19.0',
           datasource: 'github-tags',
           versioning: 'node',
+          depType: 'final',
         },
         {
           depName: 'composer/composer',
           currentValue: '1.9.3',
           datasource: 'github-releases',
           versioning: 'semver',
+          depType: 'final',
         },
         {
           depName: 'cocoapods',
           currentValue: '1.9.0',
           datasource: 'rubygems',
           versioning: 'ruby',
+          depType: 'final',
         },
         {
           depName: 'docker/docker-ce',
           currentValue: '19.03.1',
           datasource: 'github-releases',
           versioning: 'docker',
+          depType: 'final',
         },
         {
           depName: 'python-poetry/poetry',
           currentValue: '1.0.0',
           datasource: 'github-releases',
           versioning: 'semver',
+          depType: 'final',
         },
         {
           depName: 'npm',
           currentValue: '6.10.2',
           datasource: 'npm',
           versioning: 'semver',
+          depType: 'final',
         },
         {
           depName: 'yarn',
           currentValue: '1.19.1',
           datasource: 'npm',
           versioning: 'semver',
+          depType: 'final',
         },
       ],
     });
-    expect(res?.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
 
   it('returns null if no dependencies found', async () => {
@@ -271,20 +278,16 @@ describe('modules/manager/custom/regex/index', () => {
           depName: 'gradle',
           currentValue: '6.2',
           datasource: 'gradle-version',
+          versioning: 'maven',
         },
         {
           depName: 'nodejs/node',
           currentValue: '10.19.0',
           datasource: 'github-tags',
+          versioning: 'node',
         },
       ],
     });
-    expect(
-      res?.deps.find((dep) => dep.depName === 'nodejs/node')?.versioning,
-    ).toBe('node');
-    expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
-      'maven',
-    );
   });
 
   it('extracts dependency with autoReplaceStringTemplate', async () => {
