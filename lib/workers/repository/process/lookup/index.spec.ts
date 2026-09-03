@@ -3276,8 +3276,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
 
-      // both the version-bump and the digest-pin lookups must use the raw
-      // tag (v1.0.0), never the extractVersion-stripped value (1.0.0)
+      // digest lookups must use the raw tag (v1.0.0), not the stripped value (1.0.0)
       expect(getGithubTagsDigest).toHaveBeenCalledWith(
         expect.objectContaining({ currentValue: 'v1.0.0' }),
         'v2.0.0',

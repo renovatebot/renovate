@@ -858,9 +858,7 @@ export async function lookupUpdates(
           (config.pinDigests === true && !config.digestManagedExternally) ||
           config.currentDigest
         ) {
-          // `extractVersion` strips the release/tag prefix from the values we compare and
-          // write to the package file, but `getDigest()` implementations need the actual
-          // git tag. `versionOrig` on the matching release holds that pre-extraction value.
+          // getDigest() needs the real tag; versionOrig holds it pre-extractVersion.
           const currentValueOrig =
             dependency?.releases.find((r) => r.version === config.currentValue)
               ?.versionOrig ?? config.currentValue;
@@ -887,6 +885,10 @@ export async function lookupUpdates(
             getDigestConfig.replacementName = update.newName;
           }
 
+          const newRelease = dependency?.releases.find(
+            (r) => r.version === update.newValue,
+          );
+
           // Don't use current releases if replacement changes name, otherwise we use the wrong new digest.
           // This happens on datasources which return the digest in release info like `github-tags`.
           // We can still use it when only version is changing.
@@ -894,14 +896,10 @@ export async function lookupUpdates(
             update.updateType !== 'replacement' ||
             update.newName === config.packageName
           ) {
-            update.newDigest ??= dependency?.releases.find(
-              (r) => r.version === update.newValue,
-            )?.newDigest;
+            update.newDigest ??= newRelease?.newDigest;
           }
 
-          const newValueOrig =
-            dependency?.releases.find((r) => r.version === update.newValue)
-              ?.versionOrig ?? update.newValue;
+          const newValueOrig = newRelease?.versionOrig ?? update.newValue;
 
           update.newDigest ??= await getDigest(getDigestConfig, newValueOrig);
 
