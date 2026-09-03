@@ -3,6 +3,7 @@ import type { SemVer } from 'semver';
 import semver from 'semver';
 import stable from 'semver-stable';
 import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
 import { isBreaking as semverIsBreaking } from '../semver/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
@@ -27,8 +28,8 @@ function isStable(version: string): boolean {
   const patch = coerceString(m.groups.patch, '.0');
   const others = coerceString(m.groups.others);
   const fixed = `${m.groups.major}${minor}${patch}${others}`.replace(
-    regEx(/(^|\.)0+(?=\d)/g),
-    '$1',
+    regEx(/(^|\.)0+(\d)/g),
+    '$1$2',
   );
 
   return stable.is(fixed);
