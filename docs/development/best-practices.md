@@ -164,6 +164,9 @@ It is OK to not inline metadata if it's complex, but in that case first think wh
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a static `msg` component, so they can be automatically grouped or associated.
 
+Logger output passes through a shared sanitizer that redacts embedded URL credentials and query parameters whose names indicate tokens, keys, or secrets.
+Treat this as defense in depth: do not intentionally log credentials, and register dynamically obtained secrets with the sanitizer.
+
 Good:
 
 ```ts
