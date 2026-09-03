@@ -6,7 +6,8 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { RepologyPackage, RepologyPackageType } from './types.ts';
+import { type RepologyPackage, RepologyPackages } from './schema.ts';
+import type { RepologyPackageType } from './types.ts';
 
 const packageTypes: RepologyPackageType[] = ['binname', 'srcname'];
 
@@ -56,7 +57,7 @@ export class RepologyDatasource extends Datasource {
 
   private async queryPackages(url: string): Promise<RepologyPackage[]> {
     try {
-      const res = await this.http.getJsonUnchecked<RepologyPackage[]>(url);
+      const res = await this.http.getJson(url, RepologyPackages);
       return res.body;
     } catch (err) {
       if (err.statusCode === 404) {
@@ -198,7 +199,7 @@ export class RepologyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -230,13 +231,13 @@ export class RepologyDatasource extends Datasource {
       if (err.message === HOST_DISABLED) {
         logger.trace({ packageName, err }, 'Host disabled');
       } else {
-        logger.warn(
+        logger.once.warn(
           { packageName, err },
           'Repology lookup failed with unexpected error',
         );
       }
 
-      throw new ExternalHostError(err);
+      this.handleGenericErrors(err);
     }
   }
 }

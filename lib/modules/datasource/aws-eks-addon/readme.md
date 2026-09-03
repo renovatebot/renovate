@@ -5,20 +5,13 @@ This `datasource` returns the addon versions available for use on [AWS EKS](http
 - [Amazon EKS add-ons](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html)
 - [Available Amazon EKS add-ons from AWS](https://docs.aws.amazon.com/eks/latest/userguide/workloads-add-ons-available-eks.html)
 
-Since the datasource uses the AWS SDK for JavaScript, you can configure it like other AWS Tools.
-You can use common AWS configuration options, for example:
+See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
-- Set the region via the `AWS_REGION` environment variable or your `~/.aws/config` file
-- Provide credentials via the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables or your `~/.aws/credentials` file
-- Select the profile to use via `AWS_PROFILE` environment variable
-
-Alternatively, you can specify different `region` and `profile` for each addon.
-
-Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on these configuration options.
+You can also specify different `region` and `profile` for each addon.
 
 The minimal IAM privileges required for this datasource are:
 
-```json
+```json {configType=none}
 {
   "Sid": "AllowDescribeEKSAddonVersions",
   "Effect": "Allow",

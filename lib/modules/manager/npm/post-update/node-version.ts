@@ -5,7 +5,7 @@ import type { ToolConstraint } from '../../../../util/exec/types.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
-import type { LazyPackageJson } from './utils.ts';
+import type { LazyPackageJson } from './types.ts';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {

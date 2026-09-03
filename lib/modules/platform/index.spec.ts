@@ -11,7 +11,7 @@ vi.unmock('./scm.ts');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {
-    process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
+    vi.stubEnv('RENOVATE_X_GITHUB_HOST_RULES', 'true');
   });
 
   it('validates', async () => {
@@ -49,7 +49,9 @@ describe('modules/platform/index', () => {
       username: 'abc',
       password: '123',
     };
-    await expect(platform.initPlatform(config)).rejects.toThrow();
+    await expect(platform.initPlatform(config)).rejects.toThrow(
+      'Init: Platform "wrong" not found. Must be one of: azure, bitbucket,',
+    );
   });
 
   it('initializes', async () => {

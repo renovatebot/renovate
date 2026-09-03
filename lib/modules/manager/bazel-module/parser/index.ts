@@ -1,13 +1,14 @@
 import { lang, query as q } from '@renovatebot/good-enough-parser';
+import { coerceArray } from '../../../../util/array.ts';
 import { Ctx } from './context.ts';
 import { extensionTags } from './extension-tags.ts';
-import type { ResultFragment } from './fragments.ts';
 import {
   clearRepoRuleVariables,
   repoRuleCall,
   useRepoRuleAssignment,
 } from './repo-rules.ts';
 import { rules } from './rules.ts';
+import type { ResultFragment } from './types.ts';
 
 const rule = q.alt<Ctx>(
   rules,
@@ -28,5 +29,5 @@ export function parse(input: string): ResultFragment[] {
   clearRepoRuleVariables();
 
   const parsedResult = starlarkLang.query(input, query, new Ctx(input));
-  return parsedResult?.results ?? [];
+  return coerceArray(parsedResult?.results);
 }

@@ -23,14 +23,18 @@
     "embroider": "/^@embroider//",
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
-    "hotchocolate": "/^HotChocolate\\./",
     "oracle-database": [
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
     ],
-    "oxlint": ["oxlint", "eslint-plugin-oxlint"],
+    "oxlint": ["oxlint", "@oxlint/plugins", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
+    "solid": [
+      "@solid-design-system/tokens",
+      "@solid-design-system/styles",
+      "@solid-design-system/components"
+    ],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
     "spock": "/^org\\.spockframework:spock-/",
     "syncfusion-dotnet": "/^Syncfusion\\./",
@@ -69,6 +73,7 @@
     "arcus.security": "https://github.com/arcus-azure/arcus.security",
     "arcus.webapi": "https://github.com/arcus-azure/arcus.webapi",
     "arrow-kt": "https://github.com/arrow-kt/arrow",
+    "arrow-rs": "https://github.com/apache/arrow-rs",
     "aspire": [
       "https://github.com/dotnet/aspire",
       "https://github.com/microsoft/aspire"
@@ -130,6 +135,7 @@
     "babel": "https://github.com/babel/babel",
     "backstage": "https://github.com/backstage/backstage",
     "baset": "https://github.com/igmat/baset",
+    "better-auth": "https://github.com/better-auth/better-auth",
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "bull-board": "https://github.com/felixmosh/bull-board",
@@ -150,11 +156,14 @@
       "https://github.com/Microsoft/ClearScript"
     ],
     "commitlint": "https://github.com/conventional-changelog/commitlint",
+    "confect": "https://github.com/rjdellecese/confect",
+    "conform": "https://github.com/edmundhung/conform",
     "contentful-rich-text": "https://github.com/contentful/rich-text",
     "cspell": "https://github.com/streetsidesoftware/cspell",
     "datadog-browser-sdk": "https://github.com/DataDog/browser-sdk",
     "datafusion": "https://github.com/apache/datafusion",
     "datatables-net": [
+      "https://github.com/DataTables/DataTablesSrc",
       "https://github.com/DataTables/Dist-DataTables",
       "https://github.com/DataTables/Dist-DataTables-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Bootstrap4",
@@ -166,6 +175,7 @@
       "https://github.com/DataTables/Dist-DataTables-jQueryUI"
     ],
     "datatables-net-autofill": [
+      "https://github.com/DataTables/AutoFill",
       "https://github.com/DataTables/Dist-DataTables-AutoFill",
       "https://github.com/DataTables/Dist-DataTables-AutoFill-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-AutoFill-Bootstrap4",
@@ -177,6 +187,7 @@
       "https://github.com/DataTables/Dist-DataTables-AutoFill-jQueryUI"
     ],
     "datatables-net-buttons": [
+      "https://github.com/DataTables/Buttons",
       "https://github.com/DataTables/Dist-DataTables-Buttons",
       "https://github.com/DataTables/Dist-DataTables-Buttons-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Buttons-Bootstrap4",
@@ -188,6 +199,7 @@
       "https://github.com/DataTables/Dist-DataTables-Buttons-jQueryUI"
     ],
     "datatables-net-colreorder": [
+      "https://github.com/DataTables/ColReorder",
       "https://github.com/DataTables/Dist-DataTables-ColReorder",
       "https://github.com/DataTables/Dist-DataTables-ColReorder-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-ColReorder-Bootstrap4",
@@ -199,6 +211,7 @@
       "https://github.com/DataTables/Dist-DataTables-ColReorder-jQueryUI"
     ],
     "datatables-net-fixedcolumns": [
+      "https://github.com/DataTables/FixedColumns",
       "https://github.com/DataTables/Dist-DataTables-FixedColumns",
       "https://github.com/DataTables/Dist-DataTables-FixedColumns-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-FixedColumns-Bootstrap4",
@@ -210,6 +223,7 @@
       "https://github.com/DataTables/Dist-DataTables-FixedColumns-jQueryUI"
     ],
     "datatables-net-fixedheader": [
+      "https://github.com/DataTables/FixedHeader",
       "https://github.com/DataTables/Dist-DataTables-FixedHeader",
       "https://github.com/DataTables/Dist-DataTables-FixedHeader-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-FixedHeader-Bootstrap4",
@@ -221,6 +235,7 @@
       "https://github.com/DataTables/Dist-DataTables-FixedHeader-jQueryUI"
     ],
     "datatables-net-keytable": [
+      "https://github.com/DataTables/KeyTable",
       "https://github.com/DataTables/Dist-DataTables-KeyTable",
       "https://github.com/DataTables/Dist-DataTables-KeyTable-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-KeyTable-Bootstrap4",
@@ -232,6 +247,7 @@
       "https://github.com/DataTables/Dist-DataTables-KeyTable-jQueryUI"
     ],
     "datatables-net-responsive": [
+      "https://github.com/DataTables/Responsive",
       "https://github.com/DataTables/Dist-DataTables-Responsive",
       "https://github.com/DataTables/Dist-DataTables-Responsive-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Responsive-Bootstrap4",
@@ -243,6 +259,7 @@
       "https://github.com/DataTables/Dist-DataTables-Responsive-jQueryUI"
     ],
     "datatables-net-rowgroup": [
+      "https://github.com/DataTables/RowGroup",
       "https://github.com/DataTables/Dist-DataTables-RowGroup",
       "https://github.com/DataTables/Dist-DataTables-RowGroup-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-RowGroup-Bootstrap4",
@@ -254,6 +271,7 @@
       "https://github.com/DataTables/Dist-DataTables-RowGroup-jQueryUI"
     ],
     "datatables-net-rowreorder": [
+      "https://github.com/DataTables/RowReorder",
       "https://github.com/DataTables/Dist-DataTables-RowReorder",
       "https://github.com/DataTables/Dist-DataTables-RowReorder-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-RowReorder-Bootstrap4",
@@ -265,6 +283,7 @@
       "https://github.com/DataTables/Dist-DataTables-RowReorder-jQueryUI"
     ],
     "datatables-net-scroller": [
+      "https://github.com/DataTables/Scroller",
       "https://github.com/DataTables/Dist-DataTables-Scroller",
       "https://github.com/DataTables/Dist-DataTables-Scroller-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Scroller-Bootstrap4",
@@ -276,6 +295,7 @@
       "https://github.com/DataTables/Dist-DataTables-Scroller-jQueryUI"
     ],
     "datatables-net-searchbuilder": [
+      "https://github.com/DataTables/SearchBuilder",
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder",
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder-Bootstrap4",
@@ -287,6 +307,7 @@
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder-jQueryUI"
     ],
     "datatables-net-searchpanes": [
+      "https://github.com/DataTables/SearchPanes",
       "https://github.com/DataTables/Dist-DataTables-SearchPanes",
       "https://github.com/DataTables/Dist-DataTables-SearchPanes-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-SearchPanes-Bootstrap4",
@@ -298,6 +319,7 @@
       "https://github.com/DataTables/Dist-DataTables-SearchPanes-jQueryUI"
     ],
     "datatables-net-select": [
+      "https://github.com/DataTables/Select",
       "https://github.com/DataTables/Dist-DataTables-Select",
       "https://github.com/DataTables/Dist-DataTables-Select-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Select-Bootstrap4",
@@ -309,6 +331,7 @@
       "https://github.com/DataTables/Dist-DataTables-Select-jQueryUI"
     ],
     "datatables-net-staterestore": [
+      "https://github.com/DataTables/StateRestore",
       "https://github.com/DataTables/Dist-DataTables-StateRestore",
       "https://github.com/DataTables/Dist-DataTables-StateRestore-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-StateRestore-Bootstrap4",
@@ -365,6 +388,7 @@
     "enumeratum": "https://github.com/lloydmeta/enumeratum",
     "envelop": "https://github.com/n1ru4l/envelop",
     "error-prone": "https://github.com/google/error-prone",
+    "error-prone-support": "https://github.com/PicnicSupermarket/error-prone-support",
     "eslint": "https://github.com/eslint/eslint",
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
     "eslint-stylistic": "https://github.com/eslint-stylistic/eslint-stylistic",
@@ -380,6 +404,7 @@
     "fimbullinter": "https://github.com/fimbullinter/wotan",
     "flipper": "https://github.com/flippercloud/flipper",
     "flopflip": "https://github.com/tdeekens/flopflip",
+    "flue": "https://github.com/withastro/flue",
     "fontsource": [
       "https://github.com/fontsource/fontsource",
       "https://github.com/fontsource/font-files"
@@ -402,6 +427,7 @@
     "graphql-hive-gateway": "https://github.com/graphql-hive/gateway",
     "graphql-mesh": "https://github.com/Urigo/graphql-mesh",
     "graphql-modules": "https://github.com/Urigo/graphql-modules",
+    "graphql-platform": "https://github.com/ChilliCream/graphql-platform",
     "graphql-tools": "https://github.com/ardatan/graphql-tools",
     "graphql-yoga": "https://github.com/dotansimha/graphql-yoga",
     "graphqlcodegenerator": [
@@ -465,7 +491,9 @@
     "jetty": "https://github.com/jetty/jetty.project",
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
+    "jsonforms": "https://github.com/eclipsesource/jsonforms",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
+    "junior": "https://github.com/getsentry/junior",
     "junit-framework": [
       "https://github.com/junit-team/junit5",
       "https://github.com/junit-team/junit-framework"
@@ -631,7 +659,10 @@
     "quartznet": "https://github.com/quartznet/quartznet",
     "radix-ui-primitives": "https://github.com/radix-ui/primitives",
     "reach-ui": "https://github.com/reach/reach-ui",
-    "react": "https://github.com/facebook/react",
+    "react": [
+      "https://github.com/facebook/react",
+      "https://github.com/react/react"
+    ],
     "react-admin": "https://github.com/marmelab/react-admin",
     "react-apollo": "https://github.com/apollographql/react-apollo",
     "react-dnd": "https://github.com/react-dnd/react-dnd",
@@ -675,10 +706,12 @@
     "serenity-js": "https://github.com/serenity-js/serenity-js",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "servicestack": "https://github.com/ServiceStack/ServiceStack",
+    "serwist": "https://github.com/serwist/serwist",
     "shedlock": "https://github.com/lukas-krecan/ShedLock",
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
     "sitecore-jss": "https://github.com/Sitecore/jss",
+    "size-limit": "https://github.com/ai/size-limit",
     "skiasharp": [
       "https://github.com/mono/SkiaSharp",
       "https://go.microsoft.com/fwlink/?linkid=868515"
@@ -728,11 +761,13 @@
     "tiptap": "https://github.com/ueberdosis/tiptap",
     "tokio-prost": "https://github.com/tokio-rs/prost",
     "tokio-tracing": "https://github.com/tokio-rs/tracing",
+    "tomcat": "https://github.com/apache/tomcat",
     "tonic": "https://github.com/hyperium/tonic",
     "treat": "https://github.com/seek-oss/treat",
     "trpc": "https://github.com/trpc/trpc",
     "trust-dns": "https://github.com/bluejekyll/trust-dns",
     "tsoa": "https://github.com/lukeautry/tsoa",
+    "tunit": "https://github.com/thomhurst/TUnit",
     "turbo": [
       "https://github.com/vercel/turbo",
       "https://github.com/vercel/turborepo"
@@ -757,10 +792,12 @@
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
     "vanilla-extract": "https://github.com/vanilla-extract-css/vanilla-extract",
     "visx": "https://github.com/airbnb/visx",
+    "vite-plus": "https://github.com/voidzero-dev/vite-plus",
     "vitest": "https://github.com/vitest-dev/vitest",
     "vstest": "https://github.com/microsoft/vstest",
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],
     "vue-cli": "https://github.com/vuejs/vue-cli",
+    "vue-language-tools": "https://github.com/vuejs/language-tools",
     "vuepress": "https://github.com/vuejs/vuepress",
     "vueuse": "https://github.com/vueuse/vueuse",
     "weasel": "https://github.com/JasperFx/weasel",
@@ -777,6 +814,7 @@
       "https://github.com/xunit/xunit",
       "https://github.com/xunit/xunit.analyzers"
     ],
+    "yamldotnet": "https://github.com/aaubry/YamlDotNet",
     "yarn": "https://github.com/yarnpkg/berry",
     "zag-js": "https://github.com/chakra-ui/zag",
     "zxcvbn-ts": "https://github.com/zxcvbn-ts/zxcvbn",

@@ -5,9 +5,6 @@ import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
-const validFleetYamlWithCustom = Fixtures.get(
-  'valid_fleet_helm_target_customization.yaml',
-);
 const inValidFleetYaml = Fixtures.get('invalid_fleet.yaml');
 
 const validGitRepoYaml = Fixtures.get('valid_gitrepo.yaml');
@@ -130,6 +127,68 @@ kind: Fleet
         ]);
       });
       it('should parse valid configuration with target customization', () => {
+        const validFleetYamlWithCustom = codeBlock`
+          # This should generate two dependencies with different versions
+          # one with v1.8.0 and one with v1.9.2
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - name: rke2
+              helm:
+                version: "v1.9.2"
+          ---
+          # This should generate two dependencies with different repos
+          # one with https://charts.jetstack.io and one with https://charts.example.com
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: custom-cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - name: cluster1
+              helm:
+                version: "v1.8.2"
+                repo: https://charts.example.com
+
+          ---
+          # This should generate one dependency and a skipped dependency, as there is no version
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: custom-cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - name: cluster1
+              values:
+                some: customization
+
+          ---
+          # This is a valid target customization with no name
+          # It should generate one valid dependency, and one skipped dependency, like the one above
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: custom-cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - values:
+                some: customization
+        `;
         const result = extractPackageFile(
           validFleetYamlWithCustom,
           'fleet.yaml',

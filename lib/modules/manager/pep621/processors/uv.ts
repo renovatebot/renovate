@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
-import { exec } from '../../../../util/exec/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import type {
   ExecOptions,
   ToolConstraint,
@@ -12,8 +12,9 @@ import {
   findLocalSiblingOrParent,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { find } from '../../../../util/host-rules.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -27,10 +28,10 @@ import type {
 import { applyGitSource } from '../../util.ts';
 import { type PyProject, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
-
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
+const gitExec = withGitEnvironment(['pep621']);
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -60,7 +61,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        /* v8 ignore next 3 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!dep.packageName) {
           continue;
         }
@@ -96,8 +97,8 @@ export class UvProcessor extends BasePyProjectProcessor {
             dep.skipReason = 'path-dependency';
           } else if ('workspace' in depSource) {
             dep.skipReason = 'inherited-dependency';
-            /* v8 ignore next 3 -- needs test */
           } else {
+            /* v8 ignore next -- unreachable through schema */
             dep.skipReason = 'unknown-registry';
           }
         } else {
@@ -196,7 +197,6 @@ export class UvProcessor extends BasePyProjectProcessor {
       };
 
       const extraEnv = {
-        ...getGitEnvironmentVariables(['pep621']),
         ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
         ...(await getUvIndexCredentials(project)),
       };
@@ -215,7 +215,7 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
-      await exec(cmd, execOptions);
+      await gitExec(cmd, execOptions);
 
       // check for changes
       const fileChanges: UpdateArtifactsResult[] = [];
@@ -293,9 +293,8 @@ async function getUsernamePassword(
     const hostRule = await getGoogleAuthHostRule();
     if (hostRule) {
       return hostRule;
-    } else {
-      logger.once.debug({ url }, 'Could not get Google access token');
     }
+    logger.once.debug({ url }, 'Could not get Google access token');
   }
 
   return {};
@@ -317,8 +316,9 @@ async function getUvExtraIndexUrl(
     .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
-      const configuredIndexUrls =
-        project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      const configuredIndexUrls = coerceArray(
+        project.tool?.uv?.index?.map(({ url }) => url),
+      );
       return (
         registryUrl !== PypiDatasource.defaultURL &&
         !configuredIndexUrls.includes(registryUrl)
@@ -365,7 +365,7 @@ async function getUvIndexCredentials(
 
   for (const { name, url } of uv_indexes) {
     const parsedUrl = parseUrl(url);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!parsedUrl) {
       continue;
     }
@@ -377,7 +377,7 @@ async function getUvIndexCredentials(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
 
-    const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+    const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);

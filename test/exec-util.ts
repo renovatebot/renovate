@@ -30,6 +30,8 @@ function execSnapshot(
 
   const cwd = upath.toUnix(process.cwd());
 
+  // traverse binds `this.update()` to the callback, requires regular function
+  // eslint-disable-next-line prefer-arrow-callback
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
       const val = v
@@ -73,6 +75,7 @@ export function mockExecSequence(execResults: ExecResult[]): ExecSnapshots {
 }
 
 const basicEnvMock = {
+  CI: 'true',
   HTTP_PROXY: 'http://example.com',
   HTTPS_PROXY: 'https://example.com',
   NO_PROXY: 'localhost',
@@ -98,9 +101,3 @@ export const envMock = {
   full: fullEnvMock,
   filtered: filteredEnvMock,
 };
-
-// reset exec mock, otherwise there can be some left over from previous test
-beforeEach(() => {
-  // maybe not mocked
-  exec.mockReset?.();
-});

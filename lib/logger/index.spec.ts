@@ -38,7 +38,7 @@ await init();
 
 describe('logger/index', () => {
   beforeEach(() => {
-    delete process.env.LOG_FILE_LEVEL;
+    vi.stubEnv('LOG_FILE_LEVEL', undefined);
   });
 
   it('inits', () => {
@@ -203,6 +203,10 @@ describe('logger/index', () => {
   });
 
   describe('createDefaultStreams', () => {
+    beforeEach(() => {
+      vi.stubEnv('LOG_FILE_FORMAT', undefined);
+    });
+
     it('creates log file stream', () => {
       expect(
         createDefaultStreams('info', new ProblemStream(), 'file.log'),
@@ -226,7 +230,7 @@ describe('logger/index', () => {
       'handles log file stream $logFileLevel level',
       ({ logFileLevel, expectedLogLevel }) => {
         if (logFileLevel !== null) {
-          process.env.LOG_FILE_LEVEL = logFileLevel?.toString();
+          vi.stubEnv('LOG_FILE_LEVEL', logFileLevel?.toString());
         }
 
         const streams = createDefaultStreams(
@@ -253,7 +257,7 @@ describe('logger/index', () => {
     ])(
       'handles log file stream $logFileFormat format',
       ({ logFileFormat, expectedType }) => {
-        process.env.LOG_FILE_FORMAT = logFileFormat;
+        vi.stubEnv('LOG_FILE_FORMAT', logFileFormat);
 
         const streams = createDefaultStreams(
           'info',
@@ -266,6 +270,42 @@ describe('logger/index', () => {
         expect(logFileStream.type).toBe(expectedType);
       },
     );
+
+    it('writes pretty formatted data synchronously to log file', async () => {
+      vi.stubEnv('LOG_FILE_FORMAT', 'pretty');
+
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+
+      const logFileStream = streams[2];
+      const stream = logFileStream.stream as {
+        write: (...args: unknown[]) => void;
+      };
+
+      stream.write({ level: 30, msg: 'test message' });
+
+      expect(await fs.readFile('file.log', 'utf8')).toContain('test message');
+    });
+
+    it('writes json data synchronously to log file', async () => {
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+
+      const logFileStream = streams[2];
+      const stream = logFileStream.stream as {
+        write: (...args: unknown[]) => void;
+      };
+
+      stream.write('{"level":30,"msg":"json message"}\n');
+
+      expect(await fs.readFile('file.log', 'utf8')).toContain('json message');
+    });
   });
 
   it('sets level', () => {
@@ -466,7 +506,7 @@ describe('logger/index', () => {
     const childLogger = (logger as RenovateLogger).childLogger();
     childLogger.addSerializers({
       baz: (baz: string): any => {
-        return 'baz custom serializer: ' + baz;
+        return `baz custom serializer: ${baz}`;
       },
     });
 

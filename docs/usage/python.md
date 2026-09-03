@@ -10,7 +10,7 @@ See [all supported managers](./modules/manager/index.md).
 
 ## Versioning support
 
-We've written a JavaScript version of the [PEP440 specification](https://www.python.org/dev/peps/pep-0440/) so we can use it in Renovate bot.
+We've written a JavaScript version of the [PEP440 specification](https://www.python.org/dev/peps/pep-0440/) so we can use it in Renovate.
 You can find this project in our [`renovatebot/pep440` repository](https://github.com/renovatebot/pep440).
 
 Our PEP440 implementation supports pinned versions and ranges.
@@ -74,11 +74,10 @@ Fill the array with alternate index URL(s).
 }
 ```
 
-<!-- prettier-ignore -->
 !!! tip
-    If a `requirements.txt` file has an index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
-    To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
-    This is because `packageRules` are applied _after_ package file extraction.
+  If a `requirements.txt` file has an index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+  To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
+  This is because `packageRules` are applied _after_ package file extraction.
 
 ## Disabling Python support
 

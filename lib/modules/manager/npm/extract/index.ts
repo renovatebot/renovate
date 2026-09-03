@@ -26,7 +26,10 @@ import {
   extractPackageJson,
   hasPackageManager,
 } from './common/package-file.ts';
-import { extractPnpmWorkspaceFile } from './pnpm.ts';
+import {
+  applyPnpmWorkspaceRegistries,
+  extractPnpmWorkspaceFile,
+} from './pnpm.ts';
 import { postExtract } from './post/index.ts';
 import type { NpmPackage } from './types.ts';
 import { extractYarnCatalogs, isZeroInstall } from './yarn.ts';
@@ -71,11 +74,11 @@ export async function extractPackageFile(
     yarnLock: 'yarn.lock',
     packageLock: 'package-lock.json',
     shrinkwrapJson: 'npm-shrinkwrap.json',
-    pnpmShrinkwrap: 'pnpm-lock.yaml',
+    pnpmLockFile: 'pnpm-lock.yaml',
   };
 
   for (const [key, val] of Object.entries(lockFiles) as [
-    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
+    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmLockFile',
     string,
   ][]) {
     const filePath = getSiblingFileName(packageFile, val);
@@ -122,6 +125,30 @@ export async function extractPackageFile(
     : null;
   if (isString(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
     yarnrcConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
+  }
+
+  let pnpmWorkspaceRegistry: string | undefined;
+  let pnpmWorkspaceRegistries: Record<string, string> | undefined;
+  const pnpmWorkspaceYamlFileName = await findLocalSiblingOrParent(
+    packageFile,
+    'pnpm-workspace.yaml',
+  );
+  const repoPnpmWorkspaceYaml = pnpmWorkspaceYamlFileName
+    ? await readLocalFile(pnpmWorkspaceYamlFileName, 'utf8')
+    : null;
+  if (isNonEmptyStringAndNotWhitespace(repoPnpmWorkspaceYaml)) {
+    const parsed = await PnpmWorkspaceFile.safeParseAsync(
+      repoPnpmWorkspaceYaml,
+    );
+    if (parsed.success) {
+      pnpmWorkspaceRegistry = parsed.data.registry;
+      pnpmWorkspaceRegistries = parsed.data.registries;
+    } else {
+      logger.debug(
+        { packageFile: pnpmWorkspaceYamlFileName, err: parsed.error },
+        'Failed to parse pnpm-workspace.yaml',
+      );
+    }
   }
 
   if (res.deps.length === 0) {
@@ -177,6 +204,13 @@ export async function extractPackageFile(
       }
     }
   }
+
+  // Applied after the yarnrc resolution so pnpm-workspace.yaml wins in pnpm repos
+  applyPnpmWorkspaceRegistries(
+    res.deps,
+    pnpmWorkspaceRegistries,
+    pnpmWorkspaceRegistry,
+  );
 
   return {
     ...res,

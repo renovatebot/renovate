@@ -17,7 +17,7 @@ let npmrcRaw = '';
 let packageRules: PackageRule[] = [];
 
 function envReplace(value: any, env = getEnv()): any {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!isString(value)) {
     return value;
   }
@@ -37,7 +37,7 @@ export function getMatchHostFromNpmrcHost(input: string): string {
   if (input.startsWith('//')) {
     const matchHost = input.replace('//', '');
     if (matchHost.includes('/')) {
-      return 'https://' + matchHost;
+      return `https://${matchHost}`;
     }
     return matchHost;
   }

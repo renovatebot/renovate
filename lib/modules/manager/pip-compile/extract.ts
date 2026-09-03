@@ -84,6 +84,13 @@ export async function extractAllPackageFiles(
         type: 'constraint',
       });
     }
+    for (const override of coerceArray(compileArgs.overridesFiles)) {
+      depsBetweenFiles.push({
+        sourceFile: override,
+        outputFile: matchedFile,
+        type: 'override',
+      });
+    }
     const lockedDeps = extractRequirementsFile(fileContent)?.deps;
     if (!lockedDeps) {
       logger.debug(
@@ -126,7 +133,7 @@ export async function extractAllPackageFiles(
         const existingPackageFile = packageFiles.get(packageFile)!;
         existingPackageFile.lockFiles!.push(matchedFile);
         extendWithIndirectDeps(existingPackageFile, lockedDeps);
-        const source = lockFileSources.get(matchedFile) ?? [];
+        const source = coerceArray(lockFileSources.get(matchedFile));
         source.push(existingPackageFile);
         lockFileSources.set(matchedFile, source);
         continue;
@@ -190,7 +197,7 @@ export async function extractAllPackageFiles(
           packageFile,
         };
         packageFiles.set(packageFile, newPackageFile);
-        const source = lockFileSources.get(matchedFile) ?? [];
+        const source = coerceArray(lockFileSources.get(matchedFile));
         source.push(newPackageFile);
         lockFileSources.set(matchedFile, source);
       } else {
@@ -211,7 +218,9 @@ export async function extractAllPackageFiles(
 
   // This needs to go in reverse order to handle transitive dependencies
   for (const packageFile of [...result].reverse()) {
-    for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
+    for (const reqFile of coerceArray<string>(
+      packageFile.managerData?.requirementsFiles,
+    )) {
       let sourceFiles: PackageFile[] | undefined = undefined;
       if (matchedFiles.includes(reqFile)) {
         sourceFiles = lockFileSources.get(reqFile);
@@ -239,8 +248,7 @@ export async function extractAllPackageFiles(
     }
   }
   logger.debug(
-    'pip-compile: dependency graph:\n' +
-      generateMermaidGraph(depsBetweenFiles, lockFileArgs),
+    `pip-compile: dependency graph:\n${generateMermaidGraph(depsBetweenFiles, lockFileArgs)}`,
   );
   return result;
 }

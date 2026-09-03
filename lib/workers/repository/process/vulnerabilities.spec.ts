@@ -4,7 +4,9 @@ import { mockFn } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import type { PackageRuleInputConfig } from '../../../config/types.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
@@ -38,7 +40,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     it('throws when osv-offline error', async () => {
       createMock.mockRejectedValue(new Error());
 
-      await expect(Vulnerabilities.create()).rejects.toThrow();
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
     });
   });
 
@@ -717,6 +719,99 @@ describe('workers/repository/process/vulnerabilities', () => {
         });
       });
     });
+
+    it('handles sub-ecosystems (e.g. Packagist:drupal)', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        composer: [
+          {
+            deps: [
+              {
+                depName: 'drupal/ai',
+                currentValue: '1.0.6',
+                datasource: 'packagist',
+              },
+            ],
+            packageFile: 'composer.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'DRUPAL-CONTRIB-2025-119',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'drupal/ai',
+                ecosystem: 'Packagist:https://packages.drupal.org/8',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.7' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toMatchObject([
+        {
+          packageName: 'drupal/ai',
+          depVersion: '1.0.6',
+          fixedVersion: '>= 1.0.7',
+          datasource: 'packagist',
+        },
+      ]);
+    });
+
+    it('does not match unrelated ecosystem prefixes', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        composer: [
+          {
+            deps: [
+              {
+                depName: 'drupal/ai',
+                currentValue: '1.0.6',
+                datasource: 'packagist',
+              },
+            ],
+            packageFile: 'composer.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'FAKE-PACKAGISTSOMETHING-1',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'drupal/ai',
+                ecosystem: 'PackagistSomething',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.7' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toEqual([]);
+    });
   });
 
   describe('appendVulnerabilityPackageRules()', () => {
@@ -1114,6 +1209,10 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'go',
+          versioning: 'semver',
+        },
         'Setting allowed version >= 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
       );
       expect(config.packageRules).toHaveLength(1);
@@ -1123,6 +1222,292 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchPackageNames: ['stdlib'],
           matchCurrentVersion: '1.7.5',
           allowedVersions: '>= 1.7.6',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('creates vulnerability alert for go toolchain directive using stdlib', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'toolchain',
+                currentValue: '1.23.6',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GO-2025-3563',
+          modified: '',
+          aliases: ['CVE-2025-22871'],
+          affected: [
+            {
+              package: {
+                name: 'stdlib',
+                ecosystem: 'Go',
+                purl: 'pkg:golang/stdlib',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '1.23.0' }, { fixed: '1.23.8' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GO-2025-3563 affects go 1.23.6',
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['golang-version'],
+          matchPackageNames: ['go'],
+          matchCurrentVersion: '1.23.6',
+          matchDepTypes: ['toolchain'],
+          allowedVersions: '>= 1.23.8',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('does not apply go stdlib toolchain remediation to the module go directive', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'golang',
+                currentValue: '1.26.0',
+                datasource: 'golang-version',
+                versioning: 'go-mod-directive',
+              },
+              {
+                depName: 'go',
+                depType: 'toolchain',
+                currentValue: '1.26.5',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GO-2026-0001',
+          modified: '',
+          aliases: ['CVE-2026-0001'],
+          affected: [
+            {
+              package: {
+                name: 'stdlib',
+                ecosystem: 'Go',
+                purl: 'pkg:golang/stdlib',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '1.26.0' }, { fixed: '1.26.6' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['golang-version'],
+          matchPackageNames: ['go'],
+          matchCurrentVersion: '1.26.5',
+          matchDepTypes: ['toolchain'],
+          allowedVersions: '>= 1.26.6',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+
+      const toolchainDep: PackageRuleInputConfig & {
+        allowedVersions?: string;
+      } = await applyPackageRules({
+        packageRules: config.packageRules,
+        depName: 'go',
+        packageName: 'go',
+        depType: 'toolchain',
+        currentValue: '1.26.5',
+        datasource: 'golang-version',
+        versioning: 'semver',
+      });
+      expect(toolchainDep.allowedVersions).toBe('>= 1.26.6');
+      expect(toolchainDep.isVulnerabilityAlert).toBe(true);
+
+      const golangDep: PackageRuleInputConfig & { allowedVersions?: string } =
+        await applyPackageRules({
+          packageRules: config.packageRules,
+          depName: 'go',
+          packageName: 'go',
+          depType: 'golang',
+          currentValue: '1.26.0',
+          datasource: 'golang-version',
+          versioning: 'go-mod-directive',
+        });
+      expect(golangDep.allowedVersions).toBeUndefined();
+      expect(golangDep.isVulnerabilityAlert).toBeUndefined();
+    });
+
+    it('skips vulnerability lookup for go module directive', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'golang',
+                currentValue: '1.23.5',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('does not scope npm remediation rules by depType', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                depType: 'dependencies',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules?.[0]).not.toHaveProperty('matchDepTypes');
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '>= 4.17.11',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName:
+                  'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                currentValue: '3.4.0',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'pom.xml',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-x44p-gvrj-pj2r',
+          modified: '',
+          aliases: ['CVE-2025-14763'],
+          affected: [
+            {
+              package: {
+                ecosystem: 'Maven',
+                name: 'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                purl: 'pkg:maven/software.amazon.encryption.s3/amazon-s3-encryption-client-java',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '4.0.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-x44p-gvrj-pj2r affects software.amazon.encryption.s3:amazon-s3-encryption-client-java 3.4.0',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'maven',
+          versioning: 'maven',
+        },
+        'Setting allowed version [4.0.0,) to fix vulnerability GHSA-x44p-gvrj-pj2r in software.amazon.encryption.s3:amazon-s3-encryption-client-java 3.4.0',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['maven'],
+          matchPackageNames: [
+            'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+          ],
+          matchCurrentVersion: '3.4.0',
+          allowedVersions: '[4.0.0,)',
+          versioning: 'maven',
           isVulnerabilityAlert: true,
         },
       ]);
@@ -1360,6 +1745,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 0.6.3',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -1731,6 +2117,58 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('returns packageRule for deps-edn package using OSV Maven ecosystem', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        'deps-edn': [
+          {
+            deps: [
+              {
+                depName: 'org.clojure/clojure',
+                packageName: 'org.clojure:clojure',
+                currentValue: '1.10.0',
+                datasource: 'clojure',
+              },
+            ],
+            packageFile: 'deps.edn',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jfh8-c2jp-clj1',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'org.clojure:clojure',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/org.clojure/clojure',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.11.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['clojure'],
+          matchPackageNames: ['org.clojure:clojure'],
+          matchCurrentVersion: '1.10.0',
+          allowedVersions: '[1.11.0,)',
+        },
+      ]);
+    });
+
     it('returns packageRule based on last_affected version', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -1781,6 +2219,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '> 0.8.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -1863,6 +2302,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 2.5.1',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -1954,6 +2394,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 5.9.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -2016,6 +2457,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 4.17.11',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---
@@ -2101,6 +2543,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '>= 0.8.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
             '\n\n' +
               codeBlock`
               ---

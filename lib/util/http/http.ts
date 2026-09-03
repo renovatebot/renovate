@@ -2,27 +2,27 @@ import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, OptionsInit, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
-import type { z } from 'zod/v3';
-import { ZodType } from 'zod/v3';
+import type { z } from 'zod/v4';
+import { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
 import { acquireLock } from '../mutex.ts';
+import { coerceObject } from '../object.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
+import { compile } from '../template/index.ts';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
 import { fetch, normalize, stream } from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
-
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
 import { getThrottle } from './throttle.ts';
@@ -47,7 +47,7 @@ export interface InternalJsonUnsafeOptions<
 export interface InternalJsonOptions<
   Opts extends HttpOptions,
   ResT = unknown,
-  Schema extends ZodType<ResT> = ZodType<ResT>,
+  Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
 > extends InternalJsonUnsafeOptions<Opts> {
   schema?: Schema;
 }
@@ -63,12 +63,10 @@ export interface InternalHttpOptions extends HttpOptions {
 }
 
 export function applyDefaultHeaders(options: OptionsInit): void {
-  const renovateVersion = pkg.version;
+  const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
     ...options.headers,
-    'user-agent':
-      GlobalConfig.get('userAgent') ??
-      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+    'user-agent': compile(userAgentTemplate, {}),
   };
 }
 
@@ -106,11 +104,11 @@ export abstract class HttpBase<
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'text' },
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
@@ -244,6 +242,8 @@ export abstract class HttpBase<
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
+      this.handleResponse(resolvedUrl, resCopy);
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
@@ -296,10 +296,11 @@ export abstract class HttpBase<
     throw err;
   }
 
-  resolveUrl(
-    requestUrl: string | URL,
-    options: HttpOptions | undefined = undefined,
-  ): URL {
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
+  }
+
+  resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     let url = requestUrl;
 
     if (url instanceof URL) {
@@ -343,10 +344,7 @@ export abstract class HttpBase<
     }) as Promise<HttpResponse<never>>;
   }
 
-  getText(
-    url: string | URL,
-    options: HttpOptions = {},
-  ): Promise<HttpResponse<string>> {
+  getText(url: string | URL, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request(url, { ...options, responseType: 'text' });
   }
 
@@ -377,7 +375,10 @@ export abstract class HttpBase<
     return this.request<ResT>(url, { ...opts, responseType: 'json' });
   }
 
-  private async requestJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  private async requestJson<
+    ResT,
+    Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
+  >(
     method: HttpMethod,
     options: InternalJsonOptions<JSONOpts, ResT, Schema>,
   ): Promise<HttpResponse<ResT>> {
@@ -411,7 +412,7 @@ export abstract class HttpBase<
   }
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
-    const opt = options ?? {};
+    const opt = coerceObject(options);
     return await this.getText(url, {
       headers: {
         Accept: 'text/plain',
@@ -614,9 +615,9 @@ export abstract class HttpBase<
   putJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
-    arg3?: ZodType,
+    arg3?: Schema,
   ): Promise<HttpResponse<T>> {
-    const args = this.resolveArgs(arg1, arg2, arg3);
+    const args = this.resolveArgs<T>(arg1, arg2, arg3);
     return this.requestJson<T>('put', args);
   }
 
@@ -727,6 +728,6 @@ export abstract class HttpBase<
       res.body = (await Toml.parseAsync(res.body)) as z.infer<Schema>;
     }
 
-    return res;
+    return res as HttpResponse<z.infer<Schema>>;
   }
 }

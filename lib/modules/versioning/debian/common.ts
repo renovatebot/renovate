@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { DistroInfo, DistroInfoRecordWithVersion } from '../distro.ts';
+import type { DistroInfo } from '../distro.ts';
+import type { DistroInfoRecordWithVersion } from '../types.ts';
 
 const refreshInterval = { days: 1 };
 
@@ -111,7 +112,7 @@ export class RollingReleasesData {
       for (let j = 0; j < i; j++) {
         prefix += 'old';
       }
-      di.series = prefix + 'stable';
+      di.series = `${prefix}stable`;
 
       this.ltsToVer.set(di.series, di);
       this.verToLts.set(di.version, di);

@@ -32,7 +32,10 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
     osPlatformSpy.mockImplementation(() => 'linux');
-    GlobalConfig.set({ localDir: upath.join('/tmp/github/some/repo') });
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'global',
+    });
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
         isFile: () => true,
@@ -125,6 +128,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -144,6 +148,23 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
+  it('quotes a distributionType containing shell metacharacters', async () => {
+    mockMavenFileChangedInGit();
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    await updateArtifacts({
+      packageFileName: 'maven',
+      // distributionType as it would be parsed from an attacker-controlled
+      // maven-wrapper.properties
+      newPackageFileContent: 'distributionType=script;touch pwned',
+      updatedDeps: [{ depName: 'maven-wrapper' }],
+      config: { currentValue: '3.3.1', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots[0]).toMatchObject({
+      cmd: "./mvnw wrapper:wrapper -Dtype='script;touch pwned'",
+    });
+  });
+
   it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
     mockMavenFileChangedInGit('not-maven-wrapper.properties');
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
@@ -160,6 +181,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -212,13 +234,14 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "./":"./" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool java 17.0.0 ' +
           '&& ' +
-          './mvnw wrapper:wrapper -Dtype=script"',
+          "./mvnw wrapper:wrapper -Dtype=script'",
         options: {
           cwd: '../..',
           env: {

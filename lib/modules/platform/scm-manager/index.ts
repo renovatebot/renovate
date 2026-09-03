@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as git from '../../../util/git/index.ts';
 import { getBaseUrl, setBaseUrl } from '../../../util/http/scm-manager.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -92,7 +93,7 @@ export async function initRepo({
   config = {} as any;
   config.repository = repository;
   config.defaultBranch = defaultBranch;
-  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
   await git.initRepo({
     ...config,
@@ -162,8 +163,8 @@ export async function getPr(number: number): Promise<Pr | null> {
     const result = await getRepoPr(config.repository, number);
     logger.debug('Returning PR from API');
     return mapPrFromScmToRenovate(result);
-  } catch (error) {
-    logger.error({ error }, `Can not find a PR with id ${number}`);
+  } catch (err) {
+    logger.error({ err, number }, 'Can not find a PR with the given id');
     return null;
   }
 }
@@ -179,7 +180,7 @@ export async function getPrList(): Promise<Pr[]> {
     }
   }
 
-  return config.prList ?? [];
+  return coerceArray(config.prList);
 }
 
 export async function createPr({

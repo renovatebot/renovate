@@ -2,15 +2,14 @@
 
 Renovate supports [Gitea](https://gitea.io).
 
-<!-- prettier-ignore -->
 !!! note
-    Use [`forgejo`](../forgejo/index.md) as the platform if you are using Forgejo.
-    Forgejo support will be removed from `gitea` platform in a future release.
+  Use [`forgejo`](../forgejo/index.md) as the platform if you are using Forgejo.
+  Forgejo support will be removed from `gitea` platform in a future release.
 
 ## Authentication
 
-First, [create a Personal Access Token (PAT)](https://docs.gitea.io/en-us/api-usage/#authentication) for the bot account.
-The bot account should have full name and email address configured.
+First, [create a Personal Access Token (PAT)](https://docs.gitea.io/en-us/api-usage/#authentication) for the Renovate account.
+The Renovate account should have full name and email address configured.
 Then let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file

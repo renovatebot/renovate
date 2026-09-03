@@ -28,16 +28,10 @@ const pyproject12toml = Fixtures.get('pyproject.12.toml');
 describe('modules/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
-    const OLD_ENV = process.env;
 
     beforeEach(() => {
       filename = '';
-      process.env = { ...OLD_ENV };
-      delete process.env.PIP_INDEX_URL;
-    });
-
-    afterEach(() => {
-      process.env = OLD_ENV;
+      vi.stubEnv('PIP_INDEX_URL', undefined);
     });
 
     it('returns null for empty', async () => {
@@ -580,6 +574,14 @@ describe('modules/manager/poetry/extract', () => {
       expect(res).toEqual({
         deps: [
           {
+            currentValue: '==2.0.0',
+            currentVersion: '2.0.0',
+            datasource: 'pypi',
+            depName: 'poetry-core',
+            depType: 'build-system.requires',
+            packageName: 'poetry-core',
+          },
+          {
             currentValue: '==4.11.2',
             currentVersion: '4.11.2',
             datasource: 'pypi',
@@ -597,14 +599,6 @@ describe('modules/manager/poetry/extract', () => {
               depGroup: 'decouple',
             },
             packageName: 'python-decouple',
-          },
-          {
-            currentValue: '==2.0.0',
-            currentVersion: '2.0.0',
-            datasource: 'pypi',
-            depName: 'poetry-core',
-            depType: 'build-system.requires',
-            packageName: 'poetry-core',
           },
         ],
         extractedConstraints: {},
@@ -656,6 +650,72 @@ describe('modules/manager/poetry/extract', () => {
         currentVersion: '8.1.7',
         depName: 'click',
         managerData: { depGroup: 'all' },
+      },
+    ]);
+  });
+
+  it('enriches pep621/pep735 dependencies with poetry managerData', async () => {
+    const content = codeBlock`
+        [project]
+        dependencies = ["click", "pytest-cov==5.0.0"]
+        [project.optional-dependencies]
+        other = ["zoom==1.0.0"]
+        [dependency-groups]
+        typing = ["mypy==1.13.0", "types-requests"]
+        [tool.poetry.dependencies]
+        click = { version="==1.0.0", source = "artifactory" }
+        pytest-cov = { version = "==5.0.0" }
+        zoom = { source = "artifactory" }
+        [tool.poetry.group.typing.dependencies]
+        types-requests = { source = "artifactory" }
+        [tool.poetry.group.typing.dependencies.mypy]
+        source = "artifactory"
+      `;
+    const res = await extractPackageFile(content, 'pyproject.toml');
+    expect(res?.deps).toMatchObject([
+      {
+        packageName: 'click',
+        datasource: 'pypi',
+        depType: 'project.dependencies',
+        currentValue: '==1.0.0',
+        depName: 'click',
+        managerData: { nestedVersion: true, sourceName: 'artifactory' },
+      },
+      {
+        currentValue: '==5.0.0',
+        currentVersion: '5.0.0',
+        datasource: 'pypi',
+        depName: 'pytest-cov',
+        depType: 'project.dependencies',
+        managerData: {},
+        packageName: 'pytest-cov',
+        skipReason: 'invalid-dependency-specification',
+      },
+      {
+        packageName: 'mypy',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        currentValue: '==1.13.0',
+        currentVersion: '1.13.0',
+        depName: 'mypy',
+        managerData: { depGroup: 'typing', sourceName: 'artifactory' },
+      },
+      {
+        packageName: 'types-requests',
+        datasource: 'pypi',
+        depType: 'dependency-groups',
+        skipReason: 'unspecified-version',
+        depName: 'types-requests',
+        managerData: { depGroup: 'typing', sourceName: 'artifactory' },
+      },
+      {
+        packageName: 'zoom',
+        datasource: 'pypi',
+        depType: 'project.optional-dependencies',
+        currentValue: '==1.0.0',
+        currentVersion: '1.0.0',
+        depName: 'zoom',
+        managerData: { depGroup: 'other', sourceName: 'artifactory' },
       },
     ]);
   });

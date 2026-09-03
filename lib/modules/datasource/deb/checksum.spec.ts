@@ -54,7 +54,9 @@ describe('modules/datasource/deb/checksum', () => {
     });
 
     it('should fail if there is an error in the stream', async () => {
-      await expect(computeFileChecksum('file.txt')).rejects.toThrow();
+      await expect(computeFileChecksum('file.txt')).rejects.toThrow(
+        'ENOENT: no such file or directory',
+      );
     });
   });
 });

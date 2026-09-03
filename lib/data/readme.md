@@ -5,13 +5,14 @@ This readme explains what each file is used for.
 
 ## Summary
 
-| File                  | What is the file about?                   |
-| --------------------- | ----------------------------------------- |
-| `monorepo.json`       | Group related packages into a single PR.  |
-| `replacements.json`   | Rename old packages to new replacement.   |
-| `changelog-urls.json` | Tell Renovate where to find changelogs.   |
-| `source-urls.json`    | Tell Renovate the source URL of packages. |
-| `node-schedule.json`  | Node.js versioning schedule.              |
+| File                  | What is the file about?                             |
+| --------------------- | --------------------------------------------------- |
+| `monorepo.json`       | Group related packages into a single PR.            |
+| `replacements.json`   | Rename old packages to new replacement.             |
+| `changelog-urls.json` | Tell Renovate where to find changelogs.             |
+| `source-urls.json`    | Tell Renovate the source URL of packages.           |
+| `node-schedule.json`  | Node.js versioning schedule.                        |
+| `mise-registry.json`  | Mise tool registry: short names mapped to backends. |
 
 ## Group related packages (`monorepo.json`)
 
@@ -19,12 +20,11 @@ The `monorepo.json` file has all the monorepo presets.
 
 Monorepo presets group related packages, so they are updated with a single Renovate PR.
 
-<!-- prettier-ignore -->
 !!! note
-    We only accept monorepos when packages are released together.
-    So they should have all the same version or they strictly need to be merged together.
-    Otherwise those groupings would cause [immortal](https://docs.renovatebot.com/key-concepts/pull-requests/#immortal-prs) PR's.
-    Please add that information with links to source for validation.
+  We only accept monorepos when packages are released together.
+  So they should have all the same version or they strictly need to be merged together.
+  Otherwise those groupings would cause [immortal](https://docs.renovatebot.com/key-concepts/pull-requests/#immortal-prs) PR's.
+  Please add that information with links to source for validation.
 
 ### Ways to group packages
 
@@ -54,15 +54,19 @@ Example:
 
 ```json
 {
-  "matchCurrentVersion": ">=3.10.3",
-  "matchDatasources": ["npm"],
-  "matchPackageNames": [
-    "apollo-server",
-    "apollo-server-core",
-    "apollo-server-express"
-  ],
-  "replacementName": "@apollo/server",
-  "replacementVersion": "4.0.0"
+  "packageRules": [
+    {
+      "matchCurrentVersion": ">=3.10.3",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": [
+        "apollo-server",
+        "apollo-server-core",
+        "apollo-server-express"
+      ],
+      "replacementName": "@apollo/server",
+      "replacementVersion": "4.0.0"
+    }
+  ]
 }
 ```
 
@@ -121,3 +125,13 @@ This will be added to the `orb` group in the `source-urls.json` file since the p
 
 This file is automatically updated by a scheduled workflow.
 It can be manually updated by running `pnpm update-static-data:node-schedule`.
+
+## Mise tool registry (`mise-registry.json`)
+
+This file is automatically updated by a scheduled workflow.
+It can be manually updated by running `pnpm update-static-data:mise-registry`.
+
+It maps `mise` tool short names (e.g. `zola`) to their available backends (e.g. `["aqua:getzola/zola", "asdf:salasrod/asdf-zola"]`).
+The data is generated from `mise registry --json` using the [mise CLI](https://mise.jdx.dev).
+
+This enables Renovate to automatically support all tools in the [mise registry](https://github.com/jdx/mise/tree/main/registry) without manual updates.

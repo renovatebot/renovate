@@ -8,48 +8,46 @@ description: Configuration Options usable in renovate.json or package.json
 This document describes all the configuration options you may use in a Renovate configuration file.
 Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-You can store your Renovate configuration file in one of these locations:
-
-<!-- config-filenames-begin -->
-<!-- config-filenames-end -->
-
-Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
-The bot first checks all the files in the `configFileNames` array before checking from the above file list.
-
-<!-- prettier-ignore -->
-!!! warning
-    Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
-
-<!-- prettier-ignore -->
-!!! note
-     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
-     We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
-
-When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
-Renovate stops the search after it finds the first match.
-
-Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
-Renovate does not read/override the config from within each base branch if present.
-
-Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
-Shareable config presets only work with the JSON format.
-
-If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
-We will do our best to answer your question(s).
-
 A `subtype` in the configuration table specifies what type you're allowed to use within the main element.
 
 If a config option has a `parent` defined, it means it's only allowed to configure it within an object with the parent name, such as `packageRules` or `hostRules`.
 
 When an array or object configuration option is `mergeable`, it means that values inside it will be added to any existing object or array that existed with the same name.
 
-<!-- prettier-ignore -->
 !!! tip
-    This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-schema.json`](renovate-schema.json).
+  This documentation corresponds with the JSON schema in [`docs.renovatebot.com/renovate-schema.json`](renovate-schema.json).
 
-<!-- prettier-ignore -->
 !!! note
-    Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+  Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
+## Locations for configuration filenames
+
+You can store your Renovate configuration file in one of these locations:
+
+<!-- config-filenames-begin -->
+
+Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
+Shareable config presets work with JSON and JSON5 file formats.
+
+If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a [new "Request Help" discussion](https://github.com/renovatebot/renovate/discussions/new?category=request-help).
+We will do our best to answer your question(s).
+
+Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
+
+When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
+Renovate first checks all the files in the `configFileNames` array before checking from the above file list.
+Renovate stops the search after it finds the first match.
+
+!!! warning
+  Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
+
+!!! note
+  Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+  We also recommend you prefer using a `.jsonc` file if you want to add comments to your configuration, instead of a `.json5` file.
+  Using an explicit `.jsonc` file is preferred over using a `.json` file with comments, as it can cause issues with editors and syntax highlighting.
+
+Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
+Renovate does not read/override the config from within each base branch if present.
 
 ---
 
@@ -128,10 +126,9 @@ If you want to use dynamic labels, you can use [templates](./templates.md) such 
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Keep your labels within the maximum character limit for your Git hosting platform.
-    Renovate usually truncates labels to 50 characters, except for GitLab, which has a 255 character limit.
+  Keep your labels within the maximum character limit for your Git hosting platform.
+  Renovate usually truncates labels to 50 characters, except for GitLab, which has a 255 character limit.
 
 ## `additionalBranchPrefix`
 
@@ -252,20 +249,17 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
+  Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
 
-<!-- prettier-ignore -->
 !!! note
-    On Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
-    Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
-    In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
+  On Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
+  Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
+  In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
-<!-- prettier-ignore -->
 !!! note
-    By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
-    By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+  By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
+  By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
 
 **Automerge and GitHub branch protection rules**
 
@@ -297,10 +291,9 @@ Use the `automergeSchedule` option to define times of week or month during which
 The default value for `automergeSchedule` is "at any time", which functions the same as setting a `null` schedule.
 To configure this option refer to [`schedule`](#schedule) as the syntax is the same.
 
-<!-- prettier-ignore -->
 !!! warning
-    When `platformAutomerge` is enabled, Renovate enqueues the platform PR automerge at time of creation, so the schedule specified in `automergeSchedule` cannot be followed.
-    If it's essential that automerging only happens within the specific `automergeSchedule` time window, then you need to set `platformAutomerge` to `false` and instead rely on Renovate's automerge instead of the platform one.
+  When `platformAutomerge` is enabled, Renovate enqueues the platform PR automerge at time of creation, so the schedule specified in `automergeSchedule` cannot be followed.
+  If it's essential that automerging only happens within the specific `automergeSchedule` time window, then you need to set `platformAutomerge` to `false` and instead rely on Renovate's automerge instead of the platform one.
 
 ## `automergeStrategy`
 
@@ -309,6 +302,8 @@ If possible, Renovate follows the merge strategy set on the platform itself for 
 
 If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
 If you're happy with the default behavior, you don't need to do anything.
+
+On supported platforms, `automergeStrategy` also applies when using platform-native automerge.
 
 You may choose from these values:
 
@@ -333,9 +328,8 @@ In that case Renovate first creates a branch and associated Pull Request, and th
 If by the next run the PR is already behind the base branch it will be automatically rebased, because Renovate only automerges branches which are up-to-date and green.
 If Renovate is scheduled for hourly runs on the repository but commits are made every 15 minutes to the main branch, then an automerge like this will keep getting deferred with every rebase.
 
-<!-- prettier-ignore -->
 !!! tip
-    If you have no tests but still want Renovate to automerge, you need to add `"ignoreTests": true` to your configuration.
+  If you have no tests but still want Renovate to automerge, you need to add `"ignoreTests": true` to your configuration.
 
 If you prefer that Renovate more silently automerge _without_ Pull Requests at all, you can configure `"automergeType": "branch"`. In this case Renovate will:
 
@@ -352,6 +346,22 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://learn.microsoft.com/azure/devops/repos/git/branch-policies#check-for-linked-work-items).
 Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renovate can link an already existing work item when creating PRs.
 
+## `azureWorkItemType`
+
+The work item type Renovate uses when creating its issues (such as the Dependency Dashboard) on Azure DevOps.
+
+Azure DevOps has no dedicated "issue" concept, so Renovate creates a work item instead.
+It defaults to the `Issue` type, which only exists in the `Basic` process.
+Projects using another process (for example `Agile` or `Scrum`), or a custom inherited process, may not have an `Issue` type, in which case creation fails.
+Set this to a work item type that exists in your project, such as `Task`.
+
+<!-- prettier-ignore -->
+!!! note
+  Renovate finds its existing issues by title, not by work item type.
+  If you change `azureWorkItemType` while an issue (such as the Dependency Dashboard) already exists, Renovate keeps using the existing work item and does _not_ recreate it with the new type.
+  To switch an existing issue to the new type, either rename the old work item (so its title no longer matches) and close it, or close and delete the old work item.
+  Renovate then creates a fresh work item of the configured type on the next run.
+
 ## `baseBranchPatterns`
 
 This configuration option was formerly known as `baseBranches`.
@@ -360,9 +370,29 @@ By default, Renovate will detect and process only the repository's default branc
 For most projects, this is the expected approach.
 Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. for use cases such as:
 
-- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranchPatterns": ["dev"]`
-- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranchPatterns": ["main", "next"]`
-- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranchPatterns": ["main", "/^release\\/.*/"]`
+- You wish Renovate to process only a non-default branch, e.g. `dev`:
+
+  ```json
+  {
+    "baseBranchPatterns": ["dev"]
+  }
+  ```
+
+- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "next"]
+}
+```
+
+- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "/^release\\/.*/"]
+}
+```
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
@@ -396,10 +426,9 @@ You can also use the special `"$default"` string to denote the repository's defa
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Do _not_ use the `baseBranchPatterns` config option when you've set a `forkToken`.
-    You may need a `forkToken` when you're using the Forking Renovate app.
+  Do _not_ use the `baseBranchPatterns` config option when you've set a `forkToken`.
+  You may need a `forkToken` when you're using the Forking Renovate app.
 
 ## `bbAutoResolvePrTasks`
 
@@ -428,10 +457,9 @@ Example config:
 }
 ```
 
-<!-- prettier-ignore -->
 !!! warning
-    Leaving PRs/branches as unlimited or as a high number increases the time it takes for Renovate to process a repository.
-    If you find that Renovate is too slow when rebasing out-of-date branches, decrease the `branchConcurrentLimit`.
+  Leaving PRs/branches as unlimited or as a high number increases the time it takes for Renovate to process a repository.
+  If you find that Renovate is too slow when rebasing out-of-date branches, decrease the `branchConcurrentLimit`.
 
 If you have too many concurrent branches which rebase themselves each run, Renovate can take a lot of time to rebase.
 Solutions:
@@ -456,10 +484,9 @@ If `true`, Renovate removes special characters when slugifying the branch name:
 
 The default `false` behavior will mean that special characters like `.` and `/` may end up in the branch name.
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate will not apply any search/replace to the `branchPrefix` part of the branch name.
-    If you don't want any `/` in your branch name then you will also need to change `branchPrefix` from the default `renovate/` value to something like `renovate-`.
+  Renovate will not apply any search/replace to the `branchPrefix` part of the branch name.
+  If you don't want any `/` in your branch name then you will also need to change `branchPrefix` from the default `renovate/` value to something like `renovate-`.
 
 ## `branchPrefix`
 
@@ -470,10 +497,9 @@ Or if you wish to avoid forward slashes in branch names then you could use `reno
 `branchPrefix` must be configured at the root of the configuration (e.g. not within any package rule) and is not allowed to use template values.
 e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `additionalBranchPrefix`, like `"additionalBranchPrefix": "{{parentDir}}-"`.
 
-<!-- prettier-ignore -->
 !!! note
-    This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
-    If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
+  This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
+  If you wish to change that too, you need to also configure the field `onboardingBranch` in your global self-hosted config.
 
 ## `branchPrefixOld`
 
@@ -526,10 +552,9 @@ The option is an array of rules, each specifying how and where to bump versions.
 - `bumpType`: Specifies the type of version bump which defaults to `patch`. This field supports templates for conditional logic. Supported values are documented in the [bumpVersions.bumpType section](#bumpversionsbumptype).
 - `name` (optional): A descriptive name for the rule, which is used in logs for easier identification.
 
-<!-- prettier-ignore -->
 !!! tip
-    You can use templates in `filePatternTemplates`, `bumpType`, and `matchStrings`.
-    This way you can leverage the power of Renovate's templating engine to change based on the context of the upgrade.
+  You can use templates in `filePatternTemplates`, `bumpType`, and `matchStrings`.
+  This way you can leverage the power of Renovate's templating engine to change based on the context of the upgrade.
 
 Here is an example of a `bumpVersions` configuration:
 
@@ -618,7 +643,7 @@ Supported values are:
 This field supports templates for conditional logic.
 For example:
 
-```json
+```json {configType=none}
 {
   "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
 }
@@ -647,10 +672,9 @@ For example, if you have a `.release-version` file that should always match the 
 
 When Renovate updates a dependency to version `2.5.3`, it will also update the `.release-version` file to `2.5.3`.
 
-<!-- prettier-ignore -->
 !!! note
-    When using `bumpType: "sync"`, Renovate uses the `newVersion` from the first upgrade in the branch.
-    If no upgrades are found in the branch, the version bump will be skipped and a debug message will be logged.
+  When using `bumpType: "sync"`, Renovate uses the `newVersion` from the first upgrade in the branch.
+  If no upgrades are found in the branch, the version bump will be skipped and a debug message will be logged.
 
 ### `bumpVersions.filePatterns`
 
@@ -660,7 +684,7 @@ Templates can also be used for dynamic patterns. See [Templates](./templates.md)
 
 For example:
 
-```json
+```json {configType=none}
 {
   "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
 }
@@ -680,7 +704,7 @@ The `name` field is an optional identifier for the bump version rule. It is used
 
 For example:
 
-```json
+```json {configType=none}
 {
   "name": "Update release version"
 }
@@ -715,15 +739,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
-Another example would be if you want to configure a DCO sign off to each commit.
-
-If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
-
-```json
-{
-  "extends": [":gitSignOff"]
-}
-```
+To add [git trailers](https://git-scm.com/docs/git-interpret-trailers) like `Signed-off-by` to commits, use [`commitTrailers`](#committrailers) instead.
 
 ## `commitBodyTable`
 
@@ -750,9 +766,8 @@ This setting differs from `prHourlyLimit` in an important way:
 If you want strict control over CI load, use `commitHourlyLimit`.
 If you only want to limit the rate of _new_ PRs, use [prHourlyLimit](#prhourlylimit).
 
-<!-- prettier-ignore -->
 !!! tip
-    Manual rebases (requested via checkbox, Dependency Dashboard, or rebase label) always bypass this limit.
+  Manual rebases (requested via checkbox, Dependency Dashboard, or rebase label) always bypass this limit.
 
 ## `commitMessage`
 
@@ -800,6 +815,33 @@ We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules
 }
 ```
 
+## `commitTrailers`
+
+Use this option to add [git trailers](https://git-scm.com/docs/git-interpret-trailers) to the commits Renovate creates.
+Each entry must be a full trailer line in the form `Key: value`, where the key may only have letters, digits and `-`.
+Repeated keys are allowed.
+
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "commitTrailers": ["Changelog: skip"]
+    }
+  ]
+}
+```
+
+If you want Renovate to sign off its commits, you can add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
+
+```json
+{
+  "extends": [":gitSignOff"]
+}
+```
+
 ## `composerIgnorePlatformReqs`
 
 By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
@@ -824,21 +866,19 @@ The Composer output should inform you about the reasons the update failed.
 
 If enabled, all issues created by Renovate are set as confidential, even in a public repository.
 
-<!-- prettier-ignore -->
 !!! note
-    The Dependency Dashboard issue will also be confidential.
-    By default issues created by Renovate are visible to all users.
+  The Dependency Dashboard issue will also be confidential.
+  By default issues created by Renovate are visible to all users.
 
-<!-- prettier-ignore -->
 !!! note
-    This option is applicable to GitLab only.
+  This option is applicable to GitLab only.
 
 ## `configMigration`
 
 If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
 Renovate only performs `configMigration` on `.json` and `.json5` files.
 
-We're adding new features to Renovate bot often.
+We're adding new features to Renovate often.
 Often you can keep using your Renovate config and use the new features right away.
 But sometimes you need to update your Renovate configuration.
 To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
@@ -854,12 +894,11 @@ After we changed the [`baseBranchPatterns`](#basebranchpatterns) feature, the Re
 }
 ```
 
-<!-- prettier-ignore -->
 !!! warning
-    The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
-    Renovate may downgrade JSON5 content to plain JSON.
-    When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
-    This can happen because Renovate wrongly converts JSON5 to JSON, thus removing the comments.
+  The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+  Renovate may downgrade JSON5 content to plain JSON.
+  When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
+  This can happen because Renovate wrongly converts JSON5 to JSON, thus removing the comments.
 
 For more details, read the [config migration documentation](./config-migration.md).
 
@@ -886,35 +925,31 @@ For now this datasource constraint feature only supports `python`, other compati
 }
 ```
 
-If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
+If you need to _override_ constraints that Renovate detects from the repository, wrap it in the [global self-hosted configuration's `force` object](./self-hosted-configuration.md#force) like so:
 
-```json
-{
-  "force": {
-    "constraints": {
-      "node": "< 15.0.0"
-    }
-  }
-}
+```js
+module.exports = {
+  force: {
+    constraints: {
+      node: '< 15.0.0',
+    },
+  },
+};
 ```
 
 The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
 
 <!-- constraints-tools-begin -->
-<!-- constraints-tools-end -->
 
-<!-- prettier-ignore -->
 !!! note
-    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
+  When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `constraints` options do not take effect.
 
 Additionally, there are several additional constraints that can be specified:
 
 <!-- additional-constraints-begin -->
-<!-- additional-constraints-end -->
 
-<!-- prettier-ignore -->
 !!! note
-    Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
+  Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## `constraintsFiltering`
 
@@ -932,18 +967,22 @@ Additionally, the "datasource" within Renovate must be capable of returning `con
 This feature is limited to the following datasources:
 
 - `crate`
+- `go`
 - `jenkins-plugins`
 - `npm`
 - `packagist`
+- `pub`
 - `pypi`
 - `rubygems`
 
 Sometimes when using private registries they may omit constraints information, which then is another reason such filtering may not work even if the datasource and corresponding default public registry supports it.
 
-<!-- prettier-ignore -->
 !!! warning
-    Enabling this feature may result in many package updates being filtered out silently.
-    See below for a description of how it works.
+  Enabling this feature may result in many package updates being filtered out silently.
+  See below for a description of how it works.
+
+!!! warning
+  Enabling this feature when using [`binarySource=global`](./self-hosted-configuration.md#binarysource) can lead to situations where Renovate suggests updates that it cannot then update, as it does not have the right tool versions installed.
 
 When `constraintsFiltering=strict`, the following logic applies:
 
@@ -965,6 +1004,29 @@ When using with `npm`, we recommend you:
 
 - Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
+
+## `constraintsVersioning`
+
+Use `constraintsVersioning` to override the versioning scheme used when filtering releases by specific constraint names with [`constraintsFiltering`](#constraintsfiltering).
+
+!!! note
+  Each key must be an [additional constraint name](#constraints) (i.e. not a tool name), and each value must be a valid versioning scheme ID.
+
+Datasources that support constraints filtering may set sensible defaults for their constraints.
+You can override these defaults in your Renovate config.
+
+For example, to use a SemVer-style versioning scheme when defining the `rubygems` constraint:
+
+```json title="Use SemVer-style range for defining version constraint, instead of 'ruby' versioning"
+{
+  "constraints": {
+    "rubygems": "^1.3"
+  },
+  "constraintsVersioning": {
+    "rubygems": "semver-coerced"
+  }
+}
+```
 
 ## `customDatasources`
 
@@ -1043,9 +1105,8 @@ Renovate defaults to `semver-coerced` versioning if _both_ condition are met:
 For more details and examples regarding each custom manager, see our documentation for the [`regex` manager](modules/manager/regex/index.md) and the [`JSONata` manager](modules/manager/jsonata/index.md).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
-<!-- prettier-ignore -->
 !!! tip
-    Look at our [Custom Manager Presets](./presets-customManagers.md), they may have what you need.
+  Look at our [Custom Manager Presets](./presets-customManagers.md), they may have what you need.
 
 ### `customManagers.autoReplaceStringTemplate`
 
@@ -1082,9 +1143,8 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Can only be used with the custom regex manager.
+  Can only be used with the custom regex manager.
 
 ### `customManagers.currentValueTemplate`
 
@@ -1120,7 +1180,8 @@ Example:
       "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1148,9 +1209,8 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 ### `customManagers.fileFormat`
 
-<!-- prettier-ignore -->
 !!! note
-    Can only be used with the custom jsonata manager.
+  Can only be used with the custom jsonata manager.
 
 It specifies the syntax of the package file that's managed by the custom `jsonata` manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
@@ -1167,7 +1227,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1182,7 +1243,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1197,7 +1259,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1212,7 +1275,7 @@ Each `matchStrings` must be one of the following:
 
 Example:
 
-```json title="matchStrings with a valid regular expression"
+```json {title="matchStrings with a valid regular expression" configType=none}
 {
   "matchStrings": [
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
@@ -1220,7 +1283,7 @@ Example:
 }
 ```
 
-```json title="matchStrings with a valid JSONata query"
+```json {title="matchStrings with a valid JSONata query" configType=none}
 {
   "matchStrings": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
@@ -1228,9 +1291,8 @@ Example:
 }
 ```
 
-<!--prettier-ignore-->
 !!! note
-    You do not need to add leading and trailing slashes in `matchStrings`.
+  You do not need to add leading and trailing slashes in `matchStrings`.
 
 ### `customManagers.matchStringsStrategy`
 
@@ -1241,9 +1303,8 @@ Three options are available:
 - `recursive`
 - `combination`
 
-<!--prettier-ignore-->
 !!! note
-    `matchStringsStrategy` can only be used in a custom regex manager config!
+  `matchStringsStrategy` can only be used in a custom regex manager config!
 
 #### any
 
@@ -1318,7 +1379,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
 }
 ```
 
-```json title="example.json"
+```json {title="example.json" configType=none}
 {
   "backup": {
     "test": {
@@ -1444,11 +1505,10 @@ Examples of what having a Dependency Dashboard will allow you to do:
 - Override any rate limiting (e.g. concurrent PRs) or scheduling to force Renovate to create a PR that would otherwise be suppressed
 - Recreate an unmerged PR (e.g. for a major update that you postponed by closing the original PR)
 
-<!-- prettier-ignore -->
 !!! tip
-    Enabling the Dependency Dashboard by itself does _not_ change the "control flow" of Renovate.
-    Renovate still creates and manages PRs, and still follows your schedules and rate limits.
-    The Dependency Dashboard gives you extra visibility and control over your updates.
+  Enabling the Dependency Dashboard by itself does _not_ change the "control flow" of Renovate.
+  Renovate still creates and manages PRs, and still follows your schedules and rate limits.
+  The Dependency Dashboard gives you extra visibility and control over your updates.
 
 ## `dependencyDashboardApproval`
 
@@ -1457,9 +1517,8 @@ This feature allows you to use Renovate's Dependency Dashboard to force approval
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
 You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
-<!-- prettier-ignore -->
 !!! tip
-    When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explicitly.
+  When you set `dependencyDashboardApproval` to `true` the Dependency Dashboard issue will be created automatically, you do not need to turn on `dependencyDashboard` explicitly.
 
 You can configure Renovate to wait for approval for:
 
@@ -1537,7 +1596,7 @@ The Dependency Dashboard categories are only used to visually organize updates w
 ## `dependencyDashboardLabels`
 
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
-It is pointless to edit the labels, as Renovate bot restores the labels on each run.
+It is pointless to edit the labels, as Renovate restores the labels on each run.
 
 ## `dependencyDashboardOSVVulnerabilitySummary`
 
@@ -1573,6 +1632,9 @@ The description field can be used inside any configuration object to add a human
 A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
 Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
 
+> [!NOTE]
+> To overwrite descriptions of child presets, use [`overrideDescription`](#overridedescription) in place of `description`.
+
 ## `digest`
 
 Add to this object if you wish to define rules that apply only to PRs that update digests.
@@ -1589,10 +1651,9 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 
 This option is evaluated at PR/MR creation time.
 
-<!-- prettier-ignore -->
 !!! note
-    Forgejo, Gitea and GitLab implement draft status by checking if the PR's title starts with certain strings.
-    This means that `draftPR` on Forgejo, Gitea and GitLab are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+  Forgejo, Gitea and GitLab implement draft status by checking if the PR's title starts with certain strings.
+  This means that `draftPR` on Forgejo, Gitea and GitLab are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## `enabled`
 
@@ -1605,6 +1666,9 @@ For example, if you wanted to disable Renovate completely on a repository, you c
   "enabled": false
 }
 ```
+
+!!! note
+  When Renovate is disabled on a repository entirely (via `enabled=false`), if Renovate runs against the repo again, it will perform a one-time cleanup of the repository, closing open Issues, PRs and deleting any branches.
 
 To disable Renovate for all `eslint` packages, you can configure a package rule like:
 
@@ -1684,10 +1748,9 @@ The above script uses:
 The `jq` step is optional, you can leave it out if you wish.
 Its primary value is validating that the string you echo to `gpg` is valid JSON, and compact.
 
-<!-- prettier-ignore -->
 !!! note
-    Encrypted secrets must have at least an org/group scope, and optionally a repository scope.
-    This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
+  Encrypted secrets must have at least an org/group scope, and optionally a repository scope.
+  This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
 
 Encrypted secrets usually have a single organization.
 But you may encrypt a secret with more than one organization, for example: `org1,org2`.
@@ -1700,9 +1763,8 @@ For more information on how to use secrets for private packages, read [Private p
 This option allows users to specify explicit environment variables values.
 It is valid only as a top-level configuration option and not, for example, within `packageRules`.
 
-<!-- prettier-ignore -->
 !!! warning
-    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
+  The administrator of your Renovate deployment must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
 
 Behavior:
 
@@ -1735,6 +1797,8 @@ The above would mean Renovate would not include files matching the above glob pa
 
 If configured, Renovate will expand any matching `CODEOWNERS` groups into a full list of group members and assign them individually instead of the group.
 This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
+
+On GitLab, this also expands [role handles](https://docs.gitlab.com/user/project/codeowners/reference/#add-a-role-as-a-code-owner) (`@@developer`, `@@maintainer`, `@@owner`) into the project members who hold that exact role.
 
 ## `extends`
 
@@ -1816,10 +1880,12 @@ The following re-enables fetching of changelogs when creating pull-requests for 
 ```json
 {
   "fetchChangeLogs": "off",
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/lodash/lodash"],
-    "fetchChangeLogs": "pr"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/lodash/lodash"],
+      "fetchChangeLogs": "pr"
+    }
+  ]
 }
 ```
 
@@ -1828,18 +1894,19 @@ which can be time-consuming due to the repository's large number of tags:
 
 ```json
 {
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
-    "fetchChangeLogs": "off"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+      "fetchChangeLogs": "off"
+    }
+  ]
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate can only show changelogs from some platforms and some package managers.
-    We're planning improvements so that Renovate can show more changelogs.
-    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
+  Renovate can only show changelogs from some platforms and some package managers.
+  We're planning improvements so that Renovate can show more changelogs.
+  Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
 
 ## `filterUnavailableUsers`
 
@@ -1882,9 +1949,8 @@ The reviewer can simply push to the pull request without having to create a new 
 You may decide to disallow edits to Renovate pull requests in order to workaround issues in Renovate where modified fork branches are not deleted properly: [See this issue](https://github.com/renovatebot/renovate/issues/16657).
 If this option is enabled, reviewers will need to create a new PR if more changes are needed.
 
-<!-- prettier-ignore -->
 !!! note
-    This option is only relevant if you set `forkToken`.
+  This option is only relevant if you set `forkToken`.
 
 ## `forkProcessing`
 
@@ -1925,9 +1991,8 @@ You can't use other filenames because Renovate only checks the default filename 
 You can customize the Git author that's used whenever Renovate creates a commit, although we do not recommend this.
 When this field is unset (default), Renovate will use its platform credentials (e.g. token) to learn/discover its account's git author automatically.
 
-<!-- prettier-ignore -->
 !!! note
-    If running as a GitHub App and using `platformCommit`, GitHub itself sets the git author in commits so you should not configure this field.
+  If running as a GitHub App and using `platformCommit`, GitHub itself sets the git author in commits so you should not configure this field.
 
 The `gitAuthor` option accepts a [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant string.
 It's recommended to include a name followed by an email address, e.g.
@@ -1936,21 +2001,17 @@ It's recommended to include a name followed by an email address, e.g.
 Development Bot <dev-bot@my-software-company.com>
 ```
 
-<!-- prettier-ignore -->
 !!! danger
-    We strongly recommend that the Git author email you use is unique to Renovate.
-    Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
+  We strongly recommend that the Git author email you use is unique to Renovate.
+  Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
 ## `gitIgnoredAuthors`
 
-Specify commit authors ignored by Renovate.
-This field accepts [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant strings.
+Specify commit author emails ignored by Renovate.
 
 By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
 If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
-
-Example:
 
 ```json
 {
@@ -1958,9 +2019,12 @@ Example:
 }
 ```
 
+`gitIgnoredAuthors` values can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ## `gitLabIgnoreApprovals`
 
-Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Ignore the default project level approval(s), so that Renovate can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
@@ -2004,11 +2068,15 @@ For example, to group all non-major devDependencies updates together into a sing
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Replacement updates will never be grouped.
-    <br>
-    Lock file maintenance will never be grouped with other dependency updates.
+  Replacement updates will never be grouped.
+  <br>
+  Lock file maintenance will never be grouped with other dependency updates.
+
+## `groupSingleUpdates`
+
+!!! note
+  This option was [recently made opt-in, instead of opt-out](https://github.com/renovatebot/renovate/pull/44168).
 
 ## `groupSlug`
 
@@ -2031,9 +2099,8 @@ If you wished to override this then you could configure like this:
 
 As a result of the above, the branchName would be `renovate/dev-dependencies` instead.
 
-<!-- prettier-ignore -->
 !!! note
-    You shouldn't usually need to configure this unless you really care about your branch names.
+  You shouldn't usually need to configure this unless you really care about your branch names.
 
 ## `hashedBranchLength`
 
@@ -2105,14 +2172,12 @@ To match specific ports you have to add a protocol to `matchHost`:
 }
 ```
 
-<!-- prettier-ignore -->
 !!! warning
-    Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
+  Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
 
-<!-- prettier-ignore -->
 !!! note
-    Disabling a host is only 100% effective if added to self-hosted config.
-    Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
+  Disabling a host is only 100% effective if added to self-hosted config.
+  Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same Renovate deployment has successfully queried for the same dependency recently.
 
 ### `hostRules.abortIgnoreStatusCodes`
 
@@ -2130,9 +2195,8 @@ For example to also skip 404 responses then configure the following:
 }
 ```
 
-<!-- prettier-ignore -->
 !!! tip
-    This field is _not_ mergeable, so the last-applied host rule takes precedence.
+  This field is _not_ mergeable, so the last-applied host rule takes precedence.
 
 ### `hostRules.abortOnError`
 
@@ -2280,9 +2344,20 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
 By default, all headers starting with "X-" are allowed.
 
-A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
+A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
+`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+Any header which is not permitted is dropped, and a warning is logged.
+
+When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
+
+A self-hosted administrator's own host rules are resolved the same way, and whichever `headers` that leaves them sending to the host are then applied on top of yours:
+
+- your host rules cannot stop one of those headers from being sent, and
+- where one of those headers has a name you also set, the administrator's value is used.
+
+This covers the headers the administrator actually sends to that host.
+One they set in a broader rule of their own, but masked with a narrower rule of their own, is not sent there - and so is yours to set.
 
 For example:
 
@@ -2318,10 +2393,9 @@ You may use another Certificate Authority instead, by setting it in the `httpsCe
 
 Specifies the private key in [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) for mTLS authentication.
 
-<!-- prettier-ignore -->
 !!! warning
-    Do _not_ put your private key into this field, to avoid losing confidentiality completely.
-    You must use [secrets](./self-hosted-configuration.md#secrets) to pass it down securely instead.
+  Do _not_ put your private key into this field, to avoid losing confidentiality completely.
+  You must use [secrets](./self-hosted-configuration.md#secrets) to pass it down securely instead.
 
 ### `hostRules.insecureRegistry`
 
@@ -2371,9 +2445,8 @@ The above corresponds with an `.npmrc` like the following:
 registry=https://gitlab.myorg.com/api/v4/packages/npm/
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` → `https://domain.com/path`)
+  Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` → `https://domain.com/path`)
 
 ### `hostRules.maxRequestsPerSecond`
 
@@ -2555,7 +2628,7 @@ Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
 If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
 
-1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
+1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your admin configuration
 1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the supportedManagers listed in the table above)
 
 ## `ignoreTests`
@@ -2648,10 +2721,9 @@ Behavior details:
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
-<!-- prettier-ignore -->
 !!! note
-    Keep your labels within the maximum character limit for your Git hosting platform.
-    Renovate usually truncates labels to 50 characters, except for GitLab, which has a 255 character limit.
+  Keep your labels within the maximum character limit for your Git hosting platform.
+  Renovate usually truncates labels to 50 characters, except for GitLab, which has a 255 character limit.
 
 ## `lockFileMaintenance`
 
@@ -2664,7 +2736,6 @@ Renovate then commits that lock file to the update branch and creates the lock f
 Supported lock files:
 
 <!-- lock-file-maintenance-table-start -->
-<!-- lock-file-maintenance-table-end -->
 
 Support for new lock files may be added via feature request.
 
@@ -2788,7 +2859,7 @@ We do not want Renovate to parse every YAML file in every repository, just in ca
 Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
 Because the array is empty, you as user must tell Renovate which directories/files to check.
 
-Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess.
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using non-standard filenames.
 For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
 This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
 Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
@@ -2844,10 +2915,9 @@ Example:
 
 `minimumReleaseAge` is a feature that requires Renovate to wait for a specified amount of time before suggesting a dependency update.
 
-<!-- prettier-ignore -->
 !!! note
-    Minimum Release Age has [a separate documentation page](./key-concepts/minimum-release-age.md) for more in-depth documentation about the functionality.
-    This also includes documentation that was previously in this section, regarding how to specify release timestamps for custom registries.
+  Minimum Release Age has [a separate documentation page](./key-concepts/minimum-release-age.md) for more in-depth documentation about the functionality.
+  This also includes documentation that was previously in this section, regarding how to specify release timestamps for custom registries.
 
 If `minimumReleaseAge` is set to a time duration _and_ the update has a release timestamp header, then Renovate will check if the set duration has passed. This behaviour can be changed using [`minimumReleaseAgeBehaviour`](#minimumreleaseagebehaviour).
 
@@ -2866,13 +2936,11 @@ In those cases a feature request needs to be implemented.
 
 You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](./modules/datasource/index.md).
 
-<!-- prettier-ignore -->
 !!! note
-    Configuring this option will add a `renovate/stability-days` option to the status checks.
+  Configuring this option will add a `renovate/stability-days` option to the status checks.
 
-<!-- prettier-ignore -->
 !!! note
-    As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
+  As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
 
 Examples of how you can use `minimumReleaseAge`:
 
@@ -2902,8 +2970,6 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 #### Await X time duration before Automerging
 
 If you enable `automerge` _and_ `minimumReleaseAge`, Renovate Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
-
-It's recommended to also apply `prCreation="not-pending"` and `internalChecksFilter="strict"` to make sure that branches and PRs are only created after the `minimumReleaseAge` has passed.
 
 Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
 This pending check prevents the branch going green to automerge before the time has passed.
@@ -2958,14 +3024,14 @@ See [Private npm module support](./getting-started/private-packages.md) for deta
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
 In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
-A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
+A use case for the latter is if you are a Renovate admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
 
 ## `osvVulnerabilityAlerts`
 
-Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies have known vulnerabilities.
+Renovate integrates with [OSV](https://osv.dev/), an Open Source vulnerability database, to check if extracted dependencies have known vulnerabilities.
 Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability fixes (once they are available).
 
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
@@ -2988,9 +3054,8 @@ The entire database is downloaded locally by [osv-offline](https://github.com/re
 
 #### Malicious package detection and protection
 
-<!-- prettier-ignore -->
 !!! note
-    This functionality is currently experimental, being actively worked on, and will soon be available for usage outside of `osvVulnerabilityAlerts`.
+  This functionality is currently experimental, being actively worked on, and will soon be available for usage outside of `osvVulnerabilityAlerts`.
 
 If Renovate detects a malicious dependency using data from OSV, it will surface this in log warnings, and prevent PRs from being created.
 
@@ -2999,6 +3064,19 @@ If you currently have a dependency that is using a malicious version, Renovate w
 If Renovate finds a dependency update available, and that dependency update is found to be malicious, Renovate will skip **any updates to the dependency**, marking it with `skipReason: malicious-update-proposed`, and report this via a warning log.
 
 <!-- markdownlint-enable MD001 -->
+
+## `overrideDescription`
+
+Use `overrideDescription` instead of [`description`](#description) if this config's description should replace, and not be added to, the descriptions collated from the presets which this config extends.
+
+This is useful for a preset which extends many other presets, and where a single line describes them better than one line per preset would.
+For example, `workarounds:all` extends around twenty presets, but its `overrideDescription` means the onboarding PR shows only:
+
+```
+- Apply crowd-sourced workarounds for known problems with packages.
+```
+
+Renovate applies `overrideDescription` when it resolves presets, so the resolved config only ever has a `description`.
 
 ## `packageRules`
 
@@ -3097,14 +3175,12 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 }
 ```
 
-<!-- prettier-ignore -->
 !!! tip
-    Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
-    This way important rules override settings from earlier rules if needed.
+  Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
+  This way important rules override settings from earlier rules if needed.
 
-<!-- prettier-ignore -->
 !!! warning
-    Avoid nesting any `object`-type configuration in a `packageRules` array, such as a `major` or `minor` block.
+  Avoid nesting any `object`-type configuration in a `packageRules` array, such as a `major` or `minor` block.
 
 ### `packageRules.allowedVersions`
 
@@ -3145,9 +3221,8 @@ For example, if you want to upgrade to Angular to only the next major, you could
 }
 ```
 
-<!-- prettier-ignore -->
 !!! warning
-    `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
+  `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
 
 #### Using regular expressions
 
@@ -3218,9 +3293,8 @@ To read the changelogs you must use the link.
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Forgejo, Gitea, GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+  Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Forgejo, Gitea, GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
@@ -3230,6 +3304,7 @@ Use this field to restrict rules to a particular branch. e.g.
 
 ```json
 {
+  "baseBranchPatterns": ["main"],
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
@@ -3244,6 +3319,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 
 ```json
 {
+  "baseBranchPatterns": ["main", "/^release\\/.*/"],
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
@@ -3260,10 +3336,9 @@ Use `matchCategories` to restrict rules to a particular language or group.
 Matching is done using "any" logic, i.e. "match any of the following categories".
 The categories can be found in the [manager documentation](modules/manager/index.md).
 
-<!-- prettier-ignore -->
 !!! note
-    Rules with `matchCategories` are only applied _after_ extraction of dependencies.
-    If you want to configure which managers are being extracted at all, use `enabledManagers` instead.
+  Rules with `matchCategories` are only applied _after_ extraction of dependencies.
+  If you want to configure which managers are being extracted at all, use `enabledManagers` instead.
 
 ```json
 {
@@ -3278,10 +3353,9 @@ The categories can be found in the [manager documentation](modules/manager/index
 
 ### `packageRules.matchConfidence`
 
-<!-- prettier-ignore -->
 !!! warning
-    This configuration option needs a Mend API key, and is in private beta testing only.
-    API keys are not available for free or via the `renovatebot/renovate` repository.
+  This configuration option needs a Mend API key, and is in private beta testing only.
+  API keys are not available for free or via the `renovatebot/renovate` repository.
 
 ```json title="Grouping high merge confidence updates"
 {
@@ -3316,9 +3390,8 @@ The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
 Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
 Instead you should do `> 13 months`.
 
-<!-- prettier-ignore -->
 !!! note
-    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+  We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
 
 ### `packageRules.matchCurrentValue`
 
@@ -3702,16 +3775,14 @@ For example to apply a special label to `major` updates:
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
-<!-- prettier-ignore -->
 !!! warning
-    Packages that follow SemVer are allowed to make breaking changes in _any_ `0.x` version, even `patch` and `minor`.
-    Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
-    When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
-    Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
+  Packages that follow SemVer are allowed to make breaking changes in _any_ `0.x` version, even `patch` and `minor`.
+  Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
+  When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
+  Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
 
-<!-- prettier-ignore -->
 !!! warning
-    `matchUpdateTypes` and `allowedVersions` cannot be used in the same package rule.
+  `matchUpdateTypes` and `allowedVersions` cannot be used in the same package rule.
 
 Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
 
@@ -3833,17 +3904,15 @@ Can be used in combination with `replacementVersion`.
 
 You can suggest a new community package rule by editing [the `replacements.json` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/data/replacements.json) and opening a pull request.
 
-<!-- prettier-ignore -->
 !!! note
-    Replacement updates will never be grouped.
-    <br>
-    Lock file maintenance will never be grouped with other dependency updates.
+  Replacement updates will never be grouped.
+  <br>
+  Lock file maintenance will never be grouped with other dependency updates.
 
 ### `packageRules.replacementNameTemplate`
 
-<!-- prettier-ignore -->
 !!! note
-    `replacementName` will take precedence if used within the same package rule.
+  `replacementName` will take precedence if used within the same package rule.
 
 Use the `replacementNameTemplate` config option to control the replacement name.
 
@@ -3909,9 +3978,8 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 
 ### `packageRules.replacementVersionTemplate`
 
-<!-- prettier-ignore -->
 !!! note
-    `replacementVersion` will take precedence if used within the same package rule.
+  `replacementVersion` will take precedence if used within the same package rule.
 
 Use the `replacementVersionTemplate` config option to control the replacement version.
 
@@ -3944,9 +4012,8 @@ Use this field to set the directory in which the package is present at the sourc
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    `sourceDirectory` should be only be configured along with `sourceUrl`.
+  `sourceDirectory` should be only be configured along with `sourceUrl`.
 
 ### `packageRules.sourceUrl`
 
@@ -3998,16 +4065,22 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 
 ## `platformAutomerge`
 
+!!! note
+  If you use the default `platformAutomerge=true` then you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
+  If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
+  On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
+  [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
+  [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
+  If you're using another platform, search their documentation for a similar feature.
+
 <!-- prettier-ignore -->
 !!! note
-    If you use the default `platformAutomerge=true` then you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
-    If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
-    On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
-    [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
-    [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
-    If you're using another platform, search their documentation for a similar feature.
+  If you mark `renovate/artifacts` as a required status check in your branch protection rules, you must also set [`statusCheckWhen.artifactError`](#statuscheckwhen) to `"always"`.
+  The default `"failed"` only sets the check when artifact updates fail, so a required check rule would block every PR that has no artifact errors (the check would never appear). Setting it to `"always"` makes Renovate report green when there are no errors and red when there are, which is what branch protection requires.
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
+
+Where supported, platform-native automerge uses [`automergeStrategy`](#automergestrategy) to select the merge method.
 
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
@@ -4034,35 +4107,106 @@ It does not apply when you use a Personal Access Token as credential.
 When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
 This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
 
-<!-- prettier-ignore -->
 !!! note
-    When using platform commits, GitHub determines the git author string to use and Renovate's own gitAuthor is ignored.
+  When using platform commits, GitHub determines the git author string to use and Renovate's own gitAuthor is ignored.
 
 ## `postUpdateOptions`
 
-Table with options:
+### `bundlerConservative`
 
-| Name                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies.                                                                                                                                                                                                                                                                                                                         |
-| `composerNoMinimalChanges`   | Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).                                                                                                                                                                                                                                                                                                                                          |
-| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                                                                                                                                                                                                                                                                                                                                            |
-| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                                                                                                                                                                                                                                                                                                                                           |
-| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                                                                                                                                                                                                                                                                                                                                            |
-| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                                                                                                                                                                                                                                                                                                                                           |
-| `goGenerate`                 | Run `go generate ./...` after vendoring (if vendoring was required). This will then commit any files which were added or modified by running `go generate`. Note this will not install any other tools as part of the process. See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process. In order for this option to function, the global configuration option `allowedUnsafeExecutions` must include `goGenerate`. |
-| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                                                                                                                                                                                                                                                                                                                                               |
-| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                                                                                                                                                                                                                                                                                                                                                   |
-| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                           |
+Enable conservative mode for `bundler` (Ruby dependencies).
+This will only update the immediate dependency in the lockfile instead of all subdependencies.
+
+### `composerNoMinimalChanges`
+
+Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).
+
+### `composerWithAll`
+
+Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.
+
+### `dotnetWorkloadRestore`
+
+Run `dotnet workload restore` before `dotnet restore` commands.
+
+### `goGenerate`
+
+Run `go generate ./...`.
+This will then commit any files which were added or modified by running `go generate`.
+
+Note this will not install any other tools as part of the process.
+See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process.
+
+This runs after vendoring, if vendoring was required.
+
+!!! note
+  In order for this option to function, the global configuration option [`allowedUnsafeExecutions`](./self-hosted-configuration.md#allowedunsafeexecutions) must include `goGenerate`.
+
+### `gomodMassage`
+
+Enable massaging `replace` directives before calling `go` commands.
+
+### `gomodSkipVendor`
+
+Never run `go mod vendor` after Go module updates.
+
+### `gomodTidy`
+
+Run `go mod tidy` after Go module updates.
+This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.
+
+### `gomodTidy1.17`
+
+Run `go mod tidy -compat=1.17` after Go module updates.
+
+### `gomodTidyAll`
+
+After running `go mod tidy` on the updated module, also run it on every other `go.mod` which references that module through a local `replace` directive, in dependency order.
+Use this in Go monorepos, where an update to a shared module must also reach the `go.sum` files of the modules which depend on it.
+Implies `gomodTidy`, and needs Go 1.20 or later.
+Avoid combining this with `gomodMassage`, which comments out the relative `replace` directives that this option follows.
+
+### `gomodTidyE`
+
+Run `go mod tidy -e` after Go module updates.
+
+### `gomodUpdateImportPaths`
+
+Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).
+
+### `gomodVendor`
+
+Always run `go mod vendor` after Go module updates even if vendor files aren't detected.
+
+### `helmUpdateSubChartArchives`
+
+Update subchart archives in the `/charts` folder.
+
+### `kustomizeInflateHelmCharts`
+
+Inflate updated helm charts referenced in the kustomization.
+
+### `npmDedupe`
+
+Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.
+
+### `npmInstallTwice`
+
+Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once.
+
+During lock file maintenance, Renovate always runs `npm install` twice, even without this option, because regenerating a lock file from scratch is known to need a second pass.
+
+### `pnpmDedupe`
+
+Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
+
+### `yarnDedupeFewer`
+
+Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.
+
+### `yarnDedupeHighest`
+
+Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.
 
 ## `postUpgradeTasks`
 
@@ -4070,7 +4214,9 @@ Post-upgrade tasks are commands that are executed by Renovate after a dependency
 The intention is to run any other command line tools that would modify existing files or generate new files when a dependency changes.
 
 Post-upgrade tasks are blocked by default for security reasons, so the admin of Renovate needs to choose whether to allow specific commands or any commands to be run - it depends on how much they trust their users in repos.
-In Mend-hosted Renovate apps, commands remain blocked by default but can be allowed on-request for any paying ("Renovate Enterprise" or Mend Appsec) customers or trusted OSS repositories - please reach out if so.
+
+!!! tip
+  In Mend-hosted Renovate apps, commands remain blocked by default, but [depending on your plan](./mend-hosted/faq.md#how-can-i-run-arbitrary-commands-through-postupgradetasks), you have more control over this.
 
 Each command must match at least one of the patterns defined in `allowedCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
@@ -4096,9 +4242,8 @@ A list of commands that are executed after Renovate has updated a dependency but
 You can use Handlebars templating in these commands.
 They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
 
-<!-- prettier-ignore -->
 !!! note
-    Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`postUpgradeTasks.fileFilters`](#postupgradetasksfilefilters) instead.
+  Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`postUpgradeTasks.fileFilters`](#postupgradetasksfilefilters) instead.
 
 ### `postUpgradeTasks.dataFileTemplate`
 
@@ -4120,9 +4265,8 @@ Example:
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-   `dataFileTemplate` is ignored if there is no `commands` configured.
+  `dataFileTemplate` is ignored if there is no `commands` configured.
 
 ### `postUpgradeTasks.executionMode`
 
@@ -4145,11 +4289,9 @@ Whether to install any additional tools dynamically before executing the `comman
 The possible tool names that are known by [Containerbase](https://github.com/containerbase/base) are:
 
 <!-- installTools-tools-begin -->
-<!-- installTools-tools-end -->
 
-<!-- prettier-ignore -->
 !!! note
-    When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
+  When using [`binarySource=global`](./self-hosted-configuration.md#binarysource), the `installTools` options do not take effect.
 
 For example:
 
@@ -4178,9 +4320,8 @@ For example:
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    The tool objects inside `installTools` currently do not expose any additional configurability.
+  The tool objects inside `installTools` currently do not expose any additional configurability.
 
 ### `postUpgradeTasks.workingDirTemplate`
 
@@ -4213,9 +4354,8 @@ Use this array to provide a list of column names you wish to include in the PR t
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    "Package file" is predefined in the default `prBodyDefinitions` object so does not require a definition before it can be used.
+  "Package file" is predefined in the default `prBodyDefinitions` object so does not require a definition before it can be used.
 
 ## `prBodyDefinitions`
 
@@ -4247,9 +4387,8 @@ You can configure this object to either:
 }
 ```
 
-<!-- prettier-ignore -->
 !!! tip
-    Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+  Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
 
 ## `prBodyHeadingDefinitions`
 
@@ -4262,17 +4401,15 @@ This can include Markdown or any other syntax that the platform supports.
     "Package": "📦 Package",
     "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
   },
-  "prBodyColumn": ["Package", "Age"]
+  "prBodyColumns": ["Package", "Age"]
 }
 ```
 
-<!-- prettier-ignore -->
 !!! tip
-    Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+  Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
 
-<!-- prettier-ignore -->
 !!! note
-    Templating is not supported for this option.
+  Templating is not supported for this option.
 
 ## `prBodyNotes`
 
@@ -4303,10 +4440,9 @@ This setting - if enabled - limits Renovate to a maximum of `x` concurrent PRs o
 
 This limit is enforced on a per-repository basis.
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate always creates security PRs, even if the concurrent PR limit is already reached.
-    Security PRs have `[SECURITY]` in their PR title.
+  Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+  Security PRs have `[SECURITY]` in their PR title.
 
 ## `prCreation`
 
@@ -4330,14 +4466,12 @@ When a branch remains without PR due to a failing test: select the corresponding
 When prCreation is set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
 Renovate still creates the _branch_ immediately.
 
-<!-- prettier-ignore -->
 !!! note
-    For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
-    Instead, Renovate create the PR on its _next_ run after the relevant tests have completed, so there will be some delay.
+  For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+  Instead, Renovate create the PR on its _next_ run after the relevant tests have completed, so there will be some delay.
 
-<!-- prettier-ignore -->
 !!! warning
-    If you set `prCreation=approval` you must _not_ use `dependencyDashboardApproval=true`!
+  If you set `prCreation=approval` you must _not_ use `dependencyDashboardApproval=true`!
 
 ## `prFooter`
 
@@ -4358,7 +4492,7 @@ What may happen if you don't set a `prHourlyLimit`:
 
 The above may cause:
 
-- Renovate bot's PRs to overwhelm your CI systems
+- Renovate's PRs to overwhelm your CI systems
 - a lot of test runs, because branches are rebased each time you merge a PR
 
 To prevent these problems you can set `prHourlyLimit` to a value like `1` or `2`.
@@ -4366,10 +4500,9 @@ Renovate will only create that many PRs within each hourly period (`:00` through
 You still get all the PRs in a reasonable time, perhaps over a day or so.
 Now you can merge the PRs at a do-able rate, once the tests pass.
 
-<!-- prettier-ignore -->
 !!! tip
-    The `prHourlyLimit` setting does _not_ limit the number of _concurrently open PRs_, only the _rate_ at which PRs are created.
-    The `prHourlyLimit` setting is enforced on a per-repository basis.
+  The `prHourlyLimit` setting does _not_ limit the number of _concurrently open PRs_, only the _rate_ at which PRs are created.
+  The `prHourlyLimit` setting is enforced on a per-repository basis.
 
 ## `prNotPendingHours`
 
@@ -4377,9 +4510,8 @@ If you configure `prCreation=not-pending`, then Renovate will wait until tests a
 However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely.
 This is why we configured an upper limit for how long we wait until creating a PR.
 
-<!-- prettier-ignore -->
 !!! note
-    If the option `minimumReleaseAge` is non-zero then Renovate disables the `prNotPendingHours` functionality.
+  If the option `minimumReleaseAge` is non-zero then Renovate disables the `prNotPendingHours` functionality.
 
 ## `prTitle`
 
@@ -4608,11 +4740,10 @@ For `npm` manager when `replacementApproach=alias` then instead of replacing `"f
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository.
 By default, `renovate` will update to a version greater than `latest` only if the current version is itself past latest.
 
-<!-- prettier-ignore -->
 !!! note
-    By default, respectLatest will be set to `false` for Maven results if a `latest` tag is found.
-    This is because many Maven registries don't have a reliable `latest` tag - it just means whatever was last published.
-    You need to override this to `respectLatest=true` in `packageRules` in order to use it.
+  By default, respectLatest will be set to `false` for Maven results if a `latest` tag is found.
+  This is because many Maven registries don't have a reliable `latest` tag - it just means whatever was last published.
+  You need to override this to `respectLatest=true` in `packageRules` in order to use it.
 
 ## `reviewers`
 
@@ -4654,10 +4785,9 @@ Say the full team name on GitHub is `@organization/foo`, then you'd set the conf
 
 Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
-<!-- prettier-ignore -->
 !!! note
-    By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
-    By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+  By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
+  By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
 
 ## `reviewersFromCodeOwners`
 
@@ -4718,10 +4848,9 @@ Here are some example schedules and their Cron equivalent:
 | on friday and saturday                       | Yes                 | `* * * * 5,6`         |
 | every 3 months on the first day of the month | Yes                 | `* * 1 */3 *`         |
 
-<!-- prettier-ignore -->
 !!! note
-    For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
-    And the cron schedule must have five comma separated parts.
+  For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
+  And the cron schedule must have five comma separated parts.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
 You could then configure a schedule like this at the repository level:
@@ -4736,10 +4865,9 @@ You could then configure a schedule like this at the repository level:
 This would mean that Renovate can run for 7 hours each night, plus all the time on weekends.
 Note how the above example makes use of the "OR" logic of combining multiple schedules in the array.
 
-<!-- prettier-ignore -->
 !!! note
-    If both the day of the week _and_ the day of the month are restricted in the schedule, then Renovate only runs when both the day of the month _and_ day of the week match!
-    For example: `* * 1-7 * 4` means Renovate only runs on the _first_ Thursday of the month.
+  If both the day of the week _and_ the day of the month are restricted in the schedule, then Renovate only runs when both the day of the month _and_ day of the week match!
+  For example: `* * 1-7 * 4` means Renovate only runs on the _first_ Thursday of the month.
 
 It's common to use `schedule` in combination with [`timezone`](#timezone).
 You should configure [`updateNotScheduled=false`](#updatenotscheduled) if you want the schedule more strictly enforced so that _updates_ to existing branches aren't pushed out of schedule.
@@ -4819,17 +4947,15 @@ This option was formerly known as `updateLockFiles`.
 
 When this option is set, Renovate won't attempt to update artifacts such as lock files, so you will need to update them yourself, either manually or through secondary automation such as CI workflows.
 
-<!-- prettier-ignore -->
 !!! note
-    When this option is used in package rules, along with grouped upgrades, artifact updating will only be skipped if every upgrade in the grouped branch wants to skip it.
+  When this option is used in package rules, along with grouped upgrades, artifact updating will only be skipped if every upgrade in the grouped branch wants to skip it.
 
-<!-- prettier-ignore -->
-!!!warning
-    When artifact updates are skipped and the `packageManager` field in `package.json` is updated, the new version will not contain a hash. The hash is only applied when artifacts are updated. For example, a value of `packageManager: "yarn@3.0.0+sha224.deadbeef"` would be updated to just `packageManager: "yarn@3.1.0"` rather than `packageManager: "yarn@3.1.0+sha224.f0cacc1a"`.
+!!! warning
+  When artifact updates are skipped and the `packageManager` field in `package.json` is updated, the new version will not contain a hash. The hash is only applied when artifacts are updated. For example, a value of `packageManager: "yarn@3.0.0+sha224.deadbeef"` would be updated to just `packageManager: "yarn@3.1.0"` rather than `packageManager: "yarn@3.1.0+sha224.f0cacc1a"`.
 
 ## `skipInstalls`
 
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
+By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install.
 If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
@@ -4846,6 +4972,35 @@ This option is mergeable, which means you only have to specify the status checks
   "statusCheckNames": {
     "minimumReleaseAge": "custom/stability-days",
     "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
+
+## `statusCheckWhen`
+
+Control when each Renovate status check is set on branches.
+The keys match those available in [`statusCheckNames`](#statuschecknames).
+This option is mergeable, so you only need to specify the checks you want to change.
+
+Allowed values per key:
+
+- `always`: Renovate always sets the status check on every branch commit — green on success, red on failure.
+- `never`: Renovate never sets this status check. Use this to skip a check entirely.
+- `failed`: Renovate only sets the status check when there is a failure. Successes are silent (no green check).
+
+Default values:
+
+<!-- status-check-when-defaults-begin -->
+
+For example, to make `renovate/artifacts` a required check, set `artifactError` to `"always"` so it always reports green/red, allowing you to mark it as required in your branch protection rules.
+To skip a check entirely, set any key to `"never"` to suppress that status check.
+To only report failures for stability, set `minimumReleaseAge` to `"failed"` if you only care about the red/pending status.
+
+```json title="Example: always set artifacts check, skip merge confidence"
+{
+  "statusCheckWhen": {
+    "artifactError": "always",
+    "mergeConfidence": "never"
   }
 }
 ```
@@ -4896,14 +5051,12 @@ This can be overridden using the following options.
 
 This option can be used on the repository level and in the [Renovate configuration](./self-hosted-configuration.md) using the following options.
 
-<!-- prettier-ignore -->
 !!! note
-    The JVM memory settings specified in the global self-hosted configuration set by the administrator in [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md) limits the memory settings for all repositories.
-    The default limit for all repositories is 512m.
+  The JVM memory settings specified in the global self-hosted configuration set by the administrator in [`toolSettings.jvmMaxMemory`](./self-hosted-configuration.md) limits the memory settings for all repositories.
+  The default limit for all repositories is 512m.
 
-<!-- prettier-ignore -->
 !!! note
-    The JVM memory settings are considered for the `gradle` and `gradle-wrapper` manager.
+  The JVM memory settings are considered for the `gradle` and `gradle-wrapper` manager.
 
 ### `toolSettings.jvmMaxMemory`
 
@@ -4919,9 +5072,8 @@ Defaults to `jvmMaxMemory`.
 
 ### `toolSettings.nodeMaxMemory`
 
-<!-- prettier-ignore -->
 !!! note
-    This does not apply to _every_ Node process created by Renovate, only the managers noted above.
+  This does not apply to _every_ Node process created by Renovate, only the managers noted above.
 
 ## `updateInternalDeps`
 
@@ -5091,16 +5243,34 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 }
 ```
 
-<!-- prettier-ignore -->
 !!! warning
-    There's a small chance that a wrong vulnerability alert results in a flapping/looping vulnerability fix.
-    If you allow Renovate to `automerge` vulnerability fixes, please check if the automerged fix is correct.
+  There's a small chance that a wrong vulnerability alert results in a flapping/looping vulnerability fix.
+  If you allow Renovate to `automerge` vulnerability fixes, please check if the automerged fix is correct.
 
-<!-- prettier-ignore -->
 !!! note
-    When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
-    This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
-    In short: vulnerability alerts "skip the line".
+  By default, when Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+  This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
+  In short: vulnerability alerts "skip the line".
+
+If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set `prConcurrentLimit` or `branchConcurrentLimit` inside the `vulnerabilityAlerts` object.
+Vulnerability fixes get their _own_ budget, they do not take a share of the repository-wide one:
+
+```json title="Allowing up to 5 vulnerability fix PRs on top of 5 regular PRs"
+{
+  "prConcurrentLimit": 5,
+  "vulnerabilityAlerts": {
+    "prConcurrentLimit": 5
+  }
+}
+```
+
+With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
+The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
+You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+
+!!! note
+  Only the concurrent limits can be set this way.
+  Renovate always ignores `commitHourlyLimit`, `prHourlyLimit`, `prCommitsPerRunLimit` and `schedule` for vulnerability alerts, you can not override this.
 
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 
@@ -5112,9 +5282,8 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
+  If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
 
 ### `vulnerabilityAlerts.vulnerabilityFixStrategy`
 

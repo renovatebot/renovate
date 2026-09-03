@@ -199,6 +199,86 @@ describe('modules/manager/swift/artifacts', () => {
     );
   });
 
+  it('parses lockfile with mixed source-control and registry pins', async () => {
+    // Regression test: SwiftPM Package Registry (SE-0292)
+    const v2MixedFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'alamofire',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/Alamofire/Alamofire',
+            state: {
+              revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
+              version: '5.9.1',
+            },
+          },
+          {
+            identity: 'example.registry-package',
+            kind: 'registry',
+            location: '',
+            state: {
+              version: '1.2.3',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2MixedFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'Alamofire/Alamofire',
+            datasource: GithubTagsDatasource.id,
+            newVersion: 'v5.10.0',
+            newValue: '5.10.0',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: JSON.stringify(
+            {
+              pins: [
+                {
+                  identity: 'alamofire',
+                  kind: 'remoteSourceControl',
+                  location: 'https://github.com/Alamofire/Alamofire',
+                  state: {
+                    revision: 'newrevisionsha123',
+                    version: '5.10.0',
+                  },
+                },
+                {
+                  identity: 'example.registry-package',
+                  kind: 'registry',
+                  location: '',
+                  state: { version: '1.2.3' },
+                },
+              ],
+              version: 2,
+            },
+            null,
+            2,
+          ),
+        },
+      },
+    ]);
+  });
+
   it('does not write `from:` range to Package.resolved', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2Fixture);
@@ -432,6 +512,127 @@ describe('modules/manager/swift/artifacts', () => {
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
     expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin when Package.resolved uses SSH URL', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const sshFixture = v2Fixture.replace(
+      '"https://github.com/Alamofire/Alamofire"',
+      '"git@github.com:Alamofire/Alamofire.git"',
+    );
+    fs.readLocalFile.mockResolvedValue(sshFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin with git-tags datasource using SSH URL as depName', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2Fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'git@github.com:Alamofire/Alamofire.git',
+          datasource: GitTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('matches pin when Package.resolved uses ssh:// URL', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const sshFixture = v2Fixture.replace(
+      '"https://github.com/Alamofire/Alamofire"',
+      '"ssh://git@github.com/Alamofire/Alamofire.git"',
+    );
+    fs.readLocalFile.mockResolvedValue(sshFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'Alamofire/Alamofire',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v5.10.0',
+          newValue: '5.10.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.10.0"');
+  });
+
+  it('falls back to basic normalization for host-only URLs', async () => {
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    const hostOnlyFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'my-lib',
+            kind: 'remoteSourceControl',
+            location: 'https://custom-registry.example.com',
+            state: {
+              revision: 'oldsha',
+              version: '1.0.0',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    fs.readLocalFile.mockResolvedValue(hostOnlyFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newsha');
+
+    // No match expected since host-only URL won't match any dep
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'org/my-lib',
+          datasource: GithubTagsDatasource.id,
+          newVersion: 'v2.0.0',
+          newValue: '2.0.0',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toBeNull();
   });
 
   it('handles gitlab-tags with custom registryUrls', async () => {

@@ -10,6 +10,7 @@ import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/t
 import type { CustomManager } from '../../modules/manager/custom/types.ts';
 import { regEx } from '../../util/regex.ts';
 import type { ValidationMessage } from '../types.ts';
+import { ConfigValidationTopic } from './types.ts';
 
 export function getParentName(parentPath: string | undefined): string {
   return parentPath
@@ -40,17 +41,17 @@ export function validateNumber(
   subKey?: string,
 ): ValidationMessage[] {
   const errors: ValidationMessage[] = [];
-  const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
+  const path = `${currentPath}${subKey ? `.${subKey}` : ''}`;
   if (isNumber(val)) {
     if (val < 0 && !allowsNegative) {
       errors.push({
-        topic: 'Configuration Error',
+        topic: ConfigValidationTopic.Error,
         message: `Configuration option \`${path}\` should be a positive integer. Found negative value instead.`,
       });
     }
   } else {
     errors.push({
-      topic: 'Configuration Error',
+      topic: ConfigValidationTopic.Error,
       message: `Configuration option \`${path}\` should be an integer. Found: ${JSON.stringify(
         val,
       )} (${typeof val}).`,
@@ -62,22 +63,21 @@ export function validateNumber(
 
 /**  An option is a false global if it has the same name as a global only option
  *   but is actually just the field of a non global option or field an children of the non global option
- *   eg. token: it's global option used as the bot's token as well and
+ *   eg. token: it's global option used as Renovate's token as well and
  *   also it can be the token used for a platform inside the hostRules configuration
  */
 export function isFalseGlobal(
   optionName: string,
   parentPath?: string,
 ): boolean {
-  if (parentPath?.includes('hostRules')) {
-    // v8 ignore else -- TODO: add test #40625
-    if (
-      optionName === 'token' ||
+  // v8 ignore else -- TODO: add test #40625
+  if (
+    parentPath?.includes('hostRules') &&
+    (optionName === 'token' ||
       optionName === 'username' ||
-      optionName === 'password'
-    ) {
-      return true;
-    }
+      optionName === 'password')
+  ) {
+    return true;
   }
 
   return false;
@@ -110,14 +110,14 @@ export function validateRegexManagerFields(
           'customManager.matchStrings regEx validation error',
         );
         errors.push({
-          topic: 'Configuration Error',
+          topic: ConfigValidationTopic.Error,
           message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
         });
       }
     }
   } else {
     errors.push({
-      topic: 'Configuration Error',
+      topic: ConfigValidationTopic.Error,
       message:
         'Each Custom Manager `matchStrings` array must have at least one item.',
     });
@@ -127,7 +127,7 @@ export function validateRegexManagerFields(
   for (const field of mandatoryFields) {
     if (!hasField(customManager, field)) {
       errors.push({
-        topic: 'Configuration Error',
+        topic: ConfigValidationTopic.Error,
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
       });
     }
@@ -136,7 +136,7 @@ export function validateRegexManagerFields(
   const nameFields = ['depName', 'packageName'];
   if (!nameFields.some((field) => hasField(customManager, field))) {
     errors.push({
-      topic: 'Configuration Error',
+      topic: ConfigValidationTopic.Error,
       message: `Regex Managers must contain depName or packageName regex groups or templates`,
     });
   }
@@ -149,7 +149,7 @@ export function validateJSONataManagerFields(
 ): void {
   if (!isNonEmptyString(customManager.fileFormat)) {
     errors.push({
-      topic: 'Configuration Error',
+      topic: ConfigValidationTopic.Error,
       message: 'Each JSONata manager must contain a fileFormat field.',
     });
   }
@@ -164,14 +164,14 @@ export function validateJSONataManagerFields(
           'customManager.matchStrings JSONata query validation error',
         );
         errors.push({
-          topic: 'Configuration Error',
+          topic: ConfigValidationTopic.Error,
           message: `Invalid JSONata query for ${currentPath}: \`${matchString}\``,
         });
       }
     }
   } else {
     errors.push({
-      topic: 'Configuration Error',
+      topic: ConfigValidationTopic.Error,
       message: `Each Custom Manager must contain a non-empty matchStrings array`,
     });
   }
@@ -180,7 +180,7 @@ export function validateJSONataManagerFields(
   for (const field of mandatoryFields) {
     if (!hasField(customManager, field)) {
       errors.push({
-        topic: 'Configuration Error',
+        topic: ConfigValidationTopic.Error,
         message: `JSONata Managers must contain ${field}Template configuration or ${field} in the query `,
       });
     }
@@ -189,7 +189,7 @@ export function validateJSONataManagerFields(
   const nameFields = ['depName', 'packageName'];
   if (!nameFields.some((field) => hasField(customManager, field))) {
     errors.push({
-      topic: 'Configuration Error',
+      topic: ConfigValidationTopic.Error,
       message: `JSONata Managers must contain depName or packageName in the query or their templates`,
     });
   }

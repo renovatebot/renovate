@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -7,7 +8,9 @@ import { compareIntArray, extractAllParts, getParts, plusOne } from './util.ts';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
-export const urls = ['https://pvp.haskell.org'];
+export const urls = [
+  '[Haskell Package Versioning Policy](https://pvp.haskell.org)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['widen'];
 
@@ -30,7 +33,7 @@ function getMajor(version: string): number | null {
   if (parts === null) {
     return null;
   }
-  return Number(parts.major.join('.'));
+  return parseFloat(parts.major.join('.'));
 }
 
 function getMinor(version: string): number | null {
@@ -38,7 +41,7 @@ function getMinor(version: string): number | null {
   if (parts === null || parts.minor.length === 0) {
     return null;
   }
-  return Number(parts.minor.join('.'));
+  return parseFloat(parts.minor.join('.'));
 }
 
 function getPatch(version: string): number | null {
@@ -46,7 +49,7 @@ function getPatch(version: string): number | null {
   if (parts === null || parts.patch.length === 0) {
     return null;
   }
-  return Number(parts.patch[0] + '.' + parts.patch.slice(1).join(''));
+  return parseFloat(`${parts.patch[0]}.${parts.patch.slice(1).join('')}`);
 }
 
 function matches(version: string, range: string): boolean {
@@ -163,11 +166,11 @@ function isSame(
   }
   if (type === 'major') {
     return 'eq' === compareIntArray(aParts.major, bParts.major);
-  } else if (type === 'minor') {
-    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
-  } else {
-    return 'eq' === compareIntArray(aParts.patch, bParts.patch);
   }
+  if (type === 'minor') {
+    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
+  }
+  return 'eq' === compareIntArray(aParts.patch, bParts.patch);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
@@ -198,7 +201,7 @@ function subset(subRange: string, superRange: string): boolean | undefined {
 }
 
 function isVersion(maybeRange: string | undefined | null): boolean {
-  return typeof maybeRange === 'string' && parseRange(maybeRange) === null;
+  return isString(maybeRange) && parseRange(maybeRange) === null;
 }
 
 function isValid(ver: string): boolean {

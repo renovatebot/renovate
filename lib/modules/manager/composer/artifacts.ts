@@ -1,11 +1,12 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import {
   findGithubToken,
   takePersonalAccessTokenIfPossible,
@@ -27,6 +28,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { coerceString } from '../../../util/string.ts';
@@ -79,12 +81,12 @@ function getAuthJson(): string | null {
 
     if (gitlabHostRule?.token) {
       const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
-      authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
+      authJson['gitlab-token'] = coerceObject(authJson['gitlab-token']);
       authJson['gitlab-token'][host] = gitlabHostRule.token;
       // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
       authJson['gitlab-domains'] = [
         host,
-        ...(authJson['gitlab-domains'] ?? []),
+        ...coerceArray(authJson['gitlab-domains']),
       ];
     }
   }
@@ -98,10 +100,10 @@ function getAuthJson(): string | null {
 
     const { resolvedHost, username, password, token } = packagistHostRule;
     if (resolvedHost && username && password) {
-      authJson['http-basic'] = authJson['http-basic'] ?? {};
+      authJson['http-basic'] = coerceObject(authJson['http-basic']);
       authJson['http-basic'][resolvedHost] = { username, password };
     } else if (resolvedHost && token) {
-      authJson.bearer = authJson.bearer ?? {};
+      authJson.bearer = coerceObject(authJson.bearer);
       authJson.bearer[resolvedHost] = token;
     }
   }
@@ -169,8 +171,7 @@ export async function updateArtifacts({
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(lockfile)) {
       const preCmd = 'composer';
-      const preArgs =
-        'install' + getComposerArguments(config, composerToolConstraint);
+      const preArgs = `install${getComposerArguments(config, composerToolConstraint)}`;
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);

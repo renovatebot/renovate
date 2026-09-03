@@ -4,13 +4,17 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
+import { deriveGoToolchainConstraints } from './artifacts.ts';
 import * as _artifactsExtra from './artifacts-extra.ts';
 import * as gomod from './index.ts';
 
@@ -54,12 +58,13 @@ const gomod1 = codeBlock`
   )
 `;
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {
@@ -78,7 +83,7 @@ const goEnv = {
 
 describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
-    delete process.env.GOPATH;
+    vi.stubEnv('GOPATH', undefined);
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
@@ -825,6 +830,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -835,11 +841,11 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {},
@@ -979,6 +985,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1002,11 +1009,11 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -1491,6 +1498,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1501,7 +1509,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1509,7 +1517,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy' +
           ' && ' +
           'go mod tidy' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1555,6 +1563,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1565,7 +1574,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1573,7 +1582,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy -compat=1.17' +
           ' && ' +
           'go mod tidy -compat=1.17' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1619,6 +1628,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1629,7 +1639,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1637,7 +1647,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy -compat=1.17 -e' +
           ' && ' +
           'go mod tidy -compat=1.17 -e' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1683,6 +1693,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -1693,7 +1704,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1701,7 +1712,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy -e' +
           ' && ' +
           'go mod tidy -e' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1777,6 +1788,58 @@ describe('modules/manager/gomod/artifacts', () => {
       },
       {
         cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('quotes a depName containing shell metacharacters when updating import paths', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', 'main.go'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [
+        // depName as it would be parsed from an attacker-controlled `require`
+        // line in go.mod
+        { depName: 'github.com/foo;id', newVersion: 'v28.0.0' },
+      ],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        updateType: 'major',
+        postUpdateOptions: ['gomodUpdateImportPaths'],
+      },
+    });
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: "mod upgrade --mod-name='github.com/foo;id' -t=28",
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -2351,6 +2414,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -2361,7 +2425,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -t ./...' +
@@ -2373,7 +2437,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy ' +
           '&& ' +
           'go mod tidy' +
-          '"',
+          "'",
       },
     ];
     expect(execSnapshots).toMatchObject(expectedResult);
@@ -2549,6 +2613,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e GOPROXY ' +
           '-e GOPRIVATE ' +
           '-e GONOPROXY ' +
@@ -2559,7 +2624,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -2571,7 +2636,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy ' +
           '&& ' +
           'go mod tidy' +
-          '"',
+          "'",
       },
     ];
     expect(execSnapshots).toMatchObject(expectedResult);
@@ -2829,5 +2894,52 @@ describe('modules/manager/gomod/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
+  });
+
+  describe('deriveGoToolchainConstraints', () => {
+    it('returns config constraint when set', () => {
+      expect(
+        deriveGoToolchainConstraints({ constraints: { go: '1.21' } }, ''),
+      ).toBe('1.21');
+    });
+
+    it('config constraint takes precedence over go.mod content', () => {
+      expect(
+        deriveGoToolchainConstraints(
+          { constraints: { go: '1.20' } },
+          'go 1.23.5',
+        ),
+      ).toBe('1.20');
+    });
+
+    it('returns toolchain version when toolchain directive is present', () => {
+      expect(
+        deriveGoToolchainConstraints({}, 'go 1.13\ntoolchain go1.23.6'),
+      ).toBe('1.23.6');
+    });
+
+    it('returns full go version when only full go directive is present (no toolchain)', () => {
+      expect(deriveGoToolchainConstraints({}, 'go 1.23.5')).toBe('1.23.5');
+    });
+
+    it('returns range constraint for major.minor go directive', () => {
+      expect(deriveGoToolchainConstraints({}, 'go 1.17')).toBe('^1.17');
+    });
+
+    it('returns undefined when no go version in content and no config constraint', () => {
+      expect(
+        deriveGoToolchainConstraints({}, 'module example.com/foo'),
+      ).toBeUndefined();
+    });
+
+    // TODO #42601
+    it('ignores constraints.golang and falls back to go.mod content', () => {
+      expect(
+        deriveGoToolchainConstraints(
+          { constraints: { golang: '1.21' } },
+          'go 1.23.5',
+        ),
+      ).toBe('1.23.5');
+    });
   });
 });

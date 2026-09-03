@@ -14,7 +14,7 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { MAVEN_REPO } from './common.ts';
+import { MAVEN_CENTRAL_URLS, MAVEN_REPO } from './common.ts';
 import type { MavenDependency, MetadataResults } from './types.ts';
 import {
   createUrlForDependencyPom,
@@ -26,7 +26,7 @@ import {
 } from './util.ts';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!releases?.length) {
     return null;
   }
@@ -106,13 +106,26 @@ export class MavenDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
 
     const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
+
+    if (
+      // groupId
+      (packageName.includes('.gradle.plugin:') ||
+        // artifactId
+        packageName.endsWith('.gradle.plugin')) &&
+      MAVEN_CENTRAL_URLS.some((url) => repoUrl === ensureTrailingSlash(url))
+    ) {
+      logger.debug(
+        `Maven: skipping Maven Central for suspected Gradle plugin "${packageName}"`,
+      );
+      return null;
+    }
 
     logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 

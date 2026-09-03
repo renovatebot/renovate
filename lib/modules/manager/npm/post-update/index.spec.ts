@@ -51,7 +51,7 @@ describe('modules/manager/npm/post-update/index', () => {
       {
         packageFile: 'packages/pnpm/package.json',
         managerData: {
-          pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
+          pnpmLockFile: 'packages/pnpm/pnpm-lock.yaml',
         },
       },
     ],
@@ -160,7 +160,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         npmLockDirs: ['package-lock.json', 'randomFolder/package-lock.json'],
-        pnpmShrinkwrapDirs: ['packages/pnpm/pnpm-lock.yaml'],
+        pnpmLockFileDirs: ['packages/pnpm/pnpm-lock.yaml'],
         yarnLockDirs: ['yarn.lock'],
       });
     });
@@ -183,7 +183,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         npmLockDirs: [],
-        pnpmShrinkwrapDirs: [],
+        pnpmLockFileDirs: [],
         yarnLockDirs: ['yarn.lock'],
       });
     });
@@ -341,8 +341,8 @@ describe('modules/manager/npm/post-update/index', () => {
         oldYarnrcYml,
       );
       expect(git.getFile).not.toHaveBeenCalled();
-      expect(existingYarnrcYmlContent).toMatchSnapshot();
-      expect(updatedArtifacts).toMatchSnapshot();
+      expect(existingYarnrcYmlContent).toMatchSnapshot('existing yarnrc.yml');
+      expect(updatedArtifacts).toMatchSnapshot('updatedArtifacts');
     });
 
     it("should not update the Yarn binary if the old .yarnrc.yml doesn't exist", async () => {
@@ -360,7 +360,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it("should not update the Yarn binary if the new .yarnrc.yml doesn't exist", async () => {
       git.getFile.mockResolvedValueOnce(oldYarnrcYml);
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const updatedArtifacts: FileChange[] = [];
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
@@ -372,7 +372,7 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it("should return existing .yarnrc.yml if the new one doesn't exist", async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const updatedArtifacts: FileChange[] = [];
       const existingYarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
@@ -421,6 +421,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -440,6 +441,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [
           {
             type: 'addition',
@@ -456,6 +458,36 @@ describe('modules/manager/npm/post-update/index', () => {
         ['randomFolder/.npmrc'],
         ['packages/pnpm/.npmrc'],
       ]);
+    });
+
+    it('adds artifact notice on beforeFallback', async () => {
+      spyNpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: '{}',
+        beforeFallback: true,
+      });
+      fs.readLocalFile.mockImplementation((f): Promise<string> => {
+        if (f === '.npmrc') {
+          return Promise.resolve('# dummy');
+        }
+        return Promise.resolve('');
+      });
+      const res = await getAdditionalFiles(
+        { ...updateConfig, reuseExistingBranch: true },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        {
+          file: 'package-lock.json',
+          message:
+            'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.',
+        },
+      ]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { npmLock: 'package-lock.json' },
+        'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.',
+      );
     });
 
     it('detects if lock file contents are unchanged(reuseExistingBranch=true)', async () => {
@@ -523,6 +555,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [
           {
             type: 'addition',
@@ -555,6 +588,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [
           {
             type: 'addition',
@@ -569,6 +603,7 @@ describe('modules/manager/npm/post-update/index', () => {
     it('no npm files', async () => {
       expect(await getAdditionalFiles(baseConfig, {})).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -578,6 +613,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(baseConfig, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -604,6 +640,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
       expect(spyNpm).not.toHaveBeenCalled();
@@ -625,6 +662,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -644,6 +682,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -656,6 +695,7 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactErrors: [
           { fileName: 'package-lock.json', stderr: 'some-error' },
         ],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -669,6 +709,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [{ fileName: 'yarn.lock', stderr: 'some-error' }],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -692,6 +733,7 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactErrors: [
           { fileName: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -773,7 +815,7 @@ describe('modules/manager/npm/post-update/index', () => {
             },
             additionalFiles,
           ),
-        ).rejects.toThrow();
+        ).rejects.toThrow(Error);
 
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),

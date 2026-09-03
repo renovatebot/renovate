@@ -14,5 +14,7 @@
   "yaml.customTags": [
     "tag:yaml.org,2002:python/name:materialx.emoji.twemoji",
     "tag:yaml.org,2002:python/name:materialx.emoji.to_svg"
-  ]
+  ],
+  "python.terminal.activateEnvironment": false,
+  "js/ts.experimental.useTsgo": true
 }

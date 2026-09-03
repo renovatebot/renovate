@@ -18,13 +18,17 @@ const bunyanFields = [
   'msg',
   'start_time',
 ];
+/**
+ * If a log contains any of these meta fields in the meta, promote them up to the log line, rather than rendering them with other meta fields.
+ *
+ * This only applies when these fields have a string value, otherwise they are treated as a regular meta field.
+ */
 const metaFields = [
   'repository',
   'baseBranch',
   'packageFile',
   'depType',
   'dependency',
-  'dependencies',
   'branch',
 ];
 
@@ -56,7 +60,7 @@ export function getMeta(rec: BunyanRecord, colorize = true): string {
     return '';
   }
   let res = rec.module ? ` [${rec.module}]` : ``;
-  const filteredMeta = metaFields.filter((elem) => rec[elem]);
+  const filteredMeta = metaFields.filter((elem) => isString(rec[elem]));
   if (!filteredMeta.length) {
     return res;
   }
@@ -77,7 +81,7 @@ export function getDetails(rec: BunyanRecord): string {
     if (
       key === 'logContext' ||
       bunyanFields.includes(key) ||
-      metaFields.includes(key)
+      (metaFields.includes(key) && isString(recFiltered[key]))
     ) {
       delete recFiltered[key];
     }
@@ -117,14 +121,9 @@ export function formatRecord(rec: BunyanRecord, colorize = true): string {
   return util.format('%s: %s%s\n%s', level, msg, meta, details);
 }
 
-export class RenovateStream extends Writable {
-  private colorize: boolean;
-  private destination: NodeJS.WritableStream;
-
-  constructor(destination: NodeJS.WritableStream, colorize = true) {
+export class PrettyStdoutStream extends Writable {
+  constructor() {
     super({ objectMode: true });
-    this.colorize = colorize;
-    this.destination = destination;
   }
 
   override _write(
@@ -132,6 +131,7 @@ export class RenovateStream extends Writable {
     _encoding: string,
     callback: (error?: Error | null) => void,
   ): void {
-    this.destination.write(formatRecord(data, this.colorize), callback);
+    process.stdout.write(formatRecord(data));
+    callback();
   }
 }

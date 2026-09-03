@@ -1,4 +1,5 @@
 import { detectPlatform } from '../../util/common.ts';
+import type { ExecError } from '../../util/exec/exec-error.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
@@ -43,4 +44,25 @@ export function applyGitSource(
     dep.currentValue = branch;
     dep.skipReason = branch ? 'git-dependency' : 'unspecified-version';
   }
+}
+
+/**
+ * Given an {@link ExecError}, retrieve the message which will be used for an {@link ArtifactError}.
+ *
+ * An `ExecError` always carries a `stderr` property, so nullish coalescing would keep an empty string and render an artifact error with no message at all.
+ *
+ */
+export function artifactErrorMessageFromExecError(
+  err: Partial<ExecError>,
+  message: string,
+): string {
+  if (err.stderr?.trim()) {
+    return err.stderr;
+  }
+
+  if (err.stdout?.trim()) {
+    return err.stdout;
+  }
+
+  return message;
 }

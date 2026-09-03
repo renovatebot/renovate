@@ -2,6 +2,7 @@ export const repoInfoQuery = `
 query($owner: String!, $name: String!, $user: String) {
   repository(owner: $owner, name: $name) {
     id
+    sshUrl
     isFork
     parent {
       nameWithOwner
@@ -14,6 +15,7 @@ query($owner: String!, $name: String!, $user: String) {
     mergeCommitAllowed
     rebaseMergeAllowed
     squashMergeAllowed
+    mergeQueue { id }
     defaultBranchRef {
       name
       target {
@@ -68,15 +70,39 @@ query(
 }
 `;
 
+export const repoMergeQueueQuery = `
+query($owner: String!, $name: String!, $branch: String!) {
+  repository(owner: $owner, name: $name) {
+    mergeQueue(branch: $branch) {
+      id
+    }
+  }
+}
+`;
+
+export const prIsInMergeQueueQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      isInMergeQueue
+    }
+  }
+}
+`;
+
 export const enableAutoMergeMutation = `
 mutation EnablePullRequestAutoMerge(
   $pullRequestId: ID!,
   $mergeMethod: PullRequestMergeMethod!,
+  $commitHeadline: String,
+  $commitBody: String,
 ) {
   enablePullRequestAutoMerge(
     input: {
       pullRequestId: $pullRequestId,
       mergeMethod: $mergeMethod,
+      commitHeadline: $commitHeadline,
+      commitBody: $commitBody,
     }
   ) {
     pullRequest {

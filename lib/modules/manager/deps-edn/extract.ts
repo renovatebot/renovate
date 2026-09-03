@@ -120,7 +120,7 @@ function resolveGitPackageFromEdnVal(
   dep.datasource = GitRefsDatasource.id;
   dep.packageName = gitUrl;
   if (isHttpUrl(gitUrl)) {
-    dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+    dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
   }
 }
 
@@ -232,7 +232,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       }
     }
   }
-  const mavenRegistries: string[] = [...Object.values(registryMap)];
+  const mavenRegistries: string[] = Object.values(registryMap);
 
   deps.push(...extractSection(data.deps, metadata, mavenRegistries));
 

@@ -1,3 +1,4 @@
+import { isNumber } from '@sindresorhus/is';
 import type { Props } from 'editorconfig';
 import { parse } from 'editorconfig';
 import upath from 'upath';
@@ -8,7 +9,7 @@ import type { IndentationType } from './indentation-type.ts';
 
 export class EditorConfig {
   public static async getCodeFormat(fileName: string): Promise<CodeFormat> {
-    const localDir = GlobalConfig.get('localDir', '');
+    const localDir = GlobalConfig.get('localDir');
     try {
       const knownProps = await parse(upath.join(localDir, fileName));
       return {
@@ -39,9 +40,9 @@ export class EditorConfig {
   }
 
   private static getIndentationSize(knownProps: Props): number | undefined {
-    const indentSize = Number(knownProps.indent_size);
+    const { indent_size: indentSize } = knownProps;
 
-    if (!Number.isNaN(indentSize) && Number.isInteger(indentSize)) {
+    if (isNumber(indentSize) && Number.isInteger(indentSize)) {
       return indentSize;
     }
 

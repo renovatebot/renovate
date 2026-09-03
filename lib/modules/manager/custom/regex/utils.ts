@@ -1,9 +1,11 @@
 import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
 import { logger } from '../../../../logger/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import * as template from '../../../../util/template/index.ts';
+import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
-import type { ValidMatchFields } from '../utils.ts';
+import type { ValidMatchFields } from '../types.ts';
 import { validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,
@@ -18,15 +20,16 @@ function updateDependency(
   value: string,
 ): void {
   switch (field) {
-    case 'registryUrl':
+    case 'registryUrl': {
       // check if URL is valid and pack inside an array
-      try {
-        const url = new URL(value).toString();
+      const url = parseUrl(value)?.toString();
+      if (url) {
         dependency.registryUrls = [url];
-      } catch {
+      } else {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }
       break;
+    }
     case 'datasource':
       dependency.datasource = migrateDatasource(value);
       break;
@@ -45,7 +48,7 @@ export function createDependency(
   packageFileInfo: PackageFileInfo,
   dep?: PackageDependency,
 ): PackageDependency | null {
-  const dependency = dep ?? {};
+  const dependency = coerceObject(dep);
   const { groups, replaceString } = extractionTemplate;
   const { packageFileName, packageFileDir } = packageFileInfo;
 

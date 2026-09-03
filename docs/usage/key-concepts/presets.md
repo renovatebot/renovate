@@ -3,15 +3,18 @@ title: Presets
 description: Learn about Renovate configuration presets
 ---
 
-This document describes Renovate configuration presets and why you should use them.
+Renovate presets are reusable bits of configuration, stored in JSON, JSON5 or JSONC format.
 
-To learn how to create your own presets, how to host them, and how to extend from presets read the [Shareable Config Presets](../config-presets.md) page.
+Presets that are included with Renovate are referenced by their name, like [`:dependencyDashboard`](../presets-default.md#dependencydashboard) and [`security:minimumReleaseAgeNpm`](../presets-security.md#securityminimumreleaseagenpm).
+
+Custom presets are referenced by repository location.
+To learn how to create and host them, read the [Shareable Config Presets](../config-presets.md) page.
 
 ## Why you should use presets
 
 Use presets to:
 
-- Set up the bot with good default settings
+- Set up Renovate with good default settings
 - Avoid duplicating your configuration
 - Share your configuration with others
 - Use somebody else's configuration as-is, or extend it with your own rules
@@ -30,9 +33,8 @@ Then you add the preset to the `"extends"` array in your Renovate configuration 
 
 In the example above, Renovate follows the rules from the `config:recommended` preset, plus the rules for `helpers:pinGitHubActionDigests`.
 
-<!-- prettier-ignore -->
 !!! tip
-    If there is a logical conflict between presets, then the _last_ preset in the `"extends"` array "wins".
+  If there is a logical conflict between presets, then the _last_ preset in the `"extends"` array "wins".
 
 ## Managing config for many repositories
 

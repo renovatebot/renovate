@@ -2,6 +2,7 @@ import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
 import type { PackageFile } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { getNpmLock } from '../npm.ts';
@@ -9,7 +10,7 @@ import { getPnpmLock } from '../pnpm.ts';
 import type { LockFile } from '../types.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../yarn.ts';
 
-const pnpmCatalogDepTypeRe = /pnpm\.catalog\.(?<version>.*)/;
+const pnpmCatalogDepTypeRe = regEx(/pnpm\.catalog\.(?<version>.*)/);
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[],
@@ -18,7 +19,7 @@ export async function getLockedVersions(
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { managerData = {} } = packageFile;
-    const { yarnLock, npmLock, pnpmShrinkwrap } = managerData;
+    const { yarnLock, npmLock, pnpmLockFile } = managerData;
     const lockFiles: string[] = [];
     if (yarnLock) {
       logger.trace('Found yarnLock');
@@ -55,9 +56,9 @@ export async function getLockedVersions(
       logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
-        logger.trace('Retrieving/parsing ' + npmLock);
+        logger.trace(`Retrieving/parsing ${npmLock}`);
         const cache = await getNpmLock(npmLock);
-        /* v8 ignore next 4 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!cache) {
           logger.warn({ npmLock }, 'Npm: unable to get lockfile');
           return;
@@ -73,7 +74,7 @@ export async function getLockedVersions(
           if (
             semver.satisfies('6.14.18', packageFile.extractedConstraints.npm)
           ) {
-            npm = packageFile.extractedConstraints.npm + ' <7';
+            npm = `${packageFile.extractedConstraints.npm} <7`;
           }
         } else {
           npm = '<7';
@@ -84,7 +85,7 @@ export async function getLockedVersions(
           if (
             semver.satisfies('8.19.3', packageFile.extractedConstraints.npm)
           ) {
-            npm = packageFile.extractedConstraints.npm + ' <9';
+            npm = `${packageFile.extractedConstraints.npm} <9`;
           }
         } else {
           npm = '<9';
@@ -129,16 +130,16 @@ export async function getLockedVersions(
           lockFileCache[npmLock].lockedVersions?.[lockedDepName],
         )!;
       }
-    } else if (pnpmShrinkwrap) {
+    } else if (pnpmLockFile) {
       logger.debug('Found pnpm lock-file');
-      lockFiles.push(pnpmShrinkwrap);
-      if (!lockFileCache[pnpmShrinkwrap]) {
-        logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
-        lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
+      lockFiles.push(pnpmLockFile);
+      if (!lockFileCache[pnpmLockFile]) {
+        logger.trace(`Retrieving/parsing ${pnpmLockFile}`);
+        lockFileCache[pnpmLockFile] = await getPnpmLock(pnpmLockFile);
       }
 
       const packageDir = upath.dirname(packageFile.packageFile);
-      const pnpmRootDir = upath.dirname(pnpmShrinkwrap);
+      const pnpmRootDir = upath.dirname(pnpmLockFile);
       const relativeDir = upath.relative(pnpmRootDir, packageDir) || '.';
 
       for (const dep of packageFile.deps) {
@@ -149,7 +150,7 @@ export async function getLockedVersions(
 
         if (catalogName) {
           const lockedVersion = semver.valid(
-            lockFileCache[pnpmShrinkwrap].lockedVersionsWithCatalog?.[
+            lockFileCache[pnpmLockFile].lockedVersionsWithCatalog?.[
               catalogName
             ]?.[depName!],
           );
@@ -161,9 +162,9 @@ export async function getLockedVersions(
         } else {
           // TODO: types (#22198)
           const lockedVersion = semver.valid(
-            lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[
-              relativeDir
-            ]?.[depType!]?.[depName!],
+            lockFileCache[pnpmLockFile].lockedVersionsWithPath?.[relativeDir]?.[
+              depType!
+            ]?.[depName!],
           );
 
           // v8 ignore else -- TODO: add test #40625

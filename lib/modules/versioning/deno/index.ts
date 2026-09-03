@@ -5,7 +5,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'deno';
 export const displayName = 'deno';
 export const urls = [
-  'https://docs.deno.com/runtime/fundamentals/modules/#package-versions',
+  '[Deno - Package versions](https://docs.deno.com/runtime/fundamentals/modules/#package-versions)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [

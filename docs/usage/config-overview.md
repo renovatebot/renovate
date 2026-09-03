@@ -21,9 +21,8 @@ Renovate reads the configuration files in this order (from top to bottom):
 Items with a higher number override items that have lower numbers.
 If the item has the `mergeable` property, it will merge with lower numbers instead.
 
-<!-- prettier-ignore -->
 !!! note
-    If you use a Mend-hosted app, please read [Mend-hosted Apps Configuration](mend-hosted/hosted-apps-config.md) _after_ reading this page.
+  If you use a Mend-hosted app, please read [Mend-hosted Apps Configuration](mend-hosted/hosted-apps-config.md) _after_ reading this page.
 
 ## Types of config
 
@@ -42,9 +41,12 @@ The default config is loaded first, and may be superseded/overridden by the conf
 
 ### Global config
 
-Global config means: the config defined by the person or team responsible for running the bot.
-This is also referred to as "bot config", because it's the config passed to the bot by the person running it.
+Global config means: the config defined by the person or team responsible for running the deployment of Renovate.
+
 Global config can contain config which is "global only" as well as any configuration options which are valid in Inherited config or Repository config.
+
+Previously, this may have been referred to as "bot config", because it is the config passed to Renovate by the person running it.
+We no longer use "bot" terminology, so it is now called "global self-hosted configuration".
 
 If you are an end user of Renovate, for example if you're using the Mend Renovate App, then you don't need to care as much about any global config.
 As a end-user you can not change some settings because those settings are global-only.
@@ -78,9 +80,8 @@ If the file is found but cannot be parsed then Renovate will also error and exit
 Global config files can be `.js` or `.json` files.
 You may use synchronous or asynchronous methods inside a `.js` file, including even to fetch config information from remote hosts.
 
-<!-- prettier-ignore -->
 !!! warning
-    Do not name the additional config file `config.js` as it is reserved for file config.
+  Do not name the additional config file `config.js` as it is reserved for file config.
 
 #### Environment config
 
@@ -98,10 +99,9 @@ Any additional Environment config variables take precedence over values in `RENO
 
 ##### Environment variable examples
 
-<!-- prettier-ignore -->
 !!! warning
-    Make sure to escape any punctuation.
-    Be extra careful if you're passing stringified values.
+  Make sure to escape any punctuation.
+  Be extra careful if you're passing stringified values.
 
 Boolean:
 
@@ -125,9 +125,8 @@ Objects, or lists with objects:
 - `RENOVATE_CONFIG="{platform\":\"gitlab\",\"onboarding\":false}"`
 - `RENOVATE_PACKAGE_RULES="[{matchHost:\"gitlab\",token:\"$SOME_TOKEN\"}]"`
 
-<!-- prettier-ignore -->
 !!! tip
-    Use "stringify" ([Example online service](https://jsonformatter.org/json-stringify-online)) for strings and objects.
+  Use "stringify" ([Example online service](https://jsonformatter.org/json-stringify-online)) for strings and objects.
 
 ##### Experimental variables
 
@@ -250,14 +249,13 @@ Your `renovate.js` where you run Renovate cannot contain any `extends` definitio
 
 ```js
 module.exports = {
-    ...
-    onboardingConfig: {
-      "argocd": {
-        "fileMatch": [
-          "application\\.yaml$"
-        ]
-      },
-    };
+  // ...
+  onboardingConfig: {
+    argocd: {
+      managerFilePatterns: ['application\\.yaml$'],
+    },
+  },
+};
 ```
 
 The resulting onboarding config will be:
@@ -274,9 +272,8 @@ Alternatively if you follow Renovate's naming convention for shared presets then
 If the repository `{{parentOrg}}/renovate-config` has a `default.json` file then this will be treated as the organization's default preset and included in the Onboarding config.
 Additionally for platforms which support nested Organization/Group hierarchies, Renovate will "hunt" up such hierarchies for a `renovate-config` repository with default config and stop when it finds the first.
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate will also check for a `renovate.json` file if it cannot find a `default.json` file in a preset, however this option is deprecated and not recommended.
+  Renovate will also check for a `renovate.json` file if it cannot find a `default.json` file in a preset, however this option is deprecated and not recommended.
 
 If a default config is not found in a `renovate-config` repository within the Organization, Renovate will also check for the presence of a `renovate-config.json` file within a `.{{platform}}` repository parallel to the current repository.
 For example if the repository being onboarded is `abc/def` on a GitHub platform then Renovate will look for the existence of an `abc/.github` repository containing a `renovate-config.json` file.

@@ -119,7 +119,7 @@ export function poetry2npm(input: string, throwOnUnsupported = false): string {
   const transformed = chunks
     .map((chunk) => poetry2semver(chunk, false) ?? chunk)
     .join('')
-    .replace(/===/, '=');
+    .replace(regEx(/===/), '=');
   if (throwOnUnsupported) {
     const isUnsupported = transformed
       .split(regEx(/\s+/))
@@ -155,9 +155,9 @@ export function npm2poetry(range: string): string {
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
     if (operators.includes(res[i])) {
-      const newValue = res[i] + ' ' + res[i + 1];
+      const newValue = `${res[i]} ${res[i + 1]}`;
       res.splice(i, 2, newValue);
     }
   }
-  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/g, ' || ');
+  return res.join(', ').replace(regEx(/\s*,?\s*\|\|\s*,?\s*/g), ' || ');
 }

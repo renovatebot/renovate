@@ -1,5 +1,5 @@
 import { Marshal } from '@qnighy/marshal';
-import type { ZodError } from 'zod/v3';
+import type { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
@@ -57,7 +57,7 @@ export class RubygemsDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

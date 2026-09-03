@@ -13,12 +13,14 @@ import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
   WORKER_FILE_UPDATE_FAILED,
 } from '../../../../constants/error-messages.ts';
 import { logger, removeMeta } from '../../../../logger/index.ts';
+import { updateActionsLockfile } from '../../../../modules/manager/github-actions/artifacts.ts';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
 import {
   ensureComment,
@@ -28,8 +30,10 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { getElapsedMs } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
+import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -60,7 +64,6 @@ import { isScheduledNow } from './schedule.ts';
 import { setConfidence, setStability } from './status-checks.ts';
 
 async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
-  await setArtifactErrorStatus(config);
   await setStability(config);
   await setConfidence(config);
 }
@@ -147,6 +150,7 @@ export async function processBranch(
       config.branchPrefixOld!,
     );
     branchExists = await scm.branchExists(branchName);
+    // v8 ignore else -- TODO: add test #40625
     if (branchExists) {
       config.branchName = branchName;
       logger.debug('Found existing branch with branchPrefixOld');
@@ -246,11 +250,11 @@ export async function processBranch(
       `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}, Hourly Commit Count: ${getCount('HourlyCommits')}`,
     );
 
+    // for a vulnerability alert this checks the VulnerabilityBranches count
     if (
       !branchExists &&
       isLimitReached('Branches', branchConfig) &&
-      !dependencyDashboardCheck &&
-      !config.isVulnerabilityAlert
+      !dependencyDashboardCheck
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
       return {
@@ -259,7 +263,7 @@ export async function processBranch(
       };
     }
     if (
-      !branchConfig.rebaseRequested &&
+      !config.rebaseRequested &&
       isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
@@ -272,7 +276,7 @@ export async function processBranch(
       };
     }
     if (
-      !branchConfig.rebaseRequested &&
+      !config.rebaseRequested &&
       isLimitReached('HourlyCommits', branchConfig) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
@@ -340,7 +344,7 @@ export async function processBranch(
             };
           }
         }
-      } else if (branchIsModified) {
+      } else if (branchIsModified && !dependencyDashboardCheck) {
         const oldPr = await platform.findPr({
           branchName: config.branchName,
           state: '!open',
@@ -624,11 +628,25 @@ export async function processBranch(
         config,
         branchConfig.packageFiles!,
       );
-      config.artifactErrors = (config.artifactErrors ?? []).concat(
+      config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );
-      config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
+      config.artifactNotices = coerceArray(config.artifactNotices).concat(
+        coerceArray(additionalFiles.artifactNotices),
+      );
+      config.updatedArtifacts = coerceArray(config.updatedArtifacts).concat(
         additionalFiles.updatedArtifacts,
+      );
+      // `gh actions-lock` rewrites the whole lockfile from the workflows on disk, so like the lock files above it runs once here, after every updated package file has been written, rather than per package file.
+      const actionsLockfile = await updateActionsLockfile(
+        config,
+        branchConfig.packageFiles,
+      );
+      config.artifactErrors = config.artifactErrors.concat(
+        actionsLockfile.artifactErrors,
+      );
+      config.updatedArtifacts = config.updatedArtifacts.concat(
+        actionsLockfile.updatedArtifacts,
       );
       if (config.updatedArtifacts?.length) {
         logger.debug(
@@ -670,7 +688,7 @@ export async function processBranch(
 
       if (config.artifactErrors?.length) {
         if (config.releaseTimestamp) {
-          logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
+          logger.debug(`Branch timestamp: ${config.releaseTimestamp}`);
           const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
           if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {
             logger.debug(
@@ -703,6 +721,7 @@ export async function processBranch(
             topic: artifactErrorTopic,
           });
 
+          // v8 ignore else -- TODO: add test #40625
           if (!config.artifactNotices?.length) {
             await ensureCommentRemoval({
               type: 'by-topic',
@@ -731,7 +750,19 @@ export async function processBranch(
           },
         )}`;
 
-        logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
+        logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
+      }
+
+      if (config.commitTrailers) {
+        // Template expansions can produce broken trailers
+        config.commitTrailers = filterValidCommitTrailers(
+          config.commitTrailers.map((trailer) =>
+            template.compile(trailer, config),
+          ),
+        );
+        logger.trace(
+          `commitTrailers: ${JSON.stringify(config.commitTrailers)}`,
+        );
       }
 
       commitSha = await commitFilesToBranch(config);
@@ -739,6 +770,12 @@ export async function processBranch(
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
       await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
+
+      // only update artifact status if branch was updated
+      // also do before platform automerge reattempt
+      if (commitSha) {
+        await setArtifactErrorStatus(config);
+      }
     }
 
     if (branchPr) {
@@ -759,6 +796,7 @@ export async function processBranch(
           });
         }
       }
+      // v8 ignore else -- TODO: add test #40625
       if (platform.refreshPr) {
         await platform.refreshPr(branchPr.number);
       }
@@ -801,7 +839,7 @@ export async function processBranch(
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
-          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+          logger.info(`DRY-RUN: Would delete branch${config.branchName}`);
         } else {
           await deleteBranchSilently(config.branchName);
         }
@@ -888,6 +926,15 @@ export async function processBranch(
     if (err.message === MANAGER_LOCKFILE_ERROR) {
       logger.debug('Passing lockfile-error up');
       throw err;
+    }
+    if (err.message === PR_ALREADY_IN_MERGE_QUEUE) {
+      logger.debug('Branch PR is in the merge queue - skipping branch update');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'done',
+        commitSha,
+      };
     }
     /* v8 ignore if -- needs test */
     if (err.message?.includes('space left on device')) {
@@ -998,6 +1045,7 @@ export async function processBranch(
         commitSha,
       };
     }
+    // v8 ignore else -- TODO: add test #40625
     if (ensurePrResult.type === 'with-pr') {
       const { pr } = ensurePrResult;
       branchPr = pr;
@@ -1006,6 +1054,11 @@ export async function processBranch(
       // associate the status with. The earlier call may have been
       // skipped if no pipeline existed yet.
       await setBranchStatusChecks(config);
+
+      // only update artifact status if branch was updated
+      if (commitSha) {
+        await setArtifactErrorStatus(config);
+      }
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
@@ -1036,6 +1089,7 @@ export async function processBranch(
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content, config.rebaseLabel);
+        // v8 ignore else -- TODO: add test #40625
         if (
           !(
             config.suppressNotifications!.includes('artifactErrors') ||
@@ -1072,6 +1126,7 @@ export async function processBranch(
         if (config.automerge) {
           logger.debug('PR is configured for automerge');
           // skip automerge if there is a new commit since status checks aren't done yet
+          // v8 ignore else -- TODO: add test #40625
           if (config.ignoreTests === true || !commitSha) {
             logger.debug('checking auto-merge');
             const prAutomergeResult = await checkAutoMerge(pr, config);

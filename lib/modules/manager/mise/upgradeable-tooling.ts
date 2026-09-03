@@ -1,3 +1,5 @@
+import miseRegistry from '../../../data/mise-registry.json' with { type: 'json' };
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -6,16 +8,13 @@ import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
-
-export interface ToolingDefinition {
-  config: ToolingConfig;
-  misePluginUrl?: string;
-}
+import { MiseRegistryJson } from './schema.ts';
+import type { MiseRegistryData, ToolingDefinition } from './types.ts';
 
 export const asdfTooling = upgradeableTooling;
 
@@ -175,8 +174,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
   rust: {
     misePluginUrl: 'https://mise.jdx.dev/lang/rust.html',
     config: {
-      packageName: 'rust-lang/rust',
-      datasource: GithubTagsDatasource.id,
+      packageName: 'rust',
+      datasource: RustVersionDatasource.id,
     },
   },
   swift: {
@@ -326,7 +325,9 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
   kafka: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: (version) => {
-      const apacheMatches = /^apache-(?<version>\d\S+)/.exec(version)?.groups;
+      const apacheMatches = regEx(/^apache-(?<version>\d\S+)/).exec(
+        version,
+      )?.groups;
       if (apacheMatches) {
         return {
           datasource: GithubTagsDatasource.id,
@@ -563,3 +564,13 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   ...miseCoreTooling,
   ...miseRegistryTooling,
 };
+
+export const parsedMiseRegistry: MiseRegistryData = Object.freeze(
+  MiseRegistryJson.parse(miseRegistry),
+);
+
+export function getOrderedMiseRegistryBackends(
+  toolName: string,
+): Record<string, string> {
+  return coerceObject(parsedMiseRegistry.tools[toolName]);
+}
