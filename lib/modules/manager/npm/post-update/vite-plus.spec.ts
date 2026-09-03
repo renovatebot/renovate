@@ -28,6 +28,12 @@ function packageJson(vitePlus: string, coverage: string): string {
   )}\n`;
 }
 
+function aliasedPackageJson(vitePlus: string, vite: string): string {
+  return `${JSON.stringify({
+    devDependencies: { 'vite-plus': vitePlus, vite },
+  })}\n`;
+}
+
 function packageFiles(): AdditionalPackageFiles {
   return {
     npm: [
@@ -151,9 +157,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     expect(execMock).toHaveBeenCalledOnce();
     const [commands, options] = execMock.mock.calls[0];
     const execOptions = options!;
-    expect(commands).toEqual([
-      { command: ['vp', 'sync-versions', '--plan-json'] },
-    ]);
+    expect(commands).toEqual([{ command: ['vp', 'sync-versions', '--json'] }]);
     expect(execOptions).toMatchObject({
       docker: {},
       maxBuffer: 33 * 1024 * 1024,
@@ -318,6 +322,74 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     expect(
       additionContents(updateConfig.updatedArtifacts?.[0] as FileAddition),
     ).toBe(alignedWorkspace);
+  });
+
+  it('reconciles Yarn catalogs and managed npm aliases', async () => {
+    const basePackage = packageJson('0.2.0', 'catalog:vite-plus');
+    const proposedPackage = packageJson('0.3.0', 'catalog:vite-plus');
+    const baseYarnRc =
+      "catalogs:\n  vite-plus:\n    vite: 'npm:@voidzero-dev/vite-plus-core@0.2.0'\n    '@vitest/coverage-v8': 4.0.0\n";
+    const alignedYarnRc = baseYarnRc
+      .replace('vite-plus-core@0.2.0', 'vite-plus-core@0.3.0')
+      .replace('4.0.0', '4.1.11');
+    const updateConfig = config(proposedPackage);
+    updateConfig.upgrades[0].managerData = { yarnLock: 'yarn.lock' };
+    updateConfig.upgrades.push({
+      depName: 'vite',
+      packageName: '@voidzero-dev/vite-plus-core',
+      packageFile: '.yarnrc.yml',
+      currentVersion: '0.2.0',
+      currentValue: '0.2.0',
+      newVersion: '0.4.0',
+      newValue: '0.4.0',
+      npmPackageAlias: true,
+      managerData: { yarnLock: 'yarn.lock' },
+    });
+    const files = packageFiles();
+    files.npm![0].managerData = { yarnLock: 'yarn.lock' };
+    files.npm!.push({
+      packageFile: '.yarnrc.yml',
+      managerData: { yarnLock: 'yarn.lock' },
+      deps: [
+        {
+          depName: 'vite',
+          packageName: '@voidzero-dev/vite-plus-core',
+          currentVersion: '0.2.0',
+          currentValue: '0.2.0',
+          lockedVersion: '0.2.0',
+          npmPackageAlias: true,
+        },
+      ],
+    });
+    mockFiles({
+      '.yarnrc.yml': baseYarnRc,
+      'package.json': basePackage,
+    });
+    mockPlan((request) => {
+      expect(request.manifests).toEqual([
+        { path: '.yarnrc.yml', kind: 'yarnRc', contents: baseYarnRc },
+        {
+          path: 'package.json',
+          kind: 'packageJson',
+          contents: proposedPackage,
+        },
+      ]);
+      return validPlan(request, alignedYarnRc, '.yarnrc.yml');
+    });
+
+    await reconcileVitePlusVersions(updateConfig, files);
+
+    expect(
+      additionContents(updateConfig.updatedPackageFiles?.[1] as FileAddition),
+    ).toBe(alignedYarnRc);
+    expect(updateConfig.upgrades[1]).toMatchObject({
+      depName: 'vite',
+      packageName: '@voidzero-dev/vite-plus-core',
+      newVersion: '0.3.0',
+      newValue: '0.3.0',
+      displayTo: '0.3.0',
+      updateType: 'minor',
+    });
   });
 
   it('adds a planner replacement when Renovate has no existing addition', async () => {
@@ -517,6 +589,69 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     ).rejects.toThrow('unsupported manifest change at name');
   });
 
+  it.each([
+    {
+      name: 'introduces an alias',
+      before: '0.2.0',
+      after: 'npm:@voidzero-dev/vite-plus-core@0.3.0',
+    },
+    {
+      name: 'removes an alias',
+      before: 'npm:@voidzero-dev/vite-plus-core@0.2.0',
+      after: '0.3.0',
+    },
+    {
+      name: 'changes the alias target',
+      before: 'npm:@voidzero-dev/vite-plus-core@0.2.0',
+      after: 'npm:vite@0.3.0',
+    },
+    {
+      name: 'updates an unmanaged alias',
+      before: 'npm:vite@7.0.0',
+      after: 'npm:vite@7.1.0',
+    },
+    {
+      name: 'uses a non-version alias target',
+      before: 'npm:@voidzero-dev/vite-plus-core@0.2.0',
+      after: 'npm:@voidzero-dev/vite-plus-core@latest',
+    },
+  ])('rejects a plan that $name', async ({ before, after }) => {
+    const base = aliasedPackageJson('0.2.0', before);
+    const proposed = aliasedPackageJson('0.3.0', before);
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': base });
+    mockPlan((request) =>
+      validPlan(request, aliasedPackageJson('0.3.0', after)),
+    );
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toThrow('unsupported manifest change at devDependencies.vite');
+  });
+
+  it('rejects an unexpected version inside a managed npm alias', async () => {
+    const base = aliasedPackageJson(
+      '0.2.0',
+      'npm:@voidzero-dev/vite-plus-core@0.2.0',
+    );
+    const proposed = aliasedPackageJson(
+      '0.3.0',
+      'npm:@voidzero-dev/vite-plus-core@0.2.0',
+    );
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': base });
+    mockPlan((request) =>
+      validPlan(
+        request,
+        aliasedPackageJson('0.3.0', 'npm:@voidzero-dev/vite-plus-core@0.4.0'),
+      ),
+    );
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toThrow('unexpected Vite+ version');
+  });
+
   it('rejects a change to an existing non-dependency YAML field', async () => {
     const basePackage = packageJson('0.3.0', 'catalog:');
     const workspace =
@@ -541,6 +676,38 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     await expect(
       reconcileVitePlusVersions(updateConfig, files),
     ).rejects.toThrow('unsupported manifest change at packages');
+  });
+
+  it('rejects a change to a non-catalog Yarn setting', async () => {
+    const basePackage = packageJson('0.3.0', 'catalog:');
+    const yarnRc = 'nodeLinker: pnp\ncatalog:\n  vitest: 4.0.0\n';
+    const updateConfig = config(basePackage, 'vitest', '4.1.11');
+    updateConfig.updatedPackageFiles = [];
+    updateConfig.upgrades[0].managerData = { yarnLock: 'yarn.lock' };
+    const files = packageFiles();
+    files.npm![0].managerData = { yarnLock: 'yarn.lock' };
+    files.npm![0].deps![0].currentVersion = '0.3.0';
+    files.npm![0].deps![0].lockedVersion = '0.3.0';
+    files.npm!.push({
+      packageFile: '.yarnrc.yml',
+      managerData: { yarnLock: 'yarn.lock' },
+      deps: [],
+    });
+    mockFiles({
+      '.yarnrc.yml': yarnRc,
+      'package.json': basePackage,
+    });
+    mockPlan((request) =>
+      validPlan(
+        request,
+        yarnRc.replace('nodeLinker: pnp', 'nodeLinker: node-modules'),
+        '.yarnrc.yml',
+      ),
+    );
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, files),
+    ).rejects.toThrow('unsupported manifest change at nodeLinker');
   });
 
   it('rejects inconsistent Vitest ecosystem versions', async () => {
