@@ -10,6 +10,8 @@ import {
 } from './common.ts';
 
 export class RpmXmlMetadataProvider {
+  readonly metadataType = 'primary' as const;
+
   private readonly http: Http;
 
   constructor(http: Http) {
