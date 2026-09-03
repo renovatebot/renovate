@@ -7,6 +7,7 @@ import { readLocalFile } from '../../../../util/fs/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
+import { safeStringify } from '../../../../util/stringify.ts';
 import { compile } from '../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { getFilteredFileList } from '../../extract/file-match.ts';
@@ -60,7 +61,7 @@ function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
   const bumpVersions: BumpVersionConfig[] = [];
   for (const upgrade of config.upgrades ?? []) {
     for (const bumpVersionConfig of upgrade.bumpVersions ?? []) {
-      const key = JSON.stringify(bumpVersionConfig);
+      const key = safeStringify(bumpVersionConfig);
       if (!seen.has(key)) {
         seen.add(key);
         bumpVersions.push(bumpVersionConfig);
