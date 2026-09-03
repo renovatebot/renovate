@@ -34,8 +34,26 @@ describe('modules/datasource/artifactory/index', () => {
         packageName: testLookupName,
       });
       expect(res?.releases).toHaveLength(4);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
         registryUrl: 'https://jfrog.company.com/artifactory',
+        releases: [
+          {
+            releaseTimestamp: '2021-07-21T20:08:00.000Z',
+            version: '1.0.0',
+          },
+          {
+            releaseTimestamp: '2021-08-23T20:03:00.000Z',
+            version: '1.0.1',
+          },
+          {
+            releaseTimestamp: '2021-07-21T20:09:00.000Z',
+            version: '1.0.2',
+          },
+          {
+            releaseTimestamp: '2021-02-06T09:54:00.000Z',
+            version: '1.0.3',
+          },
+        ],
       });
     });
 
@@ -50,8 +68,26 @@ describe('modules/datasource/artifactory/index', () => {
         packageName: testLookupName,
       });
       expect(res?.releases).toHaveLength(4);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
         registryUrl: 'https://jfrog.company.com/artifactory',
+        releases: [
+          {
+            releaseTimestamp: '2021-07-21T20:08:00.000Z',
+            version: '1.0.0',
+          },
+          {
+            releaseTimestamp: '2021-08-23T20:03:00.000Z',
+            version: '1.0.1',
+          },
+          {
+            releaseTimestamp: '2021-07-21T20:09:00.000Z',
+            version: '1.0.2',
+          },
+          {
+            releaseTimestamp: '2021-02-06T09:54:00.000Z',
+            version: '1.0.3',
+          },
+        ],
       });
     });
 
@@ -74,7 +110,34 @@ describe('modules/datasource/artifactory/index', () => {
         packageName: testLookupName,
       });
       expect(res?.releases).toHaveLength(5);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        releases: [
+          {
+            registryUrl: 'https://jfrog.company.com/artifactory',
+            releaseTimestamp: '2021-07-21T20:08:00.000Z',
+            version: '1.0.0',
+          },
+          {
+            registryUrl: 'https://jfrog.company.com/artifactory',
+            releaseTimestamp: '2021-08-23T20:03:00.000Z',
+            version: '1.0.1',
+          },
+          {
+            registryUrl: 'https://jfrog.company.com/artifactory',
+            releaseTimestamp: '2021-07-21T20:09:00.000Z',
+            version: '1.0.2',
+          },
+          {
+            registryUrl: 'https://jfrog.company.com/artifactory',
+            releaseTimestamp: '2021-02-06T09:54:00.000Z',
+            version: '1.0.3',
+          },
+          {
+            registryUrl: 'https://jfrog.company.com/artifactory/production',
+            version: '1.3.0',
+          },
+        ],
+      });
     });
 
     it('returns null without registryUrl + warning', async () => {

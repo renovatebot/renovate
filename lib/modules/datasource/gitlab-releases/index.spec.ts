@@ -25,7 +25,24 @@ describe('modules/datasource/gitlab-releases/index', () => {
         registryUrls: ['https://gitlab.company.com'],
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.company.com',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            registryUrl: 'https://gitlab.company.com',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            registryUrl: 'https://gitlab.company.com',
+            releaseTimestamp: '2021-03-01T00:00:00.000Z',
+            version: 'v1.1.0',
+          },
+        ],
+        sourceUrl: 'https://gitlab.company.com/some/dep2',
+      });
       expect(res?.releases).toHaveLength(2);
     });
 
@@ -38,7 +55,24 @@ describe('modules/datasource/gitlab-releases/index', () => {
         datasource: GitlabReleasesDatasource.id,
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.com',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            registryUrl: 'https://gitlab.com',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            registryUrl: 'https://gitlab.com',
+            releaseTimestamp: '2021-03-01T00:00:00.000Z',
+            version: 'v1.1.0',
+          },
+        ],
+        sourceUrl: 'https://gitlab.com/some/dep2',
+      });
       expect(res?.releases).toHaveLength(2);
     });
 

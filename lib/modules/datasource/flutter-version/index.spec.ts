@@ -50,7 +50,135 @@ describe('modules/datasource/flutter-version/index', () => {
         datasource,
         packageName,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          {
+            releaseTimestamp: '2021-07-27T21:03:05.871Z',
+            isStable: false,
+            version: '2.5.0-1.0.pre',
+          },
+          {
+            isStable: false,
+            version: '2.5.0-5.0.pre',
+          },
+          {
+            isStable: false,
+            version: '2.5.0-5.1.pre',
+          },
+          {
+            isStable: false,
+            version: '2.5.0-5.2.pre',
+          },
+          {
+            isStable: false,
+            version: '2.5.0-5.3.pre',
+          },
+          {
+            isStable: false,
+            version: '2.5.0-6.0.pre',
+          },
+          {
+            isStable: true,
+            version: '2.5.0',
+          },
+          {
+            isStable: true,
+            version: '2.5.1',
+          },
+          {
+            isStable: true,
+            version: '2.5.2',
+          },
+          {
+            isStable: true,
+            version: '2.5.3',
+          },
+          {
+            isStable: false,
+            version: '2.6.0-0.0.pre',
+          },
+          {
+            isStable: false,
+            version: '2.6.0-5.1.pre',
+          },
+          {
+            isStable: false,
+            version: '2.6.0-5.2.pre',
+          },
+          {
+            isStable: false,
+            version: '2.6.0-11.0.pre',
+          },
+          {
+            isStable: false,
+            version: '2.7.0-3.0.pre',
+          },
+          {
+            isStable: false,
+            version: '2.7.0-3.1.pre',
+          },
+          {
+            isStable: false,
+            version: '2.8.0-3.1.pre',
+          },
+          {
+            isStable: false,
+            version: '2.8.0-3.2.pre',
+          },
+          {
+            isStable: false,
+            version: '2.8.0-3.3.pre',
+          },
+          {
+            isStable: true,
+            version: '2.8.0',
+          },
+          {
+            isStable: true,
+            version: '2.8.1',
+          },
+          {
+            isStable: false,
+            version: '2.9.0-0.1.pre',
+          },
+          {
+            isStable: false,
+            version: '2.10.0-0.1.pre',
+          },
+          {
+            isStable: false,
+            version: '2.10.0-0.2.pre',
+          },
+          {
+            isStable: false,
+            version: '2.10.0-0.3.pre',
+          },
+          {
+            isStable: true,
+            version: '2.10.0',
+          },
+          {
+            isStable: true,
+            version: '2.10.1',
+          },
+          {
+            isStable: true,
+            version: '2.10.2',
+          },
+          {
+            isStable: true,
+            version: '2.10.3',
+          },
+          {
+            isStable: false,
+            version: '2.11.0-0.1.pre',
+          },
+          {
+            isStable: false,
+            version: '2.12.0-4.1.pre',
+          },
+        ],
+      });
       expect(res?.releases).toHaveLength(31);
     });
   });
