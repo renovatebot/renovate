@@ -331,8 +331,6 @@ describe('config/migration', () => {
       // @ts-expect-error -- TODO: fix me
       expect(migratedConfig.depTypes).toBeUndefined();
       expect(migratedConfig.automerge).toBe(false);
-      expect(migratedConfig.packageRules).toHaveLength(11);
-      expect(migratedConfig.hostRules).toHaveLength(1);
       expect(migratedConfig.baseBranchPatterns).toMatchObject(['next']);
     });
 

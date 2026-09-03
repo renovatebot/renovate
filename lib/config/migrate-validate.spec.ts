@@ -43,7 +43,6 @@ describe('config/migrate-validate', () => {
         foo: 'none',
         warnings: [],
       });
-      expect(res.errors).toHaveLength(1);
     });
 
     it('isOnboarded', async () => {

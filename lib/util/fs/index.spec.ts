@@ -382,16 +382,12 @@ describe('util/fs/index', () => {
       await writeLocalFile('test/Cargo.lock', '');
 
       const result = await readLocalDirectory('test');
-      expect(result).not.toBeNull();
-      expect(result).toBeArrayOfSize(2);
       expect(result).toEqual(['Cargo.lock', 'Cargo.toml']);
 
       await writeLocalFile('Cargo.lock', '');
       await writeLocalFile('test/subdir/Cargo.lock', '');
 
       const resultWithAdditionalFiles = await readLocalDirectory('test');
-      expect(resultWithAdditionalFiles).not.toBeNull();
-      expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
       expect(resultWithAdditionalFiles).toEqual([
         'Cargo.lock',
         'Cargo.toml',
