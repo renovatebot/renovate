@@ -259,7 +259,6 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
-      expect(res?.releases[0].version).toBe('1.14.2-2+deb10u1');
     });
 
     it('returns correct version for source package', async () => {
@@ -284,7 +283,6 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
-      expect(res?.releases[0].version).toBe('1.181');
     });
 
     it('returns correct version for api package', async () => {
@@ -306,7 +304,6 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
-      expect(res?.releases[0].version).toBe('1.181');
     });
 
     it('returns correct version for multi-package project with same name', async () => {
@@ -328,7 +325,6 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
-      expect(res?.releases[0].version).toBe('9.3.0-r2');
     });
 
     it('returns correct version for multi-package project with different name', async () => {
@@ -350,7 +346,6 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
-      expect(res?.releases[0].version).toBe('12.2-4+deb10u1');
     });
 
     it('returns multiple versions if they are present in repository', async () => {
@@ -390,8 +385,6 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
-      expect(res?.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
-      expect(res?.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
     });
 
     it('returns null for scenario when repo is not in package results', async () => {

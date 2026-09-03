@@ -2128,7 +2128,6 @@ describe('modules/datasource/nuget/index', () => {
         ],
         sourceUrl: 'https://nunit.org/',
       });
-      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) nuspec fetch 404 error', async () => {
@@ -2194,7 +2193,6 @@ describe('modules/datasource/nuget/index', () => {
         ],
         sourceUrl: 'https://nunit.org/',
       });
-      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v2)', async () => {
@@ -2394,7 +2392,6 @@ describe('modules/datasource/nuget/index', () => {
           latest: '3.12.0',
         },
       });
-      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data no release (v2)', async () => {

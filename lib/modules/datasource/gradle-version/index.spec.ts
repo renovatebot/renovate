@@ -360,9 +360,6 @@ describe('modules/datasource/gradle-version/index', () => {
           },
         ],
       });
-      expect(
-        res?.releases.filter(({ isDeprecated }) => isDeprecated),
-      ).toHaveLength(1);
     });
 
     it('calls configured registryUrls', async () => {

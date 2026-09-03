@@ -95,7 +95,6 @@ describe('modules/datasource/npm/index', () => {
       releases: [{ version: '0.0.1' }],
       sourceUrl: 'https://github.com/renovateapp/dummy',
     });
-    expect(res?.sourceUrl).toBeDefined();
   });
 
   it('should parse repo url (string)', async () => {
@@ -119,7 +118,6 @@ describe('modules/datasource/npm/index', () => {
       releases: [{ version: '0.0.1' }],
       sourceUrl: 'https://github.com/renovateapp/dummy',
     });
-    expect(res?.sourceUrl).toBeDefined();
   });
 
   it('should return deprecated', async () => {
