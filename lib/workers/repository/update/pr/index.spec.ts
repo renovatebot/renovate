@@ -897,7 +897,14 @@ describe('workers/repository/update/pr/index', () => {
         const {
           upgrades: [{ prBodyNotes }],
         } = prBody.getPrBody.mock.calls[0][0];
-        expect(prBodyNotes).toBeNonEmptyArray();
+        expect(prBodyNotes).toEqual([
+          codeBlock`
+            > ❗ **Important**
+            >
+            > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+          `,
+        ]);
       });
 
       it('removes duplicate changelogs', async () => {
