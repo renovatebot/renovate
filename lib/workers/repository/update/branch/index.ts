@@ -250,11 +250,11 @@ export async function processBranch(
       `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}, Hourly Commit Count: ${getCount('HourlyCommits')}`,
     );
 
+    // for a vulnerability alert this checks the VulnerabilityBranches count
     if (
       !branchExists &&
       isLimitReached('Branches', branchConfig) &&
-      !dependencyDashboardCheck &&
-      !config.isVulnerabilityAlert
+      !dependencyDashboardCheck
     ) {
       logger.debug('Reached branch limit - skipping branch creation');
       return {

@@ -532,10 +532,10 @@ export async function ensurePr(
       pr = { number: 0 } as never;
     } else {
       try {
+        // for a vulnerability alert this checks the VulnerabilityConcurrentPRs count
         if (
           !dependencyDashboardCheck &&
-          isLimitReached('ConcurrentPRs', prConfig) &&
-          !config.isVulnerabilityAlert
+          isLimitReached('ConcurrentPRs', prConfig)
         ) {
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
@@ -551,7 +551,11 @@ export async function ensurePr(
           milestone: config.milestone,
         });
 
-        incCountValue('ConcurrentPRs');
+        incCountValue(
+          config.isVulnerabilityAlert
+            ? 'VulnerabilityConcurrentPRs'
+            : 'ConcurrentPRs',
+        );
         incCountValue('HourlyPRs');
         logger.info(
           { pr: pr?.number, prTitle, labels: pr?.labels },

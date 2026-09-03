@@ -2389,6 +2389,7 @@ const options: Readonly<RenovateOptions>[] = [
       branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
       vulnerabilityFixStrategy: 'lowest',
+      prConcurrentLimit: 0,
     },
     mergeable: true,
     cli: false,
