@@ -72,39 +72,39 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
     });
 
     it('returns null if @types', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if currentVersion equals newVersion', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: '1.0.0',
           newVersion: '1.0.0',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('skips invalid repos', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitlab.com/help',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('works without GitLab', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject(expectedChangeLog());
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('uses GitLab tags', async () => {
@@ -125,11 +125,11 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .persist()
         .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         ...expectedChangeLog(),
         hasReleaseNotes: true,
       });
@@ -146,11 +146,11 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .persist()
         .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject(expectedChangeLog());
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('uses GitLab tags with error', async () => {
@@ -164,47 +164,47 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .persist()
         .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject(expectedChangeLog());
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('handles no sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles invalid sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'http://example.com',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles not enough releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [{ version: '0.9.0' }],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
@@ -214,12 +214,12 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         token: 'abc',
       });
       vi.stubEnv('GITHUB_ENDPOINT', '');
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
         }),
-      ).toMatchObject(
+      ).resolves.toMatchObject(
         expectedChangeLog({
           baseUrl: 'https://gitlab-enterprise.example.com/',
         }),
@@ -234,12 +234,14 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         token: 'abc',
       });
       vi.stubEnv('GITHUB_ENDPOINT', '');
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
         }),
-      ).toMatchObject(expectedChangeLog({ baseUrl: 'https://git.test.com/' }));
+      ).resolves.toMatchObject(
+        expectedChangeLog({ baseUrl: 'https://git.test.com/' }),
+      );
     });
   });
 
@@ -264,9 +266,9 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           { name: 'v5.4.0' },
           { name: 'v5.5.0' },
         ]);
-      expect(
-        await changelogSource.getAllTags('https://git.test.com/', 'some/repo'),
-      ).toEqual(['v5.2.0', 'v5.4.0', 'v5.5.0']);
+      await expect(
+        changelogSource.getAllTags('https://git.test.com/', 'some/repo'),
+      ).resolves.toEqual(['v5.2.0', 'v5.4.0', 'v5.5.0']);
     });
   });
 });

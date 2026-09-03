@@ -235,25 +235,25 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
   describe('addReleaseNotes()', () => {
     it('returns null if input is null/undefined', async () => {
-      expect(
-        await addReleaseNotes(null, partial<BranchUpgradeConfig>()),
-      ).toBeNull();
-      expect(
-        await addReleaseNotes(undefined, partial<BranchUpgradeConfig>()),
-      ).toBeNull();
+      await expect(
+        addReleaseNotes(null, partial<BranchUpgradeConfig>()),
+      ).resolves.toBeNull();
+      await expect(
+        addReleaseNotes(undefined, partial<BranchUpgradeConfig>()),
+      ).resolves.toBeNull();
     });
 
     it('returns input if invalid', async () => {
       const input = { a: 1 };
-      expect(
-        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
-      ).toEqual(input);
-      expect(
-        await addReleaseNotes(null, partial<BranchUpgradeConfig>()),
-      ).toBeNull();
-      expect(
-        await addReleaseNotes({ versions: [] }, partial<BranchUpgradeConfig>()),
-      ).toStrictEqual({ versions: [] });
+      await expect(
+        addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
+      ).resolves.toEqual(input);
+      await expect(
+        addReleaseNotes(null, partial<BranchUpgradeConfig>()),
+      ).resolves.toBeNull();
+      await expect(
+        addReleaseNotes({ versions: [] }, partial<BranchUpgradeConfig>()),
+      ).resolves.toStrictEqual({ versions: [] });
     });
 
     it('returns ChangeLogResult', async () => {
@@ -264,9 +264,9 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         versions: [{ version: '3.10.0', compare: { url: '' } }],
       };
-      expect(
-        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
-      ).toEqual({
+      await expect(
+        addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
+      ).resolves.toEqual({
         hasReleaseNotes: false,
         project: {
           repository: 'https://github.com/nodeca/js-yaml',
@@ -499,9 +499,9 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           }),
         ],
       } satisfies ChangeLogResult;
-      expect(
-        await addReleaseNotes(input, partial<BranchUpgradeConfig>()),
-      ).toEqual({
+      await expect(
+        addReleaseNotes(input, partial<BranchUpgradeConfig>()),
+      ).resolves.toEqual({
         hasReleaseNotes: false,
         project: {
           repository: 'gitlab-org/gitter/webapp',

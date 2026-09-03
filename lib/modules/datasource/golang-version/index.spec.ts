@@ -150,9 +150,9 @@ describe('modules/datasource/golang-version/index', () => {
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(404);
-      expect(
-        await getPkgReleases({ datasource, packageName: 'golang' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'golang' }),
+      ).resolves.toBeNull();
     });
 
     it('throws ExternalHostError for invalid release format beginning', async () => {

@@ -32,14 +32,14 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, '')
         .get('/api/v1/dependencies?gems=foobar')
         .reply(200, rubyMarshal([]));
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: rubyVersioning.id,
           datasource: RubygemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for rubygems.org package miss', async () => {

@@ -9,7 +9,7 @@ import type { ParseConfigOptions } from './types.ts';
 describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', async () => {
-      expect(await env.getConfig({})).toEqual({ hostRules: [] });
+      await expect(env.getConfig({})).resolves.toEqual({ hostRules: [] });
     });
 
     it('supports boolean true', async () => {
@@ -97,7 +97,7 @@ describe('workers/global/config/parse/env', () => {
       ${{ RENOVATE_RECREATE_WHEN: 'never' }}           | ${{ recreateWhen: 'never' }}
       ${{ RENOVATE_BASE_BRANCHES: '["main", "dev"]' }} | ${{ baseBranchPatterns: ['main', 'dev'] }}
     `('"$envArg" -> $config', async ({ envArg, config }) => {
-      expect(await env.getConfig(envArg)).toMatchObject(config);
+      await expect(env.getConfig(envArg)).resolves.toMatchObject(config);
     });
 
     it('skips misconfigured arrays', async () => {
@@ -172,7 +172,7 @@ describe('workers/global/config/parse/env', () => {
         GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
         RENOVATE_TOKEN: 'a github.com token',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         token: 'a github.com token',
         hostRules: [
           {
@@ -189,7 +189,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
         RENOVATE_TOKEN: 'a github.com token',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         token: 'a github.com token',
         hostRules: [
           {
@@ -207,7 +207,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_GITHUB_COM_TOKEN: 'github_pat_YYYYYY',
         RENOVATE_TOKEN: 'a github.com token',
       };
-      expect(await env.getConfig(envParam)).toEqual({
+      await expect(env.getConfig(envParam)).resolves.toEqual({
         token: 'a github.com token',
         hostRules: [
           {

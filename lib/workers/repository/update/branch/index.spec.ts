@@ -627,7 +627,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       config.dependencyDashboardChecks = { 'renovate/some-branch': 'rebase' };
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -648,7 +648,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       limits.isLimitReached.mockReturnValueOnce(true);
       limits.isLimitReached.mockReturnValueOnce(false);
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'branch-limit-reached',
@@ -666,7 +666,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(false);
       GlobalConfig.set({ ...adminConfig });
       config.mode = 'silent';
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'needs-approval',
@@ -684,7 +684,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(false);
       GlobalConfig.set({ ...adminConfig });
       config.dependencyDashboardApproval = true;
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'needs-approval',
@@ -706,7 +706,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       limits.isLimitReached.mockReturnValue(false);
       //git.getBranchCommit.mockReturnValue('123test');TODO:not needed?
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prBlockedBy: 'RateLimited',
         result: 'pr-limit-reached',
@@ -731,7 +731,7 @@ describe('workers/repository/update/branch/index', () => {
           state: 'open',
         }),
       );
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prNo: 5,
         result: 'commit-per-run-limit-reached',
@@ -749,7 +749,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       limits.isLimitReached.mockReturnValueOnce(true);
       config.rebaseRequested = true;
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -778,7 +778,7 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.isBranchModified.mockResolvedValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -799,7 +799,7 @@ describe('workers/repository/update/branch/index', () => {
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'commit-hourly-limit-reached',
@@ -819,7 +819,7 @@ describe('workers/repository/update/branch/index', () => {
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
       config.rebaseRequested = true;
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -849,7 +849,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -868,7 +868,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'no-work',
@@ -884,7 +884,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
       });
       config.pendingChecks = true;
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'pending',
@@ -907,7 +907,7 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       config.pendingChecks = true;
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prNo: 5,
         result: 'pending',
@@ -1013,7 +1013,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'NeedsApproval',
       });
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prBlockedBy: 'NeedsApproval',
         result: 'needs-pr-approval',
@@ -1039,7 +1039,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'AwaitingTests',
       });
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prBlockedBy: 'AwaitingTests',
         result: 'pending',
@@ -1069,7 +1069,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'BranchAutomerge',
       });
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prBlockedBy: 'BranchAutomerge',
         result: 'done',
@@ -1096,7 +1096,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'Error',
       });
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prBlockedBy: 'Error',
         result: 'error',
@@ -1122,7 +1122,7 @@ describe('workers/repository/update/branch/index', () => {
         type: 'without-pr',
         prBlockedBy: 'whoops' as any,
       });
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prBlockedBy: 'whoops',
         result: 'error',
@@ -1222,7 +1222,7 @@ describe('workers/repository/update/branch/index', () => {
         fetchChangeLogs: 'branch',
       } satisfies BranchConfig;
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: undefined,
@@ -1324,7 +1324,7 @@ describe('workers/repository/update/branch/index', () => {
         cacheFingerprintMatch: 'no-match',
       } satisfies BranchConfig;
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: undefined,
@@ -1357,13 +1357,15 @@ describe('workers/repository/update/branch/index', () => {
         cacheFingerprintMatch: 'no-match',
       } satisfies BranchConfig;
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
-      expect(await branchWorker.processBranch(inconfig, true)).toEqual({
-        branchExists: true,
-        updatesVerified: true,
-        prNo: undefined,
-        result: 'pending',
-        commitSha,
-      });
+      await expect(branchWorker.processBranch(inconfig, true)).resolves.toEqual(
+        {
+          branchExists: true,
+          updatesVerified: true,
+          prNo: undefined,
+          result: 'pending',
+          commitSha,
+        },
+      );
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
@@ -1970,7 +1972,7 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
         result: 'already-existed',
@@ -1986,7 +1988,7 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.isBranchModified.mockResolvedValueOnce(true);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      expect(await branchWorker.processBranch(config)).toEqual({
+      await expect(branchWorker.processBranch(config)).resolves.toEqual({
         branchExists: true,
         prNo: 1,
         result: 'pr-edited',
@@ -2030,7 +2032,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } satisfies BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -2073,12 +2075,12 @@ describe('workers/repository/update/branch/index', () => {
       });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           artifactErrors: [],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: undefined,
@@ -2124,7 +2126,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } satisfies BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -2161,7 +2163,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } satisfies BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'no-work',
@@ -2187,7 +2189,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: true,
         cacheFingerprintMatch: 'matched' as CacheFingerprintMatchResult,
       };
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: false,
         prNo: 5,
@@ -2229,7 +2231,7 @@ describe('workers/repository/update/branch/index', () => {
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } satisfies BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -2268,7 +2270,7 @@ describe('workers/repository/update/branch/index', () => {
         dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
       } satisfies BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -3070,9 +3072,9 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({ ...config, rebaseWhen: 'never' }),
-      ).toMatchObject({ result: 'no-work' });
+      await expect(
+        branchWorker.processBranch({ ...config, rebaseWhen: 'never' }),
+      ).resolves.toMatchObject({ result: 'no-work' });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
@@ -3093,13 +3095,13 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           rebaseWhen: 'never',
           keepUpdatedLabel: 'keep-updated',
         }),
-      ).toMatchObject({ result: 'done' });
+      ).resolves.toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
@@ -3120,13 +3122,13 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           rebaseWhen: 'never',
           keepUpdatedLabel: 'keep-not-updated',
         }),
-      ).toMatchObject({ result: 'no-work' });
+      ).resolves.toMatchObject({ result: 'no-work' });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
@@ -3140,13 +3142,13 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           rebaseWhen: 'never',
           dependencyDashboardChecks: { 'renovate/some-branch': 'other' },
         }),
-      ).toMatchObject({ result: 'done' });
+      ).resolves.toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
@@ -3160,14 +3162,14 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           dependencyDashboardChecks: {
             'renovate/some-branch': 'global-config',
           },
         }),
-      ).toMatchObject({ result: 'done' });
+      ).resolves.toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
@@ -3195,7 +3197,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefixOld: 'old/',
       };
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
@@ -3235,7 +3237,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
       };
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: false,
         prNo: 5,
@@ -3335,12 +3337,12 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           dependencyDashboardAllPending: true,
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         commitSha,
@@ -3372,12 +3374,12 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           dependencyDashboardAllRateLimited: true,
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         commitSha,
@@ -3409,12 +3411,12 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
-      expect(
-        await branchWorker.processBranch({
+      await expect(
+        branchWorker.processBranch({
           ...config,
           dependencyDashboardAllAwaitingSchedule: true,
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         commitSha,
@@ -3472,7 +3474,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         prCreation: 'not-pending',
       } satisfies BranchConfig;
-      expect(await branchWorker.processBranch(inconfig)).toEqual({
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,

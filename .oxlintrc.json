@@ -201,6 +201,7 @@
       }
     ],
     "vitest/no-standalone-expect": "error",
+    "vitest/prefer-expect-resolves": "error",
     "vitest/prefer-snapshot-hint": "error",
     "vitest/require-to-throw-message": "error"
   },

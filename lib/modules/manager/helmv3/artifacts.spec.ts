@@ -74,25 +74,25 @@ describe('modules/manager/helmv3/artifacts', () => {
 
   it('returns null if no Chart.lock found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -105,14 +105,14 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
@@ -145,14 +145,14 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execMocks).toBeArrayOfSize(2);
     expect(execMocks[0].cmd).toBe(
       'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
@@ -170,14 +170,14 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -203,14 +203,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
         config: { ...config, isLockFileMaintenance: true },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -245,14 +245,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       releases: [{ version: 'v3.7.2' }],
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -280,14 +280,14 @@ describe('modules/manager/helmv3/artifacts', () => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         artifactError: {
           fileName: 'Chart.lock',
@@ -375,8 +375,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
@@ -385,7 +385,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -449,8 +449,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
@@ -459,7 +459,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -518,8 +518,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
@@ -528,7 +528,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -592,8 +592,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps,
         newPackageFileContent: chartFile,
@@ -602,7 +602,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
         },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
@@ -644,8 +644,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2);
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
@@ -659,7 +659,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -695,8 +695,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: 'v3.7.2' }],
     });
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
@@ -710,7 +710,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -750,8 +750,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
@@ -765,7 +765,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -811,8 +811,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
@@ -822,7 +822,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: {},
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -866,8 +866,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
 
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFileECR,
@@ -877,7 +877,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: {},
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -888,8 +888,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
 
     const ecr = ecrMock.call(0).thisValue as ECRClient;
-    expect(await ecr.config.region()).toBe('us-east-1');
-    expect(await ecr.config.credentials()).toEqual({
+    await expect(ecr.config.region()).resolves.toBe('us-east-1');
+    await expect(ecr.config.credentials()).resolves.toEqual({
       $source: {
         CREDENTIALS_CODE: 'e',
       },
@@ -932,8 +932,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
 
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFileECR,
@@ -943,7 +943,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: {},
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -987,8 +987,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
 
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFileECR,
@@ -998,7 +998,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: {},
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -1009,8 +1009,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
 
     const ecr = ecrMock.call(0).thisValue as ECRClient;
-    expect(await ecr.config.region()).toBe('us-east-1');
-    expect(await ecr.config.credentials()).toEqual({
+    await expect(ecr.config.region()).resolves.toBe('us-east-1');
+    await expect(ecr.config.credentials()).resolves.toEqual({
       $source: {
         CREDENTIALS_CODE: 'e',
       },
@@ -1046,8 +1046,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
 
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFileECR,
@@ -1057,7 +1057,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: {},
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -1068,8 +1068,8 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
 
     const ecr = ecrMock.call(0).thisValue as ECRClient;
-    expect(await ecr.config.region()).toBe('us-east-1');
-    expect(await ecr.config.credentials()).toEqual({
+    await expect(ecr.config.region()).resolves.toBe('us-east-1');
+    await expect(ecr.config.credentials()).resolves.toEqual({
       $source: {
         CREDENTIALS_CODE: 'e',
       },
@@ -1101,8 +1101,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
@@ -1115,7 +1115,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -1141,8 +1141,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmv3.updateArtifacts({
+    await expect(
+      helmv3.updateArtifacts({
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFileAlias,
@@ -1154,7 +1154,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',

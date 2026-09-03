@@ -15,15 +15,15 @@ describe('modules/manager/github-actions/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(
-        await extractPackageFile('nothing here', 'empty-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'empty-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid yaml', async () => {
-      expect(
-        await extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts multiple docker image lines from yaml configuration file', async () => {
@@ -1365,7 +1365,9 @@ describe('modules/manager/github-actions/extract', () => {
           using: 'node20'
           main: 'index.js'
         `;
-      expect(await extractPackageFile(yamlContent, 'action.yml')).toBeNull();
+      await expect(
+        extractPackageFile(yamlContent, 'action.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts actions and with-version inputs nested in a parallel block', async () => {

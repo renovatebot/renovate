@@ -107,12 +107,12 @@ describe('modules/platform/gitlab/index', () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
         version: '13.3.6-ee',
       });
-      expect(
-        await gitlab.initPlatform({
+      await expect(
+        gitlab.initPlatform({
           token: 'some-token',
           endpoint: undefined,
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://gitlab.com/api/v4/',
         gitAuthor: 'Renovate Bot <a@b.com>',
       });
@@ -131,12 +131,12 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, {
           version: '13.3.6-ee',
         });
-      expect(
-        await gitlab.initPlatform({
+      await expect(
+        gitlab.initPlatform({
           endpoint,
           token: 'some-token',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://gitlab.renovatebot.com/',
         gitAuthor: 'Renovate Bot <a@b.com>',
       });
@@ -146,13 +146,13 @@ describe('modules/platform/gitlab/index', () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
         version: '13.3.6-ee',
       });
-      expect(
-        await gitlab.initPlatform({
+      await expect(
+        gitlab.initPlatform({
           token: 'some-token',
           endpoint: undefined,
           gitAuthor: 'somebody',
         }),
-      ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
+      ).resolves.toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
     });
   });
 
@@ -326,11 +326,11 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, okReturn);
-      expect(
-        await gitlab.initRepo({
+      await expect(
+        gitlab.initRepo({
           repository: 'some/repo/project',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -382,11 +382,11 @@ describe('modules/platform/gitlab/index', () => {
           mirror: true,
         });
       GlobalConfig.set({ includeMirrors: true });
-      expect(
-        await gitlab.initRepo({
+      await expect(
+        gitlab.initRepo({
           repository: 'some/repo',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -449,11 +449,11 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           http_url_to_repo: null,
         });
-      expect(
-        await gitlab.initRepo({
+      await expect(
+        gitlab.initRepo({
           repository: 'some/repo/project',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -545,7 +545,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'merge',
         },
       );
-      expect(await gitlab.getBranchForceRebase()).toBeFalse();
+      await expect(gitlab.getBranchForceRebase()).resolves.toBeFalse();
     });
 
     it('should return true for merge_method=ff', async () => {
@@ -559,7 +559,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'ff',
         },
       );
-      expect(await gitlab.getBranchForceRebase()).toBeTrue();
+      await expect(gitlab.getBranchForceRebase()).resolves.toBeTrue();
     });
 
     it('should return false when merge trains are enabled', async () => {
@@ -574,7 +574,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_trains_enabled: true,
         },
       );
-      expect(await gitlab.getBranchForceRebase()).toBeFalse();
+      await expect(gitlab.getBranchForceRebase()).resolves.toBeFalse();
     });
   });
 
@@ -2248,13 +2248,13 @@ describe('modules/platform/gitlab/index', () => {
             updated_at: '2025-05-19T12:00:00.000Z',
           },
         ]);
-      expect(
-        await gitlab.findPr({
+      await expect(
+        gitlab.findPr({
           branchName: 'branch',
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 1,
         sourceBranch: 'branch',
         state: 'open',
@@ -2453,8 +2453,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2464,7 +2464,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2507,8 +2507,8 @@ describe('modules/platform/gitlab/index', () => {
           { auto_merge: true },
         )
         .reply(201);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2518,7 +2518,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2556,8 +2556,8 @@ describe('modules/platform/gitlab/index', () => {
         })
         .put('/api/v4/projects/some%2Frepo/merge_requests/12345/merge')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2567,7 +2567,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2611,8 +2611,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345')
         .reply(202);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2622,7 +2622,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2995,8 +2995,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3007,7 +3007,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3043,8 +3043,8 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005',
         )
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3055,7 +3055,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3105,8 +3105,8 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005',
         )
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3117,7 +3117,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3178,8 +3178,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3190,7 +3190,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3261,8 +3261,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3273,7 +3273,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3315,8 +3315,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [
           { name: 'renovateIgnoreApprovals', approvals_required: 0 },
         ]);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3327,7 +3327,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3369,8 +3369,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .replyWithError('Unknown');
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3381,7 +3381,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3408,8 +3408,8 @@ describe('modules/platform/gitlab/index', () => {
         })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3419,7 +3419,7 @@ describe('modules/platform/gitlab/index', () => {
             autoApprove: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3447,8 +3447,8 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .matchHeader('Authorization', 'Bearer some-token')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3458,7 +3458,7 @@ describe('modules/platform/gitlab/index', () => {
             autoApprove: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -4026,11 +4026,11 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .put('/api/v4/projects/undefined/merge_requests/1/merge')
         .reply(200);
-      expect(
-        await gitlab.mergePr({
+      await expect(
+        gitlab.mergePr({
           id: 1,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
   });
 

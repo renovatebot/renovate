@@ -161,11 +161,11 @@ describe('modules/datasource/nuget/index', () => {
         registryUrls: ['#$#api.nuget.org/v3/index.xml'],
       };
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('extracts feed version from registry URL hash', async () => {
@@ -176,11 +176,11 @@ describe('modules/datasource/nuget/index', () => {
         packageName: 'nunit',
         registryUrls: ['https://my-registry#protocolVersion=3'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it(`can't get packages list (v3)`, async () => {
@@ -245,11 +245,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3V2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result (v2)', async () => {
@@ -259,11 +259,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result (v3)', async () => {
@@ -591,20 +591,20 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3V2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for non 200 (v3)', async () => {
       httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for non 200 (v2)', async () => {
@@ -614,11 +614,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error (v3v2)', async () => {
@@ -632,11 +632,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3V2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns deduplicated results', async () => {
@@ -701,11 +701,11 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error in getQueryUrlForV3Feed  (v3)', async () => {
@@ -715,11 +715,11 @@ describe('modules/datasource/nuget/index', () => {
         .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error (v2)', async () => {
@@ -729,11 +729,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data (v3) feed is a nuget.org', async () => {

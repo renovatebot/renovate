@@ -31,11 +31,11 @@ describe('modules/manager/gitlabci/extract', () => {
 
   describe('extractAllPackageFiles()', () => {
     it('returns null for empty', async () => {
-      expect(
-        await extractAllPackageFiles(config, [
+      await expect(
+        extractAllPackageFiles(config, [
           'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.2.yaml',
         ]),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('extracts from multidoc yaml', async () => {

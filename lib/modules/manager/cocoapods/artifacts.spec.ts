@@ -57,27 +57,27 @@ describe('modules/manager/cocoapods/artifacts', () => {
 
   it('returns null if no Podfile.lock found', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if no updatedDeps were provided', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
@@ -87,27 +87,27 @@ describe('modules/manager/cocoapods/artifacts', () => {
       localDir: '',
     });
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config: {},
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if updatedDeps is empty', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
@@ -122,14 +122,14 @@ describe('modules/manager/cocoapods/artifacts', () => {
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);
   });
 
@@ -146,14 +146,14 @@ describe('modules/manager/cocoapods/artifacts', () => {
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       }),
-    ).toMatchObject([{ file: { contents: 'New Podfile' } }]);
+    ).resolves.toMatchObject([{ file: { contents: 'New Podfile' } }]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {
@@ -179,14 +179,14 @@ describe('modules/manager/cocoapods/artifacts', () => {
         deleted: ['Pods/Deleted'],
       }),
     );
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       { file: { type: 'addition', path: 'Podfile.lock' } },
       { file: { type: 'addition', path: 'Pods/Manifest.lock' } },
       { file: { type: 'addition', path: 'Pods/New' } },
@@ -208,14 +208,14 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Podfile.lock', stderr: 'not found' } },
     ]);
     expect(execSnapshots).toBeEmpty();
@@ -229,14 +229,14 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.outputCacheFile.mockResolvedValueOnce();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile.lock');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Podfile.lock', stderr: 'exec exception' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);

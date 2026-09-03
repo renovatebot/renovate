@@ -19,45 +19,45 @@ describe('modules/platform/local/scm', () => {
 
   describe('dummy functions', () => {
     it('behindBaseBranch', async () => {
-      expect(await localFs.isBranchBehindBase('', '')).toBe(false);
+      await expect(localFs.isBranchBehindBase('', '')).resolves.toBe(false);
     });
 
     it('isBranchModified', async () => {
-      expect(await localFs.isBranchModified('', '')).toBe(false);
+      await expect(localFs.isBranchModified('', '')).resolves.toBe(false);
     });
 
     it('isBranchConflicted', async () => {
-      expect(await localFs.isBranchConflicted('', '')).toBe(false);
+      await expect(localFs.isBranchConflicted('', '')).resolves.toBe(false);
     });
 
     it('branchExists', async () => {
-      expect(await localFs.branchExists('')).toBe(true);
+      await expect(localFs.branchExists('')).resolves.toBe(true);
     });
 
     it('getBranchCommit', async () => {
-      expect(await localFs.getBranchCommit('')).toBeNull();
+      await expect(localFs.getBranchCommit('')).resolves.toBeNull();
     });
 
     it('getBranchUpdateDate', async () => {
-      expect(await localFs.getBranchUpdateDate('')).toBeNull();
+      await expect(localFs.getBranchUpdateDate('')).resolves.toBeNull();
     });
 
     it('getAllBranchUpdateDates', async () => {
-      expect(await localFs.getAllBranchUpdateDates()).toEqual({});
+      await expect(localFs.getAllBranchUpdateDates()).resolves.toEqual({});
     });
 
     it('deleteBranch', async () => {
-      expect(await localFs.deleteBranch('')).toBeUndefined();
+      await expect(localFs.deleteBranch('')).resolves.toBeUndefined();
     });
 
     it('commitAndPush', async () => {
-      expect(
-        await localFs.commitAndPush(partial<CommitFilesConfig>()),
-      ).toBeNull();
+      await expect(
+        localFs.commitAndPush(partial<CommitFilesConfig>()),
+      ).resolves.toBeNull();
     });
 
     it('checkoutBranch', async () => {
-      expect(await localFs.checkoutBranch('')).toBeNull();
+      await expect(localFs.checkoutBranch('')).resolves.toBeNull();
     });
   });
 
@@ -70,7 +70,7 @@ describe('modules/platform/local/scm', () => {
           }),
         ),
       );
-      expect(await localFs.getFileList()).toHaveLength(2);
+      await expect(localFs.getFileList()).resolves.toHaveLength(2);
 
       expect(execMock).toHaveBeenCalledExactlyOnceWith('git ls-files', {
         maxBuffer: 1024 * 1024 * 10,
@@ -82,7 +82,7 @@ describe('modules/platform/local/scm', () => {
         throw new Error();
       });
 
-      expect(await localFs.getFileList()).toHaveLength(2);
+      await expect(localFs.getFileList()).resolves.toHaveLength(2);
     });
   });
 

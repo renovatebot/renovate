@@ -12,12 +12,12 @@ describe('modules/datasource/dart/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/non_sense').reply(200, '}');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'non_sense',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty fields', async () => {
@@ -29,12 +29,12 @@ describe('modules/datasource/dart/index', () => {
         .scope(baseUrl)
         .get('/shared_preferences')
         .reply(200, withoutVersions);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       const withoutLatest = {
         ...body,
@@ -44,22 +44,22 @@ describe('modules/datasource/dart/index', () => {
         .scope(baseUrl)
         .get('/shared_preferences')
         .reply(200, withoutLatest);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -74,12 +74,12 @@ describe('modules/datasource/dart/index', () => {
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {

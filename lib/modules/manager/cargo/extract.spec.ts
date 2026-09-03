@@ -44,30 +44,30 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('returns null for invalid toml', async () => {
-      expect(
-        await extractPackageFile('invalid toml', 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('invalid toml', 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty dependencies', async () => {
       const cargotoml = '[dependencies]\n';
-      expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile(cargotoml, 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty dev-dependencies', async () => {
       const cargotoml = '[dev-dependencies]\n';
-      expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile(cargotoml, 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty custom target', async () => {
       const cargotoml = '[target."foo".dependencies]\n';
-      expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config),
-      ).toBeNull();
+      await expect(
+        extractPackageFile(cargotoml, 'Cargo.toml', config),
+      ).resolves.toBeNull();
     });
 
     it('extracts multiple dependencies simple', async () => {

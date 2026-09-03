@@ -39,12 +39,12 @@ describe('modules/datasource/cdnjs/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -52,12 +52,12 @@ describe('modules/datasource/cdnjs/index', () => {
         .scope(baseUrl)
         .get(pathFor('doesnotexist/doesnotexist'))
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CdnjsDatasource.id,
           packageName: 'doesnotexist/doesnotexist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 401', async () => {

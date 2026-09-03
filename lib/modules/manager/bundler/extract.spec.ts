@@ -25,7 +25,9 @@ const sourceBlockGemfile = Fixtures.get('Gemfile.sourceBlock');
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'Gemfile'),
+      ).resolves.toBeNull();
     });
 
     it('parses rails Gemfile', async () => {
