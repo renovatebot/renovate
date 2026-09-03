@@ -18,7 +18,7 @@ const versionRegex = regEx(
 );
 
 // Regex for splitting version strings into alphanumeric parts
-const alphaNumRegex = regEx(/([a-zA-Z]+)|(\d+)/g);
+const alphaNumRegex = regEx(/(?:[a-zA-Z]+)|(?:\d+)/g);
 
 class ApkVersioningApi extends GenericVersioningApi {
   /**
@@ -238,13 +238,15 @@ class ApkVersioningApi extends GenericVersioningApi {
     range: string,
   ): string | null {
     // Handle range expressions like >5.2.37-r0, <5.2.37-r0, ~5.2.37-r0, etc.
-    const rangeMatch = regEx(/^([><=~]+)(.+)$/).exec(range);
+    const rangeMatch = regEx(/^(?<operator>[><=~]+)(?<targetVersion>.+)$/).exec(
+      range,
+    );
     if (!rangeMatch) {
       // If no range operator, look for exact match
       return versions.find((v) => this.equals(v, range)) ?? null;
     }
 
-    const [, operator, targetVersion] = rangeMatch;
+    const { operator, targetVersion } = rangeMatch.groups!;
 
     // Filter versions that satisfy the range
     const satisfyingVersions = versions.filter((version) => {

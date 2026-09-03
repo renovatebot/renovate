@@ -235,7 +235,7 @@ export function isLessThanRange(input: string, range: string): boolean {
       .map((x) =>
         x
           .replace(regEx(/\s*/g), '')
-          .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/))
+          .split(regEx(/(?<op>~=|==|!=|<=|>=|<|>|===)/))
           .slice(1),
       )
       .map(([op, version]) => {
