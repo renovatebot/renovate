@@ -18,13 +18,100 @@ describe('modules/manager/ansible-galaxy/extract', () => {
 
     it('extracts multiple dependencies from requirements.yml', () => {
       const res = extractPackageFile(yamlFile1, 'requirements.yml');
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'yatesr.timezone',
+          currentValue: '0.1.0',
+          datasource: 'galaxy',
+        },
+        {
+          depName: 'cloudalchemy.node-exporter',
+          currentValue: '0.19.0',
+          datasource: 'galaxy',
+        },
+        {
+          depName: 'nginx_role',
+          currentValue: 'master',
+          datasource: 'git-tags',
+          packageName: 'https://github.com/bennojoy/nginx',
+        },
+        {
+          depName: 'willthames/git-ansible-galaxy',
+          currentValue: 'v1.4',
+          datasource: 'git-tags',
+          packageName: 'http://bitbucket.org/willthames/git-ansible-galaxy',
+        },
+        {
+          depName: 'mygroup/ansible-base',
+          currentValue: '0.1',
+          datasource: 'git-tags',
+          packageName: 'git@gitlab.company.com:mygroup/ansible-base.git',
+        },
+        {
+          depName: 'testGroup/testProject',
+          currentValue: '0.1',
+          datasource: 'git-tags',
+          packageName: 'ssh://git@gitlab.company.com/testGroup/testProject.git',
+        },
+        {
+          depName: 'testGroup/testProject2',
+          currentValue: '0.1',
+          datasource: 'git-tags',
+          packageName: 'ssh://gitlab.company.com/testGroup/testProject2.git',
+        },
+        {
+          depName: 'testGroup/testProject3',
+          currentValue: '3.1',
+          datasource: 'git-tags',
+          packageName:
+            'ssh://git@gitlab.company.com:23/testGroup/testProject3.git',
+        },
+        {
+          depName: 'mygroup/ansible-base',
+          currentValue: '0.14',
+          datasource: 'git-tags',
+          packageName: 'git@gitlab.company.com:mygroup/ansible-base.git',
+        },
+        {
+          depName: 'mygroup/ansible-base',
+          currentValue: '0.14',
+          datasource: 'git-tags',
+          packageName: 'company.com:mygroup/ansible-base.git',
+        },
+        {
+          depName: 'org/repo',
+          currentValue: '47.11',
+          datasource: 'git-tags',
+          packageName: 'git://github.com/org/repo.git',
+        },
+        {
+          depName: 'org/re.po',
+          currentValue: '47.11',
+          datasource: 'git-tags',
+          packageName: 'git://github.com/org/re.po.git',
+        },
+      ]);
       expect(res?.deps).toHaveLength(12);
     });
 
     it('extracts dependencies from a not beautified requirements file', () => {
       const res = extractPackageFile(yamlFile2, 'requirements.yml');
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'galaxy',
+          depName: 'yatesr.timezone',
+          depType: 'role',
+          packageName: 'yatesr.timezone',
+        },
+        {
+          currentValue: '0.1',
+          datasource: 'git-tags',
+          depName: 'mygroup/ansible-base',
+          depType: 'role',
+          packageName: 'git@gitlab.company.com:mygroup/ansible-base.git',
+        },
+      ]);
       expect(res?.deps).toHaveLength(2);
     });
 
@@ -65,20 +152,135 @@ describe('modules/manager/ansible-galaxy/extract', () => {
 
     it('check collection style requirements file', () => {
       const res = extractPackageFile(collections1, 'requirements.yml');
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'geerlingguy.php_roles',
+          depType: 'galaxy-collection',
+          currentValue: '0.9.3',
+          datasource: 'galaxy-collection',
+          registryUrls: ['https://galaxy.ansible.com'],
+        },
+        {
+          depName: 'davidban77.gns3',
+          depType: 'galaxy-collection',
+          currentValue: '1.2.2',
+          datasource: 'galaxy-collection',
+        },
+        {
+          depName: 'github.com/organization/repo_name',
+          depType: 'galaxy-collection',
+          currentValue: '1.2.2',
+          datasource: 'github-tags',
+          packageName: 'https://github.com/organization/repo_name.git',
+        },
+        {
+          depName: 'example.com/organization/repo_name',
+          depType: 'galaxy-collection',
+          currentValue: '1.2.2',
+          datasource: 'git-tags',
+          packageName: 'https://example.com/organization/repo_name.git',
+        },
+        {
+          depName: 'namespace.mycollection',
+          depType: 'galaxy-collection',
+          currentValue: '3.0.0',
+          datasource: 'git-tags',
+          packageName: 'https://example.com/organization/repo_name.git',
+        },
+        {
+          depName: 'example.com/organization/repo_name',
+          depType: 'galaxy-collection',
+          currentValue: '1.2.2',
+          datasource: 'git-tags',
+          packageName: 'https://example.com/organization/repo_name.git',
+        },
+        {
+          depName: 'f5networks.f5_modules',
+          depType: 'galaxy-collection',
+          datasource: 'galaxy-collection',
+          registryUrls: ['https://cloud.redhat.com/api/automation-hub/'],
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'foo.bar/organization/repo_name',
+          depType: 'galaxy-collection',
+          datasource: 'git-tags',
+          packageName: 'https://foo.bar/organization/repo_name.git',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'fooBar',
+          depType: 'galaxy-collection',
+          currentValue: '1.0.0',
+          skipReason: 'no-source-match',
+        },
+        {
+          depName: 'foo.Bar',
+          depType: 'galaxy-collection',
+          skipReason: 'unsupported',
+        },
+        {
+          depName: 'foo.Bar',
+          depType: 'galaxy-collection',
+          skipReason: 'local-dependency',
+        },
+        {
+          depName: 'example.com/organization/repo_name',
+          depType: 'galaxy-collection',
+          currentValue: '1.2.2',
+          skipReason: 'unsupported',
+        },
+        { depName: 'geerlingguy.java', depType: 'role', currentValue: '1.9.6' },
+        {
+          depName: 'geerlingguy.docker',
+          depType: 'role',
+          currentValue: '2.9.0',
+        },
+      ]);
       expect(res?.deps).toHaveLength(14);
       expect(res?.deps.filter((value) => value.skipReason)).toHaveLength(6);
     });
 
     it('check collection style requirements file in reverse order and missing empty line', () => {
       const res = extractPackageFile(collections2, 'requirements.yml');
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'geerlingguy.php_roles',
+          depType: 'galaxy-collection',
+          currentValue: '0.9.3',
+        },
+        {
+          depName: 'davidban77.gns3',
+          depType: 'galaxy-collection',
+          currentValue: '1.2.2',
+        },
+        { depName: 'geerlingguy.java', depType: 'role', currentValue: '1.9.6' },
+        {
+          depName: 'geerlingguy.docker',
+          depType: 'role',
+          currentValue: '2.9.0',
+        },
+      ]);
       expect(res?.deps).toHaveLength(4);
     });
 
     it('check galaxy definition file', () => {
       const res = extractPackageFile(galaxy, 'galaxy.yml');
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        { depName: 'ansible.posix', currentValue: '1.5.4' },
+        { depName: 'ansible.posix_with_comment', currentValue: '1.5.4' },
+        { depName: 'ansible.windows', currentValue: '1.4.0' },
+        { depName: 'ansible.windows_with_comment', currentValue: '1.4.0' },
+        { depName: 'community.general', currentValue: '7.3.0' },
+        { depName: 'community.general_with_comment', currentValue: '7.3.0' },
+        { depName: 'community.windows', currentValue: '>=1.0.0,<2.0.0' },
+        { depName: 'community.general_quoted', currentValue: '7.3.0' },
+        {
+          depName: 'community.general_with_comment_quoted',
+          currentValue: '7.3.0',
+        },
+        { depName: 'community.windows_quoted', currentValue: '>=1.0.0,<2.0.0' },
+      ]);
       expect(res?.deps).toHaveLength(10);
     });
   });

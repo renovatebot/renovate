@@ -92,7 +92,11 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock', async () => {
@@ -116,7 +120,11 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock with precise version update', async () => {
@@ -452,7 +460,11 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated workspace Cargo.lock', async () => {
@@ -482,7 +494,11 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path crates/one/Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock for lockfile maintenance', async () => {
@@ -503,7 +519,11 @@ describe('modules/manager/cargo/artifacts', () => {
         },
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
+      },
+    ]);
   });
 
   it('supports docker mode', async () => {

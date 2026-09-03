@@ -21,13 +21,39 @@ describe('modules/manager/gitlabci-include/extract', () => {
 
     it('extracts single include block', () => {
       const res = extractPackageFile(yamlFileSingleConfig);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.0',
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example',
+          depType: 'repository',
+        },
+      ]);
       expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts multiple include blocks', () => {
       const res = extractPackageFile(yamlFileMultiConfig);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.0',
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example',
+          depType: 'repository',
+        },
+        {
+          currentValue: 'master',
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example2',
+          depType: 'repository',
+        },
+        {
+          datasource: 'gitlab-tags',
+          depName: 'mikebryant/include-source-example3',
+          depType: 'repository',
+          skipReason: 'unspecified-version',
+        },
+      ]);
       expect(res?.deps).toHaveLength(3);
     });
 

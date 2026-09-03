@@ -10,13 +10,28 @@ describe('modules/manager/ansible/extract', () => {
 
     it('extracts multiple image lines from docker_container', () => {
       const res = extractPackageFile(Fixtures.get('main1.yaml'), '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        { depName: 'busybox' },
+        { depName: 'redis' },
+        { depName: 'someuser/appimage' },
+        { depName: 'ubuntu', currentValue: '14.04' },
+        { depName: 'someuser/anotherappimage' },
+        { depName: 'busybox' },
+        { depName: 'postgres', currentValue: 'latest' },
+        { depName: 'ubuntu', currentValue: '14.04' },
+        { depName: 'ubuntu', currentValue: '14.04' },
+      ]);
       expect(res?.deps).toHaveLength(9);
     });
 
     it('extracts multiple image lines from docker_service', () => {
       const res = extractPackageFile(Fixtures.get('main2.yaml'), '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        { depName: 'sameersbn/gitlab', currentValue: '11.5.1' },
+        { depName: 'sameersbn/postgresql', currentValue: '10' },
+        { depName: 'sameersbn/redis', currentValue: '4.0.9-1' },
+        { depName: 'registry', currentValue: '2.6.2' },
+      ]);
       expect(res?.deps).toHaveLength(4);
     });
 
