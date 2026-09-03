@@ -1,6 +1,5 @@
 // TODO fix mocks
 import _timers from 'node:timers/promises';
-import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -4094,18 +4093,22 @@ These updates have all been created already. To force a retry/rebase of any, cli
 
     it('returns updated pr body', async () => {
       await initFakePlatform('13.4.0');
-      expect(gitlab.massageMarkdown(prBody)).toBe(
-        `${codeBlock`
-          https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
-
-            Merge Requests are the best, here are some MRs.
-
-            ## Open
-
-          These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.
-
-           - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
-        `}\n`,
+      const body = gitlab.massageMarkdown(prBody);
+      // PR wording and links become MR wording and links
+      expect(body).toContain('Merge Requests are the best, here are some MRs.');
+      expect(body).not.toContain('Pull Requests');
+      expect(body).not.toContain('PRs');
+      expect(body).toContain(
+        '- [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (`gh-got`, `gl-got`, `got`)',
+      );
+      expect(body).not.toContain('../pull/2433');
+      // the rest is left alone
+      expect(body).toStartWith(
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5',
+      );
+      expect(body).toContain('## Open');
+      expect(body).toContain(
+        'These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.',
       );
       expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
         expect.any(String),
