@@ -387,7 +387,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
 
-      expect(await bitbucket.getBranchPr('branch')).toMatchObject({
+      await expect(bitbucket.getBranchPr('branch')).resolves.toMatchObject({
         number: 5,
         sourceBranch: 'branch',
         state: 'open',
@@ -635,7 +635,9 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('addAssignees()', () => {
     it('does not throw', async () => {
-      expect(await bitbucket.addAssignees(3, ['some'])).toBeUndefined();
+      await expect(
+        bitbucket.addAssignees(3, ['some']),
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -730,7 +732,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getPrList()).toMatchObject([
+      await expect(bitbucket.getPrList()).resolves.toMatchObject([
         {
           number: 1,
           sourceBranch: 'branch-a',
@@ -1530,7 +1532,7 @@ describe('modules/platform/bitbucket/index', () => {
     it('exists', async () => {
       const scope = await initRepoMock();
       scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, pr);
-      expect(await bitbucket.getPr(5)).toMatchObject({
+      await expect(bitbucket.getPr(5)).resolves.toMatchObject({
         number: 5,
         sourceBranch: 'branch',
         state: 'open',
@@ -1562,14 +1564,14 @@ describe('modules/platform/bitbucket/index', () => {
         targetBranch: 'master',
         title: 'title',
       };
-      expect(await bitbucket.getPr(3)).toMatchObject({
+      await expect(bitbucket.getPr(3)).resolves.toMatchObject({
         ...expectedPr5,
         number: 3,
       });
 
-      expect(await bitbucket.getPr(5)).toMatchObject(expectedPr5);
+      await expect(bitbucket.getPr(5)).resolves.toMatchObject(expectedPr5);
 
-      expect(await bitbucket.getPr(5)).toMatchObject(expectedPr5);
+      await expect(bitbucket.getPr(5)).resolves.toMatchObject(expectedPr5);
     });
 
     it('reviewers', async () => {
