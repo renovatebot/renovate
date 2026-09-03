@@ -9,11 +9,11 @@ This PR contains the following updates:
 
 | Package | Type | Update | Change |
 |---|---|---|---|
-| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final | minor |
+| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final | 
 
-> ✂ **Note**
+> ❗ **Important**
 > 
-> PR body was truncated to here.
+> ✂ PR body was truncated to here.
 "
 `;
 
@@ -32,12 +32,11 @@ This PR contains the following updates:
 
 ### Release Notes
 
-<details>
-<s
+<deta
 
-> ✂ **Note**
+> ❗ **Important**
 > 
-> PR body was truncated to here.
+> ✂ PR body was truncated to here.
 
 
 </details>
