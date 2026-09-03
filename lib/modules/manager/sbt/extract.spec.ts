@@ -16,9 +16,6 @@ const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
 const sbtMissingScalaVersion = Fixtures.get(`missing-scala-version.sbt`);
 const sbtDependencyFile = Fixtures.get(`dependency-file.scala`);
-const sbtPrivateVariableDependencyFile = Fixtures.get(
-  `private-variable-dependency-file.scala`,
-);
 
 describe('modules/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
@@ -349,6 +346,23 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extract deps from native scala file with private variables', () => {
+      const sbtPrivateVariableDependencyFile = codeBlock`
+        import sbt._
+
+        object Dependencies {
+          val moreSettings = Seq(
+            scalaVersion := "2.13.0-RC5"
+          )
+
+          private val abcVersion = "1.2.3"
+
+          private lazy val ujson = "com.example" %% "foo" % "0.7.1"
+
+          lazy val abc = "com.abc" % "abc" % abcVersion
+
+          lazy val dependentLibraries = Seq(ujson, abc)
+        }
+      `;
       expect(
         extractPackageFile(sbtPrivateVariableDependencyFile),
       ).toMatchSnapshot({

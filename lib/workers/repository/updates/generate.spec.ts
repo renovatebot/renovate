@@ -3,6 +3,7 @@ import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchConfig } from './generate.ts';
@@ -1528,7 +1529,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      const excludeCommitPaths = res.excludeCommitPaths ?? [];
+      const excludeCommitPaths = coerceArray(res.excludeCommitPaths);
       expect(excludeCommitPaths.sort()).toStrictEqual(
         ['some/path', 'some/other/path', 'some/other-manager/path'].sort(),
       );
@@ -1647,9 +1648,11 @@ describe('workers/repository/updates/generate', () => {
         | docker     | some-dep    | 5.1.0 | 5.1.2 |
       `);
       expect([
+        // oxlint-disable-next-line renovate/prefer-coerce-array -- matchAll() yields an iterator, which coerceArray() does not accept
         ...(res.commitMessage?.matchAll(/another-dep/g) ?? []),
       ]).toBeArrayOfSize(1);
       expect([
+        // oxlint-disable-next-line renovate/prefer-coerce-array -- matchAll() yields an iterator, which coerceArray() does not accept
         ...(res.commitMessage?.matchAll(/some-dep/g) ?? []),
       ]).toBeArrayOfSize(2);
     });

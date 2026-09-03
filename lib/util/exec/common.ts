@@ -142,6 +142,11 @@ export function exec(
       detached: process.platform !== 'win32',
       shell,
       extendEnv: false,
+      // Suppress execa's internal promise rejection (e.g., from timeout).
+      // We handle all exit scenarios via 'exit' and 'error' event listeners below,
+      // so the promise rejection would otherwise surface as an unhandledRejection.
+      // TODO: Refactor to await execa result (#45650)
+      reject: false,
     });
 
     // handle streams

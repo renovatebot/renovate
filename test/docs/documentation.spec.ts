@@ -46,7 +46,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/configuration-options.md', () => {
       async function getConfigHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches
           .map((match) =>
             match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
@@ -95,7 +95,7 @@ describe('docs/documentation', () => {
       async function getConfigSubHeaders(file: string): Promise<string[]> {
         const postUpdateValues = getPostUpdateOptionsValues();
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        const matches = content.match(/\n### (?:.*?)\n/g) ?? [];
         return matches
           .map((match) =>
             match.substring(5, match.length - 1).replace(/^`|`$/g, ''),
@@ -186,7 +186,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/self-hosted-configuration.md', () => {
       async function getSelfHostedHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches.map((match) =>
           match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
         );
@@ -219,7 +219,7 @@ describe('docs/documentation', () => {
         file: string,
       ): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(4, match.length - 1));
       }
 
@@ -243,7 +243,7 @@ describe('docs/documentation', () => {
         string[]
       > {
         const content = await fs.readFile(`docs/usage/templates.md`, 'utf8');
-        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        const matches = content.match(/\n### (?:.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(5, match.length - 1));
       }
 

@@ -247,15 +247,38 @@ describe('config/presets/index', () => {
     it('works with valid', async () => {
       // @ts-expect-error -- invalid config
       config.foo = 1;
-      config.ignoreDeps = [];
       config.extends = [':pinVersions'];
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
+        description: [
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
+        ],
         foo: 1,
-        ignoreDeps: [],
         rangeStrategy: 'pin',
       });
       expect(res.rangeStrategy).toBe('pin');
+    });
+
+    it('replaces preset descriptions with overrideDescription', async () => {
+      config.overrideDescription = ['Pin everything.'];
+      config.extends = [':pinVersions'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        description: ['Pin everything.'],
+        rangeStrategy: 'pin',
+      });
+    });
+
+    it('ignores empty overrideDescription', async () => {
+      config.overrideDescription = [];
+      config.extends = [':pinVersions'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        description: [
+          'Use version pinning (maintain a single version only and not SemVer ranges).',
+        ],
+        rangeStrategy: 'pin',
+      });
     });
 
     it('throws if valid and invalid', async () => {
@@ -312,11 +335,11 @@ describe('config/presets/index', () => {
 
       expect(res.packageRules).toEqual([
         {
-          matchDepTypes: ['action'],
+          matchDepTypes: ['action', 'workflow'],
           pinDigests: true,
         },
         {
-          matchDepTypes: ['action'],
+          matchDepTypes: ['action', 'workflow'],
           extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
           versioning:
             'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
@@ -337,7 +360,7 @@ describe('config/presets/index', () => {
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(22);
+      expect(res.matchPackageNames).toHaveLength(23);
     });
 
     it('resolves nested groups', async () => {
@@ -346,7 +369,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(22);
+      expect(rule.matchPackageNames).toHaveLength(23);
     });
 
     it('migrates automerge in presets', async () => {
@@ -1470,7 +1493,7 @@ describe('config/presets/index', () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(4);
+      expect(res.matchPackageNames).toHaveLength(5);
       expect(res.extends).toHaveLength(5);
     });
 

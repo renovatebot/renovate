@@ -8,53 +8,6 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const runnerTestWorkflowMacos = codeBlock`
-jobs:
-  test1:
-     runs-on: \${{ env.RUNNER }}
-  test2:
-      runs-on: abc-123
-  test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-      runs-on: macos-15-intel
-  test6:
-      runs-on: macos-26-intel
-`;
-
-const runnerTestWorkflowUbuntu = codeBlock`
-jobs:
-  test1:
-    runs-on: ubuntu-latest
-  test2:
-    runs-on:
-      ubuntu-22.04
-  test3:
-     runs-on:
-       group: ubuntu-runners
-       labels: ubuntu-20.04-16core
-  test4:
-      runs-on: ubuntu-22.04-arm
-`;
-
-const runnerTestWorkflowWindows = codeBlock`
-jobs:
-  test1:
-    runs-on: |
-      windows-2019
-  test2:
-    runs-on: >
-      windows-2022
-  test3:
-    runs-on: [windows-2022, selfhosted]
-  test4:
-      runs-on: windows-11-arm
-  test5:
-      runs-on: windows-2025
-`;
-
 describe('modules/manager/github-actions/extract', () => {
   beforeEach(() => {
     GlobalConfig.reset();
@@ -579,6 +532,58 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('extracts a reusable workflow call as a workflow', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+        jobs:
+          release:
+            uses: some-org/some-repo/.github/workflows/release.yml@v1.2.3
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'some-org/some-repo',
+          currentValue: 'v1.2.3',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+          depType: 'workflow',
+          replaceString:
+            'some-org/some-repo/.github/workflows/release.yml@v1.2.3',
+          autoReplaceStringTemplate:
+            '{{depName}}/.github/workflows/release.yml@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        },
+      ]);
+    });
+
+    it.each`
+      uses                                                            | depType
+      ${'some-org/some-repo/.github/workflows/release.yml@v1'}        | ${'workflow'}
+      ${'some-org/some-repo/.github/workflows/release.yaml@v1'}       | ${'workflow'}
+      ${'actions/checkout@v4'}                                        | ${'action'}
+      ${'github/codeql-action/init@v3'}                               | ${'action'}
+      ${'some-org/some-repo/.github/workflows/sub/release.yml@v1'}    | ${'action'}
+      ${'some-org/some-repo/.github/workflows@v1'}                    | ${'action'}
+      ${'some-org/some-repo/.github/workflows/release.json@v1'}       | ${'action'}
+      ${'some-org/some-repo/nested/.github/workflows/release.yml@v1'} | ${'action'}
+    `(
+      'gives $uses the depType $depType',
+      async ({ uses, depType }: { uses: string; depType: string }) => {
+        const res = await extractPackageFile(
+          codeBlock`
+          jobs:
+            build:
+              steps:
+                - uses: ${uses}
+          `,
+          '.github/workflows/ci.yml',
+        );
+
+        expect(res?.deps[0]).toMatchObject({ depType });
+      },
+    );
+
     it('disables naked SHA pins without version comment', async () => {
       const res = await extractPackageFile(
         codeBlock`
@@ -726,6 +731,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple macos action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowMacos = codeBlock`
+      jobs:
+        test1:
+           runs-on: \${{ env.RUNNER }}
+        test2:
+            runs-on: abc-123
+        test3:
+          runs-on: "macos-12-large"
+        test4:
+          runs-on: 'macos-latest'
+        test5:
+            runs-on: macos-15-intel
+        test6:
+            runs-on: macos-26-intel
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowMacos,
         'workflow.yml',
@@ -772,6 +792,20 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowUbuntu = codeBlock`
+      jobs:
+        test1:
+          runs-on: ubuntu-latest
+        test2:
+          runs-on:
+            ubuntu-22.04
+        test3:
+           runs-on:
+             group: ubuntu-runners
+             labels: ubuntu-20.04-16core
+        test4:
+            runs-on: ubuntu-22.04-arm
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowUbuntu,
         'workflow.yml',
@@ -810,6 +844,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple windows action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowWindows = codeBlock`
+      jobs:
+        test1:
+          runs-on: |
+            windows-2019
+        test2:
+          runs-on: >
+            windows-2022
+        test3:
+          runs-on: [windows-2022, selfhosted]
+        test4:
+            runs-on: windows-11-arm
+        test5:
+            runs-on: windows-2025
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowWindows,
         'workflow.yml',
@@ -2311,6 +2360,23 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       // the lockfile only records `OWNER/REPO@REF` pins, so a `docker://` image is still ours to pin
       expect(res?.deps[1]).not.toHaveProperty('digestManagedExternally');
+    });
+
+    it('marks a reusable workflow call, which the lockfile records too', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          jobs:
+            release:
+              uses: some-org/some-repo/.github/workflows/release.yml@v1
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        { depType: 'workflow', digestManagedExternally: true },
+      ]);
     });
 
     it('leaves a workflow which is not onboarded alone', async () => {

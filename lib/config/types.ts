@@ -403,6 +403,7 @@ export interface RenovateConfig
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   description?: string | string[];
+  overrideDescription?: string | string[];
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;
@@ -650,6 +651,17 @@ export interface RenovateOptionBase {
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
   globalOnly?: boolean;
+
+  /**
+   * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
+   *
+   * This is in addition to any existing config validation, and ensures that these options are re-validated due to their sensitive nature.
+   *
+   * A failure of that check **must** lead to a {@link ConfigValidationTopic.Security} error (which is then a full config validation error), stopping the Renovate run.
+   *
+   * After this check has been performed, additional filtering (for defence in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
+   */
+  requiresCheckAtTrustBoundary?: boolean;
 
   inheritConfigSupport?: boolean;
 

@@ -109,18 +109,33 @@ function getNullishComparison(
 }
 
 /**
- * Whether `node` is `typeof <expr> ==/===/!=/!== '<literalValue>'` (either
- * operand order).
+ * `typeof` result literals that map onto an `@sindresorhus/is` helper with
+ * behaviour identical to the `typeof` comparison. Types are deliberately
+ * excluded when the helper's semantics diverge from a plain `typeof` check:
+ *
+ * - `'number'` — `isNumber()` also excludes `NaN`.
+ * - `'object'` — `isObject()` excludes `null` and includes functions.
  */
-function isTypeofComparison(
-  node: ESTree.BinaryExpression,
-  literalValue: string,
-): boolean {
+const TYPEOF_HELPERS: Record<string, string> = {
+  string: 'isString',
+  boolean: 'isBoolean',
+  function: 'isFunction',
+  symbol: 'isSymbol',
+  bigint: 'isBigint',
+  undefined: 'isUndefined',
+};
+
+/**
+ * If `node` is `typeof <expr> ==/===/!=/!== '<literalValue>'` (either operand
+ * order) for a `<literalValue>` with a matching helper in `TYPEOF_HELPERS`,
+ * return that literal value; otherwise return null.
+ */
+function getTypeofHelperLiteral(node: ESTree.BinaryExpression): string | null {
   if (
     !EQUALITY_OPERATORS.has(node.operator) &&
     !INEQUALITY_OPERATORS.has(node.operator)
   ) {
-    return false;
+    return null;
   }
   for (const [a, b] of [
     [node.left, node.right],
@@ -130,12 +145,13 @@ function isTypeofComparison(
       a.type === 'UnaryExpression' &&
       a.operator === 'typeof' &&
       b.type === 'Literal' &&
-      b.value === literalValue
+      typeof b.value === 'string' &&
+      b.value in TYPEOF_HELPERS
     ) {
-      return true;
+      return b.value;
     }
   }
-  return false;
+  return null;
 }
 
 export default defineRule({
@@ -144,8 +160,8 @@ export default defineRule({
     messages: {
       preferIsTruthy:
         'Use `.filter(isTruthy)` with `isTruthy` from `@sindresorhus/is` instead of `.filter(Boolean)` for a properly typed result.',
-      preferIsString:
-        "Use `isString()` from `@sindresorhus/is` instead of comparing `typeof` against 'string'.",
+      preferIsHelperForTypeof:
+        "Use `{{helper}}()` from `@sindresorhus/is` instead of comparing `typeof` against '{{literal}}'.",
       preferIsNullOrUndefined:
         'Use `isNullOrUndefined()` from `@sindresorhus/is` instead of comparing against both `null` and `undefined`.',
       preferNotIsNullOrUndefined:
@@ -169,9 +185,14 @@ export default defineRule({
         }
       },
       BinaryExpression(node) {
-        // `typeof x === 'string'` / `typeof x !== 'string'`
-        if (isTypeofComparison(node, 'string')) {
-          context.report({ node, messageId: 'preferIsString' });
+        // `typeof x === 'string'` / `typeof x !== 'string'` / etc.
+        const literal = getTypeofHelperLiteral(node);
+        if (literal) {
+          context.report({
+            node,
+            messageId: 'preferIsHelperForTypeof',
+            data: { helper: TYPEOF_HELPERS[literal], literal },
+          });
         }
       },
       LogicalExpression(node) {

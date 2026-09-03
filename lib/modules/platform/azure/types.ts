@@ -1,5 +1,11 @@
 import type { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { HostRule } from '../../../types/index.ts';
 import type { Pr } from '../types.ts';
+
+export interface AuthenticationContext {
+  credentials: HostRule;
+  key: string;
+}
 
 export interface AzurePr extends Pr {
   sourceRefName?: string;
@@ -28,4 +34,9 @@ export interface Config {
   defaultBranch: string;
   /** Work item type for issues; from `azureWorkItemType`, defaults to `Issue`. */
   workItemType: string;
+}
+
+export interface AzureBranchObj {
+  name: string;
+  oldObjectId: string;
 }

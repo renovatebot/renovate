@@ -11,7 +11,7 @@ vi.unmock('./scm.ts');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {
-    process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
+    vi.stubEnv('RENOVATE_X_GITHUB_HOST_RULES', 'true');
   });
 
   it('validates', async () => {

@@ -7,7 +7,7 @@ import type { PackageDependency } from '../types.ts';
 import type { Pep508ParseResult } from './types.ts';
 
 const pep508Regex = regEx(
-  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i,
+  /^(?<packageName>[A-Z0-9._-]+)\s*(?:\[(?<extras>[A-Z0-9\s,._-]+)\])?\s*(?<currentValue>[^;]+)?(?:;\s*(?<marker>.*))?/i,
 );
 
 export const depTypes = {

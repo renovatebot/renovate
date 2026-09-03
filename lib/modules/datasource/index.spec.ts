@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
@@ -50,7 +51,7 @@ class DummyDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);
@@ -72,7 +73,7 @@ class DummyDatasource2 extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);
@@ -95,7 +96,7 @@ class DummyDatasource3 extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);
@@ -119,7 +120,7 @@ class DummyDatasource5 extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);

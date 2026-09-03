@@ -5,20 +5,7 @@ import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator.ts';
-
-export interface Range {
-  version: string;
-  operator: string;
-  delimiter: string;
-  /**
-   * If the range is `~>` and immediately followed by `>=`,
-   * the latter range is considered the former's companion
-   * and assigned here instead of being an independent range.
-   *
-   * Example: `'~> 6.2', '>= 6.2.1'`
-   */
-  companion?: Range;
-}
+import type { Range } from './types.ts';
 
 function parse(range: string): Range {
   const regExp = regEx(

@@ -8,10 +8,10 @@ import {
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
+import type { StaticTooling } from '../asdf/types.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { BackendToolingConfig } from './backends.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
@@ -27,7 +27,7 @@ import {
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
-import type { ToolingDefinition } from './upgradeable-tooling.ts';
+import type { BackendToolingConfig, ToolingDefinition } from './types.ts';
 import {
   asdfTooling,
   getOrderedMiseRegistryBackends,
@@ -62,7 +62,9 @@ export async function extractPackageFile(
   }
 
   for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
-    for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
+    for (const [name, toolData] of Object.entries(
+      coerceObject(taskData.tools),
+    )) {
       deps.push(extractToolEntry(name, toolData, `task-${taskName}-tools`));
     }
   }

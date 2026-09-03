@@ -32,6 +32,15 @@ import * as github from './index.ts';
 import type { ApiPageCache, GhRestPr } from './types.ts';
 
 const githubApiHost = 'https://api.github.com';
+const graphqlRateLimitResponse = {
+  errors: [
+    {
+      type: 'RATE_LIMIT',
+      code: 'graphql_rate_limit',
+      message: 'API rate limit already exceeded for installation ID XXXXXXX.',
+    },
+  ],
+};
 
 vi.mock('timers/promises');
 
@@ -56,7 +65,7 @@ describe('modules/platform/github/index', () => {
 
     const repoCache = repository.getCache();
     delete repoCache.platform;
-    delete process.env.RENOVATE_X_GITHUB_HOST_RULES;
+    vi.stubEnv('RENOVATE_X_GITHUB_HOST_RULES', undefined);
   });
 
   describe('initPlatform()', () => {
@@ -421,7 +430,7 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
-      process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
+      vi.stubEnv('RENOVATE_X_GITHUB_HOST_RULES', 'true');
       httpMock
         .scope(githubApiHost, {
           reqheaders: {
@@ -518,6 +527,16 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.initPlatform({ token: 'x-access-token:ghs_123test' }),
       ).rejects.toThrowWithMessage(Error, 'Init: Authentication failure');
+    });
+
+    it('should report a spent App budget as rate limiting, not as authentication failure', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, graphqlRateLimitResponse);
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' }),
+      ).rejects.toThrowWithMessage(Error, PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
     it('should autodetect email/user on custom endpoint with GitHub App', async () => {
@@ -1165,6 +1184,16 @@ describe('modules/platform/github/index', () => {
             },
           ],
         });
+      await expect(
+        github.initRepo({ repository: 'some/repo' }),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
+    it('should abort when graphql_rate_limit is returned', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, graphqlRateLimitResponse);
       await expect(
         github.initRepo({ repository: 'some/repo' }),
       ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
@@ -2709,6 +2738,41 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('ensureIssue()', () => {
+    it('propagates GraphQL rate limit errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(
+        github.ensureIssue({ title: 'new-title', body: 'new-content' }),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
+    it('handles repositories with issues disabled', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: { hasNextPage: false, endCursor: null },
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/repos/some/repo/issues')
+        .reply(410, { message: 'Issues are disabled for this repo' });
+
+      await expect(
+        github.ensureIssue({ title: 'new-title', body: 'new-content' }),
+      ).resolves.toBeNull();
+    });
+
     it('creates issue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -4174,6 +4238,36 @@ describe('modules/platform/github/index', () => {
         ]);
       });
 
+      it('should use the configured automerge strategy', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeStrategy: 'rebase',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'REBASE',
+              },
+            },
+          },
+        ]);
+      });
+
       it('should handle GraphQL errors', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
@@ -4198,6 +4292,15 @@ describe('modules/platform/github/index', () => {
           restAddLabels,
           graphqlAutomerge,
         ]);
+      });
+
+      it('should propagate GraphQL rate limit errors', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+        await expect(github.createPr(prConfig)).rejects.toThrow(
+          PLATFORM_RATE_LIMIT_EXCEEDED,
+        );
       });
 
       it('should pass commit message as commitHeadline and commitBody for squash merge', async () => {
@@ -4802,6 +4905,17 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(PR_ALREADY_IN_MERGE_QUEUE);
     });
 
+    it('propagates rate limits from the base branch check', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+    });
+
     it('logs if the merge queue check returns errors', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -4833,6 +4947,19 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.assertPrNotInMergeQueue('somebranch', 'main'),
       ).toResolve();
+    });
+
+    it('propagates rate limits from the PR merge queue check', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope);
+      prListMock(scope);
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
     it('skips merge queue check on GHE <3.12.0', async () => {
@@ -5082,6 +5209,15 @@ describe('modules/platform/github/index', () => {
           err: new ExternalHostError(expect.any(RequestError), 'github'),
         },
         'Error re-attempting PR platform automerge',
+      );
+    });
+
+    it('propagates GraphQL rate limit errors', async () => {
+      const scope = await mockScope();
+      scope.post('/graphql').reply(200, graphqlRateLimitResponse);
+
+      await expect(github.reattemptPlatformAutomerge(pr)).rejects.toThrow(
+        PLATFORM_RATE_LIMIT_EXCEEDED,
       );
     });
   });
@@ -5613,6 +5749,103 @@ describe('modules/platform/github/index', () => {
         )
         .get(
           '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&page=2',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+              severity: 'low',
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'center-pad',
+              },
+              severity: 'low',
+              vulnerable_version_range: '0.0.3',
+              first_patched_version: { identifier: '0.0.4' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
+        ]);
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+
+      expect(res).toHaveLength(3);
+      expect(res[0].security_vulnerability!.package.name).toBe('left-pad');
+      expect(res[1].security_vulnerability!.package.name).toBe('right-pad');
+      expect(res[2].security_vulnerability!.package.name).toBe('center-pad');
+    });
+
+    it('handles cursor pagination correctly', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(
+          200,
+          [
+            {
+              security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
+                description: 'description',
+                identifiers: [{ type: 'type', value: 'value' }],
+                references: [],
+                severity: 'high',
+              },
+              security_vulnerability: {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'left-pad',
+                },
+                severity: 'high',
+                vulnerable_version_range: '0.0.2',
+                first_patched_version: { identifier: '0.0.3' },
+              },
+              dependency: {
+                manifest_path: 'bar/foo',
+              },
+            },
+            {
+              security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
+                description: 'description',
+                identifiers: [{ type: 'type', value: 'value' }],
+                references: [],
+                severity: 'critical',
+              },
+              security_vulnerability: {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'right-pad',
+                },
+                severity: 'critical',
+                vulnerable_version_range: '0.0.1',
+                first_patched_version: { identifier: '0.0.2' },
+              },
+              dependency: {
+                manifest_path: 'bar/foo',
+              },
+            },
+          ],
+          {
+            link: `<${githubApiHost}/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1>; rel="next"`,
+          },
+        )
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1',
         )
         .reply(200, [
           {
