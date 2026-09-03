@@ -23,6 +23,7 @@ import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -33,6 +34,9 @@ import type * as _hostRules from '../../../util/host-rules.ts';
 import type { Platform, RepoParams } from '../types.ts';
 import { AzurePrVote } from './types.ts';
 
+vi.mock('../../../config/global.ts', async (importOriginal) =>
+  importOriginal<typeof import('../../../config/global.ts')>(),
+);
 vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 vi.mock('./azure-helper.ts', () => mockDeep());
 vi.mock('../../../util/sanitize.ts', () =>
@@ -51,6 +55,7 @@ describe('modules/platform/azure/index', () => {
   beforeEach(async () => {
     // reset module
     vi.resetModules();
+    GlobalConfig.reset();
     hostRules = await vi.importActual('../../../util/host-rules.ts');
     azure = await vi.importActual('./index.ts');
     azureApi = await vi.importMock('./azure-got-wrapper.ts');
@@ -66,6 +71,7 @@ describe('modules/platform/azure/index', () => {
     hostRules.clear();
     hostRules.add({ token: 'token' });
     azureHelper.getPolicyEvaluations.mockResolvedValue([]);
+    azureApi.getAuthenticatedUserId.mockResolvedValue('renovate-user-id');
     // Default to the hosted (cloud) endpoint used across these tests.
     azureApi.isHosted.mockResolvedValue(true);
     await azure.initPlatform({
@@ -156,6 +162,22 @@ describe('modules/platform/azure/index', () => {
           token: 'token',
         }),
       ).toMatchSnapshot();
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
+        token: 'token',
+      });
+    });
+
+    it('should discover the authenticated user with basic credentials', async () => {
+      await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        username: 'user',
+        password: 'pass',
+      });
+
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
+        username: 'user',
+        password: 'pass',
+      });
     });
   });
 
@@ -499,6 +521,81 @@ describe('modules/platform/azure/index', () => {
       });
     });
 
+    it('queries the exact branch when including other authors', async () => {
+      await initRepo();
+      const getPullRequests = vi.fn().mockResolvedValue([
+        {
+          pullRequestId: 1,
+          sourceRefName: 'refs/heads/branch-a',
+          targetRefName: 'refs/heads/branch-b',
+          title: 'branch a pr',
+          status: 1,
+        },
+      ]);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests,
+        }),
+      );
+
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        state: 'open',
+        targetBranch: 'branch-b',
+        includeOtherAuthors: true,
+      });
+
+      expect(res).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch-a',
+        state: 'open',
+        targetBranch: 'branch-b',
+      });
+      expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
+        '1',
+        {
+          sourceRefName: 'refs/heads/branch-a',
+          sourceRepositoryId: '1',
+          status: 1,
+          targetRefName: 'refs/heads/branch-b',
+        },
+        'some',
+        0,
+        0,
+        1,
+      );
+    });
+
+    it('returns null when no PR from another author matches', async () => {
+      await initRepo();
+      const getPullRequests = vi.fn().mockResolvedValue([]);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests,
+        }),
+      );
+
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+
+      expect(res).toBeNull();
+      expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
+        '1',
+        {
+          sourceRefName: 'refs/heads/branch-a',
+          sourceRepositoryId: '1',
+          status: 1,
+        },
+        'some',
+        0,
+        0,
+        1,
+      );
+    });
+
     it('catches errors', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
@@ -514,13 +611,96 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('getPrList()', () => {
-    it('returns empty array', async () => {
+    it('filters PRs by repository and authenticated user', async () => {
+      await initRepo();
+      const getPullRequests = vi.fn().mockResolvedValue([]);
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getPullRequests: vi.fn().mockResolvedValue([]),
+          getPullRequests,
         }),
       );
       expect(await azure.getPrList()).toEqual([]);
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenCalledExactlyOnceWith({
+        token: 'token',
+      });
+      expect(azureApi.gitApi).toHaveBeenLastCalledWith();
+      expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
+        '1',
+        {
+          creatorId: 'renovate-user-id',
+          sourceRepositoryId: '1',
+          status: 4,
+        },
+        'some',
+        0,
+        0,
+        100,
+      );
+    });
+
+    it('does not filter by authenticated user when ignorePrAuthor is enabled', async () => {
+      GlobalConfig.set({ ignorePrAuthor: true });
+      await initRepo();
+      const getPullRequests = vi.fn().mockResolvedValue([]);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests,
+        }),
+      );
+
+      expect(await azure.getPrList()).toEqual([]);
+      expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
+        '1',
+        {
+          sourceRepositoryId: '1',
+          status: 4,
+        },
+        'some',
+        0,
+        0,
+        100,
+      );
+    });
+
+    it('does not filter by authenticated user when the ID is unavailable', async () => {
+      azureApi.getAuthenticatedUserId.mockResolvedValueOnce(undefined);
+      await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        token: 'token',
+      });
+      await initRepo();
+      const getPullRequests = vi.fn().mockResolvedValue([]);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests,
+        }),
+      );
+
+      expect(await azure.getPrList()).toEqual([]);
+      expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
+        '1',
+        {
+          sourceRepositoryId: '1',
+          status: 4,
+        },
+        'some',
+        0,
+        0,
+        100,
+      );
+    });
+
+    it('reuses the cached PR list', async () => {
+      await initRepo();
+      const getPullRequests = vi.fn().mockResolvedValue([]);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({ getPullRequests }),
+      );
+
+      await azure.getPrList();
+      await azure.getPrList();
+
+      expect(getPullRequests).toHaveBeenCalledOnce();
     });
   });
 
