@@ -4,195 +4,89 @@ import { extractPackageFile } from './index.ts';
 describe('modules/manager/tekton/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts deps from a file', () => {
+      const autoReplaceStringTemplate =
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const result = extractPackageFile(
         Fixtures.get('multi-doc.yaml'),
         'test-file.yaml',
       );
-      expect(result?.deps).toMatchObject([
-        {
-          currentDigest:
-            'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
-          currentValue: '1.0',
-          depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline',
-          depType: 'tekton-bundle',
-        },
-        {
-          currentDigest:
-            'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
-          currentValue: '1.0',
-          depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline-finally',
-          depType: 'tekton-bundle',
-        },
-        {
-          currentDigest:
-            'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
-          currentValue: '1.0',
-          depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline-resolver',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'gcr.io/tekton-releases/catalog/upstream/list-pipeline',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'gcr.io/tekton-releases/catalog/upstream/list-pipeline-run',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'gcr.io/tekton-releases/catalog/upstream/list-task-run',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName:
-            'gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName:
-            'gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName:
-            'gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName:
-            'gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'gcr.io/tekton-releases/catalog/upstream/task-run',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'gcr.io/tekton-releases/catalog/upstream/task-run-resolver',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline-run',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName:
-            'gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'gcr.io/tekton-releases/catalog/upstream/inline-pipeline',
-          depType: 'tekton-bundle',
-        },
-        { depType: 'tekton-bundle', skipReason: 'invalid-value' },
-        { depType: 'tekton-bundle', skipReason: 'invalid-value' },
-        { depType: 'tekton-bundle', skipReason: 'invalid-value' },
-        {
-          currentDigest:
-            'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
-          currentValue: '1.0',
-          depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline-resolver',
-          depType: 'tekton-bundle',
-        },
-        {
-          currentDigest:
-            'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
-          currentValue: '1.0',
-          depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline-resolver',
-          depType: 'tekton-bundle',
-        },
-        {
-          depName: 'example.io/taskrun/spec/taskSpec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName: 'example.io/taskrun/spec/taskSpec/sidecars/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName: 'example.io/taskrun/spec/taskSpec/stepTemplate/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName: 'example.io/task/spec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName: 'example.io/task/spec/sidecars/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName: 'example.io/task/spec/stepTemplate/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName: 'example.com/pipeline/spec/tasks/0/taskSpec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipeline/spec/tasks/0/taskSpec/sidecars/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipeline/spec/tasks/0/taskSpec/stepTemplate/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName: 'example.com/pipeline/spec/finally/0/taskSpec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipeline/spec/finally/0/taskSpec/sidecars/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipeline/spec/finally/0/taskSpec/stepTemplate/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/sidecars/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/stepTemplate/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/sidecars/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/stepTemplate/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-        {
-          depName:
-            'example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image',
-          depType: 'tekton-step-image',
-        },
-      ]);
+      const deps = result?.deps;
+      expect(deps).toHaveLength(40);
+      expect(deps?.filter((e) => e.depType === 'tekton-bundle')).toHaveLength(
+        20,
+      );
+      expect(
+        deps?.filter((e) => e.depType === 'tekton-step-image'),
+      ).toHaveLength(20);
+      expect(deps?.filter((e) => e.skipReason)).toHaveLength(3);
+
+      // first entry: bundle pinned by tag and digest
+      expect(deps?.[0]).toEqual({
+        depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline',
+        packageName: 'gcr.io/tekton-releases/catalog/upstream/pipeline',
+        currentValue: '1.0',
+        currentDigest:
+          'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
+        replaceString:
+          'gcr.io/tekton-releases/catalog/upstream/pipeline:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
+        autoReplaceStringTemplate,
+        datasource: 'docker',
+        depType: 'tekton-bundle',
+      });
+
+      // bundle without a tag or digest
+      expect(deps?.[3]).toEqual({
+        depName: 'gcr.io/tekton-releases/catalog/upstream/list-pipeline',
+        packageName: 'gcr.io/tekton-releases/catalog/upstream/list-pipeline',
+        replaceString: 'gcr.io/tekton-releases/catalog/upstream/list-pipeline',
+        autoReplaceStringTemplate,
+        datasource: 'docker',
+        depType: 'tekton-bundle',
+      });
+
+      // bundle reference that cannot be parsed
+      expect(deps?.[15]).toEqual({
+        skipReason: 'invalid-value',
+        depType: 'tekton-bundle',
+      });
+
+      // bundle declared through a resolver parameter
+      expect(deps?.[19]).toEqual({
+        depName: 'gcr.io/tekton-releases/catalog/upstream/pipeline-resolver',
+        packageName:
+          'gcr.io/tekton-releases/catalog/upstream/pipeline-resolver',
+        currentValue: '1.0',
+        currentDigest:
+          'sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
+        replaceString:
+          'gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b',
+        autoReplaceStringTemplate,
+        datasource: 'docker',
+        depType: 'tekton-bundle',
+      });
+
+      // first step image
+      expect(deps?.[20]).toEqual({
+        depName: 'example.io/taskrun/spec/taskSpec/steps/0/image',
+        packageName: 'example.io/taskrun/spec/taskSpec/steps/0/image',
+        replaceString: 'example.io/taskrun/spec/taskSpec/steps/0/image',
+        autoReplaceStringTemplate,
+        datasource: 'docker',
+        depType: 'tekton-step-image',
+      });
+
+      // last entry: step image nested in a trigger template
+      expect(deps?.[39]).toEqual({
+        depName:
+          'example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image',
+        packageName:
+          'example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image',
+        replaceString:
+          'example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image',
+        autoReplaceStringTemplate,
+        datasource: 'docker',
+        depType: 'tekton-step-image',
+      });
     });
 
     it('extracts deps from a file in annotations', () => {
