@@ -851,6 +851,13 @@ export async function lookupUpdates(
         config.registryUrls = [res.registryUrl];
       }
 
+      // getDigest() needs the real tag; versionOrig holds it pre-extractVersion.
+      function origTag(v: string | undefined): string | undefined {
+        return (
+          dependency?.releases.find((r) => r.version === v)?.versionOrig ?? v
+        );
+      }
+
       // update digest for all
       for (const update of res.updates) {
         // only update the digest in the package file if it's managed by us
@@ -858,14 +865,9 @@ export async function lookupUpdates(
           (config.pinDigests === true && !config.digestManagedExternally) ||
           config.currentDigest
         ) {
-          // getDigest() needs the real tag; versionOrig holds it pre-extractVersion.
-          const currentValueOrig =
-            dependency?.releases.find((r) => r.version === config.currentValue)
-              ?.versionOrig ?? config.currentValue;
-
           const getDigestConfig: GetDigestInputConfig = {
             ...config,
-            currentValue: currentValueOrig,
+            currentValue: origTag(config.currentValue),
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
           };
@@ -885,10 +887,6 @@ export async function lookupUpdates(
             getDigestConfig.replacementName = update.newName;
           }
 
-          const newRelease = dependency?.releases.find(
-            (r) => r.version === update.newValue,
-          );
-
           // Don't use current releases if replacement changes name, otherwise we use the wrong new digest.
           // This happens on datasources which return the digest in release info like `github-tags`.
           // We can still use it when only version is changing.
@@ -896,12 +894,15 @@ export async function lookupUpdates(
             update.updateType !== 'replacement' ||
             update.newName === config.packageName
           ) {
-            update.newDigest ??= newRelease?.newDigest;
+            update.newDigest ??= dependency?.releases.find(
+              (r) => r.version === update.newValue,
+            )?.newDigest;
           }
 
-          const newValueOrig = newRelease?.versionOrig ?? update.newValue;
-
-          update.newDigest ??= await getDigest(getDigestConfig, newValueOrig);
+          update.newDigest ??= await getDigest(
+            getDigestConfig,
+            origTag(update.newValue),
+          );
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.

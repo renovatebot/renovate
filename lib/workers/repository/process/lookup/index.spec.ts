@@ -3272,17 +3272,55 @@ describe('workers/repository/process/lookup/index', () => {
       });
       const getGithubTagsDigest = vi
         .spyOn(GithubTagsDatasource.prototype, 'getDigest')
-        .mockResolvedValueOnce('digest1234');
+        .mockResolvedValueOnce('digest1234')
+        .mockResolvedValueOnce('digest5678');
 
-      await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
 
-      // digest lookups must use the raw tag (v1.0.0), not the stripped value (1.0.0)
-      expect(getGithubTagsDigest).toHaveBeenCalledWith(
-        expect.objectContaining({ currentValue: 'v1.0.0' }),
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          hasAttestation: undefined,
+          isBreaking: true,
+          newDigest: 'digest1234',
+          newMajor: 2,
+          newMinor: 0,
+          newPatch: 0,
+          newValue: '2.0.0',
+          newVersion: '2.0.0',
+          newVersionAgeInDays: expect.any(Number),
+          releaseTimestamp: '2022-06-01T00:00:00.000Z',
+          updateType: 'major',
+        },
+        {
+          isPinDigest: true,
+          newDigest: 'digest5678',
+          newValue: '1.0.0',
+          updateType: 'pinDigest',
+        },
+      ]);
+      expect(getGithubTagsDigest).toHaveBeenNthCalledWith(
+        1,
+        {
+          currentDigest: undefined,
+          currentValue: 'v1.0.0',
+          lookupName: undefined,
+          packageName: 'angular/angular',
+          registryUrl: 'https://github.com',
+        },
         'v2.0.0',
       );
-      expect(getGithubTagsDigest).toHaveBeenCalledWith(
-        expect.objectContaining({ currentValue: 'v1.0.0' }),
+      expect(getGithubTagsDigest).toHaveBeenNthCalledWith(
+        2,
+        {
+          currentDigest: undefined,
+          currentValue: 'v1.0.0',
+          lookupName: undefined,
+          packageName: 'angular/angular',
+          registryUrl: 'https://github.com',
+        },
         'v1.0.0',
       );
     });
