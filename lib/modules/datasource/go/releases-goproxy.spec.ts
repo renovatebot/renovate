@@ -3,7 +3,9 @@ import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
@@ -627,7 +629,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it('short-circuits for errors other than 404 or 410', async () => {
+    it('propagates errors other than 404 or 410, without falling back to further URLs', async () => {
       vi.stubEnv(
         'GOPROXY',
         [
@@ -653,10 +655,11 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .replyWithError('unknown');
 
-      const res = await datasource.getReleases({
-        packageName: 'github.com/foo/bar',
-      });
-      expect(res).toBeNull();
+      await expect(
+        datasource.getReleases({ packageName: 'github.com/foo/bar' }),
+      ).rejects.toThrow(HttpError);
+      expect(githubGetTags).not.toHaveBeenCalled();
+      expect(githubGetReleases).not.toHaveBeenCalled();
     });
 
     it('supports "direct" keyword', async () => {
@@ -719,10 +722,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       expect(res).toBeNull();
     });
 
-    // this is incorrect behaviour we're documenting to fix in a follow-up
-    // a `,`-separated GOPROXY entry should only fall back to the next entry on 404/410, and otherwise propagate the error. Instead
-    // the loop silently stops and `null` is returned, which then gets cached as a "no releases found" result.
-    it('silently swallows a non-404/410 HTTP error from the primary proxy', async () => {
+    it('propagates a non-404/410 HTTP error from the primary proxy instead of falling back', async () => {
       vi.stubEnv('GOPROXY', `${baseUrl},direct`);
 
       httpMock
@@ -730,18 +730,14 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(500);
 
-      const res = await datasource.getReleases({
-        packageName: 'github.com/google/btree',
-      });
-
-      expect(res).toBeNull();
+      await expect(
+        datasource.getReleases({ packageName: 'github.com/google/btree' }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(githubGetTags).not.toHaveBeenCalled();
       expect(githubGetReleases).not.toHaveBeenCalled();
     });
 
-    // this is incorrect behaviour we're documenting to fix in a follow-up
-    // a network-level error (no HTTP status code at all) is treated the same as any other non-404/410 error.
-    it('silently swallows a network error from the primary proxy', async () => {
+    it('propagates a network error from the primary proxy instead of falling back', async () => {
       vi.stubEnv('GOPROXY', `${baseUrl},direct`);
 
       httpMock
@@ -749,11 +745,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
 
-      const res = await datasource.getReleases({
-        packageName: 'github.com/google/btree',
-      });
-
-      expect(res).toBeNull();
+      await expect(
+        datasource.getReleases({ packageName: 'github.com/google/btree' }),
+      ).rejects.toThrow(HttpError);
       expect(githubGetTags).not.toHaveBeenCalled();
       expect(githubGetReleases).not.toHaveBeenCalled();
     });
