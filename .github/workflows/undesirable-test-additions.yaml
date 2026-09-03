@@ -113,11 +113,11 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body ?? '';
-            const closingPattern = /\b(?:close[sd]?|fix(?:es|ed)?|resolve[sd]?):?\s+(?:https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/|#)(\d+)\b/gi;
+            const closingPattern = /\b(?:close[sd]?|fix(?:es|ed)?|resolve[sd]?):?\s+(?:https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/|#)(?<referenceNumber>\d+)\b/gi;
             const referenceNumbers = new Set();
 
             for (const match of body.matchAll(closingPattern)) {
-              referenceNumbers.add(match[1]);
+              referenceNumbers.add(match.groups.referenceNumber);
             }
 
             if (referenceNumbers.size === 0) {
