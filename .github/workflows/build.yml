@@ -759,7 +759,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: 0.12.8
+          version: 0.12.9
           enable-cache: true
           cache-python: true
 
@@ -903,7 +903,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: 0.12.8
+          version: 0.12.9
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true
@@ -1007,7 +1007,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   notify-release-failure:
     runs-on: ubuntu-latest

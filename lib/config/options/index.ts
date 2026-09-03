@@ -692,7 +692,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.95.1',
+    default: 'ghcr.io/renovatebot/base-image:13.95.6',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1029,7 +1029,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: true,
   },
-  // Bot administration
+  // Admin/self-hosted administration
   {
     name: 'persistRepoData',
     description:
@@ -2132,7 +2132,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rebaseLabel',
-    description: 'Label to request a rebase from Renovate bot.',
+    description: 'Label to request a rebase from Renovate.',
     type: 'string',
     default: 'rebase',
   },

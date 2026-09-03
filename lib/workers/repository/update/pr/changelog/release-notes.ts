@@ -1,4 +1,9 @@
-import { isDate, isTruthy, isUndefined } from '@sindresorhus/is';
+import {
+  isDate,
+  isNonEmptyString,
+  isTruthy,
+  isUndefined,
+} from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { instrument } from '../../../../../instrumentation/index.ts';
@@ -35,6 +40,12 @@ const repositoriesToSkipMdFetching = [
   'facebook/react-native',
   'react/react-native',
 ];
+
+// Per the OCI distribution reference grammar a leading path segment is a host
+// when it contains a `.` or a `:`. Go module paths are qualified the same way.
+const hostQualifiedNameRegex = regEx(
+  /^(?:localhost(?::\d+)?|[^/]+[.:][^/]*)\/(?<unqualifiedName>.+)$/,
+);
 
 export async function getReleaseList(
   project: ChangeLogProject,
@@ -166,8 +177,8 @@ export async function getReleaseNotes(
     let releaseNotes: ChangeLogNotes | null = null;
 
     let matchedRelease = getExactReleaseMatch(
-      packageName!,
-      depName!,
+      packageName,
+      depName,
       version,
       releases,
     );
@@ -196,19 +207,58 @@ export async function getReleaseNotes(
 }
 
 function getExactReleaseMatch(
-  packageName: string,
-  depName: string,
+  packageName: string | undefined,
+  depName: string | undefined,
   version: string,
   releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
+  const namePatterns = getNamePatterns(packageName, depName);
+  if (!namePatterns.length) {
+    return undefined;
+  }
+
   const exactReleaseReg = regEx(
-    `(?:^|/)(?:${packageName}|${depName})[@_/-]v?${version}`,
+    `(?:^|/)(?:${namePatterns.join('|')})[@_/-]v?${RegExp.escape(version)}`,
   );
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
     exactReleaseReg.test(r.tag!),
   );
   return matchedRelease;
+}
+
+/**
+ * A registry host never appears in a Git tag, so a host-qualified name such as
+ * an OCI chart `<registry>/<org>/<repo>/<chart>` can never match the tag that
+ * publishes it, which is scoped by the chart name alone: `<chart>-<version>`.
+ * For those names, also match against the name with its host stripped, and
+ * against the trailing path segment alone. Names that are not host-qualified,
+ * such as scoped npm packages, keep matching in full only, so their tag
+ * prefixes stay as specific as they are today.
+ */
+function getNamePatterns(
+  packageName: string | undefined,
+  depName: string | undefined,
+): string[] {
+  const names = new Set<string>();
+  for (const name of [packageName, depName]) {
+    if (!isNonEmptyString(name)) {
+      continue;
+    }
+    names.add(name);
+
+    const unqualifiedName =
+      hostQualifiedNameRegex.exec(name)?.groups?.unqualifiedName;
+    if (isNonEmptyString(unqualifiedName)) {
+      names.add(unqualifiedName);
+
+      const trailingName = unqualifiedName.split('/').pop();
+      if (isNonEmptyString(trailingName)) {
+        names.add(trailingName);
+      }
+    }
+  }
+  return [...names].map((name) => RegExp.escape(name));
 }
 
 async function releaseNotesResult(

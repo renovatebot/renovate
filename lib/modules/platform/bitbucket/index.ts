@@ -252,15 +252,20 @@ export async function initRepo({
     mainBranch = info.mainbranch;
 
     if (getInheritedOrGlobal('bbUseDevelopmentBranch')) {
-      // Fetch Bitbucket development branch
+      logger.debug(
+        "bbUseDevelopmentBranch is true - Checking BitBucket's development branch",
+      );
       const developmentBranch = (
         await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
-          `/2.0/repositories/${repository}/branching-model`,
+          `/2.0/repositories/${repository}/effective-branching-model`,
         )
-      ).body.development?.branch?.name;
+      ).body.development?.name;
 
       if (developmentBranch) {
         mainBranch = developmentBranch;
+        logger.debug(
+          `${developmentBranch} is BitBucket's development branch - using it as default branch`,
+        );
       }
     }
 

@@ -907,6 +907,15 @@ const staticGroups = {
       },
     ],
   },
+  vitePlus: {
+    description: 'Group all Vite+ related packages together.',
+    packageRules: [
+      {
+        extends: ['packages:vitePlus'],
+        groupName: 'Vite+ packages',
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
