@@ -119,8 +119,8 @@ describe('modules/manager/npm/update/dependency/index', () => {
         packageFile: 'package.json',
         upgrade,
       });
-      expect(res).toMatchInlineSnapshot(
-        `"{"dependencies":{"n":"git+https://github.com/owner/n#v1.1.0"}}"`,
+      expect(res).toBe(
+        '{"dependencies":{"n":"git+https://github.com/owner/n#v1.1.0"}}',
       );
       expect(res).toContain('v1.1.0');
     });
