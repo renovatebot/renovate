@@ -3256,6 +3256,38 @@ describe('workers/repository/process/lookup/index', () => {
       );
     });
 
+    it('resolves digests using the pre-extractVersion tag, not the stripped value', async () => {
+      config.currentValue = '1.0.0';
+      config.extractVersion = '^v(?<version>.*)$';
+      config.packageName = 'angular/angular';
+      config.pinDigests = true;
+      config.digestOneAndOnly = true;
+      config.datasource = GithubTagsDatasource.id;
+
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'v1.0.0', releaseTimestamp: '2022-01-01' as Timestamp },
+          { version: 'v2.0.0', releaseTimestamp: '2022-06-01' as Timestamp },
+        ],
+      });
+      const getGithubTagsDigest = vi
+        .spyOn(GithubTagsDatasource.prototype, 'getDigest')
+        .mockResolvedValueOnce('digest1234');
+
+      await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+
+      // both the version-bump and the digest-pin lookups must use the raw
+      // tag (v1.0.0), never the extractVersion-stripped value (1.0.0)
+      expect(getGithubTagsDigest).toHaveBeenCalledWith(
+        expect.objectContaining({ currentValue: 'v1.0.0' }),
+        'v2.0.0',
+      );
+      expect(getGithubTagsDigest).toHaveBeenCalledWith(
+        expect.objectContaining({ currentValue: 'v1.0.0' }),
+        'v1.0.0',
+      );
+    });
+
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';

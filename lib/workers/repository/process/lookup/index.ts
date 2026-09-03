@@ -858,8 +858,16 @@ export async function lookupUpdates(
           (config.pinDigests === true && !config.digestManagedExternally) ||
           config.currentDigest
         ) {
+          // `extractVersion` strips the release/tag prefix from the values we compare and
+          // write to the package file, but `getDigest()` implementations need the actual
+          // git tag. `versionOrig` on the matching release holds that pre-extraction value.
+          const currentValueOrig =
+            dependency?.releases.find((r) => r.version === config.currentValue)
+              ?.versionOrig ?? config.currentValue;
+
           const getDigestConfig: GetDigestInputConfig = {
             ...config,
+            currentValue: currentValueOrig,
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
           };
@@ -891,10 +899,11 @@ export async function lookupUpdates(
             )?.newDigest;
           }
 
-          update.newDigest ??= await getDigest(
-            getDigestConfig,
-            update.newValue,
-          );
+          const newValueOrig =
+            dependency?.releases.find((r) => r.version === update.newValue)
+              ?.versionOrig ?? update.newValue;
+
+          update.newDigest ??= await getDigest(getDigestConfig, newValueOrig);
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.
