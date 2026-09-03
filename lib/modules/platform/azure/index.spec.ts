@@ -161,7 +161,11 @@ describe('modules/platform/azure/index', () => {
           endpoint: 'https://dev.azure.com/renovate12345',
           token: 'token',
         }),
-      ).toMatchSnapshot();
+      ).toMatchInlineSnapshot(`
+        {
+          "endpoint": "https://dev.azure.com/renovate12345/",
+        }
+      `);
       expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
         token: 'token',
       });
@@ -187,8 +191,17 @@ describe('modules/platform/azure/index', () => {
         'sometoken',
         'https://dev.azure.com/renovate12345',
       );
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
-      expect(repos).toMatchSnapshot('repos');
+      expect(azureApi.gitApi.mock.calls).toMatchInlineSnapshot(`
+        [
+          [],
+        ]
+      `);
+      expect(repos).toMatchInlineSnapshot(`
+        [
+          "prj1/repo1",
+          "prj1/repo2",
+        ]
+      `);
     });
   });
 
@@ -240,8 +253,18 @@ describe('modules/platform/azure/index', () => {
       const config = await initRepo({
         repository: 'some/repo',
       });
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
-      expect(config).toMatchSnapshot('config');
+      expect(azureApi.gitApi.mock.calls).toMatchInlineSnapshot(`
+        [
+          [],
+        ]
+      `);
+      expect(config).toMatchInlineSnapshot(`
+        {
+          "defaultBranch": "defBr",
+          "isFork": false,
+          "repoFingerprint": "02574de485149547c1a071aa7921da3d0afadcd6162f3bd49ba3ced29be589f8b9bac689fd0badb212bd21c3f48bd8566beaf31cdca2b083bd855808a9c129e2",
+        }
+      `);
     });
 
     it(`throws if repo is disabled`, async () => {
@@ -1072,7 +1095,23 @@ describe('modules/platform/azure/index', () => {
         }),
       );
       const pr = await azure.getPr(1234);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchInlineSnapshot(`
+        {
+          "bodyStruct": {
+            "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          },
+          "createdAt": undefined,
+          "labels": [
+            "renovate",
+          ],
+          "number": 1234,
+          "pullRequestId": 1234,
+          "sourceBranch": undefined,
+          "sourceRefName": undefined,
+          "state": "open",
+          "targetBranch": undefined,
+        }
+      `);
     });
   });
 
@@ -1095,7 +1134,20 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchInlineSnapshot(`
+        {
+          "bodyStruct": {
+            "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          },
+          "createdAt": undefined,
+          "number": 456,
+          "pullRequestId": 456,
+          "sourceBranch": undefined,
+          "sourceRefName": undefined,
+          "state": "open",
+          "targetBranch": undefined,
+        }
+      `);
     });
 
     it('should create and return a PR object from base branch', async () => {
@@ -1116,7 +1168,20 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchInlineSnapshot(`
+        {
+          "bodyStruct": {
+            "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          },
+          "createdAt": undefined,
+          "number": 456,
+          "pullRequestId": 456,
+          "sourceBranch": undefined,
+          "sourceRefName": undefined,
+          "state": "open",
+          "targetBranch": undefined,
+        }
+      `);
     });
 
     describe('when usePlatformAutomerge is set', () => {
@@ -1157,7 +1222,32 @@ describe('modules/platform/azure/index', () => {
           platformPrOptions: { usePlatformAutomerge: true },
         });
         expect(updateFn).toHaveBeenCalled();
-        expect(pr).toMatchSnapshot();
+        expect(pr).toMatchInlineSnapshot(`
+          {
+            "autoCompleteSetBy": {
+              "id": "123",
+            },
+            "bodyStruct": {
+              "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            },
+            "completionOptions": {
+              "deleteSourceBranch": true,
+              "mergeCommitMessage": "The Title",
+              "mergeStrategy": 2,
+            },
+            "createdAt": undefined,
+            "createdBy": {
+              "id": "123",
+            },
+            "number": 456,
+            "pullRequestId": 456,
+            "sourceBranch": undefined,
+            "sourceRefName": undefined,
+            "state": "open",
+            "targetBranch": undefined,
+            "title": "The Title",
+          }
+        `);
       });
 
       it('should only call getMergeMethod once per run when automergeStrategy is auto', async () => {
@@ -1393,7 +1483,24 @@ describe('modules/platform/azure/index', () => {
         platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchInlineSnapshot(`
+        {
+          "bodyStruct": {
+            "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          },
+          "createdAt": undefined,
+          "createdBy": {
+            "id": 123,
+            "url": "user-url",
+          },
+          "number": 456,
+          "pullRequestId": 456,
+          "sourceBranch": undefined,
+          "sourceRefName": undefined,
+          "state": "open",
+          "targetBranch": undefined,
+        }
+      `);
     });
   });
 
@@ -1412,7 +1519,19 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world again',
         targetBranch: 'new_base',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            {
+              "description": "Hello world again",
+              "targetRefName": "refs/heads/new_base",
+              "title": "The New Title",
+            },
+            "1",
+            1234,
+          ],
+        ]
+      `);
     });
 
     it('should update the PR including cache', async () => {
@@ -1464,7 +1583,17 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title - autoclose',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            {
+              "title": "The New Title - autoclose",
+            },
+            "1",
+            1234,
+          ],
+        ]
+      `);
     });
 
     it('should close the PR', async () => {
@@ -1481,7 +1610,19 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world again',
         state: 'closed',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            {
+              "description": "Hello world again",
+              "status": 2,
+              "title": "The New Title",
+            },
+            "1",
+            1234,
+          ],
+        ]
+      `);
     });
 
     it('should reopen the PR', async () => {
@@ -1498,7 +1639,25 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world again',
         state: 'open',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            {
+              "status": 1,
+            },
+            "1",
+            1234,
+          ],
+          [
+            {
+              "description": "Hello world again",
+              "title": "The New Title",
+            },
+            "1",
+            1234,
+          ],
+        ]
+      `);
     });
 
     it('should re-approve the PR', async () => {
@@ -1535,7 +1694,7 @@ describe('modules/platform/azure/index', () => {
         platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchInlineSnapshot(`undefined`);
     });
   });
 
@@ -1558,12 +1717,28 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
-      );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
-      );
+      expect(gitApiMock.createThread.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            {
+              "comments": [
+                {
+                  "commentType": 1,
+                  "content": "### some-subject
+
+        some
+        content",
+                  "parentCommentId": 0,
+                },
+              ],
+              "status": 1,
+            },
+            "1",
+            42,
+          ],
+        ]
+      `);
+      expect(gitApiMock.updateComment.mock.calls).toMatchInlineSnapshot(`[]`);
     });
 
     it('updates comment if missing', async () => {
@@ -1588,12 +1763,24 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\nnew\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
-      );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
-      );
+      expect(gitApiMock.createThread.mock.calls).toMatchInlineSnapshot(`[]`);
+      expect(gitApiMock.updateComment.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            {
+              "content": "### some-subject
+
+        some
+        new
+        content",
+            },
+            "1",
+            42,
+            4,
+            2,
+          ],
+        ]
+      `);
     });
 
     it('does nothing if comment exists and is the same', async () => {
@@ -1618,12 +1805,8 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
-      );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
-      );
+      expect(gitApiMock.createThread.mock.calls).toMatchInlineSnapshot(`[]`);
+      expect(gitApiMock.updateComment.mock.calls).toMatchInlineSnapshot(`[]`);
     });
 
     it('does nothing if comment exists and is the same when there is no topic', async () => {
@@ -1644,12 +1827,8 @@ describe('modules/platform/azure/index', () => {
         topic: null,
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
-      );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
-      );
+      expect(gitApiMock.createThread.mock.calls).toMatchInlineSnapshot(`[]`);
+      expect(gitApiMock.updateComment.mock.calls).toMatchInlineSnapshot(`[]`);
     });
 
     it('passes comment through massageMarkdown', async () => {
@@ -2268,7 +2447,12 @@ describe('modules/platform/azure/index', () => {
         }),
       );
       await azure.deleteLabel(1234, 'rebase');
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(azureApi.gitApi.mock.calls).toMatchInlineSnapshot(`
+        [
+          [],
+          [],
+        ]
+      `);
     });
   });
 
@@ -2370,7 +2554,22 @@ describe('modules/platform/azure/index', () => {
       );
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toEqual(data);
-      expect(getItemFn.mock.calls).toMatchSnapshot();
+      expect(getItemFn.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "123456",
+            "file.json",
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            true,
+          ],
+        ]
+      `);
     });
 
     it('returns null', async () => {

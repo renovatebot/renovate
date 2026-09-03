@@ -29,7 +29,11 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getRefs('123', 'branch');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          objectId: 132,
+        },
+      ]);
     });
 
     it('should not get ref', async () => {
@@ -49,7 +53,11 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getRefs('123', 'refs/head/branch1');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          objectId: '132',
+        },
+      ]);
     });
   });
 
@@ -65,7 +73,10 @@ describe('modules/platform/azure/azure-helper', () => {
         'branchName',
         'base',
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        name: 'refs/heads/branchName',
+        oldObjectId: '132',
+      });
     });
 
     it('should get the branch object when ref missing', async () => {
@@ -75,7 +86,10 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getAzureBranchObj('123', 'branchName');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        name: 'refs/heads/branchName',
+        oldObjectId: '0000000000000000000000000000000000000000',
+      });
     });
   });
 
@@ -161,7 +175,7 @@ describe('modules/platform/azure/azure-helper', () => {
         'repository',
         './myFilePath/test',
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`"{"hello"= "test"}"`);
     });
 
     it('should return null because the file is not readable', async () => {
@@ -192,7 +206,9 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getCommitDetails('123', '123456');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        parents: ['123456'],
+      });
     });
   });
 
