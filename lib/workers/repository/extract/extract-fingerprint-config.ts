@@ -44,6 +44,7 @@ function getFilteredManagerConfig(
     npmrc: config.npmrc,
     npmrcMerge: config.npmrcMerge,
     enabled: config.enabled,
+    osvVulnerabilityAlerts: config.osvVulnerabilityAlerts,
     ignorePaths: coerceArray(config.ignorePaths),
     includePaths: coerceArray(config.includePaths),
     skipInstalls: config.skipInstalls,
