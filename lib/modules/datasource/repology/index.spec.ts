@@ -251,9 +251,14 @@ describe('modules/datasource/repology/index', () => {
         versioning,
         packageName: 'debian_stable/nginx',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(1);
-      expect(res?.releases[0].version).toBe('1.14.2-2+deb10u1');
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          {
+            version: '1.14.2-2+deb10u1',
+          },
+        ],
+      });
     });
 
     it('returns correct version for source package', async () => {
@@ -270,9 +275,14 @@ describe('modules/datasource/repology/index', () => {
         versioning,
         packageName: 'debian_stable/gcc-defaults',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(1);
-      expect(res?.releases[0].version).toBe('1.181');
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          {
+            version: '1.181',
+          },
+        ],
+      });
     });
 
     it('returns correct version for api package', async () => {
@@ -286,9 +296,14 @@ describe('modules/datasource/repology/index', () => {
         versioning,
         packageName: 'debian_stable/gcc-defaults',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(1);
-      expect(res?.releases[0].version).toBe('1.181');
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          {
+            version: '1.181',
+          },
+        ],
+      });
     });
 
     it('returns correct version for multi-package project with same name', async () => {
@@ -302,9 +317,14 @@ describe('modules/datasource/repology/index', () => {
         versioning,
         packageName: 'alpine_3_12/gcc',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(1);
-      expect(res?.releases[0].version).toBe('9.3.0-r2');
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          {
+            version: '9.3.0-r2',
+          },
+        ],
+      });
     });
 
     it('returns correct version for multi-package project with different name', async () => {
@@ -318,9 +338,14 @@ describe('modules/datasource/repology/index', () => {
         versioning,
         packageName: 'debian_stable/pulseaudio-utils',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(1);
-      expect(res?.releases[0].version).toBe('12.2-4+deb10u1');
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          {
+            version: '12.2-4+deb10u1',
+          },
+        ],
+      });
     });
 
     it('returns multiple versions if they are present in repository', async () => {
@@ -337,10 +362,29 @@ describe('modules/datasource/repology/index', () => {
         versioning,
         packageName: 'centos_8/java-11-openjdk',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(6);
-      expect(res?.releases[0].version).toBe('1:11.0.7.10-1.el8_1');
-      expect(res?.releases[5].version).toBe('1:11.0.9.11-3.el8_3');
+      expect(res).toEqual({
+        registryUrl: 'https://repology.org',
+        releases: [
+          {
+            version: '1:11.0.7.10-1.el8_1',
+          },
+          {
+            version: '1:11.0.8.10-0.el8_2',
+          },
+          {
+            version: '1:11.0.8.10-6.el8',
+          },
+          {
+            version: '1:11.0.9.11-0.el8_2',
+          },
+          {
+            version: '1:11.0.9.11-2.el8_3',
+          },
+          {
+            version: '1:11.0.9.11-3.el8_3',
+          },
+        ],
+      });
     });
 
     it('returns null for scenario when repo is not in package results', async () => {

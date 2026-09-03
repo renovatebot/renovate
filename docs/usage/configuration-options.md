@@ -336,7 +336,7 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Create the branch, wait for test results
 - Rebase it any time it gets out of date with the base branch
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
-- As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 24 hours)
+- As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 25 hours, see [`prNotPendingHours`](#prnotpendinghours))
 
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
@@ -2951,6 +2951,10 @@ Examples of how you can use `minimumReleaseAge`:
 If you use `minimumReleaseAge=3 days`, `prCreation="not-pending"` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
 We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
 
+!!! warning
+  `prCreation="not-pending"` only opens the PR once branch checks complete.
+  If your CI runs only on `pull_request` events (so Renovate branches have no checks), also set `internalChecksAsSuccess=true` so the release-age check can turn the branch green - otherwise PR creation may be [deferred indefinitely](#prcreation).
+
 #### Prevent holding broken npm packages
 
 npm packages less than 72 hours (3 days) old can be unpublished from the npm registry, which could result in a service impact if you have already updated to it.
@@ -4470,7 +4474,14 @@ You'll have to wait until the checks have been performed, before you can decide 
 
 When prCreation is set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-If there are no checks associated, Renovate will create the PR once 24 hours have elapsed since creation of the commit.
+If there are no checks associated, Renovate will create the PR once [`prNotPendingHours`](#prnotpendinghours) have elapsed since the branch's latest commit (default: 25 hours).
+
+!!! warning "`not-pending` can stall PR creation when there are no branch-level checks"
+  A branch with no external status checks is reported as `pending`, so `not-pending` never sees checks "complete" and instead relies on the `prNotPendingHours` fallback.
+  That fallback is measured from the branch's _latest commit_, not from when the branch was created, so anything that rewrites the branch (rebase, re-lock, etc.) restarts the timer.
+  On repositories whose branches are rebased or re-locked more often than `prNotPendingHours`, PRs can be deferred indefinitely.
+  This commonly happens when CI only runs on `pull_request` events, so bare Renovate branches carry no checks.
+  If you rely on `minimumReleaseAge`/`internalChecksFilter` for the "wait" behavior, set [`internalChecksAsSuccess`](#internalchecksassuccess)`=true` so the green internal stability check counts as success and the branch can go green without external checks, or use `prCreation=immediate` instead.
 
 When prCreation is set to `status-success`, Renovate creates the PR only if all tests have passed.
 When a branch remains without PR due to a failing test: select the corresponding PR from the Dependency Dashboard, and push your fixes to the branch.
@@ -4645,6 +4656,7 @@ Only change this setting if you really need to.
 
 You can use the `registryAliases` object to set registry aliases.
 Renovate applies _all_ `registryAliases` objects, from top to bottom.
+The aliases support variables with default values (using the `:-` syntax) which can be useful for Docker Compose files.
 
 This feature works with the following managers:
 
@@ -4687,6 +4699,21 @@ This feature works with the following managers:
   }
 }
 ```
+
+```json title="Using variables with default values"
+{
+  "registryAliases": {
+    "${CI_REGISTRY:-}": "my-registry.io"
+  }
+}
+```
+
+Both image reference formats work:
+
+- With a slash after the variable: `${CI_REGISTRY:-}/image:1.0`
+- Without a slash after the variable: `${CI_REGISTRY:-}image:1.0`
+
+The alias value works with or without a trailing slash.
 
 If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
 
