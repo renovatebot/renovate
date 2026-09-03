@@ -1198,6 +1198,44 @@ describe('util/exec/index', () => {
     );
   });
 
+  it('returns redacted command output without including it in completion logs', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(exec(inCmd, { redactOutput: true })).resolves.toEqual({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        durationMs: expect.any(Number),
+        stdoutBytes: 16,
+        stderrBytes: 15,
+      },
+      'exec completed',
+    );
+    expect(cpExec.mock.calls[0][1]).toMatchObject({ redactOutput: true });
+  });
+
+  it('omits redacted command errors from logs', async () => {
+    process.env = processEnv;
+    const error = new Error('private manifest');
+    cpExec.mockRejectedValue(error);
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(exec(inCmd, { redactOutput: true })).rejects.toBe(error);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { durationMs: expect.any(Number) },
+      'rawExec err',
+    );
+  });
+
   it('logs ignored tool constraints for binarySource=global', async () => {
     process.env = processEnv;
     cpExec.mockResolvedValue({ stdout: '', stderr: '' });

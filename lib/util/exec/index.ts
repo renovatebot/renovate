@@ -55,6 +55,9 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
     env: childEnv,
     maxBuffer,
     timeout,
+    ...(opts.redactOutput !== undefined && {
+      redactOutput: opts.redactOutput,
+    }),
     ...(opts.input !== undefined && { input: opts.input }),
     ...(opts.shell !== undefined && { shell: opts.shell }),
     stdin: 'pipe',
@@ -207,7 +210,8 @@ export async function exec(
       res = await rawExec(rawCmd, commandOptions);
     } catch (err) {
       const durationMs = Math.round(Date.now() - startTime);
-      logger.debug({ err, durationMs }, 'rawExec err');
+      const errorFields = opts.redactOutput ? {} : { err };
+      logger.debug({ ...errorFields, durationMs }, 'rawExec err');
       if (useDocker) {
         await removeDockerContainer(sideCarImage, dockerChildPrefix).catch(
           (removeErr: Error) => {
@@ -220,7 +224,7 @@ export async function exec(
       }
       if (err.signal === `SIGTERM`) {
         logger.debug(
-          { err },
+          errorFields,
           'exec interrupted by SIGTERM - run needs to be aborted',
         );
         throw new Error(TEMPORARY_ERROR);
@@ -228,11 +232,16 @@ export async function exec(
       throw err;
     }
     const durationMs = Math.round(Date.now() - startTime);
+    const outputFields = opts.redactOutput
+      ? {
+          stdoutBytes: Buffer.byteLength(res.stdout),
+          stderrBytes: Buffer.byteLength(res.stderr),
+        }
+      : { stdout: res.stdout, stderr: res.stderr };
     logger.debug(
       {
         durationMs,
-        stdout: res.stdout,
-        stderr: res.stderr,
+        ...outputFields,
       },
       'exec completed',
     );

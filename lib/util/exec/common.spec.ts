@@ -337,6 +337,48 @@ describe('util/exec/common', () => {
       );
     });
 
+    it('redacts ignored failure output from logs without discarding it', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          { command: ['ls', '-l'], ignoreFailure: true },
+          partial<RawExecOptions>({ redactOutput: true, timeout: 5 }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+        exitCode: 1,
+      });
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { outputRedacted: true },
+        'execa promise rejection suppressed',
+      );
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
+        {
+          command: 'ls -l',
+          stdoutBytes: 11,
+          stderrBytes: 11,
+          exitCode: 1,
+        },
+        'Ignoring failure to execute comamnd `ls -l`, as ignoreFailure=true is set',
+      );
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.not.objectContaining({ redactOutput: true }),
+      );
+    });
+
     it('can specify a shell', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
