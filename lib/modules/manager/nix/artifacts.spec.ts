@@ -129,7 +129,7 @@ describe('modules/manager/nix/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
   });
 
-  it('adds GitHub token', async () => {
+  it('falls back to a write GitHub token', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(

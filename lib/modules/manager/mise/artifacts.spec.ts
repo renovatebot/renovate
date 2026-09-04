@@ -449,6 +449,37 @@ describe('modules/manager/mise/artifacts', () => {
     },
   );
 
+  it('falls back to a write GITHUB_TOKEN', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
+    const execSnapshots = mockExecAll();
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'https://api.github.com/',
+      token: 'write-token',
+    });
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      {
+        cmd: updateToolCmd,
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: expect.objectContaining({
+            GITHUB_TOKEN: 'write-token',
+          }),
+        },
+      },
+    ]);
+  });
+
   it('prefers a readonly GITHUB_TOKEN', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
@@ -481,38 +512,6 @@ describe('modules/manager/mise/artifacts', () => {
           cwd: '/tmp/github/some/repo',
           env: expect.objectContaining({
             GITHUB_TOKEN: 'readonly-token',
-          }),
-        },
-      },
-    ]);
-  });
-
-  it('falls back to a write GITHUB_TOKEN', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
-    const execSnapshots = mockExecAll();
-    hostRules.add({
-      hostType: 'github',
-      matchHost: 'https://api.github.com/',
-      token: 'write-token',
-    });
-
-    await updateArtifacts({
-      packageFileName: 'mise.toml',
-      updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: '',
-      config,
-    });
-
-    expect(execSnapshots).toMatchObject([
-      { cmd: trustCmd },
-      {
-        cmd: updateToolCmd,
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: expect.objectContaining({
-            GITHUB_TOKEN: 'write-token',
           }),
         },
       },

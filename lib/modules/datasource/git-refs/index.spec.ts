@@ -131,7 +131,21 @@ describe('modules/datasource/git-refs/index', () => {
       });
     });
 
-    it('uses the readOnly github token for git-refs lookups', async () => {
+    it('falls back to a write GitHub token for git-refs lookups', async () => {
+      hostRules.add({
+        matchHost: 'https://github.com/',
+        token: 'write-token',
+      });
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      await new GitRefsDatasource().getDigest({ packageName }, undefined);
+
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
+        'https://x-access-token:write-token@github.com/example/example.git',
+      ]);
+    });
+
+    it('prefers a readonly GitHub token for git-refs lookups', async () => {
       hostRules.add({
         matchHost: 'https://github.com/',
         token: 'write-token',
@@ -148,20 +162,6 @@ describe('modules/datasource/git-refs/index', () => {
 
       expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
         'https://x-access-token:readonly-token@github.com/example/example.git',
-      ]);
-    });
-
-    it('falls back to the write github token for git-refs lookups', async () => {
-      hostRules.add({
-        matchHost: 'https://github.com/',
-        token: 'write-token',
-      });
-      gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      await new GitRefsDatasource().getDigest({ packageName }, undefined);
-
-      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
-        'https://x-access-token:write-token@github.com/example/example.git',
       ]);
     });
   });

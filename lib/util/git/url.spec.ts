@@ -228,7 +228,7 @@ describe('util/git/url', () => {
       ).toBe('https://x-access-token:write-token@github.com/some/repo.git');
     });
 
-    it('prefers readOnly token when requested', () => {
+    it('prefers a readonly token when readOnly is requested', () => {
       hostRules.add({
         matchHost: 'https://github.com/',
         token: 'write-token',

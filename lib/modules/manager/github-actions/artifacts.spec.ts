@@ -654,7 +654,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
     });
 
-    it('passes a github.com token as `GH_TOKEN`', async () => {
+    it('falls back to a write github.com token as `GH_TOKEN`', async () => {
       const execSnapshots = mockExecAll();
       hostRules.add({
         hostType: 'github',

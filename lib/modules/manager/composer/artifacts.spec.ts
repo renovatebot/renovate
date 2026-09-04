@@ -226,17 +226,11 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
-  it('prefers a readonly GitHub token for COMPOSER_AUTH', async () => {
+  it('falls back to a write GitHub token for COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: 'github',
       matchHost: 'api.github.com',
-      token: 'ghp_write-token',
-    });
-    hostRules.add({
-      hostType: 'github',
-      matchHost: 'api.github.com',
-      readOnly: true,
-      token: 'ghp_readonly-token',
+      token: 'write-token',
     });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();
@@ -256,19 +250,24 @@ describe('modules/manager/composer/artifacts', () => {
       {
         options: {
           env: {
-            COMPOSER_AUTH:
-              '{"github-oauth":{"github.com":"ghp_readonly-token"}}',
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"write-token"}}',
           },
         },
       },
     ]);
   });
 
-  it('falls back to a write GitHub token for COMPOSER_AUTH', async () => {
+  it('prefers a readonly GitHub token for COMPOSER_AUTH', async () => {
     hostRules.add({
       hostType: 'github',
       matchHost: 'api.github.com',
-      token: 'ghp_write-token',
+      token: 'write-token',
+    });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      readOnly: true,
+      token: 'readonly-token',
     });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();
@@ -288,7 +287,7 @@ describe('modules/manager/composer/artifacts', () => {
       {
         options: {
           env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_write-token"}}',
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"readonly-token"}}',
           },
         },
       },

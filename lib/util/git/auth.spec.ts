@@ -390,7 +390,7 @@ describe('util/git/auth', () => {
       expect(getGitEnvironmentVariables({})).toStrictEqual({});
     });
 
-    it('returns environment variables with token if hostRule for api.github.com exists', () => {
+    it('falls back to a write GitHub token for git authentication', () => {
       add({
         hostType: 'github',
         matchHost: 'api.github.com',
@@ -432,7 +432,7 @@ describe('util/git/auth', () => {
       });
     });
 
-    it('prefers readOnly github token for git authentication when available', () => {
+    it('prefers a readonly GitHub token for git authentication', () => {
       add({
         matchHost: 'api.github.com',
         token: 'readonly-token',

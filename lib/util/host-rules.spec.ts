@@ -426,7 +426,23 @@ describe('util/host-rules', () => {
       ).toEqual({ token: 'bbb' });
     });
 
-    it('prefers readOnly rules added before fallback rules', () => {
+    it('falls back to a write rule for readOnly requests', () => {
+      add({
+        hostType: 'github',
+        matchHost: 'https://api.github.com',
+        token: 'write-token',
+      });
+
+      expect(
+        find({
+          hostType: 'github',
+          url: 'https://api.github.com/repos/foo/bar/tags',
+          readOnly: true,
+        }),
+      ).toEqual({ token: 'write-token' });
+    });
+
+    it('prefers a readOnly rule added before a write rule', () => {
       add({
         matchHost: 'https://api.github.com',
         token: 'readonly-token',
@@ -445,22 +461,6 @@ describe('util/host-rules', () => {
           readOnly: true,
         }),
       ).toEqual({ token: 'readonly-token' });
-    });
-
-    it('falls back to a write rule for readOnly requests', () => {
-      add({
-        hostType: 'github',
-        matchHost: 'https://api.github.com',
-        token: 'write-token',
-      });
-
-      expect(
-        find({
-          hostType: 'github',
-          url: 'https://api.github.com/repos/foo/bar/tags',
-          readOnly: true,
-        }),
-      ).toEqual({ token: 'write-token' });
     });
   });
 
