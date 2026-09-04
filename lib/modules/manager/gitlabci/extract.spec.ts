@@ -520,7 +520,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
           versioning: 'semver-partial',
-          skipReason: 'unsupported-version',
         },
         {
           currentValue: '1.0',
@@ -539,6 +538,9 @@ describe('modules/manager/gitlabci/extract', () => {
           versioning: 'semver-partial',
         },
       ]);
+      expect(
+        res?.deps.find((dep) => dep.currentValue === '~latest'),
+      ).not.toHaveProperty('skipReason');
     });
 
     it('extracts component references', () => {
@@ -591,7 +593,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
           versioning: 'semver-partial',
-          skipReason: 'unsupported-version',
         },
         {
           currentValue: '1.0',
@@ -602,6 +603,9 @@ describe('modules/manager/gitlabci/extract', () => {
           registryUrls: ['https://other-gitlab.example.com'],
         },
       ]);
+      expect(
+        res?.deps.find((dep) => dep.currentValue === '~latest'),
+      ).not.toHaveProperty('skipReason');
     });
   });
 });
