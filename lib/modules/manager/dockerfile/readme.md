@@ -6,6 +6,7 @@ This manager extracts image references in a `Dockerfile` and/or `Containerfile` 
 - [`COPY --from`](https://docs.docker.com/reference/dockerfile/#copy---from) images
 - [`RUN --mount`](https://docs.docker.com/reference/dockerfile/#run---mount) images
 - [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) images
+- APK packages pinned by `apk add` in [`RUN`](https://docs.docker.com/reference/dockerfile/#run) instructions
 
 #### `FROM` support
 
@@ -77,6 +78,45 @@ Renovate can update `syntax` references.
 # syntax=docker/dockerfile:1.9.0
 FROM alpine:3.19.4
 ```
+
+#### `RUN apk add` support
+
+Renovate extracts Alpine packages which you pin with `apk add`, using the [`apk` datasource](../../datasource/apk/index.md).
+
+```dockerfile
+FROM alpine:3.21
+RUN apk add --no-cache \
+      bash=5.2.37-r2 \
+      rsyslog=8.2412.0-r1
+```
+
+Renovate does _not_ configure a `registryUrl` for you, because the package repository depends on the base image and you may prefer an internal mirror.
+Until you set one, the `apk` datasource falls back to its default registry, which may not match your base image.
+Set the `registryUrls` which match your base image with a `packageRules` entry:
+
+```json title="Point apk lookups at the Alpine 3.21 repositories"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["apk"],
+      "registryUrls": [
+        "https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64"
+      ]
+    }
+  ]
+}
+```
+
+Renovate skips packages which it cannot update, and says why in its logs:
+
+- packages without a version, e.g. `apk add bash`
+- packages whose version comes from a variable, e.g. `apk add "bash=$BASH_VERSION"`
+- packages given a version constraint rather than an exact version, e.g. `apk add 'curl=~8.12.1'`
+- packages constrained to an identity hash with `><`, which is not a version
+
+Local or remote `.apk` files, virtual packages (`--virtual .build-deps`) and provider dependencies (`so:`, `cmd:`, `pc:`) are ignored.
+
+To match only these dependencies in a `packageRules` entry, use `"matchDepTypes": ["apk"]`.
 
 ### Versioning
 
