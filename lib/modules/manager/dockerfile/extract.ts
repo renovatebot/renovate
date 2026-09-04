@@ -476,6 +476,10 @@ export function extractPackageFile(
   for (const d of deps) {
     d.depType ??= 'stage';
   }
-  deps.at(-1)!.depType = 'final';
+  // the final build stage is the last `FROM`, which other dep types must not shadow
+  const lastStage = deps.filter((d) => d.depType === 'stage').at(-1);
+  if (lastStage) {
+    lastStage.depType = 'final';
+  }
   return { deps };
 }
