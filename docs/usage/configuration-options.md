@@ -712,6 +712,26 @@ For example:
 
 This name will appear in Renovate logs, making it easier to debug or trace specific rules.
 
+## `changelogsLocation`
+
+Use this option to control where Renovate puts the changelogs/release notes of an update.
+The available options are:
+
+- `body`(default) - the changelogs are part of the pull request body
+- `comment` - the changelogs are posted as a comment on the pull request, and the body links to that comment
+
+Set `changelogsLocation=comment` if your platform seeds the squash commit message from the pull request body, and you don't want the changelogs in your repository history.
+
+```json
+{
+  "changelogsLocation": "comment"
+}
+```
+
+The comment is kept up-to-date the same way the pull request body is.
+The `{{{changelogs}}}` template field then holds a short notice pointing to the comment, so a custom `prBodyTemplate` needs no changes.
+This option has no effect when there are no changelogs to show, like when `fetchChangeLogs=off`.
+
 ## `cloneSubmodules`
 
 Enabling this option will mean that detected Git submodules will be cloned at time of repository clone.
