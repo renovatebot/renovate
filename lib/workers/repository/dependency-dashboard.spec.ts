@@ -1206,7 +1206,7 @@ describe('workers/repository/dependency-dashboard', () => {
       `);
       expect(body).not.toContain('i am an artifact error');
       expect(body).toContain('## Pending Status Checks');
-      expect(body).toContain(' - [ ] <!-- approvePr-branch=branchName1 -->pr1');
+      expect(body).toContain(' - [ ] <!-- unpend-branch=branchName1 -->pr1');
     });
 
     it('contains logged problems with custom header', async () => {
@@ -1253,7 +1253,7 @@ describe('workers/repository/dependency-dashboard', () => {
         'Renovate tried to run on this repository, but found these problems.',
       );
       expect(body).toContain('## Pending Status Checks');
-      expect(body).toContain(' - [ ] <!-- approvePr-branch=branchName1 -->pr1');
+      expect(body).toContain(' - [ ] <!-- unpend-branch=branchName1 -->pr1');
     });
 
     it('dependency Dashboard All Pending Approval', async () => {
