@@ -480,6 +480,13 @@ Other valid cache namespaces are as follows:
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
 
+!!! warning
+  When using `checkedBranches`, Renovate treats this as you, the self-hosted administrator, consenting to any updates the given branch introduces.
+  This can lead to branches that have not yet passed their `internalChecksFilter` / `minimumReleaseAge` to be created.
+  <br>
+  There is [not currently](https://github.com/renovatebot/renovate/issues/45668) a way to control this.
+  <!-- TODO: #45668 -->
+
 It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
 It is highly unlikely that you should ever need to add this to your permanent global config.
 

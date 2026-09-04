@@ -82,9 +82,25 @@ describe('modules/datasource/galaxy/index', () => {
         datasource: GalaxyDatasource.id,
         packageName: 'yatesr.timezone',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toEqual({
+        dependencyUrl: 'https://galaxy.ansible.com/yatesr/timezone',
+        registryUrl: 'https://galaxy.ansible.com/',
+        releases: [
+          {
+            releaseTimestamp: '2015-11-17T00:47:51.891Z',
+            version: '1.0.0',
+          },
+          {
+            releaseTimestamp: '2017-09-25T00:31:23.862Z',
+            version: '1.1.0',
+          },
+          {
+            releaseTimestamp: '2019-10-28T01:51:11.502Z',
+            version: '1.2.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/yatesr/ansible-timezone',
+      });
     });
 
     it('handles multiple results when one user matches exactly', async () => {
