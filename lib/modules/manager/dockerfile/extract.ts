@@ -476,6 +476,10 @@ export function extractPackageFile(
   for (const d of deps) {
     d.depType ??= 'stage';
   }
-  deps.at(-1)!.depType = 'final';
+  // find the last `stage`, and treat it as the `final` stage
+  const lastStage = deps.filter((d) => d.depType === 'stage').at(-1);
+  if (lastStage) {
+    lastStage.depType = 'final';
+  }
   return { deps };
 }
