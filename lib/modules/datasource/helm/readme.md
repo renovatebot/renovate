@@ -1,5 +1,7 @@
 This datasource reads `index.yaml` from a Helm chart repository.
 
+## Amazon S3 repositories
+
 In addition to HTTP(S) repositories, an `s3://` registry URL is supported, so charts hosted in an Amazon S3 bucket (or an S3-compatible backend) can be looked up:
 
 ```yaml
@@ -10,11 +12,7 @@ dependencies:
 ```
 
 Renovate then reads `s3://my-bucket/charts/index.yaml` with the AWS SDK, which signs the request with AWS Signature Version 4.
-Because the datasource uses the AWS SDK for JavaScript, you can configure it like other AWS tools, for example (partial list):
-
-- Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
-- Providing credentials via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (environment variables) or your `~/.aws/credentials` file
-- Selecting the profile to use via the `AWS_PROFILE` environment variable
+See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
 For S3-compatible backends, set the self-hosted `s3Endpoint` and `s3PathStyle` configuration options.
 
