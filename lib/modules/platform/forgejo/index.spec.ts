@@ -251,8 +251,6 @@ describe('modules/platform/forgejo/index', () => {
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules.clear();
-    delete process.env.RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_ATTEMPTS;
-    delete process.env.RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_DELAY;
   });
 
   async function initFakePlatform(
@@ -2079,7 +2077,7 @@ describe('modules/platform/forgejo/index', () => {
     });
 
     it('attempts merge anyway if mergeable is still false after all retries', async () => {
-      process.env.RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_ATTEMPTS = '2';
+      vi.stubEnv('RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_ATTEMPTS', '2');
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls')
