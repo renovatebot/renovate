@@ -52,8 +52,38 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
       ]);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res).toMatchObject([
+        {
+          packageFile:
+            'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
+          deps: [
+            {
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+          ],
+        },
+        {
+          packageFile:
+            'lib/modules/manager/gitlabci/__fixtures__/include.1.yml',
+          deps: [{ depName: 'node', currentValue: '12', depType: 'image' }],
+        },
+        {
+          packageFile: 'lib/modules/manager/gitlabci/__fixtures__/include.yml',
+          deps: [{ depName: 'alpine', currentValue: '3.11', depType: 'image' }],
+        },
+      ]);
 
       const deps = res?.map((entry) => entry.deps).flat();
       expect(deps).toHaveLength(5);
@@ -63,26 +93,137 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml',
       ]);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
-      expect(res?.[0].deps).toHaveLength(3);
+      expect(res).toMatchObject([
+        {
+          packageFile:
+            'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml',
+          deps: [
+            {
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+          ],
+        },
+      ]);
     });
 
     it('extracts multiple named services', async () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.6.yaml',
       ]);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
-      expect(res?.[0].deps).toHaveLength(10);
+      expect(res).toMatchObject([
+        {
+          packageFile:
+            'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.6.yaml',
+          deps: [
+            {
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'other/image1',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image2',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+            {
+              depName: 'mooseagency/postgresql',
+              currentValue: '12.3-1',
+              currentDigest:
+                'sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778',
+              depType: 'service-image',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'postgres',
+              currentValue: '11.7',
+              depType: 'service-image',
+            },
+            {
+              depName: 'redis',
+              currentValue: 'latest',
+              depType: 'service-image',
+            },
+            {
+              depName: 'registry.example.com/myimage',
+              currentValue: 'latest',
+              depType: 'service-image',
+            },
+            {
+              depName: 'myimage',
+              currentDigest: 'sha256:0ecb2ad60',
+              depType: 'service-image',
+            },
+            {
+              depName: 'tomcat',
+              currentValue: '7-jre8',
+              depType: 'service-image',
+            },
+          ],
+        },
+      ]);
     });
 
     it('extracts multiple image lines', async () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
       ]);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toMatchObject([
+        {
+          packageFile:
+            'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
+          deps: [
+            { depName: 'ruby', currentValue: '2.5.0', depType: 'image' },
+            {
+              depName: 'hadolint/hadolint',
+              currentValue: 'latest',
+              depType: 'image',
+            },
+            { depName: 'docker', currentValue: 'latest', depType: 'image' },
+            {
+              depName: 'docker',
+              currentValue: 'dind',
+              depType: 'service-image',
+            },
+            { depName: 'docker', currentValue: 'latest', depType: 'image' },
+            {
+              depName: 'docker',
+              currentValue: 'dind',
+              depType: 'service-image',
+            },
+            {
+              depName: 'image-name-test',
+              currentValue: '1.15',
+              depType: 'image-name',
+            },
+            {
+              depName: 'image-name-test',
+              currentValue: '1.15',
+              depType: 'image-name',
+            },
+          ],
+        },
+      ]);
 
       const deps: PackageDependency[] = [];
       res?.forEach((e) => {
@@ -100,8 +241,29 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml',
       ]);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toMatchObject([
+        {
+          packageFile:
+            'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml',
+          deps: [
+            {
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+          ],
+        },
+      ]);
 
       const deps: PackageDependency[] = [];
       res?.forEach((e) => {
@@ -358,7 +520,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
           versioning: 'semver-partial',
-          skipReason: 'unsupported-version',
         },
         {
           currentValue: '1.0',
@@ -377,6 +538,9 @@ describe('modules/manager/gitlabci/extract', () => {
           versioning: 'semver-partial',
         },
       ]);
+      expect(
+        res?.deps.find((dep) => dep.currentValue === '~latest'),
+      ).not.toHaveProperty('skipReason');
     });
 
     it('extracts component references', () => {
@@ -429,7 +593,6 @@ describe('modules/manager/gitlabci/extract', () => {
           depType: 'repository',
           registryUrls: ['https://gitlab.example.com'],
           versioning: 'semver-partial',
-          skipReason: 'unsupported-version',
         },
         {
           currentValue: '1.0',
@@ -440,6 +603,9 @@ describe('modules/manager/gitlabci/extract', () => {
           registryUrls: ['https://other-gitlab.example.com'],
         },
       ]);
+      expect(
+        res?.deps.find((dep) => dep.currentValue === '~latest'),
+      ).not.toHaveProperty('skipReason');
     });
   });
 });

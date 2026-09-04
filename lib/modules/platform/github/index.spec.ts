@@ -136,6 +136,22 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
+    it('should support fine-grained personal access tokens on GHEC', async () => {
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://api.octocorp.ghe.com',
+          token: 'github_pat_XXXXXX',
+          username: 'renovate-bot',
+          gitAuthor: 'Renovate Bot <renovate@example.com>',
+        }),
+      ).resolves.toEqual({
+        endpoint: 'https://api.octocorp.ghe.com/',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        renovateUsername: 'renovate-bot',
+        token: 'github_pat_XXXXXX',
+      });
+    });
+
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
       await expect(github.initPlatform({ token: '123test' })).rejects.toThrow(
@@ -222,6 +238,23 @@ describe('modules/platform/github/index', () => {
               token: 'anything',
 
               endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+
+          it('if on GHEC, a warning is not shown', async () => {
+            httpMock
+              .scope('https://api.octocorp.ghe.com')
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+              endpoint: 'https://api.octocorp.ghe.com',
               gitAuthor: undefined,
             });
 
@@ -571,24 +604,22 @@ describe('modules/platform/github/index', () => {
 
     it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
       httpMock
-        .scope('https://octocorp.ghe.com', {
+        .scope('https://api.octocorp.ghe.com', {
           reqheaders: {
             authorization: 'Bearer ghs_123test',
           },
         })
-        .head('/')
-        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
         .post('/graphql')
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
       expect(
         await github.initPlatform({
-          endpoint: 'https://octocorp.ghe.com',
+          endpoint: 'https://api.octocorp.ghe.com',
           token: 'x-access-token:ghs_123test',
         }),
       ).toEqual({
-        endpoint: 'https://octocorp.ghe.com/',
+        endpoint: 'https://api.octocorp.ghe.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
@@ -596,6 +627,9 @@ describe('modules/platform/github/index', () => {
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@ghe.com',
       ]);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Detected GitHub Enterprise Cloud',
+      );
     });
 
     it('should support custom endpoint', async () => {
@@ -843,6 +877,37 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
       expect(config).toMatchSnapshot();
+    });
+
+    it('queries all version-gated fields if the GHES version is unknown', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200);
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+        username: 'renovate-bot',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+      });
+
+      await github.initRepo({ repository: 'some/repo' });
+
+      expect(httpMock.getTrace()).toContainEqual(
+        expect.objectContaining({
+          graphql: expect.objectContaining({
+            query: expect.objectContaining({
+              repository: expect.objectContaining({
+                autoMergeAllowed: null,
+                hasIssuesEnabled: null,
+                hasVulnerabilityAlertsEnabled: null,
+                mergeQueue: { id: null },
+              }),
+            }),
+          }),
+        }),
+      );
     });
 
     // for coverage
@@ -4223,6 +4288,49 @@ describe('modules/platform/github/index', () => {
         );
       });
 
+      it('should perform automerge if the GHES version is unknown', async () => {
+        const scope = httpMock
+          .scope('https://github.company.com')
+          .head('/')
+          .reply(200)
+          .get('/user')
+          .reply(200, {
+            login: 'renovate-bot',
+          })
+          .get('/user/emails')
+          .reply(200, {})
+          .post('/repos/some/repo/pulls')
+          .reply(200, {
+            number: 123,
+          })
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, [])
+          .post('/graphql')
+          .reply(200, {
+            data: {
+              repository: {
+                defaultBranchRef: {
+                  name: 'main',
+                },
+                nameWithOwner: 'some/repo',
+                autoMergeAllowed: true,
+              },
+            },
+          });
+
+        initRepoMock(scope, 'some/repo');
+        await github.initPlatform({
+          endpoint: 'https://github.company.com',
+          token: '123test',
+        });
+        await github.initRepo({ repository: 'some/repo' });
+        await github.createPr(prConfig);
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'GitHub-native automerge: success...PrNo: 123',
+        );
+      });
+
       it('should set automatic merge', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeResp);
@@ -4982,6 +5090,28 @@ describe('modules/platform/github/index', () => {
         github.assertPrNotInMergeQueue('somebranch', 'main'),
       ).toResolve();
     });
+
+    it('checks the merge queue if the GHES version is unknown', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200)
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope, null);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {
@@ -5390,6 +5520,26 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initPlatform({
         endpoint: 'https://github.company.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(github.massageMarkdown(input)).toEqual(input);
+    });
+
+    it('returns not-updated pr body for GHEC', async () => {
+      const scope = httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://api.octocorp.ghe.com',
         token: '123test',
       });
       await github.initRepo({ repository: 'some/repo' });

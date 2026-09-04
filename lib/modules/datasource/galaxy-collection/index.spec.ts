@@ -158,10 +158,25 @@ describe('modules/datasource/galaxy-collection/index', () => {
         datasource,
         packageName: 'community.kubernetes',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
-      expect(res?.releases).toHaveLength(3);
+      expect(res).toMatchObject({
+        sourceUrl:
+          'https://github.com/ansible-collections/community.kubernetes',
+        releases: [
+          {
+            downloadUrl:
+              'https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-0.11.1.tar.gz',
+            isDeprecated: false,
+            newDigest:
+              'cd197084b32f8976394f269eb005bf475eff2122fddbb48380c76154ab4d4530',
+            releaseTimestamp: '2023-05-08T20:27:29.606Z',
+            sourceUrl:
+              'https://github.com/ansible-collections/community.kubernetes',
+            version: '0.11.1',
+          },
+          { version: '1.2.0' },
+          { version: '1.2.1' },
+        ],
+      });
     });
 
     it('returns null but matches automation hub URL', async () => {
@@ -200,10 +215,15 @@ describe('modules/datasource/galaxy-collection/index', () => {
           'https://my.automationhub.local/api/galaxy/content/published/',
         ],
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
-      expect(res?.releases).toHaveLength(3);
+      expect(res).toMatchObject({
+        registryUrl:
+          'https://my.automationhub.local/api/galaxy/content/published',
+        releases: [
+          { version: '0.11.1' },
+          { version: '1.2.0' },
+          { version: '1.2.1' },
+        ],
+      });
     });
   });
 

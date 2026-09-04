@@ -21,6 +21,161 @@ describe('modules/manager/composer/extract', () => {
       packageFile = 'composer.json';
     });
 
+    const requirements1Deps = [
+      {
+        depName: 'php',
+        currentValue: '>=5.3.2',
+        datasource: 'github-tags',
+        packageName: 'containerbase/php-prebuild',
+        depType: 'require',
+      },
+      {
+        depName: 'ext-intl',
+        currentValue: '*',
+        depType: 'require',
+        skipReason: 'unsupported',
+      },
+      {
+        depName: 'symfony/assetic-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'symfony/monolog-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'symfony/swiftmailer-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      { depName: 'symfony/symfony', currentValue: '2.1.*', depType: 'require' },
+      { depName: 'doctrine/common', currentValue: '2.2.2', depType: 'require' },
+      {
+        depName: 'doctrine/doctrine-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'doctrine/doctrine-fixtures-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'doctrine/orm',
+        currentValue: '2.2.x-dev',
+        depType: 'require',
+      },
+      {
+        depName: 'exercise/elastica-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'friendsofsymfony/rest-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'friendsofsymfony/user-bundle',
+        currentValue: '*',
+        depType: 'require',
+      },
+      { depName: 'fzaninotto/faker', currentValue: '*', depType: 'require' },
+      {
+        depName: 'jms/di-extra-bundle',
+        currentValue: '1.0.1',
+        depType: 'require',
+      },
+      {
+        depName: 'jms/payment-core-bundle',
+        currentValue: '*',
+        depType: 'require',
+      },
+      {
+        depName: 'jms/security-extra-bundle',
+        currentValue: '1.1.0',
+        depType: 'require',
+      },
+      {
+        depName: 'knplabs/knp-menu-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'knplabs/knp-paginator-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'liip/imagine-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'merk/dough-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'sensio/distribution-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'sensio/framework-extra-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'sensio/generator-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'simplethings/entity-audit-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'stof/doctrine-extensions-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'twig/extensions',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      { depName: 'behat/behat', currentValue: '2.3.*', depType: 'require-dev' },
+      {
+        depName: 'behat/behat-bundle',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'behat/mink-bundle',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'behat/sahi-client',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'behat/common-contexts',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'composer/composer',
+        currentValue: '^1.10.0',
+        depType: 'require-dev',
+      },
+    ];
+
     it('returns null for invalid json', async () => {
       expect(await extractPackageFile('nothing here', packageFile)).toBeNull();
     });
@@ -31,7 +186,8 @@ describe('modules/manager/composer/extract', () => {
 
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(requirements1Deps);
+      expect(res?.extractedConstraints).toEqual({ php: '>=5.3.2' });
       expect(res?.deps).toHaveLength(33);
     });
 
@@ -313,7 +469,9 @@ describe('modules/manager/composer/extract', () => {
     it('extracts dependencies with lock file', async () => {
       fs.readLocalFile.mockResolvedValue('{}');
       const res = await extractPackageFile(requirements1, packageFile);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(requirements1Deps);
+      expect(res?.extractedConstraints).toEqual({ php: '>=5.3.2' });
+      expect(res?.lockFiles).toEqual(['composer.lock']);
       expect(res?.deps).toHaveLength(33);
     });
   });
