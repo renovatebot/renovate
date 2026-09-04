@@ -156,12 +156,12 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('should init', async () => {
-      expect(
-        await azure.initPlatform({
+      await expect(
+        azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
           token: 'token',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://dev.azure.com/renovate12345/',
       });
       expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
@@ -626,7 +626,7 @@ describe('modules/platform/azure/index', () => {
           getPullRequests,
         }),
       );
-      expect(await azure.getPrList()).toEqual([]);
+      await expect(azure.getPrList()).resolves.toEqual([]);
       expect(azureApi.getAuthenticatedUserId).toHaveBeenCalledExactlyOnceWith({
         token: 'token',
       });
@@ -655,7 +655,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
 
-      expect(await azure.getPrList()).toEqual([]);
+      await expect(azure.getPrList()).resolves.toEqual([]);
       expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
         '1',
         {
@@ -683,7 +683,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
 
-      expect(await azure.getPrList()).toEqual([]);
+      await expect(azure.getPrList()).resolves.toEqual([]);
       expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
         '1',
         {
@@ -1501,7 +1501,7 @@ describe('modules/platform/azure/index', () => {
           }),
         }),
       );
-      expect(await azure.getPrList()).toEqual([]);
+      await expect(azure.getPrList()).resolves.toEqual([]);
       const createdPr = await azure.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -1510,7 +1510,7 @@ describe('modules/platform/azure/index', () => {
         labels: [],
       });
       expect(createdPr).toMatchObject({ number: 456, title: 'Title 1' });
-      expect(await azure.getPrList()).toHaveLength(1);
+      await expect(azure.getPrList()).resolves.toHaveLength(1);
       await azure.updatePr({
         number: 456,
         prTitle: 'Title 2',

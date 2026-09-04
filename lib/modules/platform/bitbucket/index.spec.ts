@@ -92,13 +92,13 @@ describe('modules/platform/bitbucket/index', () => {
         endpoint: baseUrl,
       };
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
-      expect(
-        await bitbucket.initPlatform({
+      await expect(
+        bitbucket.initPlatform({
           endpoint: baseUrl,
           username: 'abc',
           password: '123',
         }),
-      ).toEqual(expectedResult);
+      ).resolves.toEqual(expectedResult);
     });
 
     it('should init with only token', async () => {
@@ -106,12 +106,12 @@ describe('modules/platform/bitbucket/index', () => {
         endpoint: baseUrl,
       };
       httpMock.scope(baseUrl).get('/2.0/user').reply(200);
-      expect(
-        await bitbucket.initPlatform({
+      await expect(
+        bitbucket.initPlatform({
           endpoint: baseUrl,
           token: 'abc',
         }),
-      ).toEqual(expectedResult);
+      ).resolves.toEqual(expectedResult);
     });
 
     it('should warn for missing "profile" scope', async () => {
@@ -246,11 +246,11 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         });
-      expect(
-        await bitbucket.initRepo({
+      await expect(
+        bitbucket.initRepo({
           repository: 'some/repo',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -270,11 +270,11 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         });
-      expect(
-        await bitbucket.initRepo({
+      await expect(
+        bitbucket.initRepo({
           repository: 'some/repo',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -294,11 +294,11 @@ describe('modules/platform/bitbucket/index', () => {
           uuid: '123',
           full_name: 'some/repo',
         });
-      expect(
-        await bitbucket.initRepo({
+      await expect(
+        bitbucket.initRepo({
           repository: 'some/repo',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -428,7 +428,9 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('master', true)).toBe('red');
+      await expect(bitbucket.getBranchStatus('master', true)).resolves.toBe(
+        'red',
+      );
     });
 
     it('getBranchStatus 4', async () => {
@@ -453,7 +455,9 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('branch', true)).toBe('green');
+      await expect(bitbucket.getBranchStatus('branch', true)).resolves.toBe(
+        'green',
+      );
     });
 
     it('getBranchStatus 5', async () => {
@@ -478,9 +482,9 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('pending/branch', true)).toBe(
-        'yellow',
-      );
+      await expect(
+        bitbucket.getBranchStatus('pending/branch', true),
+      ).resolves.toBe('yellow');
     });
 
     it('getBranchStatus 6', async () => {
@@ -502,9 +506,9 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [],
         });
-      expect(
-        await bitbucket.getBranchStatus('branch-with-empty-status', true),
-      ).toBe('yellow');
+      await expect(
+        bitbucket.getBranchStatus('branch-with-empty-status', true),
+      ).resolves.toBe('yellow');
     });
 
     it('getBranchStatus 7', async () => {
@@ -529,7 +533,9 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('branch', false)).toBe('yellow');
+      await expect(bitbucket.getBranchStatus('branch', false)).resolves.toBe(
+        'yellow',
+      );
     });
   });
 
@@ -556,15 +562,21 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('getBranchStatusCheck 1', async () => {
-      expect(await bitbucket.getBranchStatusCheck('master', '')).toBeNull();
+      await expect(
+        bitbucket.getBranchStatusCheck('master', ''),
+      ).resolves.toBeNull();
     });
 
     it('getBranchStatusCheck 2', async () => {
-      expect(await bitbucket.getBranchStatusCheck('master', 'foo')).toBe('red');
+      await expect(
+        bitbucket.getBranchStatusCheck('master', 'foo'),
+      ).resolves.toBe('red');
     });
 
     it('getBranchStatusCheck 3', async () => {
-      expect(await bitbucket.getBranchStatusCheck('master', 'bar')).toBeNull();
+      await expect(
+        bitbucket.getBranchStatusCheck('master', 'bar'),
+      ).resolves.toBeNull();
     });
   });
 
@@ -597,7 +609,7 @@ describe('modules/platform/bitbucket/index', () => {
   describe('findIssue()', () => {
     it('returns null as issues are unsupported', async () => {
       await initRepoMock();
-      expect(await bitbucket.findIssue('title')).toBeNull();
+      await expect(bitbucket.findIssue('title')).resolves.toBeNull();
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         expect.stringContaining(
           'Bitbucket Cloud has removed its issue tracker',
@@ -609,9 +621,9 @@ describe('modules/platform/bitbucket/index', () => {
   describe('ensureIssue()', () => {
     it('returns null as issues are unsupported', async () => {
       await initRepoMock();
-      expect(
-        await bitbucket.ensureIssue({ title: 'title', body: 'body' }),
-      ).toBeNull();
+      await expect(
+        bitbucket.ensureIssue({ title: 'title', body: 'body' }),
+      ).resolves.toBeNull();
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         { title: 'title' },
         'Cannot ensure issue',
@@ -629,7 +641,7 @@ describe('modules/platform/bitbucket/index', () => {
   describe('getIssueList()', () => {
     it('returns empty array as issues are unsupported', async () => {
       await initRepoMock();
-      expect(await bitbucket.getIssueList()).toEqual([]);
+      await expect(bitbucket.getIssueList()).resolves.toEqual([]);
     });
   });
 
@@ -682,13 +694,13 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
         .reply(500);
-      expect(
-        await bitbucket.ensureComment({
+      await expect(
+        bitbucket.ensureComment({
           number: 3,
           topic: 'topic',
           content: 'content',
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
   });
 
@@ -698,13 +710,13 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/undefined/pullrequests/3/comments?pagelen=100')
         .reply(500);
-      expect(
-        await bitbucket.ensureCommentRemoval({
+      await expect(
+        bitbucket.ensureCommentRemoval({
           type: 'by-topic',
           number: 3,
           topic: 'topic',
         }),
-      ).toBeUndefined();
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -754,12 +766,12 @@ describe('modules/platform/bitbucket/index', () => {
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, { values: [pr] });
-      expect(
-        await bitbucket.findPr({
+      await expect(
+        bitbucket.findPr({
           branchName: 'branch',
           prTitle: 'title',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 5,
         sourceBranch: 'branch',
         state: 'open',
@@ -934,13 +946,13 @@ describe('modules/platform/bitbucket/index', () => {
           '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
         )
         .reply(200, { values: [pr] });
-      expect(
-        await bitbucket.findPr({
+      await expect(
+        bitbucket.findPr({
           branchName: 'branch',
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 5,
         sourceBranch: 'branch',
         targetBranch: 'master',
@@ -1585,7 +1597,7 @@ describe('modules/platform/bitbucket/index', () => {
         ...pr,
         reviewers: [reviewer],
       });
-      expect(await bitbucket.getPr(5)).toEqual({
+      await expect(bitbucket.getPr(5)).resolves.toEqual({
         bodyStruct: {
           hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
         },
@@ -2016,13 +2028,13 @@ describe('modules/platform/bitbucket/index', () => {
           values: [{ id: 5 }],
         });
 
-      expect(
-        await bitbucket.updatePr({
+      await expect(
+        bitbucket.updatePr({
           number: pr.id,
           prTitle: pr.title,
           state: 'closed',
         }),
-      ).toBeUndefined();
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -2137,48 +2149,48 @@ describe('modules/platform/bitbucket/index', () => {
     it('posts Merge with optional merge strategy', async () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      expect(
-        await bitbucket.mergePr({
+      await expect(
+        bitbucket.mergePr({
           branchName: 'branch',
           id: 5,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('posts Merge with auto', async () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      expect(
-        await bitbucket.mergePr({
+      await expect(
+        bitbucket.mergePr({
           branchName: 'branch',
           id: 5,
           strategy: 'auto',
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('posts Merge with merge-commit', async () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      expect(
-        await bitbucket.mergePr({
+      await expect(
+        bitbucket.mergePr({
           branchName: 'branch',
           id: 5,
           strategy: 'merge-commit',
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('posts Merge with squash', async () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      expect(
-        await bitbucket.mergePr({
+      await expect(
+        bitbucket.mergePr({
           branchName: 'branch',
           id: 5,
           strategy: 'squash',
         }),
-      ).toBe(true);
+      ).resolves.toBe(true);
     });
 
     it('does not post Merge with rebase', async () => {
@@ -2193,13 +2205,13 @@ describe('modules/platform/bitbucket/index', () => {
     it('posts Merge with fast-forward', async () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
-      expect(
-        await bitbucket.mergePr({
+      await expect(
+        bitbucket.mergePr({
           branchName: 'branch',
           id: 5,
           strategy: 'fast-forward',
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
   });
 

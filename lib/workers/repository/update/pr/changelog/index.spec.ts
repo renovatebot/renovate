@@ -79,49 +79,49 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('returns null if @types', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles unsupported changelog source', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://dev.azure.com/unknown-repo',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if no currentVersion', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if currentVersion equals newVersion', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: '1.0.0',
           newVersion: '1.0.0',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('skips invalid repos', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/about',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('works without Github', async () => {
@@ -137,11 +137,11 @@ describe('workers/repository/update/pr/changelog/index', () => {
         .get('/repos/chalk/chalk')
         .times(4)
         .reply(500);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject(expectedChangeLog());
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('uses GitHub tags', async () => {
@@ -155,11 +155,11 @@ describe('workers/repository/update/pr/changelog/index', () => {
         { version: 'v2.4.2' },
       ] as never);
       githubReleasesMock.mockResolvedValue([]);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject(expectedChangeLog());
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('filters unnecessary warns', async () => {
@@ -181,58 +181,58 @@ describe('workers/repository/update/pr/changelog/index', () => {
       githubTagsMock.mockResolvedValueOnce([]);
       githubReleasesMock.mockResolvedValueOnce([]);
       httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           depType: 'engines',
         }),
-      ).toMatchObject(expectedChangeLog());
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('handles no sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles invalid sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'http://example.com',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles missing Github token', async () => {
       GlobalConfig.set({ githubTokenWarn: true });
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com',
         }),
-      ).toEqual({ error: 'MissingGithubToken' });
+      ).resolves.toEqual({ error: 'MissingGithubToken' });
     });
 
     it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles not enough releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [{ version: '0.9.0' }],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('will call getInRangeReleases when releases is undefined', async () => {
@@ -253,11 +253,11 @@ describe('workers/repository/update/pr/changelog/index', () => {
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject(expectedChangeLog());
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
@@ -274,12 +274,12 @@ describe('workers/repository/update/pr/changelog/index', () => {
         token: 'abc',
       });
       vi.stubEnv('GITHUB_ENDPOINT', '');
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         }),
-      ).toMatchObject(
+      ).resolves.toMatchObject(
         expectedChangeLog({
           baseUrl: 'https://github-enterprise.example.com/',
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
@@ -301,12 +301,12 @@ describe('workers/repository/update/pr/changelog/index', () => {
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         }),
-      ).toMatchObject(
+      ).resolves.toMatchObject(
         expectedChangeLog({
           baseUrl: 'https://github-enterprise.example.com/',
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',

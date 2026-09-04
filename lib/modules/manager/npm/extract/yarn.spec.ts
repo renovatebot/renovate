@@ -109,9 +109,9 @@ describe('modules/manager/npm/extract/yarn', () => {
 
   describe('.extractYarnCatalogs()', () => {
     it('handles empty catalog entries', async () => {
-      expect(
-        await extractYarnCatalogs({}, 'package.json', false),
-      ).toMatchObject({
+      await expect(
+        extractYarnCatalogs({}, 'package.json', false),
+      ).resolves.toMatchObject({
         deps: [],
       });
     });
@@ -119,8 +119,8 @@ describe('modules/manager/npm/extract/yarn', () => {
     it('parses valid .yarnrc.yml file', async () => {
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
-      expect(
-        await extractYarnCatalogs(
+      await expect(
+        extractYarnCatalogs(
           {
             catalog: {
               react: '18.3.0',
@@ -134,7 +134,7 @@ describe('modules/manager/npm/extract/yarn', () => {
           'package.json',
           true,
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [
           {
             currentValue: '18.3.0',
@@ -161,8 +161,8 @@ describe('modules/manager/npm/extract/yarn', () => {
     it('finds relevant lockfile', async () => {
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
-      expect(
-        await extractYarnCatalogs(
+      await expect(
+        extractYarnCatalogs(
           {
             catalog: {
               react: '18.3.1',
@@ -171,7 +171,7 @@ describe('modules/manager/npm/extract/yarn', () => {
           'package.json',
           false,
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         managerData: {
           yarnLock: 'yarn.lock',
           hasPackageManager: false,

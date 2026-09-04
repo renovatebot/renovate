@@ -574,7 +574,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -613,7 +613,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -654,7 +654,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -1447,7 +1447,9 @@ describe('config/presets/index', () => {
 
     it('does not use cache for internal presets', async () => {
       const memCacheGetSpy = vi.spyOn(memCache, 'get');
-      expect(await presets.getPreset(':dependencyDashboard', {})).toBeDefined();
+      await expect(
+        presets.getPreset(':dependencyDashboard', {}),
+      ).resolves.toBeDefined();
       expect(memCacheGetSpy).not.toHaveBeenCalled();
       expect(packageCache.get).not.toHaveBeenCalled();
     });

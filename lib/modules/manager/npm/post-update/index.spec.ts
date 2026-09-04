@@ -542,9 +542,9 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('works', async () => {
-      expect(
-        await getAdditionalFiles({ ...updateConfig }, additionalFiles),
-      ).toStrictEqual({
+      await expect(
+        getAdditionalFiles({ ...updateConfig }, additionalFiles),
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [],
@@ -559,12 +559,12 @@ describe('modules/manager/npm/post-update/index', () => {
         }
         return Promise.resolve('');
       });
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [
@@ -673,12 +673,12 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('works for yarn', async () => {
       spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [
@@ -697,8 +697,8 @@ describe('modules/manager/npm/post-update/index', () => {
         error: false,
         lockFile: 'some-contents:',
       });
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           {
             ...updateConfig,
             reuseExistingBranch: true,
@@ -711,7 +711,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [
@@ -726,7 +726,7 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('no npm files', async () => {
-      expect(await getAdditionalFiles(baseConfig, {})).toStrictEqual({
+      await expect(getAdditionalFiles(baseConfig, {})).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [],
@@ -734,9 +734,9 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('no lockfiles updates', async () => {
-      expect(
-        await getAdditionalFiles(baseConfig, additionalFiles),
-      ).toStrictEqual({
+      await expect(
+        getAdditionalFiles(baseConfig, additionalFiles),
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [],
@@ -744,8 +744,8 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('skip lock file updating', async () => {
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           {
             ...updateConfig,
             skipArtifactsUpdate: true,
@@ -763,7 +763,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [],
@@ -776,8 +776,8 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it('reuse existing up-to-date', async () => {
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           {
             ...baseConfig,
             reuseExistingBranch: true,
@@ -785,7 +785,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [],
@@ -795,8 +795,8 @@ describe('modules/manager/npm/post-update/index', () => {
     it('lockfile maintenance branch exists', async () => {
       // TODO: can this really happen?
       scm.branchExists.mockResolvedValueOnce(true);
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           {
             ...baseConfig,
             upgrades: [{ isLockfileUpdate: false }],
@@ -805,7 +805,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [],
         artifactNotices: [],
         updatedArtifacts: [],
@@ -814,9 +814,9 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('fails for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: true, stderr: 'some-error' });
-      expect(
-        await getAdditionalFiles({ ...updateConfig }, additionalFiles),
-      ).toStrictEqual({
+      await expect(
+        getAdditionalFiles({ ...updateConfig }, additionalFiles),
+      ).resolves.toStrictEqual({
         artifactErrors: [
           { fileName: 'package-lock.json', stderr: 'some-error' },
         ],
@@ -827,12 +827,12 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('fails for yarn', async () => {
       spyYarn.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           { ...updateConfig, reuseExistingBranch: true },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [{ fileName: 'yarn.lock', stderr: 'some-error' }],
         artifactNotices: [],
         updatedArtifacts: [],
@@ -841,8 +841,8 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('fails for pnpm', async () => {
       spyPnpm.mockResolvedValueOnce({ error: true, stdout: 'some-error' });
-      expect(
-        await getAdditionalFiles(
+      await expect(
+        getAdditionalFiles(
           {
             ...updateConfig,
             upgrades: [
@@ -854,7 +854,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         ),
-      ).toStrictEqual({
+      ).resolves.toStrictEqual({
         artifactErrors: [
           { fileName: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],

@@ -1117,7 +1117,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         cacheDir: '/tmp/cache',
         binarySource: 'global',
       });
-      expect(await yarnHelper.checkYarnrc('.')).toEqual({
+      await expect(yarnHelper.checkYarnrc('.')).resolves.toEqual({
         offlineMirror: true,
         yarnPath: '.yarn/cli.js',
       });
@@ -1131,7 +1131,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir',
       );
-      expect(await yarnHelper.checkYarnrc('some-dir')).toEqual({
+      await expect(yarnHelper.checkYarnrc('some-dir')).resolves.toEqual({
         offlineMirror: false,
         yarnPath: 'some-dir/.yarn/cli.js',
       });
@@ -1149,7 +1149,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         cacheDir: '/tmp/cache',
         binarySource: 'global',
       });
-      expect(await yarnHelper.checkYarnrc('.')).toEqual({
+      await expect(yarnHelper.checkYarnrc('.')).resolves.toEqual({
         offlineMirror: true,
         yarnPath: null,
       });
@@ -1168,7 +1168,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         cacheDir: '/tmp/cache',
         binarySource: 'global',
       });
-      expect(await yarnHelper.checkYarnrc('renovate')).toEqual({
+      await expect(yarnHelper.checkYarnrc('renovate')).resolves.toEqual({
         offlineMirror: false,
         yarnPath: null,
       });

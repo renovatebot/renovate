@@ -120,12 +120,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, { login: 'renovate-bot' })
         .get('/user/emails')
         .reply(200, [{ email: 'user@domain.com' }]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: 'github_pat_XXXXXX',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor: 'undefined <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -192,13 +192,13 @@ describe('modules/platform/github/index', () => {
     });
 
     it('should support gitAuthor and username', async () => {
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           token: '123test',
           username: 'renovate-bot',
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'renovate@whitesourcesoftware.com',
         renovateUsername: 'renovate-bot',
@@ -431,7 +431,7 @@ describe('modules/platform/github/index', () => {
         name: 'Example User',
         email: 'user@domain.com',
       });
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'Example User <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -453,7 +453,7 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(200, [{ email: 'user@differentdomain.com' }]);
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'Example User <user@differentdomain.com>',
         renovateUsername: 'renovate-bot',
@@ -472,7 +472,7 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(403);
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: undefined,
         renovateUsername: 'renovate-bot',
@@ -492,9 +492,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({ token: 'x-access-token:ghs_123test' }),
-      ).toEqual({
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' }),
+      ).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
@@ -534,7 +534,9 @@ describe('modules/platform/github/index', () => {
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);
-      expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
+      await expect(
+        github.initPlatform({ token: 'ghs_123test' }),
+      ).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
@@ -603,12 +605,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: 'x-access-token:ghs_123test',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor:
           'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
@@ -631,12 +633,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://api.octocorp.ghe.com',
           token: 'x-access-token:ghs_123test',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://api.octocorp.ghe.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
         renovateUsername: 'my-app[bot]',
@@ -666,12 +668,12 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor: 'undefined <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -695,12 +697,12 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor: 'undefined <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -3990,13 +3992,13 @@ describe('modules/platform/github/index', () => {
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
-      expect(
-        await github.findPr({
+      await expect(
+        github.findPr({
           branchName: 'branch',
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 1,
         sourceBranch: 'branch-a',
         sourceRepo: 'some/repo',
@@ -5461,12 +5463,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should handle merge block', async () => {
@@ -5482,13 +5484,13 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
           strategy: 'merge-commit', // for coverage - has no effect on this test
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it.each([
@@ -5508,13 +5510,13 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
           strategy: 'auto', // for coverage -- has not effect on this test
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should warn if automergeStrategy is not supported', async () => {
@@ -5626,12 +5628,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('should try merge after squash', async () => {
@@ -5647,12 +5649,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should try rebase after merge', async () => {
@@ -5672,12 +5674,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('should give up', async () => {
@@ -5699,12 +5701,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
   });
 

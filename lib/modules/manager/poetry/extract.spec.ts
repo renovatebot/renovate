@@ -35,11 +35,15 @@ describe('modules/manager/poetry/extract', () => {
     });
 
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', filename)).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', filename),
+      ).resolves.toBeNull();
     });
 
     it('returns null for parsed file without poetry section', async () => {
-      expect(await extractPackageFile(pyproject5toml, filename)).toBeNull();
+      await expect(
+        extractPackageFile(pyproject5toml, filename),
+      ).resolves.toBeNull();
     });
 
     it('extracts multiple dependencies', async () => {

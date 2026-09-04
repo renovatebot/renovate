@@ -31,14 +31,14 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
 
   it('returns null if jsonnetfile.lock does not exist', async () => {
     fs.readLocalFile.mockResolvedValueOnce('');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if there are no changes', async () => {
@@ -54,14 +54,14 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       }),
     );
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
@@ -82,8 +82,8 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('New foo/main.jsonnet');
     fs.readLocalFile.mockResolvedValueOnce('New bar/main.jsonnet');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [
           {
@@ -101,7 +101,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         newPackageFileContent: 'Updated jsonnetfile.json',
         config,
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -157,8 +157,8 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
@@ -167,7 +167,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -199,8 +199,8 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
@@ -209,7 +209,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         artifactError: {
           fileName: 'jsonnetfile.lock.json',

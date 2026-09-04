@@ -177,11 +177,13 @@ describe('modules/manager/composer/extract', () => {
     ];
 
     it('returns null for invalid json', async () => {
-      expect(await extractPackageFile('nothing here', packageFile)).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', packageFile),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty deps', async () => {
-      expect(await extractPackageFile('{}', packageFile)).toBeNull();
+      await expect(extractPackageFile('{}', packageFile)).resolves.toBeNull();
     });
 
     it('extracts dependencies with no lock file', async () => {

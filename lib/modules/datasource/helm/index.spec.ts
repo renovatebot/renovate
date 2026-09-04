@@ -11,13 +11,13 @@ const indexYaml = Fixtures.get('index.yaml');
 describe('modules/datasource/helm/index', () => {
   describe('getReleases', () => {
     it('returns null if packageName was not provided', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: undefined as never, // #22198
           registryUrls: ['https://example-repository.com'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if repository was not provided', async () => {
@@ -26,13 +26,13 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://charts.helm.sh')
         .get('/stable/index.yaml')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'some_chart',
           registryUrls: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty response', async () => {
@@ -40,13 +40,13 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(200);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing response body', async () => {
@@ -54,13 +54,13 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(200);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
@@ -68,13 +68,13 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -96,13 +96,13 @@ describe('modules/datasource/helm/index', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if index.yaml in response is empty', async () => {

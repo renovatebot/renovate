@@ -289,7 +289,9 @@ describe('modules/platform/gitea/index', () => {
         .get('/version')
         .reply(200, { version: GITEA_VERSION });
 
-      expect(await gitea.initPlatform({ token: 'some-token' })).toEqual({
+      await expect(
+        gitea.initPlatform({ token: 'some-token' }),
+      ).resolves.toEqual({
         endpoint: 'https://gitea.com/',
         gitAuthor: 'renovate <renovate@example.com>',
       });
@@ -303,12 +305,12 @@ describe('modules/platform/gitea/index', () => {
         .get('/version')
         .reply(200, { version: GITEA_VERSION });
 
-      expect(
-        await gitea.initPlatform({
+      await expect(
+        gitea.initPlatform({
           token: 'some-token',
           endpoint: 'https://gitea.renovatebot.com',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://gitea.renovatebot.com/',
         gitAuthor: 'Renovate Bot <renovate@example.com>',
       });
@@ -322,12 +324,12 @@ describe('modules/platform/gitea/index', () => {
         .get('/version')
         .reply(200, { version: GITEA_VERSION });
 
-      expect(
-        await gitea.initPlatform({
+      await expect(
+        gitea.initPlatform({
           token: 'some-token',
           endpoint: 'https://gitea.renovatebot.com',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://gitea.renovatebot.com/',
         gitAuthor: 'Renovate Bot <renovate@example.com>',
       });
@@ -344,7 +346,9 @@ describe('modules/platform/gitea/index', () => {
         .get('/version')
         .reply(200, { version: GITEA_VERSION });
 
-      expect(await gitea.initPlatform({ token: 'some-token' })).toEqual({
+      await expect(
+        gitea.initPlatform({ token: 'some-token' }),
+      ).resolves.toEqual({
         endpoint: 'https://gitea.com/',
         gitAuthor: 'renovate <renovate@example.com>',
       });
@@ -1052,9 +1056,9 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      expect(
-        await gitea.getBranchStatusCheck('some-branch', 'some-context'),
-      ).toBeNull();
+      await expect(
+        gitea.getBranchStatusCheck('some-branch', 'some-context'),
+      ).resolves.toBeNull();
     });
 
     it('should return null with no matching results', async () => {
@@ -2846,7 +2850,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      expect(await gitea.getBranchPr('missing')).toBeNull();
+      await expect(gitea.getBranchPr('missing')).resolves.toBeNull();
     });
   });
 
@@ -3023,7 +3027,7 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, {});
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      expect(await gitea.getJsonFile('file.json')).toBeNull();
+      await expect(gitea.getJsonFile('file.json')).resolves.toBeNull();
     });
 
     it('throws on errors', async () => {
