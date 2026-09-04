@@ -358,6 +358,9 @@ importers:
       strip-json-comments:
         specifier: 5.0.3
         version: 5.0.3
+      tar:
+        specifier: 'catalog:'
+        version: 7.5.22
       toml-eslint-parser:
         specifier: 1.0.3
         version: 1.0.3
@@ -593,9 +596,6 @@ importers:
       semantic-release:
         specifier: 25.0.9
         version: 25.0.9(supports-color@7.2.0)(typescript@7.0.2)
-      tar:
-        specifier: 'catalog:'
-        version: 7.5.22
       tmp-promise:
         specifier: 3.0.3
         version: 3.0.3
