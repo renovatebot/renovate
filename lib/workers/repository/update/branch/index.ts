@@ -388,7 +388,13 @@ export async function processBranch(
         };
       }
       if (config.updateNotScheduled === false && !config.rebaseRequested) {
-        if (!(config.automerge && branchPr)) {
+        if (
+          !(
+            config.automerge &&
+            branchPr &&
+            isScheduledNow(config, 'automergeSchedule')
+          )
+        ) {
           logger.debug('Skipping branch update as not within schedule');
           return {
             branchExists,

@@ -205,6 +205,29 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('skips PR automerge outside automerge schedule and outside schedule', async () => {
+      schedule.isScheduledNow.mockReturnValue(false);
+      config.updateNotScheduled = false;
+      config.automerge = true;
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+        }),
+      );
+
+      const res = await branchWorker.processBranch(config);
+
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: 5,
+        result: 'update-not-scheduled',
+      });
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
     it('checks PR automerge even when not updating out of schedule and rebaseWhen=never', async () => {
       schedule.isScheduledNow.mockImplementation(
         (_config, scheduleKey) => scheduleKey === 'automergeSchedule',
