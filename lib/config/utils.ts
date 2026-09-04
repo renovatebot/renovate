@@ -1,8 +1,9 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../logger/index.ts';
 import { clone } from '../util/clone.ts';
 import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils.ts';
 import * as options from './options/index.ts';
-import type { RenovateConfig } from './types.ts';
+import type { RenovateConfig, RenovateRepository } from './types.ts';
 
 export function mergeChildConfig<
   T extends Record<string, any>,
@@ -54,4 +55,13 @@ export function mergeChildConfig<
     }
   }
   return { ...config, ...config.force };
+}
+
+/**
+ * Lower-cased name of a `repositories[]` entry, for matching entries that came from different sources.
+ */
+export function getRepositoryName(repository: RenovateRepository): string {
+  return String(
+    isString(repository) ? repository : repository.repository,
+  ).toLowerCase();
 }

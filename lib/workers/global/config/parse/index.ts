@@ -1,11 +1,17 @@
-import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyObject } from '@sindresorhus/is';
 import { setUserConfigFileNames } from '../../../../config/app-strings.ts';
 import { setPrivateKeys } from '../../../../config/decrypt.ts';
 import * as defaultsParser from '../../../../config/defaults.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
-import type { AllConfig } from '../../../../config/types.ts';
-import { mergeChildConfig } from '../../../../config/utils.ts';
+import type {
+  AllConfig,
+  RenovateRepository,
+} from '../../../../config/types.ts';
+import {
+  getRepositoryName,
+  mergeChildConfig,
+} from '../../../../config/utils.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger, setContext } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
@@ -34,6 +40,36 @@ export async function resolveGlobalExtends(
   }
 }
 
+/**
+ * Repositories named on the CLI select which repositories run, but each keeps the matching
+ * `repositories[]` entry from file or env config so that its per-repository config still applies.
+ */
+function mergeCliRepositories(
+  cliRepositories: RenovateRepository[],
+  configuredRepositories: RenovateRepository[],
+): RenovateRepository[] {
+  const matched: string[] = [];
+  const repositories = cliRepositories.map((cliRepository) => {
+    const configured = configuredRepositories.find(
+      (configuredRepository) =>
+        getRepositoryName(configuredRepository) ===
+        getRepositoryName(cliRepository),
+    );
+    if (configured === undefined) {
+      return cliRepository;
+    }
+    matched.push(getRepositoryName(cliRepository));
+    return configured;
+  });
+  if (matched.length) {
+    logger.debug(
+      { repositories: matched },
+      'Using configured `repositories` entries for repositories named on the CLI',
+    );
+  }
+  return repositories;
+}
+
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[],
@@ -56,7 +92,17 @@ export async function parseConfigs(
     config.extends = [...fileConfig.extends, ...coerceArray(config.extends)];
   }
   config = mergeChildConfig(config, envConfig);
+  const configuredRepositories = config.repositories;
   config = mergeChildConfig(config, cliConfig);
+  if (
+    isNonEmptyArray(cliConfig.repositories) &&
+    isNonEmptyArray(configuredRepositories)
+  ) {
+    config.repositories = mergeCliRepositories(
+      cliConfig.repositories,
+      configuredRepositories,
+    );
+  }
 
   config = await codespaces.setConfig(config);
 
@@ -119,38 +165,6 @@ export async function parseConfigs(
   logger.debug({ config: envConfig }, 'Env config');
   logger.debug({ config: resolvedGlobalExtends }, 'Resolved global extends');
   logger.debug({ config: combinedConfig }, 'Combined config');
-
-  // TODO #41551
-  if (isNonEmptyArray(cliConfig.repositories)) {
-    const existingRepos = [
-      ...coerceArray(fileConfig.repositories),
-      ...coerceArray(additionalFileConfig.repositories),
-      ...coerceArray(envConfig.repositories),
-    ];
-
-    if (isNonEmptyArray(existingRepos)) {
-      const allStrings = existingRepos.every((repo) => isString(repo));
-      let shouldWarn = true;
-
-      if (allStrings) {
-        const areEqual =
-          cliConfig.repositories.length === existingRepos.length &&
-          cliConfig.repositories.every(
-            (repo, idx) => repo === existingRepos[idx],
-          );
-
-        if (areEqual) {
-          shouldWarn = false;
-        }
-      }
-
-      if (shouldWarn) {
-        logger.warn(
-          'CLI config is overridding the `repositories` config previously set',
-        );
-      }
-    }
-  }
 
   if (config.detectGlobalManagerConfig) {
     logger.debug('Detecting global manager config');

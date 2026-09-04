@@ -1324,6 +1324,9 @@ module.exports = {
 };
 ```
 
+If you also pass repositories as CLI arguments, then Renovate only runs against the repositories named on the CLI.
+Each of those keeps its matching object from the `repositories` array in your file or environment config, so any per-repository configuration still applies.
+
 ## `repositoryCache`
 
 Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
