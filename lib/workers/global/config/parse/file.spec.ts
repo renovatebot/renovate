@@ -67,8 +67,9 @@ describe('workers/global/config/parse/file', () => {
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
-      expect(res).toMatchSnapshot();
-      expect(res.rangeStrategy).toBe('bump');
+      expect(res).toEqual({
+        rangeStrategy: 'bump',
+      });
     });
 
     it('warns if config is invalid', async () => {
