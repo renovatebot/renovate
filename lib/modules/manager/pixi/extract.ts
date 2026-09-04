@@ -4,6 +4,7 @@ import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { coerceNumber } from '../../../util/number.ts';
 import { Result } from '../../../util/result.ts';
 import {
   ensureTrailingSlash,
