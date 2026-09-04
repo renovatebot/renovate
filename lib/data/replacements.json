@@ -57,6 +57,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:temporalio-interceptors-opentelemetry-to-v2",
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
@@ -1209,6 +1210,18 @@
         "matchPackageNames": ["standard-version"],
         "replacementName": "commit-and-tag-version",
         "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "temporalio-interceptors-opentelemetry-to-v2": {
+    "description": "`@temporalio/interceptors-opentelemetry` was replaced by `@temporalio/interceptors-opentelemetry-v2`, which supports OpenTelemetry v2.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.19.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@temporalio/interceptors-opentelemetry"],
+        "replacementName": "@temporalio/interceptors-opentelemetry-v2",
+        "replacementVersion": "1.19.0"
       }
     ]
   },
