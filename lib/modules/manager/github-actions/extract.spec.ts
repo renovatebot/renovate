@@ -630,6 +630,12 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             'grafana/writers-toolkit@4b1248585248751e3b12fd020cf7ac91540ca09c # prettier/v2.0.1',
         },
+        {
+          currentDigest: '823ed150196915a86971ab4beb899b0c80d835fe',
+          currentValue: 'lint-pr-title/v1.2.3',
+          replaceString:
+            'grafana/shared-workflows/actions/lint-pr-title@823ed150196915a86971ab4beb899b0c80d835fe # lint-pr-title/v1.2.3',
+        },
       ]);
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
     });
