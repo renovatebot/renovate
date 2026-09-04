@@ -23,6 +23,10 @@ import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
 import type { Vulnerability } from './process/types.ts';
 import { Vulnerabilities } from './process/vulnerabilities.ts';
+import type {
+  DependencyDashboardCheck,
+  DependencyDashboardListItemType,
+} from './types.ts';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -199,9 +203,10 @@ export async function readDashboardBody(
 
   const checkedBranches = GlobalConfig.get('checkedBranches');
   if (isNonEmptyArray(checkedBranches)) {
-    const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-      checkedBranches.map((branchName) => [branchName, 'global-config']),
-    );
+    const checkedBranchesRec: Record<string, DependencyDashboardCheck> =
+      Object.fromEntries(
+        checkedBranches.map((branchName) => [branchName, 'global-config']),
+      );
     dashboardChecks.dependencyDashboardChecks = {
       ...dashboardChecks.dependencyDashboardChecks,
       ...checkedBranchesRec,
@@ -219,7 +224,10 @@ function formatAsMarkdownLink(name: string, url?: string | null): string {
   return url ? `[${name}](${url})` : `\`${name}\``;
 }
 
-function getListItem(branch: BranchConfig, type: string): string {
+function getListItem(
+  branch: BranchConfig,
+  type: DependencyDashboardListItemType,
+): string {
   let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
@@ -260,7 +268,10 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
   return { categories, uncategorized, hasCategorized, hasUncategorized };
 }
 
-function getBranchList(branches: BranchConfig[], listItemType: string): string {
+function getBranchList(
+  branches: BranchConfig[],
+  listItemType: DependencyDashboardListItemType,
+): string {
   return branches
     .map((branch: BranchConfig): string => getListItem(branch, listItemType))
     .join('');
@@ -275,7 +286,7 @@ function getBranchesListMd(
   ) => unknown,
   title: string,
   description: string,
-  listItemType = 'approvePr',
+  listItemType: DependencyDashboardListItemType = 'approvePr',
   bulkComment?: string,
   bulkMessage?: string,
   bulkIcon?: '🔐',
@@ -552,6 +563,7 @@ export async function ensureDependencyDashboard(
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
+    'unpend',
   );
   issueBody += getBranchesListMd(
     branches,
