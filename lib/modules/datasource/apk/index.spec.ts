@@ -1,13 +1,16 @@
+import * as nodeFs from 'node:fs/promises';
 import { promisify } from 'node:util';
 import * as zlib from 'node:zlib';
 import { codeBlock } from 'common-tags';
 import { Header, Pack, ReadEntry } from 'tar';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
+import upath from 'upath';
 import { vi } from 'vitest';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { toSha256 } from '../../../util/hash.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
 import { ApkDatasource } from './index.ts';
@@ -778,6 +781,142 @@ describe('modules/datasource/apk/index', () => {
       });
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('caching', () => {
+    const registryUrl = 'https://packages.wolfi.dev/os?arch=x86_64';
+    const componentUrl = 'https://packages.wolfi.dev/os/x86_64';
+    const indexPath = '/os/x86_64/APKINDEX.tar.gz';
+    const lastModified = 'Fri, 26 Apr 2024 22:27:14 GMT';
+
+    function validatorsFile(): string {
+      return upath.join(
+        cacheDir!.path,
+        'others/apk',
+        toSha256(componentUrl),
+        'APKINDEX.validators.json',
+      );
+    }
+
+    const nginxReleases = [
+      {
+        version: '1.24.0-r16',
+        releaseTimestamp: '2024-04-26T22:27:14.000Z',
+      },
+    ];
+
+    it('should reuse the cached index when the registry reports it unchanged', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, {
+          etag: '"v1"',
+          'last-modified': lastModified,
+        })
+        .get(indexPath)
+        .matchHeader('if-none-match', '"v1"')
+        .matchHeader('if-modified-since', lastModified)
+        .reply(304);
+
+      const first = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+      const second = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+
+      expect(first).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl,
+        releases: nginxReleases,
+      });
+      expect(second).toEqual(first);
+    });
+
+    it('should download the index again once the registry reports it changed', async () => {
+      const updatedArchive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: ['P:nginx', 'V:1.26.2-r0', 't:1747894670'].join('\n'),
+        },
+      ]);
+
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .matchHeader('if-none-match', '"v1"')
+        .reply(200, updatedArchive, { etag: '"v2"' });
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      const second = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+
+      expect(second).toEqual({
+        registryUrl,
+        releases: [
+          {
+            version: '1.26.2-r0',
+            releaseTimestamp: '2025-05-22T06:17:50.000Z',
+          },
+        ],
+      });
+    });
+
+    it('should not revalidate when the registry provides no validators', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive)
+        .get(indexPath)
+        .reply(200, apkIndexArchive);
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKeys([
+        'if-none-match',
+        'if-modified-since',
+      ]);
+    });
+
+    it('should not revalidate when the cached validators are gone', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' });
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      await nodeFs.rm(validatorsFile());
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKey('if-none-match');
+    });
+
+    it('should not revalidate when the cached validators are unreadable', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' });
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      await nodeFs.writeFile(validatorsFile(), 'not json');
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKey('if-none-match');
     });
   });
 });

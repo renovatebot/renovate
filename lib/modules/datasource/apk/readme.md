@@ -64,6 +64,12 @@ https://dl-cdn.alpinelinux.org/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
 
 <!-- TODO #43711 -->
 
+## Caching
+
+An index holds thousands of packages and is several megabytes in size, so Renovate keeps the extracted index in its cache directory.
+Renovate also stores the `ETag` and `Last-Modified` of each downloaded `APKINDEX.tar.gz`, and sends them with the next request for that index.
+When the registry answers with `304 Not Modified`, Renovate reuses the cached index instead of downloading the archive again.
+
 ## Usage example
 
 Say you pin Alpine packages in a `Dockerfile` and want Renovate to bump the versions.
