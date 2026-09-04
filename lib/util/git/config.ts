@@ -77,7 +77,7 @@ function getGitConfigCount(value: string | undefined): number {
   if (Number.isNaN(gitConfigCount)) {
     logger.warn(
       { GIT_CONFIG_COUNT: value },
-      `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
+      `Found GIT_CONFIG_COUNT env variable, but could not parse the value to an integer. Ignoring it.`,
     );
     return 0;
   }
