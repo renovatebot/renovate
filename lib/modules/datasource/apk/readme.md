@@ -113,7 +113,7 @@ Besides the optional `branch=` pattern in the usage example, you can:
 
 1. **Several custom managers** with different `managerFilePatterns` / `matchFilePatterns` and a fixed `registryUrlTemplate` each (e.g. one for `docker/alpine-3.18/**`, another for `docker/alpine-3.19/**`).
 
-1. **`packageRules`** with `matchFileNames` / `matchPaths` and `registryUrls` to override the parameters for specific paths or packages.
+1. **`packageRules`** with `matchFileNames` and `registryUrls` to override the parameters for specific paths or packages.
 
 For example, this `packageRules` entry overrides the `registryUrl` for the `nginx` package:
 
