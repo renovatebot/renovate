@@ -87,6 +87,11 @@ interface ArchiveResponse extends ApkIndexCache {
 }
 
 /**
+ * Download a given Index's archive to a specific path.
+ *
+ * Will **??**
+ *
+ *
  * Downloads the archive of a component, asking the registry to answer with
  * `304 Not Modified` when the cached copy is still current.
  *
