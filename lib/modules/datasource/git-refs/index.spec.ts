@@ -150,5 +150,19 @@ describe('modules/datasource/git-refs/index', () => {
         'https://x-access-token:readonly-token@github.com/example/example.git',
       ]);
     });
+
+    it('falls back to the write github token for git-refs lookups', async () => {
+      hostRules.add({
+        matchHost: 'https://github.com/',
+        token: 'write-token',
+      });
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      await new GitRefsDatasource().getDigest({ packageName }, undefined);
+
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
+        'https://x-access-token:write-token@github.com/example/example.git',
+      ]);
+    });
   });
 });

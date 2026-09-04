@@ -446,6 +446,22 @@ describe('util/host-rules', () => {
         }),
       ).toEqual({ token: 'readonly-token' });
     });
+
+    it('falls back to a write rule for readOnly requests', () => {
+      add({
+        hostType: 'github',
+        matchHost: 'https://api.github.com',
+        token: 'write-token',
+      });
+
+      expect(
+        find({
+          hostType: 'github',
+          url: 'https://api.github.com/repos/foo/bar/tags',
+          readOnly: true,
+        }),
+      ).toEqual({ token: 'write-token' });
+    });
   });
 
   describe('hosts()', () => {

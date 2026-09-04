@@ -394,13 +394,13 @@ describe('util/git/auth', () => {
       add({
         hostType: 'github',
         matchHost: 'api.github.com',
-        token: 'token123',
+        token: 'write-token',
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:write-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:write-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://write-token@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',

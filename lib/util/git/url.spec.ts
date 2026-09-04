@@ -217,6 +217,17 @@ describe('util/git/url', () => {
       );
     });
 
+    it('falls back to a write token when readOnly is requested', () => {
+      hostRules.add({ token: 'write-token' });
+      expect(
+        getRemoteUrlWithToken(
+          'ssh://github.com/some/repo.git',
+          'git-refs',
+          true,
+        ),
+      ).toBe('https://x-access-token:write-token@github.com/some/repo.git');
+    });
+
     it('prefers readOnly token when requested', () => {
       hostRules.add({
         matchHost: 'https://github.com/',

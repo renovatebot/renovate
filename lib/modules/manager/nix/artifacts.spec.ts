@@ -39,6 +39,10 @@ const updateInputTokenCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 --extra-access-tokens github.com=token \
 flake update nixpkgs`;
+const updateInputWriteTokenCmd = `nix \
+--extra-experimental-features 'nix-command flakes' \
+--extra-access-tokens github.com=write-token \
+flake update nixpkgs`;
 const updateInputReadonlyTokenCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 --extra-access-tokens github.com=readonly-token \
@@ -137,7 +141,41 @@ describe('modules/manager/nix/artifacts', () => {
     hostRules.add({
       hostType: 'github',
       matchHost: 'api.github.com',
-      token: 'token',
+      token: 'write-token',
+    });
+
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: { ...config, constraints: { python: '3.7' } },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'new flake.lock',
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateInputWriteTokenCmd }]);
+  });
+
+  it('prefers a readonly GitHub token', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['flake.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'write-token',
     });
     hostRules.add({
       hostType: 'github',
@@ -174,7 +212,10 @@ describe('modules/manager/nix/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
-    hostRules.add({ matchHost: 'github.com', token: 'x-access-token:token' });
+    hostRules.add({
+      matchHost: 'github.com',
+      token: 'x-access-token:token',
+    });
 
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
