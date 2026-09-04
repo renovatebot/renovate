@@ -29,6 +29,27 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig extends CustomExtractConfig {
+  /**
+   * The patterns that matched this file for this manager. Carried by the config
+   * that both extraction and the auto-replace confirmation are given, and the
+   * only way for a manager whose files can be named anything to tell one of its
+   * own files from a file it merely reads.
+   */
+  managerFilePatterns?: string[];
+  /**
+   * Whatever the manager recorded on the dependency being confirmed. Every
+   * update is filtered down to the branch stage before auto-replace, which
+   * drops repository-stage options such as `managerFilePatterns`; this is not a
+   * config option, so it survives, and it is how a manager can tell the
+   * confirmation something extraction knew and the name alone does not say.
+   */
+  managerData?: Record<string, unknown>;
+  /**
+   * The file the rest of this config is about, where the caller has one. A
+   * branch config describes its first upgrade, so this is what tells a manager
+   * whether `managerData` belongs to the file it is being asked to read.
+   */
+  packageFile?: string;
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
@@ -79,6 +100,19 @@ export interface PackageFileContent<
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
   deps: PackageDependency<T>[];
+  /**
+   * Declares that this entry is not a claim on the file: the manager read it and
+   * reports what is in it, but cannot maintain it.
+   *
+   * It has one effect, and only for a manager declaring `supersedesManagers`:
+   * such an entry supersedes nothing, so another manager's entry for the same
+   * file survives. It does not make anything visible, since dependencies are
+   * visible because they are reported, and it does not keep this entry alive. A
+   * secondary reporting `lockFiles` for the path still rejects the primary
+   * first, so where a lock file sits beside the source this entry is dropped and
+   * only the manager owning the format remains.
+   */
+  cannotUpdate?: boolean;
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;
