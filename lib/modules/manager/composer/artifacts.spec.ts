@@ -71,14 +71,14 @@ describe('modules/manager/composer/artifacts', () => {
   });
 
   it('returns if no composer.lock found', async () => {
-    await expect(
-      composer.updateArtifacts({
+    expect(
+      await composer.updateArtifacts({
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
       }),
-    ).resolves.toBeNull();
+    ).toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -274,14 +274,14 @@ describe('modules/manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     git.getRepoStatus.mockResolvedValueOnce(repoStatus);
 
-    expect(
-      await composer.updateArtifacts({
+    await expect(
+      composer.updateArtifacts({
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       {
