@@ -19,19 +19,24 @@ import * as parser from './parser.ts';
 const gzip = promisify(zlib.gzip);
 
 async function createTarGz(
-  entries: { name: string; content: string }[],
+  entries: { name: string; content: string; type?: 'File' | 'Directory' }[],
 ): Promise<Buffer> {
   const pack = new Pack({ gzip: true });
 
   for (const entry of entries) {
+    const type = entry.type ?? 'File';
     const data = Buffer.from(entry.content, 'utf8');
     const header = new Header({
       path: entry.name,
-      size: data.length,
-      type: 'File',
+      size: type === 'Directory' ? 0 : data.length,
+      type,
     });
     const readEntry = new ReadEntry(header);
-    readEntry.end(data);
+    if (type === 'Directory') {
+      readEntry.end();
+    } else {
+      readEntry.end(data);
+    }
     pack.add(readEntry);
   }
 
@@ -898,6 +903,38 @@ describe('modules/datasource/apk/index', () => {
       await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
       await nodeFs.rm(validatorsFile());
       await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKey('if-none-match');
+    });
+
+    it('should not cache an archive whose `APKINDEX` is a directory', async () => {
+      const directoryArchive = await createTarGz([
+        { name: 'APKINDEX', content: '', type: 'Directory' },
+      ]);
+
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, directoryArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v2"' });
+
+      const first = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+      const second = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+
+      expect(first).toBeNull();
+      expect(second).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl,
+        releases: nginxReleases,
+      });
 
       const [, secondRequest] = httpMock.getTrace();
       expect(secondRequest.headers).not.toContainKey('if-none-match');

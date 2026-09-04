@@ -21,10 +21,11 @@ const validatorsFileName = 'APKINDEX.validators.json';
  *
  * Alongside the extracted archive, we also store the `ETag` and `Last-Modified` to allow re-using them on subsequent requests.
  *
- * The validators are cached on disk rather than in the package cache, because
- * they describe the copy which this cache directory holds. A package cache can
- * be shared between machines, which would let one machine revalidate an index
- * that another machine downloaded.
+ * The validators live on disk next to the index they describe, rather than in
+ * the package cache. A package cache can be shared between machines, so a
+ * validator stored there may describe an archive which this machine never
+ * downloaded: the registry would answer `304 Not Modified`, and we would go on
+ * serving whatever older index this cache directory happens to hold.
  *
  * @param http - The HTTP client to download with.
  * @param componentUrl - The `APKINDEX` directory URL of the component.
@@ -67,7 +68,7 @@ export async function getIndexFile(
     });
 
     const extractedFile = upath.join(extractDir, indexFileName);
-    if (!(await fs.cachePathExists(extractedFile))) {
+    if (!(await fs.cachePathIsFile(extractedFile))) {
       logger.warn({ componentUrl }, 'APKINDEX file not found in tar archive');
       return null;
     }
@@ -156,7 +157,7 @@ async function readValidators(
   validatorsFile: string,
   indexFile: string,
 ): Promise<ApkIndexValidators | null> {
-  if (!(await fs.cachePathExists(indexFile))) {
+  if (!(await fs.cachePathIsFile(indexFile))) {
     return null;
   }
 
