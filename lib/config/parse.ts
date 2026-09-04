@@ -35,8 +35,8 @@ export function parseFileConfig(
     // strip them before validation. The actual parsing is handled by a lenient
     // JSONC parser which tolerates trailing commas.
     const jsonString = stripJsonComments(fileContents).replace(
-      regEx(/,(\s*[}\]])/g),
-      '$1',
+      regEx(/,(?<trailing>\s*[}\]])/g),
+      '$<trailing>',
     );
     let allowDuplicateKeys = true;
     let jsonValidationError = jsonValidator.validate(

@@ -70,14 +70,14 @@ function isErrorIsh(node: ESTree.Expression): boolean {
     return isErrorIsh(node.expression);
   }
   if (node.type === 'Identifier') {
-    return /err(or)?$/i.test(node.name);
+    return /err(?:or)?$/i.test(node.name);
   }
   if (
     node.type === 'MemberExpression' &&
     !node.computed &&
     node.property.type === 'Identifier'
   ) {
-    return /err(or)?$/i.test(node.property.name);
+    return /err(?:or)?$/i.test(node.property.name);
   }
   if (node.type === 'NewExpression') {
     return (

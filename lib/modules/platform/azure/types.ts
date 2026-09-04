@@ -14,6 +14,7 @@ export const AzurePrVote = {
 } as const;
 
 export interface Config {
+  ignorePrAuthor: boolean;
   repoForceRebase: boolean;
   mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;

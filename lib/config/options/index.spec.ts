@@ -118,14 +118,14 @@ describe('config/options/index', () => {
     ).flat();
 
     const directPattern =
-      /(?<![.\w])(?:template\.)?compile\(\s*(?:config|update|upgrade|upg|toApply)\??\.(\w+)/g;
+      /(?<![.\w])(?:template\.)?compile\(\s*(?:config|update|upgrade|upg|toApply)\??\.(?<name>\w+)/g;
     const detectedOptions = new Set<string>();
 
     for (const file of sourceFiles) {
       const content = await readFile(file, 'utf-8');
       let match;
       while ((match = directPattern.exec(content)) !== null) {
-        const name = match[1];
+        const name = match.groups!.name;
         const option = allOptions.find((o) => o.name === name);
         // Only include string or array-of-string options (not objects like userStrings)
         if (
@@ -201,5 +201,17 @@ describe('config/options/index', () => {
         // ).toBeFalse()
       });
     }
+  });
+
+  describe('every option with requiresCheckAtTrustBoundary', () => {
+    it('has remembered to implement their checks', () => {
+      // if this test fails after you've added `requiresCheckAtTrustBoundary` to a config option, make sure you've implemented the checks, and then update the list below:
+      const enforced = ['env', 'hostRules'];
+      const flagged = getOptions()
+        .filter((option) => option.requiresCheckAtTrustBoundary)
+        .map((option) => option.name)
+        .sort();
+      expect(flagged).toEqual([...enforced].sort());
+    });
   });
 });

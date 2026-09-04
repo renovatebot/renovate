@@ -10,13 +10,15 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 function getSectionName(str: string): string {
   const [, sectionName] = coerceArray(
-    regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str),
+    regEx(/^\[\s*(?<sectionName>[^\s]+)\s*]\s*$/).exec(str),
   );
   return sectionName;
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = coerceArray(regEx(/^([^\s]+)\s*=/).exec(str));
+  const [, sectionRecord] = coerceArray(
+    regEx(/^(?<sectionRecord>[^\s]+)\s*=/).exec(str),
+  );
   return sectionRecord;
 }
 

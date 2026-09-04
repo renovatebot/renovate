@@ -15,6 +15,7 @@ interface LockFilePackage {
   engines?: Record<string, string>;
   dependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
 }
 
 interface LockFileDependency {
@@ -75,7 +76,7 @@ export interface NpmLockFiles {
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
+  pnpmLockFile?: string;
   npmLock?: string;
 }
 
