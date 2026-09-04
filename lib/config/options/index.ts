@@ -2835,6 +2835,17 @@ const options: Readonly<RenovateOptions>[] = [
     },
   },
   {
+    name: 'splitPythonMarkers',
+    description:
+      'When enabled, pep621 and poetry deps with Python-version constraints ' +
+      'get separate PRs per variant, each constrained to its Python range.',
+    type: 'boolean',
+    default: false,
+    stage: 'branch',
+    cli: false,
+    supportedManagers: ['pep621', 'poetry'],
+  },
+  {
     name: 'hostRules',
     description: 'Host rules/configuration including credentials.',
     type: 'array',

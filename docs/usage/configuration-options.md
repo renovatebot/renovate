@@ -4970,6 +4970,52 @@ By default, Renovate will use the most efficient approach to updating package fi
 If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
+## `splitPythonMarkers`
+
+Use this option to update variants of the same Python dependency independently when each variant targets a different Python version.
+It is supported by the `pep621` and `poetry` managers and is disabled by default.
+
+For example, the following PEP 508 declarations use different versions of `pytest` for different Python versions:
+
+```toml
+[project]
+requires-python = ">=3.9"
+dependencies = [
+  "pytest>=6.0,<7.0; python_version < '3.10'",
+  "pytest>=7.0,<8.0; python_version >= '3.10'",
+]
+```
+
+Enable the option in your Renovate configuration:
+
+```json
+{
+  "splitPythonMarkers": true
+}
+```
+
+Renovate then extracts both declarations and creates separate branches and PRs for them.
+Each branch name and commit message identifies the applicable Python constraint.
+Renovate also filters available releases using the intersection of the dependency's Python marker and the project's `requires-python` constraint.
+
+The option recognizes standalone `python_version` and `python_full_version` markers.
+Compound PEP 508 markers containing `and` or `or`, and non-Python markers such as `sys_platform`, are not split.
+
+The Poetry manager also supports native multiple-constraint arrays when every entry specifies both `version` and `python`:
+
+```toml
+[tool.poetry.dependencies]
+numpy = [
+  { version = "^1.26", python = "^3.9" },
+  { version = "^1.24", python = "^3.8, <3.12" },
+]
+```
+
+!!! warning
+  This option enables strict Python-constraint filtering for the affected dependencies.
+  A release can be filtered out when its PyPI metadata does not support the applicable Python range.
+  See [`constraintsFiltering`](#constraintsfiltering) and [Language constraints and upgrading](language-constraints-and-upgrading.md) for details.
+
 ## `statusCheckNames`
 
 You can customize the name/context of status checks that Renovate adds to commits/branches/PRs.

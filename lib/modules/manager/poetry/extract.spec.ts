@@ -66,6 +66,96 @@ describe('modules/manager/poetry/extract', () => {
       const res = await extractPackageFile(pyproject4toml, filename);
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(4);
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'foo',
+        skipReason: 'multiple-constraint-dep',
+      });
+    });
+
+    it('splits native Poetry multiple constraint dependencies', async () => {
+      const res = await extractPackageFile(pyproject4toml, filename, {
+        splitPythonMarkers: true,
+      });
+
+      expect(res?.deps).toHaveLength(5);
+      expect(res?.deps.filter((dep) => dep.depName === 'foo')).toMatchObject([
+        {
+          currentValue: '<=1.9',
+          extractedConstraints: { python: '^2.7' },
+          constraintsFiltering: 'strict',
+          additionalBranchPrefix: 'py-caret-2-dot-7-',
+          commitMessageSuffix: '(python ^2.7)',
+          managerData: {
+            nestedVersion: true,
+            pythonConstraint: '^2.7',
+          },
+        },
+        {
+          currentValue: '^2.0',
+          extractedConstraints: { python: '^3.4' },
+          constraintsFiltering: 'strict',
+          additionalBranchPrefix: 'py-caret-3-dot-4-',
+          commitMessageSuffix: '(python ^3.4)',
+          managerData: {
+            nestedVersion: true,
+            pythonConstraint: '^3.4',
+          },
+        },
+      ]);
+    });
+
+    it('preserves optional and source metadata for split constraints', async () => {
+      const content = codeBlock`
+        [tool.poetry]
+        name = "test"
+        version = "0.1.0"
+
+        [tool.poetry.dependencies]
+        foo = [
+          { version = "^1.0", python = "^3.9", optional = true, source = "Private" },
+        ]
+      `;
+
+      const res = await extractPackageFile(content, filename, {
+        splitPythonMarkers: true,
+      });
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'foo',
+          depType: 'extras',
+          managerData: {
+            nestedVersion: true,
+            pythonConstraint: '^3.9',
+            sourceName: 'private',
+          },
+        },
+      ]);
+    });
+
+    it('retains unsupported Poetry constraint arrays as skipped', async () => {
+      const content = codeBlock`
+        [tool.poetry]
+        name = "test"
+        version = "0.1.0"
+
+        [tool.poetry.dependencies]
+        foo = [
+          { version = "^1.0", python = "^3.9" },
+          { version = "^2.0", platform = "linux" },
+        ]
+      `;
+
+      const res = await extractPackageFile(content, filename, {
+        splitPythonMarkers: true,
+      });
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'foo',
+          skipReason: 'multiple-constraint-dep',
+        },
+      ]);
     });
 
     it('extracts build-system.requires dependencies', async () => {
@@ -101,6 +191,124 @@ describe('modules/manager/poetry/extract', () => {
           depType: 'dependencies',
         },
       ]);
+    });
+
+    it('sets constraints and branch metadata for project deps when splitPythonMarkers is enabled', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+        requires-python = ">=3.9"
+        dependencies = [
+          "pytest>=6.0,<7.0; python_version < \\"3.10\\"",
+          "pytest>=7.0,<8.0; python_version >= \\"3.10\\"",
+          "requests>=2.0",
+        ]
+
+        [tool.poetry]
+        name = "test"
+        version = "0.1.0"
+      `;
+
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+
+      const pytestLt = result?.deps.find(
+        (d) =>
+          d.packageName === 'pytest' &&
+          d.additionalBranchPrefix === 'py-lt-3-dot-10-',
+      );
+      expect(pytestLt).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=6.0,<7.0',
+        extractedConstraints: { python: '>=3.9,<3.10' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'py-lt-3-dot-10-',
+        commitMessageSuffix: '(python <3.10)',
+      });
+
+      const pytestGte = result?.deps.find(
+        (d) =>
+          d.packageName === 'pytest' &&
+          d.additionalBranchPrefix === 'py-gt-eq-3-dot-10-',
+      );
+      expect(pytestGte).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=7.0,<8.0',
+        extractedConstraints: { python: '>=3.10' },
+        constraintsFiltering: 'strict',
+        additionalBranchPrefix: 'py-gt-eq-3-dot-10-',
+        commitMessageSuffix: '(python >=3.10)',
+      });
+
+      const requests = result?.deps.find((d) => d.packageName === 'requests');
+      expect(requests?.extractedConstraints).toBeUndefined();
+      expect(requests?.additionalBranchPrefix).toBeUndefined();
+      expect(requests?.commitMessageSuffix).toBeUndefined();
+    });
+
+    it('keeps legacy project dependency deduplication when disabled', async () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.1.0"
+        dependencies = [
+          "pytest>=6.0,<7.0; python_version < \\"3.10\\"",
+          "pytest>=7.0,<8.0; python_version >= \\"3.10\\"",
+        ]
+
+        [tool.poetry]
+        name = "test"
+        version = "0.1.0"
+      `;
+
+      const result = await extractPackageFile(content, 'pyproject.toml');
+
+      expect(result?.deps).toHaveLength(1);
+      expect(result?.deps[0]).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '>=7.0,<8.0',
+      });
+      expect(result?.deps[0].additionalBranchPrefix).toBeUndefined();
+    });
+
+    it('preserves pinned lockedVersion for poetry project deps when splitPythonMarkers is enabled', async () => {
+      fs.readLocalFile.mockResolvedValue(codeBlock`
+        [[package]]
+        name = "pytest"
+        version = "7.1.0"
+
+        [metadata]
+        python-versions = ">=3.9"
+      `);
+
+      const content = codeBlock`
+        [project]
+        name = "test-project"
+        version = "0.1.0"
+        dependencies = [
+          "pytest==6.0.0; python_version == \\"3.9\\"",
+        ]
+
+        [tool.poetry]
+        name = "test-project"
+        version = "0.1.0"
+      `;
+
+      const result = await extractPackageFile(content, 'pyproject.toml', {
+        splitPythonMarkers: true,
+      });
+
+      const dep = result?.deps.find((d) => d.packageName === 'pytest');
+      expect(dep).toMatchObject({
+        packageName: 'pytest',
+        currentValue: '==6.0.0',
+        currentVersion: '6.0.0',
+        lockedVersion: '6.0.0',
+        extractedConstraints: { python: '3.9' },
+        constraintsFiltering: 'strict',
+      });
     });
 
     it('can parse TOML v1 heterogeneous arrays', async () => {
@@ -601,7 +809,9 @@ describe('modules/manager/poetry/extract', () => {
             packageName: 'python-decouple',
           },
         ],
-        extractedConstraints: {},
+        extractedConstraints: {
+          python: '>=3.11,<4.0',
+        },
         packageFileVersion: undefined,
       });
     });
