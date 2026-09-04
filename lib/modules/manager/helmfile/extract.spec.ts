@@ -76,9 +76,9 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+      expect(result?.deps).toMatchObject([
+        { depName: 'example', skipReason: 'unknown-registry' },
+      ]);
     });
 
     it('skip templetized release with invalid characters', async () => {
@@ -100,19 +100,10 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toMatchSnapshot({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '1.0.0',
-            skipReason: 'unsupported-chart-type',
-          },
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: '!!!!--!', skipReason: 'unsupported-chart-type' },
+        { currentValue: '1.0.0', depName: 'example' },
+      ]);
     });
 
     it('skip local charts', async () => {
@@ -131,9 +122,15 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            depName: 'example',
+            skipReason: 'local-chart',
+          },
+        ],
+      });
     });
 
     it('skip chart with unknown repository', async () => {
@@ -152,9 +149,9 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+      expect(result?.deps).toMatchObject([
+        { depName: 'example', skipReason: 'unknown-registry' },
+      ]);
     });
 
     it('skip chart with special character in the name', async () => {
@@ -176,9 +173,10 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+      expect(result?.deps).toMatchObject([
+        { depName: 'example/example', skipReason: 'unsupported-chart-type' },
+        { depName: 'example?example', skipReason: 'unsupported-chart-type' },
+      ]);
     });
 
     it('skip chart that does not have specified version', async () => {
@@ -196,9 +194,15 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            depName: 'example',
+            skipReason: 'invalid-version',
+          },
+        ],
+      });
     });
 
     it('parses multidoc yaml', async () => {

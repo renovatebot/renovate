@@ -245,6 +245,14 @@ export const presets: Record<string, Preset> = {
         versioning: 'docker',
       },
       {
+        description:
+          'Use partial semver versioning for partial mise Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
+        matchCurrentValue: '/^\\d+(?:\\.\\d+)?$/',
+        matchDatasources: ['java-version'],
+        matchManagers: ['mise'],
+        versioning: 'semver-partial',
+      },
+      {
         allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',

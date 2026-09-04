@@ -203,7 +203,7 @@ describe('modules/datasource/maven/s3', () => {
             Key: 'org/example/package/maven-metadata.xml',
           })
           .resolvesOnce({});
-        expect(await get('org.example:package', baseUrlS3)).toBeNull();
+        await expect(get('org.example:package', baseUrlS3)).resolves.toBeNull();
       });
     });
   });

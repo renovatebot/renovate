@@ -49,25 +49,25 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -84,15 +84,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock', async () => {
@@ -108,15 +112,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock with precise version update', async () => {
@@ -135,14 +143,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
@@ -176,14 +184,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
@@ -218,14 +226,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
@@ -268,14 +276,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Cargo.lock', stderr: 'Exec error' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd }]);
@@ -388,14 +396,14 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ];
 
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
 
@@ -413,14 +421,14 @@ describe('modules/manager/cargo/artifacts', () => {
   it('returns updated Cargo.lock when there are no more dependencies to update', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New Cargo.lock',
@@ -444,15 +452,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated workspace Cargo.lock', async () => {
@@ -474,15 +486,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'crates/one/Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path crates/one/Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock for lockfile maintenance', async () => {
@@ -491,8 +507,8 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -502,8 +518,12 @@ describe('modules/manager/cargo/artifacts', () => {
           constraints: { rust: '1.65.0' },
         },
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
+      },
+    ]);
   });
 
   it('supports docker mode', async () => {
@@ -519,14 +539,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -584,14 +604,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -686,14 +706,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -764,14 +784,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -824,14 +844,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -883,14 +903,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -934,14 +954,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Cargo.lock', stderr: 'not found' } },
     ]);
   });

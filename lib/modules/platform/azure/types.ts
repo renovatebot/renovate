@@ -1,11 +1,5 @@
 import type { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { HostRule } from '../../../types/index.ts';
 import type { Pr } from '../types.ts';
-
-export interface AuthenticationContext {
-  credentials: HostRule;
-  key: string;
-}
 
 export interface AzurePr extends Pr {
   sourceRefName?: string;
@@ -28,7 +22,6 @@ export interface Config {
   project: string;
   projectId: string;
   prList: AzurePr[];
-  prListAuthKey?: string;
   fileList: null;
   repository: string;
   defaultBranch: string;

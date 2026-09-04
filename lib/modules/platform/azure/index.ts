@@ -1,11 +1,9 @@
 import { setTimeout } from 'node:timers/promises';
 import { isString } from '@sindresorhus/is';
-import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type {
   GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
-  GitPullRequestSearchCriteria,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -75,15 +73,9 @@ interface User {
   isRequired: boolean;
 }
 
-interface GetRepoPullRequestsOptions {
-  gitApi: IGitApi;
-  searchCriteria: GitPullRequestSearchCriteria;
-  skip: number;
-  top: number;
-}
-
 let config: Config = {} as any;
 let issueService: IssueService;
+let renovateUserId: string | undefined;
 
 const defaults: {
   endpoint?: string;
@@ -91,23 +83,6 @@ const defaults: {
 } = {
   hostType: 'azure',
 };
-
-function getRepoPullRequests({
-  gitApi,
-  searchCriteria,
-  skip,
-  top,
-}: GetRepoPullRequestsOptions): Promise<GitPullRequest[]> {
-  const maxCommentLength = 0;
-  return gitApi.getPullRequests(
-    config.repoId,
-    searchCriteria,
-    config.project,
-    maxCommentLength,
-    skip,
-    top,
-  );
-}
 
 export const id = 'azure';
 
@@ -131,7 +106,13 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  return Promise.resolve({ endpoint: defaults.endpoint });
+  const credentials = token
+    ? { token }
+    : { username: username!, password: password! };
+  return azureApi.getAuthenticatedUserId(credentials).then((userId) => {
+    renovateUserId = userId;
+    return res;
+  });
 }
 
 export async function getRepos(): Promise<string[]> {
@@ -292,41 +273,32 @@ export async function initRepo({
 
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
-  const authenticationContext = azureApi.getAuthenticationContext();
-  if (config.prListAuthKey !== authenticationContext.key) {
-    let renovateUserId: string | undefined;
-    if (!config.ignorePrAuthor) {
-      renovateUserId = await azureApi.getAuthenticatedUserId(
-        authenticationContext.credentials,
-      );
-    }
-
-    const azureApiGit = await azureApi.gitApi(
-      authenticationContext.credentials,
-    );
+  if (!config.prList) {
+    const azureApiGit = await azureApi.gitApi();
 
     let prs: GitPullRequest[] = [];
     let fetchedPrs: GitPullRequest[];
     let skip = 0;
     do {
-      fetchedPrs = await getRepoPullRequests({
-        gitApi: azureApiGit,
-        searchCriteria: {
+      fetchedPrs = await azureApiGit.getPullRequests(
+        config.repoId,
+        {
           status: PullRequestStatus.All,
           // fetch only prs directly created on the repo and not by forks
           sourceRepositoryId: config.repoId,
           ...(!config.ignorePrAuthor &&
             renovateUserId && { creatorId: renovateUserId }),
         },
+        config.project,
+        0,
         skip,
-        top: 100,
-      });
+        100,
+      );
       prs = prs.concat(fetchedPrs);
       skip += 100;
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(getRenovatePRFormat);
-    config.prListAuthKey = authenticationContext.key;
     logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
   }
   return config.prList;
@@ -369,9 +341,9 @@ export async function findPr({
   try {
     if (includeOtherAuthors) {
       const azureApiGit = await azureApi.gitApi();
-      const [pr] = await getRepoPullRequests({
-        gitApi: azureApiGit,
-        searchCriteria: {
+      const [pr] = await azureApiGit.getPullRequests(
+        config.repoId,
+        {
           sourceRefName: getNewBranchName(branchName),
           sourceRepositoryId: config.repoId,
           status: PullRequestStatus.Active,
@@ -379,9 +351,11 @@ export async function findPr({
             targetRefName: getNewBranchName(targetBranch),
           }),
         },
-        skip: 0,
-        top: 1,
-      });
+        config.project,
+        0,
+        0,
+        1,
+      );
       return pr ? getRenovatePRFormat(pr) : null;
     }
 

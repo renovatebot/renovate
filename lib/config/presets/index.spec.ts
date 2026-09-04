@@ -350,23 +350,60 @@ describe('config/presets/index', () => {
     it('resolves eslint', async () => {
       config.extends = ['packages:eslint'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-      // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(11);
+      expect(res).toEqual({
+        matchPackageNames: [
+          '*/eslint-plugin',
+          '@babel/eslint-parser',
+          '@eslint/**',
+          '@eslint-community/**',
+          '@stylistic/eslint-plugin**',
+          '@types/eslint',
+          '@types/eslint__**',
+          '@typescript-eslint/**',
+          'babel-eslint',
+          'eslint**',
+          'typescript-eslint',
+        ],
+      });
     });
 
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-      // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(23);
+      expect(res).toEqual({
+        description: ['All lint-related packages.'],
+        matchPackageNames: [
+          'ember-template-lint**',
+          '*/eslint-plugin',
+          '@babel/eslint-parser',
+          '@eslint/**',
+          '@eslint-community/**',
+          '@stylistic/eslint-plugin**',
+          '@types/eslint',
+          '@types/eslint__**',
+          '@typescript-eslint/**',
+          'babel-eslint',
+          'eslint**',
+          'typescript-eslint',
+          'friendsofphp/php-cs-fixer',
+          'squizlabs/php_codesniffer',
+          'symplify/easy-coding-standard',
+          'stylelint**',
+          'codelyzer',
+          '/\\btslint\\b/',
+          '@oxlint/**',
+          'oxlint',
+          'prettier',
+          'remark-lint',
+          'standard',
+        ],
+      });
     });
 
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageRules).toHaveLength(1);
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(23);
@@ -375,9 +412,11 @@ describe('config/presets/index', () => {
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
       expect(res.automerge).toBeUndefined();
-      expect(res.minor!.automerge).toBeTrue();
+      expect(res).toMatchObject({
+        major: { automerge: false },
+        minor: { automerge: true },
+      });
     });
 
     it('ignores presets', async () => {
@@ -397,9 +436,8 @@ describe('config/presets/index', () => {
 
       const { config: res } = await presets.resolveConfigPresets(config);
 
-      expect(res.labels).toEqual(['self-hosted resolved']);
       expect(local.getPreset.mock.calls).toHaveLength(1);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ labels: ['self-hosted resolved'] });
     });
 
     it('returns the presets which have been merged into the resulting config', async () => {
@@ -536,7 +574,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -575,7 +613,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -616,7 +654,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -1409,7 +1447,9 @@ describe('config/presets/index', () => {
 
     it('does not use cache for internal presets', async () => {
       const memCacheGetSpy = vi.spyOn(memCache, 'get');
-      expect(await presets.getPreset(':dependencyDashboard', {})).toBeDefined();
+      await expect(
+        presets.getPreset(':dependencyDashboard', {}),
+      ).resolves.toBeDefined();
       expect(memCacheGetSpy).not.toHaveBeenCalled();
       expect(packageCache.get).not.toHaveBeenCalled();
     });
@@ -1491,10 +1531,23 @@ describe('config/presets/index', () => {
 
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
-      expect(res).toMatchSnapshot();
-      // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(5);
-      expect(res.extends).toHaveLength(5);
+      expect(res).toEqual({
+        description: ['All lint-related packages.'],
+        extends: [
+          'packages:emberTemplateLint',
+          'packages:eslint',
+          'packages:phpLinters',
+          'packages:stylelint',
+          'packages:tslint',
+        ],
+        matchPackageNames: [
+          '@oxlint/**',
+          'oxlint',
+          'prettier',
+          'remark-lint',
+          'standard',
+        ],
+      });
     });
 
     it('gets parameterised configs', async () => {
@@ -1571,9 +1624,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toMatchSnapshot('validationSource');
-      expect(e!.validationError).toMatchSnapshot('validationError');
-      expect(e!.validationMessage).toMatchSnapshot('validationMessage');
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('handles no config', async () => {

@@ -842,11 +842,11 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
         }),
-      ).toEqual([]);
+      ).resolves.toEqual([]);
     });
 
     it('returns empty array for undefined data.', async () => {
@@ -856,11 +856,11 @@ describe('util/http/github', () => {
         .reply(200, {
           data: { repository: { otherField: 'someval' } },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
         }),
-      ).toEqual([]);
+      ).resolves.toEqual([]);
     });
 
     it('throws errors for invalid responses', async () => {
@@ -884,9 +884,9 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem'),
-      ).toMatchInlineSnapshot(`[]`);
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem'),
+      ).resolves.toMatchInlineSnapshot(`[]`);
     });
 
     it('throws when an app installation exhausts its GraphQL budget', async () => {

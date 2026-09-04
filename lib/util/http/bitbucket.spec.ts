@@ -35,7 +35,7 @@ describe('util/http/bitbucket', () => {
     httpMock.scope(baseUrl).post('/some-url').reply(200, {});
     httpMock.scope(customBaseUrl).post('/some-url').reply(200, {});
 
-    expect(await api.postJson('some-url')).toEqual({
+    await expect(api.postJson('some-url')).resolves.toEqual({
       authorization: true,
       body: {},
       headers: {
@@ -45,7 +45,7 @@ describe('util/http/bitbucket', () => {
     });
 
     setBaseUrl(customBaseUrl);
-    expect(await api.postJson('some-url')).toEqual({
+    await expect(api.postJson('some-url')).resolves.toEqual({
       authorization: false,
       body: {},
       headers: {

@@ -71,10 +71,6 @@ describe('modules/platform/azure/index', () => {
     hostRules.clear();
     hostRules.add({ token: 'token' });
     azureHelper.getPolicyEvaluations.mockResolvedValue([]);
-    azureApi.getAuthenticationContext.mockReturnValue({
-      credentials: { token: 'token' },
-      key: 'token-key',
-    });
     azureApi.getAuthenticatedUserId.mockResolvedValue('renovate-user-id');
     // Default to the hosted (cloud) endpoint used across these tests.
     azureApi.isHosted.mockResolvedValue(true);
@@ -160,12 +156,30 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('should init', async () => {
-      expect(
-        await azure.initPlatform({
+      await expect(
+        azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
           token: 'token',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://dev.azure.com/renovate12345/',
+      });
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
+        token: 'token',
+      });
+    });
+
+    it('should discover the authenticated user with basic credentials', async () => {
+      await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        username: 'user',
+        password: 'pass',
+      });
+
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
+        username: 'user',
+        password: 'pass',
+      });
     });
   });
 
@@ -175,8 +189,8 @@ describe('modules/platform/azure/index', () => {
         'sometoken',
         'https://dev.azure.com/renovate12345',
       );
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
-      expect(repos).toMatchSnapshot('repos');
+      expect(azureApi.gitApi.mock.calls).toEqual([[]]);
+      expect(repos).toEqual(['prj1/repo1', 'prj1/repo2']);
     });
   });
 
@@ -228,8 +242,13 @@ describe('modules/platform/azure/index', () => {
       const config = await initRepo({
         repository: 'some/repo',
       });
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
-      expect(config).toMatchSnapshot('config');
+      expect(azureApi.gitApi.mock.calls).toEqual([[]]);
+      expect(config).toEqual({
+        defaultBranch: 'defBr',
+        isFork: false,
+        repoFingerprint:
+          '02574de485149547c1a071aa7921da3d0afadcd6162f3bd49ba3ced29be589f8b9bac689fd0badb212bd21c3f48bd8566beaf31cdca2b083bd855808a9c129e2',
+      });
     });
 
     it(`throws if repo is disabled`, async () => {
@@ -607,11 +626,11 @@ describe('modules/platform/azure/index', () => {
           getPullRequests,
         }),
       );
-      expect(await azure.getPrList()).toEqual([]);
+      await expect(azure.getPrList()).resolves.toEqual([]);
       expect(azureApi.getAuthenticatedUserId).toHaveBeenCalledExactlyOnceWith({
         token: 'token',
       });
-      expect(azureApi.gitApi).toHaveBeenLastCalledWith({ token: 'token' });
+      expect(azureApi.gitApi).toHaveBeenLastCalledWith();
       expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
         '1',
         {
@@ -636,8 +655,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
 
-      expect(await azure.getPrList()).toEqual([]);
-      expect(azureApi.getAuthenticatedUserId).not.toHaveBeenCalled();
+      await expect(azure.getPrList()).resolves.toEqual([]);
       expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
         '1',
         {
@@ -653,6 +671,10 @@ describe('modules/platform/azure/index', () => {
 
     it('does not filter by authenticated user when the ID is unavailable', async () => {
       azureApi.getAuthenticatedUserId.mockResolvedValueOnce(undefined);
+      await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        token: 'token',
+      });
       await initRepo();
       const getPullRequests = vi.fn().mockResolvedValue([]);
       azureApi.gitApi.mockResolvedValueOnce(
@@ -661,7 +683,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
 
-      expect(await azure.getPrList()).toEqual([]);
+      await expect(azure.getPrList()).resolves.toEqual([]);
       expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
         '1',
         {
@@ -675,61 +697,17 @@ describe('modules/platform/azure/index', () => {
       );
     });
 
-    it('refetches PRs when effective credentials change', async () => {
+    it('reuses the cached PR list', async () => {
       await initRepo();
-      const firstCredentials = { token: 'first-token' };
-      const secondCredentials = { token: 'second-token' };
-      azureApi.getAuthenticationContext
-        .mockReturnValueOnce({
-          credentials: firstCredentials,
-          key: 'first-key',
-        })
-        .mockReturnValueOnce({
-          credentials: secondCredentials,
-          key: 'second-key',
-        });
-      azureApi.getAuthenticatedUserId
-        .mockResolvedValueOnce('first-user-id')
-        .mockResolvedValueOnce('second-user-id');
-      const firstGetPullRequests = vi.fn().mockResolvedValue([]);
-      const secondGetPullRequests = vi.fn().mockResolvedValue([]);
-      azureApi.gitApi
-        .mockResolvedValueOnce(
-          partial<IGitApi>({ getPullRequests: firstGetPullRequests }),
-        )
-        .mockResolvedValueOnce(
-          partial<IGitApi>({ getPullRequests: secondGetPullRequests }),
-        );
+      const getPullRequests = vi.fn().mockResolvedValue([]);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({ getPullRequests }),
+      );
 
       await azure.getPrList();
       await azure.getPrList();
 
-      expect(azureApi.getAuthenticatedUserId).toHaveBeenNthCalledWith(
-        1,
-        firstCredentials,
-      );
-      expect(azureApi.getAuthenticatedUserId).toHaveBeenNthCalledWith(
-        2,
-        secondCredentials,
-      );
-      expect(azureApi.gitApi).toHaveBeenNthCalledWith(2, firstCredentials);
-      expect(azureApi.gitApi).toHaveBeenNthCalledWith(3, secondCredentials);
-      expect(firstGetPullRequests).toHaveBeenCalledWith(
-        '1',
-        expect.objectContaining({ creatorId: 'first-user-id' }),
-        'some',
-        0,
-        0,
-        100,
-      );
-      expect(secondGetPullRequests).toHaveBeenCalledWith(
-        '1',
-        expect.objectContaining({ creatorId: 'second-user-id' }),
-        'some',
-        0,
-        0,
-        100,
-      );
+      expect(getPullRequests).toHaveBeenCalledOnce();
     });
   });
 
@@ -1101,7 +1079,15 @@ describe('modules/platform/azure/index', () => {
         }),
       );
       const pr = await azure.getPr(1234);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        labels: ['renovate'],
+        number: 1234,
+        pullRequestId: 1234,
+        state: 'open',
+      });
     });
   });
 
@@ -1124,7 +1110,14 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        number: 456,
+        pullRequestId: 456,
+        state: 'open',
+      });
     });
 
     it('should create and return a PR object from base branch', async () => {
@@ -1145,7 +1138,14 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
       });
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        number: 456,
+        pullRequestId: 456,
+        state: 'open',
+      });
     });
 
     describe('when usePlatformAutomerge is set', () => {
@@ -1186,7 +1186,26 @@ describe('modules/platform/azure/index', () => {
           platformPrOptions: { usePlatformAutomerge: true },
         });
         expect(updateFn).toHaveBeenCalled();
-        expect(pr).toMatchSnapshot();
+        expect(pr).toEqual({
+          autoCompleteSetBy: {
+            id: '123',
+          },
+          bodyStruct: {
+            hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+          },
+          completionOptions: {
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'The Title',
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+          },
+          createdBy: {
+            id: '123',
+          },
+          number: 456,
+          pullRequestId: 456,
+          state: 'open',
+          title: 'The Title',
+        });
       });
 
       it('should only call getMergeMethod once per run when automergeStrategy is auto', async () => {
@@ -1422,7 +1441,18 @@ describe('modules/platform/azure/index', () => {
         platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+        number: 456,
+        pullRequestId: 456,
+        state: 'open',
+      });
     });
   });
 
@@ -1441,7 +1471,16 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world again',
         targetBranch: 'new_base',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest).toHaveBeenCalledTimes(1);
+      expect(updatePullRequest).toHaveBeenCalledWith(
+        {
+          description: 'Hello world again',
+          targetRefName: 'refs/heads/new_base',
+          title: 'The New Title',
+        },
+        '1',
+        1234,
+      );
     });
 
     it('should update the PR including cache', async () => {
@@ -1462,7 +1501,7 @@ describe('modules/platform/azure/index', () => {
           }),
         }),
       );
-      expect(await azure.getPrList()).toEqual([]);
+      await expect(azure.getPrList()).resolves.toEqual([]);
       const createdPr = await azure.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -1471,7 +1510,7 @@ describe('modules/platform/azure/index', () => {
         labels: [],
       });
       expect(createdPr).toMatchObject({ number: 456, title: 'Title 1' });
-      expect(await azure.getPrList()).toHaveLength(1);
+      await expect(azure.getPrList()).resolves.toHaveLength(1);
       await azure.updatePr({
         number: 456,
         prTitle: 'Title 2',
@@ -1493,7 +1532,14 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title - autoclose',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest).toHaveBeenCalledTimes(1);
+      expect(updatePullRequest).toHaveBeenCalledWith(
+        {
+          title: 'The New Title - autoclose',
+        },
+        '1',
+        1234,
+      );
     });
 
     it('should close the PR', async () => {
@@ -1510,7 +1556,16 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world again',
         state: 'closed',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest).toHaveBeenCalledTimes(1);
+      expect(updatePullRequest).toHaveBeenCalledWith(
+        {
+          description: 'Hello world again',
+          status: PullRequestStatus.Abandoned,
+          title: 'The New Title',
+        },
+        '1',
+        1234,
+      );
     });
 
     it('should reopen the PR', async () => {
@@ -1527,7 +1582,23 @@ describe('modules/platform/azure/index', () => {
         prBody: 'Hello world again',
         state: 'open',
       });
-      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+      expect(updatePullRequest.mock.calls).toEqual([
+        [
+          {
+            status: PullRequestStatus.Active,
+          },
+          '1',
+          1234,
+        ],
+        [
+          {
+            description: 'Hello world again',
+            title: 'The New Title',
+          },
+          '1',
+          1234,
+        ],
+      ]);
     });
 
     it('should re-approve the PR', async () => {
@@ -1564,7 +1635,7 @@ describe('modules/platform/azure/index', () => {
         platformPrOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
-      expect(pr).toMatchSnapshot();
+      expect(pr).toBeUndefined();
     });
   });
 
@@ -1587,12 +1658,22 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
+      expect(gitApiMock.createThread).toHaveBeenCalledTimes(1);
+      expect(gitApiMock.createThread).toHaveBeenCalledWith(
+        {
+          comments: [
+            {
+              commentType: 1,
+              content: '### some-subject\n\nsome\ncontent',
+              parentCommentId: 0,
+            },
+          ],
+          status: 1,
+        },
+        '1',
+        42,
       );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
-      );
+      expect(gitApiMock.updateComment).not.toHaveBeenCalled();
     });
 
     it('updates comment if missing', async () => {
@@ -1617,11 +1698,16 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\nnew\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
-      );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
+      expect(gitApiMock.createThread).not.toHaveBeenCalled();
+      expect(gitApiMock.updateComment).toHaveBeenCalledTimes(1);
+      expect(gitApiMock.updateComment).toHaveBeenCalledWith(
+        {
+          content: '### some-subject\n\nsome\nnew\ncontent',
+        },
+        '1',
+        42,
+        4,
+        2,
       );
     });
 
@@ -1647,12 +1733,8 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
-      );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
-      );
+      expect(gitApiMock.createThread).not.toHaveBeenCalled();
+      expect(gitApiMock.updateComment).not.toHaveBeenCalled();
     });
 
     it('does nothing if comment exists and is the same when there is no topic', async () => {
@@ -1673,12 +1755,8 @@ describe('modules/platform/azure/index', () => {
         topic: null,
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
-        'createThread calls',
-      );
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
-        'updateComment calls',
-      );
+      expect(gitApiMock.createThread).not.toHaveBeenCalled();
+      expect(gitApiMock.updateComment).not.toHaveBeenCalled();
     });
 
     it('passes comment through massageMarkdown', async () => {
@@ -2297,7 +2375,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
       await azure.deleteLabel(1234, 'rebase');
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+      expect(azureApi.gitApi.mock.calls).toEqual([[], []]);
     });
   });
 
@@ -2399,7 +2477,20 @@ describe('modules/platform/azure/index', () => {
       );
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toEqual(data);
-      expect(getItemFn.mock.calls).toMatchSnapshot();
+      expect(getItemFn.mock.calls).toEqual([
+        [
+          '123456',
+          'file.json',
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          true,
+        ],
+      ]);
     });
 
     it('returns null', async () => {

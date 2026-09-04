@@ -319,13 +319,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           .get(`${urlPath}/rest/api/1.0/users/${username}`)
           .reply(404);
 
-        expect(
-          await bitbucket.initPlatform({
+        await expect(
+          bitbucket.initPlatform({
             endpoint: url.href,
             username,
             password,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           endpoint: ensureTrailingSlash(url.href),
         });
 
@@ -341,14 +341,14 @@ describe('modules/platform/bitbucket-server/index', () => {
           .get(`${urlPath}/rest/api/1.0/application-properties`)
           .reply(200, { version: '8.0.0' });
 
-        expect(
-          await bitbucket.initPlatform({
+        await expect(
+          bitbucket.initPlatform({
             endpoint: url.href,
             username: 'def',
             password: '123',
             gitAuthor: `Def Abc <def@abc.com>`,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           endpoint: ensureTrailingSlash(url.href),
         });
       });
@@ -359,12 +359,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           .get(`${urlPath}/rest/api/1.0/application-properties`)
           .reply(200, { version: '8.0.0' });
 
-        expect(
-          await bitbucket.initPlatform({
+        await expect(
+          bitbucket.initPlatform({
             endpoint: url.href,
             token: '123',
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           endpoint: ensureTrailingSlash(url.href),
         });
       });
@@ -379,13 +379,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           .get(`${urlPath}/rest/api/1.0/users/${username}`)
           .reply(200, userInfo);
 
-        expect(
-          await bitbucket.initPlatform({
+        await expect(
+          bitbucket.initPlatform({
             endpoint: url.href,
             token: '123',
             username,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           endpoint: ensureTrailingSlash(url.href),
           gitAuthor: `${userInfo.displayName} <${userInfo.emailAddress}>`,
         });
@@ -397,12 +397,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           .get(`${urlPath}/rest/api/1.0/application-properties`)
           .reply(200, { version: '8.0.0' }, { 'x-ausername': 'user_name' });
 
-        expect(
-          await bitbucket.initPlatform({
+        await expect(
+          bitbucket.initPlatform({
             endpoint: url.href,
             token: '123',
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           endpoint: ensureTrailingSlash(url.href),
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -426,13 +426,13 @@ describe('modules/platform/bitbucket-server/index', () => {
             emailAddress: '',
           });
 
-        expect(
-          await bitbucket.initPlatform({
+        await expect(
+          bitbucket.initPlatform({
             endpoint: url.href,
             token: '123',
             username,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           endpoint: ensureTrailingSlash(url.href),
         });
 
@@ -454,13 +454,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           .get(`/rest/api/1.0/users/${username}`)
           .reply(200, userInfo);
 
-        expect(
-          await bitbucket.initPlatform({
+        await expect(
+          bitbucket.initPlatform({
             endpoint: 'https://stash.renovatebot.com',
             username: 'abc',
             password: '123',
           }),
-        ).toMatchSnapshot();
+        ).resolves.toEqual({
+          endpoint: 'https://stash.renovatebot.com/',
+          gitAuthor: 'Abc Def <abc@def.com>',
+        });
       });
     });
 
@@ -479,7 +482,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             values: [repoMock(url, 'SOME', 'repo')],
             start: 0,
           });
-        expect(await bitbucket.getRepos()).toEqual(['SOME/repo']);
+        await expect(bitbucket.getRepos()).resolves.toEqual(['SOME/repo']);
       });
     });
 
@@ -496,11 +499,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           .reply(200, {
             displayId: 'master',
           });
-        expect(
-          await bitbucket.initRepo({
+        await expect(
+          bitbucket.initRepo({
             repository: 'SOME/repo',
           }),
-        ).toMatchSnapshot();
+        ).resolves.toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('no git url', async () => {
@@ -515,11 +523,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           .reply(200, {
             displayId: 'master',
           });
-        expect(
-          await bitbucket.initRepo({
+        await expect(
+          bitbucket.initRepo({
             repository: 'SOME/repo',
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           defaultBranch: 'master',
           isFork: false,
           repoFingerprint: expect.any(String),
@@ -643,7 +651,12 @@ describe('modules/platform/bitbucket-server/index', () => {
         expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
           expect.objectContaining({ url: sshLink('SOME', 'repo') }),
         );
-        expect(res).toMatchSnapshot();
+        expect(res).toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('uses http url from API with injected auth if http url in API response', async () => {
@@ -672,7 +685,12 @@ describe('modules/platform/bitbucket-server/index', () => {
             ),
           }),
         );
-        expect(res).toMatchSnapshot();
+        expect(res).toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('generates URL if API does not contain clone links', async () => {
@@ -700,7 +718,12 @@ describe('modules/platform/bitbucket-server/index', () => {
             url: link,
           }),
         );
-        expect(res).toMatchSnapshot();
+        expect(res).toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('throws REPOSITORY_EMPTY if there is no default branch', async () => {
@@ -798,7 +821,9 @@ describe('modules/platform/bitbucket-server/index', () => {
     describe('addAssignees()', () => {
       it('does not throw', async () => {
         await initRepo();
-        expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
+        await expect(
+          bitbucket.addAssignees(3, ['some']),
+        ).resolves.toBeUndefined();
       });
     });
 
@@ -816,7 +841,9 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.addReviewers(5, ['name'])).toMatchSnapshot();
+        await expect(
+          bitbucket.addReviewers(5, ['name']),
+        ).resolves.toBeUndefined();
       });
 
       it('sends the reviewer name as a reviewer', async () => {
@@ -1087,9 +1114,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
           )
           .reply(405);
-        await expect(
-          bitbucket.addReviewers(5, ['name']),
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
+          'Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5',
+        );
       });
     });
 
@@ -1226,7 +1253,9 @@ describe('modules/platform/bitbucket-server/index', () => {
 
     describe('deleteLAbel()', () => {
       it('does not throw', async () => {
-        expect(await bitbucket.deleteLabel(5, 'renovate')).toMatchSnapshot();
+        await expect(
+          bitbucket.deleteLabel(5, 'renovate'),
+        ).resolves.toBeUndefined();
       });
     });
 
@@ -1280,13 +1309,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200);
 
-        expect(
-          await bitbucket.ensureComment({
+        await expect(
+          bitbucket.ensureComment({
             number: 5,
             topic: 'topic',
             content: 'content',
           }),
-        ).toBeTrue();
+        ).resolves.toBeTrue();
       });
 
       it('add comment if not found 2', async () => {
@@ -1323,13 +1352,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200);
 
-        expect(
-          await bitbucket.ensureComment({
+        await expect(
+          bitbucket.ensureComment({
             number: 5,
             topic: null,
             content: 'content',
           }),
-        ).toBeTrue();
+        ).resolves.toBeTrue();
       });
 
       it('add updates comment if necessary 1', async () => {
@@ -1372,13 +1401,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200);
 
-        expect(
-          await bitbucket.ensureComment({
+        await expect(
+          bitbucket.ensureComment({
             number: 5,
             topic: 'some-subject',
             content: 'some\ncontent',
           }),
-        ).toBeTrue();
+        ).resolves.toBeTrue();
       });
 
       it('add updates comment if necessary 2', async () => {
@@ -1415,13 +1444,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200);
 
-        expect(
-          await bitbucket.ensureComment({
+        await expect(
+          bitbucket.ensureComment({
             number: 5,
             topic: null,
             content: 'some\ncontent',
           }),
-        ).toBeTrue();
+        ).resolves.toBeTrue();
       });
 
       it('skips comment 1', async () => {
@@ -1454,13 +1483,13 @@ describe('modules/platform/bitbucket-server/index', () => {
             values: [{ action: 'OTHER' }],
           });
 
-        expect(
-          await bitbucket.ensureComment({
+        await expect(
+          bitbucket.ensureComment({
             number: 5,
             topic: 'some-subject',
             content: 'blablabla',
           }),
-        ).toBeTrue();
+        ).resolves.toBeTrue();
       });
 
       it('skips comment 2', async () => {
@@ -1690,7 +1719,15 @@ describe('modules/platform/bitbucket-server/index', () => {
             isLastPage: true,
             values: [prMock(url, 'SOME', 'repo')],
           });
-        expect(await bitbucket.getPrList()).toMatchSnapshot();
+        await expect(bitbucket.getPrList()).resolves.toMatchObject([
+          {
+            number: 5,
+            sourceBranch: 'userName1/pullRequest5',
+            state: 'open',
+            targetBranch: 'master',
+            title: 'title',
+          },
+        ]);
       });
     });
 
@@ -1710,9 +1747,15 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(
-          await bitbucket.getBranchPr('userName1/pullRequest5'),
-        ).toMatchSnapshot();
+        await expect(
+          bitbucket.getBranchPr('userName1/pullRequest5'),
+        ).resolves.toMatchObject({
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          targetBranch: 'master',
+          title: 'title',
+        });
       });
 
       it('has no pr', async () => {
@@ -1726,9 +1769,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             values: [prMock(url, 'SOME', 'repo')],
           });
 
-        expect(
-          await bitbucket.getBranchPr('userName1/pullRequest1'),
-        ).toBeNull();
+        await expect(
+          bitbucket.getBranchPr('userName1/pullRequest1'),
+        ).resolves.toBeNull();
       });
 
       it('has no existing pr', async () => {
@@ -1742,9 +1785,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             values: [],
           });
 
-        expect(
-          await bitbucket.getBranchPr('userName1/pullRequest1'),
-        ).toBeNull();
+        await expect(
+          bitbucket.getBranchPr('userName1/pullRequest1'),
+        ).resolves.toBeNull();
       });
     });
 
@@ -1760,13 +1803,18 @@ describe('modules/platform/bitbucket-server/index', () => {
             values: [prMock(url, 'SOME', 'repo')],
           });
 
-        expect(
-          await bitbucket.findPr({
+        await expect(
+          bitbucket.findPr({
             branchName: 'userName1/pullRequest5',
             prTitle: 'title',
             state: 'open',
           }),
-        ).toMatchSnapshot();
+        ).resolves.toMatchObject({
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          title: 'title',
+        });
       });
 
       it('has no pr', async () => {
@@ -1780,13 +1828,13 @@ describe('modules/platform/bitbucket-server/index', () => {
             values: [prMock(url, 'SOME', 'repo')],
           });
 
-        expect(
-          await bitbucket.findPr({
+        await expect(
+          bitbucket.findPr({
             branchName: 'userName1/pullRequest5',
             prTitle: 'title',
             state: 'closed',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('finds pr from other authors', async () => {
@@ -1799,13 +1847,13 @@ describe('modules/platform/bitbucket-server/index', () => {
             isLastPage: true,
             values: [prMock(url, 'SOME', 'repo')],
           });
-        expect(
-          await bitbucket.findPr({
+        await expect(
+          bitbucket.findPr({
             branchName: 'branch',
             state: 'open',
             includeOtherAuthors: true,
           }),
-        ).toMatchObject({
+        ).resolves.toMatchObject({
           number: 5,
           sourceBranch: 'userName1/pullRequest5',
           targetBranch: 'master',
@@ -2106,7 +2154,7 @@ describe('modules/platform/bitbucket-server/index', () => {
     describe('getPr()', () => {
       it('returns null for no prNo', async () => {
         httpMock.scope(urlHost);
-        expect(await bitbucket.getPr(undefined as any)).toBeNull();
+        await expect(bitbucket.getPr(undefined as any)).resolves.toBeNull();
       });
 
       it('gets a PR', async () => {
@@ -2117,7 +2165,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject({
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          targetBranch: 'master',
+          title: 'title',
+        });
       });
 
       it('canRebase', async () => {
@@ -2133,11 +2187,19 @@ describe('modules/platform/bitbucket-server/index', () => {
           .twice()
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
+        const expectedPr = {
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          targetBranch: 'master',
+          title: 'title',
+        };
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
+        await expect(bitbucket.getPr(3)).resolves.toMatchObject(expectedPr);
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject(expectedPr);
+
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject(expectedPr);
       });
 
       it('gets a closed PR', async () => {
@@ -2155,7 +2217,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             toRef: {},
           });
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        await expect(bitbucket.getPr(5)).resolves.toMatchObject({
+          state: 'merged',
+        });
       });
     });
 
@@ -2397,7 +2461,9 @@ describe('modules/platform/bitbucket-server/index', () => {
 
         await expect(
           bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-        ).rejects.toThrowErrorMatchingSnapshot();
+        ).rejects.toThrow(
+          'Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5',
+        );
       });
     });
 
@@ -2414,12 +2480,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200);
 
-        expect(
-          await bitbucket.mergePr({
+        await expect(
+          bitbucket.mergePr({
             branchName: 'branch',
             id: 5,
           }),
-        ).toBeTrue();
+        ).resolves.toBeTrue();
       });
 
       it('throws not-found 1', async () => {
@@ -2479,12 +2545,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(409);
 
-        expect(
-          await bitbucket.mergePr({
+        await expect(
+          bitbucket.mergePr({
             branchName: 'branch',
             id: 5,
           }),
-        ).toBeFalsy();
+        ).resolves.toBeFalsy();
       });
 
       it('unknown error', async () => {
@@ -2514,7 +2580,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           bitbucket.massageMarkdown(
             '<details><summary>foo</summary>bar</details>text<details>',
           ),
-        ).toMatchSnapshot();
+        ).toBe('**foo**bartext');
       });
 
       it('sanitizes HTML comments in the body', () => {
@@ -2531,7 +2597,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           Followed by some information.
           <!-- followed by some more comments -->
         `);
-        expect(prBody).toMatchSnapshot();
+        expect(prBody).not.toContain('<!--');
+        // the content around the comments survives
+        expect(prBody).toContain(
+          '- [ ] If you want to rebase/retry this PR, click this checkbox',
+        );
+        expect(prBody).toContain(
+          '- [ ] <a href="/some/link">Update renovate/renovate to 16.1.2</a>',
+        );
+        expect(prBody).toContain('Empty comment.');
+        expect(prBody).toContain('Followed by some information.');
       });
 
       it('resizes mend.io merge confidence badges', () => {
@@ -2553,7 +2628,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             failed: 0,
           });
 
-        expect(await bitbucket.getBranchStatus('somebranch')).toBe('green');
+        await expect(bitbucket.getBranchStatus('somebranch')).resolves.toBe(
+          'green',
+        );
       });
 
       it('should be pending', async () => {
@@ -2566,7 +2643,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             failed: 0,
           });
 
-        expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+        await expect(bitbucket.getBranchStatus('somebranch')).resolves.toBe(
+          'yellow',
+        );
 
         scope
           .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
@@ -2576,7 +2655,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             failed: 0,
           });
 
-        expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+        await expect(bitbucket.getBranchStatus('somebranch')).resolves.toBe(
+          'yellow',
+        );
       });
 
       it('should be failed', async () => {
@@ -2589,13 +2670,17 @@ describe('modules/platform/bitbucket-server/index', () => {
             failed: 1,
           });
 
-        expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+        await expect(bitbucket.getBranchStatus('somebranch')).resolves.toBe(
+          'red',
+        );
 
         scope
           .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .replyWithError('requst-failed');
 
-        expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+        await expect(bitbucket.getBranchStatus('somebranch')).resolves.toBe(
+          'red',
+        );
       });
 
       it('throws repository-changed', async () => {
@@ -2625,9 +2710,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             ],
           });
 
-        expect(
-          await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
-        ).toBe('green');
+        await expect(
+          bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
+        ).resolves.toBe('green');
       });
 
       it('should be pending', async () => {
@@ -2647,9 +2732,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             ],
           });
 
-        expect(
-          await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
-        ).toBe('yellow');
+        await expect(
+          bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
+        ).resolves.toBe('yellow');
       });
 
       it('should be failure', async () => {
@@ -2669,9 +2754,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             ],
           });
 
-        expect(
-          await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
-        ).toBe('red');
+        await expect(
+          bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
+        ).resolves.toBe('red');
       });
 
       it('should be null', async () => {
@@ -2682,9 +2767,9 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .replyWithError('requst-failed');
 
-        expect(
-          await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
-        ).toBeNull();
+        await expect(
+          bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
+        ).resolves.toBeNull();
 
         scope
           .get(
@@ -2695,9 +2780,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             values: [],
           });
 
-        expect(
-          await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
-        ).toBeNull();
+        await expect(
+          bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
+        ).resolves.toBeNull();
       });
     });
 

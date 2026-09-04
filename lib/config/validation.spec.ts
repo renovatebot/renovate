@@ -1160,7 +1160,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue',
+            'Regex Managers must contain currentValue or currentDigest, their template variants (currentValueTemplate or currentDigestTemplate) or regex groups named after configuration fields',
         },
         {
           message:
@@ -1253,9 +1253,59 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue',
+            'Regex Managers must contain currentValue or currentDigest, their template variants (currentValueTemplate or currentDigestTemplate) or regex groups named after configuration fields',
         },
       ]);
+    });
+
+    // via https://github.com/renovatebot/renovate/discussions/45665
+    it('does not error if a customManager only uses `currentDigest`', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: [
+              '/\\.gitlab-ci\\.yml$/',
+              '/\\.gitlab\\/pipelines\\/.*\\.yaml$/',
+            ],
+            matchStrings: [
+              '.*@(?<currentDigest>sha256:[^ ]+) *# renovate: image=(?<depName>[^ \\n]+)\\n',
+            ],
+            datasourceTemplate: 'docker',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('does not error if a customManager only uses `currentValue`', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: [
+              '/\\.gitlab-ci\\.yml$/',
+              '/\\.gitlab\\/pipelines\\/.*\\.yaml$/',
+            ],
+            matchStrings: ['ENV YARN_VERSION=(?<currentValue>.*?)\\n'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'docker',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors if customManager fields are missing: JSONataManager', async () => {
@@ -1278,7 +1328,8 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `JSONata Managers must contain currentValueTemplate configuration or currentValue in the query `,
+          message:
+            'JSONata Managers must contain currentValue or currentDigest in the query or their templates',
         },
         {
           topic: 'Configuration Error',

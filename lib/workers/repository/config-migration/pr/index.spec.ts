@@ -151,7 +151,13 @@ describe('workers/repository/config-migration/pr/index', () => {
         migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      // empty header: nothing precedes the separating newlines
+      expect(prBody).toStartWith(
+        '\n\nThe Renovate config in this repository needs migrating.',
+      );
+      // empty footer: nothing follows the separator
+      expect(prBody).toEndWith('\n---\n\n\n');
     });
 
     it('creates PR for JSON5 config file', async () => {
@@ -161,7 +167,13 @@ describe('workers/repository/config-migration/pr/index', () => {
         indent: partial<Indent>(),
       });
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      expect(prBody).toContain(
+        '#### [PLEASE NOTE](https://docs.renovatebot.com/configuration-options#configmigration): JSON5 config file migrated! All comments & trailing commas were removed.',
+      );
+      expect(prBody).toStartWith(
+        'The Renovate config in this repository needs migrating.',
+      );
     });
 
     it('creates PR with footer and header with trailing and leading newlines', async () => {
@@ -175,7 +187,15 @@ describe('workers/repository/config-migration/pr/index', () => {
         migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      // leading newlines of the header are kept, as are the two separating ones
+      expect(prBody).toStartWith(
+        '\r\r\nThis should not be the first line of the PR\n\n',
+      );
+      // trailing newlines of the footer are kept, plus the one appended after it
+      expect(prBody).toEndWith(
+        '---\n\nThere should be several empty lines at the end of the PR\r\n\n\n\n',
+      );
     });
 
     it('creates non-semantic PR title', async () => {
@@ -225,16 +245,11 @@ describe('workers/repository/config-migration/pr/index', () => {
         migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /platform:github/,
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      expect(prBody).toStartWith('This is a header for platform:github\n\n');
+      expect(prBody).toEndWith(
+        '---\n\nAnd this is a footer for repository:test baseBranch:some-branch\n',
       );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /repository:test/,
-      );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-        /baseBranch:some-branch/,
-      );
-      expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
     });
   });
 

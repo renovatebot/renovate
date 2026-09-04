@@ -75,12 +75,12 @@ describe('modules/datasource/terraform-provider/index', () => {
       async ({ variant }) => {
         mockDefaultRegistryLookup(variant);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: TerraformProviderDatasource.id,
             packageName: 'azurerm',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       },
     );
 
@@ -143,13 +143,13 @@ describe('modules/datasource/terraform-provider/index', () => {
       async ({ variant }) => {
         mockThirdPartyRegistryLookup(variant);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: TerraformProviderDatasource.id,
             packageName: 'azurerm',
             registryUrls: ['https://registry.company.com'],
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       },
     );
 
@@ -369,13 +369,13 @@ describe('modules/datasource/terraform-provider/index', () => {
         .get('/registry/docs/providers/hashicorp/azurerm/index.json')
         .reply(200, {});
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: TerraformProviderDatasource.id,
           packageName: 'hashicorp/azurerm',
           registryUrls: ['https://registry.opentofu.org'],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
         sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
         releases: [],

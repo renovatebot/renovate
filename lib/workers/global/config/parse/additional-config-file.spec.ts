@@ -48,9 +48,9 @@ describe('workers/global/config/parse/additional-config-file', () => {
         './__fixtures__/',
         filePath,
       );
-      expect(
-        await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile }),
-      ).toEqual(customConfig);
+      await expect(
+        file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile }),
+      ).resolves.toEqual(customConfig);
     });
 
     it('migrates', async () => {
@@ -83,7 +83,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
     });
 
     it('parse and returns empty config if there is no RENOVATE_ADDITIONAL_CONFIG_FILE in env', async () => {
-      expect(await file.getConfig({})).toBeDefined();
+      await expect(file.getConfig({})).resolves.toBeDefined();
     });
 
     it.each([
