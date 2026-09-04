@@ -1,4 +1,8 @@
-import type { ParsedCommit } from './module-changelog.ts';
+import type {
+  CategoryGroup,
+  FlatGroup,
+  ParsedCommit,
+} from './module-changelog.ts';
 import {
   categoryRank,
   groupByModule,
@@ -73,26 +77,85 @@ describe('tools/release-notes/module-changelog', () => {
   });
 
   describe('groupByModule', () => {
-    it('groups commits by scope', () => {
+    it('nests module scopes under a category group', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'manager/gitlabci', subject: 'a' },
+        { type: 'fix', scope: 'manager/npm', subject: 'b' },
+      ];
+      const labels = new Map([
+        ['manager/gitlabci', 'GitLab CI/CD'],
+        ['manager/npm', 'npm'],
+      ]);
+
+      const groups = groupByModule(commits, types, labels);
+      expect(groups).toEqual([
+        {
+          kind: 'category',
+          category: 'manager',
+          modules: [
+            {
+              scope: 'manager/gitlabci',
+              label: 'GitLab CI/CD',
+              commits: [
+                { type: 'fix', scope: 'manager/gitlabci', subject: 'a' },
+              ],
+            },
+            {
+              scope: 'manager/npm',
+              label: 'npm',
+              commits: [{ type: 'fix', scope: 'manager/npm', subject: 'b' }],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('sorts modules within a category alphabetically by label', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'versioning/cargo', subject: 'a' },
+        { type: 'fix', scope: 'versioning/npm', subject: 'b' },
+      ];
+      const labels = new Map([
+        ['versioning/cargo', 'Cargo'],
+        ['versioning/npm', 'npm'],
+      ]);
+
+      const [group] = groupByModule(commits, types, labels) as [CategoryGroup];
+      expect(group.modules.map((m) => m.label)).toEqual(['Cargo', 'npm']);
+    });
+
+    it('groups a bare (non-module) scope as a flat group', () => {
       const commits: ParsedCommit[] = [
         { type: 'fix', scope: 'workers/repository', subject: 'a' },
         { type: 'fix', scope: 'tools', subject: 'b' },
       ];
 
-      expect(
-        groupByModule(commits, types, new Map()).map((g) => g.scope),
-      ).toEqual(['tools', 'workers/repository']);
+      const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+      expect(groups.map((g) => g.scope)).toEqual([
+        'tools',
+        'workers/repository',
+      ]);
     });
 
-    it('sorts module scopes ahead of non-module scopes', () => {
+    it('sorts category groups ahead of flat groups', () => {
       const commits: ParsedCommit[] = [
         { type: 'fix', scope: 'workers/repository', subject: 'a' },
         { type: 'fix', scope: 'versioning/cargo', subject: 'b' },
       ];
 
-      expect(
-        groupByModule(commits, types, new Map()).map((g) => g.scope),
-      ).toEqual(['versioning/cargo', 'workers/repository']);
+      const groups = groupByModule(
+        commits,
+        types,
+        new Map([['versioning/cargo', 'Cargo']]),
+      );
+      expect(groups[0]).toMatchObject({
+        kind: 'category',
+        category: 'versioning',
+      });
+      expect(groups[1]).toMatchObject({
+        kind: 'flat',
+        scope: 'workers/repository',
+      });
     });
 
     it('sorts deps after non-module scopes, and Other last', () => {
@@ -102,24 +165,12 @@ describe('tools/release-notes/module-changelog', () => {
         { type: 'fix', scope: 'workers/repository', subject: 'c' },
       ];
 
-      expect(
-        groupByModule(commits, types, new Map()).map((g) => g.scope),
-      ).toEqual(['workers/repository', 'deps', undefined]);
-    });
-
-    it('sorts within a rank by resolved label, falling back to the scope', () => {
-      const commits: ParsedCommit[] = [
-        { type: 'fix', scope: 'manager/gitlabci', subject: 'a' },
-        { type: 'fix', scope: 'versioning/cargo', subject: 'b' },
-      ];
-      const labels = new Map([
-        ['manager/gitlabci', 'GitLab CI/CD'],
-        ['versioning/cargo', 'Cargo'],
+      const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+      expect(groups.map((g) => g.scope)).toEqual([
+        'workers/repository',
+        'deps',
+        undefined,
       ]);
-
-      expect(groupByModule(commits, types, labels).map((g) => g.label)).toEqual(
-        ['Cargo', 'GitLab CI/CD'],
-      );
     });
 
     it('sorts commits within a group by type priority', () => {
@@ -132,7 +183,8 @@ describe('tools/release-notes/module-changelog', () => {
         { type: 'fix', scope: 'workers/repository', subject: 'fix it' },
       ];
 
-      expect(groupByModule(commits, types, new Map())[0].commits).toEqual([
+      const [group] = groupByModule(commits, types, new Map()) as [FlatGroup];
+      expect(group.commits).toEqual([
         { type: 'fix', scope: 'workers/repository', subject: 'fix it' },
         {
           type: 'refactor',
@@ -148,33 +200,45 @@ describe('tools/release-notes/module-changelog', () => {
         { type: 'fix', scope: 'tools', subject: 'fix it' },
       ];
 
-      expect(
-        groupByModule(commits, types, new Map())[0].commits.map((c) => c.type),
-      ).toEqual(['fix', 'chore']);
+      const [group] = groupByModule(commits, types, new Map()) as [FlatGroup];
+      expect(group.commits.map((c) => c.type)).toEqual(['fix', 'chore']);
     });
   });
 
   describe('renderModuleChangelog', () => {
-    it('renders a nested Markdown list, using the resolved label', () => {
+    it('renders category groups nested three levels deep', () => {
       const groups = groupByModule(
         [
-          { type: 'fix', scope: 'versioning/cargo', subject: 'ensure checks' },
-          { type: 'docs', scope: undefined, subject: 'add warning' },
+          { type: 'fix', scope: 'manager/gitlabci', subject: 'support refs' },
+          { type: 'fix', scope: 'manager/npm', subject: 'massage lockstep' },
         ],
-        [
-          { type: 'fix', section: 'Bug Fixes' },
-          { type: 'docs', section: 'Documentation' },
-        ],
-        new Map([['versioning/cargo', 'Cargo']]),
+        [{ type: 'fix', section: 'Bug Fixes' }],
+        new Map([
+          ['manager/gitlabci', 'GitLab CI/CD'],
+          ['manager/npm', 'npm'],
+        ]),
       );
 
       expect(renderModuleChangelog(groups)).toBe(
         [
-          '- Cargo',
-          '  - fix: ensure checks',
-          '- Other',
-          '  - docs: add warning',
+          '- manager',
+          '  - GitLab CI/CD',
+          '    - fix: support refs',
+          '  - npm',
+          '    - fix: massage lockstep',
         ].join('\n'),
+      );
+    });
+
+    it('renders a flat group using its label', () => {
+      const groups = groupByModule(
+        [{ type: 'docs', scope: undefined, subject: 'add warning' }],
+        [{ type: 'docs', section: 'Documentation' }],
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups)).toBe(
+        ['- Other', '  - docs: add warning'].join('\n'),
       );
     });
 

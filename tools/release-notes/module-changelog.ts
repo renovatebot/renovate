@@ -10,11 +10,30 @@ export interface ParsedCommit {
   subject: string;
 }
 
-export interface ModuleGroup {
+export interface ModuleEntry {
+  scope: string;
+  label: string;
+  commits: ParsedCommit[];
+}
+
+/** A `manager`/`datasource`/`versioning`/`platform` scope, split into its
+ * category and per-module entries, e.g. `manager` -> [`npm`, `cargo`, ...]. */
+export interface CategoryGroup {
+  kind: 'category';
+  category: string;
+  modules: ModuleEntry[];
+}
+
+/** Anything that isn't a module scope: a bare named scope (`workers/
+ * repository`, `deps`), or no scope at all (`label: 'Other'`). */
+export interface FlatGroup {
+  kind: 'flat';
   scope: string | undefined;
   label: string;
   commits: ParsedCommit[];
 }
+
+export type ModuleGroup = CategoryGroup | FlatGroup;
 
 const COMMIT_HEADER_RE =
   /^(?<type>[a-z]+)(?:\((?<scope>[^)]+)\))?!?:\s*(?<subject>.+)$/i;
@@ -86,6 +105,10 @@ const MODULE_CATEGORIES = new Set([
   'platform',
 ]);
 
+const MODULE_SCOPE_RE = new RegExp(
+  `^(?<category>${Array.from(MODULE_CATEGORIES).join('|')})/(?<name>.+)$`,
+);
+
 function formatName(input: string): string {
   return input
     .split('-')
@@ -134,43 +157,75 @@ export async function resolveModuleLabels(
 
 /**
  * Group commits by their Conventional Commits scope (Renovate's modules,
- * for example `manager/gitlab`) instead of by type. Commits with no scope
- * are collected under `scope: undefined` ("Other").
+ * for example `manager/gitlab`) instead of by type. A module scope (one of
+ * `manager/`, `datasource/`, `versioning/`, `platform/`) becomes a module
+ * entry nested under a category group (`manager`, ...); everything else
+ * (a bare named scope, or no scope at all) becomes its own flat group,
+ * with the scope-less group labelled "Other".
  *
- * Groups are sorted by `categoryRank`, then alphabetically by `label`
- * within a rank; the scope-less group is always last. Commits inside each
- * group are sorted by their type's position in `types`, i.e. the same
- * priority order `.releaserc.json` already assigns each Conventional
- * Commit type.
+ * Category groups always lead, sorted alphabetically by category name; the
+ * modules inside a category are sorted alphabetically by `label`. Flat
+ * groups follow, sorted by `categoryRank` then alphabetically by `label`,
+ * with the scope-less group last. Commits inside a group are sorted by
+ * their type's position in `types`, i.e. the same priority order
+ * `.releaserc.json` already assigns each Conventional Commit type.
  */
 export function groupByModule(
   commits: ParsedCommit[],
   types: CommitTypeConfig[],
   labels: ReadonlyMap<string, string>,
 ): ModuleGroup[] {
-  const groups = new Map<string | undefined, ParsedCommit[]>();
+  const byScope = new Map<string | undefined, ParsedCommit[]>();
   for (const commit of commits) {
-    const existing = groups.get(commit.scope);
+    const existing = byScope.get(commit.scope);
     if (existing) {
       existing.push(commit);
     } else {
-      groups.set(commit.scope, [commit]);
+      byScope.set(commit.scope, [commit]);
     }
   }
 
-  const result: ModuleGroup[] = [];
-  for (const [scope, groupCommits] of groups) {
+  const modulesByCategory = new Map<string, ModuleEntry[]>();
+  const flat: FlatGroup[] = [];
+
+  for (const [scope, groupCommits] of byScope) {
     groupCommits.sort(
       (a, b) => typeRank(types, a.type) - typeRank(types, b.type),
     );
-    result.push({
+
+    const match = scope ? MODULE_SCOPE_RE.exec(scope) : null;
+    if (scope && match?.groups) {
+      const { category } = match.groups;
+      const entry: ModuleEntry = {
+        scope,
+        label: labels.get(scope) ?? scope,
+        commits: groupCommits,
+      };
+      const existing = modulesByCategory.get(category);
+      if (existing) {
+        existing.push(entry);
+      } else {
+        modulesByCategory.set(category, [entry]);
+      }
+      continue;
+    }
+
+    flat.push({
+      kind: 'flat',
       scope,
-      label: scope ? (labels.get(scope) ?? scope) : 'Other',
+      label: scope ?? 'Other',
       commits: groupCommits,
     });
   }
 
-  result.sort((a, b) => {
+  const categoryGroups: CategoryGroup[] = [];
+  for (const [category, modules] of modulesByCategory) {
+    modules.sort((a, b) => a.label.localeCompare(b.label));
+    categoryGroups.push({ kind: 'category', category, modules });
+  }
+  categoryGroups.sort((a, b) => a.category.localeCompare(b.category));
+
+  flat.sort((a, b) => {
     if (!a.scope && !b.scope) {
       return 0;
     }
@@ -187,14 +242,15 @@ export function groupByModule(
     return a.label.localeCompare(b.label);
   });
 
-  return result;
+  return [...categoryGroups, ...flat];
 }
 
 /**
  * Render module groups as a nested Markdown list, for example:
  *
- * - Cargo
- *   - fix: support ~latest component refs
+ * - manager
+ *   - Cargo
+ *     - fix: support ~latest component refs
  * - deps
  *   <details>
  *   <summary>2 updates</summary>
@@ -209,6 +265,17 @@ export function groupByModule(
 export function renderModuleChangelog(groups: ModuleGroup[]): string {
   const lines: string[] = [];
   for (const group of groups) {
+    if (group.kind === 'category') {
+      lines.push(`- ${group.category}`);
+      for (const module of group.modules) {
+        lines.push(`  - ${module.label}`);
+        for (const commit of module.commits) {
+          lines.push(`    - ${commit.type}: ${commit.subject}`);
+        }
+      }
+      continue;
+    }
+
     lines.push(`- ${group.label}`);
     const collapse =
       group.scope !== undefined && COLLAPSED_SCOPES.has(group.scope);
