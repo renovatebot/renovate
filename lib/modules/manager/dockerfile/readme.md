@@ -107,12 +107,22 @@ Set the `registryUrls` which match your base image with a `packageRules` entry:
 }
 ```
 
+Version constraints are read with [`apk` versioning](../../versioning/apk/index.md), so the fuzzy constraints which Wolfi and Chainguard images commonly pin with are supported too:
+
+```dockerfile
+FROM cgr.dev/chainguard/wolfi-base
+RUN apk add --no-cache curl=~8.12.1
+```
+
+`~8.12.1` matches every `8.12.1-rN`, so Renovate only raises a PR once a version outside the constraint is released, and keeps the precision you wrote it with - `curl=~8.13.0`, not `curl=~8.13.0-r0`.
+
 Renovate skips packages which it cannot update, and says why in its logs:
 
 - packages without a version, e.g. `apk add bash`
 - packages whose version comes from a variable, e.g. `apk add "bash=$BASH_VERSION"`
-- packages given a version constraint rather than an exact version, e.g. `apk add 'curl=~8.12.1'`
 - packages constrained to an identity hash with `><`, which is not a version
+
+Renovate also proposes no new value for the `<`, `<=`, `>`, `>=`, `>~` and `<~` operators, as there is no single obvious new bound for them.
 
 Local or remote `.apk` files, virtual packages (`--virtual .build-deps`) and provider dependencies (`so:`, `cmd:`, `pc:`) are ignored.
 
