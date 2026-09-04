@@ -291,6 +291,14 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
   upgrade: Upgrade<T>;
 }
 
+export interface UpdateDependencyResult {
+  content: string;
+  /**
+   * Whether to update artifacts when `content` is unchanged.
+   */
+  updateArtifacts?: boolean;
+}
+
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
 }
@@ -383,7 +391,7 @@ interface ManagerApiBase extends ModuleApi {
 
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig,
-  ): MaybePromise<string | null>;
+  ): MaybePromise<string | UpdateDependencyResult | null>;
 
   updateLockedDependency?(
     config: UpdateLockedConfig,
