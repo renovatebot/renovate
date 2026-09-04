@@ -93,6 +93,77 @@ RUN apk add --no-cache bash=5.2.37-r2
 
 The manager does not set a `registryUrl`, so set one which matches your base image as shown above.
 
+## Wolfi and Chainguard example
+
+Wolfi serves its index directly below the repository root, so its `registryUrl` needs neither `branch` nor `components` - only `arch`:
+
+```json title="Point apk lookups at the Wolfi repository"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["apk"],
+      "registryUrls": ["https://packages.wolfi.dev/os?arch=x86_64"]
+    }
+  ]
+}
+```
+
+Renovate then fetches a single index:
+
+```
+https://packages.wolfi.dev/os/x86_64/APKINDEX.tar.gz
+```
+
+Use `arch=aarch64` for an arm64 image.
+
+### Pinning packages in a Wolfi image
+
+Wolfi is a rolling repository, so a package's revision (`-rN`) changes more often than its version.
+That makes the choice of constraint matter more than it does on a fixed Alpine release:
+
+```dockerfile
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:96ff486b326d15db16aa1fbd41a17043a557bebf76d2c0ac932e717534025940
+
+RUN apk add --no-cache \
+      curl=~8.12.1 \
+      jq=1.7.1-r4
+```
+
+- `curl=~8.12.1` is a prefix constraint, so it already accepts every `8.12.1-rN`.
+  Renovate leaves it alone while the package is only rebuilt, and raises a PR once `8.13.0` is published, writing `curl=~8.13.0` rather than `curl=~8.13.0-r0` so the constraint stays revision-agnostic.
+- `jq=1.7.1-r4` is an exact pin, so Renovate raises a PR for a new revision as well as for a new version.
+
+Neither is more correct than the other - pick the exact pin when you want a PR for every rebuild, and the prefix constraint when you only care about version changes.
+
+A base image which only publishes a rolling tag is usually pinned by digest, as above.
+Renovate updates that digest through the [`dockerfile` manager](../../manager/dockerfile/index.md), separately from the packages inside the image.
+
+### Mixing Alpine and Wolfi in one repository
+
+A `registryUrl` applies per lookup, so a repository holding both Alpine and Wolfi images needs the two scoped apart.
+Match on the file the dependency was found in:
+
+```json title="Separate apk registries for Alpine and Wolfi Dockerfiles"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["apk"],
+      "registryUrls": [
+        "https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64"
+      ]
+    },
+    {
+      "matchDatasources": ["apk"],
+      "matchFileNames": ["**/*.wolfi", "**/Dockerfile.wolfi"],
+      "registryUrls": ["https://packages.wolfi.dev/os?arch=x86_64"]
+    }
+  ]
+}
+```
+
+A later rule overrides an earlier one, so set the repository you use most as the first rule and narrow it with the rules after it.
+Putting the narrower rule first would let the broader one overwrite its `registryUrls` again.
+
 ## Usage example
 
 Say you pin Alpine packages in a `Dockerfile` and want Renovate to bump the versions.
