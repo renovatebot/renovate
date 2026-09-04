@@ -4,11 +4,12 @@ import { Command } from 'commander';
 import { init, logger } from '../../lib/logger/index.ts';
 import { linkify } from '../../lib/util/markdown.ts';
 import { exec } from '../utils/exec.ts';
-import type { CommitTypeConfig } from './module-changelog.ts';
+import type { CommitTypeConfig, ParsedCommit } from './module-changelog.ts';
 import {
   groupByModule,
   parseCommitHeader,
   renderModuleChangelog,
+  resolveModuleLabels,
 } from './module-changelog.ts';
 
 interface CliOptions {
@@ -55,7 +56,7 @@ async function summarize(
     loadCommitTypes(),
   ]);
 
-  const commits = [];
+  const commits: ParsedCommit[] = [];
   for (const header of headers) {
     const commit = parseCommitHeader(header);
     if (commit) {
@@ -63,7 +64,12 @@ async function summarize(
     }
   }
 
-  const groups = groupByModule(commits, types);
+  const scopes = commits
+    .map((commit) => commit.scope)
+    .filter((scope) => scope !== undefined);
+  const labels = await resolveModuleLabels(scopes);
+
+  const groups = groupByModule(commits, types, labels);
   const changelog = renderModuleChangelog(groups);
   return await linkify(changelog, { repository: repo });
 }

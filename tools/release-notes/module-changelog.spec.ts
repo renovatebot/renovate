@@ -1,9 +1,16 @@
 import type { ParsedCommit } from './module-changelog.ts';
 import {
+  categoryRank,
   groupByModule,
   parseCommitHeader,
   renderModuleChangelog,
 } from './module-changelog.ts';
+
+const types = [
+  { type: 'feat', section: 'Features' },
+  { type: 'fix', section: 'Bug Fixes' },
+  { type: 'refactor', section: 'Code Refactoring' },
+];
 
 describe('tools/release-notes/module-changelog', () => {
   describe('parseCommitHeader', () => {
@@ -48,35 +55,71 @@ describe('tools/release-notes/module-changelog', () => {
     });
   });
 
-  describe('groupByModule', () => {
-    const types = [
-      { type: 'feat', section: 'Features' },
-      { type: 'fix', section: 'Bug Fixes' },
-      { type: 'refactor', section: 'Code Refactoring' },
-    ];
-
-    it('groups commits by scope and sorts groups alphabetically', () => {
-      const commits: ParsedCommit[] = [
-        { type: 'fix', scope: 'workers/repository', subject: 'a' },
-        { type: 'fix', scope: 'manager/gitlab', subject: 'b' },
-      ];
-
-      expect(groupByModule(commits, types).map((g) => g.scope)).toEqual([
-        'manager/gitlab',
-        'workers/repository',
-      ]);
+  describe('categoryRank', () => {
+    it('ranks module scopes ahead of everything else', () => {
+      expect(categoryRank('versioning/cargo')).toBeLessThan(
+        categoryRank('workers/repository'),
+      );
+      expect(categoryRank('manager/npm')).toBeLessThan(
+        categoryRank('workers/repository'),
+      );
     });
 
-    it('sorts the scope-less group last', () => {
+    it('ranks deps last of the named scopes', () => {
+      expect(categoryRank('workers/repository')).toBeLessThan(
+        categoryRank('deps'),
+      );
+    });
+  });
+
+  describe('groupByModule', () => {
+    it('groups commits by scope', () => {
       const commits: ParsedCommit[] = [
-        { type: 'docs', scope: undefined, subject: 'a' },
-        { type: 'fix', scope: 'manager/gitlab', subject: 'b' },
+        { type: 'fix', scope: 'workers/repository', subject: 'a' },
+        { type: 'fix', scope: 'tools', subject: 'b' },
       ];
 
-      expect(groupByModule(commits, types).map((g) => g.scope)).toEqual([
-        'manager/gitlab',
-        undefined,
+      expect(
+        groupByModule(commits, types, new Map()).map((g) => g.scope),
+      ).toEqual(['tools', 'workers/repository']);
+    });
+
+    it('sorts module scopes ahead of non-module scopes', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'workers/repository', subject: 'a' },
+        { type: 'fix', scope: 'versioning/cargo', subject: 'b' },
+      ];
+
+      expect(
+        groupByModule(commits, types, new Map()).map((g) => g.scope),
+      ).toEqual(['versioning/cargo', 'workers/repository']);
+    });
+
+    it('sorts deps after non-module scopes, and Other last', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'docs', scope: undefined, subject: 'a' },
+        { type: 'chore', scope: 'deps', subject: 'b' },
+        { type: 'fix', scope: 'workers/repository', subject: 'c' },
+      ];
+
+      expect(
+        groupByModule(commits, types, new Map()).map((g) => g.scope),
+      ).toEqual(['workers/repository', 'deps', undefined]);
+    });
+
+    it('sorts within a rank by resolved label, falling back to the scope', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'manager/gitlabci', subject: 'a' },
+        { type: 'fix', scope: 'versioning/cargo', subject: 'b' },
+      ];
+      const labels = new Map([
+        ['manager/gitlabci', 'GitLab CI/CD'],
+        ['versioning/cargo', 'Cargo'],
       ]);
+
+      expect(groupByModule(commits, types, labels).map((g) => g.label)).toEqual(
+        ['Cargo', 'GitLab CI/CD'],
+      );
     });
 
     it('sorts commits within a group by type priority', () => {
@@ -89,7 +132,7 @@ describe('tools/release-notes/module-changelog', () => {
         { type: 'fix', scope: 'workers/repository', subject: 'fix it' },
       ];
 
-      expect(groupByModule(commits, types)[0].commits).toEqual([
+      expect(groupByModule(commits, types, new Map())[0].commits).toEqual([
         { type: 'fix', scope: 'workers/repository', subject: 'fix it' },
         {
           type: 'refactor',
@@ -101,46 +144,63 @@ describe('tools/release-notes/module-changelog', () => {
 
     it('ranks unknown types after known types', () => {
       const commits: ParsedCommit[] = [
-        { type: 'chore', scope: 'deps', subject: 'chore it' },
-        { type: 'fix', scope: 'deps', subject: 'fix it' },
+        { type: 'chore', scope: 'tools', subject: 'chore it' },
+        { type: 'fix', scope: 'tools', subject: 'fix it' },
       ];
 
       expect(
-        groupByModule(commits, types)[0].commits.map((c) => c.type),
+        groupByModule(commits, types, new Map())[0].commits.map((c) => c.type),
       ).toEqual(['fix', 'chore']);
     });
   });
 
   describe('renderModuleChangelog', () => {
-    it('renders a nested Markdown list', () => {
+    it('renders a nested Markdown list, using the resolved label', () => {
       const groups = groupByModule(
         [
-          {
-            type: 'fix',
-            scope: 'workers/repository',
-            subject: 'ensure checks',
-          },
-          {
-            type: 'refactor',
-            scope: 'workers/repository',
-            subject: 'add a check',
-          },
+          { type: 'fix', scope: 'versioning/cargo', subject: 'ensure checks' },
           { type: 'docs', scope: undefined, subject: 'add warning' },
         ],
         [
           { type: 'fix', section: 'Bug Fixes' },
-          { type: 'refactor', section: 'Code Refactoring' },
           { type: 'docs', section: 'Documentation' },
         ],
+        new Map([['versioning/cargo', 'Cargo']]),
       );
 
       expect(renderModuleChangelog(groups)).toBe(
         [
-          '- workers/repository',
+          '- Cargo',
           '  - fix: ensure checks',
-          '  - refactor: add a check',
           '- Other',
           '  - docs: add warning',
+        ].join('\n'),
+      );
+    });
+
+    it('collapses a `deps` group behind a <details> block', () => {
+      const groups = groupByModule(
+        [
+          { type: 'chore', scope: 'deps', subject: 'update foo' },
+          { type: 'build', scope: 'deps', subject: 'update bar' },
+        ],
+        [
+          { type: 'chore', section: 'Miscellaneous Chores' },
+          { type: 'build', section: 'Build System' },
+        ],
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups)).toBe(
+        [
+          '- deps',
+          '  <details>',
+          '  <summary>2 updates</summary>',
+          '',
+          '  - chore: update foo',
+          '  - build: update bar',
+          '',
+          '  </details>',
         ].join('\n'),
       );
     });
