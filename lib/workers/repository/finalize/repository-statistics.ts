@@ -1,5 +1,8 @@
 import type { RenovateConfig } from '../../../config/types.ts';
-import { addBranchStats } from '../../../instrumentation/reporting.ts';
+import {
+  addBranchStats,
+  addRepositoryMetadata,
+} from '../../../instrumentation/reporting.ts';
 import { logger } from '../../../logger/index.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -79,7 +82,15 @@ function filterDependencyDashboardData(
   const branchesFiltered: Partial<BranchCache>[] = [];
   for (const branch of branches) {
     const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
-    const { branchName, prNo, prTitle, result, upgrades, prBlockedBy } = branch;
+    const {
+      baseBranch,
+      branchName,
+      prNo,
+      prTitle,
+      result,
+      upgrades,
+      prBlockedBy,
+    } = branch;
 
     for (const upgrade of coerceArray(upgrades)) {
       const {
@@ -117,6 +128,7 @@ function filterDependencyDashboardData(
     }
 
     const filteredBranch: Partial<BranchCache> = {
+      baseBranch,
       branchName,
       prNo,
       prTitle,
@@ -131,8 +143,11 @@ function filterDependencyDashboardData(
 }
 
 export function runBranchSummary(config: RenovateConfig): void {
+  const { scan, branches, configFileName } = getCache();
+
+  addRepositoryMetadata(config, configFileName);
+
   const defaultBranch = config.defaultBranch;
-  const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
   for (const [branchName, cached] of Object.entries(coerceObject(scan))) {
