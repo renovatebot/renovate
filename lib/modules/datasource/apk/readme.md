@@ -64,7 +64,10 @@ https://dl-cdn.alpinelinux.org/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
 
 ## Versioning
 
-This datasource uses [`apk` versioning](../../versioning/apk/index.md) by default, which follows Alpine's version format (`3.2.1-r0`, `2.39.0_rc1-r0`, `6.5_p20250503-r0`).
+This datasource uses [`apk` versioning](../../versioning/apk/index.md) by default, which follows Alpine's version format (`3.2.1-r0`, `2.39.0_rc1-r0`, `6.5_p20250503-r0`) and understands APK's version constraints.
+
+This means a `currentValue` may be a constraint rather than a plain version, e.g. `=~8.12.1` to accept any `8.12.1-rN`.
+Read the [`apk` versioning](../../versioning/apk/index.md) docs for the operators it supports.
 
 Depending on which APK repository you are using, you may want to use [the `loose` versioning scheme](../../versioning/loose/index.md), like so:
 
