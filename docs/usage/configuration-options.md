@@ -341,6 +341,43 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
+## `azureBypassPolicyReason`
+
+Define a custom reason when policies are being bypassed to perform auto-merge.
+
+By default, the reason for bypassing policies is set to "Auto-merge by Renovate".
+
+## `azureBypassPolicyTypeIds`
+
+Define a list of policy UUIDs which are allowed to be bypassed when merging the PR.
+
+!!! note
+  For this to work, the account used by Renovate must have the "Bypass policies when completing pull requests" permission enabled in Azure DevOps.
+
+!!! tip
+  You can acquire list of the policy UUIDs by using the [Azure DevOps REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/types/list) to list the policies for a repository.
+
+Specific API request to acquire the policy UUIDs configured within given organization and project:
+```http request
+GET https://dev.azure.com/{organization}/{project}/_apis/policy/types?api-version=7.1
+```
+
+Example:
+
+```json5
+{
+  "azureBypassPolicyTypeIds": [
+    "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd", // Approval count policy
+    "0609b952-1397-4640-95ec-e00a01b2c241", // Build policy
+    "fd2167ab-b0be-447a-8ec8-39368250530e", // Required reviewers policy
+    "7ed39669-655c-494e-b4a0-a08b4da0fcce", // Git case enforcement policy
+    "2e26e725-8201-4edd-8bf5-978563c34a80", // Git maximum blob size policy
+    "fa4e907d-c16b-4a4c-9dfa-4916e5d171ab", // Merge strategy policy
+    "40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e", // Work item linking policy
+  ]
+}
+```
+
 ## `azureWorkItemId`
 
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://learn.microsoft.com/azure/devops/repos/git/branch-policies#check-for-linked-work-items).
