@@ -221,10 +221,10 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         .reply(404)
         .get(`/orgs/error`)
         .reply(503);
-      expect(await isOrg(mockRepo.owner.login)).toEqual(true);
+      await expect(isOrg(mockRepo.owner.login)).resolves.toEqual(true);
       // uses cached result
-      expect(await isOrg(mockRepo.owner.login)).toEqual(true);
-      expect(await isOrg('user')).toEqual(false);
+      await expect(isOrg(mockRepo.owner.login)).resolves.toEqual(true);
+      await expect(isOrg('user')).resolves.toEqual(false);
       await expect(isOrg('error')).rejects.toThrow(
         'Request failed with status code 503 (Service Unavailable)',
       );

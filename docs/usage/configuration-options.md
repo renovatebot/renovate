@@ -336,7 +336,7 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Create the branch, wait for test results
 - Rebase it any time it gets out of date with the base branch
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
-- As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 24 hours)
+- As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 25 hours, see [`prNotPendingHours`](#prnotpendinghours))
 
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
@@ -499,7 +499,7 @@ e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `addit
 
 !!! note
   This setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`.
-  If you wish to change that too, you need to also configure the field `onboardingBranch` in your global bot config.
+  If you wish to change that too, you need to also configure the field `onboardingBranch` in your global self-hosted config.
 
 ## `branchPrefixOld`
 
@@ -878,7 +878,7 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
 Renovate only performs `configMigration` on `.json` and `.json5` files.
 
-We're adding new features to Renovate bot often.
+We're adding new features to Renovate often.
 Often you can keep using your Renovate config and use the new features right away.
 But sometimes you need to update your Renovate configuration.
 To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
@@ -1596,7 +1596,7 @@ The Dependency Dashboard categories are only used to visually organize updates w
 ## `dependencyDashboardLabels`
 
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
-It is pointless to edit the labels, as Renovate bot restores the labels on each run.
+It is pointless to edit the labels, as Renovate restores the labels on each run.
 
 ## `dependencyDashboardOSVVulnerabilitySummary`
 
@@ -1764,7 +1764,7 @@ This option allows users to specify explicit environment variables values.
 It is valid only as a top-level configuration option and not, for example, within `packageRules`.
 
 !!! warning
-  The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
+  The administrator of your Renovate deployment must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
 
 Behavior:
 
@@ -2024,7 +2024,7 @@ For more details on the syntax and supported patterns, see Renovate's [string pa
 
 ## `gitLabIgnoreApprovals`
 
-Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
+Ignore the default project level approval(s), so that Renovate can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
@@ -2177,7 +2177,7 @@ To match specific ports you have to add a protocol to `matchHost`:
 
 !!! note
   Disabling a host is only 100% effective if added to self-hosted config.
-  Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
+  Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same Renovate deployment has successfully queried for the same dependency recently.
 
 ### `hostRules.abortIgnoreStatusCodes`
 
@@ -2344,9 +2344,20 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
 By default, all headers starting with "X-" are allowed.
 
-A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
+A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
+`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+Any header which is not permitted is dropped, and a warning is logged.
+
+When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
+
+A self-hosted administrator's own host rules are resolved the same way, and whichever `headers` that leaves them sending to the host are then applied on top of yours:
+
+- your host rules cannot stop one of those headers from being sent, and
+- where one of those headers has a name you also set, the administrator's value is used.
+
+This covers the headers the administrator actually sends to that host.
+One they set in a broader rule of their own, but masked with a narrower rule of their own, is not sent there - and so is yours to set.
 
 For example:
 
@@ -2617,7 +2628,7 @@ Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
 If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
 
-1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
+1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your admin configuration
 1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the supportedManagers listed in the table above)
 
 ## `ignoreTests`
@@ -2848,7 +2859,7 @@ We do not want Renovate to parse every YAML file in every repository, just in ca
 Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
 Because the array is empty, you as user must tell Renovate which directories/files to check.
 
-Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess.
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using non-standard filenames.
 For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
 This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
 Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
@@ -2940,6 +2951,10 @@ Examples of how you can use `minimumReleaseAge`:
 If you use `minimumReleaseAge=3 days`, `prCreation="not-pending"` and `internalChecksFilter="strict"` then Renovate only creates branches when 3 (or more days) have passed since the version was released.
 We recommend you set `dependencyDashboard=true`, so you can see these pending PRs.
 
+!!! warning
+  `prCreation="not-pending"` only opens the PR once branch checks complete.
+  If your CI runs only on `pull_request` events (so Renovate branches have no checks), also set `internalChecksAsSuccess=true` so the release-age check can turn the branch green - otherwise PR creation may be [deferred indefinitely](#prcreation).
+
 #### Prevent holding broken npm packages
 
 npm packages less than 72 hours (3 days) old can be unpublished from the npm registry, which could result in a service impact if you have already updated to it.
@@ -3013,7 +3028,7 @@ See [Private npm module support](./getting-started/private-packages.md) for deta
 
 This option exists to provide flexibility about whether `npmrc` strings in config should override `.npmrc` files in the repo, or be merged with them.
 In some situations you need the ability to force override `.npmrc` contents in a repo (`npmrcMerge=false`) while in others you might want to simply supplement the settings already in the `.npmrc` (`npmrcMerge=true`).
-A use case for the latter is if you are a Renovate bot admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
+A use case for the latter is if you are a Renovate admin and wish to provide a default token for `npmjs.org` without removing any other `.npmrc` settings which individual repositories have configured (such as scopes/registries).
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
@@ -4183,6 +4198,8 @@ Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `pac
 
 Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once.
 
+During lock file maintenance, Renovate always runs `npm install` twice, even without this option, because regenerating a lock file from scratch is known to need a second pass.
+
 ### `pnpmDedupe`
 
 Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
@@ -4201,7 +4218,9 @@ Post-upgrade tasks are commands that are executed by Renovate after a dependency
 The intention is to run any other command line tools that would modify existing files or generate new files when a dependency changes.
 
 Post-upgrade tasks are blocked by default for security reasons, so the admin of Renovate needs to choose whether to allow specific commands or any commands to be run - it depends on how much they trust their users in repos.
-In Mend-hosted Renovate apps, commands remain blocked by default but can be allowed on-request for any paying ("Renovate Enterprise" or Mend Appsec) customers or trusted OSS repositories - please reach out if so.
+
+!!! tip
+  In Mend-hosted Renovate apps, commands remain blocked by default, but [depending on your plan](./mend-hosted/faq.md#how-can-i-run-arbitrary-commands-through-postupgradetasks), you have more control over this.
 
 Each command must match at least one of the patterns defined in `allowedCommands` (a global-only configuration option) in order to be executed.
 If the list of allowed tasks is empty then no tasks will be executed.
@@ -4443,7 +4462,14 @@ You'll have to wait until the checks have been performed, before you can decide 
 
 When prCreation is set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-If there are no checks associated, Renovate will create the PR once 24 hours have elapsed since creation of the commit.
+If there are no checks associated, Renovate will create the PR once [`prNotPendingHours`](#prnotpendinghours) have elapsed since the branch's latest commit (default: 25 hours).
+
+!!! warning "`not-pending` can stall PR creation when there are no branch-level checks"
+  A branch with no external status checks is reported as `pending`, so `not-pending` never sees checks "complete" and instead relies on the `prNotPendingHours` fallback.
+  That fallback is measured from the branch's _latest commit_, not from when the branch was created, so anything that rewrites the branch (rebase, re-lock, etc.) restarts the timer.
+  On repositories whose branches are rebased or re-locked more often than `prNotPendingHours`, PRs can be deferred indefinitely.
+  This commonly happens when CI only runs on `pull_request` events, so bare Renovate branches carry no checks.
+  If you rely on `minimumReleaseAge`/`internalChecksFilter` for the "wait" behavior, set [`internalChecksAsSuccess`](#internalchecksassuccess)`=true` so the green internal stability check counts as success and the branch can go green without external checks, or use `prCreation=immediate` instead.
 
 When prCreation is set to `status-success`, Renovate creates the PR only if all tests have passed.
 When a branch remains without PR due to a failing test: select the corresponding PR from the Dependency Dashboard, and push your fixes to the branch.
@@ -4477,7 +4503,7 @@ What may happen if you don't set a `prHourlyLimit`:
 
 The above may cause:
 
-- Renovate bot's PRs to overwhelm your CI systems
+- Renovate's PRs to overwhelm your CI systems
 - a lot of test runs, because branches are rebased each time you merge a PR
 
 To prevent these problems you can set `prHourlyLimit` to a value like `1` or `2`.
@@ -4618,6 +4644,7 @@ Only change this setting if you really need to.
 
 You can use the `registryAliases` object to set registry aliases.
 Renovate applies _all_ `registryAliases` objects, from top to bottom.
+The aliases support variables with default values (using the `:-` syntax) which can be useful for Docker Compose files.
 
 This feature works with the following managers:
 
@@ -4660,6 +4687,21 @@ This feature works with the following managers:
   }
 }
 ```
+
+```json title="Using variables with default values"
+{
+  "registryAliases": {
+    "${CI_REGISTRY:-}": "my-registry.io"
+  }
+}
+```
+
+Both image reference formats work:
+
+- With a slash after the variable: `${CI_REGISTRY:-}/image:1.0`
+- Without a slash after the variable: `${CI_REGISTRY:-}image:1.0`
+
+The alias value works with or without a trailing slash.
 
 If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
 
@@ -4924,7 +4966,7 @@ When this option is set, Renovate won't attempt to update artifacts such as lock
 
 ## `skipInstalls`
 
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
+By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install.
 If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
@@ -5217,9 +5259,29 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   If you allow Renovate to `automerge` vulnerability fixes, please check if the automerged fix is correct.
 
 !!! note
-  When Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
+  By default, when Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
   This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
   In short: vulnerability alerts "skip the line".
+
+If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set `prConcurrentLimit` or `branchConcurrentLimit` inside the `vulnerabilityAlerts` object.
+Vulnerability fixes get their _own_ budget, they do not take a share of the repository-wide one:
+
+```json title="Allowing up to 5 vulnerability fix PRs on top of 5 regular PRs"
+{
+  "prConcurrentLimit": 5,
+  "vulnerabilityAlerts": {
+    "prConcurrentLimit": 5
+  }
+}
+```
+
+With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
+The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
+You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+
+!!! note
+  Only the concurrent limits can be set this way.
+  Renovate always ignores `commitHourlyLimit`, `prHourlyLimit`, `prCommitsPerRunLimit` and `schedule` for vulnerability alerts, you can not override this.
 
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 

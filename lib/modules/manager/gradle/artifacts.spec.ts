@@ -144,14 +144,14 @@ describe('modules/manager/gradle/artifacts', () => {
       const execSnapshots = mockExecAll();
       scm.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No Gradle dependency lockfiles or verification metadata found - skipping update',
@@ -163,14 +163,14 @@ describe('modules/manager/gradle/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.findUpLocal.mockResolvedValue(null);
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Found Gradle dependency lockfiles but no gradlew - aborting update',
@@ -186,8 +186,8 @@ describe('modules/manager/gradle/artifacts', () => {
 
       const execSnapshots = mockExecAll();
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [
             { depName: 'org.junit.jupiter:junit-jupiter-api' },
@@ -196,7 +196,7 @@ describe('modules/manager/gradle/artifacts', () => {
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
@@ -381,14 +381,14 @@ describe('modules/manager/gradle/artifacts', () => {
     });
 
     it('aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project', async () => {
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'somedir/settings.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',
@@ -586,27 +586,27 @@ describe('modules/manager/gradle/artifacts', () => {
       mockExecAll();
       fs.readLocalFile.mockResolvedValue('Current gradle.lockfile');
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('gradlew failed', async () => {
       const execSnapshots = mockExecAll(new Error('failed'));
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           artifactError: {
             fileName: 'build.gradle',
@@ -754,8 +754,8 @@ describe('modules/manager/gradle/artifacts', () => {
         }),
       );
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [
             { depName: 'org.junit.jupiter:junit-jupiter-api' },
@@ -764,7 +764,7 @@ describe('modules/manager/gradle/artifacts', () => {
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(execSnapshots).toBeEmptyArray();
     });

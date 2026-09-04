@@ -40,7 +40,9 @@ describe('modules/manager/terraform/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', '1.tf', {}),
+      ).resolves.toBeNull();
     });
 
     it('returns null for no deps', async () => {
@@ -51,7 +53,7 @@ describe('modules/manager/terraform/extract', () => {
         }
         `;
 
-      expect(await extractPackageFile(src, '1.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '1.tf', {})).resolves.toBeNull();
     });
 
     it('extracts  modules', async () => {
@@ -762,7 +764,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
         deps: [{ skipReason: 'local' }],
       });
     });
@@ -773,7 +775,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toBeNull();
     });
 
     it('extract helm releases', async () => {

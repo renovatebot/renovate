@@ -14,7 +14,7 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)|(~)/g);
+const alphaNumPattern = regEx(/(?:[a-zA-Z]+)|(?:\d+)|(?:~)/g);
 const epochPattern = regEx(/^\d+$/);
 
 class RpmVersioningApi extends GenericVersioningApi {

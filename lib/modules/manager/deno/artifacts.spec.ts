@@ -41,17 +41,17 @@ describe('modules/manager/deno/artifacts', () => {
     });
 
     it('skips if no updatedDeps and no lockFileMaintenance', async () => {
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips if no lock file in config', async () => {
       updateArtifact.updatedDeps = [{}];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips and returns an error if cannot read lock file', async () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           artifactError: {
             fileName: 'deno.lock',
@@ -69,7 +69,7 @@ describe('modules/manager/deno/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('returns updated lock content', async () => {
@@ -81,7 +81,7 @@ describe('modules/manager/deno/artifacts', () => {
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'deno.lock',
@@ -108,7 +108,7 @@ describe('modules/manager/deno/artifacts', () => {
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'sub/deno.lock',
@@ -129,7 +129,7 @@ describe('modules/manager/deno/artifacts', () => {
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'deno.lock',
@@ -167,7 +167,7 @@ describe('modules/manager/deno/artifacts', () => {
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll(execError);
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         { artifactError: { fileName: 'deno.lock', stderr: 'nope' } },
       ]);
     });
@@ -189,7 +189,7 @@ describe('modules/manager/deno/artifacts', () => {
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
-    expect(await updateArtifacts(updateArtifact)).toEqual([
+    await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
       {
         artifactError: {
           fileName: 'deno.lock',
@@ -215,7 +215,7 @@ describe('modules/manager/deno/artifacts', () => {
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
-    expect(await updateArtifacts(updateArtifact)).toEqual([
+    await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
       {
         artifactError: {
           fileName: 'deno.lock',
@@ -236,7 +236,7 @@ describe('modules/manager/deno/artifacts', () => {
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
     const execSnapshots = mockExecAll();
-    expect(await updateArtifacts(updateArtifact)).toEqual([
+    await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
       {
         file: {
           path: 'deno.lock',
@@ -299,7 +299,7 @@ describe('modules/manager/deno/artifacts', () => {
         matchHost: 'https://private-registry.example',
       });
       const execSnapshots = mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'deno.lock',

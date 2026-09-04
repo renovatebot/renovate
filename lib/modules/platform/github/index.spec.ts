@@ -120,12 +120,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, { login: 'renovate-bot' })
         .get('/user/emails')
         .reply(200, [{ email: 'user@domain.com' }]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: 'github_pat_XXXXXX',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor: 'undefined <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -134,6 +134,22 @@ describe('modules/platform/github/index', () => {
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@ghe.renovatebot.com',
       ]);
+    });
+
+    it('should support fine-grained personal access tokens on GHEC', async () => {
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://api.octocorp.ghe.com',
+          token: 'github_pat_XXXXXX',
+          username: 'renovate-bot',
+          gitAuthor: 'Renovate Bot <renovate@example.com>',
+        }),
+      ).resolves.toEqual({
+        endpoint: 'https://api.octocorp.ghe.com/',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        renovateUsername: 'renovate-bot',
+        token: 'github_pat_XXXXXX',
+      });
     });
 
     it('should throw if user failure', async () => {
@@ -152,7 +168,11 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(400);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support default endpoint no email result', async () => {
@@ -164,17 +184,26 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(200, [{}]);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support gitAuthor and username', async () => {
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           token: '123test',
           username: 'renovate-bot',
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'renovate@whitesourcesoftware.com',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);
@@ -222,6 +251,23 @@ describe('modules/platform/github/index', () => {
               token: 'anything',
 
               endpoint: 'https://ghe.renovatebot.com',
+              gitAuthor: undefined,
+            });
+
+            expect(logger.logger.once.warn).not.toHaveBeenCalled();
+          });
+
+          it('if on GHEC, a warning is not shown', async () => {
+            httpMock
+              .scope('https://api.octocorp.ghe.com')
+              .get('/user')
+              .reply(200, { login: 'renovate-bot' })
+              .get('/user/emails')
+              .reply(400);
+
+            await github.initPlatform({
+              token: 'anything',
+              endpoint: 'https://api.octocorp.ghe.com',
               gitAuthor: undefined,
             });
 
@@ -371,7 +417,12 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should use public email from user profile when available', async () => {
@@ -380,7 +431,7 @@ describe('modules/platform/github/index', () => {
         name: 'Example User',
         email: 'user@domain.com',
       });
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'Example User <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -402,7 +453,7 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(200, [{ email: 'user@differentdomain.com' }]);
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'Example User <user@differentdomain.com>',
         renovateUsername: 'renovate-bot',
@@ -421,7 +472,7 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(403);
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: undefined,
         renovateUsername: 'renovate-bot',
@@ -441,9 +492,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({ token: 'x-access-token:ghs_123test' }),
-      ).toEqual({
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' }),
+      ).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
@@ -483,7 +534,9 @@ describe('modules/platform/github/index', () => {
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);
-      expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
+      await expect(
+        github.initPlatform({ token: 'ghs_123test' }),
+      ).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
@@ -552,12 +605,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: 'x-access-token:ghs_123test',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor:
           'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
@@ -571,24 +624,22 @@ describe('modules/platform/github/index', () => {
 
     it('should autodetect email/user on GHEC endpoint with GitHub App', async () => {
       httpMock
-        .scope('https://octocorp.ghe.com', {
+        .scope('https://api.octocorp.ghe.com', {
           reqheaders: {
             authorization: 'Bearer ghs_123test',
           },
         })
-        .head('/')
-        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
         .post('/graphql')
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({
-          endpoint: 'https://octocorp.ghe.com',
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://api.octocorp.ghe.com',
           token: 'x-access-token:ghs_123test',
         }),
-      ).toEqual({
-        endpoint: 'https://octocorp.ghe.com/',
+      ).resolves.toEqual({
+        endpoint: 'https://api.octocorp.ghe.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
@@ -596,6 +647,9 @@ describe('modules/platform/github/index', () => {
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@ghe.com',
       ]);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Detected GitHub Enterprise Cloud',
+      );
     });
 
     it('should support custom endpoint', async () => {
@@ -614,12 +668,17 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support custom endpoint without version', async () => {
@@ -638,12 +697,17 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
   });
 
@@ -668,7 +732,7 @@ describe('modules/platform/github/index', () => {
           null,
         ]);
       const repos = await github.getRepos();
-      expect(repos).toMatchSnapshot();
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
 
     it('should filters repositories by topics', async () => {
@@ -842,7 +906,43 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
+    });
+
+    it('queries all version-gated fields if the GHES version is unknown', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200);
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+        username: 'renovate-bot',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+      });
+
+      await github.initRepo({ repository: 'some/repo' });
+
+      expect(httpMock.getTrace()).toContainEqual(
+        expect.objectContaining({
+          graphql: expect.objectContaining({
+            query: expect.objectContaining({
+              repository: expect.objectContaining({
+                autoMergeAllowed: null,
+                hasIssuesEnabled: null,
+                hasVulnerabilityAlertsEnabled: null,
+                mergeQueue: { id: null },
+              }),
+            }),
+          }),
+        }),
+      );
     });
 
     // for coverage
@@ -879,7 +979,12 @@ describe('modules/platform/github/index', () => {
         forkToken: 'token',
         forkCreation: true,
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should throw if fork needed but forkCreation=false', async () => {
@@ -1029,7 +1134,12 @@ describe('modules/platform/github/index', () => {
         forkCreation: true,
         forkOrg: 'forked',
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('detects fork default branch mismatch', async () => {
@@ -1045,7 +1155,12 @@ describe('modules/platform/github/index', () => {
         forkToken: 'true',
         forkCreation: true,
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should merge', async () => {
@@ -1074,7 +1189,12 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should rebase', async () => {
@@ -1101,7 +1221,12 @@ describe('modules/platform/github/index', () => {
           },
         });
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should not guess at merge', async () => {
@@ -1121,7 +1246,12 @@ describe('modules/platform/github/index', () => {
           },
         });
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should throw error if archived', async () => {
@@ -1318,9 +1448,9 @@ describe('modules/platform/github/index', () => {
         .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(401);
-      await expect(
-        github.getBranchForceRebase('main'),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      await expect(github.getBranchForceRebase('main')).rejects.toThrow(
+        'Request failed with status code 401 (Unauthorized): GET https://api.github.com/repos/undefined/branches/main/protection',
+      );
     });
 
     it('should return empty object when parentRepo is set', async () => {
@@ -3862,13 +3992,13 @@ describe('modules/platform/github/index', () => {
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
-      expect(
-        await github.findPr({
+      await expect(
+        github.findPr({
           branchName: 'branch',
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 1,
         sourceBranch: 'branch-a',
         sourceRepo: 'some/repo',
@@ -4185,6 +4315,49 @@ describe('modules/platform/github/index', () => {
           .scope('https://github.company.com')
           .head('/')
           .reply(200, '', { 'x-github-enterprise-version': '3.3.5' })
+          .get('/user')
+          .reply(200, {
+            login: 'renovate-bot',
+          })
+          .get('/user/emails')
+          .reply(200, {})
+          .post('/repos/some/repo/pulls')
+          .reply(200, {
+            number: 123,
+          })
+          .post('/repos/some/repo/issues/123/labels')
+          .reply(200, [])
+          .post('/graphql')
+          .reply(200, {
+            data: {
+              repository: {
+                defaultBranchRef: {
+                  name: 'main',
+                },
+                nameWithOwner: 'some/repo',
+                autoMergeAllowed: true,
+              },
+            },
+          });
+
+        initRepoMock(scope, 'some/repo');
+        await github.initPlatform({
+          endpoint: 'https://github.company.com',
+          token: '123test',
+        });
+        await github.initRepo({ repository: 'some/repo' });
+        await github.createPr(prConfig);
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'GitHub-native automerge: success...PrNo: 123',
+        );
+      });
+
+      it('should perform automerge if the GHES version is unknown', async () => {
+        const scope = httpMock
+          .scope('https://github.company.com')
+          .head('/')
+          .reply(200)
           .get('/user')
           .reply(200, {
             login: 'renovate-bot',
@@ -4982,6 +5155,28 @@ describe('modules/platform/github/index', () => {
         github.assertPrNotInMergeQueue('somebranch', 'main'),
       ).toResolve();
     });
+
+    it('checks the merge queue if the GHES version is unknown', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200)
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope, null);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {
@@ -5268,12 +5463,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should handle merge block', async () => {
@@ -5289,13 +5484,13 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
           strategy: 'merge-commit', // for coverage - has no effect on this test
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it.each([
@@ -5315,13 +5510,13 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
           strategy: 'auto', // for coverage -- has not effect on this test
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should warn if automergeStrategy is not supported', async () => {
@@ -5373,7 +5568,9 @@ describe('modules/platform/github/index', () => {
     it('returns updated pr body', () => {
       const input =
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(github.massageMarkdown(input)).toMatchSnapshot();
+      expect(github.massageMarkdown(input)).toBe(
+        '[https://github.com/foo/bar/issues/5](https://redirect.github.com/foo/bar/issues/5) plus also [a link](https://redirect.github.com/foo/bar/issues/5)',
+      );
     });
 
     it('returns not-updated pr body for GHES', async () => {
@@ -5397,6 +5594,26 @@ describe('modules/platform/github/index', () => {
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(github.massageMarkdown(input)).toEqual(input);
     });
+
+    it('returns not-updated pr body for GHEC', async () => {
+      const scope = httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://api.octocorp.ghe.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(github.massageMarkdown(input)).toEqual(input);
+    });
   });
 
   describe('mergePr(prNo) - autodetection', () => {
@@ -5411,12 +5628,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('should try merge after squash', async () => {
@@ -5432,12 +5649,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should try rebase after merge', async () => {
@@ -5457,12 +5674,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('should give up', async () => {
@@ -5484,12 +5701,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
   });
 

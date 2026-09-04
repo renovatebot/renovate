@@ -127,14 +127,14 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns if no Pipfile.lock found', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -150,14 +150,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       {
@@ -207,14 +207,14 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get('Pipfile1'),
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.6.2' },
@@ -260,14 +260,14 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get('Pipfile2'),
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.6.5' },
@@ -309,14 +309,14 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some toml',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.7.6' },
@@ -367,14 +367,14 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some toml',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.8.5' },
@@ -423,14 +423,14 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       {
@@ -483,14 +483,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { python: '== 3.8.*' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'new pipfile.lock',
@@ -556,14 +556,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
@@ -645,14 +645,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.6.5' },
@@ -713,14 +713,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
@@ -777,14 +777,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       throw new Error('not found');
     });
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Pipfile.lock', stderr: 'not found' } },
     ]);
 
@@ -808,14 +808,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: lockMaintenanceConfig,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New Pipfile.lock',
@@ -860,14 +860,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
@@ -948,14 +948,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
@@ -1035,14 +1035,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { pipenv: '==2020.1.1' } },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
@@ -1119,14 +1119,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       password: 'passwordTwo',
     });
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get('Pipfile6'),
         config: { ...config, constraints: { python: '== 3.8.*' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New Pipfile.lock',
@@ -1203,14 +1203,14 @@ describe('modules/manager/pipenv/artifacts', () => {
       password: 'passwordTwo',
     });
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get('Pipfile7'),
         config: { ...config, constraints: { python: '== 3.8.*' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New Pipfile.lock',
