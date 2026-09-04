@@ -56,6 +56,7 @@ export async function initRepo(
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
+  platform.configureRepo?.(config);
   setRepositoryLogLevelRemaps(config.logLevelRemap);
   if (config.mode === 'silent') {
     logger.info(

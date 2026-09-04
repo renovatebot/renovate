@@ -2029,6 +2029,13 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## `gitlabMergeRequestCommentType`
+
+By default, Renovate posts comments on GitLab merge requests as regular notes.
+Set this option to `discussion` to post new comments as resolvable threads instead.
+GitLab can be configured to [prevent merging while threads remain unresolved](https://docs.gitlab.com/user/project/merge_requests/#prevent-merge-unless-all-threads-are-resolved).
+When this GitLab setting is enabled, Renovate threads prevent the merge request from being merged until someone resolves them.
+
 ## `goGetDirs`
 
 By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.

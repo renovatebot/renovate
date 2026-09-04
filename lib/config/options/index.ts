@@ -1293,6 +1293,16 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'repository',
   },
   {
+    name: 'gitlabMergeRequestCommentType',
+    description:
+      'Choose whether Renovate comments on GitLab merge requests are created as notes or discussions.',
+    type: 'string',
+    allowedValues: ['note', 'discussion'],
+    default: 'note',
+    stage: 'repository',
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'gitTimeout',
     description:
       'Configure the timeout with a number of milliseconds to wait for a Git task.',
