@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
 
 export const BicepResourceVersionIndex = z
   .object({
@@ -9,7 +10,7 @@ export const BicepResourceVersionIndex = z
 
     for (const resourceReference of Object.keys(resources)) {
       const [type, version] = resourceReference.toLowerCase().split('@', 2);
-      const versions = releaseMap.get(type) ?? [];
+      const versions = coerceArray(releaseMap.get(type));
       versions.push(version);
       releaseMap.set(type, versions);
     }

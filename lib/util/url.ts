@@ -24,7 +24,7 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/'); // TODO #12875 adds slash at the front when re2 is used
+  return url.replace(regEx(/\/?$/), '/');
 }
 
 export function trimTrailingSlash(url: string): string {
@@ -32,7 +32,7 @@ export function trimTrailingSlash(url: string): string {
 }
 
 export function trimLeadingSlash(path: string): string {
-  return path.replace(/^\/+/, '');
+  return path.replace(regEx(/^\/+/), '');
 }
 
 export function trimSlashes(path: string): string {
@@ -97,12 +97,24 @@ export function resolveSameOriginUrl(
   if (!base) {
     return null;
   }
+
   let resolved: URL;
   try {
     resolved = new URL(nextUrl.toString(), base);
   } catch {
     return null;
   }
+
+  // If the base URL is HTTPS and the resolved URL is HTTP, but has no port specified, we can assume that the server intended to use HTTPS. This is a common misconfiguration in some registries.
+  if (
+    base.protocol === 'https:' &&
+    resolved.protocol === 'http:' &&
+    resolved.port === ''
+  ) {
+    logger.debug(`Detected protocol downgrade and fixed it: ${resolved.href}`);
+    resolved.protocol = 'https:';
+  }
+
   return resolved.origin === base.origin ? resolved.href : null;
 }
 

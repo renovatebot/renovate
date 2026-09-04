@@ -40,7 +40,7 @@ describe('modules/manager/nuget/package-tree', () => {
         ),
       });
 
-      expect(await getDependentPackageFiles('single.csproj')).toEqual([
+      await expect(getDependentPackageFiles('single.csproj')).resolves.toEqual([
         { isLeaf: true, name: 'single.csproj' },
       ]);
     });
@@ -52,10 +52,10 @@ describe('modules/manager/nuget/package-tree', () => {
         '/tmp/repo/two.csproj': Fixtures.get('two-no-reference/two.csproj'),
       });
 
-      expect(await getDependentPackageFiles('one.csproj')).toEqual([
+      await expect(getDependentPackageFiles('one.csproj')).resolves.toEqual([
         { isLeaf: true, name: 'one.csproj' },
       ]);
-      expect(await getDependentPackageFiles('two.csproj')).toEqual([
+      await expect(getDependentPackageFiles('two.csproj')).resolves.toEqual([
         { isLeaf: true, name: 'two.csproj' },
       ]);
     });
@@ -71,10 +71,12 @@ describe('modules/manager/nuget/package-tree', () => {
         ),
       });
 
-      expect(await getDependentPackageFiles('one/one.csproj')).toEqual([
-        { isLeaf: false, name: 'one/one.csproj' },
-        { isLeaf: true, name: 'two/two.csproj' },
-      ]);
+      await expect(getDependentPackageFiles('one/one.csproj')).resolves.toEqual(
+        [
+          { isLeaf: false, name: 'one/one.csproj' },
+          { isLeaf: true, name: 'two/two.csproj' },
+        ],
+      );
     });
 
     it('returns project for two projects with one reference and central versions', async () => {
@@ -91,9 +93,9 @@ describe('modules/manager/nuget/package-tree', () => {
         ),
       });
 
-      expect(
-        await getDependentPackageFiles('Directory.Packages.props', true),
-      ).toEqual([
+      await expect(
+        getDependentPackageFiles('Directory.Packages.props', true),
+      ).resolves.toEqual([
         { isLeaf: false, name: 'one/one.csproj' },
         { isLeaf: true, name: 'two/two.csproj' },
       ]);
@@ -113,9 +115,9 @@ describe('modules/manager/nuget/package-tree', () => {
         ),
       });
 
-      expect(
-        await getDependentPackageFiles('Directory.Build.props', true),
-      ).toEqual([
+      await expect(
+        getDependentPackageFiles('Directory.Build.props', true),
+      ).resolves.toEqual([
         { isLeaf: false, name: 'one/one.csproj' },
         { isLeaf: true, name: 'two/two.csproj' },
       ]);
@@ -138,9 +140,9 @@ describe('modules/manager/nuget/package-tree', () => {
         ),
       });
 
-      expect(
-        await getDependentPackageFiles('src/Directory.Build.props', true),
-      ).toEqual([{ isLeaf: true, name: 'src/one/one.csproj' }]);
+      await expect(
+        getDependentPackageFiles('src/Directory.Build.props', true),
+      ).resolves.toEqual([{ isLeaf: true, name: 'src/one/one.csproj' }]);
     });
 
     it('returns project for two projects with one reference and global.json', async () => {
@@ -155,9 +157,9 @@ describe('modules/manager/nuget/package-tree', () => {
         '/tmp/repo/global.json': '{}',
       });
 
-      expect(
-        await getDependentPackageFiles('global.json', false, true),
-      ).toEqual([
+      await expect(
+        getDependentPackageFiles('global.json', false, true),
+      ).resolves.toEqual([
         { isLeaf: false, name: 'one/one.csproj' },
         { isLeaf: true, name: 'two/two.csproj' },
       ]);
@@ -181,20 +183,24 @@ describe('modules/manager/nuget/package-tree', () => {
         ),
       });
 
-      expect(await getDependentPackageFiles('one/one.csproj')).toEqual([
-        { isLeaf: false, name: 'one/one.csproj' },
-        { isLeaf: false, name: 'two/two.csproj' },
-        { isLeaf: true, name: 'three/three.csproj' },
-      ]);
+      await expect(getDependentPackageFiles('one/one.csproj')).resolves.toEqual(
+        [
+          { isLeaf: false, name: 'one/one.csproj' },
+          { isLeaf: false, name: 'two/two.csproj' },
+          { isLeaf: true, name: 'three/three.csproj' },
+        ],
+      );
 
-      expect(await getDependentPackageFiles('two/two.csproj')).toEqual([
-        { isLeaf: false, name: 'two/two.csproj' },
-        { isLeaf: true, name: 'three/three.csproj' },
-      ]);
+      await expect(getDependentPackageFiles('two/two.csproj')).resolves.toEqual(
+        [
+          { isLeaf: false, name: 'two/two.csproj' },
+          { isLeaf: true, name: 'three/three.csproj' },
+        ],
+      );
 
-      expect(await getDependentPackageFiles('three/three.csproj')).toEqual([
-        { isLeaf: true, name: 'three/three.csproj' },
-      ]);
+      await expect(
+        getDependentPackageFiles('three/three.csproj'),
+      ).resolves.toEqual([{ isLeaf: true, name: 'three/three.csproj' }]);
     });
 
     it('returns projects for three projects with two tree-like references', async () => {
@@ -215,18 +221,20 @@ describe('modules/manager/nuget/package-tree', () => {
         ),
       });
 
-      expect(await getDependentPackageFiles('one/one.csproj')).toEqual([
-        { isLeaf: false, name: 'one/one.csproj' },
-        { isLeaf: true, name: 'two/two.csproj' },
-        { isLeaf: true, name: 'three/three.csproj' },
-      ]);
+      await expect(getDependentPackageFiles('one/one.csproj')).resolves.toEqual(
+        [
+          { isLeaf: false, name: 'one/one.csproj' },
+          { isLeaf: true, name: 'two/two.csproj' },
+          { isLeaf: true, name: 'three/three.csproj' },
+        ],
+      );
 
-      expect(await getDependentPackageFiles('two/two.csproj')).toEqual([
-        { isLeaf: true, name: 'two/two.csproj' },
-      ]);
-      expect(await getDependentPackageFiles('three/three.csproj')).toEqual([
-        { isLeaf: true, name: 'three/three.csproj' },
-      ]);
+      await expect(getDependentPackageFiles('two/two.csproj')).resolves.toEqual(
+        [{ isLeaf: true, name: 'two/two.csproj' }],
+      );
+      await expect(
+        getDependentPackageFiles('three/three.csproj'),
+      ).resolves.toEqual([{ isLeaf: true, name: 'three/three.csproj' }]);
     });
 
     it('throws error on circular reference', async () => {
@@ -248,9 +256,9 @@ describe('modules/manager/nuget/package-tree', () => {
     it('skips on invalid xml file', async () => {
       scm.getFileList.mockResolvedValue(['foo/bar.csproj']);
       Fixtures.mock({ '/tmp/repo/foo/bar.csproj': '<invalid' });
-      expect(await getDependentPackageFiles('foo/bar.csproj')).toEqual([
-        { isLeaf: true, name: 'foo/bar.csproj' },
-      ]);
+      await expect(getDependentPackageFiles('foo/bar.csproj')).resolves.toEqual(
+        [{ isLeaf: true, name: 'foo/bar.csproj' }],
+      );
     });
   });
 });

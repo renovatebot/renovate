@@ -37,7 +37,7 @@ describe('util/s3', () => {
     const client1 = s3.getS3Client();
     const client2 = getS3Client();
     expect(client1).not.toBe(client2);
-    expect(await client1.config.endpoint?.()).toStrictEqual({
+    await expect(client1.config.endpoint?.()).resolves.toStrictEqual({
       hostname: 'minio.domain.test',
       path: '/',
       port: undefined,
@@ -52,7 +52,7 @@ describe('util/s3', () => {
     const client1 = s3.getS3Client('https://minio.domain.test', true);
     const client2 = getS3Client('https://minio.domain.test', true);
     expect(client1).not.toBe(client2);
-    expect(await client1.config.endpoint?.()).toStrictEqual({
+    await expect(client1.config.endpoint?.()).resolves.toStrictEqual({
       hostname: 'minio.domain.test',
       path: '/',
       port: undefined,

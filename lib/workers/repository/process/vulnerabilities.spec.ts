@@ -1,15 +1,27 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
+import { DateTime } from 'luxon';
 import { mockFn } from 'vitest-mock-extended';
-import type { RenovateConfig } from '~test/util.ts';
-import { logger } from '~test/util.ts';
+import { type RenovateConfig, logger, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import type { PackageRuleInputConfig } from '../../../config/types.ts';
+import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import { Result } from '../../../util/result.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as lookup from './lookup/index.ts';
+import type { LookupUpdateConfig } from './lookup/types.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
 const createMock = vi.fn();
+const getMavenReleases = vi.spyOn(MavenDatasource.prototype, 'getReleases');
+const postprocessMavenRelease = vi.spyOn(
+  MavenDatasource.prototype,
+  'postprocessRelease',
+);
 
 vi.mock('@renovatebot/osv-offline', () => {
   return {
@@ -717,6 +729,99 @@ describe('workers/repository/process/vulnerabilities', () => {
         });
       });
     });
+
+    it('handles sub-ecosystems (e.g. Packagist:drupal)', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        composer: [
+          {
+            deps: [
+              {
+                depName: 'drupal/ai',
+                currentValue: '1.0.6',
+                datasource: 'packagist',
+              },
+            ],
+            packageFile: 'composer.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'DRUPAL-CONTRIB-2025-119',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'drupal/ai',
+                ecosystem: 'Packagist:https://packages.drupal.org/8',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.7' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toMatchObject([
+        {
+          packageName: 'drupal/ai',
+          depVersion: '1.0.6',
+          fixedVersion: '>= 1.0.7',
+          datasource: 'packagist',
+        },
+      ]);
+    });
+
+    it('does not match unrelated ecosystem prefixes', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        composer: [
+          {
+            deps: [
+              {
+                depName: 'drupal/ai',
+                currentValue: '1.0.6',
+                datasource: 'packagist',
+              },
+            ],
+            packageFile: 'composer.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'FAKE-PACKAGISTSOMETHING-1',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'drupal/ai',
+                ecosystem: 'PackagistSomething',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.7' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toEqual([]);
+    });
   });
 
   describe('appendVulnerabilityPackageRules()', () => {
@@ -1128,6 +1233,8 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchCurrentVersion: '1.7.5',
           allowedVersions: '>= 1.7.6',
           isVulnerabilityAlert: true,
+          // security updates inherit `vulnerabilityAlerts`, which disables `minimumReleaseAge`
+          force: { minimumReleaseAge: null },
         },
       ]);
     });
@@ -1187,10 +1294,103 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchDatasources: ['golang-version'],
           matchPackageNames: ['go'],
           matchCurrentVersion: '1.23.6',
+          matchDepTypes: ['toolchain'],
           allowedVersions: '>= 1.23.8',
           isVulnerabilityAlert: true,
         },
       ]);
+    });
+
+    it('does not apply go stdlib toolchain remediation to the module go directive', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'golang',
+                currentValue: '1.26.0',
+                datasource: 'golang-version',
+                versioning: 'go-mod-directive',
+              },
+              {
+                depName: 'go',
+                depType: 'toolchain',
+                currentValue: '1.26.5',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GO-2026-0001',
+          modified: '',
+          aliases: ['CVE-2026-0001'],
+          affected: [
+            {
+              package: {
+                name: 'stdlib',
+                ecosystem: 'Go',
+                purl: 'pkg:golang/stdlib',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '1.26.0' }, { fixed: '1.26.6' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['golang-version'],
+          matchPackageNames: ['go'],
+          matchCurrentVersion: '1.26.5',
+          matchDepTypes: ['toolchain'],
+          allowedVersions: '>= 1.26.6',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+
+      const toolchainDep: PackageRuleInputConfig & {
+        allowedVersions?: string;
+      } = await applyPackageRules({
+        packageRules: config.packageRules,
+        depName: 'go',
+        packageName: 'go',
+        depType: 'toolchain',
+        currentValue: '1.26.5',
+        datasource: 'golang-version',
+        versioning: 'semver',
+      });
+      expect(toolchainDep.allowedVersions).toBe('>= 1.26.6');
+      expect(toolchainDep.isVulnerabilityAlert).toBe(true);
+
+      const golangDep: PackageRuleInputConfig & { allowedVersions?: string } =
+        await applyPackageRules({
+          packageRules: config.packageRules,
+          depName: 'go',
+          packageName: 'go',
+          depType: 'golang',
+          currentValue: '1.26.0',
+          datasource: 'golang-version',
+          versioning: 'go-mod-directive',
+        });
+      expect(golangDep.allowedVersions).toBeUndefined();
+      expect(golangDep.isVulnerabilityAlert).toBeUndefined();
     });
 
     it('skips vulnerability lookup for go module directive', async () => {
@@ -1216,6 +1416,42 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
 
       expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('does not scope npm remediation rules by depType', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                depType: 'dependencies',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules?.[0]).not.toHaveProperty('matchDepTypes');
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '>= 4.17.11',
+          isVulnerabilityAlert: true,
+        },
+      ]);
     });
 
     it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {
@@ -1287,6 +1523,91 @@ describe('workers/repository/process/vulnerabilities', () => {
           isVulnerabilityAlert: true,
         },
       ]);
+    });
+
+    it('proposes a fresh security fix immediately despite minimumReleaseAge', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'org.example:lib',
+                currentValue: '1.0.0',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'pom.xml',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-1111-2222-3333',
+          modified: '',
+          affected: [
+            {
+              package: {
+                ecosystem: 'Maven',
+                name: 'org.example:lib',
+                purl: 'pkg:maven/org.example/lib',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.1' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      // The user enforces a long release-age delay with strict filtering.
+      config.minimumReleaseAge = '14 days';
+      config.internalChecksFilter = 'strict';
+
+      // The real vulnerability flow appends the security packageRule to config.
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      // The fix was released yesterday: far inside the 14-day window, so a normal
+      // update would be held as a pending status check.
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.0.0' },
+          {
+            version: '1.0.1',
+            releaseTimestamp: asTimestamp(
+              DateTime.now().minus({ days: 1 }).toISO(),
+            ),
+          },
+        ],
+      });
+      postprocessMavenRelease.mockImplementation((_, release) =>
+        Promise.resolve(release),
+      );
+
+      // Feed the config that the vulnerability flow just mutated into the real lookup.
+      const dep = packageFiles.maven[0].deps[0];
+      const lookupConfig = partial<LookupUpdateConfig>({
+        ...config,
+        abandonmentThreshold: config.abandonmentThreshold ?? undefined,
+        manager: 'maven',
+        packageName: dep.depName,
+        currentValue: dep.currentValue!,
+        datasource: dep.datasource,
+        versioning: 'maven',
+      });
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(lookupConfig),
+      ).unwrapOrThrow();
+
+      // The fix is proposed right away, with no pending status check.
+      expect(updates).toHaveLength(1);
+      expect(updates[0]).toMatchObject({ newVersion: '1.0.1' });
+      expect(updates[0]).not.toHaveProperty('pendingChecks');
     });
 
     it('vulnerability with multiple affected entries and version ranges', async () => {

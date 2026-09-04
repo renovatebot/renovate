@@ -10,6 +10,7 @@ import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 
 export { extractPackageFile } from './extract.ts';
 
@@ -33,4 +34,5 @@ export const supportedDatasources = [
   NpmDatasource.id,
   PypiDatasource.id,
   RubyVersionDatasource.id,
+  RustVersionDatasource.id,
 ];

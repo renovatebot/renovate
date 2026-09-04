@@ -169,10 +169,10 @@ describe('modules/datasource/docker/index', () => {
       username: 'some-username',
       password: 'some-password',
     });
-    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
-    delete process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP;
-    delete process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN;
-    delete process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN;
+    vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', undefined);
+    vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', undefined);
+    vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
+    vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
   });
 
   describe('getDigest', () => {
@@ -362,12 +362,12 @@ describe('modules/datasource/docker/index', () => {
         .head('/cache-poison/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
 
-      expect(
-        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
-      ).toBeNull();
-      expect(
-        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
-      ).toBe('sha256:some-digest');
+      await expect(
+        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).resolves.toBeNull();
+      await expect(
+        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).resolves.toBe('sha256:some-digest');
     });
 
     it.each(amazonHosts)(
@@ -388,19 +388,19 @@ describe('modules/datasource/docker/index', () => {
           authorizationData: [{ authorizationToken: 'test_token' }],
         });
 
-        expect(
-          await getDigest(
+        await expect(
+          getDigest(
             {
               datasource: 'docker',
               packageName: `${host}/node`,
             },
             'some-tag',
           ),
-        ).toBe('some-digest');
+        ).resolves.toBe('some-digest');
 
         const ecr = ecrMock.call(0).thisValue as ECRClient;
-        expect(await ecr.config.region()).toBe(region);
-        expect(await ecr.config.credentials()).toEqual({
+        await expect(ecr.config.region()).resolves.toBe(region);
+        await expect(ecr.config.credentials()).resolves.toEqual({
           $source: {
             CREDENTIALS_CODE: 'e',
           },
@@ -435,19 +435,19 @@ describe('modules/datasource/docker/index', () => {
           authorizationData: [{ authorizationToken: 'test_token' }],
         });
 
-        expect(
-          await getDigest(
+        await expect(
+          getDigest(
             {
               datasource: 'docker',
               packageName: `${host}/node`,
             },
             'some-tag',
           ),
-        ).toBe('some-digest');
+        ).resolves.toBe('some-digest');
 
         const ecr = ecrMock.call(0).thisValue as ECRClient;
-        expect(await ecr.config.region()).toBe(region);
-        expect(await ecr.config.credentials()).toEqual({
+        await expect(ecr.config.region()).resolves.toBe(region);
+        await expect(ecr.config.credentials()).resolves.toEqual({
           $source: {
             CREDENTIALS_CODE: 'e',
           },
@@ -1717,26 +1717,26 @@ describe('modules/datasource/docker/index', () => {
           architecture: 'amd64',
         });
 
-      expect(
-        await datasource.getImageArchitecture(
+      await expect(
+        datasource.getImageArchitecture(
           registryHost,
           dockerRepository,
           currentDigest,
         ),
-      ).toBeNull();
-      expect(
-        await datasource.getImageArchitecture(
+      ).resolves.toBeNull();
+      await expect(
+        datasource.getImageArchitecture(
           registryHost,
           dockerRepository,
           currentDigest,
         ),
-      ).toBe('amd64');
+      ).resolves.toBe('amd64');
     });
   });
 
   describe('getReleases', () => {
     it('returns null if no token', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1808,7 +1808,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('follows cross-origin tags pagination when the datasource is opted in', async () => {
-      process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/node/tags/list?n=10000')
@@ -1842,7 +1842,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('does not opt docker in when only another datasource is opted in', async () => {
-      process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/node/tags/list?n=10000')
@@ -1868,9 +1868,9 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       GlobalConfig.set({ dockerMaxPages: 2 });
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -2086,12 +2086,12 @@ describe('modules/datasource/docker/index', () => {
           .reply(200, '', {})
           .get('/node/manifests/some')
           .reply(200);
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: `${host}/node`,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'node',
           registryUrl: `https://${host}`,
           releases: [],
@@ -2140,12 +2140,12 @@ describe('modules/datasource/docker/index', () => {
           .get('/v2/amazonlinux/amazonlinux/manifests/some')
           .reply(200);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: `${host}/amazonlinux/amazonlinux`,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'amazonlinux/amazonlinux',
           registryUrl: `https://${host}`,
           releases: [],
@@ -2200,12 +2200,12 @@ describe('modules/datasource/docker/index', () => {
               },
             },
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'node',
           registryUrl: 'https://ecr-proxy.company.com',
           releases: [],
@@ -2266,12 +2266,12 @@ describe('modules/datasource/docker/index', () => {
               },
             },
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           lookupName: 'node',
           registryUrl: 'https://ecr-proxy.company.com',
           releases: [],
@@ -2302,12 +2302,12 @@ describe('modules/datasource/docker/index', () => {
           .reply(405, maxResultsErrorBody, {
             'Docker-Distribution-Api-Version': 'registry/2.0',
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the response code is not 405', async () => {
@@ -2333,12 +2333,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when no response headers are present', async () => {
@@ -2356,12 +2356,12 @@ describe('modules/datasource/docker/index', () => {
               },
             ],
           });
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the expected docker header is missing', async () => {
@@ -2385,12 +2385,12 @@ describe('modules/datasource/docker/index', () => {
               'Irrelevant-Header': 'irrelevant-value',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the response body does not contain an errors object', async () => {
@@ -2406,12 +2406,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the response body does not contain errors', async () => {
@@ -2429,12 +2429,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the the response errors does not have a message property', async () => {
@@ -2456,12 +2456,12 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null when the the error message does not have the expected max results error', async () => {
@@ -2484,17 +2484,17 @@ describe('modules/datasource/docker/index', () => {
               'Docker-Distribution-Api-Version': 'registry/2.0',
             },
           );
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: DockerDatasource.id,
             packageName: 'ecr-proxy.company.com/node',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2541,7 +2541,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses custom page limit for Docker hub repository tags', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       GlobalConfig.set({ dockerMaxPages: 2 });
       httpMock
         .scope(dockerHubUrl)
@@ -2593,7 +2593,7 @@ describe('modules/datasource/docker/index', () => {
 
     // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
     it('does not follow Docker Hub tags pagination to a different origin', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2633,8 +2633,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('follows cross-origin Docker Hub pagination when the datasource is opted in', async () => {
-      process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN', 'true');
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2679,7 +2679,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -2708,7 +2708,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2755,7 +2755,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('sets releaseTimestamp on digests from Docker Hub', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2833,7 +2833,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null on error', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2848,7 +2848,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('strips trailing slash from registry', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2875,7 +2875,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null if no auth', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_TAGS_DISABLE', 'true');
       hostRules.clear();
       httpMock
         .scope(baseUrl)
@@ -3417,14 +3417,14 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/renovatebot/renovate',
-          'org.opencontainers.image.revision':
-            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'node', '2-alpine'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+      });
     });
 
     it('uses annotations for oci helm', async () => {
@@ -3448,14 +3448,14 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/renovatebot/renovate',
-          'org.opencontainers.image.revision':
-            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'node', '2-alpine'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+      });
     });
 
     it('uses sources for oci helm', async () => {
@@ -3480,12 +3480,12 @@ describe('modules/datasource/docker/index', () => {
           home: 'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'harbor', '16.7.2')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'harbor', '16.7.2'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+      });
     });
 
     it('uses descriptor annotations for docker hub library images', async () => {
@@ -3527,13 +3527,9 @@ describe('modules/datasource/docker/index', () => {
           ],
         });
 
-      expect(
-        await ds.getLabels(
-          'https://index.docker.io',
-          'library/convertigo',
-          '8.4.3',
-        ),
-      ).toEqual({
+      await expect(
+        ds.getLabels('https://index.docker.io', 'library/convertigo', '8.4.3'),
+      ).resolves.toEqual({
         'org.opencontainers.image.source':
           'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
         'org.opencontainers.image.revision':
@@ -3564,13 +3560,13 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(
-        await ds.getLabels(
+      await expect(
+        ds.getLabels(
           'https://index.docker.io',
           'renovate/renovate',
           '37.405.1-full',
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         'org.opencontainers.image.source':
           'https://github.com/renovatebot/renovate',
         'org.opencontainers.image.revision':
@@ -3579,21 +3575,21 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('skips docker hub labels', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
 
       httpMock.scope('https://index.docker.io/v2');
 
-      expect(
-        await ds.getLabels(
+      await expect(
+        ds.getLabels(
           'https://index.docker.io',
           'renovate/renovate',
           '37.405.1-full',
         ),
-      ).toEqual({});
+      ).resolves.toEqual({});
     });
 
     it('does not skip non docker hub registry labels', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      vi.stubEnv('RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP', 'true');
 
       httpMock
         .scope('https://ghcr.io/v2')
@@ -3615,14 +3611,14 @@ describe('modules/datasource/docker/index', () => {
           },
         });
 
-      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
-        {
-          'org.opencontainers.image.source':
-            'https://github.com/renovatebot/renovate',
-          'org.opencontainers.image.revision':
-            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
-        },
-      );
+      await expect(
+        ds.getLabels('https://ghcr.io', 'node', '2-alpine'),
+      ).resolves.toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+      });
     });
   });
 });

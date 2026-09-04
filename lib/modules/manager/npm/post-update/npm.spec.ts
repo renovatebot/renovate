@@ -48,7 +48,12 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe(packageLockContents);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('runs npm install twice', async () => {
@@ -101,7 +106,12 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs lock file updates retaining the package.json counterparts', async () => {
@@ -129,8 +139,22 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toMatchSnapshot('lockFile');
-    expect(execSnapshots).toMatchSnapshot('execSnapshots');
+    // the lock file update is applied to the "dependencies" section while the
+    // package.json counterpart in the "packages" section is retained
+    const lockFile = JSON.parse(res.lockFile!);
+    expect(lockFile.packages['']).toEqual({
+      name: 'update-lockfile-massage-1',
+      version: '1.0.0',
+      dependencies: { postcss: '^8.0.0' },
+    });
+    expect(lockFile.dependencies.postcss.version).toBe('8.4.8');
+    expect(lockFile.packages['node_modules/postcss'].version).toBe('8.4.31');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -396,7 +420,39 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('does not run npm install four times for lock file maintenance with npmInstallTwice', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValue('{}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { postUpdateOptions: ['npmInstallTwice'] },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('works for docker mode', async () => {
@@ -425,6 +481,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'ghcr.io/renovatebot/base-image ' +
@@ -432,6 +489,8 @@ describe('modules/manager/npm/post-update/npm', () => {
           'install-tool node 16.16.0 ' +
           '&& ' +
           'install-tool npm 6.0.0 ' +
+          '&& ' +
+          'npm install --package-lock-only --no-audit ' +
           '&& ' +
           'npm install --package-lock-only --no-audit' +
           "'",
@@ -462,6 +521,9 @@ describe('modules/manager/npm/post-update/npm', () => {
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
     ]);
   });
 
@@ -484,6 +546,9 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
       {
         cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
       },

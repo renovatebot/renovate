@@ -4,7 +4,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { id as semverVersioning } from '../../versioning/semver/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
-const VERSION_REGEX = regEx(/^\s+VERSION="(.*)"$/m);
+const VERSION_REGEX = regEx(/^\s+VERSION="(?<version>.*)"$/m);
 
 export function extractPackageFile(
   fileContent: string,
@@ -19,7 +19,7 @@ export function extractPackageFile(
   const dependency: PackageDependency = {
     depName: 'batect/batect',
     commitMessageTopic: 'Batect',
-    currentValue: match[1],
+    currentValue: match.groups!.version,
     datasource: GithubReleasesDatasource.id,
     versioning: semverVersioning,
   };

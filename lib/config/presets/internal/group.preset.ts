@@ -372,6 +372,16 @@ const staticGroups = {
       },
     ],
   },
+  octokit: {
+    description: 'Group all `@octokit` packages together.',
+    packageRules: [
+      {
+        groupName: 'octokit packages',
+        groupSlug: 'octokit',
+        matchPackageNames: ['@octokit/**'],
+      },
+    ],
+  },
   phpstan: {
     description: 'Group PHPStan packages together.',
     packageRules: [
@@ -479,8 +489,6 @@ const staticGroups = {
     ],
   },
   recommended: {
-    description:
-      'Use curated list of recommended non-monorepo package groupings.',
     extends: [
       'group:nodeJs',
       'group:allApollographql',
@@ -503,6 +511,7 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:micrometer',
+      'group:octokit',
       'group:phpstan',
       'group:polymer',
       'group:puppeteer',
@@ -537,7 +546,8 @@ const staticGroups = {
       'group:springWs',
       'group:symfony',
     ],
-    ignoreDeps: [], // Hack to improve onboarding PR description
+    overrideDescription:
+      'Use curated list of recommended non-monorepo package groupings.',
   },
   remark: {
     description: 'Group remark packages together.',
@@ -897,6 +907,15 @@ const staticGroups = {
       },
     ],
   },
+  vitePlus: {
+    description: 'Group all Vite+ related packages together.',
+    packageRules: [
+      {
+        extends: ['packages:vitePlus'],
+        groupName: 'Vite+ packages',
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
@@ -917,9 +936,8 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: 'Group known monorepo packages together.',
   extends: monorepoNames,
-  ignoreDeps: [], // Hack to improve onboarding PR description
+  overrideDescription: 'Group known monorepo packages together.',
 };
 
 export const presets: Record<string, Preset> = config;

@@ -2,8 +2,8 @@ import type { SimpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import { clearEnv } from '~test/util.ts';
 import * as git from '../../../util/git/index.ts';
-import { add, clear } from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitTagsDatasource } from './index.ts';
 
@@ -20,11 +20,7 @@ describe('modules/datasource/git-tags/index', () => {
   let gitMock: MockProxy<SimpleGit>;
 
   beforeEach(() => {
-    // clear host rules
-    clear();
-
-    // clear environment variables
-    process.env = {};
+    clearEnv();
 
     // reset git mock
     gitMock = mock<SimpleGit>({
@@ -56,7 +52,41 @@ describe('modules/datasource/git-tags/index', () => {
         datasource,
         packageName,
       });
-      expect(versions).toMatchSnapshot();
+      expect(versions).toEqual({
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            newDigest: '7b756026fb2de270240a889a413e7e3a9d4d4d85',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.0.1',
+            newDigest: 'e173183f932ba8a31d0e4f23cc1070e8ebfa59d6',
+            version: 'v1.0.1',
+          },
+          {
+            gitRef: 'v1.0.2',
+            newDigest: '3936a6bced3587dc9fd464b0a910e0dfd4cfe10d',
+            version: 'v1.0.2',
+          },
+          {
+            gitRef: 'v1.0.3',
+            newDigest: '125ca9f3df4151e50046e5327ecb29ec4c13efab',
+            version: 'v1.0.3',
+          },
+          {
+            gitRef: 'v1.0.4',
+            newDigest: '3ed9e7d7094fd4ee7751c24a3e6b706060f461ff',
+            version: 'v1.0.4',
+          },
+          {
+            gitRef: 'v1.0.5',
+            newDigest: '6d7a933c2e6b7b39e992b1f93b6b42de083b28f0',
+            version: 'v1.0.5',
+          },
+        ],
+        sourceUrl: 'https://github.com/example/example',
+      });
     });
   });
 
@@ -91,14 +121,8 @@ describe('modules/datasource/git-tags/index', () => {
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
     });
 
-    it('returns digest for HEAD with authentication environment variables', async () => {
+    it('requests authentication for git-tags lookups', async () => {
       gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'github',
-        matchHost: 'api.github.com',
-        token: 'token123',
-      });
 
       const digest = await datasourceInstance.getDigest(
         { packageName: 'another tag to look up' },
@@ -106,44 +130,7 @@ describe('modules/datasource/git-tags/index', () => {
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
       expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
-        env: {
-          GIT_CONFIG_COUNT: '3',
-          GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-          GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-          GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
-          GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-          GIT_CONFIG_VALUE_1: 'git@github.com:',
-          GIT_CONFIG_VALUE_2: 'https://github.com/',
-        },
-      });
-    });
-
-    it('returns digest for HEAD with authentication environment variables for datasource type git-tags', async () => {
-      gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'git-tags',
-        matchHost: 'git.example.com',
-        token: 'token123',
-      });
-
-      const digest = await datasourceInstance.getDigest(
-        { packageName: 'another tag to look up' },
-        undefined,
-      );
-      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
-        env: {
-          GIT_CONFIG_COUNT: '3',
-          GIT_CONFIG_KEY_0:
-            'url.https://ssh:token123@git.example.com/.insteadOf',
-          GIT_CONFIG_KEY_1:
-            'url.https://git:token123@git.example.com/.insteadOf',
-          GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
-          GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
-          GIT_CONFIG_VALUE_1: 'git@git.example.com:',
-          GIT_CONFIG_VALUE_2: 'https://git.example.com/',
-        },
+        authentication: { hostTypes: ['git-tags'] },
       });
     });
   });

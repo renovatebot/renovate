@@ -12,32 +12,77 @@ const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
 describe('modules/manager/bundler/locked-version', () => {
   it('Parse Rails Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(railsGemfileLock);
-    expect(parsedLockEntries.size).toBe(185);
-    expect(parsedLockEntries).toMatchSnapshot();
+    expect(Object.fromEntries(parsedLockEntries)).toEqual({
+      'activerecord-jdbc-adapter': '52.1',
+      'activerecord-jdbcsqlite3-adapter': '52.1',
+      'azure-core': '0.1.14',
+      'azure-storage': '0.15.0.preview',
+      listen: '3.1.5',
+      nokogiri: '1.9.1',
+      pg: '1.1.3',
+      rake: '12.3.1',
+      redcarpet: '3.2.3',
+    });
   });
 
   it('Parse WebPacker Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(webPackerGemfileLock);
-    expect(parsedLockEntries.size).toBe(53);
-    expect(parsedLockEntries).toMatchSnapshot();
+    expect(Object.fromEntries(parsedLockEntries)).toEqual({
+      byebug: '11.0.1',
+      'concurrent-ruby': '1.1.5',
+      minitest: '5.13.0',
+      rack: '2.0.8',
+      'rack-proxy': '0.6.5',
+      rails: '6.0.1',
+      railties: '6.0.1',
+      rake: '13.0.0',
+    });
   });
 
   it('Parse Mastodon Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(mastodonGemfileLock);
-    expect(parsedLockEntries.size).toBe(266);
-    expect(parsedLockEntries).toMatchSnapshot();
+    expect(Object.fromEntries(parsedLockEntries)).toEqual({
+      'aws-sdk-core': '3.84.0',
+      'aws-sdk-s3': '1.59.0',
+      'concurrent-ruby': '1.1.5',
+      devise_pam_authenticatable2: '9.2.0',
+      fabrication: '2.21.0',
+      'fog-core': '2.1.0',
+      'pkg-config': '1.4.0',
+      private_address_check: '0.5.0',
+    });
   });
 
   it('Parse Ruby CI Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(rubyCIGemfileLock);
-    expect(parsedLockEntries.size).toBe(64);
-    expect(parsedLockEntries).toMatchSnapshot();
+    expect(Object.fromEntries(parsedLockEntries)).toEqual({
+      activejob: '5.2.3',
+      activesupport: '5.2.3',
+      foreman: '0.86.0',
+      pg: '1.2.1',
+      puma: '4.3.1',
+      rails: '5.2.3',
+      'sass-rails': '5.1.0',
+      sqlite3: '1.4.2',
+      sqreen: '1.17.0',
+    });
   });
 
   it('Parse Gitlab Foss Gem Lock File', () => {
     const parsedLockEntries = extractLockFileEntries(gitlabFossGemfileLock);
-    expect(parsedLockEntries.size).toBe(478);
-    expect(parsedLockEntries).toMatchSnapshot();
+    expect(Object.fromEntries(parsedLockEntries)).toEqual({
+      RedCloth: '4.3.2',
+      bootsnap: '1.4.5',
+      bullet: '6.0.2',
+      'elasticsearch-api': '5.0.3',
+      'gitlab-puma': '4.3.1.gitlab.2',
+      'graphql-docs': '1.6.0',
+      liquid: '4.0.3',
+      'omniauth-kerberos': '0.3.0',
+      'omniauth-ultraauth': '0.0.2',
+      rails: '5.2.3',
+      rubyzip: '1.3.0',
+    });
   });
 
   it('returns empty map for empty string', () => {

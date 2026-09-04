@@ -1,11 +1,12 @@
 import * as httpMock from '~test/http-mock.ts';
 import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import * as comments from './comments.ts';
+import type { CommentsConfig } from './types.ts';
 
 const baseUrl = 'https://api.bitbucket.org';
 
 describe('modules/platform/bitbucket/comments', () => {
-  const config: comments.CommentsConfig = { repository: 'some/repo' };
+  const config: CommentsConfig = { repository: 'some/repo' };
 
   beforeEach(() => {
     setBaseUrl(baseUrl);
@@ -18,14 +19,14 @@ describe('modules/platform/bitbucket/comments', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/3/comments?pagelen=100')
         .reply(200);
-      expect(
-        await comments.ensureComment({
+      await expect(
+        comments.ensureComment({
           config,
           number: 3,
           topic: 'topic',
           content: 'content',
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('add comment if not found', async () => {
@@ -37,14 +38,14 @@ describe('modules/platform/bitbucket/comments', () => {
         .post('/2.0/repositories/some/repo/pullrequests/5/comments')
         .reply(200);
 
-      expect(
-        await comments.ensureComment({
+      await expect(
+        comments.ensureComment({
           config,
           number: 5,
           topic: 'topic',
           content: 'content',
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('finds reopen comment', async () => {
@@ -67,7 +68,9 @@ describe('modules/platform/bitbucket/comments', () => {
           values: [prComment],
         });
 
-      expect(await comments.reopenComments(config, 5)).toEqual([prComment]);
+      await expect(comments.reopenComments(config, 5)).resolves.toEqual([
+        prComment,
+      ]);
     });
 
     it('finds no reopen comment', async () => {
@@ -90,7 +93,9 @@ describe('modules/platform/bitbucket/comments', () => {
           values: [prComment],
         });
 
-      expect(await comments.reopenComments(config, 5)).toBeEmptyArray();
+      await expect(
+        comments.reopenComments(config, 5),
+      ).resolves.toBeEmptyArray();
     });
 
     it('add updates comment if necessary', async () => {
@@ -130,14 +135,14 @@ describe('modules/platform/bitbucket/comments', () => {
             },
           ],
         });
-      expect(
-        await comments.ensureComment({
+      await expect(
+        comments.ensureComment({
           config,
           number: 5,
           topic: null,
           content: 'blablabla',
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
   });
 

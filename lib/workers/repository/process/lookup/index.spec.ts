@@ -28,6 +28,7 @@ import { id as nodeVersioningId } from '../../../../modules/versioning/node/inde
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/index.ts';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
+import { id as semverVersioningId } from '../../../../modules/versioning/semver/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import * as McApi from '../../../../util/merge-confidence/index.ts';
@@ -3122,6 +3123,64 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    describe('digest managed externally', () => {
+      it('does not create a pinDigest update', async () => {
+        config.currentValue = 'v1.0.0';
+        config.packageName = 'angular/angular';
+        config.pinDigests = true;
+        // for instance, if a lockfile manages the digest instead of the package file
+        config.digestManagedExternally = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v1.0.0',
+              gitRef: 'v1.0.0',
+              releaseTimestamp: '2022-01-01' as Timestamp,
+            },
+          ],
+        });
+        const getDigest = vi.spyOn(GithubTagsDatasource.prototype, 'getDigest');
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toBeEmptyArray();
+        expect(getDigest).not.toHaveBeenCalled();
+      });
+
+      it('still refreshes a digest that is already inline', async () => {
+        config.currentValue = 'v1.0.0';
+        config.currentDigest = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        config.packageName = 'angular/angular';
+        config.pinDigests = true;
+        config.digestManagedExternally = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v1.0.0',
+              gitRef: 'v1.0.0',
+              releaseTimestamp: '2022-01-01' as Timestamp,
+            },
+          ],
+        });
+        vi.spyOn(
+          GithubTagsDatasource.prototype,
+          'getDigest',
+        ).mockResolvedValueOnce('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toMatchObject([{ updateType: 'digest' }]);
+      });
+    });
+
     describe('pinning enabled but no existing digest', () => {
       it('should not warn if no new digest could be found', async () => {
         config.currentValue = 'v1.0.0';
@@ -4178,6 +4237,36 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('preserves currentCompatibility after lookup', async () => {
+      config.currentValue = 'distroless-v1.38.3';
+      config.packageName = 'envoyproxy/envoy';
+      config.versioning = semverVersioningId;
+      config.versionCompatibility = '^(?<compatibility>.*)-(?<version>.*)$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'distroless-v1.38.3' },
+          { version: 'distroless-v1.39.0' },
+          { version: 'v1.40.0' },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toMatchObject({
+        currentCompatibility: 'distroless',
+        currentVersion: 'v1.38.3',
+        updates: [
+          {
+            newValue: 'distroless-v1.39.0',
+            newVersion: 'v1.39.0',
+          },
+        ],
+      });
+    });
+
     it('applies versionCompatibility for 18.10.0', async () => {
       config.currentValue = '18.10.0-alpine';
       config.currentDigest = 'aaa111';
@@ -4222,6 +4311,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
 
       expect(res).toEqual({
+        currentCompatibility: '-alpine',
         currentVersion: '18.10.0',
         fixedVersion: '18.10.0',
         isSingleVersion: true,
@@ -4337,6 +4427,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
 
       expect(res).toEqual({
+        currentCompatibility: '-slim',
         currentVersion: 'bullseye',
         fixedVersion: 'bullseye',
         isSingleVersion: true,

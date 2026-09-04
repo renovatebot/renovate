@@ -5,7 +5,7 @@
 
 !!! warning
   Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
-  GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
+  GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or your deployment will get rate limited quickly.
   &nbsp;
   Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
 
@@ -34,8 +34,8 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
 docker run --rm renovate/renovate:44
-docker run --rm renovate/renovate:44.7
-docker run --rm renovate/renovate:44.7.2
+docker run --rm renovate/renovate:44.52
+docker run --rm renovate/renovate:44.52.1
 ```
 
 !!! warning
@@ -70,7 +70,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:44.7.2
+              image: renovate/renovate:44.52.1
               args:
                 - user/repo
               # Environment Variables
@@ -96,7 +96,7 @@ stringData:
   # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
@@ -129,7 +129,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:44.7.2
+            - image: renovate/renovate:44.52.1
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -237,7 +237,7 @@ If you want to override the cache directory then set your own value for `cacheDi
 
 The following example uses the Renovate CLI tool, which you can install by running `npm i -g renovate`.
 
-If running your own Renovate bot then you will need a user account that Renovate will run as.
+If running your own Renovate deployment, then you will need a user account that Renovate will run as.
 We recommend you create and use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
 Create and save a PAT for this account.
 
@@ -281,7 +281,7 @@ Only add the script to `cron` after you checked it works.
 
 !!! note
   The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
-  You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
+  You don't need to add it if you are already running Renovate against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
 
@@ -340,7 +340,7 @@ stringData:
   RENOVATE_GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
-  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ---
@@ -373,7 +373,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:44.7.2
+              image: renovate/renovate:44.52.1
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

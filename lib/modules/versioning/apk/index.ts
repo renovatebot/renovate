@@ -1,7 +1,8 @@
+import { isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type { VersioningApi } from '../types.ts';
+import type { ApkVersion } from './types.ts';
 
 export const id = 'apk';
 export const displayName = 'Alpine Package Keeper (APK)';
@@ -17,20 +18,7 @@ const versionRegex = regEx(
 );
 
 // Regex for splitting version strings into alphanumeric parts
-const alphaNumRegex = regEx(/([a-zA-Z]+)|(\d+)/g);
-
-export interface ApkVersion extends GenericVersion {
-  /**
-   * version is the main version part: it defines the version of origin software
-   * that was packaged.
-   */
-  version: string;
-  /**
-   * releaseString is used to distinguish between different versions of packaging for the
-   * same upstream version.
-   */
-  releaseString: string;
-}
+const alphaNumRegex = regEx(/(?:[a-zA-Z]+)|(?:\d+)/g);
 
 class ApkVersioningApi extends GenericVersioningApi {
   /**
@@ -82,7 +70,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       const extraParts = extra
         .substring(1)
         .split('.')
-        .filter(Boolean)
+        .filter(isTruthy)
         .map(Number);
       release.push(...extraParts);
     }
@@ -171,8 +159,8 @@ class ApkVersioningApi extends GenericVersioningApi {
       const matchv1 = matchesv1[i];
       const matchv2 = matchesv2[i];
 
-      if (matchv1 && /^\d+$/.test(matchv1)) {
-        if (!matchv2 || !/^\d+$/.test(matchv2)) {
+      if (matchv1 && regEx(/^\d+$/).test(matchv1)) {
+        if (!matchv2 || !regEx(/^\d+$/).test(matchv2)) {
           return 1;
         }
         const num1 = parseInt(matchv1, 10);
@@ -180,7 +168,7 @@ class ApkVersioningApi extends GenericVersioningApi {
         if (num1 !== num2) {
           return num1 - num2;
         }
-      } else if (matchv2 && /^\d+$/.test(matchv2)) {
+      } else if (matchv2 && regEx(/^\d+$/).test(matchv2)) {
         return -1;
       } else if (matchv1 !== matchv2) {
         return matchv1.localeCompare(matchv2);
@@ -193,10 +181,10 @@ class ApkVersioningApi extends GenericVersioningApi {
         const matchv1 = matchesv1[i];
         const matchv2 = matchesv2[i];
 
-        if (matchv1 && /^\d+$/.test(matchv1)) {
+        if (matchv1 && regEx(/^\d+$/).test(matchv1)) {
           return 1;
         }
-        if (matchv2 && /^\d+$/.test(matchv2)) {
+        if (matchv2 && regEx(/^\d+$/).test(matchv2)) {
           return -1;
         }
         if (matchv1) {
@@ -214,7 +202,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       return false;
     }
     // Strip any operators (=, >, <, ~) before validation
-    const cleanVersion = version.replace(/^[=><~][=]?/, '');
+    const cleanVersion = version.replace(regEx(/^[=><~][=]?/), '');
     const parsed = this._parse(cleanVersion);
     return parsed !== null;
   }
@@ -224,7 +212,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       return false;
     }
     // Range constraints (>, >=, <, <=, ~) are not single versions
-    if (/^[><~]/.test(version)) {
+    if (regEx(/^[><~]/).test(version)) {
       return false;
     }
     // Exact versions (starting with = or no operator) are single versions
@@ -236,7 +224,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       return false;
     }
     // Strip any operators (=, >, <, ~) before checking stability
-    const cleanVersion = version.replace(/^[=><~][=]?/, '');
+    const cleanVersion = version.replace(regEx(/^[=><~][=]?/), '');
     const parsed = this._parse(cleanVersion);
     if (!parsed) {
       return false;
@@ -250,13 +238,15 @@ class ApkVersioningApi extends GenericVersioningApi {
     range: string,
   ): string | null {
     // Handle range expressions like >5.2.37-r0, <5.2.37-r0, ~5.2.37-r0, etc.
-    const rangeMatch = /^([><=~]+)(.+)$/.exec(range);
+    const rangeMatch = regEx(/^(?<operator>[><=~]+)(?<targetVersion>.+)$/).exec(
+      range,
+    );
     if (!rangeMatch) {
       // If no range operator, look for exact match
       return versions.find((v) => this.equals(v, range)) ?? null;
     }
 
-    const [, operator, targetVersion] = rangeMatch;
+    const { operator, targetVersion } = rangeMatch.groups!;
 
     // Filter versions that satisfy the range
     const satisfyingVersions = versions.filter((version) => {
@@ -319,7 +309,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       return null;
     }
     // Strip any operators (=, >, <, ~) before parsing
-    const cleanVersion = version.replace(/^[=><~][=]?/, '');
+    const cleanVersion = version.replace(regEx(/^[=><~][=]?/), '');
     const parsed = this._parse(cleanVersion);
     return parsed?.release[0] ?? null;
   }
@@ -329,7 +319,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       return null;
     }
     // Strip any operators (=, >, <, ~) before parsing
-    const cleanVersion = version.replace(/^[=><~][=]?/, '');
+    const cleanVersion = version.replace(regEx(/^[=><~][=]?/), '');
     const parsed = this._parse(cleanVersion);
     return parsed?.release[1] ?? null;
   }
@@ -339,7 +329,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       return null;
     }
     // Strip any operators (=, >, <, ~) before parsing
-    const cleanVersion = version.replace(/^[=><~][=]?/, '');
+    const cleanVersion = version.replace(regEx(/^[=><~][=]?/), '');
     const parsed = this._parse(cleanVersion);
     if (!parsed) {
       return null;
@@ -358,12 +348,12 @@ class ApkVersioningApi extends GenericVersioningApi {
   }): string | null {
     // APK packages in apko.yaml only use exact versions
     // currentValue is stored without the = operator for cleaner PR display
-    const hasRevision = /-r\d+$/.test(currentValue);
+    const hasRevision = regEx(/-r\d+$/).test(currentValue);
 
     // If current version has no revision, strip revision from newVersion
     // This ensures both newValue and the displayed version are clean
     if (!hasRevision) {
-      return newVersion.replace(/-r\d+$/, '');
+      return newVersion.replace(regEx(/-r\d+$/), '');
     }
 
     // If current version has revision, keep revision in newVersion
@@ -373,8 +363,8 @@ class ApkVersioningApi extends GenericVersioningApi {
   // Override to provide clean version for PR titles and display
   override sortVersions(a: string, b: string): number {
     // Strip = prefix if present for comparison
-    const cleanA = a.replace(/^=/, '');
-    const cleanB = b.replace(/^=/, '');
+    const cleanA = a.replace(regEx(/^=/), '');
+    const cleanB = b.replace(regEx(/^=/), '');
     return super.sortVersions(cleanA, cleanB);
   }
 }
