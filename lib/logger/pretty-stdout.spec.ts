@@ -199,6 +199,19 @@ describe('logger/pretty-stdout', () => {
         `}\n`,
       );
     });
+
+    it('formats the record timestamp when requested', () => {
+      const rec = partial<BunyanRecord>({
+        level: 10,
+        msg: 'test message',
+        time: new Date('2026-08-31T11:30:45.123Z'),
+        v: 0,
+      });
+
+      expect(prettyStdout.formatRecord(rec, false, true)).toBe(
+        '2026-08-31T11:30:45.123Z TRACE: test message\n',
+      );
+    });
   });
 
   describe('PrettyStdoutStream', () => {
@@ -217,6 +230,23 @@ describe('logger/pretty-stdout', () => {
       stream.write(rec);
       expect(stdoutSpy).toHaveBeenCalledOnce();
       expect(stdoutSpy.mock.calls[0][0]).toContain('test message');
+    });
+
+    it('writes timestamps when requested', () => {
+      const stdoutSpy = vi
+        .spyOn(process.stdout, 'write')
+        .mockImplementation(() => true);
+
+      const stream = new prettyStdout.PrettyStdoutStream(true);
+      const rec: BunyanRecord = {
+        level: 10,
+        msg: 'test message',
+        time: new Date('2026-08-31T11:30:45.123Z'),
+        v: 0,
+      };
+
+      stream.write(rec);
+      expect(stdoutSpy.mock.calls[0][0]).toMatch(/^2026-08-31T11:30:45\.123Z /);
     });
   });
 });

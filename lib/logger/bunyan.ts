@@ -21,6 +21,7 @@ export function createDefaultStreams(
   problems: ProblemStream,
   logFile: string | undefined,
 ): BunyanStream[] {
+  const includePrettyTimestamp = getEnv('LOG_PRETTY_TIMESTAMP') === 'true';
   const stdout: BunyanStream = {
     name: 'stdout',
     level: stdoutLevel,
@@ -29,7 +30,7 @@ export function createDefaultStreams(
 
   // v8 ignore else -- TODO: add test #40625
   if (getEnv('LOG_FORMAT') !== 'json') {
-    const prettyStdOut = new PrettyStdoutStream();
+    const prettyStdOut = new PrettyStdoutStream(includePrettyTimestamp);
     stdout.stream = prettyStdOut;
     stdout.type = 'raw';
   }
@@ -42,13 +43,16 @@ export function createDefaultStreams(
   };
 
   const logFileStream: BunyanStream | undefined = isString(logFile)
-    ? createLogFileStream(logFile)
+    ? createLogFileStream(logFile, includePrettyTimestamp)
     : undefined;
 
   return [stdout, problemsStream, logFileStream].filter(isTruthy);
 }
 
-function createLogFileStream(logFile: string): BunyanStream {
+function createLogFileStream(
+  logFile: string,
+  includePrettyTimestamp: boolean,
+): BunyanStream {
   // Ensure log file directory exists
   const directoryName = upath.dirname(logFile);
   fs.ensureDirSync(directoryName);
@@ -66,7 +70,10 @@ function createLogFileStream(logFile: string): BunyanStream {
       stream: {
         writable: true,
         write: (rec: unknown) => {
-          fs.writeSync(fd, formatRecord(rec as BunyanRecord, false));
+          fs.writeSync(
+            fd,
+            formatRecord(rec as BunyanRecord, false, includePrettyTimestamp),
+          );
         },
       },
     };

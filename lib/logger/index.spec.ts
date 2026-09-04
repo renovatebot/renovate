@@ -205,6 +205,8 @@ describe('logger/index', () => {
   describe('createDefaultStreams', () => {
     beforeEach(() => {
       vi.stubEnv('LOG_FILE_FORMAT', undefined);
+      vi.stubEnv('LOG_FORMAT', undefined);
+      vi.stubEnv('LOG_PRETTY_TIMESTAMP', undefined);
     });
 
     it('creates log file stream', () => {
@@ -288,6 +290,58 @@ describe('logger/index', () => {
       stream.write({ level: 30, msg: 'test message' });
 
       expect(await fs.readFile('file.log', 'utf8')).toContain('test message');
+    });
+
+    it('writes timestamps to pretty stdout when configured', () => {
+      vi.stubEnv('LOG_PRETTY_TIMESTAMP', 'true');
+      const stdoutSpy = vi
+        .spyOn(process.stdout, 'write')
+        .mockImplementation(() => true);
+
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        undefined,
+      );
+
+      const stream = streams[0].stream as {
+        write: (record: Record<string, unknown>) => void;
+      };
+      stream.write({
+        level: 30,
+        msg: 'test message',
+        time: new Date('2026-08-31T11:30:45.123Z'),
+        v: 0,
+      });
+
+      expect(stdoutSpy.mock.calls[0][0]).toMatch(/^2026-08-31T11:30:45\.123Z /);
+    });
+
+    it('writes timestamps to pretty log files when configured', async () => {
+      vi.stubEnv('LOG_FILE_FORMAT', 'pretty');
+      vi.stubEnv('LOG_PRETTY_TIMESTAMP', 'true');
+
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+
+      const logFileStream = streams[2];
+      const stream = logFileStream.stream as {
+        write: (...args: unknown[]) => void;
+      };
+
+      stream.write({
+        level: 30,
+        msg: 'timestamped message',
+        time: new Date('2026-08-31T11:30:45.123Z'),
+        v: 0,
+      });
+
+      expect(await fs.readFile('file.log', 'utf8')).toContain(
+        '2026-08-31T11:30:45.123Z  INFO: timestamped message',
+      );
     });
 
     it('writes json data synchronously to log file', async () => {
