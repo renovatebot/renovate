@@ -5,6 +5,7 @@ import type {
 } from './module-changelog.ts';
 import {
   categoryRank,
+  consolidateDependencyBumps,
   groupByModule,
   parseCommitHeader,
   renderModuleChangelog,
@@ -206,7 +207,7 @@ describe('tools/release-notes/module-changelog', () => {
   });
 
   describe('renderModuleChangelog', () => {
-    it('renders category groups nested three levels deep', () => {
+    it('renders a category group as an h3 heading, modules as a list', () => {
       const groups = groupByModule(
         [
           { type: 'fix', scope: 'manager/gitlabci', subject: 'support refs' },
@@ -221,16 +222,17 @@ describe('tools/release-notes/module-changelog', () => {
 
       expect(renderModuleChangelog(groups)).toBe(
         [
-          '- manager',
-          '  - GitLab CI/CD',
-          '    - fix: support refs',
-          '  - npm',
-          '    - fix: massage lockstep',
+          '### manager',
+          '',
+          '- GitLab CI/CD',
+          '  - fix: support refs',
+          '- npm',
+          '  - fix: massage lockstep',
         ].join('\n'),
       );
     });
 
-    it('renders a flat group using its label', () => {
+    it('renders a flat group as an h3 heading, commits as a list', () => {
       const groups = groupByModule(
         [{ type: 'docs', scope: undefined, subject: 'add warning' }],
         [{ type: 'docs', section: 'Documentation' }],
@@ -238,7 +240,33 @@ describe('tools/release-notes/module-changelog', () => {
       );
 
       expect(renderModuleChangelog(groups)).toBe(
-        ['- Other', '  - docs: add warning'].join('\n'),
+        ['### Other', '', '- docs: add warning'].join('\n'),
+      );
+    });
+
+    it('joins multiple groups with a blank line between them', () => {
+      const groups = groupByModule(
+        [
+          { type: 'fix', scope: 'workers/repository', subject: 'a' },
+          { type: 'docs', scope: undefined, subject: 'b' },
+        ],
+        [
+          { type: 'fix', section: 'Bug Fixes' },
+          { type: 'docs', section: 'Documentation' },
+        ],
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups)).toBe(
+        [
+          '### workers/repository',
+          '',
+          '- fix: a',
+          '',
+          '### Other',
+          '',
+          '- docs: b',
+        ].join('\n'),
       );
     });
 
@@ -257,16 +285,158 @@ describe('tools/release-notes/module-changelog', () => {
 
       expect(renderModuleChangelog(groups)).toBe(
         [
-          '- deps',
-          '  <details>',
-          '  <summary>2 updates</summary>',
+          '### deps',
           '',
-          '  - chore: update foo',
-          '  - build: update bar',
+          '<details>',
+          '<summary>2 updates</summary>',
           '',
-          '  </details>',
+          '- chore: update foo',
+          '- build: update bar',
+          '',
+          '</details>',
         ].join('\n'),
       );
+    });
+
+    it('counts every folded-in commit in the <summary>, not just the displayed entries', () => {
+      const groups = groupByModule(
+        [
+          {
+            type: 'fix',
+            scope: 'deps',
+            subject:
+              'update ghcr.io/renovatebot/base-image docker tag to v13.95.4',
+          },
+          {
+            type: 'fix',
+            scope: 'deps',
+            subject:
+              'update ghcr.io/renovatebot/base-image docker tag to v13.95.5',
+          },
+          {
+            type: 'fix',
+            scope: 'deps',
+            subject:
+              'update ghcr.io/renovatebot/base-image docker tag to v13.95.6',
+          },
+        ],
+        [{ type: 'fix', section: 'Bug Fixes' }],
+        new Map(),
+      );
+
+      const rendered = renderModuleChangelog(groups);
+      expect(rendered).toContain('<summary>3 updates</summary>');
+      // Only the final version survives as a displayed entry.
+      expect(rendered).toContain(
+        '- fix: update ghcr.io/renovatebot/base-image docker tag to v13.95.6 (3 updates)',
+      );
+      expect(rendered).not.toContain('v13.95.4');
+      expect(rendered).not.toContain('v13.95.5');
+    });
+  });
+
+  describe('consolidateDependencyBumps', () => {
+    it('folds repeated bumps of the same dependency into the latest one', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'fix',
+          scope: 'deps',
+          subject:
+            'update ghcr.io/renovatebot/base-image docker tag to v13.95.4 (main) (#45620)',
+        },
+        {
+          type: 'fix',
+          scope: 'deps',
+          subject:
+            'update ghcr.io/renovatebot/base-image docker tag to v13.95.5 (main) (#45625)',
+        },
+      ];
+
+      expect(consolidateDependencyBumps(commits)).toEqual([
+        {
+          type: 'fix',
+          scope: 'deps',
+          subject:
+            'update ghcr.io/renovatebot/base-image docker tag to v13.95.5 (2 updates)',
+        },
+      ]);
+    });
+
+    it('keeps a single bump unchanged', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'build',
+          scope: 'deps',
+          subject: 'update dependency p-map to v7.0.7 (main) (#45678)',
+        },
+      ];
+
+      expect(consolidateDependencyBumps(commits)).toEqual(commits);
+    });
+
+    it('does not fold bumps of different dependencies together', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'build',
+          scope: 'deps',
+          subject: 'update dependency foo to v1.0.0',
+        },
+        {
+          type: 'build',
+          scope: 'deps',
+          subject: 'update dependency bar to v2.0.0',
+        },
+      ];
+
+      expect(consolidateDependencyBumps(commits)).toEqual(commits);
+    });
+
+    it('does not fold bumps of the same dependency across different types', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'build',
+          scope: 'deps',
+          subject: 'update dependency protobufjs to v8.8.0',
+        },
+        {
+          type: 'chore',
+          scope: 'deps',
+          subject: 'update dependency protobufjs@8.0.1 to v8.8.0',
+        },
+      ];
+
+      expect(consolidateDependencyBumps(commits)).toEqual(commits);
+    });
+
+    it('leaves non-dependency-update subjects untouched', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'chore', scope: 'deps', subject: 'lock file maintenance' },
+      ];
+
+      expect(consolidateDependencyBumps(commits)).toEqual(commits);
+    });
+
+    it('strips a pinned-version suffix from the grouping key', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'chore',
+          scope: 'deps',
+          subject: 'update dependency protobufjs@8.0.1 to v8.8.0',
+        },
+        {
+          type: 'chore',
+          scope: 'deps',
+          subject: 'update dependency protobufjs@8.8.0 to v8.9.0',
+        },
+      ];
+
+      expect(consolidateDependencyBumps(commits)).toEqual([
+        {
+          type: 'chore',
+          scope: 'deps',
+          subject: 'update dependency protobufjs@8.8.0 to v8.9.0 (2 updates)',
+        },
+      ]);
     });
   });
 });

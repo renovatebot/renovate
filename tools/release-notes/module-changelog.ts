@@ -31,6 +31,9 @@ export interface FlatGroup {
   scope: string | undefined;
   label: string;
   commits: ParsedCommit[];
+  /** Commits in this group before `consolidateDependencyBumps` folded
+   * repeated dependency bumps together; `>= commits.length`. */
+  totalCommits: number;
 }
 
 export type ModuleGroup = CategoryGroup | FlatGroup;
@@ -60,6 +63,83 @@ export function parseCommitHeader(header: string): ParsedCommit | undefined {
 function typeRank(types: CommitTypeConfig[], type: string): number {
   const rank = types.findIndex((entry) => entry.type === type);
   return rank === -1 ? types.length : rank;
+}
+
+// Matches Renovate's own "update dependency X to Y", "update X docker tag
+// to Y", "update X action to Y", "update X monorepo to Y" commit subjects.
+// This only ever looks at a single commit's own header/title. A commit's
+// body can carry a much richer `| datasource | package | from | to |`
+// table (see `getCommitHeaders` in summarize.ts), but parsing that means
+// fetching full commit history, which is only affordable for this
+// standalone tool, not for something that would run on every changelog
+// fetch in the real product — so this stays title-only on purpose.
+const DEPENDENCY_UPDATE_RE =
+  /^update (?:dependency )?(?<name>.+?)(?: (?:docker tag|action|monorepo))? to (?<version>v?[^\s(]+)/i;
+
+interface DependencyUpdate {
+  name: string;
+  version: string;
+  text: string;
+}
+
+function stripPinnedVersionSuffix(name: string): string {
+  const at = name.lastIndexOf('@');
+  // Keep a leading `@` (a scoped package name like `@biomejs/biome`); only
+  // strip a trailing `@<version>` pin, e.g. `protobufjs@8.0.1` -> `protobufjs`.
+  return at > 0 ? name.slice(0, at) : name;
+}
+
+function parseDependencyUpdate(subject: string): DependencyUpdate | undefined {
+  const match = DEPENDENCY_UPDATE_RE.exec(subject);
+  if (!match?.groups) {
+    return undefined;
+  }
+
+  return {
+    name: stripPinnedVersionSuffix(match.groups.name),
+    version: match.groups.version,
+    text: match[0],
+  };
+}
+
+/**
+ * Collapse repeated "update X to Y" commits for the same dependency (and
+ * commit type) into a single entry showing only the version it ended up
+ * at, plus how many commits were folded in. Commits that aren't a
+ * recognised dependency-update subject pass through unchanged.
+ */
+export function consolidateDependencyBumps(
+  commits: ParsedCommit[],
+): ParsedCommit[] {
+  const result: ParsedCommit[] = [];
+  const indexByKey = new Map<string, number>();
+  const countByKey = new Map<string, number>();
+
+  for (const commit of commits) {
+    const update = parseDependencyUpdate(commit.subject);
+    if (!update) {
+      result.push(commit);
+      continue;
+    }
+
+    const key = `${commit.type}::${update.name.toLowerCase()}`;
+    const existingIndex = indexByKey.get(key);
+    if (existingIndex === undefined) {
+      indexByKey.set(key, result.length);
+      countByKey.set(key, 1);
+      result.push(commit);
+      continue;
+    }
+
+    const count = (countByKey.get(key) ?? 1) + 1;
+    countByKey.set(key, count);
+    result[existingIndex] = {
+      ...commit,
+      subject: `${update.text} (${count} updates)`,
+    };
+  }
+
+  return result;
 }
 
 interface CategoryRank {
@@ -188,7 +268,8 @@ export function groupByModule(
   const modulesByCategory = new Map<string, ModuleEntry[]>();
   const flat: FlatGroup[] = [];
 
-  for (const [scope, groupCommits] of byScope) {
+  for (const [scope, rawCommits] of byScope) {
+    const groupCommits = consolidateDependencyBumps(rawCommits);
     groupCommits.sort(
       (a, b) => typeRank(types, a.type) - typeRank(types, b.type),
     );
@@ -215,6 +296,7 @@ export function groupByModule(
       scope,
       label: scope ?? 'Other',
       commits: groupCommits,
+      totalCommits: rawCommits.length,
     });
   }
 
@@ -246,54 +328,65 @@ export function groupByModule(
 }
 
 /**
- * Render module groups as a nested Markdown list, for example:
+ * Render module groups as `###` headings over a Markdown list, for example:
  *
- * - manager
- *   - Cargo
- *     - fix: support ~latest component refs
- * - deps
- *   <details>
- *   <summary>2 updates</summary>
+ * ### manager
  *
- *   - chore: update dependency foo to v1.2.3
- *   - build: update dependency bar to v4.5.6
+ * - Cargo
+ *   - fix: support ~latest component refs
  *
- *   </details>
- * - Other
- *   - docs: add warning to `checkedBranches`
+ * ### deps
+ *
+ * <details>
+ * <summary>2 updates</summary>
+ *
+ * - chore: update dependency foo to v1.2.3
+ * - build: update dependency bar to v4.5.6
+ *
+ * </details>
+ *
+ * ### Other
+ *
+ * - docs: add warning to `checkedBranches`
  */
 export function renderModuleChangelog(groups: ModuleGroup[]): string {
-  const lines: string[] = [];
+  const sections: string[] = [];
   for (const group of groups) {
+    const lines: string[] = [];
+
     if (group.kind === 'category') {
-      lines.push(`- ${group.category}`);
+      lines.push(`### ${group.category}`, '');
       for (const module of group.modules) {
-        lines.push(`  - ${module.label}`);
+        lines.push(`- ${module.label}`);
         for (const commit of module.commits) {
-          lines.push(`    - ${commit.type}: ${commit.subject}`);
+          lines.push(`  - ${commit.type}: ${commit.subject}`);
         }
       }
+      sections.push(lines.join('\n'));
       continue;
     }
 
-    lines.push(`- ${group.label}`);
+    lines.push(`### ${group.label}`, '');
     const collapse =
       group.scope !== undefined && COLLAPSED_SCOPES.has(group.scope);
 
     if (collapse) {
-      lines.push('  <details>');
-      lines.push(`  <summary>${group.commits.length} updates</summary>`);
-      lines.push('');
+      lines.push(
+        '<details>',
+        `<summary>${group.totalCommits} updates</summary>`,
+        '',
+      );
     }
 
     for (const commit of group.commits) {
-      lines.push(`  - ${commit.type}: ${commit.subject}`);
+      lines.push(`- ${commit.type}: ${commit.subject}`);
     }
 
     if (collapse) {
-      lines.push('');
-      lines.push('  </details>');
+      lines.push('', '</details>');
     }
+
+    sections.push(lines.join('\n'));
   }
-  return lines.join('\n');
+  return sections.join('\n\n');
 }
