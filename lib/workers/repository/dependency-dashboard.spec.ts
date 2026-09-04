@@ -1639,7 +1639,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'The following dependencies are either deprecated or have replacements available.',
+            '> [!WARNING]\n> The following dependencies are either deprecated or have replacements available.',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
@@ -2279,10 +2279,11 @@ None detected
       expect(result).toContain(
         '<summary>View abandoned dependencies (1)</summary>',
       );
-      expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain(
+        `> ℹ️ **Note**\n> \n> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release.\n> Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n`,
+      );
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
-      expect(result).toContain('abandonmentThreshold');
     });
 
     it('handles multiple abandoned packages across different managers', () => {
