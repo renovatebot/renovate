@@ -6,6 +6,9 @@ import type {
 import {
   categoryRank,
   consolidateDependencyBumps,
+  dedupeCommits,
+  escapeMentions,
+  filterHiddenTypes,
   groupByModule,
   parseCommitHeader,
   renderModuleChangelog,
@@ -26,6 +29,7 @@ describe('tools/release-notes/module-changelog', () => {
         type: 'fix',
         scope: 'manager/gitlabci',
         subject: 'support ~latest refs',
+        breaking: false,
       });
     });
 
@@ -34,6 +38,7 @@ describe('tools/release-notes/module-changelog', () => {
         type: 'docs',
         scope: undefined,
         subject: 'add warning',
+        breaking: false,
       });
     });
 
@@ -42,6 +47,7 @@ describe('tools/release-notes/module-changelog', () => {
         type: 'feat',
         scope: 'api',
         subject: 'drop old option',
+        breaking: true,
       });
     });
 
@@ -74,6 +80,72 @@ describe('tools/release-notes/module-changelog', () => {
       expect(categoryRank('workers/repository')).toBeLessThan(
         categoryRank('deps'),
       );
+    });
+  });
+
+  describe('dedupeCommits', () => {
+    it('folds exact repeats (same type, scope, subject) and counts them', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'feat',
+          scope: undefined,
+          subject: 'always set `CI=true` for subprocesses',
+        },
+        {
+          type: 'feat',
+          scope: undefined,
+          subject: 'always set `CI=true` for subprocesses',
+        },
+      ];
+
+      expect(dedupeCommits(commits)).toEqual([
+        {
+          type: 'feat',
+          scope: undefined,
+          subject: 'always set `CI=true` for subprocesses (×2)',
+        },
+      ]);
+    });
+
+    it('does not fold commits that only share a subject', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'a', subject: 'same subject' },
+        { type: 'fix', scope: 'b', subject: 'same subject' },
+      ];
+
+      expect(dedupeCommits(commits)).toEqual(commits);
+    });
+  });
+
+  describe('filterHiddenTypes', () => {
+    it('drops test/style/ci/refactor by default', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'test', scope: 'tools', subject: 'a' },
+        { type: 'fix', scope: 'tools', subject: 'b' },
+      ];
+
+      expect(filterHiddenTypes(commits)).toEqual([commits[1]]);
+    });
+
+    it('keeps a hidden-type commit if it is a breaking change', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'refactor',
+          scope: 'tools',
+          subject: 'a',
+          breaking: true,
+        },
+      ];
+
+      expect(filterHiddenTypes(commits)).toEqual(commits);
+    });
+
+    it('keeps everything when given an empty set', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'test', scope: 'tools', subject: 'a' },
+      ];
+
+      expect(filterHiddenTypes(commits, new Set())).toEqual(commits);
     });
   });
 
@@ -111,6 +183,46 @@ describe('tools/release-notes/module-changelog', () => {
       ]);
     });
 
+    it('normalises a plural category scope into its singular category group', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'managers/npm', subject: 'a' },
+      ];
+      const labels = new Map([['managers/npm', 'npm']]);
+
+      const [group] = groupByModule(commits, types, labels) as [CategoryGroup];
+      expect(group).toMatchObject({ kind: 'category', category: 'manager' });
+      expect(group.modules).toEqual([
+        {
+          scope: 'managers/npm',
+          label: 'npm',
+          commits: [{ type: 'fix', scope: 'managers/npm', subject: 'a' }],
+        },
+      ]);
+    });
+
+    it('routes a bare category scope into that category as a "General" entry', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'test', scope: 'datasource', subject: 'replace snapshots' },
+      ];
+
+      const [group] = groupByModule(commits, types, new Map()) as [
+        CategoryGroup,
+      ];
+      expect(group).toMatchObject({
+        kind: 'category',
+        category: 'datasource',
+      });
+      expect(group.modules).toEqual([
+        {
+          scope: 'datasource',
+          label: 'General',
+          commits: [
+            { type: 'test', scope: 'datasource', subject: 'replace snapshots' },
+          ],
+        },
+      ]);
+    });
+
     it('sorts modules within a category alphabetically by label', () => {
       const commits: ParsedCommit[] = [
         { type: 'fix', scope: 'versioning/cargo', subject: 'a' },
@@ -125,10 +237,12 @@ describe('tools/release-notes/module-changelog', () => {
       expect(group.modules.map((m) => m.label)).toEqual(['Cargo', 'npm']);
     });
 
-    it('groups a bare (non-module) scope as a flat group', () => {
+    it('groups a bare (non-module) scope with enough commits as its own flat group', () => {
       const commits: ParsedCommit[] = [
         { type: 'fix', scope: 'workers/repository', subject: 'a' },
-        { type: 'fix', scope: 'tools', subject: 'b' },
+        { type: 'refactor', scope: 'workers/repository', subject: 'b' },
+        { type: 'fix', scope: 'tools', subject: 'c' },
+        { type: 'fix', scope: 'tools', subject: 'd' },
       ];
 
       const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
@@ -141,7 +255,8 @@ describe('tools/release-notes/module-changelog', () => {
     it('sorts category groups ahead of flat groups', () => {
       const commits: ParsedCommit[] = [
         { type: 'fix', scope: 'workers/repository', subject: 'a' },
-        { type: 'fix', scope: 'versioning/cargo', subject: 'b' },
+        { type: 'refactor', scope: 'workers/repository', subject: 'b' },
+        { type: 'fix', scope: 'versioning/cargo', subject: 'c' },
       ];
 
       const groups = groupByModule(
@@ -164,6 +279,7 @@ describe('tools/release-notes/module-changelog', () => {
         { type: 'docs', scope: undefined, subject: 'a' },
         { type: 'chore', scope: 'deps', subject: 'b' },
         { type: 'fix', scope: 'workers/repository', subject: 'c' },
+        { type: 'refactor', scope: 'workers/repository', subject: 'd' },
       ];
 
       const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
@@ -203,6 +319,112 @@ describe('tools/release-notes/module-changelog', () => {
 
       const [group] = groupByModule(commits, types, new Map()) as [FlatGroup];
       expect(group.commits.map((c) => c.type)).toEqual(['fix', 'chore']);
+    });
+
+    it('only folds dependency-shaped commits inside a `deps`-like scope', () => {
+      // Regression: a docs commit like "update references to renovatebot/
+      // github-action to v46.2.5" is dependency-bump *shaped*, but must not
+      // be folded — only COLLAPSED_SCOPES commits go through
+      // `consolidateDependencyBumps` at all.
+      const commits: ParsedCommit[] = [
+        {
+          type: 'docs',
+          scope: undefined,
+          subject: 'update references to renovatebot/github-action to v46.2.5',
+        },
+        {
+          type: 'docs',
+          scope: undefined,
+          subject: 'update references to renovatebot/github-action to v46.2.4',
+        },
+      ];
+
+      const [group] = groupByModule(commits, types, new Map()) as [FlatGroup];
+      expect(group.commits).toHaveLength(2);
+    });
+
+    describe('pooling small flat groups into "Other"', () => {
+      it('pools a scope below MIN_SCOPE_GROUP_SIZE, keeping the scope inline', () => {
+        const commits: ParsedCommit[] = [
+          { type: 'fix', scope: 'tools', subject: 'a' },
+        ];
+
+        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+        expect(groups).toHaveLength(1);
+        expect(groups[0]).toMatchObject({ scope: undefined, label: 'Other' });
+        expect(groups[0].commits[0].subject).toBe('`tools` a');
+      });
+
+      it('keeps a scope at MIN_SCOPE_GROUP_SIZE as its own group', () => {
+        const commits: ParsedCommit[] = [
+          { type: 'fix', scope: 'tools', subject: 'a' },
+          { type: 'fix', scope: 'tools', subject: 'b' },
+        ];
+
+        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+        expect(groups.map((g) => g.scope)).toEqual(['tools']);
+      });
+
+      it('never pools a COLLAPSED_SCOPES scope, even with a single commit', () => {
+        const commits: ParsedCommit[] = [
+          {
+            type: 'chore',
+            scope: 'deps',
+            subject: 'update dependency foo to v1.0.0',
+          },
+        ];
+
+        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+        expect(groups.map((g) => g.scope)).toEqual(['deps']);
+      });
+
+      it('merges pooled commits into an existing Other group, sorted by type', () => {
+        const commits: ParsedCommit[] = [
+          { type: 'docs', scope: undefined, subject: 'existing other entry' },
+          { type: 'fix', scope: 'tools', subject: 'pooled fix' },
+        ];
+
+        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+        expect(groups).toHaveLength(1);
+        expect(groups[0].commits.map((c) => c.subject)).toEqual([
+          '`tools` pooled fix',
+          'existing other entry',
+        ]);
+      });
+    });
+
+    describe('breaking changes', () => {
+      it('pulls a breaking commit into a leading group, in addition to its normal group', () => {
+        const commits: ParsedCommit[] = [
+          {
+            type: 'feat',
+            scope: 'config',
+            subject: 'drop old option',
+            breaking: true,
+          },
+          { type: 'fix', scope: 'config', subject: 'other change' },
+        ];
+
+        const groups = groupByModule(commits, types, new Map());
+        expect(groups[0]).toEqual({
+          kind: 'breaking',
+          commits: [commits[0]],
+        });
+
+        const configGroup = groups.find(
+          (g) => g.kind === 'flat' && g.scope === 'config',
+        ) as FlatGroup;
+        expect(configGroup.commits).toHaveLength(2);
+      });
+
+      it('omits the breaking group entirely when nothing is breaking', () => {
+        const commits: ParsedCommit[] = [
+          { type: 'fix', scope: 'config', subject: 'a' },
+        ];
+
+        const groups = groupByModule(commits, types, new Map());
+        expect(groups.some((g) => g.kind === 'breaking')).toBe(false);
+      });
     });
   });
 
@@ -248,10 +470,12 @@ describe('tools/release-notes/module-changelog', () => {
       const groups = groupByModule(
         [
           { type: 'fix', scope: 'workers/repository', subject: 'a' },
-          { type: 'docs', scope: undefined, subject: 'b' },
+          { type: 'refactor', scope: 'workers/repository', subject: 'b' },
+          { type: 'docs', scope: undefined, subject: 'c' },
         ],
         [
           { type: 'fix', section: 'Bug Fixes' },
+          { type: 'refactor', section: 'Code Refactoring' },
           { type: 'docs', section: 'Documentation' },
         ],
         new Map(),
@@ -262,10 +486,43 @@ describe('tools/release-notes/module-changelog', () => {
           '### workers/repository',
           '',
           '- fix: a',
+          '- refactor: b',
           '',
           '### Other',
           '',
-          '- docs: b',
+          '- docs: c',
+        ].join('\n'),
+      );
+    });
+
+    it('renders the breaking group first, with scope and type shown inline', () => {
+      const groups = groupByModule(
+        [
+          {
+            type: 'feat',
+            scope: 'config',
+            subject: 'drop old option',
+            breaking: true,
+          },
+          { type: 'fix', scope: 'config', subject: 'other change' },
+        ],
+        [
+          { type: 'feat', section: 'Features' },
+          { type: 'fix', section: 'Bug Fixes' },
+        ],
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups)).toBe(
+        [
+          '### Breaking changes',
+          '',
+          '- `config` feat!: drop old option',
+          '',
+          '### config',
+          '',
+          '- feat: drop old option',
+          '- fix: other change',
         ].join('\n'),
       );
     });
@@ -391,7 +648,7 @@ describe('tools/release-notes/module-changelog', () => {
       expect(consolidateDependencyBumps(commits)).toEqual(commits);
     });
 
-    it('does not fold bumps of the same dependency across different types', () => {
+    it('folds bumps of the same dependency across different commit types', () => {
       const commits: ParsedCommit[] = [
         {
           type: 'build',
@@ -401,16 +658,34 @@ describe('tools/release-notes/module-changelog', () => {
         {
           type: 'chore',
           scope: 'deps',
-          subject: 'update dependency protobufjs@8.0.1 to v8.8.0',
+          subject: 'update dependency protobufjs@8.0.1 to v8.9.0',
         },
       ];
 
-      expect(consolidateDependencyBumps(commits)).toEqual(commits);
+      expect(consolidateDependencyBumps(commits)).toEqual([
+        {
+          type: 'chore',
+          scope: 'deps',
+          subject: 'update dependency protobufjs@8.0.1 to v8.9.0 (2 updates)',
+        },
+      ]);
     });
 
     it('leaves non-dependency-update subjects untouched', () => {
       const commits: ParsedCommit[] = [
         { type: 'chore', scope: 'deps', subject: 'lock file maintenance' },
+      ];
+
+      expect(consolidateDependencyBumps(commits)).toEqual(commits);
+    });
+
+    it('does not treat a non-version "to X" phrase as a dependency bump', () => {
+      const commits: ParsedCommit[] = [
+        {
+          type: 'docs',
+          scope: 'deps',
+          subject: 'update docs to mention the new option',
+        },
       ];
 
       expect(consolidateDependencyBumps(commits)).toEqual(commits);
@@ -437,6 +712,26 @@ describe('tools/release-notes/module-changelog', () => {
           subject: 'update dependency protobufjs@8.8.0 to v8.9.0 (2 updates)',
         },
       ]);
+    });
+  });
+
+  describe('escapeMentions', () => {
+    it('neutralises an npm scoped package name so it cannot be read as a mention', () => {
+      expect(escapeMentions('update dependency @types/luxon to v3.7.5')).toBe(
+        'update dependency @\u200Btypes/luxon to v3.7.5',
+      );
+    });
+
+    it('leaves an email-like name@host untouched', () => {
+      expect(escapeMentions('contact jane@example.com')).toBe(
+        'contact jane@example.com',
+      );
+    });
+
+    it('leaves code spans and URLs untouched', () => {
+      expect(escapeMentions('see `@foo` at https://example.com/@bar')).toBe(
+        'see `@foo` at https://example.com/@bar',
+      );
     });
   });
 });

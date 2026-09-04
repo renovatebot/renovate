@@ -1,13 +1,13 @@
 export interface CommitTypeConfig {
   type: string;
   section?: string;
-  hidden?: boolean;
 }
 
 export interface ParsedCommit {
   type: string;
   scope: string | undefined;
   subject: string;
+  breaking?: boolean;
 }
 
 export interface ModuleEntry {
@@ -36,10 +36,18 @@ export interface FlatGroup {
   totalCommits: number;
 }
 
-export type ModuleGroup = CategoryGroup | FlatGroup;
+/** Commits carrying a Conventional Commits `!` breaking-change marker,
+ * pulled out into a leading section. These also still appear in their
+ * normal category/flat group — this is a highlight, not a move. */
+export interface BreakingGroup {
+  kind: 'breaking';
+  commits: ParsedCommit[];
+}
+
+export type ModuleGroup = CategoryGroup | FlatGroup | BreakingGroup;
 
 const COMMIT_HEADER_RE =
-  /^(?<type>[a-z]+)(?:\((?<scope>[^)]+)\))?!?:\s*(?<subject>.+)$/i;
+  /^(?<type>[a-z]+)(?:\((?<scope>[^)]+)\))?(?<breaking>!)?:\s*(?<subject>.+)$/i;
 
 /**
  * Parse a single-line Conventional Commits header (`type(scope): subject`)
@@ -52,17 +60,79 @@ export function parseCommitHeader(header: string): ParsedCommit | undefined {
     return undefined;
   }
 
-  const { type, scope, subject } = match.groups;
+  const { type, scope, subject, breaking } = match.groups;
   return {
     type: type.toLowerCase(),
     scope,
     subject,
+    breaking: breaking === '!',
   };
 }
 
 function typeRank(types: CommitTypeConfig[], type: string): number {
   const rank = types.findIndex((entry) => entry.type === type);
   return rank === -1 ? types.length : rank;
+}
+
+/**
+ * Drop commits that are exact repeats of an earlier one in the same range
+ * (same type, scope and subject) — for example a change that landed, got
+ * reverted, and was reapplied verbatim. Keeps a running count on the
+ * surviving entry rather than silently dropping the repeat.
+ */
+export function dedupeCommits(commits: ParsedCommit[]): ParsedCommit[] {
+  const result: ParsedCommit[] = [];
+  const indexByKey = new Map<string, number>();
+  const countByKey = new Map<string, number>();
+
+  for (const commit of commits) {
+    const key = `${commit.type}::${commit.scope ?? ''}::${commit.subject}`;
+    const existingIndex = indexByKey.get(key);
+    if (existingIndex === undefined) {
+      indexByKey.set(key, result.length);
+      countByKey.set(key, 1);
+      result.push(commit);
+      continue;
+    }
+
+    const count = (countByKey.get(key) ?? 1) + 1;
+    countByKey.set(key, count);
+    result[existingIndex] = {
+      ...commit,
+      subject: `${commit.subject} (×${count})`,
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Commit types hidden by default: implementation detail that rarely
+ * matters to someone skimming what changed, as opposed to a behaviour
+ * change. `docs`/`chore` stay visible by default — a docs fix can matter
+ * to the reader, and `chore` is how Renovate's own dependency bumps are
+ * typed (already deprioritised and collapsed via `CATEGORY_RANKS`/
+ * `COLLAPSED_SCOPES`, rather than hidden outright).
+ *
+ * A commit with a breaking-change marker is always shown, regardless of
+ * its type.
+ */
+export const HIDDEN_TYPES = new Set(['test', 'style', 'ci', 'refactor']);
+
+/**
+ * Drop commits whose type is in `hiddenTypes`, unless they're a breaking
+ * change. Pass `new Set()` to disable filtering.
+ */
+export function filterHiddenTypes(
+  commits: ParsedCommit[],
+  hiddenTypes: ReadonlySet<string> = HIDDEN_TYPES,
+): ParsedCommit[] {
+  return commits.filter((commit) => {
+    if (commit.breaking) {
+      return true;
+    }
+    return !hiddenTypes.has(commit.type);
+  });
 }
 
 // Matches Renovate's own "update dependency X to Y", "update X docker tag
@@ -76,9 +146,16 @@ function typeRank(types: CommitTypeConfig[], type: string): number {
 const DEPENDENCY_UPDATE_RE =
   /^update (?:dependency )?(?<name>.+?)(?: (?:docker tag|action|monorepo))? to (?<version>v?[^\s(]+)/i;
 
+// A parsed "version" only counts if it actually looks like one (or a git
+// SHA/digest) — otherwise ordinary prose like "update docs to mention the
+// new option" gets misread as a dependency bump. This is on top of only
+// running `consolidateDependencyBumps` for `COLLAPSED_SCOPES` scopes
+// (below) — belt and braces, since those scopes are bot-authored and
+// unlikely to contain non-dependency subjects in the first place.
+const VERSION_LIKE_RE = /^(?:v?\d[\w.+-]*|[0-9a-f]{7,40})$/i;
+
 interface DependencyUpdate {
   name: string;
-  version: string;
   text: string;
 }
 
@@ -91,22 +168,27 @@ function stripPinnedVersionSuffix(name: string): string {
 
 function parseDependencyUpdate(subject: string): DependencyUpdate | undefined {
   const match = DEPENDENCY_UPDATE_RE.exec(subject);
-  if (!match?.groups) {
+  if (!match?.groups || !VERSION_LIKE_RE.test(match.groups.version)) {
     return undefined;
   }
 
   return {
     name: stripPinnedVersionSuffix(match.groups.name),
-    version: match.groups.version,
     text: match[0],
   };
 }
 
 /**
- * Collapse repeated "update X to Y" commits for the same dependency (and
- * commit type) into a single entry showing only the version it ended up
- * at, plus how many commits were folded in. Commits that aren't a
- * recognised dependency-update subject pass through unchanged.
+ * Collapse repeated "update X to Y" commits for the same dependency into a
+ * single entry showing only the version it ended up at, plus how many
+ * commits were folded in. Commits that aren't a recognised
+ * dependency-update subject pass through unchanged.
+ *
+ * Only call this on a scope's commits when that scope is one of
+ * `COLLAPSED_SCOPES` — dependency-bump phrasing ("update X to Y") isn't
+ * unique to actual dependency bumps (e.g. "update docs to mention ..."),
+ * so this is only safe to run where every commit is already known to be a
+ * Renovate self-update.
  */
 export function consolidateDependencyBumps(
   commits: ParsedCommit[],
@@ -122,7 +204,12 @@ export function consolidateDependencyBumps(
       continue;
     }
 
-    const key = `${commit.type}::${update.name.toLowerCase()}`;
+    // Keyed on the dependency name alone, not the commit type — the same
+    // dependency can be classified `feat`/`fix`/`chore` across different
+    // bumps, and folding by type would leave stale, contradictory entries
+    // (e.g. a `feat:` bump "stuck" at an old version once later bumps were
+    // reclassified as `fix:`).
+    const key = update.name.toLowerCase();
     const existingIndex = indexByKey.get(key);
     if (existingIndex === undefined) {
       indexByKey.set(key, result.length);
@@ -178,16 +265,52 @@ export function categoryRank(scope: string): number {
 /** Scopes rendered as a collapsed `<details>` block, for verbosity. */
 export const COLLAPSED_SCOPES = new Set(['deps']);
 
-const MODULE_CATEGORIES = new Set([
-  'manager',
-  'datasource',
-  'versioning',
-  'platform',
-]);
+/** Flat (non-module, non-`COLLAPSED_SCOPES`) groups smaller than this get
+ * pooled into "Other" instead of getting their own heading, to avoid a
+ * changelog that's mostly one-line sections. */
+export const MIN_SCOPE_GROUP_SIZE = 2;
+
+// A commit scope's category can be written singular or plural
+// (`manager/npm`, `managers/npm`) — both are normalised to the singular
+// form, which is also the real `lib/modules/<category>` directory name.
+const CATEGORY_ALIASES: Record<string, string> = {
+  manager: 'manager',
+  managers: 'manager',
+  datasource: 'datasource',
+  datasources: 'datasource',
+  versioning: 'versioning',
+  versionings: 'versioning',
+  platform: 'platform',
+  platforms: 'platform',
+};
 
 const MODULE_SCOPE_RE = new RegExp(
-  `^(?<category>${Array.from(MODULE_CATEGORIES).join('|')})/(?<name>.+)$`,
+  `^(?<category>${Object.keys(CATEGORY_ALIASES).join('|')})(?:/(?<name>.+))?$`,
+  'i',
 );
+
+interface ModuleScope {
+  category: string;
+  name: string | undefined;
+}
+
+/**
+ * Parse a commit scope into a module category and name, accepting both
+ * `manager/npm` and the plural `managers/npm`, and a bare category with no
+ * specific module (`datasource` on its own). Returns `undefined` for
+ * anything that isn't a module scope at all.
+ */
+function parseModuleScope(scope: string): ModuleScope | undefined {
+  const match = MODULE_SCOPE_RE.exec(scope);
+  if (!match?.groups) {
+    return undefined;
+  }
+
+  return {
+    category: CATEGORY_ALIASES[match.groups.category.toLowerCase()],
+    name: match.groups.name,
+  };
+}
 
 function formatName(input: string): string {
   return input
@@ -204,16 +327,16 @@ function formatName(input: string): string {
  * name, or the raw scope, when there is no `displayName` to find.
  */
 async function resolveModuleLabel(scope: string): Promise<string> {
-  const [category, name] = scope.split('/');
-  if (!name || !MODULE_CATEGORIES.has(category)) {
+  const parsed = parseModuleScope(scope);
+  if (!parsed?.name) {
     return scope;
   }
 
   try {
     const definition = (await import(
-      `../../lib/modules/${category}/${name}/index.ts`
+      `../../lib/modules/${parsed.category}/${parsed.name}/index.ts`
     )) as { displayName?: string };
-    return definition.displayName ?? formatName(name);
+    return definition.displayName ?? formatName(parsed.name);
   } catch {
     return scope;
   }
@@ -237,24 +360,35 @@ export async function resolveModuleLabels(
 
 /**
  * Group commits by their Conventional Commits scope (Renovate's modules,
- * for example `manager/gitlab`) instead of by type. A module scope (one of
- * `manager/`, `datasource/`, `versioning/`, `platform/`) becomes a module
- * entry nested under a category group (`manager`, ...); everything else
- * (a bare named scope, or no scope at all) becomes its own flat group,
- * with the scope-less group labelled "Other".
+ * for example `manager/gitlab`) instead of by type.
  *
- * Category groups always lead, sorted alphabetically by category name; the
- * modules inside a category are sorted alphabetically by `label`. Flat
- * groups follow, sorted by `categoryRank` then alphabetically by `label`,
- * with the scope-less group last. Commits inside a group are sorted by
- * their type's position in `types`, i.e. the same priority order
- * `.releaserc.json` already assigns each Conventional Commit type.
+ * - A commit with a breaking-change marker (`!`) is always pulled into a
+ *   leading `BreakingGroup`, in addition to (not instead of) its normal
+ *   group below.
+ * - A module scope (`manager/`, `datasource/`, `versioning/`, `platform/`,
+ *   singular or plural, with or without a specific module name) becomes a
+ *   module entry nested under a `CategoryGroup`; a bare category with no
+ *   module name (`datasource` on its own) becomes a "General" entry in
+ *   that same category, rather than a second, colliding group.
+ * - Everything else becomes its own `FlatGroup`, with the scope-less group
+ *   labelled "Other". A flat group smaller than `MIN_SCOPE_GROUP_SIZE`
+ *   (and not one of `COLLAPSED_SCOPES`) is folded into "Other" instead of
+ *   getting its own heading, with its scope kept inline on each commit.
+ *
+ * Category groups are sorted alphabetically by category name, and the
+ * modules inside a category alphabetically by `label`. Flat groups are
+ * sorted by `categoryRank` then alphabetically by `label`, with "Other"
+ * last. Commits inside a group are sorted by their type's position in
+ * `types`, i.e. the same priority order `.releaserc.json` already assigns
+ * each Conventional Commit type.
  */
 export function groupByModule(
   commits: ParsedCommit[],
   types: CommitTypeConfig[],
   labels: ReadonlyMap<string, string>,
 ): ModuleGroup[] {
+  const breaking = commits.filter((commit) => commit.breaking);
+
   const byScope = new Map<string | undefined, ParsedCommit[]>();
   for (const commit of commits) {
     const existing = byScope.get(commit.scope);
@@ -269,24 +403,26 @@ export function groupByModule(
   const flat: FlatGroup[] = [];
 
   for (const [scope, rawCommits] of byScope) {
-    const groupCommits = consolidateDependencyBumps(rawCommits);
+    const groupCommits =
+      scope && COLLAPSED_SCOPES.has(scope)
+        ? consolidateDependencyBumps(rawCommits)
+        : rawCommits;
     groupCommits.sort(
       (a, b) => typeRank(types, a.type) - typeRank(types, b.type),
     );
 
-    const match = scope ? MODULE_SCOPE_RE.exec(scope) : null;
-    if (scope && match?.groups) {
-      const { category } = match.groups;
+    const parsed = scope ? parseModuleScope(scope) : undefined;
+    if (scope && parsed) {
       const entry: ModuleEntry = {
         scope,
-        label: labels.get(scope) ?? scope,
+        label: parsed.name ? (labels.get(scope) ?? scope) : 'General',
         commits: groupCommits,
       };
-      const existing = modulesByCategory.get(category);
+      const existing = modulesByCategory.get(parsed.category);
       if (existing) {
         existing.push(entry);
       } else {
-        modulesByCategory.set(category, [entry]);
+        modulesByCategory.set(parsed.category, [entry]);
       }
       continue;
     }
@@ -324,11 +460,57 @@ export function groupByModule(
     return a.label.localeCompare(b.label);
   });
 
-  return [...categoryGroups, ...flat];
+  const pooled: ParsedCommit[] = [];
+  const kept: FlatGroup[] = [];
+  let other: FlatGroup | undefined;
+
+  for (const group of flat) {
+    if (group.scope === undefined) {
+      other = group;
+      continue;
+    }
+    if (
+      !COLLAPSED_SCOPES.has(group.scope) &&
+      group.totalCommits < MIN_SCOPE_GROUP_SIZE
+    ) {
+      for (const commit of group.commits) {
+        pooled.push({
+          ...commit,
+          subject: `\`${group.scope}\` ${commit.subject}`,
+        });
+      }
+      continue;
+    }
+    kept.push(group);
+  }
+
+  if (pooled.length > 0) {
+    const combined = [...(other?.commits ?? []), ...pooled];
+    combined.sort((a, b) => typeRank(types, a.type) - typeRank(types, b.type));
+    other = {
+      kind: 'flat',
+      scope: undefined,
+      label: 'Other',
+      commits: combined,
+      totalCommits: (other?.totalCommits ?? 0) + pooled.length,
+    };
+  }
+
+  const finalFlat = other ? [...kept, other] : kept;
+  const groups: ModuleGroup[] = [...categoryGroups, ...finalFlat];
+  if (breaking.length > 0) {
+    groups.unshift({ kind: 'breaking', commits: breaking });
+  }
+
+  return groups;
 }
 
 /**
  * Render module groups as `###` headings over a Markdown list, for example:
+ *
+ * ### Breaking changes
+ *
+ * - `manager/npm` fix!: drop support for npm 6
  *
  * ### manager
  *
@@ -353,6 +535,16 @@ export function renderModuleChangelog(groups: ModuleGroup[]): string {
   const sections: string[] = [];
   for (const group of groups) {
     const lines: string[] = [];
+
+    if (group.kind === 'breaking') {
+      lines.push('### Breaking changes', '');
+      for (const commit of group.commits) {
+        const scopePrefix = commit.scope ? `\`${commit.scope}\` ` : '';
+        lines.push(`- ${scopePrefix}${commit.type}!: ${commit.subject}`);
+      }
+      sections.push(lines.join('\n'));
+      continue;
+    }
 
     if (group.kind === 'category') {
       lines.push(`### ${group.category}`, '');
@@ -389,4 +581,32 @@ export function renderModuleChangelog(groups: ModuleGroup[]): string {
     sections.push(lines.join('\n'));
   }
   return sections.join('\n\n');
+}
+
+/**
+ * Neutralise `@name` sequences (`@biomejs/biome`, `@types/luxon`, ...) so
+ * `linkify()` (remark-github) doesn't misread an npm-scoped package name as
+ * a GitHub `@mention` and turn it into a broken profile link, e.g.
+ * `@types/luxon` -> a fabricated link to `github.com/types/luxon`. Skips
+ * code spans and URLs, and leaves an email-like `name@host` alone — same
+ * approach as `sanitizeMarkdown` in `lib/util/markdown.ts`, but narrower:
+ * that helper also neutralises bare `#1234` references, which would stop
+ * `linkify()` from turning them into real links, so it can't be reused
+ * as-is here (`linkify()` runs after this, not before).
+ */
+const ZERO_WIDTH_SPACE = '\u200B';
+
+export function escapeMentions(markdown: string): string {
+  const escaped = markdown
+    .split(/(?<skip>```[\s\S]*?```|`[^`\n]*?`|https?:\/\/[^\s<]+)/g)
+    .map((part) =>
+      part.startsWith('`') || /^https?:\/\//i.test(part)
+        ? part
+        : part.replace(/@/g, `@${ZERO_WIDTH_SPACE}`),
+    )
+    .join('');
+  return escaped.replace(
+    new RegExp(`([a-z])@${ZERO_WIDTH_SPACE}`, 'gi'),
+    '$1@',
+  );
 }

@@ -6,6 +6,9 @@ import { linkify } from '../../lib/util/markdown.ts';
 import { exec } from '../utils/exec.ts';
 import type { CommitTypeConfig, ParsedCommit } from './module-changelog.ts';
 import {
+  dedupeCommits,
+  escapeMentions,
+  filterHiddenTypes,
   groupByModule,
   parseCommitHeader,
   renderModuleChangelog,
@@ -14,6 +17,7 @@ import {
 
 interface CliOptions {
   repo: string;
+  all: boolean;
 }
 
 const defaultRepo = 'renovatebot/renovate';
@@ -50,18 +54,28 @@ async function summarize(
   repo: string,
   from: string,
   to: string,
+  all: boolean,
 ): Promise<string> {
   const [headers, types] = await Promise.all([
     getCommitHeaders(repo, from, to),
     loadCommitTypes(),
   ]);
 
-  const commits: ParsedCommit[] = [];
+  const parsed: ParsedCommit[] = [];
   for (const header of headers) {
     const commit = parseCommitHeader(header);
     if (commit) {
-      commits.push(commit);
+      parsed.push(commit);
     }
+  }
+
+  const deduped = dedupeCommits(parsed);
+  const commits = all ? deduped : filterHiddenTypes(deduped);
+  const hiddenCount = deduped.length - commits.length;
+  if (hiddenCount > 0) {
+    logger.info(
+      `Hid ${hiddenCount} test/style/ci/refactor commit(s); pass --all to include them.`,
+    );
   }
 
   const scopes = commits
@@ -71,7 +85,7 @@ async function summarize(
 
   const groups = groupByModule(commits, types, labels);
   const changelog = renderModuleChangelog(groups);
-  return await linkify(changelog, { repository: repo });
+  return await linkify(escapeMentions(changelog), { repository: repo });
 }
 
 await init();
@@ -87,10 +101,15 @@ const program = new Command('node tools/release-notes/summarize.ts')
     'Summarize the commits between two tags, grouped by module instead of by Conventional Commit type.',
   )
   .option('--repo <owner/name>', 'Repository to query', defaultRepo)
+  .option(
+    '--all',
+    'Include test/style/ci/refactor commits, hidden by default',
+    false,
+  )
   .argument('<from>', 'tag/ref to compare from, for example 44.61.2')
   .argument('<to>', 'tag/ref to compare to, for example 44.61.3')
   .action(async (from: string, to: string, options: CliOptions) => {
-    console.log(await summarize(options.repo, from, to));
+    console.log(await summarize(options.repo, from, to, options.all));
   });
 
 await program.parseAsync();
