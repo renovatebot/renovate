@@ -135,15 +135,12 @@ export function validateRegexManagerFields(
 
   const versionFields = ['currentValue', 'currentDigest'];
   if (!versionFields.some((field) => hasField(customManager, field))) {
-    const msg = versionFields
-      .map(
-        (field) =>
-          `${field}Template configuration or regex group named ${field}`,
-      )
-      .join(', or ');
+    const templateFields = versionFields
+      .map((field) => `${field}Template`)
+      .join(' or ');
     errors.push({
       topic: ConfigValidationTopic.Error,
-      message: `Regex Managers must contain ${msg}`,
+      message: `Regex Managers must contain ${versionFields.join(' or ')}, their template variants (${templateFields}) or regex groups named after configuration fields`,
     });
   }
 
@@ -204,7 +201,7 @@ export function validateJSONataManagerFields(
   if (!versionFields.some((field) => hasField(customManager, field))) {
     errors.push({
       topic: ConfigValidationTopic.Error,
-      message: `JSONata Managers must contain ${versionFields.join(', or ')} in the query or their templates`,
+      message: `JSONata Managers must contain ${versionFields.join(' or ')} in the query or their templates`,
     });
   }
 

@@ -1160,7 +1160,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue, or currentDigestTemplate configuration or regex group named currentDigest',
+            'Regex Managers must contain currentValue or currentDigest, their template variants (currentValueTemplate or currentDigestTemplate) or regex groups named after configuration fields',
         },
         {
           message:
@@ -1253,7 +1253,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue, or currentDigestTemplate configuration or regex group named currentDigest',
+            'Regex Managers must contain currentValue or currentDigest, their template variants (currentValueTemplate or currentDigestTemplate) or regex groups named after configuration fields',
         },
       ]);
     });
@@ -1329,7 +1329,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'JSONata Managers must contain currentValue, or currentDigest in the query or their templates',
+            'JSONata Managers must contain currentValue or currentDigest in the query or their templates',
         },
         {
           topic: 'Configuration Error',
