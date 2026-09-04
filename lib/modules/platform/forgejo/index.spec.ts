@@ -33,8 +33,6 @@ import type {
 
 vi.mock('timers/promises');
 
-const timers = vi.mocked(_timers);
-
 /**
  * latest tested forgejo version.
  */
@@ -2071,7 +2069,9 @@ describe('modules/platform/forgejo/index', () => {
         'Forgejo-native automerge: success',
       );
       // exponential backoff between polls, no sleep before the first poll
-      expect(timers.setTimeout.mock.calls).toMatchObject([[250], [1000]]);
+      expect(_timers.setTimeout).toHaveBeenCalledTimes(2);
+      expect(_timers.setTimeout).toHaveBeenNthCalledWith(1, 250);
+      expect(_timers.setTimeout).toHaveBeenNthCalledWith(2, 1000);
     });
 
     it('attempts merge anyway if mergeable is still false after all retries', async () => {
@@ -2102,7 +2102,7 @@ describe('modules/platform/forgejo/index', () => {
         'PR not mergeable after 2 attempts, merging anyway...prNo: 42',
       );
       // no sleep after the final poll
-      expect(timers.setTimeout.mock.calls).toMatchObject([[250]]);
+      expect(_timers.setTimeout).toHaveBeenCalledExactlyOnceWith(250);
     });
 
     describe('reattemptPlatformAutomerge', () => {
