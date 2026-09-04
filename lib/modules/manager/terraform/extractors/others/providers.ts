@@ -2,7 +2,7 @@ import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { TerraformProviderExtractor } from '../../base.ts';
-import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { TerraformDefinitionFile } from '../../hcl/schema.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 
 export class ProvidersExtractor extends TerraformProviderExtractor {
