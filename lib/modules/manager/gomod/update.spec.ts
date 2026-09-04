@@ -84,7 +84,12 @@ describe('modules/manager/gomod/update', () => {
         upgrade: upgrade2,
       });
       expect(res2).not.toEqual(res1);
-      expect(res2).toMatchSnapshot();
+      expect(res2).toContain('require github.com/pkg/errors v0.8.0');
+      expect(res2).toContain('require github.com/aws/aws-sdk-go v1.15.36');
+      expect(res2).not.toContain('v1.15.21');
+      expect(res2).toContain(
+        'require github.com/davecgh/go-spew v1.0.0 // indirect',
+      );
     });
 
     it('returns same', () => {
@@ -194,9 +199,10 @@ describe('modules/manager/gomod/update', () => {
         packageFile: 'go.mod',
         upgrade,
       });
-      expect(res).toMatchSnapshot();
       expect(res).not.toEqual(gomod1);
-      expect(res).toContain('gopkg.in/russross/blackfriday.v2 v2.0.0');
+      expect(res).toContain('require gopkg.in/russross/blackfriday.v2 v2.0.0');
+      expect(res).not.toContain('blackfriday.v1');
+      expect(res).toContain('require github.com/pkg/errors v0.7.0');
     });
 
     it('skip replacing incompatible major updates', () => {
@@ -272,9 +278,10 @@ describe('modules/manager/gomod/update', () => {
         packageFile: 'go.mod',
         upgrade,
       });
-      expect(res).toMatchSnapshot();
       expect(res).not.toEqual(gomod2);
-      expect(res).toContain(upgrade.newValue);
+      expect(res).toContain('"gopkg.in/src-d/go-billy.v4" v4.8.0');
+      expect(res).not.toContain('"gopkg.in/src-d/go-billy.v4" v4.2.0');
+      expect(res).toContain('github.com/davecgh/go-spew v1.1.0');
     });
 
     it('replaces major multiline', () => {

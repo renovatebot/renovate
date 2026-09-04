@@ -65,7 +65,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if no updatedDeps were provided', async () => {
@@ -78,7 +78,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null for invalid local directory', async () => {
@@ -95,7 +95,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config: {},
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if updatedDeps is empty', async () => {
@@ -108,7 +108,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if unchanged', async () => {
@@ -130,7 +130,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);
   });
 
   it('returns updated Podfile', async () => {
@@ -154,7 +154,12 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toMatchObject([{ file: { contents: 'New Podfile' } }]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c \'install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install\'',
+      },
+    ]);
   });
 
   it('returns updated Podfile and Pods files', async () => {
@@ -187,7 +192,12 @@ describe('modules/manager/cocoapods/artifacts', () => {
       { file: { type: 'addition', path: 'Pods/New' } },
       { file: { type: 'deletion', path: 'Pods/Deleted' } },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c \'install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && pod install\'',
+      },
+    ]);
   });
 
   it('catches write error', async () => {
@@ -229,7 +239,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     ).toEqual([
       { artifactError: { fileName: 'Podfile.lock', stderr: 'exec exception' } },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);
   });
 
   it('dynamically selects Docker image tag', async () => {
