@@ -112,7 +112,10 @@ describe('modules/platform/gitlab/index', () => {
           token: 'some-token',
           endpoint: undefined,
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://gitlab.com/api/v4/',
+        gitAuthor: 'Renovate Bot <a@b.com>',
+      });
     });
 
     it('should accept custom endpoint', async () => {
@@ -133,7 +136,10 @@ describe('modules/platform/gitlab/index', () => {
           endpoint,
           token: 'some-token',
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://gitlab.renovatebot.com/',
+        gitAuthor: 'Renovate Bot <a@b.com>',
+      });
     });
 
     it('should reuse existing gitAuthor', async () => {
@@ -468,7 +474,9 @@ describe('modules/platform/gitlab/index', () => {
         gitUrl: 'ssh',
       });
 
-      expect(git.initRepo.mock.calls).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toMatchObject([
+        [{ url: 'ssh://git@gitlab.com/some%2Frepo%2Fproject.git' }],
+      ]);
     });
 
     it('should throw if ssh_url_to_repo is not present but gitUrl is set to ssh', async () => {
@@ -515,7 +523,13 @@ describe('modules/platform/gitlab/index', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
       });
-      expect(git.initRepo.mock.calls).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toMatchObject([
+        [
+          {
+            url: 'http://oauth2:123test@mycompany.com/gitlab/some/repo/project.git',
+          },
+        ],
+      ]);
     });
   });
 
@@ -614,7 +628,13 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'some change',
+      });
     });
 
     it('should strip draft prefix from title', async () => {
@@ -654,7 +674,11 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 91,
+        title: 'some change',
+      });
     });
 
     it('should strip deprecated draft prefix from title', async () => {
@@ -694,7 +718,11 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 91,
+        title: 'some change',
+      });
     });
   });
 
@@ -3492,7 +3520,13 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'merged',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeFalse();
     });
 
@@ -3516,8 +3550,11 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
-      expect(pr?.title).toBe('do something');
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 12345,
+        title: 'do something',
+      });
     });
 
     it('removes deprecated draft prefix from returned title', async () => {
@@ -3540,8 +3577,11 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
-      expect(pr?.title).toBe('do something');
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 12345,
+        title: 'do something',
+      });
     });
 
     it('returns the mergeable PR', async () => {
@@ -3565,7 +3605,13 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeTrue();
     });
 
@@ -3593,7 +3639,13 @@ describe('modules/platform/gitlab/index', () => {
           ],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeTrue();
     });
 
@@ -4039,7 +4091,23 @@ These updates have all been created already. To force a retry/rebase of any, cli
 
     it('returns updated pr body', async () => {
       await initFakePlatform('13.4.0');
-      expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
+      const body = gitlab.massageMarkdown(prBody);
+      // PR wording and links become MR wording and links
+      expect(body).toContain('Merge Requests are the best, here are some MRs.');
+      expect(body).not.toContain('Pull Requests');
+      expect(body).not.toContain('PRs');
+      expect(body).toContain(
+        '- [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (`gh-got`, `gl-got`, `got`)',
+      );
+      expect(body).not.toContain('../pull/2433');
+      // the rest is left alone
+      expect(body).toStartWith(
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5',
+      );
+      expect(body).toContain('## Open');
+      expect(body).toContain(
+        'These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.',
+      );
       expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
         expect.any(String),
         expect.any(Number),
