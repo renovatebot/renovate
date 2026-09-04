@@ -174,7 +174,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
 
       const ec2 = ec2Mock.call(0).thisValue as EC2Client;
-      expect(await ec2.config.credentials()).toEqual({
+      await expect(ec2.config.credentials()).resolves.toEqual({
         accessKeyId: 'access-key-id',
         secretAccessKey: 'secret-access-key',
         sessionToken: 'session-token',

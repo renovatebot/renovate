@@ -13,7 +13,7 @@ describe('config/presets/http/index', () => {
     it('should return parsed JSON', async () => {
       httpMock.scope(host).get(filePath).reply(200, { foo: 'bar' });
 
-      expect(await http.getPreset({ repo })).toEqual({ foo: 'bar' });
+      await expect(http.getPreset({ repo })).resolves.toEqual({ foo: 'bar' });
     });
 
     it('should return parsed JSON5', async () => {
@@ -24,7 +24,7 @@ describe('config/presets/http/index', () => {
 
       const repo = 'https://my.server/test-preset.json5';
 
-      expect(await http.getPreset({ repo })).toEqual({ foo: 'bar' });
+      await expect(http.getPreset({ repo })).resolves.toEqual({ foo: 'bar' });
     });
 
     it('should return parsed JSONC', async () => {
@@ -35,7 +35,7 @@ describe('config/presets/http/index', () => {
 
       const repo = 'https://my.server/test-preset.jsonc';
 
-      expect(await http.getPreset({ repo })).toEqual({ foo: 'bar' });
+      await expect(http.getPreset({ repo })).resolves.toEqual({ foo: 'bar' });
     });
 
     it('throws if fails to parse', async () => {

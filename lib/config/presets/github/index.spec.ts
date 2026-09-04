@@ -226,9 +226,9 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github.getPresetFromEndpoint('some/repo', 'default', undefined),
-      ).toEqual({ from: 'api' });
+      await expect(
+        github.getPresetFromEndpoint('some/repo', 'default', undefined),
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint', async () => {
@@ -238,8 +238,8 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github
+      await expect(
+        github
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -248,7 +248,7 @@ describe('config/presets/github/index', () => {
             undefined,
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses default endpoint with a tag', async () => {
@@ -258,15 +258,15 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github.getPresetFromEndpoint(
+      await expect(
+        github.getPresetFromEndpoint(
           'some/repo',
           'default',
           undefined,
           githubApiHost,
           'someTag',
         ),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint with a tag', async () => {
@@ -276,8 +276,8 @@ describe('config/presets/github/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await github
+      await expect(
+        github
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -286,7 +286,7 @@ describe('config/presets/github/index', () => {
             'someTag',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
   });
 });

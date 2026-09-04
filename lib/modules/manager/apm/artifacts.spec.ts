@@ -54,28 +54,28 @@ describe('modules/manager/apm/artifacts', () => {
 
     it('returns null if no updated deps and no lock file maintenance', async () => {
       const execSnapshots = mockExecAll();
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [],
           newPackageFileContent: '',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toEqual([]);
     });
 
     it('returns null if no lock file found', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [{ depName: 'owner/repo' }],
           newPackageFileContent: '',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toEqual([]);
     });
 
@@ -83,14 +83,14 @@ describe('modules/manager/apm/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Current apm.lock.yaml');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [{ depName: 'owner/repo' }],
           newPackageFileContent: 'new',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
     });
 
@@ -102,14 +102,14 @@ describe('modules/manager/apm/artifacts', () => {
         repoStatus({ modified: ['apm.lock.yaml'] }),
       );
       fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [{ depName: 'owner/repo' }],
           newPackageFileContent: 'new',
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -141,14 +141,14 @@ describe('modules/manager/apm/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('# copilot');
       fs.readLocalFile.mockResolvedValueOnce('# review');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [{ depName: 'owner/repo' }],
           newPackageFileContent: 'new',
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -185,14 +185,14 @@ describe('modules/manager/apm/artifacts', () => {
         repoStatus({ modified: ['apm.lock.yaml'] }),
       );
       fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [],
           newPackageFileContent: 'new',
           config: { ...config, isLockFileMaintenance: true },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -217,14 +217,14 @@ describe('modules/manager/apm/artifacts', () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '0.1.0' }, { version: '0.2.0' }],
       });
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [{ depName: 'owner/repo' }],
           newPackageFileContent: 'new',
           config: { ...config, constraints: { apm: '0.2.0' } },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -272,14 +272,14 @@ describe('modules/manager/apm/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
       fs.writeLocalFile.mockRejectedValueOnce(new Error('write failed'));
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'apm.yml',
           updatedDeps: [{ depName: 'owner/repo' }],
           newPackageFileContent: 'new',
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           artifactError: {
             fileName: 'apm.lock.yaml',

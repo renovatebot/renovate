@@ -25,8 +25,104 @@ describe('modules/manager/bazel/extract', () => {
 
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
-      expect(res?.deps).toHaveLength(18);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'go',
+            depType: 'go_repository',
+            depName: 'com_github_bitly_go-nsq',
+            packageName: 'github.com/bitly/go-nsq',
+            currentValue: 'v1.0.5',
+            managerData: { idx: 0 },
+          },
+          {
+            datasource: 'go',
+            depType: 'go_repository',
+            depName: 'com_github_google_uuid',
+            packageName: 'github.com/google/uuid',
+            currentDigest: 'dec09d789f3dba190787f8b4454c7d3c936fed9e',
+            digestOneAndOnly: true,
+            managerData: { idx: 1 },
+          },
+          {
+            datasource: 'github-releases',
+            depType: 'git_repository',
+            depName: 'build_bazel_rules_nodejs',
+            packageName: 'bazelbuild/rules_nodejs',
+            currentValue: '0.3.1',
+            managerData: { idx: 2 },
+          },
+          {
+            datasource: 'github-releases',
+            depType: 'new_git_repository',
+            depName: 'build_bazel_rules_typescript',
+            packageName: 'bazelbuild/rules_typescript',
+            currentValue: '0.6.1',
+            managerData: { idx: 3 },
+          },
+          {
+            datasource: 'github-tags',
+            depType: 'git_repository',
+            depName: 'com_github_bazelbuild_buildtools',
+            packageName: 'bazelbuild/buildtools',
+            currentDigest: 'b3b620e8bcff18ed3378cd3f35ebeb7016d71f71',
+            managerData: { idx: 4 },
+          },
+          {
+            datasource: 'github-tags',
+            depType: 'http_archive',
+            depName: 'bazel_toolchains',
+            packageName: 'bazelbuild/bazel-toolchains',
+            currentDigest: 'd665ccfa3e9c90fa789671bf4ef5f7c19c5715c4',
+            managerData: { idx: 5 },
+          },
+          {
+            datasource: 'github-releases',
+            depType: 'http_archive',
+            depName: 'io_bazel_rules_go',
+            packageName: 'bazelbuild/rules_go',
+            currentValue: 'v0.29.0',
+            managerData: { idx: 6 },
+          },
+          {
+            datasource: 'go',
+            depType: 'go_repository',
+            depName: 'com_github_pkg_errors',
+            packageName: 'github.com/pkg/errors',
+            currentDigest: '816c9085562cd7ee03e7f8188a1cfd942858cded',
+            digestOneAndOnly: true,
+            managerData: { idx: 7 },
+          },
+          {
+            datasource: 'docker',
+            versioning: 'docker',
+            depType: 'container_pull',
+            depName: 'py3_image_base',
+            packageName: 'distroless/python3-debian10',
+            currentValue: 'latest',
+            currentDigest:
+              'sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7',
+            registryUrls: ['gcr.io'],
+            replaceString: codeBlock`
+              container_pull(
+                  name = "py3_image_base",
+                  digest = "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7",
+                  registry = "gcr.io",
+                  repository = "distroless/python3-debian10",
+                  tag = "latest",
+              )`,
+            managerData: { idx: 8 },
+          },
+          {
+            datasource: 'github-tags',
+            depType: 'http_file',
+            depName: 'distroless',
+            packageName: 'GoogleContainerTools/distroless',
+            currentDigest: '446923c3756ceeaa75888f52fcbdd48bb314fbf8',
+            managerData: { idx: 9 },
+          },
+        ],
+      });
     });
 
     it('extracts github tags', () => {
@@ -47,20 +143,34 @@ describe('modules/manager/bazel/extract', () => {
 
     it('extracts dependencies from *.bzl files', () => {
       const res = extractPackageFile(Fixtures.get('repositories.bzl'));
-      expect(res?.deps).toMatchObject([
-        {
-          currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',
-          packageName: 'google/subpar',
-        },
-        {
-          currentValue: '0.6.0',
-          packageName: 'bazelbuild/bazel-skylib',
-        },
-        {
-          currentValue: '0.5.0',
-          packageName: 'bazelbuild/stardoc',
-        },
-      ]);
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depType: 'http_archive',
+            depName: 'subpar',
+            packageName: 'google/subpar',
+            currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',
+            managerData: { idx: 2 },
+          },
+          {
+            datasource: 'github-tags',
+            depType: 'http_archive',
+            depName: 'bazel_skylib',
+            packageName: 'bazelbuild/bazel-skylib',
+            currentValue: '0.6.0',
+            managerData: { idx: 3 },
+          },
+          {
+            datasource: 'github-releases',
+            depType: 'http_archive',
+            depName: 'io_bazel_stardoc',
+            packageName: 'bazelbuild/stardoc',
+            currentValue: '0.5.0',
+            managerData: { idx: 4 },
+          },
+        ],
+      });
     });
 
     it('extracts dependencies for container_pull deptype', () => {
@@ -184,8 +294,20 @@ describe('modules/manager/bazel/extract', () => {
         `,
       );
 
-      expect(res?.deps).toHaveLength(2);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: 'v1.1.2',
+          datasource: 'github-tags',
+          depName: 'aspect_rules_js',
+          packageName: 'aspect-build/rules_js',
+        },
+        {
+          currentValue: '5.5.3',
+          datasource: 'github-releases',
+          depName: 'rules_nodejs',
+          packageName: 'bazelbuild/rules_nodejs',
+        },
+      ]);
     });
 
     it('http_archive with GitLab url', () => {

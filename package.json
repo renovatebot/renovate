@@ -233,7 +233,7 @@
     "klona": "2.0.6",
     "lru-cache": "11.5.2",
     "luxon": "3.7.2",
-    "markdown-it": "14.3.0",
+    "markdown-it": "14.3.1",
     "markdown-table": "3.0.4",
     "minimatch": "10.2.6",
     "moo": "0.5.3",
@@ -241,7 +241,7 @@
     "neotraverse": "0.6.18",
     "node-html-parser": "7.1.0",
     "p-all": "5.0.1",
-    "p-map": "7.0.6",
+    "p-map": "7.0.7",
     "p-queue": "9.3.3",
     "p-throttle": "8.1.0",
     "parse-link-header": "2.0.0",
@@ -276,7 +276,7 @@
     "re2": "1.26.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.10",
+    "@biomejs/biome": "2.5.11",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/istanbul-reports-html": "2.0.17",
     "@containerbase/semantic-release-pnpm": "1.4.3",

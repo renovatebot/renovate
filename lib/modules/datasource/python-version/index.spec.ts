@@ -73,12 +73,12 @@ describe('modules/datasource/python-version/index', () => {
 
     it('returns null for error', async () => {
       httpMock.scope(defaultRegistryUrl).get('').replyWithError('error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'python',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('falls back to prebuild releases on 429', async () => {
@@ -106,22 +106,22 @@ describe('modules/datasource/python-version/index', () => {
         'getPrebuildReleases',
       ).mockResolvedValueOnce(null);
       httpMock.scope(defaultRegistryUrl).get('').reply(429);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'python',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(defaultRegistryUrl).get('').reply(200, []);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'python',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     describe('processes real data', () => {

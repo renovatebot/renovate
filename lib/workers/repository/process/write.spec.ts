@@ -222,7 +222,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: 'no-work',
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
     });
 
     it('updates branch fingerprint when new commit is made', async () => {
@@ -264,7 +264,7 @@ describe('workers/repository/process/write', () => {
         commitFingerprintConfig: generateCommitFingerprintConfig(branch),
         managers,
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -309,7 +309,7 @@ describe('workers/repository/process/write', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       config.repositoryCache = 'enabled';
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -351,7 +351,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: 'done',
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 

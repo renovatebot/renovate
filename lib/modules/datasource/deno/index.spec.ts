@@ -116,11 +116,11 @@ describe('modules/datasource/deno/index', () => {
     });
 
     it('returns null if we could not match a deno land dependency', async () => {
-      expect(
-        await deno.getReleases({
+      await expect(
+        deno.getReleases({
           packageName: 'https://myexample.com/std',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns releases of third-party library', async () => {

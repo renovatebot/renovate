@@ -86,8 +86,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('returns if no requirements.txt found', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '',
@@ -96,7 +96,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toEqual([]);
   });
 
@@ -105,8 +105,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('new lock');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -115,7 +115,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'pip-compile requirements.in' },
     ]);
@@ -125,8 +125,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     fs.readLocalFile.mockResolvedValueOnce('new lock');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -134,7 +134,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           ...config,
         },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFileName: 'requirements.in' },
@@ -152,8 +152,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -163,7 +163,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'pip-compile requirements.in' },
     ]);
@@ -184,8 +184,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -195,7 +195,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
@@ -238,8 +238,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -249,7 +249,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
@@ -277,8 +277,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -288,7 +288,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.11.1' },
@@ -320,8 +320,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
         'uv pip compile --python-version=3.11 requirements.in',
       ),
     );
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -331,7 +331,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           constraints: { uv: '0.5.27' },
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.11.1' },
@@ -362,8 +362,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(
       getCommandInUvHeader('uv pip compile requirements.in'),
     );
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -372,7 +372,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.12.0' },
@@ -409,8 +409,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
       #
     `;
     fs.readLocalFile.mockResolvedValueOnce(noPythonVersionHeader);
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -420,7 +420,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.12.0' },
@@ -439,14 +439,14 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, lockFiles: ['requirements.txt'] },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: { fileName: 'requirements.txt', stderr: 'not found' },
       },
@@ -464,14 +464,14 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...lockMaintenanceConfig, lockFiles: ['requirements.txt'] },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'pip-compile requirements.in' },
     ]);
@@ -487,8 +487,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [
           { depName: 'foo', newVersion: '1.0.2', isLockfileUpdate: true },
@@ -497,7 +497,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         newPackageFileContent: '{}',
         config: { ...lockMaintenanceConfig, lockFiles: ['requirements.txt'] },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'pip-compile requirements.in --upgrade-package=foo==1.0.2',
@@ -521,8 +521,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
@@ -532,7 +532,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           lockFiles: ['requirements.txt'],
         },
       }),
-    ).not.toBeNull();
+    ).resolves.not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
@@ -765,8 +765,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('new lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'setup.cfg',
           updatedDeps: [],
           newPackageFileContent: 'some new content',
@@ -775,7 +775,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
             lockFiles: ['requirements.txt'],
           },
         }),
-      ).not.toBeNull();
+      ).resolves.not.toBeNull();
       expect(execSnapshots).toMatchObject([
         { cmd: 'pip-compile --output-file=requirements.txt setup.cfg' },
       ]);
@@ -791,8 +791,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
         }),
       );
       fs.readLocalFile.mockResolvedValueOnce('new lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'requirements.in',
           updatedDeps: [],
           newPackageFileContent: 'some new content',
@@ -801,7 +801,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
             lockFiles: ['requirements.txt'],
           },
         }),
-      ).not.toBeNull();
+      ).resolves.not.toBeNull();
       expect(execSnapshots).toMatchObject([
         { cmd: 'pip-compile requirements.in' },
       ]);
