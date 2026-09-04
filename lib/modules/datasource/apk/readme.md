@@ -62,6 +62,23 @@ https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64/APKINDEX.tar.gz
 https://dl-cdn.alpinelinux.org/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
 ```
 
+## Versioning
+
+This datasource uses [`apk` versioning](../../versioning/apk/index.md) by default, which follows Alpine's version format (`3.2.1-r0`, `2.39.0_rc1-r0`, `6.5_p20250503-r0`).
+
+Depending on which APK repository you are using, you may want to use [the `loose` versioning scheme](../../versioning/loose/index.md), like so:
+
+```json title="Specify loose versioning for apk lookups"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["apk"],
+      "versioning": "loose"
+    }
+  ]
+}
+```
+
 <!-- TODO #43711 -->
 
 ## Usage example
