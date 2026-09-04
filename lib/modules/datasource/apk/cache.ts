@@ -9,23 +9,19 @@ import type { Http } from '../../../util/http/index.ts';
 import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { ApkIndexValidators } from './schema.ts';
+import { ApkIndexCache } from './schema.ts';
 
 const cacheSubDir = 'apk';
 const archiveFileName = 'APKINDEX.tar.gz';
 const indexFileName = 'APKINDEX';
-const validatorsFileName = 'APKINDEX.validators.json';
+const cacheFileName = 'APKINDEX.cache.json';
 
 /**
  * Downloads and extracts `APKINDEX.tar.gz` for a component, or return the path to the cached version if it is still current.
  *
  * Alongside the extracted archive, we also store the `ETag` and `Last-Modified` to allow re-using them on subsequent requests.
  *
- * The validators live on disk next to the index they describe, rather than in
- * the package cache. A package cache can be shared between machines, so a
- * validator stored there may describe an archive which this machine never
- * downloaded: the registry would answer `304 Not Modified`, and we would go on
- * serving whatever older index this cache directory happens to hold.
+ * The extracted index (and the cache headers) are only ever kept on-disk, rather than in the package cache, due to their size.
  *
  * @param http - The HTTP client to download with.
  * @param componentUrl - The `APKINDEX` directory URL of the component.
@@ -38,9 +34,9 @@ export async function getIndexFile(
   const componentCacheDir = upath.join(cacheSubDir, toSha256(componentUrl));
   const componentDir = await fs.ensureCacheDir(componentCacheDir);
   const indexFile = upath.join(componentDir, indexFileName);
-  const validatorsFile = upath.join(componentDir, validatorsFileName);
+  const cacheFile = upath.join(componentDir, cacheFileName);
 
-  const cachedValidators = await readValidators(validatorsFile, indexFile);
+  const cached = await readIndexCache(cacheFile, indexFile);
 
   const indexUrl = joinUrlParts(componentUrl, archiveFileName);
   const extractDir = await fs.ensureCacheDir(
@@ -49,14 +45,14 @@ export async function getIndexFile(
 
   try {
     const archiveFile = upath.join(extractDir, archiveFileName);
-    const { statusCode, validators } = await downloadArchive(
+    const { statusCode, etag, lastModified } = await downloadArchive(
       http,
       indexUrl,
       archiveFile,
-      cachedValidators,
+      cached,
     );
 
-    if (cachedValidators && statusCode === 304) {
+    if (cached && statusCode === 304) {
       logger.debug(`APK index ${indexUrl} is unchanged, using the cached copy`);
       return indexFile;
     }
@@ -75,10 +71,10 @@ export async function getIndexFile(
 
     logger.debug('Successfully extracted APKINDEX content');
 
-    // The validators are written last, so that a failure never leaves them
+    // The cache headers are written last, so that a failure never leaves them
     // describing an index which was not stored
     await fs.renameCacheFile(extractedFile, indexFile);
-    await fs.outputCacheFile(validatorsFile, JSON.stringify(validators));
+    await fs.outputCacheFile(cacheFile, JSON.stringify({ etag, lastModified }));
 
     return indexFile;
   } finally {
@@ -86,9 +82,8 @@ export async function getIndexFile(
   }
 }
 
-interface ArchiveResponse {
+interface ArchiveResponse extends ApkIndexCache {
   statusCode: number | undefined;
-  validators: ApkIndexValidators;
 }
 
 /**
@@ -98,30 +93,28 @@ interface ArchiveResponse {
  * @param http - The HTTP client to download with.
  * @param indexUrl - The URL of the archive.
  * @param archiveFile - The path to download the archive to.
- * @param cachedValidators - The validators of the cached copy, if there is one.
- * @returns The status code and the validators of the response, whose body is
+ * @param cached - The cache headers of the cached copy, if there is one.
+ * @returns The status code and the cache headers of the response, whose body is
  * empty when the index is unchanged.
  */
 async function downloadArchive(
   http: Http,
   indexUrl: string,
   archiveFile: string,
-  cachedValidators: ApkIndexValidators | null,
+  cached: ApkIndexCache | null,
 ): Promise<ArchiveResponse> {
   logger.debug(`Attempting to download ${indexUrl}`);
 
   const readStream = http.stream(indexUrl, {
-    headers: conditionalHeaders(cachedValidators),
+    headers: conditionalHeaders(cached),
   });
 
   // A stream exposes the status code and the headers on its response event only
-  const result: ArchiveResponse = { statusCode: undefined, validators: {} };
+  const result: ArchiveResponse = { statusCode: undefined };
   readStream.on('response', (response: IncomingMessage) => {
     result.statusCode = response.statusCode;
-    result.validators = {
-      etag: response.headers.etag,
-      lastModified: response.headers['last-modified'],
-    };
+    result.etag = response.headers.etag;
+    result.lastModified = response.headers['last-modified'];
   });
 
   const writeStream = fs.createCacheWriteStream(archiveFile);
@@ -130,56 +123,51 @@ async function downloadArchive(
   return result;
 }
 
-function conditionalHeaders(
-  cachedValidators: ApkIndexValidators | null,
-): OutgoingHttpHeaders {
+function conditionalHeaders(cached: ApkIndexCache | null): OutgoingHttpHeaders {
   const headers: OutgoingHttpHeaders = {};
 
-  if (cachedValidators?.etag) {
-    headers['If-None-Match'] = cachedValidators.etag;
+  if (cached?.etag) {
+    headers['If-None-Match'] = cached.etag;
   }
 
-  if (cachedValidators?.lastModified) {
-    headers['If-Modified-Since'] = cachedValidators.lastModified;
+  if (cached?.lastModified) {
+    headers['If-Modified-Since'] = cached.lastModified;
   }
 
   return headers;
 }
 
 /**
- * Reads the validators of the cached index.
+ * Reads the cache headers of the cached index.
  *
- * @param validatorsFile - The path of the validators file.
+ * @param cacheFile - The path of the cache headers file.
  * @param indexFile - The path of the extracted index they describe.
- * @returns The validators, or `null` when there is no index to revalidate.
+ * @returns The cache headers, or `null` when there is no index to revalidate.
  */
-async function readValidators(
-  validatorsFile: string,
+async function readIndexCache(
+  cacheFile: string,
   indexFile: string,
-): Promise<ApkIndexValidators | null> {
+): Promise<ApkIndexCache | null> {
   if (!(await fs.cachePathIsFile(indexFile))) {
     return null;
   }
 
   let content: string;
   try {
-    content = await fs.readCacheFile(validatorsFile, 'utf8');
+    content = await fs.readCacheFile(cacheFile, 'utf8');
   } catch (err) {
+    logger.debug({ cacheFile, err }, 'Could not read the APK index cache');
+    return null;
+  }
+
+  const cached = Json.pipe(ApkIndexCache).safeParse(content);
+  if (!cached.success) {
     logger.debug(
-      { validatorsFile, err },
-      'Could not read the cached APK index validators',
+      { cacheFile, err: cached.error },
+      'Could not parse the APK index cache',
     );
     return null;
   }
 
-  const validators = Json.pipe(ApkIndexValidators).safeParse(content);
-  if (!validators.success) {
-    logger.debug(
-      { validatorsFile, err: validators.error },
-      'Could not parse the cached APK index validators',
-    );
-    return null;
-  }
-
-  return validators.data;
+  return cached.data;
 }

@@ -795,12 +795,12 @@ describe('modules/datasource/apk/index', () => {
     const indexPath = '/os/x86_64/APKINDEX.tar.gz';
     const lastModified = 'Fri, 26 Apr 2024 22:27:14 GMT';
 
-    function validatorsFile(): string {
+    function cacheFile(): string {
       return upath.join(
         cacheDir!.path,
         'others/apk',
         toSha256(componentUrl),
-        'APKINDEX.validators.json',
+        'APKINDEX.cache.json',
       );
     }
 
@@ -874,7 +874,7 @@ describe('modules/datasource/apk/index', () => {
       });
     });
 
-    it('should not revalidate when the registry provides no validators', async () => {
+    it('should not revalidate when the registry provides no cache headers', async () => {
       httpMock
         .scope('https://packages.wolfi.dev')
         .get(indexPath)
@@ -892,7 +892,7 @@ describe('modules/datasource/apk/index', () => {
       ]);
     });
 
-    it('should not revalidate when the cached validators are gone', async () => {
+    it('should not revalidate when the cached headers are gone', async () => {
       httpMock
         .scope('https://packages.wolfi.dev')
         .get(indexPath)
@@ -901,7 +901,7 @@ describe('modules/datasource/apk/index', () => {
         .reply(200, apkIndexArchive, { etag: '"v1"' });
 
       await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
-      await nodeFs.rm(validatorsFile());
+      await nodeFs.rm(cacheFile());
       await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
 
       const [, secondRequest] = httpMock.getTrace();
@@ -940,7 +940,7 @@ describe('modules/datasource/apk/index', () => {
       expect(secondRequest.headers).not.toContainKey('if-none-match');
     });
 
-    it('should not revalidate when the cached validators are unreadable', async () => {
+    it('should not revalidate when the cached headers are unreadable', async () => {
       httpMock
         .scope('https://packages.wolfi.dev')
         .get(indexPath)
@@ -949,7 +949,7 @@ describe('modules/datasource/apk/index', () => {
         .reply(200, apkIndexArchive, { etag: '"v1"' });
 
       await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
-      await nodeFs.writeFile(validatorsFile(), 'not json');
+      await nodeFs.writeFile(cacheFile(), 'not json');
       await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
 
       const [, secondRequest] = httpMock.getTrace();
