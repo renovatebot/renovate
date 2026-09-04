@@ -208,12 +208,14 @@ describe('modules/manager/dockerfile/apk', () => {
       ${'bash<=5.2'} | ${'<=5.2'}
       ${'bash>~5.2'} | ${'>~5.2'}
       ${'bash<~5.2'} | ${'<~5.2'}
-    `('skips the range $constraint for now', ({ spec }) => {
+    `('extracts $spec as the range $currentValue', ({ spec, currentValue }) => {
       expect(extractApkDeps(`RUN apk add '${spec}'`, escapeChar)).toEqual([
         {
           datasource: 'apk',
           depName: 'bash',
-          skipReason: 'unsupported-version',
+          currentValue,
+          replaceString: spec,
+          autoReplaceStringTemplate: 'bash{{{newValue}}}',
         },
       ]);
     });
@@ -331,7 +333,7 @@ describe('modules/manager/dockerfile/apk', () => {
       ]);
     });
 
-    it('skips the fuzzy constraints which Wolfi images commonly pin with', () => {
+    it('extracts the fuzzy constraints which Wolfi images commonly pin with', () => {
       // https://github.com/elastic/crawler/blob/bc15328fb808affd00dff0cd92527bbe402f5ded/Dockerfile.wolfi#L7
       expect(
         extractApkDeps(
@@ -342,12 +344,16 @@ describe('modules/manager/dockerfile/apk', () => {
         {
           datasource: 'apk',
           depName: 'libcurl-openssl4',
-          skipReason: 'unsupported-version',
+          currentValue: '=~8.12.1',
+          replaceString: 'libcurl-openssl4=~8.12.1',
+          autoReplaceStringTemplate: 'libcurl-openssl4{{{newValue}}}',
         },
         {
           datasource: 'apk',
           depName: 'curl',
-          skipReason: 'unsupported-version',
+          currentValue: '=~8.12.1',
+          replaceString: 'curl=~8.12.1',
+          autoReplaceStringTemplate: 'curl{{{newValue}}}',
         },
         {
           datasource: 'apk',
