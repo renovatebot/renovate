@@ -265,11 +265,6 @@ export function categoryRank(scope: string): number {
 /** Scopes rendered as a collapsed `<details>` block, for verbosity. */
 export const COLLAPSED_SCOPES = new Set(['deps']);
 
-/** Flat (non-module, non-`COLLAPSED_SCOPES`) groups smaller than this get
- * pooled into "Other" instead of getting their own heading, to avoid a
- * changelog that's mostly one-line sections. */
-export const MIN_SCOPE_GROUP_SIZE = 2;
-
 // A commit scope's category can be written singular or plural
 // (`manager/npm`, `managers/npm`) — both are normalised to the singular
 // form, which is also the real `lib/modules/<category>` directory name.
@@ -371,9 +366,8 @@ export async function resolveModuleLabels(
  *   module name (`datasource` on its own) becomes a "General" entry in
  *   that same category, rather than a second, colliding group.
  * - Everything else becomes its own `FlatGroup`, with the scope-less group
- *   labelled "Other". A flat group smaller than `MIN_SCOPE_GROUP_SIZE`
- *   (and not one of `COLLAPSED_SCOPES`) is folded into "Other" instead of
- *   getting its own heading, with its scope kept inline on each commit.
+ *   labelled "Other" — however few commits it has, so a scope stays
+ *   scannable as its own heading.
  *
  * Category groups are sorted alphabetically by category name, and the
  * modules inside a category alphabetically by `label`. Flat groups are
@@ -460,44 +454,7 @@ export function groupByModule(
     return a.label.localeCompare(b.label);
   });
 
-  const pooled: ParsedCommit[] = [];
-  const kept: FlatGroup[] = [];
-  let other: FlatGroup | undefined;
-
-  for (const group of flat) {
-    if (group.scope === undefined) {
-      other = group;
-      continue;
-    }
-    if (
-      !COLLAPSED_SCOPES.has(group.scope) &&
-      group.totalCommits < MIN_SCOPE_GROUP_SIZE
-    ) {
-      for (const commit of group.commits) {
-        pooled.push({
-          ...commit,
-          subject: `\`${group.scope}\` ${commit.subject}`,
-        });
-      }
-      continue;
-    }
-    kept.push(group);
-  }
-
-  if (pooled.length > 0) {
-    const combined = [...(other?.commits ?? []), ...pooled];
-    combined.sort((a, b) => typeRank(types, a.type) - typeRank(types, b.type));
-    other = {
-      kind: 'flat',
-      scope: undefined,
-      label: 'Other',
-      commits: combined,
-      totalCommits: (other?.totalCommits ?? 0) + pooled.length,
-    };
-  }
-
-  const finalFlat = other ? [...kept, other] : kept;
-  const groups: ModuleGroup[] = [...categoryGroups, ...finalFlat];
+  const groups: ModuleGroup[] = [...categoryGroups, ...flat];
   if (breaking.length > 0) {
     groups.unshift({ kind: 'breaking', commits: breaking });
   }

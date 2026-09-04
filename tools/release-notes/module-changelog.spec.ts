@@ -237,12 +237,10 @@ describe('tools/release-notes/module-changelog', () => {
       expect(group.modules.map((m) => m.label)).toEqual(['Cargo', 'npm']);
     });
 
-    it('groups a bare (non-module) scope with enough commits as its own flat group', () => {
+    it('groups a bare (non-module) scope as its own flat group, however few commits it has', () => {
       const commits: ParsedCommit[] = [
         { type: 'fix', scope: 'workers/repository', subject: 'a' },
-        { type: 'refactor', scope: 'workers/repository', subject: 'b' },
-        { type: 'fix', scope: 'tools', subject: 'c' },
-        { type: 'fix', scope: 'tools', subject: 'd' },
+        { type: 'fix', scope: 'tools', subject: 'b' },
       ];
 
       const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
@@ -255,8 +253,7 @@ describe('tools/release-notes/module-changelog', () => {
     it('sorts category groups ahead of flat groups', () => {
       const commits: ParsedCommit[] = [
         { type: 'fix', scope: 'workers/repository', subject: 'a' },
-        { type: 'refactor', scope: 'workers/repository', subject: 'b' },
-        { type: 'fix', scope: 'versioning/cargo', subject: 'c' },
+        { type: 'fix', scope: 'versioning/cargo', subject: 'b' },
       ];
 
       const groups = groupByModule(
@@ -279,7 +276,6 @@ describe('tools/release-notes/module-changelog', () => {
         { type: 'docs', scope: undefined, subject: 'a' },
         { type: 'chore', scope: 'deps', subject: 'b' },
         { type: 'fix', scope: 'workers/repository', subject: 'c' },
-        { type: 'refactor', scope: 'workers/repository', subject: 'd' },
       ];
 
       const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
@@ -343,54 +339,15 @@ describe('tools/release-notes/module-changelog', () => {
       expect(group.commits).toHaveLength(2);
     });
 
-    describe('pooling small flat groups into "Other"', () => {
-      it('pools a scope below MIN_SCOPE_GROUP_SIZE, keeping the scope inline', () => {
-        const commits: ParsedCommit[] = [
-          { type: 'fix', scope: 'tools', subject: 'a' },
-        ];
+    it('gives a singleton scope its own group rather than folding it into Other', () => {
+      // A scope stays scannable on its own — e.g. searching for "Cargo" —
+      // even if it only has one commit in this range.
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'tools', subject: 'a' },
+      ];
 
-        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
-        expect(groups).toHaveLength(1);
-        expect(groups[0]).toMatchObject({ scope: undefined, label: 'Other' });
-        expect(groups[0].commits[0].subject).toBe('`tools` a');
-      });
-
-      it('keeps a scope at MIN_SCOPE_GROUP_SIZE as its own group', () => {
-        const commits: ParsedCommit[] = [
-          { type: 'fix', scope: 'tools', subject: 'a' },
-          { type: 'fix', scope: 'tools', subject: 'b' },
-        ];
-
-        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
-        expect(groups.map((g) => g.scope)).toEqual(['tools']);
-      });
-
-      it('never pools a COLLAPSED_SCOPES scope, even with a single commit', () => {
-        const commits: ParsedCommit[] = [
-          {
-            type: 'chore',
-            scope: 'deps',
-            subject: 'update dependency foo to v1.0.0',
-          },
-        ];
-
-        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
-        expect(groups.map((g) => g.scope)).toEqual(['deps']);
-      });
-
-      it('merges pooled commits into an existing Other group, sorted by type', () => {
-        const commits: ParsedCommit[] = [
-          { type: 'docs', scope: undefined, subject: 'existing other entry' },
-          { type: 'fix', scope: 'tools', subject: 'pooled fix' },
-        ];
-
-        const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
-        expect(groups).toHaveLength(1);
-        expect(groups[0].commits.map((c) => c.subject)).toEqual([
-          '`tools` pooled fix',
-          'existing other entry',
-        ]);
-      });
+      const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+      expect(groups.map((g) => g.scope)).toEqual(['tools']);
     });
 
     describe('breaking changes', () => {
@@ -470,12 +427,10 @@ describe('tools/release-notes/module-changelog', () => {
       const groups = groupByModule(
         [
           { type: 'fix', scope: 'workers/repository', subject: 'a' },
-          { type: 'refactor', scope: 'workers/repository', subject: 'b' },
-          { type: 'docs', scope: undefined, subject: 'c' },
+          { type: 'docs', scope: undefined, subject: 'b' },
         ],
         [
           { type: 'fix', section: 'Bug Fixes' },
-          { type: 'refactor', section: 'Code Refactoring' },
           { type: 'docs', section: 'Documentation' },
         ],
         new Map(),
@@ -486,11 +441,10 @@ describe('tools/release-notes/module-changelog', () => {
           '### workers/repository',
           '',
           '- fix: a',
-          '- refactor: b',
           '',
           '### Other',
           '',
-          '- docs: c',
+          '- docs: b',
         ].join('\n'),
       );
     });
