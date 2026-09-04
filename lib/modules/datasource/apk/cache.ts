@@ -17,13 +17,9 @@ const indexFileName = 'APKINDEX';
 const validatorsFileName = 'APKINDEX.validators.json';
 
 /**
- * Downloads and extracts `APKINDEX.tar.gz` for a component, unless the copy in
- * the cache directory is still current.
+ * Downloads and extracts `APKINDEX.tar.gz` for a component, or return the path to the cached version if it is still current.
  *
- * An index holds thousands of packages and is several megabytes in size, so the
- * `ETag` and `Last-Modified` of the archive are cached next to the extracted
- * index. A later run only downloads the archive again once the registry answers
- * the conditional request with something other than `304 Not Modified`.
+ * Alongside the extracted archive, we also store the `ETag` and `Last-Modified` to allow re-using them on subsequent requests.
  *
  * The validators are cached on disk rather than in the package cache, because
  * they describe the copy which this cache directory holds. A package cache can
