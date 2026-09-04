@@ -4554,6 +4554,7 @@ It usually doesn't _know_ why they're there, instead it simply knows that it has
 
 If a branch appears stale but has been modified by a different git author, then Renovate won't delete the branch or autoclose any associated PR.
 Instead, it will update the title to append " - abandoned" plus add a comment noting that autoclosing is skipped.
+Read the [Abandoned PRs](./key-concepts/pull-requests.md#abandoned-prs) docs to learn more.
 
 If a branch appears stale and hasn't been modified, then:
 
