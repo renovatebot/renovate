@@ -914,6 +914,287 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('returns if pending checks - even when rebase requested via PR checkbox', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      config.pendingChecks = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prNo: 5,
+        result: 'pending',
+      });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          number: 5,
+          topic: '⚠️ Rebase not applied',
+          content: expect.stringContaining('This branch has not been rebased'),
+        }),
+      );
+    });
+
+    it('returns if pending checks - and does not comment when there is no PR', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      const inconfig = {
+        ...config,
+        pendingChecks: true,
+        rebaseRequested: true,
+      } satisfies BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pending',
+      });
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
+
+    it('returns if pending checks - even when rebase requested via PR checkbox (dry run)', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      config.pendingChecks = true;
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prNo: 5,
+        result: 'pending',
+      });
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would ensure pending rebase comment in PR #5',
+      );
+      expect(platform.ensureComment).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      'approve',
+      'approveGroup',
+      'unschedule',
+      'unlimit',
+      'retry',
+      'approvePr',
+      'rebase',
+      'other',
+      'recreate',
+    ])(
+      'returns if pending checks - Dependency Dashboard check %s does not unpend an existing branch',
+      async (dependencyDashboardCheck) => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            number: 5,
+            state: 'open',
+          }),
+        );
+        const inconfig = {
+          ...config,
+          pendingChecks: true,
+          dependencyDashboardChecks: {
+            'renovate/some-branch': dependencyDashboardCheck,
+          },
+        } satisfies BranchConfig;
+        expect(await branchWorker.processBranch(inconfig)).toEqual({
+          branchExists: true,
+          prNo: 5,
+          result: 'pending',
+        });
+        expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+      },
+    );
+
+    it('removes the rebase comment once a requested rebase is applied', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha,
+      });
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledWith({
+        type: 'by-topic',
+        number: 5,
+        topic: '⚠️ Rebase not applied',
+      });
+    });
+
+    it('removes the rebase comment once a requested rebase is applied (dry run)', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      await branchWorker.processBranch(config);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would ensure pending rebase comment removal in PR #5',
+      );
+      expect(platform.ensureCommentRemoval).not.toHaveBeenCalled();
+    });
+
+    it.each(['unpend', 'global-config'])(
+      'updates branch with pending checks if Dependency Dashboard check is %s',
+      async (dependencyDashboardCheck) => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            number: 5,
+            state: 'open',
+          }),
+        );
+        scm.isBranchModified.mockResolvedValueOnce(false);
+        const inconfig = {
+          ...config,
+          pendingChecks: true,
+          dependencyDashboardChecks: {
+            'renovate/some-branch': dependencyDashboardCheck,
+          },
+        } satisfies BranchConfig;
+        expect(await branchWorker.processBranch(inconfig)).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: 5,
+          result: 'done',
+          commitSha,
+        });
+        expect(commit.commitFilesToBranch).toHaveBeenCalled();
+      },
+    );
+
+    it('returns if pending checks - Dependency Dashboard rebase check does not unpend branch creation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      const inconfig = {
+        ...config,
+        pendingChecks: true,
+        dependencyDashboardChecks: { 'renovate/some-branch': 'rebase' },
+      } satisfies BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'pending',
+      });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
+    it.each(['unpend', 'global-config'])(
+      'creates branch with pending checks if Dependency Dashboard check is %s',
+      async (dependencyDashboardCheck) => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        scm.branchExists.mockResolvedValue(false);
+        const inconfig = {
+          ...config,
+          pendingChecks: true,
+          dependencyDashboardChecks: {
+            'renovate/some-branch': dependencyDashboardCheck,
+          },
+        } satisfies BranchConfig;
+        expect(await branchWorker.processBranch(inconfig)).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: 5,
+          result: 'pr-created',
+          commitSha,
+        });
+        expect(commit.commitFilesToBranch).toHaveBeenCalled();
+      },
+    );
+
     // automerge should respect only automergeSchedule
     // mock a case where branchPr does not exist, pr-creation is off-schedule, and the branch is configured for automerge
     it('automerges when there is no pr and, pr-creation is off-schedule', async () => {
@@ -2349,7 +2630,11 @@ describe('workers/repository/update/branch/index', () => {
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
-              commands: ['echo {{{versioning}}}', 'disallowed task'],
+              commands: [
+                'echo {{{versioning}}}',
+                'disallowed task',
+                '{{#if (equals manager "non-existing")}}empty task{{/if}}',
+              ],
               fileFilters: ['modified_file', 'deleted_file'],
             },
             branchName: 'renovate/some-branch',
