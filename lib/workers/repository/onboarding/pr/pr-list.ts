@@ -1,4 +1,6 @@
+import { getDefault } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { getOptions } from '../../../../config/options/index.ts';
 import {
   type RenovateConfig,
   type UpdateType,
@@ -71,6 +73,53 @@ function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
   return { limit: prConcurrentLimit, key: 'prConcurrentLimit' };
 }
 
+/**
+ * Vulnerability alert fixes get their own concurrent-limit budget via `vulnerabilityAlerts.prConcurrentLimit`/ `vulnerabilityAlerts.branchConcurrentLimit`, separate from repository-wide/dependency-specific rules.
+ * Falls back to the `vulnerabilityAlerts` option's own schema default (currently `0`, i.e. no limit) when
+ * unset, via `getDefault()`, rather than duplicating that value here.
+ */
+function resolveVulnerabilityConcurrentLimit(
+  config: RenovateConfig,
+): ConcurrentLimit {
+  // `vulnerabilityAlerts` is typed as `RenovateSharedConfig`, which doesn't declare `prConcurrentLimit`/
+  // `branchConcurrentLimit`, even though both are valid nested options (see docs for `vulnerabilityAlerts`).
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+  const vulnerabilityAlerts = config.vulnerabilityAlerts as
+    | RenovateConfig
+    | undefined;
+  const vulnerabilityAlertsDefault = getDefault(
+    getOptions().find((option) => option.name === 'vulnerabilityAlerts')!,
+  ) as RenovateConfig;
+  const configAsUpgrade: BranchUpgradeConfig = {
+    branchName: '',
+    manager: '',
+    prConcurrentLimit:
+      vulnerabilityAlerts?.prConcurrentLimit ??
+      vulnerabilityAlertsDefault.prConcurrentLimit,
+    // `undefined` and `null` are handled identically by `calcLimit()` (both inherit `prConcurrentLimit`),
+    // so there's no default value to duplicate here - unlike `prConcurrentLimit` above.
+    branchConcurrentLimit: vulnerabilityAlerts?.branchConcurrentLimit,
+  };
+  const prConcurrentLimit = calcLimit([configAsUpgrade], 'prConcurrentLimit');
+  const branchConcurrentLimit = calcLimit(
+    [configAsUpgrade],
+    'branchConcurrentLimit',
+  );
+
+  if (
+    typeof vulnerabilityAlerts?.branchConcurrentLimit === 'number' &&
+    branchConcurrentLimit > 0 &&
+    (prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit)
+  ) {
+    return {
+      limit: branchConcurrentLimit,
+      key: 'branchConcurrentLimit',
+    };
+  }
+
+  return { limit: prConcurrentLimit, key: 'prConcurrentLimit' };
+}
+
 export function getExpectedPrList(
   config: RenovateConfig,
   branches: BranchConfig[],
@@ -81,7 +130,8 @@ export function getExpectedPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
-  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  // Vulnerability alert branches bypass the repository-wide rate/concurrency limits, so they shouldn't
+  // count towards them - they get their own budget, see `resolveVulnerabilityConcurrentLimit()`.
   const securityBranchCount = branches.filter(
     (b) => b.isVulnerabilityAlert,
   ).length;
@@ -99,6 +149,11 @@ export function getExpectedPrList(
     prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
     prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
   }
+  prDesc += getSecurityConcurrentLimitNote(
+    securityBranchCount,
+    concurrentLimit,
+    resolveVulnerabilityConcurrentLimit(config),
+  );
 
   for (const branch of branches) {
     const prTitleRe = regEx(/@(?<scope>[a-z]+\/[a-z]+)/);
@@ -169,6 +224,42 @@ export function getExpectedPrList(
     );
   }
   return prDesc;
+}
+
+/**
+ * Security update Pull Requests bypass the repository-wide `prConcurrentLimit`/`branchConcurrentLimit`
+ * by default, but they can be rate limited on their own via `vulnerabilityAlerts.prConcurrentLimit`/
+ * `branchConcurrentLimit`.
+ *
+ * - If the user has already opted in to that limit, and it would actually throttle the security updates,
+ *   say so - the "not subject to this limit" wording elsewhere refers only to the repository-wide limit.
+ * - Otherwise, once the number of security updates alone would exceed the repository-wide limit, suggest
+ *   that the user may want to opt in to limiting them too.
+ */
+function getSecurityConcurrentLimitNote(
+  securityCount: number,
+  concurrentLimit: number,
+  vulnerabilityLimit: ConcurrentLimit,
+): string {
+  if (securityCount === 0) {
+    return '';
+  }
+
+  if (vulnerabilityLimit.limit > 0) {
+    if (securityCount <= vulnerabilityLimit.limit) {
+      return '';
+    }
+    return emojify(
+      `:information_source: Renovate will only create ${vulnerabilityLimit.limit} security update Pull Request${vulnerabilityLimit.limit > 1 ? 's' : ''} at a time, up to a maximum of ${securityCount} over time, due to your [\`vulnerabilityAlerts.${vulnerabilityLimit.key}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#vulnerabilityalerts) setting.\n\n`,
+    );
+  }
+
+  if (concurrentLimit <= 0 || securityCount <= concurrentLimit) {
+    return '';
+  }
+  return emojify(
+    `:information_source: If you want to rate limit security update Pull Requests too, set [\`vulnerabilityAlerts.prConcurrentLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#vulnerabilityalerts).\n\n`,
+  );
 }
 
 function getBranchUpgradeTypes(branch: BranchConfig): Set<SummaryCategory> {
@@ -383,7 +474,9 @@ export function getExpectedPrListSummary(
   const prHourlyLimit = coerceNumber(config.prHourlyLimit);
   const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
   const concurrentLimit = resolveConcurrentLimit(config);
-  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  const vulnerabilityLimit = resolveVulnerabilityConcurrentLimit(config);
+  // Vulnerability alert branches bypass the repository-wide rate/concurrency limits, so they shouldn't
+  // count towards them - they get their own budget, see `resolveVulnerabilityConcurrentLimit()`.
   const securityCount = Object.keys(stats.securityGroups).length;
 
   if (hasMultipleBaseBranches) {
@@ -452,6 +545,14 @@ export function getExpectedPrListSummary(
     prDesc += `\n**Security updates**:\n\n`;
     for (const groupBranches of Object.values(stats.securityGroups)) {
       prDesc += describeSecurityGroup(groupBranches);
+    }
+    const securityConcurrentLimitNote = getSecurityConcurrentLimitNote(
+      securityCount,
+      concurrentLimit.limit,
+      vulnerabilityLimit,
+    );
+    if (securityConcurrentLimitNote) {
+      prDesc += `\n${securityConcurrentLimitNote}`;
     }
   }
 
