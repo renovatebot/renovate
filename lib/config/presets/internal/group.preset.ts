@@ -372,6 +372,16 @@ const staticGroups = {
       },
     ],
   },
+  octokit: {
+    description: 'Group all `@octokit` packages together.',
+    packageRules: [
+      {
+        groupName: 'octokit packages',
+        groupSlug: 'octokit',
+        matchPackageNames: ['@octokit/**'],
+      },
+    ],
+  },
   phpstan: {
     description: 'Group PHPStan packages together.',
     packageRules: [
@@ -501,6 +511,7 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:micrometer',
+      'group:octokit',
       'group:phpstan',
       'group:polymer',
       'group:puppeteer',
