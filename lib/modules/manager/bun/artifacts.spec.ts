@@ -264,7 +264,7 @@ describe('modules/manager/bun/artifacts', () => {
         fs.readLocalFile.mockResolvedValueOnce('# dummy');
         exec.mockRejectedValueOnce(execError);
 
-        expect(await updateArtifacts(updateArtifact)).toEqual([
+        await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
           { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
         expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
