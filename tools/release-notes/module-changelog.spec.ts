@@ -4,6 +4,7 @@ import type {
   ParsedCommit,
 } from './module-changelog.ts';
 import {
+  attributeReleases,
   categoryRank,
   consolidateDependencyBumps,
   dedupeCommits,
@@ -12,6 +13,7 @@ import {
   groupByModule,
   parseCommitHeader,
   renderModuleChangelog,
+  stripPrReference,
 } from './module-changelog.ts';
 
 const types = [
@@ -19,6 +21,8 @@ const types = [
   { type: 'fix', section: 'Bug Fixes' },
   { type: 'refactor', section: 'Code Refactoring' },
 ];
+
+const repo = 'renovatebot/renovate';
 
 describe('tools/release-notes/module-changelog', () => {
   describe('parseCommitHeader', () => {
@@ -399,7 +403,7 @@ describe('tools/release-notes/module-changelog', () => {
         ]),
       );
 
-      expect(renderModuleChangelog(groups)).toBe(
+      expect(renderModuleChangelog(groups, repo)).toBe(
         [
           '### manager',
           '',
@@ -418,7 +422,7 @@ describe('tools/release-notes/module-changelog', () => {
         new Map(),
       );
 
-      expect(renderModuleChangelog(groups)).toBe(
+      expect(renderModuleChangelog(groups, repo)).toBe(
         ['### Other', '', '- docs: add warning'].join('\n'),
       );
     });
@@ -436,7 +440,7 @@ describe('tools/release-notes/module-changelog', () => {
         new Map(),
       );
 
-      expect(renderModuleChangelog(groups)).toBe(
+      expect(renderModuleChangelog(groups, repo)).toBe(
         [
           '### workers/repository',
           '',
@@ -467,7 +471,7 @@ describe('tools/release-notes/module-changelog', () => {
         new Map(),
       );
 
-      expect(renderModuleChangelog(groups)).toBe(
+      expect(renderModuleChangelog(groups, repo)).toBe(
         [
           '### Breaking changes',
           '',
@@ -494,7 +498,7 @@ describe('tools/release-notes/module-changelog', () => {
         new Map(),
       );
 
-      expect(renderModuleChangelog(groups)).toBe(
+      expect(renderModuleChangelog(groups, repo)).toBe(
         [
           '### deps',
           '',
@@ -535,7 +539,7 @@ describe('tools/release-notes/module-changelog', () => {
         new Map(),
       );
 
-      const rendered = renderModuleChangelog(groups);
+      const rendered = renderModuleChangelog(groups, repo);
       expect(rendered).toContain('<summary>3 updates</summary>');
       // Only the final version survives as a displayed entry.
       expect(rendered).toContain(
@@ -685,6 +689,94 @@ describe('tools/release-notes/module-changelog', () => {
     it('leaves code spans and URLs untouched', () => {
       expect(escapeMentions('see `@foo` at https://example.com/@bar')).toBe(
         'see `@foo` at https://example.com/@bar',
+      );
+    });
+  });
+
+  describe('stripPrReference', () => {
+    it('strips a trailing PR reference', () => {
+      expect(stripPrReference('support ~latest component refs (#45234)')).toBe(
+        'support ~latest component refs',
+      );
+    });
+
+    it('strips a channel marker and PR reference together', () => {
+      expect(
+        stripPrReference(
+          'update dependency @biomejs/biome to v2.5.11 (main) (#45676)',
+        ),
+      ).toBe('update dependency @biomejs/biome to v2.5.11');
+    });
+
+    it('leaves a subject with no PR reference untouched', () => {
+      expect(stripPrReference('add warning to `checkedBranches`')).toBe(
+        'add warning to `checkedBranches`',
+      );
+    });
+  });
+
+  describe('attributeReleases', () => {
+    it('attributes each commit to the nearest release at or after it', () => {
+      const releaseTagBySha = new Map([
+        ['c3', '44.61.3'],
+        ['c5', '44.61.4'],
+      ]);
+
+      expect(
+        attributeReleases(['c1', 'c2', 'c3', 'c4', 'c5'], releaseTagBySha),
+      ).toEqual(
+        new Map([
+          ['c1', '44.61.3'],
+          ['c2', '44.61.3'],
+          ['c3', '44.61.3'],
+          ['c4', '44.61.4'],
+          ['c5', '44.61.4'],
+        ]),
+      );
+    });
+
+    it('leaves a trailing commit unattributed if no release follows it', () => {
+      const releaseTagBySha = new Map([['c1', '44.61.3']]);
+
+      const result = attributeReleases(['c1', 'c2'], releaseTagBySha);
+      expect(result.get('c1')).toBe('44.61.3');
+      expect(result.has('c2')).toBe(false);
+    });
+  });
+
+  describe('renderModuleChangelog release links', () => {
+    it('appends a release link when the commit has one', () => {
+      const groups = groupByModule(
+        [
+          {
+            type: 'fix',
+            scope: 'workers/repository',
+            subject: 'a',
+            release: '44.61.3',
+          },
+        ],
+        types,
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups, repo)).toBe(
+        [
+          '### workers/repository',
+          '',
+          '- fix: a ([44.61.3](https://github.com/renovatebot/renovate/releases/tag/44.61.3))',
+        ].join('\n'),
+      );
+    });
+
+    it('omits the release link when the commit has none', () => {
+      const groups = groupByModule(
+        [{ type: 'fix', scope: 'workers/repository', subject: 'a' }],
+        types,
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups, repo)).toBe(
+        ['### workers/repository', '', '- fix: a'].join('\n'),
       );
     });
   });

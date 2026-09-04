@@ -8,6 +8,10 @@ export interface ParsedCommit {
   scope: string | undefined;
   subject: string;
   breaking?: boolean;
+  /** The release (tag) this commit was first shipped in, if known. Set by
+   * `attributeReleases`, not `parseCommitHeader` — a single commit header
+   * carries no information about which release it landed in. */
+  release?: string;
 }
 
 export interface ModuleEntry {
@@ -72,6 +76,58 @@ export function parseCommitHeader(header: string): ParsedCommit | undefined {
 function typeRank(types: CommitTypeConfig[], type: string): number {
   const rank = types.findIndex((entry) => entry.type === type);
   return rank === -1 ? types.length : rank;
+}
+
+// Matches GitHub's own trailing PR reference on a squash-merge commit
+// subject, e.g. " (#45678)" or " (main) (#45678)" (the "(main)" part is
+// semantic-release's channel marker, which Renovate's own bump commits
+// carry). We replace this with which release the commit shipped in
+// instead — more useful for tracing when something changed than a link to
+// the PR that merged it.
+const TRAILING_PR_REFERENCE_RE = /\s*(?:\([\w-]+\)\s*)?\(#\d+\)\s*$/;
+
+/**
+ * Strip a trailing GitHub PR reference (and any channel marker before it)
+ * from a commit subject.
+ */
+export function stripPrReference(subject: string): string {
+  return subject.replace(TRAILING_PR_REFERENCE_RE, '');
+}
+
+/**
+ * Attribute each commit to the release it first shipped in.
+ *
+ * `orderedShas` must be oldest-to-newest, covering every commit in the
+ * range up to (and including) the release being summarized. `releaseTagBySha`
+ * maps a commit SHA to the release tag pointing directly at it, for every
+ * commit in the repository that happens to be a release boundary (most
+ * commits won't be in this map at all).
+ *
+ * A commit is attributed to the nearest release tag at or after it in
+ * `orderedShas` — i.e. whichever release actually shipped it. A commit
+ * with no release at or after it in the given range (for example, because
+ * `orderedShas` doesn't reach all the way to a tagged commit) is left
+ * unattributed.
+ */
+export function attributeReleases(
+  orderedShas: string[],
+  releaseTagBySha: ReadonlyMap<string, string>,
+): Map<string, string> {
+  const releaseBySha = new Map<string, string>();
+  const pending: string[] = [];
+
+  for (const sha of orderedShas) {
+    pending.push(sha);
+    const release = releaseTagBySha.get(sha);
+    if (release) {
+      for (const pendingSha of pending) {
+        releaseBySha.set(pendingSha, release);
+      }
+      pending.length = 0;
+    }
+  }
+
+  return releaseBySha;
 }
 
 /**
@@ -462,25 +518,37 @@ export function groupByModule(
   return groups;
 }
 
+function renderReleaseLink(commit: ParsedCommit, repo: string): string {
+  if (!commit.release) {
+    return '';
+  }
+  return ` ([${commit.release}](https://github.com/${repo}/releases/tag/${commit.release}))`;
+}
+
+function renderCommitLine(commit: ParsedCommit, repo: string): string {
+  return `- ${commit.type}: ${commit.subject}${renderReleaseLink(commit, repo)}`;
+}
+
 /**
- * Render module groups as `###` headings over a Markdown list, for example:
+ * Render module groups as `###` headings over a Markdown list, linking each
+ * commit to the release it shipped in (when known), for example:
  *
  * ### Breaking changes
  *
- * - `manager/npm` fix!: drop support for npm 6
+ * - `manager/npm` fix!: drop support for npm 6 ([44.61.4](...))
  *
  * ### manager
  *
  * - Cargo
- *   - fix: support ~latest component refs
+ *   - fix: support ~latest component refs ([44.61.3](...))
  *
  * ### deps
  *
  * <details>
  * <summary>2 updates</summary>
  *
- * - chore: update dependency foo to v1.2.3
- * - build: update dependency bar to v4.5.6
+ * - chore: update dependency foo to v1.2.3 ([44.61.3](...))
+ * - build: update dependency bar to v4.5.6 ([44.61.4](...))
  *
  * </details>
  *
@@ -488,7 +556,10 @@ export function groupByModule(
  *
  * - docs: add warning to `checkedBranches`
  */
-export function renderModuleChangelog(groups: ModuleGroup[]): string {
+export function renderModuleChangelog(
+  groups: ModuleGroup[],
+  repo: string,
+): string {
   const sections: string[] = [];
   for (const group of groups) {
     const lines: string[] = [];
@@ -497,7 +568,9 @@ export function renderModuleChangelog(groups: ModuleGroup[]): string {
       lines.push('### Breaking changes', '');
       for (const commit of group.commits) {
         const scopePrefix = commit.scope ? `\`${commit.scope}\` ` : '';
-        lines.push(`- ${scopePrefix}${commit.type}!: ${commit.subject}`);
+        lines.push(
+          `- ${scopePrefix}${commit.type}!: ${commit.subject}${renderReleaseLink(commit, repo)}`,
+        );
       }
       sections.push(lines.join('\n'));
       continue;
@@ -508,7 +581,7 @@ export function renderModuleChangelog(groups: ModuleGroup[]): string {
       for (const module of group.modules) {
         lines.push(`- ${module.label}`);
         for (const commit of module.commits) {
-          lines.push(`  - ${commit.type}: ${commit.subject}`);
+          lines.push(`  ${renderCommitLine(commit, repo)}`);
         }
       }
       sections.push(lines.join('\n'));
@@ -528,7 +601,7 @@ export function renderModuleChangelog(groups: ModuleGroup[]): string {
     }
 
     for (const commit of group.commits) {
-      lines.push(`- ${commit.type}: ${commit.subject}`);
+      lines.push(renderCommitLine(commit, repo));
     }
 
     if (collapse) {
