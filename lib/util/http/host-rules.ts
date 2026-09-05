@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
@@ -210,7 +210,7 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     logger.once.debug(`hostRules: no authentication for ${host}`);
   }
   // Apply optional params
-  if (hostRule.abortOnError) {
+  if (!isUndefined(hostRule.abortOnError)) {
     options.abortOnError = hostRule.abortOnError;
   }
 

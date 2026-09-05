@@ -4,8 +4,10 @@ import { z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as _packageCache from '../../cache/package/index.ts';
-import { Http, type HttpResponse } from '../index.ts';
+import * as hostRules from '../../host-rules.ts';
+import { Http, HttpError, type HttpResponse } from '../index.ts';
 import {
   PackageHttpCacheProvider,
   type PackageHttpCacheProviderOptions,
@@ -54,6 +56,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
 
     GlobalConfig.reset();
+    hostRules.clear();
   });
 
   function mockTime(time: string) {
@@ -70,6 +73,16 @@ describe('util/http/cache/package-http-cache-provider', () => {
       checkCacheControlHeader: false,
       ...options,
     });
+  }
+
+  function mockStaleCache(body: unknown = 'cached response'): void {
+    mockTime('2024-06-15T00:15:00.000Z');
+    cache[url] = {
+      etag: 'etag-value',
+      lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+      httpResponse: { statusCode: 200, body },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
   }
 
   it('skips persisting null cache values', async () => {
@@ -271,20 +284,83 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(packageCache.setWithRawTtl).toHaveBeenCalled();
   });
 
-  it('serves stale response during revalidation error', async () => {
-    mockTime('2024-06-15T00:15:00.000Z');
-    cache[url] = {
-      etag: 'etag-value',
-      lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-      httpResponse: { statusCode: 200, body: 'cached response' },
-      timestamp: '2024-06-15T00:00:00.000Z',
-    };
+  it.each([500, 502, 503, 504])(
+    'serves stale response during %i revalidation error',
+    async (statusCode) => {
+      mockStaleCache();
+      const cacheProvider = createCacheProvider();
+      httpMock.scope(url).get('').reply(statusCode);
+
+      const res = await http.getText(url, { cacheProvider });
+
+      expect(res.body).toBe('cached response');
+    },
+  );
+
+  it('serves stale response for a response-bearing retryable error', async () => {
+    mockStaleCache();
+    const readError = httpMock.error({
+      code: 'ECONNRESET',
+      response: { statusCode: 200 },
+    });
+    Object.setPrototypeOf(readError, HttpError.prototype);
+    packageCache.setWithRawTtl.mockRejectedValueOnce(readError);
     const cacheProvider = createCacheProvider();
-    httpMock.scope(url).get('').reply(500);
+    httpMock.scope(url).get('').reply(200, 'partial response');
 
     const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
+  });
+
+  it('honors explicit abortOnError before stale cache fallback', async () => {
+    mockStaleCache();
+    hostRules.add({
+      matchHost: 'http://example.com',
+      abortOnError: true,
+    });
+    const cacheProvider = createCacheProvider();
+    httpMock.scope(url).get('').reply(500);
+
+    await expect(http.getText(url, { cacheProvider })).rejects.toThrow(
+      ExternalHostError,
+    );
+  });
+
+  it.each([401, 404])(
+    'does not serve stale response during %i response',
+    async (statusCode) => {
+      mockStaleCache();
+      const cacheProvider = createCacheProvider();
+      httpMock.scope(url).get('').reply(statusCode);
+
+      await expect(http.getText(url, { cacheProvider })).rejects.toThrow(
+        HttpError,
+      );
+    },
+  );
+
+  it('does not serve stale response for malformed JSON', async () => {
+    mockStaleCache({ cached: true });
+    const cacheProvider = createCacheProvider();
+    httpMock.scope(url).get('').reply(200, '{');
+
+    await expect(http.getJsonUnchecked(url, { cacheProvider })).rejects.toThrow(
+      "Expected property name or '}' in JSON at position 1",
+    );
+  });
+
+  it('does not serve stale response for cache write errors', async () => {
+    mockStaleCache();
+    packageCache.setWithRawTtl.mockRejectedValueOnce(
+      new Error('cache write failed'),
+    );
+    const cacheProvider = createCacheProvider();
+    httpMock.scope(url).get('').reply(200, 'new response');
+
+    await expect(http.getText(url, { cacheProvider })).rejects.toThrow(
+      'cache write failed',
+    );
   });
 
   it('stores a trimmed body when refreshing cache after 304', async () => {

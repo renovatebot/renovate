@@ -1,3 +1,4 @@
+import type { RetryObject } from 'got';
 import { ZodError, z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
@@ -17,6 +18,12 @@ import * as throttle from './throttle.ts';
 import type { HttpResponse } from './types.ts';
 
 const baseUrl = 'http://renovate.com';
+
+class FastRetryHttp extends Http {
+  protected override calculateRetryDelay(retryObject: RetryObject): number {
+    return super.calculateRetryDelay(retryObject) > 0 ? 1 : 0;
+  }
+}
 
 describe('util/http/index', () => {
   let http: Http;
@@ -440,7 +447,7 @@ describe('util/http/index', () => {
   describe('retry', () => {
     beforeEach(() => {
       vi.stubEnv('NODE_ENV', undefined);
-      http = new Http('dummy');
+      http = new FastRetryHttp('dummy');
     });
 
     it('works', async () => {
@@ -458,6 +465,20 @@ describe('util/http/index', () => {
         },
         statusCode: 200,
       });
+      expect(httpMock.allUsed()).toBeTrue();
+    });
+
+    it('retries EBADF errors for GET requests', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/test')
+        .replyWithError(httpMock.error({ code: 'EBADF' }))
+        .get('/test')
+        .reply(200, 'retried');
+
+      const res = await http.getText(`${baseUrl}/test`);
+
+      expect(res.body).toBe('retried');
       expect(httpMock.allUsed()).toBeTrue();
     });
   });

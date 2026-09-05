@@ -281,6 +281,17 @@ describe('modules/datasource/npm/get', () => {
     ).rejects.toThrow(ExternalHostError);
   });
 
+  it('throws ExternalHostError for EBADF without stale cache', async () => {
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get('/some-package')
+      .replyWithError(httpMock.error({ code: 'EBADF' }));
+
+    await expect(
+      getDependency(http, defaultRegistryUrl, 'some-package'),
+    ).rejects.toThrow(ExternalHostError);
+  });
+
   it('redact body for ExternalHostError when error happens on registry.npmjs.org', async () => {
     httpMock
       .scope(defaultRegistryUrl)
@@ -630,6 +641,31 @@ describe('modules/datasource/npm/get', () => {
       headers: { 'cache-control': 'max-age=180, public' },
     };
 
+    const cachedDependency = {
+      releases: [
+        {
+          attestation: false,
+          dependencies: undefined,
+          devDependencies: undefined,
+          gitRef: undefined,
+          version: '1.0.0',
+        },
+      ],
+      sourceDirectory: 'packages/foo',
+      sourceUrl:
+        'https://github.com/octocat/Hello-World/tree/master/packages/test',
+      tags: { latest: '1.0.0' },
+    };
+
+    function mockExpiredCache(): void {
+      vi.setSystemTime('2024-06-15T00:15:00.000Z');
+      packageCache.get.mockResolvedValue({
+        etag: 'some-etag',
+        timestamp: '2024-06-15T00:00:00.000Z',
+        httpResponse,
+      });
+    }
+
     it('stores a trimmed packument body in cache', async () => {
       httpMock
         .scope('https://example.com')
@@ -863,36 +899,42 @@ describe('modules/datasource/npm/get', () => {
     });
 
     it('returns soft expired cache on npmjs error', async () => {
-      vi.setSystemTime('2024-06-15T00:15:00.000Z');
-      packageCache.get.mockResolvedValue({
-        etag: 'some-etag',
-        timestamp: '2024-06-15T00:00:00.000Z',
-        httpResponse,
-      });
-      setNpmrc('registry=https://example.com\n_authToken=XXX');
-      httpMock.scope('https://example.com').get('/some-package').reply(500);
+      mockExpiredCache();
+      httpMock.scope(defaultRegistryUrl).get('/some-package').reply(500);
 
-      const dep = await getDependency(
-        http,
-        'https://example.com',
-        'some-package',
-      );
+      const dep = await getDependency(http, defaultRegistryUrl, 'some-package');
 
       expect(dep).toEqual({
-        registryUrl: 'https://example.com',
-        releases: [
-          {
-            attestation: false,
-            dependencies: undefined,
-            devDependencies: undefined,
-            gitRef: undefined,
-            version: '1.0.0',
-          },
-        ],
-        sourceDirectory: 'packages/foo',
-        sourceUrl:
-          'https://github.com/octocat/Hello-World/tree/master/packages/test',
-        tags: { latest: '1.0.0' },
+        registryUrl: defaultRegistryUrl,
+        ...cachedDependency,
+      });
+    });
+
+    it('honors explicit npmjs abortOnError before stale cache', async () => {
+      mockExpiredCache();
+      hostRules.add({
+        matchHost: defaultRegistryUrl,
+        abortOnError: true,
+      });
+      httpMock.scope(defaultRegistryUrl).get('/some-package').reply(500);
+
+      await expect(
+        getDependency(http, defaultRegistryUrl, 'some-package'),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('returns soft expired cache on npmjs EBADF', async () => {
+      mockExpiredCache();
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get('/some-package')
+        .replyWithError(httpMock.error({ code: 'EBADF' }));
+
+      const dep = await getDependency(http, defaultRegistryUrl, 'some-package');
+
+      expect(dep).toEqual({
+        registryUrl: defaultRegistryUrl,
+        ...cachedDependency,
       });
     });
   });

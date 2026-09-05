@@ -75,7 +75,7 @@ export interface GraphqlOptions {
  * Renovate http options that are partly not part of `got` options.
  * Remember to delete these in `normalizeGotOptions` before passing to `got`.
  */
-export interface HttpOptions {
+export interface HttpOptions extends Pick<GotExtraOptions, 'abortOnError'> {
   body?: any;
   username?: string;
   password?: string;

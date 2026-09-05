@@ -3,7 +3,6 @@ import { z } from 'zod/v4';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import type { Http } from '../../../util/http/index.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
@@ -84,22 +83,10 @@ export async function getDependency(
       checkCacheControlHeader: true,
       writeSchema: CachedPackument,
     });
-    const options: HttpOptions = { cacheProvider };
-
-    // set abortOnError for registry.npmjs.org if no hostRule with explicit abortOnError exists
-    if (
-      registryUrl === defaultRegistryUrl &&
-      hostRules.find({ url: defaultRegistryUrl })?.abortOnError === undefined
-    ) {
-      logger.trace(
-        { packageName, registry: defaultRegistryUrl },
-        'setting abortOnError hostRule for well known host',
-      );
-      hostRules.add({
-        matchHost: defaultRegistryUrl,
-        abortOnError: true,
-      });
-    }
+    const options: HttpOptions = {
+      abortOnError: registryUrl === defaultRegistryUrl,
+      cacheProvider,
+    };
 
     const resp = await http.getJson(packageUrl, options, NpmResponse);
     const { body: res } = resp;
