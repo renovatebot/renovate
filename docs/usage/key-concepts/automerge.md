@@ -194,6 +194,21 @@ Confirm you've set the correct "required checks" for your base branch.
 
 Finally, allow Renovate to automerge by setting `automerge=true` in your Renovate config file (see earlier example).
 
+### GitLab Merge Trains
+
+Renovate supports GitLab's [merge trains](https://docs.gitlab.com/ci/pipelines/merge_trains/).
+Renovate detects whether merge trains are enabled on the project and then:
+
+- With `platformAutomerge` enabled (the default), Renovate asks GitLab to add the MR to the merge train once its pipeline succeeds. This requires GitLab 17.11 or later.
+- With `platformAutomerge=false`, Renovate adds the MR to the merge train itself once all checks have passed, instead of merging it directly.
+- `rebaseWhen=auto` resolves to `conflicted` instead of `behind-base-branch`, because the merge train already tests MRs against the head of the target branch.
+
+<!-- prettier-ignore -->
+!!! warning
+  Branch automerge (`automergeType=branch`) cannot work if merge trains are enabled, because pushing directly to the target branch is not possible.
+  Renovate detects this misconfiguration, logs a warning, and creates a MR instead.
+  Configure `automergeType=pr` in such projects.
+
 ## Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.

@@ -561,8 +561,10 @@ describe('modules/platform/gitlab/index', () => {
       );
       await expect(gitlab.getBranchForceRebase()).resolves.toBeTrue();
     });
+  });
 
-    it('should return false when merge trains are enabled', async () => {
+  describe('isBranchMergeQueueEnabled', () => {
+    it('should return true when merge trains are enabled', async () => {
       await initRepo(
         {
           repository: 'some/repo/project',
@@ -570,11 +572,27 @@ describe('modules/platform/gitlab/index', () => {
         {
           default_branch: 'master',
           http_url_to_repo: null,
-          merge_method: 'ff',
           merge_trains_enabled: true,
         },
       );
-      await expect(gitlab.getBranchForceRebase()).resolves.toBeFalse();
+      await expect(
+        gitlab.isBranchMergeQueueEnabled('master'),
+      ).resolves.toBeTrue();
+    });
+
+    it('should return false when merge trains are disabled', async () => {
+      await initRepo(
+        {
+          repository: 'some/repo/project',
+        },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+        },
+      );
+      await expect(
+        gitlab.isBranchMergeQueueEnabled('master'),
+      ).resolves.toBeFalse();
     });
   });
 
@@ -4031,6 +4049,50 @@ describe('modules/platform/gitlab/index', () => {
           id: 1,
         }),
       ).resolves.toBeTrue();
+    });
+
+    it('adds the MR to the merge train when merge trains are enabled', async () => {
+      const scope = await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+          merge_trains_enabled: true,
+        },
+      );
+      scope
+        .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(201);
+      await expect(
+        gitlab.mergePr({
+          id: 1,
+          targetBranch: 'master',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('returns false if adding the MR to the merge train fails', async () => {
+      const scope = await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+          merge_trains_enabled: true,
+        },
+      );
+      scope
+        .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(403);
+      await expect(
+        gitlab.mergePr({
+          id: 1,
+          targetBranch: 'master',
+        }),
+      ).resolves.toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to add MR to the merge train',
+      );
     });
   });
 
