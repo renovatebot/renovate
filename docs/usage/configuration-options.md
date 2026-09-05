@@ -2346,8 +2346,10 @@ By default, all headers starting with "X-" are allowed.
 
 A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+`headers` you configure in a repository config file, or a preset it extends, are checked against `allowedHeaders`.
 Any header which is not permitted is dropped, and a warning is logged.
+
+`allowedHeaders` does not constrain the self-hosted administrator's own `hostRules` (for example in a `config.js` file, or a `repositories[]` entry): their `headers` are always applied, regardless of `allowedHeaders`.
 
 When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
 

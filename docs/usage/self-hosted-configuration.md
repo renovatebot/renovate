@@ -127,9 +127,15 @@ The `allowedHeaders` config option takes an array of minimatch-compatible globs 
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 !!! note
+  `allowedHeaders` constrains what a repository, and the presets it extends, may set - it does not constrain you, the self-hosted administrator.
+  <br>
+  The `headers` you set in your own `hostRules` - whether in your global config or in a `repositories[]` entry - are always applied, regardless of `allowedHeaders`, as is any `headers` set by a preset a `repositories[]` entry chose to `extends`.
+  <br>
+  This does not (yet) extend to a preset your global config itself chooses to `extends` when no `repositories[]` entry is involved: those `headers` are still constrained by `allowedHeaders`, unlike the equivalent case for `env`.
+  <br>
   Where more than one of your own rules matches a request, the `headers` of the most specific rule are used, and replace those of the broader rules it matched alongside.
   So to keep a header away from a host that a broader rule of yours also matches, give that host a rule of its own which sets `headers`.
-  Whichever of your `headers` that leaves for a request are then applied over any a repository set, and always with the value you set: a repository's `hostRules` - or those of a preset it extends - can neither stop one of them being sent, nor replace its value.
+  Whichever of your `headers` that leaves for a request are then applied over any a repository set, and always with the value you set: a repository's `hostRules` - or those of a preset it extends - can neither stop one of them being sent, nor replace its value, and can only set a header name of its own where it is permitted by `allowedHeaders`.
 
 Examples:
 

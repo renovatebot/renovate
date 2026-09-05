@@ -865,6 +865,44 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('does not drop a header named in trustedHeaderNames, even where allowedHeaders would deny it', () => {
+    // set by `hostRules.find()` for headers that already bypassed `allowedHeaders` at registration as the self-hosted administrator's own - must not be re-checked, and dropped, here
+    GlobalConfig.set({ allowedHeaders: ['X-*'] });
+    const hostRule = {
+      matchHost: 'https://domain.com/all-versions',
+      headers: {
+        Authorization: 'from-admin',
+      },
+      trustedHeaderNames: ['Authorization'],
+    };
+
+    expect(applyHostRule(url, {}, hostRule)).toEqual({
+      headers: {
+        Authorization: 'from-admin',
+      },
+    });
+  });
+
+  it("keeps an admin's trusted headers exempt from allowedHeaders through a hostType fallback", () => {
+    // `findMatchingRule`'s hostType fallbacks (e.g. `github-tags` -> `github`) rebuild `res` as `{ ...fallbackResult, ...res }` for each one - `trustedHeaderNames` must survive that merge alongside `headers`, not just when queried under the rule's own `hostType`
+    GlobalConfig.set({ allowedHeaders: ['X-*'] });
+    hostRules.add(
+      {
+        hostType: 'github',
+        matchHost: 'github.com',
+        headers: { Authorization: 'from-admin' },
+      },
+      { trusted: true },
+    );
+
+    const opts: GotOptions = { ...options, hostType: 'github-tags' };
+    const hostRule = findMatchingRule(url, opts);
+
+    expect(applyHostRule(url, opts, hostRule).headers).toEqual({
+      Authorization: 'from-admin',
+    });
+  });
+
   it('enabled=false with noAuth', () => {
     hostRules.add({
       hostType: 'docker',
