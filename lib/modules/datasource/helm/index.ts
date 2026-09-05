@@ -1,6 +1,14 @@
+import { Readable } from 'node:stream';
+import type { S3ClientConfig } from '@aws-sdk/client-s3';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { S3UrlParts } from '../../../util/s3.ts';
+import { getS3Client, parseS3Url } from '../../../util/s3.ts';
+import { streamToString } from '../../../util/streams.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
 import * as helmVersioning from '../../versioning/helm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -31,6 +39,13 @@ export class HelmDatasource extends Datasource {
   private async _getRepositoryData(
     helmRepository: string,
   ): Promise<HelmRepository> {
+    const indexUrl = `${ensureTrailingSlash(helmRepository)}index.yaml`;
+
+    const s3Url = parseS3Url(indexUrl);
+    if (s3Url) {
+      return await getS3RepositoryData(s3Url, indexUrl);
+    }
+
     const { val, err } = await this.http
       .getYamlSafe(
         'index.yaml',
@@ -76,4 +91,39 @@ export class HelmDatasource extends Datasource {
     }
     return releases;
   }
+}
+
+async function getS3RepositoryData(
+  s3Url: S3UrlParts,
+  indexUrl: string,
+): Promise<HelmRepository> {
+  const client = getS3Client(undefined, undefined, getS3Credentials(indexUrl));
+  const { Body } = await client.send(new GetObjectCommand(s3Url));
+  if (!(Body instanceof Readable)) {
+    logger.debug({ indexUrl }, 'Helm S3 lookup error: unsupported Body type');
+    throw new Error(`Unsupported S3 response body for ${indexUrl}`);
+  }
+  return parseSingleYaml(await streamToString(Body), {
+    customSchema: HelmRepository,
+  });
+}
+
+function getS3Credentials(
+  indexUrl: string,
+): S3ClientConfig['credentials'] | undefined {
+  const { username, password, token } = hostRules.find({
+    hostType: HelmDatasource.id,
+    url: indexUrl,
+  });
+
+  // Fall back to the default AWS credential provider chain
+  if (!username || !password) {
+    return undefined;
+  }
+
+  return {
+    accessKeyId: username,
+    secretAccessKey: password,
+    sessionToken: token,
+  };
 }

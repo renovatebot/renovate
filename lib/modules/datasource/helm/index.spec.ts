@@ -1,7 +1,11 @@
+import { Readable } from 'node:stream';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { HelmDatasource } from './index.ts';
 
@@ -261,6 +265,91 @@ describe('modules/datasource/helm/index', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('S3', () => {
+    const s3mock = mockClient(S3Client);
+
+    afterEach(() => {
+      s3mock.reset();
+      hostRules.clear();
+    });
+
+    it('returns releases from an S3 bucket', async () => {
+      s3mock
+        .on(GetObjectCommand, {
+          Bucket: 'chart-bucket',
+          Key: 'charts/index.yaml',
+        })
+        .resolvesOnce({ Body: Readable.from([indexYaml]) as never });
+
+      const res = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'ambassador',
+        registryUrls: ['s3://chart-bucket/charts'],
+      });
+
+      expect(res).toMatchObject({
+        homepage: 'https://www.getambassador.io/',
+        registryUrl: 's3://chart-bucket/charts',
+        sourceUrl: 'https://github.com/datawire/ambassador',
+        releases: expect.toBeArrayOfSize(27),
+      });
+    });
+
+    it('uses credentials from host rules', async () => {
+      hostRules.add({
+        hostType: HelmDatasource.id,
+        matchHost: 'chart-bucket',
+        username: 'some-access-key',
+        password: 'some-secret-key',
+        token: 'some-session-token',
+      });
+      s3mock
+        .on(GetObjectCommand, {
+          Bucket: 'chart-bucket',
+          Key: 'charts/index.yaml',
+        })
+        .resolvesOnce({ Body: Readable.from([indexYaml]) as never });
+
+      const res = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'ambassador',
+        registryUrls: ['s3://chart-bucket/charts'],
+      });
+
+      expect(res).toMatchObject({ registryUrl: 's3://chart-bucket/charts' });
+      const client = s3mock.call(0).thisValue as S3Client;
+      expect(await client.config.credentials()).toMatchObject({
+        accessKeyId: 'some-access-key',
+        secretAccessKey: 'some-secret-key',
+        sessionToken: 'some-session-token',
+      });
+    });
+
+    it('returns null when the S3 object is missing', async () => {
+      s3mock.on(GetObjectCommand).rejectsOnce('NoSuchKey');
+
+      expect(
+        await getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null for an unsupported response body', async () => {
+      s3mock.on(GetObjectCommand).resolvesOnce({ Body: undefined });
+
+      expect(
+        await getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).toBeNull();
     });
   });
 });
