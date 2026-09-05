@@ -1635,15 +1635,15 @@ describe('modules/platform/github/index', () => {
 
   describe('isBranchMergeQueueEnabled', () => {
     beforeEach(() => {
-      process.env.RENOVATE_X_GITHUB_MERGE_QUEUE = 'true';
+      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', 'true');
     });
 
     afterEach(() => {
-      delete process.env.RENOVATE_X_GITHUB_MERGE_QUEUE;
+      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', undefined);
     });
 
     it('should return false if the experimental flag is not set', async () => {
-      delete process.env.RENOVATE_X_GITHUB_MERGE_QUEUE;
+      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', undefined);
 
       const res = await github.isBranchMergeQueueEnabled('main');
 
@@ -5668,11 +5668,11 @@ describe('modules/platform/github/index', () => {
     };
 
     beforeEach(() => {
-      process.env.RENOVATE_X_GITHUB_MERGE_QUEUE = 'true';
+      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', 'true');
     });
 
     afterEach(() => {
-      delete process.env.RENOVATE_X_GITHUB_MERGE_QUEUE;
+      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', undefined);
     });
 
     function mergeQueueMock(
@@ -5725,7 +5725,7 @@ describe('modules/platform/github/index', () => {
         },
       ]);
       // The PR is not merged yet, so it must not be cached as merged
-      expect(await github.getPr(1234)).toMatchObject({
+      await expect(github.getPr(1234)).resolves.toMatchObject({
         number: 1234,
         state: 'open',
       });
