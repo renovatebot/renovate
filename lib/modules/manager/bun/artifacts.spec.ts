@@ -116,6 +116,162 @@ describe('modules/manager/bun/artifacts', () => {
         });
       });
 
+      it('writes configured npmrc for the bun artifact command', async () => {
+        updateArtifact.packageFileName = 'package.json';
+        updateArtifact.config.npmrc = 'registry=https://registry.example.com/';
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        const newLock = Buffer.from('new');
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+          'registry=https://registry.example.com/\n',
+        );
+      });
+
+      it('writes a workspace npmrc beside the root lockfile', async () => {
+        updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.config.npmrc =
+          '@scope:registry=https://registry.example.com/';
+        updateArtifact.config.npmrcMerge = true;
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        // no .npmrc in the lockfile directory
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        const newLock = Buffer.from('new');
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+          '@scope:registry=https://registry.example.com/\n',
+        );
+      });
+
+      it('merges configured npmrc with repo .npmrc when npmrcMerge=true', async () => {
+        updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.config.npmrc =
+          '@scope:registry=https://registry.example.com/';
+        updateArtifact.config.npmrcMerge = true;
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        // original .npmrc in the lockfile directory
+        fs.readLocalFile.mockResolvedValueOnce(
+          'registry=https://repo.example.com/',
+        );
+        fs.findLocalSiblingOrParent.mockImplementationOnce(
+          (fileName, otherFileName) =>
+            Promise.resolve(
+              fileName === 'bun.lockb' && otherFileName === '.npmrc'
+                ? '.npmrc'
+                : null,
+            ),
+        );
+        // .npmrc read by resolveNpmrc
+        fs.readLocalFile.mockResolvedValueOnce(
+          'registry=https://repo.example.com/',
+        );
+        const newLock = Buffer.from('new');
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
+        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+          '@scope:registry=https://registry.example.com/\nregistry=https://repo.example.com/\n',
+        );
+        // original .npmrc is restored afterwards
+        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[2][1]).toBe(
+          'registry=https://repo.example.com/',
+        );
+      });
+
+      it('ignores repo .npmrc when npmrcMerge=false', async () => {
+        updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.config.npmrc =
+          '@scope:registry=https://registry.example.com/';
+        updateArtifact.config.npmrcMerge = false;
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        // original .npmrc in the lockfile directory
+        fs.readLocalFile.mockResolvedValueOnce(
+          'registry=https://repo.example.com/',
+        );
+        fs.findLocalSiblingOrParent.mockImplementationOnce(
+          (fileName, otherFileName) =>
+            Promise.resolve(
+              fileName === 'bun.lockb' && otherFileName === '.npmrc'
+                ? '.npmrc'
+                : null,
+            ),
+        );
+        // .npmrc read by resolveNpmrc
+        fs.readLocalFile.mockResolvedValueOnce(
+          'registry=https://repo.example.com/',
+        );
+        const newLock = Buffer.from('new');
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
+        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+          '@scope:registry=https://registry.example.com/\n',
+        );
+        // original .npmrc is restored afterwards
+        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[2][1]).toBe(
+          'registry=https://repo.example.com/',
+        );
+      });
+
+      it('resets npmrc when the bun command fails', async () => {
+        const execError = new ExecError('nope', {
+          cmd: '',
+          stdout: '',
+          stderr: '',
+          options: {},
+        });
+        updateArtifact.packageFileName = 'package.json';
+        updateArtifact.config.npmrc = 'registry=https://registry.example.com/';
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
+        exec.mockRejectedValueOnce(execError);
+
+        await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
+        ]);
+        expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
+        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[2][1]).toBe('# dummy');
+      });
+
       it('supports lockFileMaintenance', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -165,15 +321,21 @@ describe('modules/manager/bun/artifacts', () => {
           stderr: '',
           options: {},
         });
+        updateArtifact.packageFileName = 'package.json';
+        updateArtifact.config.npmrc = 'registry=https://registry.example.com/';
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
         const oldLock = Buffer.from('old');
         fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         exec.mockRejectedValueOnce(execError);
         await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
           TEMPORARY_ERROR,
         );
+        expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
+        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
+        expect(fs.writeLocalFile.mock.calls[2][1]).toBe('# dummy');
       });
 
       it('handles full error', async () => {
