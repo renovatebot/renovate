@@ -244,7 +244,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(getInRangeReleasesMock).toHaveBeenCalledExactlyOnceWith(param);
     });
 
-    it('supports github enterprise and github.com changelog', async () => {
+    it('supports GHES and github.com changelog', async () => {
       githubTagsMock.mockRejectedValue([]);
       githubReleasesMock.mockRejectedValue([]);
       httpMock.scope(githubApiHost).persist().get(/.*/).reply(200, []);
@@ -260,7 +260,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       ).resolves.toMatchObject(expectedChangeLog());
     });
 
-    it('supports github enterprise and github enterprise changelog', async () => {
+    it('supports GHES and GHES changelog', async () => {
       githubTagsMock.mockRejectedValue([]);
       githubReleasesMock.mockRejectedValue([]);
       httpMock
@@ -288,7 +288,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       );
     });
 
-    it('supports github.com and github enterprise changelog', async () => {
+    it('supports github.com and GHES changelog', async () => {
       githubTagsMock.mockRejectedValue([]);
       githubReleasesMock.mockRejectedValue([]);
       httpMock

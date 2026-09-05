@@ -276,7 +276,7 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
-    it('paginates with auth and repo on GHE', async () => {
+    it('paginates with auth and repo on GHES', async () => {
       const url = '/api/v3/some-url?per_page=2';
       hostRules.add({
         hostType: 'github',
@@ -332,15 +332,15 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a']);
     });
 
-    it('rebases GHE Server pagination links', async () => {
+    it('rebases GHES pagination links', async () => {
       vi.stubEnv('RENOVATE_X_REBASE_PAGINATION_LINKS', '1');
-      // The origin and base URL which Renovate uses (from its config) to reach GHE:
+      // The origin and base URL which Renovate uses (from its config) to reach GHES:
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
       setBaseUrl(baseUrl);
-      // The hostname from GHE settings, which users use through their browsers to reach GHE:
+      // The hostname from GHES settings, which users use through their browsers to reach GHES:
       // https://docs.github.com/en/enterprise-server@3.5/admin/configuration/configuring-network-settings/configuring-a-hostname
       const gheHostname = 'ghe.mycompany.com';
-      // GHE replies to paginated requests with a Link response header whose URLs have this base
+      // GHES replies to paginated requests with a Link response header whose URLs have this base
       const gheBaseUrl = `https://${gheHostname}/api/v3`;
       const apiUrl = '/some-url?per_page=2';
       httpMock
@@ -550,7 +550,7 @@ describe('util/http/github', () => {
         );
       });
 
-      it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
+      it('when the rate limit is exceeded to GHES, but no host rules are set, a warn is logged', async () => {
         async function fail(
           code: number,
           body?: any,

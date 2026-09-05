@@ -460,7 +460,7 @@ describe('util/http/host-rules', () => {
 
     hostRules.clear();
 
-    // for instance, if running with GitHub Enterprise Server, this may be set as the default host rule
+    // for instance, if running with GHES, this may be set as the default host rule
     hostRules.add({
       hostType: 'github',
       token: 'token',
@@ -566,7 +566,7 @@ describe('util/http/host-rules', () => {
     });
   });
 
-  describe('GHE platform endpoint fallback', () => {
+  describe('GHES platform endpoint fallback', () => {
     beforeEach(() => {
       GlobalConfig.set({
         platform: 'github',
@@ -580,9 +580,9 @@ describe('util/http/host-rules', () => {
       });
     });
 
-    it('fallback to github for non-listed hostType targeting GHE endpoint', () => {
+    it('fallback to github for non-listed hostType targeting GHES endpoint', () => {
       // github-digest is NOT in GITHUB_API_USING_HOST_TYPES,
-      // but should still get credentials when targeting the GHE endpoint
+      // but should still get credentials when targeting the GHES endpoint
       const opts = { hostType: 'github-digest' };
       const hostRule = findMatchingRule(
         'https://ghe.example.com/api/v3/',

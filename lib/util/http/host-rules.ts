@@ -85,7 +85,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     // Fallback to `github` hostType when the request URL targets the same host
     // as the configured GitHub platform endpoint.
     //
-    // This covers GitHub Enterprise Server without hardcoding URLs.
+    // This covers GHES without hardcoding URLs.
     const requestHost = parseUrl(url)?.hostname;
     const endpointHost = parseUrl(platformEndpoint)?.hostname;
     if (requestHost && endpointHost && requestHost === endpointHost) {
