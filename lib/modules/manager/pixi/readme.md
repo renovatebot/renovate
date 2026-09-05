@@ -1,6 +1,10 @@
 ### Pixi package manager
 
-Currently support channels from anaconda and prefix.dev, other channels are not supported yet.
+Conda channels are looked up via the [`conda` datasource](../../datasource/conda/index.md).
+Channels referenced by name (e.g. `conda-forge`) resolve to the Anaconda.org API, and `https://prefix.dev/<channel>` channels use the prefix.dev API.
+Any other channel given as a full URL (e.g. a self-hosted mirror or an Artifactory conda repository) is treated as a standard conda channel.
+Renovate passes the `platforms` of the workspace to the datasource, which reads the `repodata.json` index of each of those platform subdirs plus `noarch`.
+A version is only offered when it is installable on every platform the workspace targets, so an update never proposes a version that `pixi lock` could not solve.
 
 Whenever the pixi config in `pyproject.toml` or `pixi.toml` file is updated, `pixi.lock` file will be checked for updates as well.
 
