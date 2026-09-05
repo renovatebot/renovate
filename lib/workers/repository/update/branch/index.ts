@@ -413,6 +413,16 @@ export async function processBranch(
         };
       }
       if (config.updateNotScheduled === false && !config.rebaseRequested) {
+        if (branchPr && config.automerge) {
+          const prAutomergeResult = await checkAutoMerge(branchPr, config);
+          if (prAutomergeResult.automerged) {
+            return {
+              branchExists,
+              result: 'automerged',
+              commitSha,
+            };
+          }
+        }
         logger.debug('Skipping branch update as not within schedule');
         return {
           branchExists,
