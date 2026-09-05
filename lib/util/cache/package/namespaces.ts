@@ -103,6 +103,7 @@ export const packageCacheNamespaces = [
   'datasource-typst:registry-releases',
   'datasource-unity3d',
   'datasource-unity3d-packages',
+  'datasource-unpkg',
   'github-branches-datasource-v1',
   'github-releases-datasource-v2',
   'github-tags-datasource-v2',
