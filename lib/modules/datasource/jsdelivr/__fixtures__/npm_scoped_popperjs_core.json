@@ -1,0 +1,36 @@
+{
+  "type": "npm",
+  "name": "@popperjs/core",
+  "tags": {
+    "latest": "2.11.8"
+  },
+  "versions": [
+    {
+      "version": "2.11.8",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/@popperjs/core@2.11.8",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/@popperjs/core@2.11.8/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/@popperjs/core@2.11.8"
+      }
+    },
+    {
+      "version": "2.11.7",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/@popperjs/core@2.11.7",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/@popperjs/core@2.11.7/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/@popperjs/core@2.11.7"
+      }
+    },
+    {
+      "version": "2.11.6",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/@popperjs/core@2.11.6",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/@popperjs/core@2.11.6/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/@popperjs/core@2.11.6"
+      }
+    }
+  ],
+  "links": {
+    "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/@popperjs/core"
+  }
+}
