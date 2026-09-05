@@ -18,6 +18,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
+import { emojify } from '../../../util/emoji.ts';
 import * as _git from '../../../util/git/index.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
 import { toBase64 } from '../../../util/string.ts';
@@ -5570,6 +5571,46 @@ describe('modules/platform/github/index', () => {
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(github.massageMarkdown(input)).toBe(
         '[https://github.com/foo/bar/issues/5](https://redirect.github.com/foo/bar/issues/5) plus also [a link](https://redirect.github.com/foo/bar/issues/5)',
+      );
+    });
+
+    it('converts note callout to GitHub alert syntax', () => {
+      const input = `${emojify('> :information_source: **Note**\n> \n')}> Some note text\n`;
+      expect(input).toBe('> ℹ️ **Note**\n> \n> Some note text\n');
+      expect(github.massageMarkdown(input)).toBe(
+        '> [!NOTE]\n> Some note text\n',
+      );
+    });
+
+    it('converts warning callout to GitHub alert syntax', () => {
+      const input = `${emojify('> :warning: **Warning**\n> \n')}> Some warning text\n`;
+      expect(input).toBe('> ⚠️ **Warning**\n> \n> Some warning text\n');
+      expect(github.massageMarkdown(input)).toBe(
+        '> [!WARNING]\n> Some warning text\n',
+      );
+    });
+
+    it('converts caution callout to GitHub alert syntax', () => {
+      const input = `${emojify('> :stop_sign: **Caution**\n> \n')}> Some caution text\n`;
+      expect(input).toBe('> 🛑 **Caution**\n> \n> Some caution text\n');
+      expect(github.massageMarkdown(input)).toBe(
+        '> [!CAUTION]\n> Some caution text\n',
+      );
+    });
+
+    it('converts important callout to GitHub alert syntax', () => {
+      const input = `${emojify('> :exclamation: **Important**\n> \n')}> Some important text\n`;
+      expect(input).toBe('> ❗ **Important**\n> \n> Some important text\n');
+      expect(github.massageMarkdown(input)).toBe(
+        '> [!IMPORTANT]\n> Some important text\n',
+      );
+    });
+
+    it('converts the note added by smartTruncate() to GitHub alert syntax', () => {
+      const input = 'x'.repeat(github.maxBodyLength() + 1000);
+      const result = github.massageMarkdown(input);
+      expect(result).toContain(
+        '> [!NOTE]\n> This PR body was truncated due to platform limits.\n\n',
       );
     });
 
