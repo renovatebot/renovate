@@ -1174,7 +1174,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
   });
 
-  it('prevents injections', async () => {
+  it('does use token for ECR auth, when username and password are omitted', async () => {
     const username = 'user';
     const password = 'pass>word';
     mockEcrAuthResolve({
@@ -1185,6 +1185,39 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     hostRules.add({
       token: 'some-session-token',
+      hostType: 'docker',
+      matchHost: '123456789.dkr.ecr.us-east-1.amazonaws.com',
+    });
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1ECR);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    const execSnapshots = mockExecAll();
+    await helmv3.updateArtifacts({
+      packageFileName: 'Chart.yaml',
+      updatedDeps: [{}],
+      newPackageFileContent: `dependencies: { repository: oci://123456789.dkr.ecr.us-east-1.amazonaws.com/bitnami || date }`,
+      config: { ...config },
+    });
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "helm dependency update ''",
+      },
+    ]);
+  });
+
+  it('prevents injections when no credentials are configured for ECR auth', async () => {
+    const username = 'user';
+    const password = 'pass>word';
+    mockEcrAuthResolve({
+      authorizationData: [
+        { authorizationToken: toBase64(`${username}:${password}`) },
+      ],
+    });
+
+    hostRules.add({
       hostType: 'docker',
       matchHost: '123456789.dkr.ecr.us-east-1.amazonaws.com',
     });
