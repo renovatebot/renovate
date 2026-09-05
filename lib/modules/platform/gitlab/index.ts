@@ -609,9 +609,17 @@ async function tryPrAutomerge(
         250,
       );
 
+      // The HEAD sha of the source branch, captured from the most recent MR
+      // poll below. GitLab rejects the merge API call with
+      // `400 SHA must be provided when merging` when the target namespace
+      // enables the "require SHA when merging" setting, so we echo it back
+      // when arming automerge.
+      let headSha: string | undefined;
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
+          sha?: string;
           merge_status?: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
@@ -621,6 +629,7 @@ async function tryPrAutomerge(
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+        headSha = body.sha;
 
         // Exit early if merge_when_pipeline_succeeds is already set
         if (body.merge_when_pipeline_succeeds === true) {
@@ -683,6 +692,7 @@ async function tryPrAutomerge(
                 body: {
                   should_remove_source_branch: true,
                   merge_when_pipeline_succeeds: true,
+                  sha: headSha,
                 },
               },
             );
@@ -844,11 +854,21 @@ export async function reattemptPlatformAutomerge({
 
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   try {
+    // GitLab rejects the merge API call with `400 SHA must be provided when
+    // merging` when the target namespace enables the "require SHA when
+    // merging" setting. Fetch the current HEAD sha of the source branch and
+    // echo it back so the merge is accepted (this also guards against merging
+    // a HEAD that moved since Renovate last looked at it).
+    const { body: mr } = await gitlabApi.getJsonUnchecked<{ sha?: string }>(
+      `projects/${config.repository}/merge_requests/${id}`,
+      { memCache: false },
+    );
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${id}/merge`,
       {
         body: {
           should_remove_source_branch: true,
+          sha: mr.sha,
         },
       },
     );
