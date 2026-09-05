@@ -851,6 +851,13 @@ export async function lookupUpdates(
         config.registryUrls = [res.registryUrl];
       }
 
+      // getDigest() needs the real tag; versionOrig holds it pre-extractVersion.
+      function origTag(v: string | undefined): string | undefined {
+        return (
+          dependency?.releases.find((r) => r.version === v)?.versionOrig ?? v
+        );
+      }
+
       // update digest for all
       for (const update of res.updates) {
         // only update the digest in the package file if it's managed by us
@@ -860,6 +867,7 @@ export async function lookupUpdates(
         ) {
           const getDigestConfig: GetDigestInputConfig = {
             ...config,
+            currentValue: origTag(config.currentValue),
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
           };
@@ -893,7 +901,7 @@ export async function lookupUpdates(
 
           update.newDigest ??= await getDigest(
             getDigestConfig,
-            update.newValue,
+            origTag(update.newValue),
           );
 
           // If the digest could not be determined, report this as otherwise the
