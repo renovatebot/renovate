@@ -2499,7 +2499,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: { status: 'running' },
         })
         .post(
@@ -2551,7 +2551,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: { status: 'running' },
         })
         .put('/api/v4/projects/some%2Frepo/merge_requests/12345/merge')
@@ -2604,7 +2604,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: { status: 'running' },
         })
         .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345')
@@ -2629,10 +2629,13 @@ describe('modules/platform/gitlab/index', () => {
       });
     });
 
-    it('should parse merge_status attribute if detailed_merge_status is not set (on < 15.6)', async () => {
+    it('does not use deprecated merge_status if detailed_merge_status is missing', async () => {
       await initPlatform('13.3.6-ee');
       const reply_body = {
-        merge_status: 'pending',
+        merge_status: 'can_be_merged',
+        pipeline: {
+          status: 'running',
+        },
       };
       httpMock
         .scope(gitlabApiHost)
@@ -2981,7 +2984,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3083,7 +3086,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3145,7 +3148,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3218,7 +3221,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3301,7 +3304,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3355,7 +3358,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3984,7 +3987,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'mergeable',
           pipeline: {
             status: 'running',
           },
