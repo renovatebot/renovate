@@ -89,4 +89,43 @@ describe('modules/manager/npm/extract/common/catalogs', () => {
     expect(result).toEqual([]);
     expect(resultYarn).toEqual([]);
   });
+
+  it('returns correct dependencies for bun', () => {
+    const sampleCatalog: Catalog[] = [
+      {
+        name: 'default',
+        dependencies: {
+          react: '^19.0.0',
+        },
+      },
+      {
+        name: 'testing',
+        dependencies: {
+          jest: '30.0.0',
+        },
+      },
+    ];
+    const result = extractCatalogDeps(sampleCatalog, 'bun');
+    expect(result).toEqual([
+      {
+        depType: 'bun.catalog.default',
+        depName: 'react',
+        currentValue: '^19.0.0',
+        datasource: 'npm',
+        prettyDepType: 'bun.catalog.default',
+      },
+      {
+        depType: 'bun.catalog.testing',
+        depName: 'jest',
+        currentValue: '30.0.0',
+        datasource: 'npm',
+        prettyDepType: 'bun.catalog.testing',
+      },
+    ]);
+  });
+
+  it('handles empty catalogs list for bun', () => {
+    const result = extractCatalogDeps([], 'bun');
+    expect(result).toEqual([]);
+  });
 });
