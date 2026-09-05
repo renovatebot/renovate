@@ -777,7 +777,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(platform.massageMarkdown).toHaveBeenCalledWith(
           expect.stringContaining(
-            'The base branch has a merge queue which rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or add Renovate to the merge queue bypass list.',
+            'The base branch only accepts changes through its merge queue and rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or allow Renovate to bypass the merge queue.',
           ),
           undefined,
         );

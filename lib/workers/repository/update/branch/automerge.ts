@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
-import { regEx } from '../../../../util/regex.ts';
 import { isScheduledNow } from './schedule.ts';
 import { resolveBranchStatus } from './status-checks.ts';
 
@@ -70,20 +69,14 @@ export async function tryBranchAutomerge(
         logger.info('Branch is not up to date - cannot automerge');
         return 'stale';
       }
-      // A merge queue rejects direct pushes unless Renovate is on its bypass
-      // list, so the push is attempted first and a PR is created only if it
-      // was refused. GitHub reports this as "Changes must be made through the
-      // merge queue"; other platforms are covered by asking the platform.
-      if (
-        regEx(/merge queue/i).test(err.message) ||
-        (regEx(/Protected branch|Repository rule violations/).test(
-          err.message,
-        ) &&
-          (await platform.isBranchMergeQueueEnabled?.(config.baseBranch!)))
-      ) {
+      // A merge queue (or merge train) rejects direct pushes unless Renovate
+      // is allowed to bypass it, so the push is attempted first and a PR is
+      // created only if it was refused. The rejection message is platform
+      // specific, so the platform is asked instead of parsing it.
+      if (await platform.isBranchMergeQueueEnabled?.(config.baseBranch!)) {
         logger.warn(
           { baseBranch: config.baseBranch, err },
-          'automergeType=branch is not possible because the base branch has a merge queue - falling back to creating a PR. Set automergeType=pr instead, or add Renovate to the merge queue bypass list.',
+          'automergeType=branch is not possible because the base branch only accepts changes through its merge queue - falling back to creating a PR. Set automergeType=pr instead, or allow Renovate to bypass the merge queue.',
         );
         return 'automerge aborted - merge queue';
       }

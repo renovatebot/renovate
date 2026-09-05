@@ -60,41 +60,24 @@ describe('workers/repository/update/branch/automerge', () => {
       );
     });
 
-    it('aborts if the push is rejected by a merge queue', async () => {
-      config.automerge = true;
-      config.automergeType = 'branch';
-      config.baseBranch = 'test-branch';
-      platform.getBranchStatus.mockResolvedValueOnce('green');
-      const err = new Error(
-        'GH013: Repository rule violations found for refs/heads/test-branch.\n- Changes must be made through the merge queue.',
-      );
-      scm.mergeAndPush.mockRejectedValueOnce(err);
-
-      const res = await tryBranchAutomerge(config);
-
-      expect(res).toBe('automerge aborted - merge queue');
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { baseBranch: 'test-branch', err },
-        'automergeType=branch is not possible because the base branch has a merge queue - falling back to creating a PR. Set automergeType=pr instead, or add Renovate to the merge queue bypass list.',
-      );
-      expect(platform.isBranchMergeQueueEnabled).not.toHaveBeenCalled();
-    });
-
-    it('aborts if a protected branch rejects the push and the platform reports a merge queue', async () => {
+    it('aborts if the push is rejected and the base branch has a merge queue', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       config.baseBranch = 'test-branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
       platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
-      scm.mergeAndPush.mockRejectedValueOnce(
-        new Error('Protected branch update failed'),
-      );
+      const err = new Error('Protected branch update failed');
+      scm.mergeAndPush.mockRejectedValueOnce(err);
 
       const res = await tryBranchAutomerge(config);
 
       expect(res).toBe('automerge aborted - merge queue');
       expect(platform.isBranchMergeQueueEnabled).toHaveBeenCalledWith(
         'test-branch',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { baseBranch: 'test-branch', err },
+        'automergeType=branch is not possible because the base branch only accepts changes through its merge queue - falling back to creating a PR. Set automergeType=pr instead, or allow Renovate to bypass the merge queue.',
       );
     });
 
