@@ -256,6 +256,17 @@ Make sure the user has the following permissions on the work item's _area path_:
 
 If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
 
+### Automerging Pull Requests with branch policies
+
+[`platformAutomerge`](../../../configuration-options.md#platformautomerge) delegates merging to Azure DevOps by enabling auto-complete on the Pull Request.
+Azure DevOps normally waits until every blocking branch policy passes before completing it.
+
+Set the [`azureBypassPolicy`](../../../self-hosted-configuration.md#azurebypasspolicy) self-hosted option to add `bypassPolicy: true` to the auto-complete request and override all branch policies.
+Renovate also sends [`azureBypassPolicyReason`](../../../self-hosted-configuration.md#azurebypasspolicyreason) as the `bypassReason` string.
+The user needs the following permission on the repository:
+
+- Bypass policies when completing pull requests
+
 ### Dependency Dashboard work item state
 
 On Azure DevOps, Renovate stores the Dependency Dashboard (and any other issues) as a work item of type `Issue`.
