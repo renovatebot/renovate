@@ -220,6 +220,12 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'rust',
     versioning: 'rust-release-channel',
   },
+  vp: {
+    datasource: 'github-releases',
+    packageName: 'voidzero-dev/vite-plus',
+    extractVersion: '^v(?<version>.*)$',
+    versioning: 'npm',
+  },
   uv: {
     datasource: 'pypi',
     packageName: 'uv',

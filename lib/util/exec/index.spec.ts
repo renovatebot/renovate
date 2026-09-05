@@ -683,6 +683,30 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Explicit input',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          input: '{"request":true}',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            input: '{"request":true}',
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
       'Custom environment variables for child',
       {
         processEnv: envMock.basic,
@@ -1174,6 +1198,44 @@ describe('util/exec/index', () => {
     );
   });
 
+  it('returns redacted command output without including it in completion logs', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(exec(inCmd, { redactOutput: true })).resolves.toEqual({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        durationMs: expect.any(Number),
+        stdoutBytes: 16,
+        stderrBytes: 15,
+      },
+      'exec completed',
+    );
+    expect(cpExec.mock.calls[0][1]).toMatchObject({ redactOutput: true });
+  });
+
+  it('omits redacted command errors from logs', async () => {
+    process.env = processEnv;
+    const error = new Error('private manifest');
+    cpExec.mockRejectedValue(error);
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(exec(inCmd, { redactOutput: true })).rejects.toBe(error);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { durationMs: expect.any(Number) },
+      'rawExec err',
+    );
+  });
+
   it('logs ignored tool constraints for binarySource=global', async () => {
     process.env = processEnv;
     cpExec.mockResolvedValue({ stdout: '', stderr: '' });
@@ -1197,6 +1259,30 @@ describe('util/exec/index', () => {
     process.env.CONTAINERBASE = 'true';
     await exec('foobar', { preCommands: ['install-pip foobar'] });
     expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
+  });
+
+  it('passes input only to the final command', async () => {
+    process.env = processEnv;
+    const calls: { command: string; input: unknown }[] = [];
+    cpExec.mockImplementation((execCmd, options) => {
+      calls.push({
+        command: asRawCommand(execCmd),
+        input: options.input,
+      });
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    await exec('foobar', {
+      input: 'private manifest',
+      preCommands: ['prepare'],
+    });
+
+    expect(calls).toEqual([
+      { command: 'prepare', input: undefined },
+      { command: 'foobar', input: 'private manifest' },
+    ]);
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {

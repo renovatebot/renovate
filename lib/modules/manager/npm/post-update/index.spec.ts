@@ -3,6 +3,8 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type { PostUpdateConfig } from '../../types.ts';
 import {
@@ -16,12 +18,14 @@ import * as npm from './npm.ts';
 import * as pnpm from './pnpm.ts';
 import * as rules from './rules.ts';
 import type { AdditionalPackageFiles } from './types.ts';
+import * as vitePlus from './vite-plus.ts';
 import * as yarn from './yarn.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 vi.mock('./npm.ts');
 vi.mock('./yarn.ts');
 vi.mock('./pnpm.ts');
+vi.mock('./vite-plus.ts');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -530,11 +534,13 @@ describe('modules/manager/npm/post-update/index', () => {
     const spyYarn = vi.spyOn(yarn, 'generateLockFile');
     const spyPnpm = vi.spyOn(pnpm, 'generateLockFile');
     const spyProcessHostRules = vi.spyOn(rules, 'processHostRules');
+    const spyVitePlus = vi.mocked(vitePlus.reconcileVitePlusVersions);
 
     beforeEach(() => {
       spyNpm.mockResolvedValue({});
       spyPnpm.mockResolvedValue({});
       spyYarn.mockResolvedValue({});
+      spyVitePlus.mockResolvedValue([]);
       spyProcessHostRules.mockReturnValue({
         additionalNpmrcContent: [],
         additionalYarnRcYml: undefined,
@@ -549,6 +555,34 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactNotices: [],
         updatedArtifacts: [],
       });
+    });
+
+    it('surfaces Vite+ reconciliation failures as artifact errors', async () => {
+      spyVitePlus.mockRejectedValueOnce(new Error('planner failed validation'));
+
+      expect(
+        await getAdditionalFiles({ ...updateConfig }, additionalFiles),
+      ).toStrictEqual({
+        artifactErrors: [
+          { fileName: 'vite-plus', stderr: 'planner failed validation' },
+        ],
+        artifactNotices: [],
+        updatedArtifacts: [],
+      });
+      expect(spyNpm).not.toHaveBeenCalled();
+      expect(spyYarn).not.toHaveBeenCalled();
+      expect(spyPnpm).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      new Error(TEMPORARY_ERROR),
+      new ExternalHostError(new Error('registry unavailable')),
+    ])('rethrows transient Vite+ reconciliation failures', async (error) => {
+      spyVitePlus.mockRejectedValueOnce(error);
+
+      await expect(
+        getAdditionalFiles({ ...updateConfig }, additionalFiles),
+      ).rejects.toBe(error);
     });
 
     it('works for npm', async () => {
