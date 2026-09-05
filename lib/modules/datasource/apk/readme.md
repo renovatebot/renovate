@@ -82,7 +82,16 @@ If you relied on the previous `loose` versioning for a custom manager, set it ba
 }
 ```
 
-<!-- TODO #43711 -->
+## Dockerfile support
+
+The [`dockerfile` manager](../../manager/dockerfile/index.md) extracts packages which you pin with `apk add`, so you do not need a custom manager for them:
+
+```dockerfile
+FROM alpine:3.21
+RUN apk add --no-cache bash=5.2.37-r2
+```
+
+The manager does not set a `registryUrl`, so set one which matches your base image as shown above.
 
 ## Usage example
 
