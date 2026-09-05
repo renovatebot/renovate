@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -941,7 +942,14 @@ describe('workers/repository/update/pr/index', () => {
         const {
           upgrades: [{ prBodyNotes }],
         } = prBody.getPrBody.mock.calls[0][0];
-        expect(prBodyNotes).toBeNonEmptyArray();
+        expect(prBodyNotes).toEqual([
+          codeBlock`
+            > ❗ **Important**
+            >
+            > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+          `,
+        ]);
       });
 
       it('removes duplicate changelogs', async () => {
@@ -1114,12 +1122,12 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [
                 {
                   prBodyNotes: [
-                    `> :stop_sign: **Caution**
->
-> bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
-> Verify that release 2.3.4 was published by the expected author.
-
-`,
+                    codeBlock`
+                      > 🛑 **Caution**
+                      >
+                      > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
+                      > Verify that release 2.3.4 was published by the expected author.
+                    `,
                   ],
                 },
               ],
