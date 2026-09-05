@@ -5,6 +5,7 @@ import { Writable } from 'node:stream';
 import * as util from 'node:util';
 import { isNonEmptyObject, isPlainObject, isString } from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
+import { DateTime } from 'luxon';
 import { regEx } from '../util/regex.ts';
 import type { BunyanRecord } from './types.ts';
 
@@ -113,17 +114,27 @@ export function getDetails(rec: BunyanRecord): string {
     .join(',\n')}\n`;
 }
 
-export function formatRecord(rec: BunyanRecord, colorize = true): string {
+export function formatRecord(
+  rec: BunyanRecord,
+  colorize = true,
+  includeTimestamp = false,
+): string {
+  const timestamp = includeTimestamp
+    ? `${DateTime.fromJSDate(rec.time).toUTC().toISO()} `
+    : '';
   const level = colorize ? colorizedLevels[rec.level] : levels[rec.level];
   const msg = `${indent(rec.msg)}`;
   const meta = getMeta(rec, colorize);
   const details = getDetails(rec);
-  return util.format('%s: %s%s\n%s', level, msg, meta, details);
+  return util.format('%s%s: %s%s\n%s', timestamp, level, msg, meta, details);
 }
 
 export class PrettyStdoutStream extends Writable {
-  constructor() {
+  private readonly includeTimestamp: boolean;
+
+  constructor(includeTimestamp = false) {
     super({ objectMode: true });
+    this.includeTimestamp = includeTimestamp;
   }
 
   override _write(
@@ -131,7 +142,7 @@ export class PrettyStdoutStream extends Writable {
     _encoding: string,
     callback: (error?: Error | null) => void,
   ): void {
-    process.stdout.write(formatRecord(data));
+    process.stdout.write(formatRecord(data, true, this.includeTimestamp));
     callback();
   }
 }
