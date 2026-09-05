@@ -218,6 +218,8 @@ If tests subsequently _fail_, making automerge not possible, then Renovate will 
 Note: Renovate won't add assignees and reviewers to a PR with failing checks if the PR already has assignees or reviewers present.
 If there are accounts you wish to ignore (i.e. add assignees and reviewers regardless) then add them to `ignoreReviewers` to specify those which should be filtered out in such consideration.
 
+If you want Renovate to _always_ add assigness and reviewers to a PR regardless of automerge configuration, activate the [`assignAutomerge` option](../configuration-options.md#assignautomerge).
+
 ## Frequent problems and how to resolve them
 
 ### Automerge not enabled correctly in config
