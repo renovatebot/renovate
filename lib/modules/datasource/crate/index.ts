@@ -359,16 +359,16 @@ export class CrateDatasource extends Datasource {
       url,
     };
 
-    if (
-      registry.flavor !== 'crates.io' &&
-      !GlobalConfig.get('allowCustomCrateRegistries')
-    ) {
-      logger.warn(
-        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out',
-      );
-      return null;
-    }
     if (!isSparseRegistry) {
+      if (
+        registry.flavor !== 'crates.io' &&
+        !GlobalConfig.get('allowCustomCrateRegistries')
+      ) {
+        logger.warn(
+          'crate datasource: allowCustomCrateRegistries=true is required for git-cloning registries other than crates.io, bailing out',
+        );
+        return null;
+      }
       const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
       const lockKey = registryFetchUrl;
 
