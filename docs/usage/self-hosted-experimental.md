@@ -63,7 +63,7 @@ If set to any value, Renovate will detect if a GitHub merge queue is required fo
 If a merge queue is detected, then:
 
 - Renovate-native PR automerge (`platformAutomerge=false`) adds the PR to the merge queue instead of merging it directly, even if Renovate is on the merge queue's bypass list
-- branch automerge (`automergeType=branch`) is skipped with a warning, and a PR is created instead
+- branch automerge (`automergeType=branch`) falls back to creating a PR if the merge queue rejects the direct push. If Renovate is on the merge queue's bypass list, branch automerge keeps working
 - `rebaseWhen=auto` resolves to `conflicted` instead of `behind-base-branch`, because the merge queue already tests PRs against the head of the base branch
 
 ## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
