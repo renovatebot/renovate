@@ -1328,6 +1328,36 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('raises a PR if branch automerge is aborted due to a merge queue', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce(
+        'automerge aborted - merge queue',
+      );
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+      });
+
+      await branchWorker.processBranch(config);
+
+      expect(prWorker.ensurePr).toHaveBeenCalledWith(
+        expect.objectContaining({
+          forcePr: true,
+          branchAutomergeFailureMessage: 'automerge aborted - merge queue',
+        }),
+      );
+    });
+
     it('returns if branch automerge is pending', async () => {
       expect.assertions(2);
       const setArtifactErrorStatus = vi.spyOn(

@@ -80,6 +80,7 @@ import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import {
   enableAutoMergeMutation,
+  enqueuePullRequestMutation,
   getIssuesQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
@@ -99,6 +100,8 @@ import type {
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
+  GhEnqueuePullRequestResponse,
+  GhMergeQueueResponse,
   GhPr,
   GhRepo,
   GhRestPr,
@@ -897,6 +900,51 @@ export async function getBranchForceRebase(
   }
 
   return config.branchForceRebase[branchName];
+}
+
+export async function isBranchMergeQueueEnabled(
+  branchName: string,
+): Promise<boolean> {
+  if (!getEnv().RENOVATE_X_GITHUB_MERGE_QUEUE) {
+    return false;
+  }
+
+  config.branchMergeQueueEnabled ??= {};
+
+  const cachedResult = config.branchMergeQueueEnabled[branchName];
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+
+  // Merge queues configured via classic branch protection are only visible
+  // through the GraphQL mergeQueue field, which also covers repository rulesets
+  const [owner, name] = (config.parentRepo ?? config.repository!).split('/');
+  let result = false;
+  try {
+    const res = await githubApi.requestGraphql<GhMergeQueueResponse>(
+      repoMergeQueueQuery,
+      {
+        variables: { owner, name, branch: branchName },
+        readOnly: true,
+        count: 1, // set count to one to bypass graphql check
+      },
+    );
+    if (res?.errors) {
+      // e.g. GitHub Enterprise Server versions without merge queue support
+      logger.once.debug(
+        { errors: res.errors },
+        'Merge queue detection: query failed',
+      );
+    } else {
+      result = isNonEmptyString(res?.data?.repository?.mergeQueue?.id);
+    }
+  } catch (err) {
+    logger.warn({ err }, 'Merge queue detection: request error');
+  }
+
+  logger.debug(`Branch ${branchName} has merge queue enabled: ${result}`);
+  config.branchMergeQueueEnabled[branchName] = result;
+  return result;
 }
 
 function handleBranchProtectionError(
@@ -2165,12 +2213,60 @@ export async function reattemptPlatformAutomerge({
   }
 }
 
+async function tryEnqueuePr(prNo: number): Promise<boolean> {
+  const pr = await getPr(prNo);
+  if (!pr) {
+    logger.debug(`Could not find PR #${prNo} to add to the merge queue`);
+    return false;
+  }
+
+  try {
+    const res = await githubApi.requestGraphql<GhEnqueuePullRequestResponse>(
+      enqueuePullRequestMutation,
+      {
+        variables: { pullRequestId: pr.node_id },
+        count: 1, // set count to one to bypass graphql check
+      },
+    );
+
+    if (res?.errors) {
+      // GitHub does not document the exact message, so match loosely.
+      // "enqueue" contains "queue", so both wordings are covered.
+      if (
+        res.errors.some((error) => regEx(/already.*queue/i).test(error.message))
+      ) {
+        logger.debug(`PR #${prNo} is already in the merge queue`);
+        return true;
+      }
+      logger.debug(
+        { prNumber: prNo, errors: res.errors },
+        'Failed to add PR to the merge queue',
+      );
+      return false;
+    }
+
+    logger.debug(`PR #${prNo} added to the merge queue`);
+    return true;
+  } catch (err) {
+    logger.warn({ prNumber: prNo, err }, 'Failed to add PR to the merge queue');
+    return false;
+  }
+}
+
 export async function mergePr({
   branchName,
   id: prNo,
   strategy,
+  targetBranch,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
+
+  if (targetBranch && (await isBranchMergeQueueEnabled(targetBranch))) {
+    // The PR is not merged directly but through the merge queue, so it must
+    // not be cached as merged nor may its branch be deleted yet
+    return tryEnqueuePr(prNo);
+  }
+
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;

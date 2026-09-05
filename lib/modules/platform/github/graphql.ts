@@ -90,6 +90,23 @@ query($owner: String!, $name: String!, $number: Int!) {
 }
 `;
 
+export const enqueuePullRequestMutation = `
+mutation EnqueuePullRequest(
+  $pullRequestId: ID!,
+) {
+  enqueuePullRequest(
+    input: {
+      pullRequestId: $pullRequestId,
+    }
+  ) {
+    mergeQueueEntry {
+      id
+      position
+    }
+  }
+}
+`;
+
 export const enableAutoMergeMutation = `
 mutation EnablePullRequestAutoMerge(
   $pullRequestId: ID!,

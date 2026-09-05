@@ -122,6 +122,7 @@ export interface LocalRepoConfig {
   pushProtection: boolean;
   prReviewsRequired: boolean;
   branchForceRebase?: Record<string, boolean>;
+  branchMergeQueueEnabled?: Record<string, boolean>;
   parentRepo: string | null;
   forkOrg?: string;
   forkToken?: string;
@@ -169,6 +170,18 @@ export interface GhRepo {
 export interface GhAutomergeResponse {
   enablePullRequestAutoMerge: {
     pullRequest: { number: number };
+  };
+}
+
+export interface GhMergeQueueResponse {
+  repository: {
+    mergeQueue: { id: string } | null;
+  };
+}
+
+export interface GhEnqueuePullRequestResponse {
+  enqueuePullRequest: {
+    mergeQueueEntry: { id: string; position: number } | null;
   };
 }
 

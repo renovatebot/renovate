@@ -913,6 +913,7 @@ export async function processBranch(
         config.branchAutomergeFailureMessage = mergeStatus;
       }
       if (
+        mergeStatus === 'automerge aborted - merge queue' ||
         mergeStatus === 'automerge aborted - PR exists' ||
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
