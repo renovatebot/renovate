@@ -367,6 +367,34 @@ describe('modules/manager/helmfile/extract', () => {
       });
     });
 
+    it('splits the digest out of an OCI chart reference', async () => {
+      const content = `
+      releases:
+        - name: grafana
+          chart: oci://ghcr.io/grafana/helm-charts/grafana@sha256:3d75dc3173c3fb07eaa8853283f38558c7c27259f7ed00cf8c096173667426a1
+          version: 10.5.15
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {});
+      expect(result).toStrictEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '10.5.15',
+            currentDigest:
+              'sha256:3d75dc3173c3fb07eaa8853283f38558c7c27259f7ed00cf8c096173667426a1',
+            depName: 'ghcr.io/grafana/helm-charts/grafana',
+            datasource: 'docker',
+            packageName: 'ghcr.io/grafana/helm-charts/grafana',
+            replaceString:
+              'oci://ghcr.io/grafana/helm-charts/grafana@sha256:3d75dc3173c3fb07eaa8853283f38558c7c27259f7ed00cf8c096173667426a1',
+            autoReplaceStringTemplate:
+              'oci://{{depName}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          },
+        ],
+      });
+    });
+
     it('allows OCI chart names containing forward slashes', async () => {
       const content = `
       repositories:
