@@ -274,8 +274,13 @@ export interface Platform {
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getBranchForceRebase?(branchName: string): Promise<boolean>;
   /**
-   * Returns true if the given branch is protected by a merge queue,
-   * so PRs targeting it must be merged through the queue.
+   * Returns true if the given branch is protected by a merge queue (GitHub)
+   * or a merge train (GitLab), so PRs targeting it must be merged through
+   * the queue. `mergePr` is then expected to add the PR to the queue instead
+   * of merging it directly.
+   *
+   * Platforms where the feature is configured per repository rather than
+   * per branch may ignore the branch name.
    */
   isBranchMergeQueueEnabled?(branchName: string): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;

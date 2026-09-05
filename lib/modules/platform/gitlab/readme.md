@@ -97,6 +97,7 @@ By setting the server version yourself, you save a API call that fetches the ser
 - Do not truncate Markdown body to 25K chars since `v13.4.0`
 - Allow configure reviewers since `v13.9.0`
 - Add automerged MRs to merge trains since `v17.11.0` (when [merge trains](https://docs.gitlab.com/ci/pipelines/merge_trains/) are enabled on the project)
+- With `platformAutomerge=false`, Renovate adds MRs to the merge train itself once all checks have passed, see [GitLab Merge Trains](../../../key-concepts/automerge.md#gitlab-merge-trains)
 
 ## Multiple merge request assignees
 

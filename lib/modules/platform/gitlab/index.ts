@@ -367,14 +367,24 @@ export async function initRepo({
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
-  const forceRebase =
-    config?.mergeMethod !== 'merge' && !config.mergeTrainsEnabled;
+  const forceRebase = config?.mergeMethod !== 'merge';
   if (forceRebase) {
     logger.once.debug(
       `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
     );
   }
   return Promise.resolve(forceRebase);
+}
+
+/**
+ * Merge trains are GitLab's equivalent of a merge queue. They are enabled per
+ * project, so the branch name is not needed.
+ * https://docs.gitlab.com/ci/pipelines/merge_trains/
+ */
+export function isBranchMergeQueueEnabled(
+  _branchName: string,
+): Promise<boolean> {
+  return Promise.resolve(config.mergeTrainsEnabled);
 }
 
 type BranchState =
@@ -842,7 +852,27 @@ export async function reattemptPlatformAutomerge({
   logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }
 
+async function tryAddPrToMergeTrain(id: number): Promise<boolean> {
+  try {
+    // Without `auto_merge` the MR is added to the train immediately. The
+    // train merges it and removes the source branch on its own.
+    // https://docs.gitlab.com/api/merge_trains/#add-a-merge-request-to-a-merge-train
+    await gitlabApi.postJson(
+      `projects/${config.repository}/merge_trains/merge_requests/${id}`,
+    );
+    logger.debug(`MR !${id} added to the merge train`);
+    return true;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to add MR to the merge train');
+    return false;
+  }
+}
+
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
+  if (config.mergeTrainsEnabled) {
+    return tryAddPrToMergeTrain(id);
+  }
+
   try {
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${id}/merge`,
