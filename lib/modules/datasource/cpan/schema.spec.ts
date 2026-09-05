@@ -71,5 +71,34 @@ describe('modules/datasource/cpan/schema', () => {
         isLatest: true,
       });
     });
+
+    it.each`
+      version     | expected
+      ${'v1.1.1'} | ${'1.1.1'}
+      ${'1.1.1'}  | ${'1.1.1'}
+    `(
+      'normalizes version $version to $expected',
+      ({ version, expected }: { version: string; expected: string }) => {
+        const response = {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  module: [{ name: 'Test::Module', version }],
+                  distribution: 'Test-Package',
+                  date: '2023-01-01T00:00:00',
+                  deprecated: false,
+                  maturity: 'released',
+                  status: 'latest',
+                },
+              },
+            ],
+          },
+        };
+        const result = MetaCpanApiFileSearchResponse.parse(response);
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({ version: expected });
+      },
+    );
   });
 });
