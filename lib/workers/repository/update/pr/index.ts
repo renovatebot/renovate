@@ -602,7 +602,7 @@ export async function ensurePr(
         'automerge aborted - merge queue'
       ) {
         content +=
-          '\n___\n * The base branch has a merge queue, so branch automerge is not possible. Please set `automergeType=pr` instead.';
+          '\n___\n * The base branch only accepts changes through its merge queue and rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or allow Renovate to bypass the merge queue.';
       }
       content = platform.massageMarkdown(content, config.rebaseLabel);
       logger.debug('Adding branch automerge failure message to PR');
