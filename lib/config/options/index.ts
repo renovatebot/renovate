@@ -2166,6 +2166,13 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
+    name: 'minimumReleaseAgeBuffer',
+    description:
+      'Extra time added to `minimumReleaseAge` before an update is considered stable.',
+    type: 'string',
+    default: '10 minutes',
+  },
+  {
     name: 'abandonmentThreshold',
     description:
       'Flags packages that have not been updated within this period as abandoned.',
