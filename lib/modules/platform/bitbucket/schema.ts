@@ -71,6 +71,16 @@ export const Repositories = z
   })
   .transform((body) => body.values);
 
+const BitbucketBranch = z.object({
+  name: z.string(),
+});
+
+export const BranchNames = z
+  .object({
+    values: z.array(BitbucketBranch),
+  })
+  .transform((body) => body.values.map(({ name }) => name));
+
 const TaskState = z.union([z.literal('RESOLVED'), z.literal('UNRESOLVED')]);
 
 const PrTask = z.object({
