@@ -25,7 +25,9 @@ const extensionName = 'github/gh-actions-lock';
 const lockedDepTypes = ['action', 'workflow', 'docker'];
 
 function findToken(url: string): string | undefined {
-  return findGithubToken(hostRules.find({ hostType: 'github', url }));
+  return findGithubToken(
+    hostRules.find({ hostType: 'github', url, readOnly: true }),
+  );
 }
 
 /**
