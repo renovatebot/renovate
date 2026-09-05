@@ -4204,6 +4204,10 @@ During lock file maintenance, Renovate always runs `npm install` twice, even wit
 
 Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
 
+### `uvExportRequirements`
+
+Re-run `uv export` after `uv.lock` updates when a `requirements.txt` with a `uv export` header is found alongside `pyproject.toml`.
+
 ### `yarnDedupeFewer`
 
 Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.
