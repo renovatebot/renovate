@@ -9,8 +9,13 @@ import {
   ensureTrailingSlash,
   isHttpUrl,
   joinUrlParts,
+  trimTrailingSlash,
 } from '../../../util/url.ts';
-import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common.ts';
+import {
+  defaultRegistryUrl as defaultCondaRegistryApi,
+  isPrefixDevUrl,
+  platformsParam,
+} from '../../datasource/conda/common.ts';
 import type { RegistryStrategy } from '../../datasource/index.ts';
 import type { PackageFileContent } from '../types.ts';
 import {
@@ -92,21 +97,27 @@ export async function extractPackageFile(
 
   for (const item of val.conda) {
     conda.push(
-      addRegistryUrls({
-        ...item,
-        channels: project.channels,
-        registryStrategy,
-      }),
+      addRegistryUrls(
+        {
+          ...item,
+          channels: project.channels,
+          registryStrategy,
+        },
+        project.platforms,
+      ),
     );
   }
 
   for (const item of val.feature.conda) {
     conda.push(
-      addRegistryUrls({
-        ...item,
-        registryStrategy,
-        channels: [...coerceArray(item.channels), ...project.channels],
-      }),
+      addRegistryUrls(
+        {
+          ...item,
+          registryStrategy,
+          channels: [...coerceArray(item.channels), ...project.channels],
+        },
+        project.platforms,
+      ),
     );
   }
 
@@ -116,14 +127,17 @@ export async function extractPackageFile(
   };
 }
 
-function addRegistryUrls(item: PixiPackageDependency): PixiPackageDependency {
+function addRegistryUrls(
+  item: PixiPackageDependency,
+  platforms: string[],
+): PixiPackageDependency {
   const channels = orderChannels(item.channels);
 
   if (item.channel) {
     return {
       ...item,
       channels,
-      registryUrls: [channelToRegistryUrl(item.channel)],
+      registryUrls: [channelToRegistryUrl(item.channel, platforms)],
     };
   }
 
@@ -136,24 +150,45 @@ function addRegistryUrls(item: PixiPackageDependency): PixiPackageDependency {
     };
   }
 
-  const registryUrls: string[] = [];
-  for (const channel of channels) {
-    registryUrls.push(channelToRegistryUrl(channel));
-  }
-
   return {
     ...item,
     channels,
-    registryUrls,
+    registryUrls: channels.map((channel) =>
+      channelToRegistryUrl(channel, platforms),
+    ),
   };
 }
 
-function channelToRegistryUrl(channel: string): string {
-  if (isHttpUrl(channel)) {
+/**
+ * Resolves a pixi channel to the registry URL the conda datasource should query.
+ *
+ * A bare channel name (e.g. `conda-forge`) maps to the Anaconda.org REST API.
+ * A full URL is a standard conda channel, whose packages live under one subdir
+ * per platform plus `noarch`. Those subdirs are reconciled by the datasource
+ * rather than expanded into separate registry URLs here, because a version is
+ * only usable when it is installable on every platform the workspace targets -
+ * an intersection that no `registryStrategy` can express. So the channel URL
+ * carries the platforms and stays a single registry URL.
+ */
+function channelToRegistryUrl(channel: string, platforms: string[]): string {
+  if (!isHttpUrl(channel)) {
+    return ensureTrailingSlash(joinUrlParts(defaultCondaRegistryApi, channel));
+  }
+
+  // prefix.dev channels are resolved through its own API by the conda
+  // datasource, so they carry no subdirs to reconcile
+  if (isPrefixDevUrl(channel)) {
     return ensureTrailingSlash(channel);
   }
 
-  return ensureTrailingSlash(joinUrlParts(defaultCondaRegistryApi, channel));
+  if (!platforms.length) {
+    logger.once.warn(
+      { channel },
+      'pixi: workspace declares no platforms, so full-URL conda channels are only searched for `noarch` packages',
+    );
+  }
+
+  return `${trimTrailingSlash(channel)}?${platformsParam}=${platforms.join(',')}`;
 }
 
 function orderChannels(channels: Channels = []): string[] {
