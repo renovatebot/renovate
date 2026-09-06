@@ -1726,6 +1726,28 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('isPrInMergeQueue', () => {
+    it.each`
+      isInMergeQueue
+      ${true}
+      ${false}
+    `(
+      'returns $isInMergeQueue from the pull request merge queue status',
+      async ({ isInMergeQueue }) => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({ repository: 'some/repo' });
+        scope.post('/graphql').reply(200, {
+          data: { repository: { pullRequest: { isInMergeQueue } } },
+        });
+
+        const res = await github.isPrInMergeQueue(1234);
+
+        expect(res).toBe(isInMergeQueue);
+      },
+    );
+  });
+
   describe('getPrList()', () => {
     const t = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
     const t1 = t.plus({ minutes: 1 }).toISO()!;
