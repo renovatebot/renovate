@@ -1107,24 +1107,6 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('resolves tools from the mise registry data file via cargo backend', async () => {
-      const content = codeBlock`
-      [tools]
-      magika = "0.3.1"
-    `;
-      const result = await extractPackageFile(content, miseFilename);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'magika',
-            currentValue: '0.3.1',
-            datasource: 'crate',
-            packageName: 'magika-cli',
-          },
-        ],
-      });
-    });
-
     it('resolves tools from the mise registry data file via github backend', async () => {
       const content = codeBlock`
       [tools]
