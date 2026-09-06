@@ -283,6 +283,11 @@ export interface Platform {
    * per branch may ignore the branch name.
    */
   isBranchMergeQueueEnabled?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the PR is currently waiting in a merge queue, so it must
+   * not be enqueued or modified again.
+   */
+  isPrInMergeQueue?(number: number): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;

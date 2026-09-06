@@ -17,6 +17,7 @@ export type PrAutomergeBlockReason =
   | 'BranchNotGreen'
   | 'Conflicted'
   | 'DryRun'
+  | 'InMergeQueue'
   | 'PlatformNotReady'
   | 'PlatformRejection'
   | 'off schedule';
@@ -48,6 +49,15 @@ export async function checkAutoMerge(
     return {
       automerged: false,
       prAutomergeBlockReason: 'off schedule',
+    };
+  }
+  const mergeQueueEnabled =
+    await platform.isBranchMergeQueueEnabled?.(baseBranch);
+  if (mergeQueueEnabled && (await platform.isPrInMergeQueue?.(pr.number))) {
+    logger.debug(`PR #${pr.number} is already in the merge queue`);
+    return {
+      automerged: false,
+      prAutomergeBlockReason: 'InMergeQueue',
     };
   }
   const isConflicted =
@@ -140,14 +150,18 @@ export async function checkAutoMerge(
     targetBranch: baseBranch,
   });
   if (res) {
-    if (await platform.isBranchMergeQueueEnabled?.(baseBranch)) {
+    if (mergeQueueEnabled) {
       logger.info(
         { pr: pr.number, prTitle: pr.title },
         'PR added to the merge queue',
       );
-      // The PR is not merged yet - deleting the branch would close the PR
-      // and drop the merge queue entry
-      return { automerged: true, branchRemoved: false };
+      // The PR is not merged yet and the base branch is unchanged, so this is
+      // not reported as automerged. Deleting the branch would close the PR
+      // and drop the merge queue entry.
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      };
     }
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     if (!pruneBranchAfterAutomerge) {

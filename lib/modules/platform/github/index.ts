@@ -87,7 +87,11 @@ import {
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
-import { getPrCache, isPrInMergeQueue, updatePrCache } from './pr.ts';
+import {
+  isPrInMergeQueue as checkPrInMergeQueue,
+  getPrCache,
+  updatePrCache,
+} from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
@@ -2111,6 +2115,15 @@ async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
   return result;
 }
 
+export function isPrInMergeQueue(prNo: number): Promise<boolean> {
+  return checkPrInMergeQueue(
+    githubApi,
+    config.repositoryOwner,
+    config.repositoryName,
+    prNo,
+  );
+}
+
 export async function assertPrNotInMergeQueue(
   branchName: string,
   baseBranch?: string,
@@ -2124,14 +2137,7 @@ export async function assertPrNotInMergeQueue(
     return;
   }
 
-  if (
-    await isPrInMergeQueue(
-      githubApi,
-      config.repositoryOwner,
-      config.repositoryName,
-      pr.number,
-    )
-  ) {
+  if (await isPrInMergeQueue(pr.number)) {
     logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
     throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
   }
