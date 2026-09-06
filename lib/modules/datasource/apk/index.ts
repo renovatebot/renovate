@@ -1,17 +1,13 @@
-import { randomUUID } from 'node:crypto';
 import { isNonEmptyObject } from '@sindresorhus/is';
-import { extract as tarExtract } from 'tar';
-import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import * as fs from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts } from '../../../util/url.ts';
 import { id as looseVersioning } from '../../versioning/loose/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { getIndexFile } from './cache.ts';
 import { parseApkIndexFile } from './parser.ts';
 import type { ApkPackage } from './types.ts';
 import { constructComponentUrls } from './url.ts';
@@ -90,34 +86,15 @@ export class ApkDatasource extends Datasource {
   ): Promise<Record<string, ApkPackage[]>> {
     logger.debug(`Fetching APK packages from ${componentUrl}`);
 
-    const extractId = randomUUID();
-    const cacheDir = await fs.ensureCacheDir(upath.join('apk', extractId));
-    const tarFile = upath.join(cacheDir, 'APKINDEX.tar.gz');
-    const extractedFile = upath.join(cacheDir, 'APKINDEX');
-
     try {
-      const indexUrl = joinUrlParts(componentUrl, 'APKINDEX.tar.gz');
-      logger.debug(`Attempting to download ${indexUrl}`);
-      const readStream = this.http.stream(indexUrl);
-      const writeStream = fs.createCacheWriteStream(tarFile);
-      await fs.pipeline(readStream, writeStream);
-
-      await tarExtract({
-        file: tarFile,
-        cwd: cacheDir,
-        filter: (path) => upath.basename(path) === 'APKINDEX',
-      });
-
-      if (!(await fs.cachePathExists(extractedFile))) {
-        logger.warn({ componentUrl }, 'APKINDEX file not found in tar archive');
+      const indexFile = await getIndexFile(this.http, componentUrl);
+      if (!indexFile) {
         return {};
       }
 
-      logger.debug('Successfully extracted APKINDEX content');
-
       let packages: ApkPackage[] = [];
       try {
-        packages = await parseApkIndexFile(extractedFile);
+        packages = await parseApkIndexFile(indexFile);
       } catch (err) {
         logger.warn({ componentUrl, err }, 'Error parsing APK index file');
         return {};
@@ -144,8 +121,6 @@ export class ApkDatasource extends Datasource {
         'Error extracting APK index from tar.gz',
       );
       return {};
-    } finally {
-      await fs.rmCache(cacheDir);
     }
   }
 

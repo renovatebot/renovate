@@ -1,13 +1,16 @@
+import * as nodeFs from 'node:fs/promises';
 import { promisify } from 'node:util';
 import * as zlib from 'node:zlib';
 import { codeBlock } from 'common-tags';
 import { Header, Pack, ReadEntry } from 'tar';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
+import upath from 'upath';
 import { vi } from 'vitest';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { toSha256 } from '../../../util/hash.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
 import { ApkDatasource } from './index.ts';
@@ -16,19 +19,24 @@ import * as parser from './parser.ts';
 const gzip = promisify(zlib.gzip);
 
 async function createTarGz(
-  entries: { name: string; content: string }[],
+  entries: { name: string; content: string; type?: 'File' | 'Directory' }[],
 ): Promise<Buffer> {
   const pack = new Pack({ gzip: true });
 
   for (const entry of entries) {
+    const type = entry.type ?? 'File';
     const data = Buffer.from(entry.content, 'utf8');
     const header = new Header({
       path: entry.name,
-      size: data.length,
-      type: 'File',
+      size: type === 'Directory' ? 0 : data.length,
+      type,
     });
     const readEntry = new ReadEntry(header);
-    readEntry.end(data);
+    if (type === 'Directory') {
+      readEntry.end();
+    } else {
+      readEntry.end(data);
+    }
     pack.add(readEntry);
   }
 
@@ -778,6 +786,174 @@ describe('modules/datasource/apk/index', () => {
       });
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('caching', () => {
+    const registryUrl = 'https://packages.wolfi.dev/os?arch=x86_64';
+    const componentUrl = 'https://packages.wolfi.dev/os/x86_64';
+    const indexPath = '/os/x86_64/APKINDEX.tar.gz';
+    const lastModified = 'Fri, 26 Apr 2024 22:27:14 GMT';
+
+    function cacheFile(): string {
+      return upath.join(
+        cacheDir!.path,
+        'others/apk',
+        toSha256(componentUrl),
+        'APKINDEX.cache.json',
+      );
+    }
+
+    const nginxReleases = [
+      {
+        version: '1.24.0-r16',
+        releaseTimestamp: '2024-04-26T22:27:14.000Z',
+      },
+    ];
+
+    it('should reuse the cached index when the registry reports it unchanged', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, {
+          etag: '"v1"',
+          'last-modified': lastModified,
+        })
+        .get(indexPath)
+        .matchHeader('if-none-match', '"v1"')
+        .matchHeader('if-modified-since', lastModified)
+        .reply(304);
+
+      const first = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+      const second = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+
+      expect(first).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl,
+        releases: nginxReleases,
+      });
+      expect(second).toEqual(first);
+    });
+
+    it('should download the index again once the registry reports it changed', async () => {
+      const updatedArchive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: ['P:nginx', 'V:1.26.2-r0', 't:1747894670'].join('\n'),
+        },
+      ]);
+
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .matchHeader('if-none-match', '"v1"')
+        .reply(200, updatedArchive, { etag: '"v2"' });
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      const second = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+
+      expect(second).toEqual({
+        registryUrl,
+        releases: [
+          {
+            version: '1.26.2-r0',
+            releaseTimestamp: '2025-05-22T06:17:50.000Z',
+          },
+        ],
+      });
+    });
+
+    it('should not revalidate when the registry provides no cache headers', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive)
+        .get(indexPath)
+        .reply(200, apkIndexArchive);
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKeys([
+        'if-none-match',
+        'if-modified-since',
+      ]);
+    });
+
+    it('should not revalidate when the cached headers are gone', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' });
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      await nodeFs.rm(cacheFile());
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKey('if-none-match');
+    });
+
+    it('should not cache an archive whose `APKINDEX` is a directory', async () => {
+      const directoryArchive = await createTarGz([
+        { name: 'APKINDEX', content: '', type: 'Directory' },
+      ]);
+
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, directoryArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v2"' });
+
+      const first = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+      const second = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl,
+      });
+
+      expect(first).toBeNull();
+      expect(second).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl,
+        releases: nginxReleases,
+      });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKey('if-none-match');
+    });
+
+    it('should not revalidate when the cached headers are unreadable', async () => {
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' })
+        .get(indexPath)
+        .reply(200, apkIndexArchive, { etag: '"v1"' });
+
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+      await nodeFs.writeFile(cacheFile(), 'not json');
+      await apkDatasource.getReleases({ packageName: 'nginx', registryUrl });
+
+      const [, secondRequest] = httpMock.getTrace();
+      expect(secondRequest.headers).not.toContainKey('if-none-match');
     });
   });
 });
