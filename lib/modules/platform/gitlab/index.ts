@@ -387,6 +387,29 @@ export function isBranchMergeQueueEnabled(
   return Promise.resolve(config.mergeTrainsEnabled);
 }
 
+/**
+ * GitLab answers with 404 if the MR is not on a merge train. A car that has
+ * already been merged is not waiting any more.
+ * https://docs.gitlab.com/api/merge_trains/#get-the-status-of-a-merge-request-on-a-merge-train
+ */
+export async function isPrInMergeQueue(id: number): Promise<boolean> {
+  if (!config.mergeTrainsEnabled) {
+    return false;
+  }
+  try {
+    const { body } = await gitlabApi.getJsonUnchecked<{ status?: string }>(
+      `projects/${config.repository}/merge_trains/merge_requests/${id}`,
+      { memCache: false },
+    );
+    return body.status !== 'merged';
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      logger.debug({ err }, 'Failed to fetch merge train status');
+    }
+    return false;
+  }
+}
+
 type BranchState =
   | 'pending'
   | 'created'

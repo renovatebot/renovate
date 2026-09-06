@@ -4038,6 +4038,64 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
+  describe('isPrInMergeQueue', () => {
+    async function initRepoWithMergeTrains(): Promise<httpMock.Scope> {
+      return await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+          merge_trains_enabled: true,
+        },
+      );
+    }
+
+    it('returns false if merge trains are disabled', async () => {
+      await initRepo();
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+    });
+
+    it('returns true if the MR is waiting on the merge train', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(200, { status: 'idle' });
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeTrue();
+    });
+
+    it('returns false if the MR was already merged by the merge train', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(200, { status: 'merged' });
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+    });
+
+    it('returns false if the MR is not on the merge train', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(404);
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to fetch merge train status',
+      );
+    });
+
+    it('returns false and logs on other errors', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(500);
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to fetch merge train status',
+      );
+    });
+  });
+
   describe('mergePr(pr)', () => {
     it('merges the PR', async () => {
       httpMock
