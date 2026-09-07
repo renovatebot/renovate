@@ -48,7 +48,6 @@ import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import { isRelativePresetReference, parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
@@ -82,6 +81,7 @@ let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
 let optionSupportsTemplating: Set<string>;
+let optionAllowedValues: Map<string, string[]>;
 
 const managerList: readonly string[] = AllManagersListLiteral;
 
@@ -168,6 +168,7 @@ function initOptions(): void {
   optionGlobals = new Set();
   optionAllowsNegativeIntegers = new Set();
   optionSupportsTemplating = new Set();
+  optionAllowedValues = new Map();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
@@ -195,9 +196,65 @@ function initOptions(): void {
     if (option.supportsTemplating) {
       optionSupportsTemplating.add(option.name);
     }
+
+    // Templated values are Handlebars expressions and pattern matched values
+    // are regexes or globs, so neither can be compared against `allowedValues`.
+    if (
+      option.allowedValues &&
+      !option.supportsTemplating &&
+      !option.patternMatch
+    ) {
+      optionAllowedValues.set(option.name, option.allowedValues);
+    }
   }
 
   optionsInitialized = true;
+}
+
+/**
+ * `versioning` values may carry a configuration suffix, for example
+ * `regex:^(?<major>\d+)$`, so only the scheme name is checked.
+ */
+function isAllowedValue(
+  key: string,
+  value: unknown,
+  allowedValues: string[],
+): boolean {
+  if (!isString(value)) {
+    return false;
+  }
+
+  const candidate = key === 'versioning' ? value.split(':')[0] : value;
+  return allowedValues.includes(candidate);
+}
+
+/**
+ * Validates a value, or each element of an array value, against the
+ * `allowedValues` declared by the option's metadata.
+ */
+function checkAllowedValues(
+  key: string,
+  val: unknown,
+  currentPath: string | undefined,
+): ValidationMessage[] {
+  const allowedValues = optionAllowedValues.get(key);
+  if (!allowedValues) {
+    return [];
+  }
+
+  const messages: ValidationMessage[] = [];
+  const values = isArray(val) ? val : [val];
+  for (const value of values) {
+    if (isAllowedValue(key, value, allowedValues)) {
+      continue;
+    }
+
+    messages.push({
+      topic: ConfigValidationTopic.Error,
+      message: `Invalid value \`${String(value)}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+    });
+  }
+  return messages;
 }
 
 /**
@@ -456,6 +513,9 @@ export async function validateConfig(
                     }),
                   );
                 }
+                warnings = warnings.concat(
+                  checkAllowedValues(key, val, currentPath),
+                );
                 if (key === 'extends') {
                   for (const subval of val) {
                     if (isString(subval)) {
@@ -768,7 +828,11 @@ export async function validateConfig(
                 });
               }
             } else if (type === 'string') {
-              if (!isString(val)) {
+              if (isString(val)) {
+                warnings = warnings.concat(
+                  checkAllowedValues(key, val, currentPath),
+                );
+              } else {
                 errors.push({
                   topic: ConfigValidationTopic.Error,
                   message: `Configuration option \`${currentPath}\` should be a string`,
@@ -1141,47 +1205,9 @@ async function validateGlobalConfig(
               },
             ).join(', ')}.`,
           });
-        } else if (
-          key === 'repositoryCache' &&
-          !['enabled', 'disabled', 'reset'].includes(val)
-        ) {
-          warnings.push({
-            topic: ConfigValidationTopic.Error,
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
-          });
-        } else if (
-          key === 'dryRun' &&
-          !['extract', 'lookup', 'full'].includes(val)
-        ) {
-          warnings.push({
-            topic: ConfigValidationTopic.Error,
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
-          });
-        } else if (
-          key === 'binarySource' &&
-          !['docker', 'global', 'install', 'hermit'].includes(val)
-        ) {
-          warnings.push({
-            topic: ConfigValidationTopic.Error,
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
-          });
-        } else if (
-          key === 'requireConfig' &&
-          !['required', 'optional', 'ignored'].includes(val)
-        ) {
-          warnings.push({
-            topic: ConfigValidationTopic.Error,
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
-          });
-        } else if (
-          key === 'gitUrl' &&
-          !['default', 'ssh', 'endpoint'].includes(val)
-        ) {
-          warnings.push({
-            topic: ConfigValidationTopic.Error,
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
-          });
         }
+
+        warnings.push(...checkAllowedValues(key, val, currentPath));
 
         if (
           key === 'reportType' &&
@@ -1234,30 +1260,7 @@ async function validateGlobalConfig(
             }),
           );
         }
-        if (key === 'gitNoVerify') {
-          const allowedValues = ['commit', 'push'];
-          for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: ConfigValidationTopic.Error,
-                message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
-        if (key === 'mergeConfidenceDatasources') {
-          const allowedValues = supportedDatasources;
-          for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: ConfigValidationTopic.Error,
-                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
+        warnings.push(...checkAllowedValues(key, val, currentPath));
       } else if (isArray(val)) {
         for (const [subIndex, subval] of val.entries()) {
           if (isPlainObject(subval)) {

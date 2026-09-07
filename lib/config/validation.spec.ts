@@ -2,6 +2,7 @@ import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
+import { getOptions } from './options/index.ts';
 import type { AllConfig, RenovateConfig } from './types.ts';
 import * as configValidation from './validation.ts';
 
@@ -980,7 +981,13 @@ describe('config/validation', () => {
         config as any,
         true,
       );
-      expect(warnings).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value `unknown` for `customManagers[0].customType`. The allowed values are jsonata, regex.',
+        },
+      ]);
       expect(errors).toMatchInlineSnapshot(`
         [
           {
@@ -2839,7 +2846,7 @@ describe('config/validation', () => {
       expect(warnings).toEqual([
         {
           message:
-            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+            'Invalid value `invalid` for `binarySource`. The allowed values are global, docker, install, hermit.',
           topic: 'Configuration Error',
         },
       ]);
@@ -2858,7 +2865,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+              'Invalid value `invalid` for `binarySource`. The allowed values are global, docker, install, hermit.',
             topic: 'Configuration Error',
           },
         ]);
@@ -2929,7 +2936,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset.',
+              'Invalid value `invalid` for `repositoryCache`. The allowed values are disabled, enabled, reset.',
             topic: 'Configuration Error',
           },
         ]);
@@ -3092,7 +3099,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
+            'Invalid value `invalid` for `gitNoVerify`. The allowed values are commit, push.',
           topic: 'Configuration Error',
         },
       ]);
@@ -3153,7 +3160,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are global, docker, install, hermit.',
         },
       ]);
     });
@@ -3771,5 +3778,56 @@ describe('config/validation', () => {
         ]);
       });
     });
+  });
+
+  describe('validates allowedValues', () => {
+    const invalidValue = 'not-an-allowed-value';
+    const enumOptions = getOptions().filter(
+      (option) =>
+        option.allowedValues &&
+        !option.supportsTemplating &&
+        !option.patternMatch,
+    );
+
+    it.each(enumOptions)('warns for $name', async (option) => {
+      const config = partial<AllConfig>({
+        [option.name]: option.type === 'array' ? [invalidValue] : invalidValue,
+      });
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        option.globalOnly ? 'global' : 'repo',
+        config,
+      );
+
+      const message = `Invalid value \`${invalidValue}\` for \`${option.name}\`. The allowed values are ${option.allowedValues!.join(', ')}.`;
+      expect(warnings.map((warning) => warning.message)).toContain(message);
+      expect(errors.map((error) => error.message)).not.toContain(message);
+    });
+
+    it.each`
+      option                | value
+      ${'bumpType'}         | ${'{{{depType}}}'}
+      ${'matchUpdateTypes'} | ${['/^ma/']}
+      ${'versioning'}       | ${'regex:^(?<major>\\d+)$'}
+    `(
+      'accepts $option values which are not plain enum members',
+      async ({ option, value }: { option: string; value: unknown }) => {
+        const config = partial<RenovateConfig>({ [option]: value });
+
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+        );
+
+        expect(
+          warnings.filter((warning) =>
+            warning.message.startsWith('Invalid value'),
+          ),
+        ).toBeEmptyArray();
+        expect(
+          errors.filter((error) => error.message.startsWith('Invalid value')),
+        ).toBeEmptyArray();
+      },
+    );
   });
 });
