@@ -1,7 +1,17 @@
-import { isFalsy, isString, isTruthy, isUndefined } from '@sindresorhus/is';
+import {
+  isFalsy,
+  isNonEmptyString,
+  isString,
+  isTruthy,
+  isUndefined,
+} from '@sindresorhus/is';
 import { GlobalConfig } from '../config/global.ts';
 import { logger } from '../logger/index.ts';
-import type { CombinedHostRule, HostRule } from '../types/index.ts';
+import type {
+  CombinedHostRule,
+  HostRule,
+  InternalHostGrant,
+} from '../types/index.ts';
 import { clone } from './clone.ts';
 import * as sanitize from './sanitize.ts';
 import { toBase64 } from './string.ts';
@@ -144,6 +154,14 @@ export function add(params: HostRule, options?: AddHostRuleOptions): void {
   delete rule.trusted;
   if (options?.trusted) {
     rule.trusted = true;
+  }
+
+  // like `trusted`, `allowInternal` may only come from the administrator's own config: a repository or preset rule must not be able to grant itself access to internal hosts
+  if (!isUndefined(rule.allowInternal) && !rule.trusted) {
+    logger.debug(
+      `Ignoring hostRules allowInternal for ${rule.matchHost ?? rule.hostType} from untrusted config`,
+    );
+    delete rule.allowInternal;
   }
 
   if (rule.headers) {
@@ -309,7 +327,8 @@ export function find(search: HostRuleSearch): CombinedHostRule {
     }
   }
 
-  const res: RegisteredHostRule = Object.assign({}, ...matchedRules);
+  const res: RegisteredHostRule & Pick<CombinedHostRule, 'internalHostGrant'> =
+    Object.assign({}, ...matchedRules);
 
   // `headers` are resolved per trust tier and then combined key by key, so that repository or preset config can no longer discard - or substitute - the headers a self-hosted admin configured for the same host
   // Within a tier nothing changes: the most specific rule's `headers` still replace those of the broader rules it is combined with, so an admin masking their own broad rule with a narrower one keeps working, as does a repository doing the same among its own rules
@@ -336,11 +355,33 @@ export function find(search: HostRuleSearch): CombinedHostRule {
     res.enabled = enabled;
   }
 
+  // computed here and never from configuration: `add()` strips `allowInternal` from untrusted registrations, so only the administrator's own rules can contribute
+  const internalHostGrant: InternalHostGrant = {
+    explicit: lastDefined(matchedRules.map((rule) => rule.allowInternal)),
+    scoped: lastDefined(
+      matchedRules
+        .filter(
+          (rule) =>
+            isNonEmptyString(rule.hostType) || isHttpUrl(rule.matchHost),
+        )
+        .map((rule) => rule.allowInternal),
+    ),
+    implicit: trustedRules.some((rule) => isNonEmptyString(rule.matchHost)),
+  };
+  if (
+    !isUndefined(internalHostGrant.explicit) ||
+    !isUndefined(internalHostGrant.scoped) ||
+    internalHostGrant.implicit
+  ) {
+    res.internalHostGrant = internalHostGrant;
+  }
+
   delete res.hostType;
   delete res.resolvedHost;
   delete res.matchHost;
   delete res.readOnly;
   delete res.trusted;
+  delete res.allowInternal;
   return res;
 }
 

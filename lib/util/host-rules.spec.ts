@@ -34,6 +34,7 @@ describe('util/host-rules', () => {
       timeout: true,
       abortOnError: true,
       abortIgnoreStatusCodes: true,
+      allowInternal: true,
       enabled: true,
       enableHttp2: true,
       concurrentRequestLimit: true,
@@ -562,6 +563,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         token: 'from-admin',
         headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        internalHostGrant: { implicit: true },
       });
     });
 
@@ -583,6 +585,7 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'from-admin' },
+        internalHostGrant: { implicit: true },
       });
     });
 
@@ -623,9 +626,11 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other': 'yes' },
+        internalHostGrant: { implicit: true },
       });
       expect(find({ url: 'https://trusted.example.com' })).toEqual({
         headers: { 'X-Api-Key': 'secret' },
+        internalHostGrant: { implicit: true },
       });
     });
 
@@ -649,6 +654,7 @@ describe('util/host-rules', () => {
       // the repo's narrower rule masks its own broader one, but cannot mask the admin's
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other-Repo-Header': 'yes', 'X-From-Admin': 'yes' },
+        internalHostGrant: { implicit: true },
       });
     });
 
@@ -669,6 +675,7 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'from-repo', 'X-Other-Admin-Header': 'yes' },
+        internalHostGrant: { implicit: true },
       });
     });
 
@@ -687,6 +694,121 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'yes' },
+      });
+    });
+
+    describe('internalHostGrant', () => {
+      it('is absent when no trusted rule matches', () => {
+        add({ matchHost: 'registry.example.com', token: 'abc' });
+
+        expect(
+          find({ url: 'https://registry.example.com' }).internalHostGrant,
+        ).toBeUndefined();
+      });
+
+      it('is implicit for a host the admin named', () => {
+        add(
+          { matchHost: 'registry.example.com', token: 'abc' },
+          { trusted: true },
+        );
+
+        expect(find({ url: 'https://registry.example.com' })).toEqual({
+          token: 'abc',
+          internalHostGrant: { implicit: true },
+        });
+      });
+
+      it('is not implicit for a host-less trusted rule', () => {
+        add({ hostType: 'nuget', token: 'abc' }, { trusted: true });
+
+        expect(
+          find({ hostType: 'nuget', url: 'https://internal.example.com' })
+            .internalHostGrant,
+        ).toBeUndefined();
+      });
+
+      it('ignores allowInternal from untrusted config', () => {
+        add({ matchHost: 'internal.example.com', allowInternal: true });
+
+        expect(
+          find({ url: 'https://internal.example.com' }).internalHostGrant,
+        ).toBeUndefined();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Ignoring hostRules allowInternal for internal.example.com from untrusted config',
+        );
+      });
+
+      it('ignores allowInternal from an untrusted host-less rule', () => {
+        add({ hostType: 'nuget', allowInternal: true });
+
+        expect(
+          find({ hostType: 'nuget', url: 'https://internal.example.com' })
+            .internalHostGrant,
+        ).toBeUndefined();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Ignoring hostRules allowInternal for nuget from untrusted config',
+        );
+      });
+
+      it('takes explicit allowInternal from the admin, most specific rule winning', () => {
+        add(
+          { matchHost: 'example.com', allowInternal: true },
+          { trusted: true },
+        );
+        add(
+          { matchHost: 'https://secure.example.com', allowInternal: false },
+          { trusted: true },
+        );
+
+        expect(
+          find({ url: 'https://other.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: true, implicit: true });
+        expect(
+          find({ url: 'https://secure.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: true });
+      });
+
+      it('marks a grant scoped by hostType', () => {
+        add(
+          {
+            hostType: 'preset',
+            matchHost: 'presets.example.com',
+            allowInternal: true,
+          },
+          { trusted: true },
+        );
+
+        expect(
+          find({ hostType: 'preset', url: 'https://presets.example.com' })
+            .internalHostGrant,
+        ).toEqual({ explicit: true, scoped: true, implicit: true });
+      });
+
+      it('does not mark a bare-hostname grant as scoped', () => {
+        add(
+          { matchHost: 'internal.example.com', allowInternal: true },
+          { trusted: true },
+        );
+
+        expect(
+          find({ url: 'https://internal.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: true, implicit: true });
+      });
+
+      it('does not let a repository rule override the admin allowInternal', () => {
+        add(
+          { matchHost: 'https://internal.example.com', allowInternal: false },
+          { trusted: true },
+        );
+        add({
+          matchHost: 'https://internal.example.com/deeper/path',
+          allowInternal: true,
+        });
+
+        expect(
+          find({ url: 'https://internal.example.com/deeper/path/file' })
+            .internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: true });
       });
     });
 

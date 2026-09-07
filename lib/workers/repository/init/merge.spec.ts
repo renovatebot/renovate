@@ -804,6 +804,7 @@ describe('workers/repository/init/merge', () => {
               'custom-header': 'Bearer admin-secret',
               'X-Allowed': 'yes',
             },
+            internalHostGrant: { implicit: true },
           },
         );
       });
@@ -827,7 +828,7 @@ describe('workers/repository/init/merge', () => {
         });
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          {},
+          { internalHostGrant: { implicit: true } },
         );
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { denied: ['Authorization'] },
@@ -1680,6 +1681,7 @@ describe('workers/repository/init/merge', () => {
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        internalHostGrant: { implicit: true },
       });
     });
 
@@ -1708,6 +1710,7 @@ describe('workers/repository/init/merge', () => {
         }),
       ).toEqual({
         headers: { 'X-Api-Key': 'from-admin' },
+        internalHostGrant: { implicit: true },
       });
     });
 

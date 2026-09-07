@@ -2905,6 +2905,17 @@ const options: Readonly<RenovateOptions>[] = [
     advancedUse: true,
   },
   {
+    name: 'allowInternal',
+    description: 'Whether requests to this host may reach internal addresses',
+    type: 'boolean',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+    globalOnly: true,
+  },
+  {
     name: 'abortOnError',
     description:
       'If enabled, Renovate aborts its run when HTTP request errors occur.',
