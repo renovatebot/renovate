@@ -15,7 +15,9 @@ ruleTester.run('logger-err-key', rule, {
     `logger.once.warn({ err }, 'Failed');`,
     // non-error-ish value under the error key is fine
     `logger.error({ error: 'string' }, 'Failed');`,
-    `logger.error({ error: err.message }, 'Failed');`,
+    `logger.error({ error: res.message }, 'Failed');`,
+    `logger.error({ error: err.code }, 'Failed');`,
+    `logger.error({ error: err['message'] }, 'Failed');`,
     // other keys holding an error are not flagged
     `logger.warn({ configError: error }, 'Failed');`,
     // computed keys and spreads are ignored
@@ -84,6 +86,37 @@ ruleTester.run('logger-err-key', rule, {
       code: `logger.error({ url, error: err }, 'Failed');`,
       errors: [{ messageId: 'errKey' }],
       output: `logger.error({ url, err }, 'Failed');`,
+    },
+    // error message or stack strings under a non-canonical key
+    {
+      code: `logger.warn({ error: err.message }, 'Failed');`,
+      errors: [{ messageId: 'errString' }],
+      output: `logger.warn({ err }, 'Failed');`,
+    },
+    {
+      code: `logger.fatal({ error: err.stack }, 'Failed');`,
+      errors: [{ messageId: 'errString' }],
+      output: `logger.fatal({ err }, 'Failed');`,
+    },
+    {
+      code: `logger.warn({ url, error: error.message }, 'Failed');`,
+      errors: [{ messageId: 'errString' }],
+      output: `logger.warn({ url, err: error }, 'Failed');`,
+    },
+    {
+      code: `logger.debug({ error: res.parseError.message }, 'Failed');`,
+      errors: [{ messageId: 'errString' }],
+      output: `logger.debug({ err: res.parseError }, 'Failed');`,
+    },
+    {
+      code: `logger.debug({ error: (err as Error).message }, 'Failed');`,
+      errors: [{ messageId: 'errString' }],
+      output: `logger.debug({ err: err as Error }, 'Failed');`,
+    },
+    {
+      code: `logger.debug({ exception: err.stack as string }, 'Failed');`,
+      errors: [{ messageId: 'errString' }],
+      output: `logger.debug({ err }, 'Failed');`,
     },
   ],
 });

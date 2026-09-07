@@ -1,3 +1,4 @@
+import type { ESTree } from '@oxlint/plugins';
 import { defineRule } from '@oxlint/plugins';
 import { getLoggerLevel, isErrorIsh } from '../utils/logger.ts';
 
@@ -9,6 +10,41 @@ import { getLoggerLevel, isErrorIsh } from '../utils/logger.ts';
  */
 const nonCanonicalKeys = new Set(['error', 'exception']);
 
+/**
+ * Error properties which are commonly logged instead of the error itself.
+ * The `err` serializer already includes them, together with the rest of the
+ * error, so the whole error should be logged instead.
+ */
+const errorStringProperties = new Set(['message', 'stack']);
+
+/**
+ * If the value is `<error>.message` or `<error>.stack`, return the `<error>`
+ * expression, otherwise `null`. TS-specific wrapper expressions are unwrapped
+ * first.
+ */
+function getErrorStringSource(
+  node: ESTree.Expression,
+): ESTree.Expression | null {
+  if (
+    node.type === 'TSAsExpression' ||
+    node.type === 'TSNonNullExpression' ||
+    node.type === 'TSSatisfiesExpression'
+  ) {
+    return getErrorStringSource(node.expression);
+  }
+  if (
+    node.type === 'MemberExpression' &&
+    !node.computed &&
+    node.property.type === 'Identifier' &&
+    errorStringProperties.has(node.property.name) &&
+    node.object.type !== 'Super' &&
+    isErrorIsh(node.object)
+  ) {
+    return node.object;
+  }
+  return null;
+}
+
 export default defineRule({
   meta: {
     type: 'problem',
@@ -16,6 +52,8 @@ export default defineRule({
     messages: {
       errKey:
         'Use the `err` key for errors in logger metadata instead of `{{key}}`, so the error serializer is applied and error logs can be searched consistently.',
+      errString:
+        'Log the whole error under the `err` key instead of `{{key}}: {{value}}`; the error serializer includes the message and stack and keeps error logs searchable.',
     },
   },
   createOnce(context) {
@@ -39,11 +77,26 @@ export default defineRule({
           } else if (key.type === 'Literal' && typeof key.value === 'string') {
             name = key.value;
           }
-          if (
-            !name ||
-            !nonCanonicalKeys.has(name) ||
-            !isErrorIsh(property.value)
-          ) {
+          if (!name || !nonCanonicalKeys.has(name)) {
+            continue;
+          }
+          const { value } = property;
+          const errorSource = getErrorStringSource(value);
+          if (errorSource) {
+            const source = context.sourceCode.getText(errorSource);
+            context.report({
+              node: property,
+              messageId: 'errString',
+              data: { key: name, value: context.sourceCode.getText(value) },
+              fix: (fixer) =>
+                fixer.replaceText(
+                  property,
+                  source === 'err' ? 'err' : `err: ${source}`,
+                ),
+            });
+            continue;
+          }
+          if (!isErrorIsh(value)) {
             continue;
           }
           context.report({
@@ -51,7 +104,6 @@ export default defineRule({
             messageId: 'errKey',
             data: { key: name },
             fix(fixer) {
-              const { value } = property;
               if (value.type === 'Identifier' && value.name === 'err') {
                 return fixer.replaceText(property, 'err');
               }
