@@ -105,7 +105,6 @@ import type {
   GhAutomergeResponse,
   GhBranchStatus,
   GhEnqueuePullRequestResponse,
-  GhMergeQueueResponse,
   GhPr,
   GhRepo,
   GhRestPr,
@@ -913,42 +912,7 @@ export async function isBranchMergeQueueEnabled(
     return false;
   }
 
-  config.branchMergeQueueEnabled ??= {};
-
-  const cachedResult = config.branchMergeQueueEnabled[branchName];
-  if (cachedResult !== undefined) {
-    return cachedResult;
-  }
-
-  // Merge queues configured via classic branch protection are only visible
-  // through the GraphQL mergeQueue field, which also covers repository rulesets
-  const [owner, name] = (config.parentRepo ?? config.repository!).split('/');
-  let result = false;
-  try {
-    const res = await githubApi.requestGraphql<GhMergeQueueResponse>(
-      repoMergeQueueQuery,
-      {
-        variables: { owner, name, branch: branchName },
-        readOnly: true,
-        count: 1, // set count to one to bypass graphql check
-      },
-    );
-    if (res?.errors) {
-      // e.g. GitHub Enterprise Server versions without merge queue support
-      logger.once.debug(
-        { errors: res.errors },
-        'Merge queue detection: query failed',
-      );
-    } else {
-      result = isNonEmptyString(res?.data?.repository?.mergeQueue?.id);
-    }
-  } catch (err) {
-    logger.warn({ err }, 'Merge queue detection: request error');
-  }
-
-  logger.debug(`Branch ${branchName} has merge queue enabled: ${result}`);
-  config.branchMergeQueueEnabled[branchName] = result;
-  return result;
+  return isMergeQueueEnabled(branchName);
 }
 
 function handleBranchProtectionError(
