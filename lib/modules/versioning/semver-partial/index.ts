@@ -235,7 +235,7 @@ function isCompatible(version: string): boolean {
   return isValid(version);
 }
 
-function isBreaking(version: string, current: string): boolean {
+function isBreaking(current: string, version: string): boolean {
   const versionParsed = parseVersion(version);
   const currentParsed = parseVersion(current);
 
