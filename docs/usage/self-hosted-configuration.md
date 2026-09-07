@@ -720,6 +720,29 @@ If set to a string value, Renovate will log warnings with the `encryptedWarning`
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
 
+## `exitCodeForErrors`
+
+By default Renovate exits with code `1` if anything was logged at error level, and `0` otherwise.
+Set `exitCodeForErrors` to `true` to instead exit with a code that says _which_ kind of error ended the repository run:
+
+| Exit code | Meaning                                                                                        |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| `0`       | Success                                                                                        |
+| `1`       | Renovate logged an error                                                                       |
+| `2`       | Renovate could not parse its own configuration                                                 |
+| `3`       | System error, see `SystemErrors` in `lib/constants/error-messages.ts`                          |
+| `4`       | Platform error, see `PlatformErrors`                                                           |
+| `5`       | Configuration error, see `ConfigErrors`                                                        |
+| `6`       | Temporary error, see `TemporaryErrors`                                                         |
+| `7`       | Other error: external host error, lockfile error, missing API credentials, or an unknown error |
+
+The results in `RepositoryErrors` are _not_ mapped to an exit code, because they mean the repository is disabled, archived, empty and so on, and not that the run failed.
+
+When Renovate runs against multiple repositories, the exit code comes from the first repository that ended in an error state.
+Renovate still processes the remaining repositories.
+
+The exit code a repository maps to is always logged in the `Repository finished` message, even when this option is disabled.
+
 ## `exposeAllEnv`
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.

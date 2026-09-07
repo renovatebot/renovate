@@ -1,19 +1,17 @@
 import type { RenovateConfig } from '../../config/types.ts';
 
-import type {
-  ConfigErrors,
-  EXTERNAL_HOST_ERROR,
-  MANAGER_LOCKFILE_ERROR,
-  PlatformErrors,
-  SystemErrors,
-  TemporaryErrors,
-  UNKNOWN_ERROR,
-} from '../../constants/error-messages.ts';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
+  ConfigErrors,
+  EXTERNAL_HOST_ERROR,
+  MANAGER_LOCKFILE_ERROR,
   MISSING_API_CREDENTIALS,
+  PlatformErrors,
   RepositoryErrors,
+  SystemErrors,
+  TemporaryErrors,
+  UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
 
 import { logger } from '../../logger/index.ts';
@@ -48,6 +46,8 @@ export interface ProcessResult {
   status: ProcessStatus;
   enabled: boolean | undefined;
   onboarded: boolean | undefined;
+  /** the process exit code this result maps to, used when `exitCodeForErrors` is enabled */
+  exitCode: number;
 }
 
 /** a strong type for any repository result status that Renovate may report */
@@ -69,6 +69,31 @@ export type RepositoryResult =
   | typeof MISSING_API_CREDENTIALS
   | typeof MANAGER_LOCKFILE_ERROR
   | typeof UNKNOWN_ERROR;
+
+/**
+ * Exit code per known error group, used when `exitCodeForErrors` is enabled.
+ *
+ * `RepositoryErrors` are deliberately absent: they mean the repository is disabled, not that the run failed.
+ */
+const exitCodes: [readonly string[], number][] = [
+  [SystemErrors, 3],
+  [PlatformErrors, 4],
+  [ConfigErrors, 5],
+  [TemporaryErrors, 6],
+  [
+    [
+      EXTERNAL_HOST_ERROR,
+      MANAGER_LOCKFILE_ERROR,
+      MISSING_API_CREDENTIALS,
+      UNKNOWN_ERROR,
+    ],
+    7,
+  ],
+];
+
+function getExitCode(res: RepositoryResult): number {
+  return exitCodes.find(([errors]) => errors.includes(res))?.[1] ?? 0;
+}
 
 export function processResult(
   config: RenovateConfig,
@@ -106,5 +131,5 @@ export function processResult(
     // TODO: types (#22198)
     `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`,
   );
-  return { res, status, enabled, onboarded };
+  return { res, status, enabled, onboarded, exitCode: getExitCode(res) };
 }

@@ -1,13 +1,14 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
 import type { RenovateConfig } from '~test/util.ts';
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import * as secrets from '../../util/sanitize.ts';
 import * as repositoryWorker from '../repository/index.ts';
+import type { ProcessResult } from '../repository/result.ts';
 import * as configParser from './config/parse/index.ts';
 import * as globalWorker from './index.ts';
 import * as limits from './limits.ts';
@@ -198,6 +199,33 @@ describe('workers/global/index', () => {
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns the exit code of the first errored repository when exitCodeForErrors is enabled', async () => {
+    parseConfigs.mockResolvedValueOnce({
+      enabled: true,
+      exitCodeForErrors: true,
+      repositories: ['a', 'b', 'c'],
+    });
+    vi.mocked(repositoryWorker.renovateRepository)
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(partial<ProcessResult>({ exitCode: 5 }))
+      .mockResolvedValueOnce(partial<ProcessResult>({ exitCode: 6 }));
+
+    await expect(globalWorker.start()).resolves.toBe(5);
+    expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(3);
+  });
+
+  it('ignores repository exit codes when exitCodeForErrors is disabled', async () => {
+    parseConfigs.mockResolvedValueOnce({
+      enabled: true,
+      repositories: ['a'],
+    });
+    vi.mocked(repositoryWorker.renovateRepository).mockResolvedValueOnce(
+      partial<ProcessResult>({ exitCode: 5 }),
+    );
+
+    await expect(globalWorker.start()).resolves.toBe(0);
   });
 
   it("filters the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
