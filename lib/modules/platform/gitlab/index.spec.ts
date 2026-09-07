@@ -4071,6 +4071,19 @@ describe('modules/platform/gitlab/index', () => {
       await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
     });
 
+    it('returns false and logs if the response is malformed', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(200, { status: 'unknown' });
+
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to fetch merge train status',
+      );
+    });
+
     it('returns false if the MR is not on the merge train', async () => {
       const scope = await initRepoWithMergeTrains();
       scope
