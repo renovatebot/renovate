@@ -28,6 +28,7 @@ import {
 } from '../../../../modules/platform/pr-body.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { getElapsedHours } from '../../../../util/date.ts';
 import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
@@ -54,7 +55,6 @@ import {
   validatePrCache,
 } from './pr-fingerprint.ts';
 import { tryReuseAutoclosedPr } from './pr-reuse.ts';
-import { coerceArray } from '../../../../util/array.ts';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
