@@ -74,11 +74,11 @@ export async function extractPackageFile(
     yarnLock: 'yarn.lock',
     packageLock: 'package-lock.json',
     shrinkwrapJson: 'npm-shrinkwrap.json',
-    pnpmShrinkwrap: 'pnpm-lock.yaml',
+    pnpmLockFile: 'pnpm-lock.yaml',
   };
 
   for (const [key, val] of Object.entries(lockFiles) as [
-    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
+    'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmLockFile',
     string,
   ][]) {
     const filePath = getSiblingFileName(packageFile, val);

@@ -549,7 +549,7 @@ const platform: Platform = {
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     if (includeOtherAuthors && isString(targetBranch)) {
-      // do not use pr cache as it only fetches prs created by the bot account
+      // do not use pr cache as it only fetches prs created by the Renovate account
       const pr = await helper.getPRByBranch(
         config.repository,
         targetBranch,

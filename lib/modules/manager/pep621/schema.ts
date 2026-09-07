@@ -147,6 +147,14 @@ const UvSource = z.union([
   UvPathSource,
   UvWorkspaceSource,
 ]);
+export type UvSource = z.infer<typeof UvSource>;
+
+// A dependency can declare a single source or, when disambiguated by
+// environment markers, an array of sources. Normalize both to an array.
+// https://docs.astral.sh/uv/concepts/projects/dependencies/#multiple-sources
+const UvSources = z
+  .union([UvSource, z.array(UvSource).min(1)])
+  .transform((source) => (Array.isArray(source) ? source : [source]));
 
 const UvConfig = z.object({
   'dev-dependencies': LooseArray(
@@ -156,7 +164,7 @@ const UvConfig = z.object({
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
-    UvSource,
+    UvSources,
   ).optional(),
   index: z
     .array(

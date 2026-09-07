@@ -79,7 +79,7 @@ export function fixParsedRange(range: string): any {
   }
 
   const parsedRange = parseRange(range);
-  const cleanRange = range.replace(regEx(/([<=>^~])( )?/g), '');
+  const cleanRange = range.replace(regEx(/(?:[<=>^~])(?: )?/g), '');
   const splitRange = cleanRange.split(' ');
   const semverRange: SemVer[] = [];
 

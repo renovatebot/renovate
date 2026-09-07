@@ -186,7 +186,7 @@ On our side, we’re not using the on-premise but rather a custom scheduler usin
 
 > The figures here have been updated in November 2023
 
-We started using Renovate Bot in 2019, using the (now deprecated) `renovate/pro` Docker image.
+We started using Renovate in 2019, using the (now deprecated) `renovate/pro` Docker image.
 We installed it as a GitHub app and some early adopters started to use it.
 
 Pretty quickly, we ran into the biggest limitation; this Docker image runs all repositories one after another.

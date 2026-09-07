@@ -17,6 +17,7 @@ import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts'
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
+import type { PyProject, UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
 
@@ -219,6 +220,148 @@ describe('modules/manager/pep621/processors/uv', () => {
           depName: 'dep4',
           registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
           packageName: 'dep4',
+        },
+      ]);
+    });
+
+    it('handles the array form of uv sources', () => {
+      const pyproject = parsePyProject(codeBlock`
+      [tool.uv.sources]
+      dep1 = [{ index = "foo" }]
+      dep2 = [
+        { index = "foo", marker = "sys_platform == 'darwin'" },
+        { index = "bar", marker = "sys_platform == 'linux'" },
+      ]
+      dep3 = [{ git = "https://github.com/foo/dep3", tag = "0.3.0" }]
+      dep4 = [
+        { index = "foo", marker = "sys_platform == 'darwin'" },
+        { git = "https://github.com/foo/dep4", marker = "sys_platform == 'linux'" },
+      ]
+      dep5 = [
+        { index = "unknown", marker = "sys_platform == 'darwin'" },
+        { index = "foo", marker = "sys_platform == 'linux'" },
+      ]
+      dep6 = [
+        { index = "unknown", marker = "sys_platform == 'darwin'" },
+        { index = "unknown2", marker = "sys_platform == 'linux'" },
+      ]
+      dep7 = [{ index = "unknown" }]
+
+      [[tool.uv.index]]
+      name = "foo"
+      url = "https://foo.com/simple"
+      default = false
+      explicit = true
+
+      [[tool.uv.index]]
+      name = "bar"
+      url = "https://bar.com/simple"
+      default = false
+      explicit = true
+    `)!;
+
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          packageName: 'dep2',
+        },
+        {
+          depName: 'dep3',
+          packageName: 'dep3',
+        },
+        {
+          depName: 'dep4',
+          packageName: 'dep4',
+        },
+        {
+          depName: 'dep5',
+          packageName: 'dep5',
+        },
+        {
+          depName: 'dep6',
+          packageName: 'dep6',
+        },
+        {
+          depName: 'dep7',
+          packageName: 'dep7',
+        },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple', 'https://bar.com/simple'],
+          packageName: 'dep2',
+        },
+        {
+          depName: 'dep3',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          registryUrls: ['https://github.com'],
+          packageName: 'foo/dep3',
+          currentValue: '0.3.0',
+        },
+        {
+          depName: 'dep4',
+          depType: depTypes.uvSources,
+          skipReason: 'unsupported',
+          packageName: 'dep4',
+        },
+        {
+          depName: 'dep5',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep5',
+        },
+        {
+          depName: 'dep6',
+          depType: depTypes.uvSources,
+          packageName: 'dep6',
+        },
+        {
+          depName: 'dep7',
+          depType: depTypes.uvSources,
+          packageName: 'dep7',
+        },
+      ]);
+    });
+
+    it('skips source types the schema does not produce', () => {
+      // Cannot be expressed in pyproject.toml, as the schema only emits the
+      // known source shapes. Exercises the defensive fallback.
+      const uv = partial<NonNullable<NonNullable<PyProject['tool']>['uv']>>({
+        sources: { dep1: [partial<UvSource>({})] },
+      });
+      const pyproject = partial<PyProject>({ tool: { uv } });
+
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          packageName: 'dep1',
+          skipReason: 'unknown-registry',
         },
       ]);
     });

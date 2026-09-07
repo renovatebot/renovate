@@ -16,22 +16,22 @@ describe('modules/datasource/cpan/index', () => {
           (body) => body.query.bool.filter[0].term['module.name'] === 'FooBar',
         )
         .reply(200, Fixtures.get('empty.json'));
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'FooBar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).post('/v1/file/_search').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'Plack',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -46,12 +46,12 @@ describe('modules/datasource/cpan/index', () => {
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).post('/v1/file/_search').replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'Plack',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {

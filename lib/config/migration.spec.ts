@@ -172,14 +172,162 @@ describe('config/migration', () => {
       } as any;
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        additionalBranchPrefix: '{{parentDir}}-',
+        allowCustomCrateRegistries: true,
+        allowScripts: true,
+        autodiscover: true,
+        automerge: false,
+        automergeType: 'branch',
+        baseBranchPatterns: ['next'],
+        binarySource: 'global',
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}{{{packageFileDir}}}',
+        branchPrefix: 'renovate/',
+        commitMessage:
+          '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message {{depName}} {{packageName}}',
+        constraints: {
+          python: '3.7',
+        },
+        dependencyDashboard: true,
+        dependencyDashboardTitle: 'foo',
+        enabled: true,
+        enabledManagers: ['npm'],
+        exposeAllEnv: true,
+        extends: [
+          ':automergeBranch',
+          ':skipArtifactsUpdate',
+          'config:js-app',
+          'config:js-lib',
+          ':dependencyDashboard',
+        ],
+        forkProcessing: 'enabled',
+        hostRules: [
+          {
+            hostType: 'docker',
+            matchHost: 'https://docker.io',
+            password: 'some-password',
+            username: 'some-username',
+          },
+        ],
+        ignorePaths: ['node_modules/'],
+        lockFileMaintenance: {
+          automerge: true,
+          exposeAllEnv: false,
+          schedule: 'before 5am',
+        },
+        major: {
+          automerge: false,
+        },
+        meteor: {
+          enabled: true,
+        },
+        minor: {
+          automerge: true,
+        },
+        npmrc: '',
+        nvmrc: {
+          packageRules: [
+            {
+              extends: ['node'],
+              matchFileNames: ['node/**'],
+            },
+          ],
+        },
+        onboarding: false,
+        packageRules: [
+          {
+            enabled: false,
+            matchCategories: ['python'],
+            matchPackageNames: ['foo'],
+          },
+          {
+            enabled: false,
+            matchCategories: ['dotnet'],
+          },
+          {
+            groupName: 'angular packages',
+            matchPackageNames: ['/^(@angular|typescript)/', '!foo'],
+          },
+          {
+            groupName: 'foo',
+            matchPackageNames: ['/^foo/'],
+          },
+          {
+            enabled: false,
+            matchPackageNames: ['angular', '/ang/'],
+          },
+          {
+            matchPackageNames: ['guava'],
+            versioning: 'maven',
+          },
+          {
+            automerge: true,
+            matchDepTypes: ['bar'],
+            matchPackageNames: ['foo'],
+          },
+          {
+            extends: ['foo'],
+            matchFileNames: ['examples/**'],
+          },
+          {
+            matchDepTypes: ['peerDependencies'],
+            rangeStrategy: 'widen',
+          },
+          {
+            major: {
+              automerge: false,
+            },
+            matchDepTypes: ['devDependencies'],
+            minor: {
+              automerge: true,
+            },
+            schedule: null,
+          },
+          {
+            major: {
+              automerge: false,
+            },
+            matchDepTypes: ['optionalDependencies'],
+            minor: {
+              automerge: true,
+            },
+            respectLatest: false,
+            schedule: 'before 5am on Monday',
+          },
+        ],
+        patch: {
+          automerge: true,
+        },
+        pip_setup: {
+          rebaseWhen: 'never',
+        },
+        pipenv: {
+          rebaseWhen: 'conflicted',
+        },
+        platform: 'github',
+        poetry: {
+          rebaseWhen: 'behind-base-branch',
+          versioning: 'pep440',
+        },
+        postUpdateOptions: ['gomodTidy'],
+        prTitle:
+          '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title',
+        rangeStrategy: 'bump',
+        rebaseWhen: 'auto',
+        schedule: 'on the first day of the month',
+        semanticCommitScope: 'deps',
+        semanticCommitType: 'fix',
+        separateMajorMinor: true,
+        separateMajorReleases: true,
+        separateMinorPatch: true,
+        skipArtifactsUpdate: true,
+        suppressNotifications: ['lockFileErrors'],
+        travis: {
+          enabled: true,
+        },
+      });
       expect(isMigrated).toBeTrue();
-      // @ts-expect-error -- TODO: fix me
-      expect(migratedConfig.depTypes).toBeUndefined();
-      expect(migratedConfig.automerge).toBe(false);
-      expect(migratedConfig.packageRules).toHaveLength(11);
-      expect(migratedConfig.hostRules).toHaveLength(1);
-      expect(migratedConfig.baseBranchPatterns).toMatchObject(['next']);
     });
 
     it('migrates before and after schedules', () => {
@@ -193,14 +341,15 @@ describe('config/migration', () => {
       };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        major: {
+          schedule: ['after 10pm', 'before 7am'],
+        },
+        minor: {
+          schedule: ['after 10pm every weekday', 'before 7am every weekday'],
+        },
+      });
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig.major).toMatchObject({
-        schedule: ['after 10pm', 'before 7am'],
-      });
-      expect(migratedConfig.minor).toMatchObject({
-        schedule: ['after 10pm every weekday', 'before 7am every weekday'],
-      });
     });
 
     it('migrates every friday', () => {
@@ -240,9 +389,10 @@ describe('config/migration', () => {
       };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        schedule: 'after 5:00pm on wednesday and thursday',
+      });
       expect(isMigrated).toBeFalse();
-      expect(migratedConfig.schedule).toEqual(config.schedule);
     });
 
     it('does not migrate hour range', () => {
@@ -292,8 +442,28 @@ describe('config/migration', () => {
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.packageRules?.[0].minor?.automerge).toBeFalse();
+      expect(migratedConfig).toEqual({
+        major: {
+          automerge: false,
+        },
+        minor: {
+          automerge: true,
+        },
+        packageRules: [
+          {
+            major: {
+              automerge: false,
+            },
+            matchPackageNames: ['/^(@angular|typescript)/'],
+            minor: {
+              automerge: false,
+            },
+            patch: {
+              automerge: true,
+            },
+          },
+        ],
+      });
     });
 
     it('does not migrate config', () => {
@@ -323,14 +493,16 @@ describe('config/migration', () => {
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig).toMatchSnapshot();
-      // @ts-expect-error -- TODO: fix me
-      expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
-      // TODO: fix types #22198
-      expect(
-        (migratedConfig.lockFileMaintenance as RenovateConfig)
-          ?.packageRules?.[0].respectLatest,
-      ).toBeFalse();
+      expect(migratedConfig).toEqual({
+        lockFileMaintenance: {
+          packageRules: [
+            {
+              matchDepTypes: ['optionalDependencies'],
+              respectLatest: false,
+            },
+          ],
+        },
+      });
     });
 
     it('migrates packageFiles', () => {
@@ -349,14 +521,35 @@ describe('config/migration', () => {
       };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        includePaths: [
+          'package.json',
+          'backend/package.json',
+          'frontend/package.json',
+          'other/package.json',
+        ],
+        packageRules: [
+          {
+            matchFileNames: ['backend/package.json'],
+            rangeStrategy: 'replace',
+          },
+          {
+            matchFileNames: ['frontend/package.json'],
+            rangeStrategy: 'pin',
+          },
+          {
+            matchDepTypes: ['devDependencies'],
+            matchFileNames: ['other/package.json'],
+            rangeStrategy: 'pin',
+          },
+          {
+            matchDepTypes: ['dependencies'],
+            matchFileNames: ['other/package.json'],
+            rangeStrategy: 'pin',
+          },
+        ],
+      });
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig.includePaths).toHaveLength(4);
-      // @ts-expect-error -- TODO: fix me
-      expect(migratedConfig.packageFiles).toBeUndefined();
-      expect(migratedConfig.packageRules).toHaveLength(4);
-      expect(migratedConfig.packageRules?.[0].rangeStrategy).toBe('replace');
-      expect(migratedConfig.packageRules?.[1].rangeStrategy).toBe('pin');
     });
 
     it('migrates more packageFiles', () => {
@@ -380,12 +573,22 @@ describe('config/migration', () => {
       };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig).toEqual({
+        includePaths: ['package.json'],
+        packageRules: [
+          {
+            matchDepTypes: ['devDependencies'],
+            matchFileNames: ['package.json'],
+            rangeStrategy: 'pin',
+          },
+          {
+            matchDepTypes: ['dependencies'],
+            matchFileNames: ['package.json'],
+            rangeStrategy: 'pin',
+          },
+        ],
+      });
       expect(isMigrated).toBeTrue();
-      expect(migratedConfig.includePaths).toHaveLength(1);
-      // @ts-expect-error -- TODO: fix me
-      expect(migratedConfig.packageFiles).toBeUndefined();
-      expect(migratedConfig.packageRules).toHaveLength(2);
     });
 
     it('removes invalid configs', () => {
@@ -653,8 +856,24 @@ describe('config/migration', () => {
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toMatchSnapshot();
-    expect(migratedConfig.packageRules).toHaveLength(3);
+    expect(migratedConfig).toEqual({
+      packageRules: [
+        {
+          enabled: false,
+          matchDepTypes: ['devDependencies'],
+        },
+        {
+          automerge: true,
+          groupName: 'definitelyTyped',
+          matchPackageNames: ['!@types/react-table', '@types/**'],
+        },
+        {
+          automerge: false,
+          matchDepTypes: ['dependencies'],
+          matchPackageNames: ['!@types/react-table'],
+        },
+      ],
+    });
   });
 
   it('migrates presets', () => {
@@ -696,7 +915,31 @@ describe('config/migration', () => {
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig).toEqual({
+      customManagers: [
+        {
+          customType: 'regex',
+          managerFilePatterns: [
+            '/(^|/|\\.)Dockerfile$/',
+            '/(^|/)Dockerfile[^/]*$/',
+          ],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+        },
+        {
+          customType: 'regex',
+          managerFilePatterns: [
+            '/(^|/|\\.)Dockerfile$/',
+            '/(^|/)Dockerfile[^/]*$/',
+          ],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+          packageNameTemplate: '{{{holder}}}',
+        },
+      ],
+    });
   });
 
   it('migrates pip-compile', () => {
@@ -751,7 +994,18 @@ describe('config/migration', () => {
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig).toEqual({
+      gradle: {
+        enabled: true,
+        managerFilePatterns: ['/foo/'],
+      },
+      packageRules: [
+        {
+          matchManagers: ['gradle'],
+          separateMinorPatch: true,
+        },
+      ],
+    });
   });
 
   it('migrates empty requiredStatusChecks', () => {

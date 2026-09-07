@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: read
+  discussions: read
+  issues: read
   statuses: write
 
 concurrency:
@@ -19,44 +21,18 @@ jobs:
   closes-issue-or-discussion:
     runs-on: ubuntu-slim
     steps:
-      - name: Check for 'Closes \#' in commit messages
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Check for closing keywords that would close a Discussion
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            // Co-authored-by: Claude Sonnet 4.5 (GitHub Copilot)
-
-            // Get all commits in this PR using the GitHub API
-            const { data: commits } = await github.rest.pulls.listCommits({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            });
-
-            // Check each commit message for closing keywords
-            const violatingCommits = [];
-            // Matches: closes #123, fixes #123, closes: #123, etc.
-            const closingPattern = /(closes|fixes|resolves|fixed|closed|resolved):?\s+#\d+/i;
-
-            for (const commit of commits) {
-              const message = commit.commit.message;
-              if (closingPattern.test(message)) {
-                const shortSha = commit.sha.substring(0, 7);
-                const firstLine = message.split('\n')[0];
-                violatingCommits.push({ sha: shortSha, message: firstLine });
-              }
-            }
-
-            // Report results
-            if (violatingCommits.length > 0) {
-              let errorMessage = `Found ${violatingCommits.length} commit(s) with issue closing keywords:\n\n`;
-              for (const commit of violatingCommits) {
-                errorMessage += `- ${commit.sha}: ${commit.message}\n`;
-              }
-              errorMessage += `\nCommit messages should not contain closing keywords (closes, fixes, resolves, etc.). Use the PR description instead.`;
-              core.setFailed(errorMessage);
-            } else {
-              core.info('✓ No commits with issue closing keywords found');
-            }
+            const script = require('./tools/check-closes-discussion.cjs')
+            await script({ github, context, core })
 
   # Runs a full `semantic-release` dry-run for the state that would exist right
   # after this PR merges, and fails if it would publish a new *major* version.

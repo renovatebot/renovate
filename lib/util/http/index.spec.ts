@@ -110,7 +110,7 @@ describe('util/http/index', () => {
 
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
-    expect(await http.getText('http://renovate.com/test')).toEqual({
+    await expect(http.getText('http://renovate.com/test')).resolves.toEqual({
       authorization: false,
       body: '',
       headers: {},
@@ -232,9 +232,9 @@ describe('util/http/index', () => {
 
   it('postJson', async () => {
     httpMock.scope(baseUrl).post('/').reply(200, {});
-    expect(
-      await http.postJson('http://renovate.com', { body: {}, baseUrl }),
-    ).toEqual({
+    await expect(
+      http.postJson('http://renovate.com', { body: {}, baseUrl }),
+    ).resolves.toEqual({
       authorization: false,
       body: {},
       headers: {
@@ -247,9 +247,9 @@ describe('util/http/index', () => {
 
   it('putJson', async () => {
     httpMock.scope(baseUrl).put('/').reply(200, {});
-    expect(
-      await http.putJson('http://renovate.com', { body: {}, baseUrl }),
-    ).toEqual({
+    await expect(
+      http.putJson('http://renovate.com', { body: {}, baseUrl }),
+    ).resolves.toEqual({
       authorization: false,
       body: {},
       headers: {
@@ -262,9 +262,9 @@ describe('util/http/index', () => {
 
   it('patchJson', async () => {
     httpMock.scope(baseUrl).patch('/').reply(200, {});
-    expect(
-      await http.patchJson('http://renovate.com', { body: {}, baseUrl }),
-    ).toEqual({
+    await expect(
+      http.patchJson('http://renovate.com', { body: {}, baseUrl }),
+    ).resolves.toEqual({
       authorization: false,
       body: {},
       headers: {
@@ -277,9 +277,9 @@ describe('util/http/index', () => {
 
   it('deleteJson', async () => {
     httpMock.scope(baseUrl).delete('/').reply(200, {});
-    expect(
-      await http.deleteJson('http://renovate.com', { body: {}, baseUrl }),
-    ).toEqual({
+    await expect(
+      http.deleteJson('http://renovate.com', { body: {}, baseUrl }),
+    ).resolves.toEqual({
       authorization: false,
       body: {},
       headers: {
@@ -294,7 +294,9 @@ describe('util/http/index', () => {
     httpMock.scope(baseUrl).head('/').reply(200, undefined, {
       'content-type': 'application/json',
     });
-    expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
+    await expect(
+      http.headJson('http://renovate.com', { baseUrl }),
+    ).resolves.toEqual({
       authorization: false,
       body: '',
       headers: {
@@ -448,7 +450,7 @@ describe('util/http/index', () => {
         .reply(500)
         .head('/')
         .reply(200, undefined, { 'x-some-header': 'abc' });
-      expect(await http.head('http://renovate.com')).toEqual({
+      await expect(http.head('http://renovate.com')).resolves.toEqual({
         authorization: false,
         body: '',
         headers: {
