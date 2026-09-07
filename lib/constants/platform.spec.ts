@@ -8,8 +8,8 @@ import { GitlabReleasesDatasource } from '../modules/datasource/gitlab-releases/
 import { GitlabTagsDatasource } from '../modules/datasource/gitlab-tags/index.ts';
 import { HermitDatasource } from '../modules/datasource/hermit/index.ts';
 import { PodDatasource } from '../modules/datasource/pod/index.ts';
-import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/github/index.ts';
-import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab/index.ts';
+import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/github/source.ts';
+import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab/source.ts';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,

@@ -38,7 +38,7 @@ const bitbucketProject = partial<ChangeLogProject>({
 
 const changelogSource = new BitbucketServerChangeLogSource();
 
-describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => {
+describe('workers/repository/update/pr/changelog/bitbucket-server/source', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();
@@ -181,7 +181,10 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         .get('/projects/some-org/repos/some-repo/raw/src/CHANGELOG.md')
         .reply(200, changelogMd);
 
-      const res = await getReleaseNotesMdFile(bitbucketProject);
+      const res = await getReleaseNotesMdFile(
+        bitbucketProject,
+        changelogSource,
+      );
       expect(res).toStrictEqual({
         changelogFile: 'src/CHANGELOG.md',
         changelogMd: `${changelogMd}\n#\n##`,
@@ -213,7 +216,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         ...bitbucketProject,
         sourceDirectory: 'packages/components',
       };
-      const res = await getReleaseNotesMdFile(project);
+      const res = await getReleaseNotesMdFile(project, changelogSource);
       expect(res).toStrictEqual({
         changelogFile: 'packages/components/src/CHANGELOG.md',
         changelogMd: `${changelogMd}\n#\n##`,
@@ -232,7 +235,9 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
           isLastPage: true,
           values: ['.gitignore', 'README.md'],
         });
-      await expect(getReleaseNotesMdFile(bitbucketProject)).resolves.toBeNull();
+      await expect(
+        getReleaseNotesMdFile(bitbucketProject, changelogSource),
+      ).resolves.toBeNull();
     });
   });
 
@@ -240,6 +245,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
     const res = await getReleaseList(
       bitbucketProject,
       partial<ChangeLogRelease>({}),
+      changelogSource,
     );
     expect(res).toBeEmptyArray();
   });

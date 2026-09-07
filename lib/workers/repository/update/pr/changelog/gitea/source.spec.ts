@@ -5,9 +5,8 @@ import * as hostRules from '../../../../../../util/host-rules.ts';
 import { toBase64 } from '../../../../../../util/string.ts';
 import type { Timestamp } from '../../../../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
-import { GiteaChangeLogSource } from '../gitea/source.ts';
 import { getChangeLogJSON } from '../index.ts';
-import { getReleaseNotesMd } from './index.ts';
+import { GiteaChangeLogSource } from './source.ts';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -37,7 +36,7 @@ const matchHost = 'https://gitea.com/';
 
 const changelogSource = new GiteaChangeLogSource();
 
-describe('workers/repository/update/pr/changelog/gitea/index', () => {
+describe('workers/repository/update/pr/changelog/gitea/source', () => {
   beforeAll(() => {
     // TODO: why?
     vi.stubEnv('GITHUB_ENDPOINT', undefined);
@@ -457,7 +456,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           content: toBase64('some content'),
         });
       await expect(
-        getReleaseNotesMd(
+        changelogSource.getReleaseNotesMd(
           'some/repo',
           'https://git.test.com/api/v1/',
           'charts/some',

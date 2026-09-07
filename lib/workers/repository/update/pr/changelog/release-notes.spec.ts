@@ -14,9 +14,9 @@ import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { getChangeLogSourceFor } from './index.ts';
 import {
   addReleaseNotes as addReleaseNotesRaw,
-  getReleaseList,
-  getReleaseNotes,
+  getReleaseList as getReleaseListRaw,
   getReleaseNotesMd as getReleaseNotesMdRaw,
+  getReleaseNotes as getReleaseNotesRaw,
   massageBody,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
@@ -39,6 +39,30 @@ function getReleaseNotesMd(
   return getReleaseNotesMdRaw(
     project,
     release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function getReleaseList(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+): Promise<ChangeLogNotes[]> {
+  return getReleaseListRaw(
+    project,
+    release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function getReleaseNotes(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+  config: BranchUpgradeConfig,
+): Promise<ChangeLogNotes | null> {
+  return getReleaseNotesRaw(
+    project,
+    release,
+    config,
     getChangeLogSourceFor(project.type)!,
   );
 }
@@ -697,14 +721,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   describe('getReleaseList()', () => {
-    it('should return empty array if no apiBaseUrl', async () => {
-      const res = await getReleaseList(
-        partial<ChangeLogProject>(),
-        partial<ChangeLogRelease>(),
-      );
-      expect(res).toBeEmptyArray();
-    });
-
     it('should return release list for github repo', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {
