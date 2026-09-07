@@ -198,15 +198,38 @@ export async function writeExistingFiles(
             widens.push(upgrade.depName!);
           }
           const { depName } = upgrade;
-          for (const packageName of packageNames) {
-            if (
-              'packages' in npmLockParsed &&
-              (packageName === `node_modules/${depName}` ||
-                packageName.startsWith(`node_modules/${depName}/`))
-            ) {
-              logger.trace({ packageName }, 'Massaging out package name');
-              lockFileChanged = true;
-              delete npmLockParsed.packages[packageName];
+          const oldVersion = upgrade.lockedVersion ?? upgrade.currentVersion;
+          if ('packages' in npmLockParsed) {
+            for (const packageName of packageNames) {
+              if (
+                packageName === `node_modules/${depName}` ||
+                packageName.startsWith(`node_modules/${depName}/`)
+              ) {
+                logger.trace({ packageName }, 'Massaging out package name');
+                lockFileChanged = true;
+                delete npmLockParsed.packages[packageName];
+                continue;
+              }
+              if (!depName || !oldVersion) {
+                continue;
+              }
+              // Lockstep monorepo siblings (e.g. vue -> @vue/server-renderer)
+              // pin the updated dep to its exact old version. Left in the lock
+              // they cannot resolve against the new version and npm fails with
+              // ERESOLVE, so massage them out too and let npm re-resolve them.
+              const entry = npmLockParsed.packages[packageName];
+              const pinned =
+                entry?.peerDependencies?.[depName] === oldVersion ||
+                entry?.dependencies?.[depName] === oldVersion ||
+                entry?.optionalDependencies?.[depName] === oldVersion;
+              if (pinned) {
+                logger.trace(
+                  { packageName, depName, oldVersion },
+                  'Massaging out lockstep sibling',
+                );
+                lockFileChanged = true;
+                delete npmLockParsed.packages[packageName];
+              }
             }
           }
         }

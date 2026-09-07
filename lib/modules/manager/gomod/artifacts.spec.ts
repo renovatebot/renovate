@@ -96,14 +96,14 @@ describe('modules/manager/gomod/artifacts', () => {
 
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
 
@@ -118,14 +118,14 @@ describe('modules/manager/gomod/artifacts', () => {
       }),
     );
 
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'go get -d -t ./...',
@@ -157,14 +157,14 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -806,14 +806,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -870,14 +870,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -911,14 +911,14 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -961,14 +961,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -1067,14 +1067,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -1134,14 +1134,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -1198,14 +1198,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -1271,14 +1271,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -1340,14 +1340,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -1421,14 +1421,14 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -1476,8 +1476,8 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -1486,7 +1486,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodTidy'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
@@ -1541,8 +1541,8 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -1551,7 +1551,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodTidy1.17'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
@@ -1606,8 +1606,8 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -1616,7 +1616,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodTidyE', 'gomodTidy1.17'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
@@ -1671,8 +1671,8 @@ describe('modules/manager/gomod/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -1681,7 +1681,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodTidyE'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
@@ -1727,14 +1727,14 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
     });
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'go.sum',
@@ -1759,8 +1759,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
@@ -1772,7 +1772,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -1867,8 +1867,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
@@ -1881,7 +1881,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -1927,8 +1927,8 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/pkg/errors', newVersion: 'v1.0.0' },
@@ -1940,7 +1940,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
@@ -1973,8 +1973,8 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/pkg/errors', newVersion: 'vx.0.0' },
@@ -1986,7 +1986,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
@@ -2020,8 +2020,8 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           {
@@ -2036,7 +2036,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
@@ -2070,8 +2070,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
@@ -2082,7 +2082,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodTidy'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New main.go', path: 'go.mod', type: 'addition' } },
     ]);
@@ -2108,8 +2108,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
@@ -2119,7 +2119,7 @@ describe('modules/manager/gomod/artifacts', () => {
           newMajor: 28,
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New main.go', path: 'go.mod', type: 'addition' } },
     ]);
@@ -2145,8 +2145,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
@@ -2162,7 +2162,7 @@ describe('modules/manager/gomod/artifacts', () => {
           },
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -2205,8 +2205,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
@@ -2222,7 +2222,7 @@ describe('modules/manager/gomod/artifacts', () => {
           },
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -2264,8 +2264,8 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'gopkg.in/yaml.v2', newVersion: 'v28.0.0' },
@@ -2278,7 +2278,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
@@ -2652,8 +2652,8 @@ describe('modules/manager/gomod/artifacts', () => {
       }),
     );
 
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -2662,7 +2662,7 @@ describe('modules/manager/gomod/artifacts', () => {
           goGetDirs: ['.', 'foo', '.bar/...', '&&', 'cat', '/etc/passwd'],
         },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: "go get -d -t . foo .bar/... '&&' cat",
@@ -2685,8 +2685,8 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -2695,7 +2695,7 @@ describe('modules/manager/gomod/artifacts', () => {
           goGetDirs: ['.'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New go.sum',
@@ -2725,8 +2725,8 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -2735,7 +2735,7 @@ describe('modules/manager/gomod/artifacts', () => {
           goGetDirs: ['/etc', '../../../'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'go.sum', stderr: 'Invalid goGetDirs' } },
     ]);
     expect(execSnapshots).toMatchObject([]);
@@ -2769,14 +2769,14 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New tools.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'tools.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New tools.sum',
@@ -2804,8 +2804,8 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New tools.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'tools.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -2814,7 +2814,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodTidy'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New tools.sum',
@@ -2853,8 +2853,8 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New tools.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'tools.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
@@ -2863,7 +2863,7 @@ describe('modules/manager/gomod/artifacts', () => {
           postUpdateOptions: ['gomodTidy'],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New tools.sum',

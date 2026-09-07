@@ -557,7 +557,7 @@ export function massageMarkdown(prBody: string, rebaseLabel: string): string {
       .replace(regEx(/\b(?:Pull Request|PR)/g), 'change')
       // Remove HTML tags not supported in Gerrit markdown
       .replace(regEx(/<\/?summary>/g), '**')
-      .replace(regEx(/<\/?(details|blockquote)>/g), '')
+      .replace(regEx(/<\/?(?:details|blockquote)>/g), '')
       .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
       .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
       // Remove zero-width-space not supported in Gerrit markdown

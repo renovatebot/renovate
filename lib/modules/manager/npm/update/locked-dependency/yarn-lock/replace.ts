@@ -13,7 +13,10 @@ export function replaceConstraintVersion(
     return lockFileContent;
   }
   const depNameConstraint = `${depName}@${constraint}`;
-  const escaped = depNameConstraint.replace(regEx(/(@|\^|\.|\\|\|)/g), '\\$1');
+  const escaped = depNameConstraint.replace(
+    regEx(/(?<special>@|\^|\.|\\|\|)/g),
+    '\\$<special>',
+  );
   const matchString = `(${escaped}(("|",|,)[^\n:]*)?:\n)(.*\n)*?(\\s+dependencies|\n[@a-z])`;
   // yarn will fill in the details later
   const matchResult = regEx(matchString).exec(lockFileContent);

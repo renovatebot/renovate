@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.8.14 linux-x64 (2026-08-26)"
+    "version": "2026.9.1 linux-x64 (2026-09-02)"
   },
   "tools": {
     "1password": {
@@ -10,6 +10,14 @@
     "1password-cli": {
       "aqua": "1password/cli",
       "vfox": "mise-plugins/vfox-1password"
+    },
+    "7z": {
+      "aqua": "ip7z/7zip",
+      "github": "ip7z/7zip"
+    },
+    "7zip": {
+      "aqua": "ip7z/7zip",
+      "github": "ip7z/7zip"
     },
     "aapt2": {
       "vfox": "mise-plugins/vfox-aapt2"
@@ -403,6 +411,9 @@
       "asdf": "mise-plugins/mise-bpkg",
       "vfox": "mise-plugins/vfox-bpkg"
     },
+    "broot": {
+      "github": "canop/broot"
+    },
     "btop": {
       "aqua": "aristocratos/btop"
     },
@@ -597,6 +608,9 @@
     },
     "claude-squad": {
       "aqua": "smtg-ai/claude-squad"
+    },
+    "cliamp": {
+      "github": "bjarneo/cliamp"
     },
     "clickhouse": {
       "asdf": "mise-plugins/mise-clickhouse",
@@ -802,6 +816,12 @@
     },
     "curlie": {
       "aqua": "rs/curlie"
+    },
+    "cursor-agent": {
+      "http": "cursor-agent"
+    },
+    "cursor-cli": {
+      "http": "cursor-agent"
     },
     "cyclonedx": {
       "aqua": "CycloneDX/cyclonedx-cli",
@@ -1045,6 +1065,10 @@
       "asdf": "mise-plugins/mise-emsdk",
       "vfox": "jdx/vfox-emsdk"
     },
+    "engram": {
+      "aqua": "Gentleman-Programming/engram",
+      "github": "Gentleman-Programming/engram"
+    },
     "entire": {
       "aqua": "entireio/cli",
       "github": "entireio/cli",
@@ -1074,6 +1098,9 @@
     "evans": {
       "aqua": "ktr0731/evans",
       "asdf": "goki90210/asdf-evans"
+    },
+    "exiftool": {
+      "conda": "exiftool"
     },
     "expert": {
       "aqua": "expert-lsp/expert",
@@ -1201,6 +1228,10 @@
     },
     "gemini-cli": {
       "npm": "@google/gemini-cli"
+    },
+    "gentle-ai": {
+      "aqua": "Gentleman-Programming/gentle-ai",
+      "github": "Gentleman-Programming/gentle-ai"
     },
     "getenvoy": {
       "asdf": "mise-plugins/mise-getenvoy",
@@ -1830,9 +1861,6 @@
       "aqua": "microsoft/kiota",
       "asdf": "asdf-community/asdf-kiota"
     },
-    "kiro-cli": {
-      "aqua": "kiro.dev/kiro-cli"
-    },
     "kn": {
       "aqua": "knative/client",
       "asdf": "joke/asdf-kn"
@@ -2121,7 +2149,8 @@
       "asdf": "mathew-fleisch/asdf-mage"
     },
     "magika": {
-      "cargo": "magika-cli"
+      "cargo": "magika-cli",
+      "github": "google/magika"
     },
     "mago": {
       "aqua": "carthage-software/mago"
@@ -2270,6 +2299,9 @@
     "mongosh": {
       "asdf": "itspngu/asdf-mongosh",
       "github": "mongodb-js/mongosh"
+    },
+    "mosh": {
+      "conda": "mosh"
     },
     "mprocs": {
       "aqua": "pvolok/dekit"
@@ -2439,12 +2471,19 @@
       "aqua": "ollama/ollama",
       "asdf": "virtualstaticvoid/asdf-ollama"
     },
+    "ols": {
+      "github": "DanielGavin/ols"
+    },
     "om": {
       "aqua": "pivotal-cf/om",
       "asdf": "mise-plugins/tanzu-plug-in-for-asdf"
     },
     "omnictl": {
       "aqua": "siderolabs/omni/omnictl"
+    },
+    "onefetch": {
+      "aqua": "o2sh/onefetch",
+      "github": "o2sh/onefetch"
     },
     "onyx": {
       "asdf": "jtakakura/asdf-onyx",
@@ -2541,6 +2580,10 @@
       "asdf": "Fbrisset/asdf-pandoc",
       "github": "jgm/pandoc"
     },
+    "pastel": {
+      "aqua": "sharkdp/pastel",
+      "github": "sharkdp/pastel"
+    },
     "patat": {
       "asdf": "airtonix/asdf-patat",
       "github": "jaspervdj/patat"
@@ -2604,6 +2647,10 @@
     },
     "pixi": {
       "github": "prefix-dev/pixi"
+    },
+    "pkgx": {
+      "aqua": "pkgxdev/pkgx",
+      "github": "pkgxdev/pkgx"
     },
     "pkl": {
       "aqua": "apple/pkl",
@@ -2926,7 +2973,8 @@
     },
     "sbt": {
       "asdf": "mise-plugins/mise-sbt",
-      "conda": "sbt"
+      "conda": "sbt",
+      "github": "sbt/sbt"
     },
     "scala": {
       "asdf": "mise-plugins/mise-scala",
@@ -3121,6 +3169,12 @@
       "aqua": "spinnaker/spin",
       "asdf": "pavloos/asdf-spin"
     },
+    "spin-framework": {
+      "github": "spinframework/spin"
+    },
+    "spotify-player": {
+      "github": "aome510/spotify-player"
+    },
     "spring-boot": {
       "asdf": "mise-plugins/mise-spring-boot",
       "vfox": "jdx/vfox-spring-boot"
@@ -3245,6 +3299,10 @@
     "syft": {
       "aqua": "anchore/syft",
       "asdf": "davidgp1701/asdf-syft"
+    },
+    "syncthing": {
+      "aqua": "syncthing/syncthing",
+      "github": "syncthing/syncthing"
     },
     "systemctl-tui": {
       "aqua": "rgwood/systemctl-tui"
@@ -3827,6 +3885,9 @@
     "yt-dlp": {
       "asdf": "duhow/asdf-yt-dlp",
       "github": "yt-dlp/yt-dlp"
+    },
+    "yt-dlp-nightly": {
+      "github": "yt-dlp/yt-dlp-nightly-builds"
     },
     "ytt": {
       "aqua": "carvel-dev/ytt",

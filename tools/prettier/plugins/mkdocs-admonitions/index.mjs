@@ -30,9 +30,9 @@ function normalizeBodyIndent(bodyLines) {
     if (line.trim() === '') {
       continue;
     }
-    const m = /^(\s*)/.exec(line);
-    if (m) {
-      minIndent = Math.min(minIndent, m[1].length);
+    const m = /^(?<indent>\s*)/.exec(line);
+    if (m?.groups) {
+      minIndent = Math.min(minIndent, m.groups.indent.length);
     }
   }
   if (minIndent === Infinity || minIndent === 2) {

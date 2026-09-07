@@ -36,9 +36,17 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('extracts dependencies', () => {
       const res = extractPackageFile(requirements1);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        { currentValue: '==0.3.1', depName: 'some-package' },
+        { currentValue: '==1.0.0', depName: 'some-other-package' },
+        { depName: 'sphinx' },
+        {
+          currentValue: '==1.9',
+          depName: 'not_semver',
+          packageName: 'not-semver',
+        },
+      ]);
       expect(res?.registryUrls).toEqual(['http://example.com/private-pypi/']);
-      expect(res?.deps).toHaveLength(4);
     });
 
     it('extracts dependencies with --index-url short code', () => {
@@ -89,40 +97,63 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(requirements2)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(5);
+      expect(res).toMatchObject([
+        { currentValue: '==1', depName: 'Django' },
+        { currentValue: '==0.6.27', depName: 'distribute' },
+        { currentValue: '==0.2', depName: 'dj-database-url' },
+        { currentValue: '==2.4.5', depName: 'psycopg2' },
+        { currentValue: '==0.1.2', depName: 'wsgiref' },
+      ]);
     });
 
     it('handles comments and commands', () => {
       const res = extractPackageFile(requirements3)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(5);
+      expect(res).toMatchObject([
+        { currentValue: '==1.11.23', depName: 'Django' },
+        {
+          currentValue: '==0.6.27',
+          depName: 'distribute',
+          skipReason: 'ignored',
+        },
+        { currentValue: '==0.2', depName: 'dj-database-url' },
+        { currentValue: '==2.4.5', depName: 'psycopg2' },
+        { currentValue: '==0.1.2', depName: 'wsgiref' },
+      ]);
     });
 
     it('handles extras and complex index url', () => {
       const res = extractPackageFile(requirements4);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        { currentValue: '==2.0.12', depName: 'Django' },
+        { currentValue: '==4.1.1', depName: 'celery' },
+        { currentValue: '== 3.2.1', depName: 'foo' },
+      ]);
       expect(res?.registryUrls).toEqual([
         'https://artifactory.company.com/artifactory/api/pypi/python/simple',
       ]);
-      expect(res?.deps).toHaveLength(3);
     });
 
     it('handles extra index url', () => {
       const res = extractPackageFile(requirements5);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        { currentValue: '==2.0.12', depName: 'Django' },
+        { currentValue: '==4.1.1', depName: 'celery' },
+        { currentValue: '== 3.2.1', depName: 'foo' },
+        { currentValue: '==0.3.1', depName: 'some-package' },
+        { currentValue: '==1.0.0', depName: 'some-other-package' },
+        { currentValue: '==1.9', depName: 'not_semver' },
+      ]);
       expect(res?.registryUrls).toEqual([
         'https://artifactory.company.com/artifactory/api/pypi/python/simple',
       ]);
       expect(res?.additionalRegistryUrls).toEqual([
         'http://example.com/private-pypi/',
       ]);
-      expect(res?.deps).toHaveLength(6);
     });
 
     it('handles extra index url and defaults without index to config', () => {
       const res = extractPackageFile(requirements6);
-      expect(res).toMatchSnapshot();
+      expect(res?.registryUrls).toBeUndefined();
       expect(res?.additionalRegistryUrls).toEqual([
         'http://example.com/private-pypi/',
       ]);
@@ -131,7 +162,7 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('handles extra index url and defaults without index to pypi', () => {
       const res = extractPackageFile(requirements6);
-      expect(res).toMatchSnapshot();
+      expect(res?.registryUrls).toBeUndefined();
       expect(res?.additionalRegistryUrls).toEqual([
         'http://example.com/private-pypi/',
       ]);
@@ -140,14 +171,16 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('handles extra spaces around pinned dependency equal signs', () => {
       const res = extractPackageFile(requirements4);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps[2]).toMatchObject({
+        currentValue: '== 3.2.1',
+        currentVersion: '3.2.1',
+        depName: 'foo',
+      });
 
       expect(res?.deps[0].currentValue).toStartWith('==');
       expect(res?.deps[0].currentVersion).toStartWith('2.0.12');
       expect(res?.deps[1].currentValue).toStartWith('==');
       expect(res?.deps[1].currentVersion).toStartWith('4.1.1');
-      expect(res?.deps[2].currentValue).toStartWith('==');
-      expect(res?.deps[2].currentVersion).toStartWith('3.2.1');
 
       expect(res?.deps).toHaveLength(3);
     });
@@ -177,8 +210,11 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('should handle hashes', () => {
       const res = extractPackageFile(requirements8);
-      expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toMatchObject([
+        { currentValue: '==1.9.1', depName: 'Django' },
+        { currentValue: '==0.22.1', depName: 'bgg' },
+        { currentValue: '==2016.1.8', depName: 'html2text' },
+      ]);
     });
 
     it('should handle package with extras and no version specifiers', () => {

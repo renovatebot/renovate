@@ -1,6 +1,7 @@
 import { definePlugin } from '@oxlint/plugins';
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.ts';
 import enforceTsExtension from './rules/enforce-ts-extension.ts';
+import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.ts';
 import loggerStaticMessage from './rules/logger-static-message.ts';
 import noExecShellOption from './rules/no-exec-shell-option.ts';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.ts';
@@ -39,6 +40,7 @@ export default definePlugin({
   rules: {
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
     'enforce-ts-extension': enforceTsExtension,
+    'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-static-message': loggerStaticMessage,
     'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
