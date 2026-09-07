@@ -1,7 +1,7 @@
-import { giteaHttp } from '../../../modules/platform/gitea/index.ts';
+import { GiteaHttp } from '../../../util/http/gitea.ts';
 import { createPresetSource } from './common.ts';
 
 export const Endpoint = 'https://gitea.com/';
 
 export const { fetchJSONFile, getPresetFromEndpoint, getPreset } =
-  createPresetSource(giteaHttp, Endpoint);
+  createPresetSource(new GiteaHttp(), Endpoint);
