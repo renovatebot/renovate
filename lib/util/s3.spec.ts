@@ -57,7 +57,9 @@ describe('util/s3', () => {
     const client2 = getS3Client(undefined, undefined, credentials);
     expect(client1).not.toBe(client2);
     expect(client1).not.toBe(getS3Client());
-    expect(await client1.config.credentials()).toMatchObject(credentials);
+    await expect(client1.config.credentials()).resolves.toMatchObject(
+      credentials,
+    );
   });
 
   it('uses s3 values from globalConfig instead of GlobalConfig class', async () => {

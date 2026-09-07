@@ -332,7 +332,7 @@ describe('modules/datasource/helm/index', () => {
 
       expect(res).toMatchObject({ registryUrl: 's3://chart-bucket/charts' });
       const client = s3mock.call(0).thisValue as S3Client;
-      expect(await client.config.credentials()).toMatchObject({
+      await expect(client.config.credentials()).resolves.toMatchObject({
         accessKeyId: 'some-access-key',
         secretAccessKey: 'some-secret-key',
         sessionToken: 'some-session-token',
@@ -344,49 +344,49 @@ describe('modules/datasource/helm/index', () => {
         .on(GetObjectCommand)
         .rejectsOnce(s3Error('NoSuchKey', 'The specified key does not exist.'));
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'ambassador',
           registryUrls: ['s3://chart-bucket/charts'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for an unsupported response body', async () => {
       s3mock.on(GetObjectCommand).resolvesOnce({ Body: undefined });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'ambassador',
           registryUrls: ['s3://chart-bucket/charts'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null when the S3 object is not found', async () => {
       s3mock.on(GetObjectCommand).rejectsOnce(s3Error('NotFound', 'Not Found'));
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'ambassador',
           registryUrls: ['s3://chart-bucket/charts'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null when the S3 object is deleted', async () => {
       s3mock.on(GetObjectCommand).resolvesOnce({ DeleteMarker: true });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'ambassador',
           registryUrls: ['s3://chart-bucket/charts'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for credentials errors', async () => {
