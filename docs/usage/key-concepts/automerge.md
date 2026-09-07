@@ -204,7 +204,6 @@ Renovate detects whether merge trains are enabled on the project and then:
 - With `platformAutomerge=false`, Renovate adds the MR to the merge train itself once all checks have passed, instead of merging it directly.
 - `rebaseWhen=auto` resolves to `conflicted` instead of `behind-base-branch`, because the merge train already tests MRs against the head of the target branch.
 
-<!-- prettier-ignore -->
 !!! warning
   Branch automerge (`automergeType=branch`) cannot work if merge trains are enabled, because pushing directly to the target branch is not possible.
   Renovate detects this misconfiguration, logs a warning, and creates a MR instead.
