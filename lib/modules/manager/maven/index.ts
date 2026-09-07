@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 
@@ -17,6 +18,10 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [MavenDatasource.id, DockerDatasource.id];
+export const supportedDatasources = [
+  BuildpacksRegistryDatasource.id,
+  DockerDatasource.id,
+  MavenDatasource.id,
+];
 
 export { knownDepTypes } from './dep-types.ts';

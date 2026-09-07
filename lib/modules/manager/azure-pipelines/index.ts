@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 
 export { knownDepTypes } from './dep-types.ts';
@@ -18,5 +19,6 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   AzurePipelinesTasksDatasource.id,
+  DockerDatasource.id,
   GitTagsDatasource.id,
 ];

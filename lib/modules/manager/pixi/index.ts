@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { CondaDatasource } from '../../datasource/conda/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -19,6 +20,10 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [PypiDatasource.id, CondaDatasource.id];
+export const supportedDatasources = [
+  CondaDatasource.id,
+  GitRefsDatasource.id,
+  PypiDatasource.id,
+];
 
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

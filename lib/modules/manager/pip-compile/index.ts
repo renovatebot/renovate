@@ -1,6 +1,7 @@
 import type { Category } from '../../../constants/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
@@ -23,6 +24,10 @@ export const defaultConfig = {
   },
 };
 
-export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];
+export const supportedDatasources = [
+  GitTagsDatasource.id,
+  PypiDatasource.id,
+  PythonVersionDatasource.id,
+];
 
 export { knownDepTypes } from './dep-types.ts';

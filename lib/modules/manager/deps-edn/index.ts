@@ -1,5 +1,9 @@
 import type { Category } from '../../../constants/index.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { ClojureDatasource } from '../../datasource/clojure/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import * as mavenVersioning from '../../versioning/maven/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -14,4 +18,10 @@ export const defaultConfig = {
   versioning: mavenVersioning.id,
 };
 
-export const supportedDatasources = [ClojureDatasource.id];
+export const supportedDatasources = [
+  BitbucketTagsDatasource.id,
+  ClojureDatasource.id,
+  GithubTagsDatasource.id,
+  GitlabTagsDatasource.id,
+  GitRefsDatasource.id,
+];

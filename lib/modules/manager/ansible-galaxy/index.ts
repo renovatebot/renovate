@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import { GalaxyDatasource } from '../../datasource/galaxy/index.ts';
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -15,8 +16,9 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   GalaxyCollectionDatasource.id,
-  GitTagsDatasource.id,
+  GalaxyDatasource.id,
   GithubTagsDatasource.id,
+  GitTagsDatasource.id,
 ];
 
 export { knownDepTypes } from './dep-types.ts';

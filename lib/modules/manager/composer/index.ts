@@ -1,6 +1,7 @@
 import type { Category } from '../../../constants/index.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import { updateArtifacts } from './artifacts.ts';
 import { extractPackageFile } from './extract.ts';
@@ -29,6 +30,7 @@ export const defaultConfig = {
 
 export const supportedDatasources = [
   BitbucketTagsDatasource.id,
+  GithubTagsDatasource.id,
   GitTagsDatasource.id,
   PackagistDatasource.id,
 ];

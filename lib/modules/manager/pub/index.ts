@@ -2,6 +2,7 @@ import type { Category } from '../../../constants/index.ts';
 import { DartDatasource } from '../../datasource/dart/index.ts';
 import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
@@ -22,6 +23,7 @@ export const supportedDatasources = [
   DartDatasource.id,
   DartVersionDatasource.id,
   FlutterVersionDatasource.id,
+  GitRefsDatasource.id,
 ];
 
 export { knownDepTypes } from './dep-types.ts';

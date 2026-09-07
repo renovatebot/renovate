@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -16,4 +17,7 @@ export const defaultConfig = {
   managerFilePatterns: ['**/*-pipelines.yml'],
 };
 
-export const supportedDatasources = [DockerDatasource.id];
+export const supportedDatasources = [
+  BitbucketTagsDatasource.id,
+  DockerDatasource.id,
+];

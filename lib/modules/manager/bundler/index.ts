@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import * as rubyVersioning from '../../versioning/ruby/index.ts';
@@ -30,6 +31,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
+  GitRefsDatasource.id,
   RubygemsDatasource.id,
   RubyVersionDatasource.id,
 ];

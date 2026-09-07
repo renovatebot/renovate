@@ -18,9 +18,9 @@ describe('modules/manager/index', () => {
 
       it(`has valid supportedDatasources for ${m}`, () => {
         expect(supportedDatasources).toBeNonEmptyArray();
-        supportedDatasources!.every((d) => {
-          expect(datasources.includes(d)).toBeTrue();
-        });
+        for (const datasource of supportedDatasources!) {
+          expect(datasources).toContain(datasource);
+        }
       });
     }
   });
