@@ -5,6 +5,8 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
+
 export const displayName = 'APM';
 export const url = 'https://github.com/microsoft/apm';
 
@@ -17,7 +19,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)apm\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   GitTagsDatasource.id,
