@@ -81,20 +81,22 @@ function parseSpec(spec: string): PackageDependency | null {
     return dep;
   }
 
-  // Rejects an unparseable version and the `><` identity hash operator, as
-  // well as the range constraints, which a follow-up change will extract
+  // rejects an unparseable version, and the `><` identity hash operator
   const constraint = operator + version;
-  if (!apkVersioning.isSingleVersion(constraint)) {
+  if (!apkVersioning.isValid(constraint)) {
     dep.skipReason = 'unsupported-version';
     return dep;
   }
 
   // An exact pin reads better as a plain version, so the `=` stays in the
   // replaceString rather than becoming part of the value we report
-  dep.currentValue = version;
+  const isPin = apkVersioning.isSingleVersion(constraint);
+  const currentValue = isPin ? version : constraint;
+
+  dep.currentValue = currentValue;
   dep.replaceString = spec;
-  // Only the version is templated, so a `@repoTag` in the spec is preserved
-  dep.autoReplaceStringTemplate = `${spec.slice(0, -version.length)}{{{newValue}}}`;
+  // Only the value is templated, so a `@repoTag` in the spec is preserved
+  dep.autoReplaceStringTemplate = `${spec.slice(0, -currentValue.length)}{{{newValue}}}`;
   return dep;
 }
 
