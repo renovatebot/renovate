@@ -444,8 +444,8 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${String(
-    registryUrls,
+  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${JSON.stringify(
+    [registryUrls, config.defaultRegistryUrls, config.additionalRegistryUrls],
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);

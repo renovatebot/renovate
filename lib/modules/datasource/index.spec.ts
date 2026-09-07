@@ -7,6 +7,7 @@ import {
   HOST_DISABLED,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
 import * as _packageCache from '../../util/cache/package/index.ts';
 import { loadModules } from '../../util/modules.ts';
 import datasources from './api.ts';
@@ -22,6 +23,7 @@ import {
 import type {
   DatasourceApi,
   DigestConfig,
+  GetPkgReleasesConfig,
   GetReleasesConfig,
   ReleaseResult,
 } from './types.ts';
@@ -316,6 +318,58 @@ describe('modules/datasource/index', () => {
   });
 
   describe('Packages', () => {
+    describe('registry caching', () => {
+      beforeEach(() => memCache.init());
+      afterEach(() => memCache.reset());
+
+      it.each(['defaultRegistryUrls', 'additionalRegistryUrls'])(
+        'keeps releases separate for different %s',
+        async (registryOption) => {
+          const firstRegistry = vi.fn(() => ({
+            releases: [{ version: '1.0.0' }],
+          }));
+          const secondRegistry = vi.fn(() => ({
+            releases: [{ version: '2.0.0' }],
+          }));
+          datasources.set(
+            datasource,
+            new DummyDatasource({
+              'https://reg2.com': firstRegistry,
+              'https://reg3.com': secondRegistry,
+            }),
+          );
+          const firstConfig = {
+            datasource,
+            packageName,
+            registryStrategy: 'merge',
+            [registryOption]: ['https://reg2.com'],
+          } satisfies GetPkgReleasesConfig;
+          const secondConfig = {
+            ...firstConfig,
+            [registryOption]: ['https://reg3.com'],
+          };
+
+          const [first, second, repeated] = await Promise.all([
+            getPkgReleases(firstConfig),
+            getPkgReleases(secondConfig),
+            getPkgReleases(secondConfig),
+          ]);
+
+          expect(first).toMatchObject({
+            releases: [{ version: '1.0.0' }],
+            registryUrl: 'https://reg2.com',
+          });
+          expect(second).toMatchObject({
+            releases: [{ version: '2.0.0' }],
+            registryUrl: 'https://reg3.com',
+          });
+          expect(repeated).toEqual(second);
+          expect(firstRegistry).toHaveBeenCalledTimes(1);
+          expect(secondRegistry).toHaveBeenCalledTimes(1);
+        },
+      );
+    });
+
     it('supports defaultRegistryUrls parameter', async () => {
       const registries: RegistriesMock = {
         'https://foo.bar': { releases: [{ version: '0.0.1' }] },
