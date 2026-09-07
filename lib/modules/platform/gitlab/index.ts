@@ -71,7 +71,7 @@ import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
 import { getRoleAccessLevel } from './roles.ts';
 import type { GitLabMergeRequest } from './schema.ts';
-import { LastPipelineId } from './schema.ts';
+import { LastPipelineId, MergeTrainCarStatus } from './schema.ts';
 import type {
   GitlabComment,
   GitlabIssue,
@@ -397,11 +397,12 @@ export async function isPrInMergeQueue(id: number): Promise<boolean> {
     return false;
   }
   try {
-    const { body } = await gitlabApi.getJsonUnchecked<{ status?: string }>(
+    const { body: status } = await gitlabApi.getJson(
       `projects/${config.repository}/merge_trains/merge_requests/${id}`,
       { memCache: false },
+      MergeTrainCarStatus,
     );
-    return body.status !== 'merged';
+    return status !== 'merged';
   } catch (err) {
     if (err.statusCode !== 404) {
       logger.debug({ err }, 'Failed to fetch merge train status');
