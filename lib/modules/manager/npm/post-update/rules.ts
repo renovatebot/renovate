@@ -1,4 +1,4 @@
-import { isNullOrUndefined, isString } from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import * as hostRules from '../../../../util/host-rules.ts';
 import { regEx } from '../../../../util/regex.ts';
@@ -10,27 +10,7 @@ export function processHostRules(): HostRulesResult {
 
   // Determine the additional npmrc content to add based on host rules
   const additionalNpmrcContent = [];
-  const npmHostRules = hostRules.findAll({
-    hostType: 'npm',
-  });
-  logger.debug(`Found ${npmHostRules.length} npm host rule(s)`);
-  // Include host rules without specific type to mimic the behavior used when determining dependencies with updates.
-  const noTypeHostRules = hostRules
-    .getAll()
-    .filter((rule) => isNullOrUndefined(rule.hostType));
-  logger.debug(
-    `Found ${noTypeHostRules.length} host rule(s) without host type`,
-  );
-  // Drop duplicates for the same matchHost while prefering the more specific rules with hostType npm.
-  const noTypeHostRulesWithoutDuplicates = noTypeHostRules.filter(
-    (rule) => !npmHostRules.some((elem) => elem.matchHost === rule.matchHost),
-  );
-  logger.debug(
-    `Found ${noTypeHostRulesWithoutDuplicates.length} host rule(s) without host type after dropping duplicates`,
-  );
-  const effectiveHostRules = npmHostRules.concat(
-    noTypeHostRulesWithoutDuplicates,
-  );
+  const effectiveHostRules = hostRules.findAllForHostType('npm');
   logger.trace(
     `Found ${effectiveHostRules.length} effective npm host rule(s) after deduplication`,
   );
