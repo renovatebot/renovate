@@ -1,6 +1,5 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -51,7 +50,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   override readonly sourceUrlNote =
     'For `registry.terraform.io`, the source URL is taken from the `source` field of the v2 API response. For `registry.opentofu.org`, it is derived from the package name following the OpenTofu registry policy of `github.com/NAMESPACE/terraform-provider-NAME`.';
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -83,13 +82,12 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = config.registryUrl;
     const repo = TerraformProviderDatasource.getRepository(config);
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getReleases:${url}/${repo}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
@@ -215,7 +213,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return dep;
   }
 
-  private async _getBuilds(
+  private async fetchBuilds(
     registryURL: string,
     repository: string,
     version: string,
@@ -325,12 +323,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     repository: string,
     version: string,
   ): Promise<TerraformBuild[] | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getBuilds:${registryURL}/${repository}/${version}`,
       },
-      () => this._getBuilds(registryURL, repository, version),
+      () => this.fetchBuilds(registryURL, repository, version),
     );
   }
 
@@ -340,7 +337,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
    * provider lacks that platform (404).
    * See https://github.com/opentofu/opentofu/pull/3434
    */
-  private async _getProviderPackages(
+  private async fetchProviderPackages(
     repository: string,
     version: string,
   ): Promise<string[] | null> {
@@ -362,7 +359,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           throw err;
         }
       }
-      return await this._getProviderPackagesForAvailablePlatform(
+      return await this.fetchProviderPackagesForAvailablePlatform(
         baseUrl,
         version,
       );
@@ -382,7 +379,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
    * Some providers do not publish a `linux/amd64` build, so discover an
    * available platform via `/versions` and fetch its download endpoint.
    */
-  private async _getProviderPackagesForAvailablePlatform(
+  private async fetchProviderPackagesForAvailablePlatform(
     baseUrl: string,
     version: string,
   ): Promise<string[] | null> {
@@ -407,16 +404,15 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     repository: string,
     version: string,
   ): Promise<string[] | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getProviderPackages:${repository}/${version}`,
       },
-      () => this._getProviderPackages(repository, version),
+      () => this.fetchProviderPackages(repository, version),
     );
   }
 
-  private async _getZipHashes(
+  private async fetchZipHashes(
     zipHashUrl: string,
   ): Promise<string[] | undefined> {
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
@@ -442,16 +438,15 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getZipHashes:${zipHashUrl}`,
       },
-      () => this._getZipHashes(zipHashUrl),
+      () => this.fetchZipHashes(zipHashUrl),
     );
   }
 
-  private async _getReleaseBackendIndex(
+  private async fetchReleaseBackendIndex(
     backendLookUpName: string,
     version: string,
   ): Promise<VersionDetailResponse> {
@@ -467,12 +462,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     backendLookUpName: string,
     version: string,
   ): Promise<VersionDetailResponse> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${TerraformProviderDatasource.id}`,
         key: `getReleaseBackendIndex:${backendLookUpName}/${version}`,
       },
-      () => this._getReleaseBackendIndex(backendLookUpName, version),
+      () => this.fetchReleaseBackendIndex(backendLookUpName, version),
     );
   }
 }

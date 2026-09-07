@@ -1,4 +1,3 @@
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/node/index.ts';
@@ -27,7 +26,7 @@ export class NodeVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/nodejs/node';
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next -- should never happen */
@@ -60,14 +59,13 @@ export class NodeVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         // TODO: types (#22198)
         key: `${config.registryUrl}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

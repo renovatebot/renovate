@@ -1,5 +1,3 @@
-import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import {
   queryBranches,
   queryTags,
@@ -17,8 +15,6 @@ import type {
 
 export class GithubDigestDatasource extends Datasource {
   static readonly id = 'github-digest';
-
-  private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${GithubDigestDatasource.id}`;
 
   override readonly defaultRegistryUrls = ['https://github.com'];
 
@@ -52,9 +48,8 @@ export class GithubDigestDatasource extends Datasource {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);
 
-    return withCache(
+    return this.cached(
       {
-        namespace: GithubDigestDatasource.cacheNamespace,
         key: GithubDigestDatasource.getCacheKey(registryUrl, repo, 'releases'),
       },
       async () => {
@@ -115,9 +110,8 @@ export class GithubDigestDatasource extends Datasource {
       return null;
     }
 
-    return await withCache(
+    return await this.cached(
       {
-        namespace: GithubDigestDatasource.cacheNamespace,
         key: GithubDigestDatasource.getCacheKey(
           registryUrl,
           repo,

@@ -7,7 +7,7 @@ import * as packageCache from './index.ts';
 import { resolveTtlValues } from './ttl.ts';
 import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 
-interface CachedOptions {
+export interface CachedOptions {
   /**
    * The cache namespace.
    */

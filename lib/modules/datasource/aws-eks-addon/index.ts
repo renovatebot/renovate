@@ -3,7 +3,6 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -21,7 +20,7 @@ export class AwsEKSAddonDataSource extends Datasource {
     super(AwsEKSAddonDataSource.id);
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName: serializedFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res = EksAddonsFilter.safeParse(serializedFilter);
@@ -68,13 +67,12 @@ export class AwsEKSAddonDataSource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsEKSAddonDataSource.id}`,
         key: `getReleases:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 

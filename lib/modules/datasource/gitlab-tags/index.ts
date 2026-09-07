@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -31,7 +30,7 @@ export class GitlabTagsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -67,13 +66,12 @@ export class GitlabTagsDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GitlabTagsDatasource.id}`,
         key: `getReleases:${getDepHost(config.registryUrl)}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
@@ -82,7 +80,7 @@ export class GitlabTagsDatasource extends Datasource {
    *
    * Returs the latest commit hash of the repository.
    */
-  private async _getDigest(
+  private async fetchDigest(
     { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -132,13 +130,12 @@ export class GitlabTagsDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GitlabTagsDatasource.id}`,
         key: `getDigest:${getDepHost(config.registryUrl)}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getDigest(config, newValue),
+      () => this.fetchDigest(config, newValue),
     );
   }
 }
