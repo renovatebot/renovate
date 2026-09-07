@@ -3659,12 +3659,16 @@ describe('modules/datasource/docker/index', () => {
 
       const ds = new DockerDatasource();
 
-      expect(await ds.getTags(DOCKER_HUB, 'library/node')).toEqual(['1.0.0']);
+      await expect(ds.getTags(DOCKER_HUB, 'library/node')).resolves.toEqual([
+        '1.0.0',
+      ]);
       expect(httpMock.getTrace()).toHaveLength(2);
 
       // Second call pulls from the cache which was hydrated by the first call,
       // resulting in no additional requests to the HTTP mock.
-      expect(await ds.getTags(DOCKER_HUB, 'library/node')).toEqual(['1.0.0']);
+      await expect(ds.getTags(DOCKER_HUB, 'library/node')).resolves.toEqual([
+        '1.0.0',
+      ]);
       expect(httpMock.getTrace()).toHaveLength(2);
     });
 
@@ -3682,15 +3686,14 @@ describe('modules/datasource/docker/index', () => {
 
       const ds = new DockerDatasource();
 
-      expect(await ds.getTags('https://registry.company.com', 'node')).toEqual([
-        '1.0.0',
-      ]);
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toEqual(['1.0.0']);
       expect(httpMock.getTrace()).toHaveLength(2);
 
-      expect(await ds.getTags('https://registry.company.com', 'node')).toEqual([
-        '1.0.0',
-        '2.0.0',
-      ]);
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toEqual(['1.0.0', '2.0.0']);
       expect(httpMock.getTrace()).toHaveLength(4);
     });
 
@@ -3708,16 +3711,16 @@ describe('modules/datasource/docker/index', () => {
 
       const ds = new DockerDatasource();
 
-      expect(
-        await ds.getTags('https://registry.company.com', 'node'),
-      ).toBeUndefined();
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toBeUndefined();
       expect(httpMock.getTrace()).toHaveLength(1);
 
       // The previous auth error (`undefined`) didn't get cached, so the second
       // lookup hits the mock as expected.
-      expect(await ds.getTags('https://registry.company.com', 'node')).toEqual([
-        '1.0.0',
-      ]);
+      await expect(
+        ds.getTags('https://registry.company.com', 'node'),
+      ).resolves.toEqual(['1.0.0']);
       expect(httpMock.getTrace()).toHaveLength(3);
     });
   });
