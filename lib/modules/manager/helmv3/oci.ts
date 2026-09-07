@@ -45,9 +45,10 @@ export function getOciChartDep(
     datasource: DockerDatasource.id,
     packageName,
     ...(skipReason && { skipReason }),
-    // Helm cannot pull OCI charts by digest:
-    // https://github.com/helm/helm/issues/10312
-    // https://github.com/helm/helm/issues/10678
+    // The version fields these managers update cannot carry a digest: Helm only
+    // accepts one inside the OCI reference (`chart@sha256:...`, helm/helm#12690)
+    // and Flux HelmCharts take semver only. A pin would fail in auto-replace
+    // with "Digest is not updated".
     pinDigests: false,
   };
 }
