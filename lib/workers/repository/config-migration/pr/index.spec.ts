@@ -152,12 +152,14 @@ describe('workers/repository/config-migration/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       const prBody = platform.createPr.mock.calls[0][0].prBody;
-      // empty header: nothing precedes the separating newlines
+      // empty header: no separating newlines are added
       expect(prBody).toStartWith(
-        '\n\nThe Renovate config in this repository needs migrating.',
+        'The Renovate config in this repository needs migrating.',
       );
-      // empty footer: nothing follows the separator
-      expect(prBody).toEndWith('\n---\n\n\n');
+      // empty footer: no separator is added
+      expect(prBody).toEndWith(
+        '[request help here](https://github.com/renovatebot/renovate/discussions).\n\n',
+      );
     });
 
     it('creates PR for JSON5 config file', async () => {
@@ -192,9 +194,9 @@ describe('workers/repository/config-migration/pr/index', () => {
       expect(prBody).toStartWith(
         '\r\r\nThis should not be the first line of the PR\n\n',
       );
-      // trailing newlines of the footer are kept, plus the one appended after it
+      // trailing newlines of the footer are kept
       expect(prBody).toEndWith(
-        '---\n\nThere should be several empty lines at the end of the PR\r\n\n\n\n',
+        '---\n\nThere should be several empty lines at the end of the PR\r\n\n\n',
       );
     });
 
@@ -248,7 +250,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       const prBody = platform.createPr.mock.calls[0][0].prBody;
       expect(prBody).toStartWith('This is a header for platform:github\n\n');
       expect(prBody).toEndWith(
-        '---\n\nAnd this is a footer for repository:test baseBranch:some-branch\n',
+        '---\n\nAnd this is a footer for repository:test baseBranch:some-branch',
       );
     });
   });
@@ -276,8 +278,8 @@ describe('workers/repository/config-migration/pr/index', () => {
       await expect(ensureConfigMigrationPr(config, migratedData)).toResolve();
 
       expect(logger.warn).toHaveBeenCalledWith(
-        { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.',
+        { err, branchName: 'renovate/migrate-config' },
+        'PR already exists but cannot find it. It was probably created by a different user.',
       );
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });
