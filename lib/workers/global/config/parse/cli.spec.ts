@@ -149,6 +149,22 @@ describe('workers/global/config/parse/cli', () => {
       expect(cli.getConfig(argv)).toMatchObject(config);
     });
 
+    it('migrates legacy hostRules keys', () => {
+      argv.push(
+        `--endpoints=[{"platform":"docker","endpoint":"docker.io","username":"user"},{"host":"github.com"}]`,
+      );
+      expect(cli.getConfig(argv)).toEqual({
+        hostRules: [
+          {
+            hostType: DockerDatasource.id,
+            matchHost: 'docker.io',
+            username: 'user',
+          },
+          { matchHost: 'github.com' },
+        ],
+      });
+    });
+
     it('parses json object correctly when empty', () => {
       argv.push(`--onboarding-config=`);
       expect(cli.getConfig(argv)).toEqual({

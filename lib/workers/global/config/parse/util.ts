@@ -12,10 +12,10 @@ import { parseJson } from '../../../../util/common.ts';
 import { readSystemFile } from '../../../../util/fs/index.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 
-export async function migrateAndValidateConfig(
-  config: RenovateConfig,
+export function migrateGlobalConfig<T extends RenovateConfig>(
+  config: T,
   configType: string,
-): Promise<RenovateConfig> {
+): T {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
@@ -23,6 +23,14 @@ export async function migrateAndValidateConfig(
       'Config needs migrating',
     );
   }
+  return migratedConfig as T;
+}
+
+export async function migrateAndValidateConfig(
+  config: RenovateConfig,
+  configType: string,
+): Promise<RenovateConfig> {
+  const migratedConfig = migrateGlobalConfig(config, configType);
   const massagedConfig = massageConfig(migratedConfig);
   // log only if it's changed
   if (!dequal(migratedConfig, massagedConfig)) {

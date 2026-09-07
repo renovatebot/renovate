@@ -1,12 +1,14 @@
 import { isArray } from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { MigrationsService } from '../../../../config/migrations/index.ts';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { parseJson } from '../../../../util/common.ts';
 import { coersions } from './coersions.ts';
-import { migrateAndValidateConfig } from './util.ts';
+import type { ParseConfigOptions } from './types.ts';
+import { migrateAndValidateConfig, migrateGlobalConfig } from './util.ts';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -25,19 +27,20 @@ function normalizePrefixes(
   return result;
 }
 
-const renameKeys = {
-  aliases: 'registryAliases',
-  azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
-  gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
-  mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
-  mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
-  allowedPostUpgradeCommands: 'allowedCommands',
-  baseBranches: 'baseBranchPatterns',
-};
+// Environment variables are matched against option names, so a renamed option
+// has to be resolved to its current name before the options loop below can find
+// it. The mapping is taken from the migration service so it cannot drift;
+// `azureAutoComplete`/`gitLabAutomerge` are added because
+// `AzureGitLabAutomergeMigration` declares them via a regular expression.
+const renameKeys: ReadonlyMap<string, string> = new Map([
+  ...MigrationsService.renamedProperties,
+  ['azureAutoComplete', 'platformAutomerge'],
+  ['gitLabAutomerge', 'platformAutomerge'],
+]);
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const result = { ...env };
-  for (const [from, to] of Object.entries(renameKeys)) {
+  for (const [from, to] of renameKeys) {
     const fromKey = getEnvName({ name: from });
     const toKey = getEnvName({ name: to });
     if (env[fromKey]) {
@@ -48,32 +51,12 @@ function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
-const migratedKeysWithValues = [
-  {
-    oldName: 'recreateClosed',
-    newName: 'recreateWhen',
-    from: 'true',
-    to: 'always',
-  },
-  {
-    oldName: 'recreateClosed',
-    newName: 'recreateWhen',
-    from: 'false',
-    to: 'auto',
-  },
+// Options which migrate to a different name *and* a different value are absent
+// from `getOptions()`, so they are read using these definitions and left under
+// their old name for `migrateGlobalConfig()` to convert.
+const deprecatedOptions: ParseConfigOptions[] = [
+  { name: 'recreateClosed', type: 'boolean' },
 ];
-
-function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  const result = { ...env };
-  for (const { oldName, newName, from, to } of migratedKeysWithValues) {
-    const key = getEnvName({ name: oldName });
-    if (env[key] !== undefined && result[key] === from) {
-      delete result[key];
-      result[getEnvName({ name: newName })] = to;
-    }
-  }
-  return result;
-}
 
 interface ConvertedExperimentalEnvVar {
   optionName: string;
@@ -145,7 +128,7 @@ export async function getConfig(
   const env = prepareEnv(inputEnv);
   const config = await parseAndValidateOrExit(env, configEnvKey);
 
-  const options = getOptions();
+  const options: ParseConfigOptions[] = [...getOptions(), ...deprecatedOptions];
   config.hostRules ??= [];
 
   for (const option of options) {
@@ -178,52 +161,12 @@ export async function getConfig(
         );
       }
     } else {
-      const coerce = coersions[option.type];
+      const coerce = coersions[option.type!];
       try {
         // @ts-expect-error -- type can't be narrowed
         config[option.name] = coerce(envVal);
       } catch (e) {
         throw new Error(`${envName} was invalid: ${e}`);
-      }
-
-      if (option.name === 'dryRun') {
-        if ((config[option.name] as string) === 'true') {
-          logger.warn('env config dryRun property has been changed to full');
-          config[option.name] = 'full';
-        } else if ((config[option.name] as string) === 'false') {
-          logger.warn('env config dryRun property has been changed to null');
-          delete config[option.name];
-        } else if ((config[option.name] as string) === 'null') {
-          delete config[option.name];
-        }
-      }
-
-      if (option.name === 'requireConfig') {
-        if ((config[option.name] as string) === 'true') {
-          logger.warn(
-            'env config requireConfig property has been changed to required',
-          );
-          config[option.name] = 'required';
-        } else if ((config[option.name] as string) === 'false') {
-          logger.warn(
-            'env config requireConfig property has been changed to optional',
-          );
-          config[option.name] = 'optional';
-        }
-      }
-
-      if (option.name === 'platformCommit') {
-        if ((config[option.name] as string) === 'true') {
-          logger.warn(
-            'env config platformCommit property has been changed to enabled',
-          );
-          config[option.name] = 'enabled';
-        } else if ((config[option.name] as string) === 'false') {
-          logger.warn(
-            'env config platformCommit property has been changed to disabled',
-          );
-          config[option.name] = 'disabled';
-        }
       }
     }
   }
@@ -255,15 +198,12 @@ export async function getConfig(
     delete env[val];
   }
 
-  return config;
+  return migrateGlobalConfig(config, 'env');
 }
 
 export function prepareEnv(inputEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  let env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
-  env = massageConvertedExperimentalVars(env);
-  env = renameEnvKeys(env);
-  // massage the values of migrated configuration keys
-  return massageEnvKeyValues(env);
+  const env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  return renameEnvKeys(massageConvertedExperimentalVars(env));
 }
 
 export async function parseAndValidateOrExit(

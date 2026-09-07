@@ -22,4 +22,26 @@ describe('config/migrations/custom/dry-run-migration', () => {
       },
     );
   });
+
+  it.each`
+    value      | expected
+    ${'true'}  | ${'full'}
+    ${'false'} | ${null}
+    ${'null'}  | ${null}
+  `(
+    'should migrate dryRun=$value to $expected',
+    async ({ value, expected }) => {
+      await expect(DryRunMigration).toMigrate(
+        { dryRun: value },
+        { dryRun: expected },
+      );
+    },
+  );
+
+  it('should not migrate dryRun=full', async () => {
+    await expect(DryRunMigration).not.toMigrate(
+      { dryRun: 'full' },
+      { dryRun: 'full' },
+    );
+  });
 });

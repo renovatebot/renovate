@@ -102,6 +102,8 @@ export class MigrationsService {
     ['separatePatchReleases', 'separateMinorPatch'],
     ['versionScheme', 'versioning'],
     ['lookupNameTemplate', 'packageNameTemplate'],
+    ['mergeConfidenceApiBaseUrl', 'mergeConfidenceEndpoint'],
+    ['mergeConfidenceSupportedDatasources', 'mergeConfidenceDatasources'],
     ['aliases', 'registryAliases'],
     ['masterIssue', 'dependencyDashboard'],
     ['masterIssueApproval', 'dependencyDashboardApproval'],

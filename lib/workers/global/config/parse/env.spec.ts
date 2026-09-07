@@ -100,6 +100,31 @@ describe('workers/global/config/parse/env', () => {
       await expect(env.getConfig(envArg)).resolves.toMatchObject(config);
     });
 
+    it.each`
+      envArg                                                            | config
+      ${{ RENOVATE_ALIASES: '{"a":"b"}' }}                              | ${{ registryAliases: { a: 'b' } }}
+      ${{ RENOVATE_ALLOWED_POST_UPGRADE_COMMANDS: 'a' }}                | ${{ allowedCommands: ['a'] }}
+      ${{ RENOVATE_MERGE_CONFIDENCE_API_BASE_URL: 'https://example' }}  | ${{ mergeConfidenceEndpoint: 'https://example' }}
+      ${{ RENOVATE_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES: '["npm"]' }} | ${{ mergeConfidenceDatasources: ['npm'] }}
+      ${{ RENOVATE_ENDPOINTS: '[{"host":"example.com"}]' }}             | ${{ hostRules: [{ matchHost: 'example.com' }] }}
+      ${{ RENOVATE_AZURE_AUTO_COMPLETE: 'false' }}                      | ${{ platformAutomerge: false }}
+    `('renames "$envArg" -> $config', async ({ envArg, config }) => {
+      await expect(env.getConfig(envArg)).resolves.toMatchObject(config);
+    });
+
+    it('warns when the env config needs migrating', async () => {
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_REQUIRE_CONFIG: 'true' };
+
+      await expect(env.getConfig(envParam)).resolves.toMatchObject({
+        requireConfig: 'required',
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ configType: 'env' }),
+        'Config needs migrating',
+      );
+    });
+
     it('skips misconfigured arrays', async () => {
       const envName = 'RENOVATE_HOST_RULES';
       const val = JSON.stringify('foobar');
@@ -458,7 +483,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_DRY_RUN: 'false',
       };
       const config = await env.getConfig(envParam);
-      expect(config.dryRun).toBeUndefined();
+      expect(config.dryRun).toBeNull();
     });
 
     it('dryRun null', async () => {
@@ -466,7 +491,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_DRY_RUN: 'null',
       };
       const config = await env.getConfig(envParam);
-      expect(config.dryRun).toBeUndefined();
+      expect(config.dryRun).toBeNull();
     });
 
     it('requireConfig boolean true', async () => {

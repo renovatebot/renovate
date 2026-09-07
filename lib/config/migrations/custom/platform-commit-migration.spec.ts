@@ -23,6 +23,20 @@ describe('config/migrations/custom/platform-commit-migration', () => {
     );
   });
 
+  it.each`
+    value      | expected
+    ${'true'}  | ${'enabled'}
+    ${'false'} | ${'disabled'}
+  `(
+    'should migrate platformCommit=$value to $expected',
+    async ({ value, expected }) => {
+      await expect(PlatformCommitMigration).toMigrate(
+        { platformCommit: value },
+        { platformCommit: expected },
+      );
+    },
+  );
+
   it('should not migrate platformCommit=auto', async () => {
     await expect(PlatformCommitMigration).not.toMigrate(
       {
