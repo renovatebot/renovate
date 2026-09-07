@@ -1,12 +1,20 @@
-// based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { logger } from '../../../logger/index.ts';
 import type { MaybePromise } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import {
+  extrasPattern,
+  packagePattern,
+  pypiDependency,
+  specifierPattern,
+} from '../../../util/pep508.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+
+// `setup.cfg` requires a version specifier for the name/extras form, so it
+// does not reuse the shared `dependencyPattern`.
+const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
+const pkgRegex = regEx(`^(${packagePattern})$`);
+const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
 function getSectionName(str: string): string {
   const [, sectionName] = coerceArray(
@@ -48,20 +56,6 @@ function parseDep(
   section: string | null,
   record: string | null,
 ): PackageDependency | null {
-  const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
-  const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
-
-  const rangePattern: string = RANGE_PATTERN;
-  const specifierPartPattern = `\\s*${rangePattern.replace(
-    regEx(/\?<\w+>/g),
-    '?:',
-  )}`;
-  const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
-  const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
-
-  const pkgRegex = regEx(`^(${packagePattern})$`);
-  const pkgValRegex = regEx(`^${dependencyPattern}$`);
-
   const depType = getDepType(section, record);
   if (!depType) {
     return null;
@@ -76,21 +70,7 @@ function parseDep(
   }
 
   const [, depName, , currVal] = packageMatches;
-  const currentValue = currVal?.trim();
-
-  const dep: PackageDependency = {
-    depName,
-    packageName: normalizePythonDepName(depName),
-    currentValue,
-    datasource: PypiDatasource.id,
-    depType,
-  };
-
-  if (currentValue?.startsWith('==')) {
-    dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
-  }
-
-  return dep;
+  return pypiDependency(depName, currVal?.trim(), depType);
 }
 
 export function extractPackageFile(

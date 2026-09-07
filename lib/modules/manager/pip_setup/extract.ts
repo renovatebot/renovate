@@ -1,9 +1,7 @@
 import type { lexer, parser } from '@renovatebot/good-enough-parser';
 import { lang, query as q } from '@renovatebot/good-enough-parser';
-import { RANGE_PATTERN } from '@renovatebot/pep440';
+import { pypiDependency, rangePattern } from '../../../util/pep508.ts';
 import { regEx } from '../../../util/regex.ts';
-import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -23,8 +21,9 @@ function cleanupNamedGroups(regexSource: string): string {
   return regexSource.replace(regEx(/\(\?<\w+>/g), '(?:');
 }
 
-const rangePattern = cleanupNamedGroups(RANGE_PATTERN);
 const versionPattern = `(?:${rangePattern}(?:\\s*,\\s*${rangePattern})*)`;
+// Stricter than the shared `packagePattern`: names must start with a letter
+// and be at least two characters long.
 const depNamePattern = '(?:[a-zA-Z][-_a-zA-Z0-9\\.]*[a-zA-Z0-9])';
 const depPattern = [
   '^',
@@ -46,18 +45,11 @@ function depStringHandler(
   const { depName, currentValue } = match!.groups!;
 
   const dep: PackageDependency<ManagerData> = {
-    depName,
-    packageName: normalizePythonDepName(depName),
-    currentValue,
+    ...pypiDependency(depName, currentValue),
     managerData: {
       lineNumber: token.line - 1,
     },
-    datasource: PypiDatasource.id,
   };
-
-  if (currentValue?.startsWith('==')) {
-    dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
-  }
 
   return { ...ctx, deps: [...ctx.deps, dep] };
 }

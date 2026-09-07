@@ -1,11 +1,16 @@
 import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
-import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { isArray, isObject, isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getParentDir, localPathExists } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
+import {
+  extractPinnedVersion,
+  packagePattern,
+  repeatedExtrasPattern,
+  specifierPattern,
+} from '../../../util/pep508.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parse as parseToml } from '../../../util/toml.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
@@ -13,19 +18,14 @@ import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { PipFile, PipRequirement, PipSource } from './types.ts';
 
-// based on https://www.python.org/dev/peps/pep-0508/#names
-export const packagePattern = '[A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9]';
-export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])*';
-const packageRegex = regEx(`^(${packagePattern})(${extrasPattern})$`, 'i');
+// Pipfile keys are matched case-insensitively and may repeat the extras
+// group, e.g. `requests[socks][use_chardet_on_py3]`.
+const packageRegex = regEx(
+  `^(${packagePattern})(${repeatedExtrasPattern})$`,
+  'i',
+);
+const specifierRegex = regEx(`^${specifierPattern}\\s*$`);
 
-const rangePattern: string = RANGE_PATTERN;
-
-const specifierPartPattern = `\\s*${rangePattern.replace(
-  regEx(/\?<\w+>/g),
-  '?:',
-)}\\s*`;
-const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
-const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   sectionName: string,
   pipfileSection: Record<string, PipRequirement>,
@@ -91,8 +91,11 @@ function extractFromSection(
       } else {
         dep.datasource = PypiDatasource.id;
       }
-      if (!skipReason && currentValue?.startsWith('==')) {
-        dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
+      if (!skipReason) {
+        const currentVersion = extractPinnedVersion(currentValue);
+        if (currentVersion) {
+          dep.currentVersion = currentVersion;
+        }
       }
       if (nestedVersion) {
         // TODO #22198

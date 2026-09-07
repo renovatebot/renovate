@@ -5,9 +5,9 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { ensureCacheDir, readLocalFile } from '../../../util/fs/index.ts';
+import { extrasPattern } from '../../../util/pep508.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { extrasPattern } from './extract.ts';
 
 /**
  * Create a RegExp that matches the first dependency pattern for

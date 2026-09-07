@@ -8,6 +8,7 @@ import type { SkipReason } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { find } from '../../../util/host-rules.ts';
+import { pep508ToPackageDependency } from '../../../util/pep508.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
@@ -15,7 +16,6 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { parseLine } from '../gomod/line-parser.ts';
 import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency.ts';
-import { pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   matchesPrecommitConfigHeuristic,

@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
+import { pep508ToPackageDependency } from '../../../util/pep508.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -21,7 +22,7 @@ import * as gitVersioning from '../../versioning/git/index.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
 import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import { DependencyGroup, ProjectSection } from '../pep621/schema.ts';
-import { depTypes, pep508ToPackageDependency } from '../pep621/utils.ts';
+import { depTypes } from '../pep621/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const PoetryOptionalDependencyMixin = z

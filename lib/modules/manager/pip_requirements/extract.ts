@@ -1,30 +1,20 @@
-// based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { isSkipComment } from '../../../util/ignore.ts';
+import {
+  dependencyPattern,
+  packagePattern,
+  pypiDependency,
+} from '../../../util/pep508.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { extractPackageFileFlags } from './common.ts';
 import type { PipRequirementsManagerData } from './types.ts';
 
-export const packagePattern =
-  '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
-export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 const packageGitRegex = regEx(
   /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(?:\.git)?(?:@(?<version>.*))))/,
 );
-
-const rangePattern: string = RANGE_PATTERN;
-const specifierPartPattern = `\\s*${rangePattern.replace(
-  regEx(/\?<\w+>/g),
-  '?:',
-)}`;
-const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
-export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})?`;
 
 export function extractPackageFile(
   content: string,
@@ -78,18 +68,7 @@ export function extractPackageFile(
 
       // validated above
       const [, depName, , currVal] = packageMatches!;
-      const currentValue = currVal?.trim();
-      dep = {
-        ...dep,
-        depName,
-        packageName: normalizePythonDepName(depName),
-        currentValue,
-        datasource: PypiDatasource.id,
-      };
-      if (currentValue?.startsWith('==')) {
-        dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
-      }
-      return dep;
+      return { ...dep, ...pypiDependency(depName, currVal?.trim()) };
     })
     .filter(isTruthy);
 

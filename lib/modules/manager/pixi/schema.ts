@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { regEx } from '../../../util/regex.ts';
+import { extractPinnedVersion } from '../../../util/pep508.ts';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils/index.ts';
 import { CondaDatasource } from '../../datasource/conda//index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -48,8 +48,9 @@ const PypiDependency = z
       versioning: pep440VersionID,
       datasource: PypiDatasource.id,
     };
-    if (version.startsWith('==')) {
-      dep.currentVersion = version.replace(regEx(/^==\s*/), '');
+    const currentVersion = extractPinnedVersion(version);
+    if (currentVersion) {
+      dep.currentVersion = currentVersion;
     }
     return dep;
   });

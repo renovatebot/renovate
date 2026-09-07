@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { pep508ToPackageDependency } from '../../../util/pep508.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -7,7 +8,7 @@ import {
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency } from '../types.ts';
-import { depTypes, pep508ToPackageDependency } from './utils.ts';
+import { depTypes } from './utils.ts';
 
 type Pep508Dependency = z.ZodType<PackageDependency>;
 
