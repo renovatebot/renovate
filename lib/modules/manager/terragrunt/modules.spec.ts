@@ -1,34 +1,8 @@
 import type { PackageDependency } from '../types.ts';
-import {
-  analyseTerragruntModule,
-  gitTagsRefMatchRegex,
-  githubRefMatchRegex,
-} from './modules.ts';
+import { analyseTerragruntModule, gitTagsRefMatchRegex } from './modules.ts';
 import type { TerraformManagerData } from './types.ts';
 
 describe('modules/manager/terragrunt/modules', () => {
-  describe('githubRefMatchRegex', () => {
-    it('should split project and tag from source', () => {
-      const groups = githubRefMatchRegex.exec(
-        'github.com/hashicorp/example?ref=v1.0.0',
-      )?.groups;
-      expect(groups).toEqual({
-        project: 'hashicorp/example',
-        tag: 'v1.0.0',
-      });
-    });
-
-    it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
-      const groups = githubRefMatchRegex.exec(
-        'github.com/hashicorp/example.repo-123?ref=v1.0.0',
-      )?.groups;
-      expect(groups).toEqual({
-        project: 'hashicorp/example.repo-123',
-        tag: 'v1.0.0',
-      });
-    });
-  });
-
   describe('gitTagsRefMatchRegex', () => {
     it('should split host, path and tag from source', () => {
       const http = gitTagsRefMatchRegex.exec(
@@ -86,15 +60,46 @@ describe('modules/manager/terragrunt/modules', () => {
 });
 
 describe('modules/manager/terragrunt/modules', () => {
-  it('sets skipReason for invalid git tags URL', () => {
+  function analyse(
+    source?: string,
+  ): PackageDependency<TerraformManagerData> | PackageDependency {
     const dep: PackageDependency<TerraformManagerData> = {
       managerData: {
-        source: 'ssh://[/path?ref=v1.0.0',
-        terragruntDependencyType: 'terraform',
+        source,
         moduleName: 'terragrunt',
       },
     };
     analyseTerragruntModule(dep);
-    expect(dep.skipReason).toBe('invalid-url');
+    delete dep.managerData;
+    return dep;
+  }
+
+  it('sets skipReason for invalid git tags URL', () => {
+    expect(analyse('ssh://[/path?ref=v1.0.0')).toMatchObject({
+      skipReason: 'invalid-url',
+    });
+  });
+
+  it('sets skipReason for missing source', () => {
+    expect(analyse()).toMatchObject({ skipReason: 'no-source' });
+  });
+
+  it('sets skipReason for a relative local path', () => {
+    expect(analyse('./modules/foo')).toMatchObject({ skipReason: 'local' });
+    expect(analyse('../modules/foo')).toMatchObject({ skipReason: 'local' });
+  });
+
+  it('extracts Azure DevOps SSH sources', () => {
+    expect(
+      analyse(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=v1.0.0',
+      ),
+    ).toEqual({
+      currentValue: 'v1.0.0',
+      datasource: 'git-tags',
+      depName: 'MyOrg/MyProject/MyRepository//some-module/path',
+      depType: 'gitTags',
+      packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+    });
   });
 });

@@ -1,13 +1,14 @@
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { ExtractionResult } from '../terraform/types.ts';
+import { checkFileContainsDependency } from '../terraform/util.ts';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
 import { extractTFLintPlugin } from './plugins.ts';
-import type { ExtractionResult } from './types.ts';
-import { checkFileContainsPlugins } from './util.ts';
+import { contentCheckList } from './util.ts';
 
 const dependencyBlockExtractionRegex = regEx(
   /^\s*plugin\s+"(?<pluginName>[^"]+)"\s+{\s*$/,
@@ -19,7 +20,7 @@ export function extractPackageFile(
   _config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace({ content }, `tflint.extractPackageFile(${packageFile})`);
-  if (!checkFileContainsPlugins(content)) {
+  if (!checkFileContainsDependency(content, contentCheckList)) {
     logger.debug(
       { packageFile },
       'preflight content check has not found any relevant content',

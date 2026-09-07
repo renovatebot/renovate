@@ -695,6 +695,29 @@ describe('modules/manager/terragrunt/extract', () => {
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
+    it('ignores blocks which are not terraform blocks', () => {
+      expect(
+        extractPackageFile(`remote_state {
+        backend = "local"
+      }
+
+      terraform {
+        source = "github.com/hashicorp/example?ref=v1.0.0"
+      }
+      `),
+      ).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            depName: 'github.com/hashicorp/example',
+            depType: 'github',
+            packageName: 'hashicorp/example',
+          },
+        ],
+      });
+    });
+
     it('returns null if only local terragrunt deps', () => {
       expect(
         extractPackageFile(`terragrunt {

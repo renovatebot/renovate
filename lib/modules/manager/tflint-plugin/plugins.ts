@@ -3,8 +3,8 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import type { ExtractionResult } from '../terraform/types.ts';
 import type { PackageDependency } from '../types.ts';
-import type { ExtractionResult } from './types.ts';
 import { keyValueExtractionRegex } from './util.ts';
 
 export function extractTFLintPlugin(

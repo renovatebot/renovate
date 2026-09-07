@@ -1,11 +1,8 @@
-import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { newlineRegex } from '../../../util/regex.ts';
+import type { ExtractionResult } from '../terraform/types.ts';
 import type { PackageDependency } from '../types.ts';
-import type { ExtractionResult, TerraformManagerData } from './types.ts';
+import type { TerraformManagerData } from './types.ts';
 import { keyValueExtractionRegex } from './util.ts';
-
-export const sourceExtractionRegex = regEx(
-  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/,
-);
 
 function extractBracesContent(content: string): number {
   const stack: string[] = [];
@@ -27,14 +24,11 @@ export function extractTerragruntProvider(
   startingLine: number,
   lines: string[],
   moduleName: string,
-): ExtractionResult {
+): ExtractionResult<TerraformManagerData> {
   const lineNumber = startingLine;
   let line: string;
   const deps: PackageDependency<TerraformManagerData>[] = [];
-  const managerData: TerraformManagerData = {
-    moduleName,
-    terragruntDependencyType: 'terraform',
-  };
+  const managerData: TerraformManagerData = { moduleName };
   const dep: PackageDependency<TerraformManagerData> = { managerData };
   const teraformContent = lines
     .slice(lineNumber)
