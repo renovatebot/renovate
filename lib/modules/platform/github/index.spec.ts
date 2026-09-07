@@ -853,6 +853,22 @@ describe('modules/platform/github/index', () => {
     });
   }
 
+  function prListMock(scope: httpMock.Scope, prNo: number): void {
+    scope
+      .get(
+        '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+      )
+      .reply(200, [
+        {
+          number: prNo,
+          base: { ref: 'master' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'Some PR',
+        },
+      ]);
+  }
+
   function forkInitRepoMock(
     scope: httpMock.Scope,
     repository: string,
@@ -1634,22 +1650,6 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('isBranchMergeQueueEnabled', () => {
-    beforeEach(() => {
-      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', 'true');
-    });
-
-    afterEach(() => {
-      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', undefined);
-    });
-
-    it('should return false if the experimental flag is not set', async () => {
-      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', undefined);
-
-      const res = await github.isBranchMergeQueueEnabled('main');
-
-      expect(res).toBeFalse();
-    });
-
     it('should return true if the branch has a merge queue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -5576,6 +5576,7 @@ describe('modules/platform/github/index', () => {
     it('should handle merge error', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .replyWithError('merge error');
@@ -5597,6 +5598,7 @@ describe('modules/platform/github/index', () => {
     it('should handle merge block', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .reply(405, { message: 'Required status check "build" is expected.' });
@@ -5623,6 +5625,7 @@ describe('modules/platform/github/index', () => {
     ])('should handle approvers required: %j', async (message) => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
         message,
       });
@@ -5645,6 +5648,7 @@ describe('modules/platform/github/index', () => {
     it('should warn if automergeStrategy is not supported', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
       await github.initRepo({ repository: 'some/repo' });
 
@@ -5664,6 +5668,7 @@ describe('modules/platform/github/index', () => {
     it('should use configured automergeStrategy', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
       await github.initRepo({ repository: 'some/repo' });
 
@@ -5697,14 +5702,6 @@ describe('modules/platform/github/index', () => {
       title: 'Some PR',
       updated_at: '01-09-2022',
     };
-
-    beforeEach(() => {
-      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', 'true');
-    });
-
-    afterEach(() => {
-      vi.stubEnv('RENOVATE_X_GITHUB_MERGE_QUEUE', undefined);
-    });
 
     function mergeQueueMock(
       scope: httpMock.Scope,
@@ -5938,6 +5935,7 @@ describe('modules/platform/github/index', () => {
     it('should try squash first', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1235);
       scope.put('/repos/some/repo/pulls/1235/merge').reply(200);
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
@@ -5957,6 +5955,7 @@ describe('modules/platform/github/index', () => {
     it('should try merge after squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1236);
       scope
         .put('/repos/some/repo/pulls/1236/merge')
         .reply(400, 'no squashing allowed');
@@ -5978,6 +5977,7 @@ describe('modules/platform/github/index', () => {
     it('should try rebase after merge', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1237);
       scope
         .put('/repos/some/repo/pulls/1237/merge')
         .reply(405, 'no squashing allowed')
@@ -6003,6 +6003,7 @@ describe('modules/platform/github/index', () => {
     it('should give up', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1237);
       scope
         .put('/repos/some/repo/pulls/1237/merge')
         .reply(405, 'no squashing allowed')

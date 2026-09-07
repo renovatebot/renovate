@@ -905,16 +905,6 @@ export async function getBranchForceRebase(
   return config.branchForceRebase[branchName];
 }
 
-export async function isBranchMergeQueueEnabled(
-  branchName: string,
-): Promise<boolean> {
-  if (!getEnv().RENOVATE_X_GITHUB_MERGE_QUEUE) {
-    return false;
-  }
-
-  return isMergeQueueEnabled(branchName);
-}
-
 function handleBranchProtectionError(
   protection: 'branch-protection' | 'rulesets',
   err: any,
@@ -2026,7 +2016,9 @@ export async function createPr({
   return result;
 }
 
-async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
+export async function isBranchMergeQueueEnabled(
+  baseBranch: string,
+): Promise<boolean> {
   const cachedResult = config.mergeQueueEnabled[baseBranch];
   if (cachedResult !== undefined) {
     return cachedResult;
@@ -2092,7 +2084,7 @@ export async function assertPrNotInMergeQueue(
   branchName: string,
   baseBranch?: string,
 ): Promise<void> {
-  if (!(await isMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
+  if (!(await isBranchMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
     return;
   }
 
@@ -2225,18 +2217,11 @@ export async function mergePr({
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
-  // Only look up the PR when merge queues are enabled, so the direct merge
-  // path stays free of extra requests
-  if (getEnv().RENOVATE_X_GITHUB_MERGE_QUEUE) {
-    const pr = await getPr(prNo);
-    if (
-      pr?.targetBranch &&
-      (await isBranchMergeQueueEnabled(pr.targetBranch))
-    ) {
-      // The PR is not merged directly but through the merge queue, so it must
-      // not be cached as merged nor may its branch be deleted yet
-      return tryEnqueuePr(pr);
-    }
+  const pr = await getPr(prNo);
+  if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
+    // The PR is not merged directly but through the merge queue, so it must
+    // not be cached as merged nor may its branch be deleted yet
+    return tryEnqueuePr(pr);
   }
 
   const url = `repos/${
