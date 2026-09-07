@@ -17,7 +17,7 @@ export function replaceConstraintVersion(
     regEx(/(?<special>@|\^|\.|\\|\|)/g),
     '\\$<special>',
   );
-  const matchString = `(${escaped}(("|",|,)[^\n:]*)?:\n)(.*\n)*?(\\s+dependencies|\n[@a-z])`;
+  const matchString = `((?:^|\n|, )"?${escaped}(("|",|,)[^\n:]*)?:\n)(.*\n)*?(\\s+dependencies|\n[@a-z])`;
   // yarn will fill in the details later
   const matchResult = regEx(matchString).exec(lockFileContent);
   /* v8 ignore next -- needs test */
