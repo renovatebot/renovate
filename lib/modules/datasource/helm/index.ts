@@ -1,7 +1,11 @@
 import { Readable } from 'node:stream';
-import type { S3ClientConfig } from '@aws-sdk/client-s3';
+import type {
+  GetObjectCommandOutput,
+  S3ClientConfig,
+} from '@aws-sdk/client-s3';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { S3UrlParts } from '../../../util/s3.ts';
@@ -39,7 +43,8 @@ export class HelmDatasource extends Datasource {
   private async _getRepositoryData(
     helmRepository: string,
   ): Promise<HelmRepository> {
-    const indexUrl = `${ensureTrailingSlash(helmRepository)}index.yaml`;
+    const baseUrl = ensureTrailingSlash(helmRepository);
+    const indexUrl = `${baseUrl}index.yaml`;
 
     const s3Url = parseS3Url(indexUrl);
     if (s3Url) {
@@ -47,11 +52,7 @@ export class HelmDatasource extends Datasource {
     }
 
     const { val, err } = await this.http
-      .getYamlSafe(
-        'index.yaml',
-        { baseUrl: ensureTrailingSlash(helmRepository) },
-        HelmRepository,
-      )
+      .getYamlSafe('index.yaml', { baseUrl }, HelmRepository)
       .unwrap();
 
     if (err) {
@@ -98,14 +99,67 @@ async function getS3RepositoryData(
   indexUrl: string,
 ): Promise<HelmRepository> {
   const client = getS3Client(undefined, undefined, getS3Credentials(indexUrl));
-  const { Body } = await client.send(new GetObjectCommand(s3Url));
-  if (!(Body instanceof Readable)) {
+
+  let res: GetObjectCommandOutput;
+  try {
+    res = await client.send(new GetObjectCommand(s3Url));
+  } catch (err) {
+    throw classifyS3Error(err, indexUrl);
+  }
+
+  if (res.DeleteMarker) {
+    logger.debug(
+      { indexUrl },
+      'Helm S3 lookup error: DeleteMarker encountered',
+    );
+    throw new Error(`No index.yaml found at ${indexUrl}`);
+  }
+
+  if (!(res.Body instanceof Readable)) {
     logger.debug({ indexUrl }, 'Helm S3 lookup error: unsupported Body type');
     throw new Error(`Unsupported S3 response body for ${indexUrl}`);
   }
-  return parseSingleYaml(await streamToString(Body), {
+
+  return parseSingleYaml(await streamToString(res.Body), {
     customSchema: HelmRepository,
   });
+}
+
+/**
+ * Only a missing object means "this chart repository has no releases", so that
+ * error is rethrown as-is and the lookup resolves to `null`.
+ * Everything else becomes an `ExternalHostError` to abort the run, otherwise a
+ * transient S3 failure looks like a deleted chart and closes open PRs.
+ */
+function classifyS3Error(
+  // `name` holds the S3 error code, `message` holds server-supplied prose
+  err: Error & { $metadata?: { httpStatusCode?: number } },
+  indexUrl: string,
+): Error {
+  if (err.name === 'NotFound' || err.name === 'NoSuchKey') {
+    logger.debug({ indexUrl }, 'Helm S3 lookup error: object not found');
+    return err;
+  }
+
+  if (
+    err.name === 'CredentialsProviderError' ||
+    err.$metadata?.httpStatusCode === 403
+  ) {
+    logger.debug(
+      { indexUrl, err },
+      'Helm S3 lookup error: credentials error, check "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" variables or the matching `hostRules` entry',
+    );
+  } else if (err.message === 'Region is missing') {
+    // Thrown client-side by the SDK region resolver, so this string is stable
+    logger.debug(
+      { indexUrl },
+      'Helm S3 lookup error: missing region, check "AWS_REGION" variable',
+    );
+  } else {
+    logger.debug({ indexUrl, err }, 'Helm S3 lookup error: unknown error');
+  }
+
+  return new ExternalHostError(err, HelmDatasource.id);
 }
 
 function getS3Credentials(
