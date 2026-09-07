@@ -428,7 +428,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
     it('works', async () => {
       httpMock
         .scope('https://git.test.com/')
-        .get('/api/v1/repos/some/repo/contents/charts/some')
+        .get('/api/v1/repos/some/repo/contents/charts%2Fsome')
         .reply(200, [
           {
             name: 'CHANGELOG',
@@ -449,7 +449,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
             content: null,
           },
         ])
-        .get('/api/v1/repos/some/repo/contents/charts/some/CHANGELOG.md')
+        .get('/api/v1/repos/some/repo/contents/charts%2Fsome%2FCHANGELOG.md')
         .reply(200, {
           name: 'CHANGELOG.md',
           path: 'charts/some/CHANGELOG.md',

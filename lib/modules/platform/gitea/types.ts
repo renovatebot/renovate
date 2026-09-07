@@ -107,12 +107,6 @@ export interface RepoSearchResults {
   data: Repo[];
 }
 
-export interface RepoContents {
-  path: string;
-  content?: string;
-  contentString?: string;
-}
-
 export interface Comment {
   id: number;
   body: string;

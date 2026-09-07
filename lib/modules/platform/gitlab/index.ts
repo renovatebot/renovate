@@ -24,6 +24,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
+import { getRepoFile } from '../../../util/gitlab/files.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
 import { setBaseUrl } from '../../../util/http/gitlab.ts';
@@ -252,15 +253,10 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+  return await getRepoFile(gitlabApi, '', repo, fileName, branchOrTag, {
     cacheProvider: memCacheProvider,
   });
-  const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
-  return str;
 }
 
 export async function getJsonFile(

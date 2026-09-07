@@ -1,12 +1,12 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger/index.ts';
 import { Releases } from '../../../../../../modules/datasource/gitea-releases/schema.ts';
+import type { RepoContents } from '../../../../../../util/gitea/contents.ts';
 import {
-  ContentsListResponse,
-  ContentsResponse,
-} from '../../../../../../modules/platform/gitea/schema.ts';
+  getRepoFile,
+  listRepoDir,
+} from '../../../../../../util/gitea/contents.ts';
 import { GiteaHttp } from '../../../../../../util/http/gitea.ts';
-import { fromBase64 } from '../../../../../../util/string.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import type {
   ChangeLogFile,
@@ -24,20 +24,17 @@ export async function getReleaseNotesMd(
   sourceDirectory?: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('gitea.getReleaseNotesMd()');
-  const apiPrefix = `${apiBaseUrl}repos/${repository}/contents`;
-
-  const sourceDir = sourceDirectory ? `/${sourceDirectory}` : '';
-  const tree = (
-    await http.getJson(
-      `${apiPrefix}${sourceDir}`,
-      {
-        paginate: false, // no pagination yet
-      },
-      ContentsListResponse,
-    )
-  ).body;
+  const tree = await listRepoDir(
+    http,
+    apiBaseUrl,
+    repository,
+    sourceDirectory,
+    {
+      paginate: false, // no pagination yet
+    },
+  );
   const allFiles = tree.filter((f) => f.type === 'file');
-  let files: ContentsResponse[] = [];
+  let files: RepoContents[] = [];
   if (!files.length) {
     files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   }
@@ -56,16 +53,18 @@ export async function getReleaseNotesMd(
     );
   }
 
-  const fileRes = await http.getJson(
-    `${apiPrefix}/${changelogFile}`,
-    ContentsResponse,
+  const fileRes = await getRepoFile(
+    http,
+    apiBaseUrl,
+    repository,
+    changelogFile,
   );
   // istanbul ignore if: should never happen
-  if (!fileRes.body.content) {
+  if (fileRes.type !== 'file' || !fileRes.content) {
     logger.debug(`Missing content for changelog file, using ${changelogFile}`);
     return null;
   }
-  const changelogMd = `${fromBase64(fileRes.body.content)}\n#\n##`;
+  const changelogMd = `${fileRes.contentString}\n#\n##`;
 
   return { changelogFile, changelogMd };
 }

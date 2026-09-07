@@ -3,11 +3,24 @@ import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { setBaseUrl } from '../../../util/http/gitea.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util.ts';
+import {
+  PRESET_INVALID,
+  PRESET_INVALID_JSON,
+  PRESET_NOT_FOUND,
+} from '../util.ts';
 import * as gitea from './index.ts';
 
 const giteaApiHost = gitea.Endpoint;
 const basePath = '/api/v1/repos/some/repo/contents';
+
+function fileBody(content: string): Record<string, string> {
+  return {
+    type: 'file',
+    name: 'preset.json',
+    path: 'preset.json',
+    content: toBase64(content),
+  };
+}
 
 describe('config/presets/gitea/index', () => {
   beforeEach(() => {
@@ -20,9 +33,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/some-filename.json`)
-        .reply(200, {
-          content: toBase64('{"from":"api"}'),
-        });
+        .reply(200, fileBody('{"from":"api"}'));
 
       const res = await gitea.fetchJSONFile(
         'some/repo',
@@ -37,9 +48,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/some-filename.json5`)
-        .reply(200, {
-          content: toBase64('{from:"api"}'),
-        });
+        .reply(200, fileBody('{from:"api"}'));
 
       const res = await gitea.fetchJSONFile(
         'some/repo',
@@ -54,9 +63,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/some-filename.jsonc`)
-        .reply(200, {
-          content: toBase64('{"from": /* secret! */ "api"}'),
-        });
+        .reply(200, fileBody('{"from": /* secret! */ "api"}'));
 
       const res = await gitea.fetchJSONFile(
         'some/repo',
@@ -65,6 +72,26 @@ describe('config/presets/gitea/index', () => {
         null,
       );
       expect(res).toEqual({ from: 'api' });
+    });
+
+    it('throws for non-file response', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .reply(200, {
+          type: 'dir',
+          name: 'some-filename.json',
+          path: 'some-filename.json',
+        });
+
+      await expect(
+        gitea.fetchJSONFile(
+          'some/repo',
+          'some-filename.json',
+          giteaApiHost,
+          null,
+        ),
+      ).rejects.toThrow(PRESET_INVALID);
     });
 
     it('throws external host error', async () => {
@@ -104,7 +131,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, { content: toBase64('invalid') });
+        .reply(200, fileBody('invalid'));
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON,
@@ -115,9 +142,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, {
-          content: toBase64('not json'),
-        });
+        .reply(200, fileBody('not json'));
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON,
@@ -128,9 +153,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, {
-          content: toBase64('{"foo":"bar"}'),
-        });
+        .reply(200, fileBody('{"foo":"bar"}'));
 
       const content = await gitea.getPreset({ repo: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
@@ -140,9 +163,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/somefile.json`)
-        .reply(200, {
-          content: toBase64('{"somename":{"foo":"bar"}}'),
-        });
+        .reply(200, fileBody('{"somename":{"foo":"bar"}}'));
       const content = await gitea.getPreset({
         repo: 'some/repo',
         presetName: 'somefile/somename',
@@ -154,11 +175,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/somefile.json`)
-        .reply(200, {
-          content: Buffer.from(
-            '{"somename":{"somesubname":{"foo":"bar"}}}',
-          ).toString('base64'),
-        });
+        .reply(200, fileBody('{"somename":{"somesubname":{"foo":"bar"}}}'));
 
       const content = await gitea.getPreset({
         repo: 'some/repo',
@@ -171,9 +188,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/custom.json`)
-        .reply(200, {
-          content: toBase64('{"foo":"bar"}'),
-        });
+        .reply(200, fileBody('{"foo":"bar"}'));
       const content = await gitea.getPreset({
         repo: 'some/repo',
         presetName: 'custom',
@@ -185,9 +200,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/path%2Fcustom.json`)
-        .reply(200, {
-          content: toBase64('{"foo":"bar"}'),
-        });
+        .reply(200, fileBody('{"foo":"bar"}'));
       const content = await gitea.getPreset({
         repo: 'some/repo',
         presetName: 'custom',
@@ -200,9 +213,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/somefile.json`)
-        .reply(200, {
-          content: toBase64('{}'),
-        });
+        .reply(200, fileBody('{}'));
       await expect(
         gitea.getPreset({
           repo: 'some/repo',
@@ -217,9 +228,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, {
-          content: toBase64('{"from":"api"}'),
-        });
+        .reply(200, fileBody('{"from":"api"}'));
       await expect(
         gitea.getPresetFromEndpoint('some/repo', 'default', undefined),
       ).resolves.toEqual({ from: 'api' });
@@ -229,9 +238,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope('https://api.gitea.example.org')
         .get(`${basePath}/default.json`)
-        .reply(200, {
-          content: toBase64('{"from":"api"}'),
-        });
+        .reply(200, fileBody('{"from":"api"}'));
       await expect(
         gitea
           .getPresetFromEndpoint(
@@ -248,9 +255,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json?ref=someTag`)
-        .reply(200, {
-          content: toBase64('{"from":"api"}'),
-        });
+        .reply(200, fileBody('{"from":"api"}'));
       await expect(
         gitea.getPresetFromEndpoint(
           'some/repo',
@@ -266,9 +271,7 @@ describe('config/presets/gitea/index', () => {
       httpMock
         .scope('https://api.gitea.example.org')
         .get(`${basePath}/default.json?ref=someTag`)
-        .reply(200, {
-          content: toBase64('{"from":"api"}'),
-        });
+        .reply(200, fileBody('{"from":"api"}'));
       await expect(
         gitea
           .getPresetFromEndpoint(

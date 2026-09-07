@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { getRepoFile } from '../../../util/bitbucket/files.ts';
 import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -198,9 +199,7 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
   const repo = repoName ?? config.repository;
-  const path = fileName;
 
   let finalBranchOrTag = branchOrTag;
   if (branchOrTag?.includes(pathSeparator)) {
@@ -208,11 +207,16 @@ export async function getRawFile(
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
-  const url = `/2.0/repositories/${repo}/src/${finalBranchOrTag ?? `HEAD`}/${path}`;
-  const res = await bitbucketHttp.getText(url, {
-    cacheProvider: repoCacheProvider,
-  });
-  return res.body;
+  return await getRepoFile(
+    bitbucketHttp,
+    '/',
+    repo,
+    fileName,
+    finalBranchOrTag,
+    {
+      cacheProvider: repoCacheProvider,
+    },
+  );
 }
 
 export async function getJsonFile(

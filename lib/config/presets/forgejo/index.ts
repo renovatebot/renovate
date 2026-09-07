@@ -1,8 +1,9 @@
 import { logger } from '../../../logger/index.ts';
-import { getRepoContents } from '../../../modules/platform/forgejo/forgejo-helper.ts';
-import type { RepoContents } from '../../../modules/platform/forgejo/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
+import type { RepoContents } from '../../../util/gitea/contents.ts';
+import { API_BASE_PATH, getRepoFile } from '../../../util/gitea/contents.ts';
+import { ForgejoHttp } from '../../../util/http/forgejo.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
@@ -13,6 +14,8 @@ import {
 
 export const Endpoint = 'https://code.forgejo.org/';
 
+const http = new ForgejoHttp();
+
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
@@ -21,7 +24,7 @@ export async function fetchJSONFile(
 ): Promise<Nullish<Preset>> {
   let res: RepoContents;
   try {
-    res = await getRepoContents(repo, fileName, tag, {
+    res = await getRepoFile(http, API_BASE_PATH, repo, fileName, tag, {
       baseUrl: endpoint,
     });
   } catch (err) {
@@ -34,16 +37,14 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  let contentString: string;
-  if (res.type === 'file') {
-    contentString = res.contentString;
-  } else {
+  if (res.type !== 'file') {
     logger.debug(
       `Preset ${fileName} has unexpected type '${res.type}'. Only \`file\` is supported`,
     );
     throw new Error(PRESET_INVALID);
   }
-  return parsePreset(contentString, fileName);
+
+  return parsePreset(res.contentString, fileName);
 }
 
 export function getPresetFromEndpoint(

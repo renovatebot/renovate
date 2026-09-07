@@ -1,25 +1,13 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
-import type { GitlabProject } from '../../../types/platform/gitlab/index.ts';
+import { getRepoFile } from '../../../util/gitlab/files.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
-import type { HttpResponse } from '../../../util/http/types.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
 
 const gitlabApi = new GitlabHttp();
 export const Endpoint = 'https://gitlab.com/api/v4/';
-
-async function getDefaultBranchName(
-  urlEncodedPkgName: string,
-  endpoint: string,
-): Promise<string> {
-  const res = await gitlabApi.getJsonUnchecked<GitlabProject>(
-    `${endpoint}projects/${urlEncodedPkgName}`,
-  );
-  return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
-}
 
 export async function fetchJSONFile(
   repo: string,
@@ -27,24 +15,15 @@ export async function fetchJSONFile(
   endpoint: string,
   tag?: string,
 ): Promise<Nullish<Preset>> {
-  let url = endpoint;
-  let ref = '';
-  let res: HttpResponse;
+  let content: string;
   try {
-    const urlEncodedRepo = encodeURIComponent(repo);
-    const urlEncodedPkgName = encodeURIComponent(fileName);
-    if (isNonEmptyString(tag)) {
-      ref = `?ref=${tag}`;
-    } else {
-      const defaultBranchName = await getDefaultBranchName(
-        urlEncodedRepo,
-        endpoint,
-      );
-      ref = `?ref=${defaultBranchName}`;
-    }
-    url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw${ref}`;
-    logger.trace({ url }, `Preset URL`);
-    res = await gitlabApi.getText(url);
+    content = await getRepoFile(
+      gitlabApi,
+      endpoint,
+      encodeURIComponent(repo),
+      fileName,
+      tag,
+    );
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;
@@ -55,7 +34,7 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(res.body, fileName);
+  return parsePreset(content, fileName);
 }
 
 export function getPresetFromEndpoint(

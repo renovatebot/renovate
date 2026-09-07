@@ -15,6 +15,7 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
+import { API_BASE_PATH, getRepoFile } from '../../../util/gitea/contents.ts';
 import { setBaseUrl } from '../../../util/http/forgejo.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -254,11 +255,17 @@ const platform: Platform = {
     branchOrTag?: string,
   ): Promise<string | null> {
     const repo = repoName ?? config.repository;
-    const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
+    const contents = await getRepoFile(
+      forgejoHttp,
+      API_BASE_PATH,
+      repo,
+      fileName,
+      branchOrTag,
+    );
     if (contents.type !== 'file') {
       return null;
     }
-    return contents.contentString ?? null;
+    return contents.contentString;
   },
 
   async getJsonFile(

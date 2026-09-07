@@ -14,6 +14,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
+import { toBase64 } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './gitea-helper.ts';
@@ -2943,7 +2944,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -2959,7 +2963,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/different/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope, { full_name: 'different/repo' });
@@ -2975,7 +2982,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json?ref=dev')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -2996,7 +3006,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json5')
         .reply(200, {
-          content: Buffer.from(json5Data, 'utf-8'),
+          type: 'file',
+          name: 'file.json5',
+          path: 'file.json5',
+          content: toBase64(json5Data),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3011,7 +3024,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from('!@#', 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64('!@#'),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3020,11 +3036,23 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('returns null on missing content', async () => {
+    it('throws when file content is missing', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json')
-        .reply(200, {});
+        .reply(200, { type: 'file', name: 'file.json', path: 'file.json' });
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      await expect(gitea.getJsonFile('file.json')).rejects.toThrow(
+        'Invalid input: expected string, received undefined',
+      );
+    });
+
+    it('returns null for non-file entries', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/contents/file.json')
+        .reply(200, { type: 'dir', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
       await expect(gitea.getJsonFile('file.json')).resolves.toBeNull();

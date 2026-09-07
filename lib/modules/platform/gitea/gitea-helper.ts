@@ -2,7 +2,6 @@ import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import type { GiteaHttpOptions } from '../../../util/http/gitea.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
-import { fromBase64 } from '../../../util/string.ts';
 import { getQueryString } from '../../../util/url.ts';
 import type {
   Branch,
@@ -25,7 +24,6 @@ import type {
   PRUpdateParams,
   PrReviewersParams,
   Repo,
-  RepoContents,
   RepoSearchParams,
   RepoSearchResults,
   User,
@@ -102,25 +100,6 @@ export async function getRepo(
 ): Promise<Repo> {
   const url = `${API_PATH}/repos/${repoPath}`;
   const res = await giteaHttp.getJsonUnchecked<Repo>(url, options);
-  return res.body;
-}
-
-export async function getRepoContents(
-  repoPath: string,
-  filePath: string,
-  ref?: string | null,
-  options?: GiteaHttpOptions,
-): Promise<RepoContents> {
-  const query = getQueryString(ref ? { ref } : {});
-  const url = `${API_PATH}/repos/${repoPath}/contents/${urlEscape(
-    filePath,
-  )}?${query}`;
-  const res = await giteaHttp.getJsonUnchecked<RepoContents>(url, options);
-
-  if (res.body.content) {
-    res.body.contentString = fromBase64(res.body.content);
-  }
-
   return res.body;
 }
 

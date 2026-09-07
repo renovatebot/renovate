@@ -15,7 +15,6 @@ import {
   Label,
   PR,
   Repo,
-  RepoContents,
   RepoSearchResults,
   User,
   Version,
@@ -136,21 +135,6 @@ export async function getRepo(
 ): Promise<Repo> {
   const url = `${API_PATH}/repos/${repoPath}`;
   const res = await forgejoHttp.getJson(url, options, Repo);
-  return res.body;
-}
-
-export async function getRepoContents(
-  repoPath: string,
-  filePath: string,
-  ref?: string | null,
-  options: ForgejoHttpOptions = {},
-): Promise<RepoContents> {
-  const query = getQueryString(ref ? { ref } : {});
-  const url = `${API_PATH}/repos/${repoPath}/contents/${urlEscape(
-    filePath,
-  )}?${query}`;
-  const res = await forgejoHttp.getJson(url, options, RepoContents);
-
   return res.body;
 }
 
