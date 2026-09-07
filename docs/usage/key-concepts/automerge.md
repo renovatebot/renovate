@@ -133,17 +133,18 @@ Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/reposi
 
 The steps to enable GitHub's Merge Queue differ based on whether you use GitHub Actions or another CI provider.
 
-By default, merge queues need `platformAutomerge` enabled (which is the default), because GitHub's auto-merge takes care of adding the PR to the merge queue.
+With `platformAutomerge` enabled (which is the default), GitHub's auto-merge takes care of adding the PR to the merge queue.
 This requires the "Allow auto-merge" checkbox in the repository settings to be enabled, as described in the steps below.
 
-If you self-host Renovate and set the experimental environment variable [`RENOVATE_X_GITHUB_MERGE_QUEUE`](../self-hosted-experimental.md#renovate_x_github_merge_queue), merge queues also work with `platformAutomerge=false`: Renovate then adds the PR to the merge queue itself once all checks have passed.
+Merge queues also work with `platformAutomerge=false`: Renovate detects whether the base branch has a merge queue, configured via classic branch protection or repository rulesets, and adds the PR to the merge queue itself once all checks have passed.
 In that case the "Allow auto-merge" checkbox is not needed.
+PRs that are already waiting in the merge queue are left untouched on later runs.
 We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
 
 <!-- prettier-ignore -->
 !!! warning
   Branch automerge (`automergeType=branch`) only works if the base branch has a merge queue when Renovate is on the merge queue's bypass list, because pushing directly to the base branch is not possible otherwise.
-  With `RENOVATE_X_GITHUB_MERGE_QUEUE` set, Renovate logs a warning and creates a PR instead if the merge queue rejects the push.
+  Renovate logs a warning and creates a PR instead if the merge queue rejects the push.
   Configure `automergeType=pr` in such repositories, or add Renovate to the bypass list.
 
 !!! tip "GitHub Merge Queue overview page"
