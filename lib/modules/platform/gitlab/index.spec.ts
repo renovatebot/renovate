@@ -4124,7 +4124,6 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.mergePr({
           id: 1,
-          targetBranch: 'master',
         }),
       ).resolves.toBeTrue();
     });
@@ -4144,7 +4143,6 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.mergePr({
           id: 1,
-          targetBranch: 'master',
         }),
       ).resolves.toBeFalse();
       expect(logger.logger.debug).toHaveBeenCalledWith(
