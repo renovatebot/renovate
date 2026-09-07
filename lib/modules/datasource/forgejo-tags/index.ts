@@ -1,24 +1,19 @@
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { ForgejoHttp } from '../../../util/http/forgejo.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  ReleaseResult,
-} from '../types.ts';
+import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
+import type { GetReleasesConfig, GitHostTag } from '../types.ts';
 import { Commits, Tag, Tags } from './schema.ts';
 
-export class ForgejoTagsDatasource extends Datasource {
+export class ForgejoTagsDatasource extends GitHostTagsDigestDatasource {
   static readonly id = 'forgejo-tags';
 
   override http = new ForgejoHttp(ForgejoTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://code.forgejo.org'];
 
-  private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${ForgejoTagsDatasource.id}`;
+  protected readonly cacheNamespace: PackageCacheNamespace = `datasource-${ForgejoTagsDatasource.id}`;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -58,11 +53,19 @@ export class ForgejoTagsDatasource extends Datasource {
     return `${normalizedUrl}${packageName}`;
   }
 
-  // getReleases fetches list of tags for the repository
-  private async _getReleases({
+  getRegistryUrl(registryUrl?: string): string {
+    return ForgejoTagsDatasource.getRegistryURL(registryUrl);
+  }
+
+  getSourceUrl(packageName: string, registryUrl?: string): string {
+    return ForgejoTagsDatasource.getSourceUrl(packageName, registryUrl);
+  }
+
+  // fetchTags fetches list of tags for the repository
+  protected async fetchTags({
     registryUrl,
     packageName: repo,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: GetReleasesConfig): Promise<GitHostTag[]> {
     const url = `${ForgejoTagsDatasource.getApiUrl(
       registryUrl,
     )}repos/${repo}/tags`;
@@ -76,37 +79,15 @@ export class ForgejoTagsDatasource extends Datasource {
       )
     ).body;
 
-    const dependency: ReleaseResult = {
-      sourceUrl: ForgejoTagsDatasource.getSourceUrl(repo, registryUrl),
-      registryUrl: ForgejoTagsDatasource.getRegistryURL(registryUrl),
-      releases: tags.map(({ name, commit }) => ({
-        version: name,
-        gitRef: name,
-        newDigest: commit.sha,
-        releaseTimestamp: commit.created,
-      })),
-    };
-
-    return dependency;
+    return tags.map(({ name, commit }) => ({
+      version: name,
+      newDigest: commit.sha,
+      releaseTimestamp: commit.created,
+    }));
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
-      {
-        namespace: ForgejoTagsDatasource.cacheNamespace,
-        key: ForgejoTagsDatasource.getCacheKey(
-          config.registryUrl,
-          config.packageName,
-          'tags',
-        ),
-        fallback: true,
-      },
-      () => this._getReleases(config),
-    );
-  }
-
-  // getTagCommit fetched the commit has for specified tag
-  private async _getTagCommit(
+  // fetchTagCommit fetches the commit hash for the specified tag
+  protected async fetchTagCommit(
     registryUrl: string | undefined,
     repo: string,
     tag: string,
@@ -120,30 +101,11 @@ export class ForgejoTagsDatasource extends Datasource {
     return body.commit.sha;
   }
 
-  getTagCommit(
+  // fetchLatestCommit fetches the latest commit for the repository main branch
+  protected async fetchLatestCommit(
     registryUrl: string | undefined,
     repo: string,
-    tag: string,
   ): Promise<string | null> {
-    return withCache(
-      {
-        namespace: ForgejoTagsDatasource.cacheNamespace,
-        key: ForgejoTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
-      },
-      () => this._getTagCommit(registryUrl, repo, tag),
-    );
-  }
-
-  // getDigest fetched the latest commit for repository main branch
-  // however, if newValue is provided, then getTagCommit is called
-  private async _getDigest(
-    { packageName: repo, registryUrl }: DigestConfig,
-    newValue?: string,
-  ): Promise<string | null> {
-    if (newValue?.length) {
-      return this.getTagCommit(registryUrl, repo, newValue);
-    }
-
     const url = `${ForgejoTagsDatasource.getApiUrl(
       registryUrl,
     )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
@@ -154,23 +116,5 @@ export class ForgejoTagsDatasource extends Datasource {
     }
 
     return body[0].sha;
-  }
-
-  override getDigest(
-    config: DigestConfig,
-    newValue?: string,
-  ): Promise<string | null> {
-    return withCache(
-      {
-        namespace: ForgejoTagsDatasource.cacheNamespace,
-        key: ForgejoTagsDatasource.getCacheKey(
-          config.registryUrl,
-          config.packageName,
-          'digest',
-        ),
-        fallback: true,
-      },
-      () => this._getDigest(config, newValue),
-    );
   }
 }

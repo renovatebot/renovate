@@ -121,6 +121,14 @@ export interface ReleaseResult {
   respectLatest?: boolean;
 }
 
+/**
+ * A single tag as returned by a git hosting provider.
+ *
+ * `gitRef` is filled in by the `*-tags` datasource base class, which always
+ * mirrors the tag name.
+ */
+export type GitHostTag = Omit<Release, 'gitRef'>;
+
 export interface PostprocessReleaseConfig {
   packageName: string;
   registryUrl: string | null;
