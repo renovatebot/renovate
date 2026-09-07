@@ -37,6 +37,101 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('extracts apk deps in a fragment without a FROM', () => {
+      const res = extractPackageFile(
+        'RUN apk add --no-cache bash=5.2.37-r2\n',
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate: 'bash={{{newValue}}}',
+          currentValue: '5.2.37-r2',
+          datasource: 'apk',
+          depName: 'bash',
+          depType: 'apk',
+          replaceString: 'bash=5.2.37-r2',
+        },
+      ]);
+    });
+
+    it('extracts apk deps from a RUN instruction', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21
+          RUN apk add --no-cache bash=5.2.37-r2
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.21',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'final',
+          packageName: 'alpine',
+          replaceString: 'alpine:3.21',
+        },
+        {
+          autoReplaceStringTemplate: 'bash={{{newValue}}}',
+          currentValue: '5.2.37-r2',
+          datasource: 'apk',
+          depName: 'bash',
+          depType: 'apk',
+          replaceString: 'bash=5.2.37-r2',
+        },
+      ]);
+    });
+
+    it('keeps the final stage when each stage has its own apk deps', () => {
+      const digest =
+        'sha256:96ff486b326d15db16aa1fbd41a17043a557bebf76d2c0ac932e717534025940';
+      const res = extractPackageFile(
+        codeBlock`
+          FROM cgr.dev/chainguard/wolfi-base:latest@${digest} AS builder
+          RUN apk add --no-cache curl-dev=8.9.1-r4
+          FROM cgr.dev/chainguard/wolfi-base:latest@${digest}
+          RUN apk add --no-cache curl=8.9.1-r4
+        `,
+        '',
+        {},
+      );
+      // the trailing dep is an apk one, so `final` has to be the last `FROM`
+      // rather than whatever was extracted last
+      expect(
+        res?.deps.map(({ depName, currentValue, depType }) => ({
+          depName,
+          currentValue,
+          depType,
+        })),
+      ).toEqual([
+        {
+          depName: 'cgr.dev/chainguard/wolfi-base',
+          currentValue: 'latest',
+          depType: 'stage',
+        },
+        {
+          depName: 'curl-dev',
+          currentValue: '8.9.1-r4',
+          depType: 'apk',
+        },
+        {
+          depName: 'cgr.dev/chainguard/wolfi-base',
+          currentValue: 'latest',
+          depType: 'final',
+        },
+        {
+          depName: 'curl',
+          currentValue: '8.9.1-r4',
+          depType: 'apk',
+        },
+      ]);
+    });
+
     it('handles naked dep', () => {
       const res = extractPackageFile('FROM node\n', '', {})?.deps;
       expect(res).toEqual([
@@ -607,6 +702,12 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'final',
           replaceString: 'alpine:latest',
         },
+        {
+          datasource: 'apk',
+          depName: 'ca-certificates',
+          depType: 'apk',
+          skipReason: 'unspecified-version',
+        },
       ]);
       const passed = [
         res?.[2].depType === 'final',
@@ -642,6 +743,24 @@ describe('modules/manager/dockerfile/extract', () => {
           packageName: 'buildkite/puppeteer',
           depType: 'final',
           replaceString: 'buildkite/puppeteer:1.1.1',
+        },
+        {
+          datasource: 'apk',
+          depName: 'python',
+          depType: 'apk',
+          skipReason: 'unspecified-version',
+        },
+        {
+          datasource: 'apk',
+          depName: 'make',
+          depType: 'apk',
+          skipReason: 'unspecified-version',
+        },
+        {
+          datasource: 'apk',
+          depName: 'g++',
+          depType: 'apk',
+          skipReason: 'unspecified-version',
         },
       ]);
     });
