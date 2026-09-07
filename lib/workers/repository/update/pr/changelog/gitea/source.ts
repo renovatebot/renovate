@@ -1,9 +1,13 @@
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { ChangeLogSource } from '../source.ts';
+import type { ChangeLogPlatform } from '../types.ts';
 
 export class GiteaChangeLogSource extends ChangeLogSource {
-  constructor() {
-    super('gitea', 'gitea-tags');
+  constructor(
+    platform: ChangeLogPlatform = 'gitea',
+    datasource: 'forgejo-tags' | 'gitea-tags' = 'gitea-tags',
+  ) {
+    super(platform, datasource);
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {

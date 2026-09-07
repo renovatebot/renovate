@@ -1,25 +1,11 @@
-import type { BranchUpgradeConfig } from '../../../../../types.ts';
-import { ChangeLogSource } from '../source.ts';
+import { GiteaChangeLogSource } from '../gitea/source.ts';
 
-export class ForgejoChangeLogSource extends ChangeLogSource {
+/**
+ * Forgejo is a fork of Gitea and shares its URL layout, so only the platform
+ * and datasource ids differ.
+ */
+export class ForgejoChangeLogSource extends GiteaChangeLogSource {
   constructor() {
     super('forgejo', 'forgejo-tags');
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return `${this.getBaseUrl(config)}api/v1/`;
-  }
-
-  getCompareURL(
-    baseUrl: string,
-    repository: string,
-    prevHead: string,
-    nextHead: string,
-  ): string {
-    return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
-  }
-
-  override hasValidRepository(repository: string): boolean {
-    return repository.split('/').length === 2;
   }
 }
