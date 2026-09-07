@@ -1,10 +1,14 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import { dir as tmpDir } from 'tmp-promise';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { extractPackageFile } from '../../manager/pip_requirements/extract.ts';
 import { getPkgReleases } from '../index.ts';
 import { PypiDatasource } from './index.ts';
 
@@ -79,6 +83,65 @@ const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
 
 describe('modules/datasource/pypi/index', () => {
+  describe('registry caching', () => {
+    let cacheDir: Awaited<ReturnType<typeof tmpDir>>;
+
+    beforeEach(async () => {
+      memCache.init();
+      cacheDir = await tmpDir({ unsafeCleanup: true });
+      await packageCache.init({ cacheDir: cacheDir.path });
+    });
+
+    afterEach(async () => {
+      await packageCache.cleanup({});
+      memCache.reset();
+      await cacheDir.cleanup();
+    });
+
+    it('keeps merged PyPI releases within each requirements file registry set', async () => {
+      httpMock
+        .scope(PypiDatasource.defaultURL)
+        .get('/foo/json')
+        .reply(200, { releases: { '1.0.0': [{}] } });
+      httpMock
+        .scope('https://index-a.example/pypi')
+        .get('/foo/json')
+        .reply(200, { releases: { '2.0.0': [{}] } });
+      httpMock
+        .scope('https://index-b.example/pypi')
+        .get('/foo/json')
+        .reply(200, { releases: { '3.0.0': [{}] } });
+
+      const fileA = extractPackageFile(
+        '--extra-index-url https://index-a.example/pypi\nfoo==1.0.0\n',
+      )!;
+      const fileB = extractPackageFile(
+        '--extra-index-url https://index-b.example/pypi\nfoo==1.0.0\n',
+      )!;
+      const firstConfig = {
+        ...fileA,
+        datasource: 'pypi',
+        packageName: fileA.deps[0].packageName!,
+      };
+      const first = await getPkgReleases(firstConfig);
+      const second = await getPkgReleases({
+        ...fileB,
+        datasource: 'pypi',
+        packageName: fileB.deps[0].packageName!,
+      });
+
+      expect(first?.releases.map(({ version }) => version)).toEqual([
+        '1.0.0',
+        '2.0.0',
+      ]);
+      expect(second?.releases.map(({ version }) => version)).toEqual([
+        '1.0.0',
+        '3.0.0',
+      ]);
+      await expect(getPkgReleases(firstConfig)).resolves.toEqual(first);
+    });
+  });
+
   describe('getReleases', () => {
     beforeEach(() => {
       vi.stubEnv('PIP_INDEX_URL', undefined);
