@@ -3,6 +3,12 @@ import type { SemVer } from 'semver';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import {
+  createPartialSemverOps,
+  massageValue,
+  parsePartialRange,
+} from '../semver-partial/common.ts';
+import type { PartialSemverRange } from '../semver-partial/types.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'github-actions';
@@ -14,11 +20,6 @@ export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
 
 const floatingMinorTagRegex = regEx(/^\d+(?:\.\d+)?$/);
-const majorOnlyRegex = regEx(/^\d+$/);
-
-function massageValue(input: string): string {
-  return input.trim().replace(regEx(/^v/i), '');
-}
 
 function parseVersion(input: string): SemVer | null {
   const stripped = massageValue(input);
@@ -35,28 +36,11 @@ function parseVersion(input: string): SemVer | null {
   );
 }
 
-interface Range {
-  major: number;
-  minor?: number;
-}
-
-function parseRange(input: string): Range | null {
-  const stripped = massageValue(input);
-  if (!floatingMinorTagRegex.test(stripped)) {
+function parseRange(input: string): PartialSemverRange | null {
+  if (!floatingMinorTagRegex.test(massageValue(input))) {
     return null;
   }
-  const coerced = semver.coerce(stripped);
-  /* v8 ignore if -- unreachable: floatingMinorTagRegex should guarantee coerce() succeeds */
-  if (!coerced) {
-    return null;
-  }
-  const { major, minor } = coerced;
-
-  if (majorOnlyRegex.test(stripped)) {
-    return { major };
-  }
-
-  return { major, minor };
+  return parsePartialRange(input);
 }
 
 /*
@@ -96,149 +80,26 @@ function isVersion(input: string | undefined | null): boolean {
   return parseRange(input) !== null;
 }
 
-function isStable(version: string): boolean {
-  const v = parseVersionCoerced(version);
-  if (!v) {
-    return false;
-  }
-
-  return v.prerelease.length === 0;
-}
-
-function isSingleVersion(input: string): boolean {
-  return !!parseVersion(input);
-}
-
-function getMajor(version: string): number | null {
-  return parseVersionCoerced(version)?.major ?? null;
-}
-
-function getMinor(version: string): number | null {
-  return parseVersionCoerced(version)?.minor ?? null;
-}
-
-function getPatch(version: string): number | null {
-  return parseVersionCoerced(version)?.patch ?? null;
-}
-
-function sortVersions(x: string, y: string): number {
-  const a = parseVersionCoerced(x);
-  const b = parseVersionCoerced(y);
-  if (!a || !b) {
-    return 0;
-  }
-  const cmp = semver.compare(a, b);
-  if (cmp === 0) {
-    return x.localeCompare(y, undefined, { numeric: true });
-  }
-  return cmp;
-}
-
-function equals(x: string, y: string): boolean {
-  const a = parseVersionCoerced(x);
-  const b = parseVersionCoerced(y);
-  if (!a || !b) {
-    return false;
-  }
-  return semver.eq(a, b);
-}
-
-function isGreaterThan(x: string, y: string): boolean {
-  const a = parseVersionCoerced(x);
-  const b = parseVersionCoerced(y);
-  if (!a || !b) {
-    return false;
-  }
-  return semver.gt(a, b);
-}
-
-function matches(version: string, range: string): boolean {
-  // if we have a valid floating tag provided, and it's the same as the range, treat it as the same
-  if (
-    parseVersionCoerced(version) &&
+// if we have a valid floating tag provided, and it's the same as the range, treat it as the same
+function matchesFloatingTag(version: string, range: string): boolean {
+  return (
+    !!parseVersionCoerced(version) &&
     massageValue(version) === massageValue(range)
-  ) {
-    return true;
-  }
-
-  const v = parseVersion(version);
-  if (!v) {
-    return false;
-  }
-
-  const rv = parseVersion(range);
-  if (rv) {
-    return semver.eq(v, rv);
-  }
-
-  const r = parseRange(range);
-  if (!r) {
-    return false;
-  }
-
-  if (v.prerelease.length > 0) {
-    return false;
-  }
-
-  if (v.major !== r.major) {
-    return false;
-  }
-
-  if (isUndefined(r.minor)) {
-    return true;
-  }
-
-  return v.minor === r.minor;
+  );
 }
 
-function getSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  const sortedVersions = versions.sort(sortVersions).reverse();
-  for (const version of sortedVersions) {
-    if (matches(version, range)) {
-      return version;
-    }
-  }
-  return null;
+// `v1.2` and `1.2` compare as equal, so fall back to the raw values
+function compareEqual(x: string, y: string): number {
+  return x.localeCompare(y, undefined, { numeric: true });
 }
 
-function minSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  const sortedVersions = versions.sort(sortVersions);
-  for (const version of sortedVersions) {
-    if (matches(version, range)) {
-      return version;
-    }
-  }
-  return null;
-}
-
-function isLessThanRange(version: string, range: string): boolean {
-  const v = parseVersionCoerced(version);
-  const r = parseRange(range);
-
-  if (!v || !r) {
-    return false;
-  }
-
-  if (v.major !== r.major) {
-    return v.major < r.major;
-  }
-
-  if (isUndefined(r.minor)) {
-    return false;
-  }
-
-  if (v.minor !== r.minor) {
-    return v.minor < r.minor;
-  }
-
-  return false;
-}
+const ops = createPartialSemverOps({
+  parseVersion,
+  parseVersionForCompare: parseVersionCoerced,
+  parseRange,
+  matchesAlias: matchesFloatingTag,
+  compareEqual,
+});
 
 function getNewValue({
   currentValue,
@@ -363,39 +224,12 @@ function isCompatible(version: string): boolean {
   return isValid(version);
 }
 
-function isBreaking(current: string, version: string): boolean {
-  const versionParsed = parseVersion(version);
-  const currentParsed = parseVersion(current);
-
-  if (!versionParsed || !currentParsed) {
-    return false;
-  }
-
-  if (currentParsed.major === 0) {
-    return versionParsed.major > 0 || versionParsed.minor > currentParsed.minor;
-  }
-
-  return versionParsed.major > currentParsed.major;
-}
-
 export const api: VersioningApi = {
-  equals,
-  getMajor,
-  getMinor,
-  getPatch,
-  isBreaking,
+  ...ops,
   isCompatible,
-  isGreaterThan,
-  isLessThanRange,
-  isSingleVersion,
-  isStable,
   isValid,
   isVersion,
-  matches,
-  getSatisfyingVersion,
-  minSatisfyingVersion,
   getNewValue,
-  sortVersions,
 };
 
 export default api;
