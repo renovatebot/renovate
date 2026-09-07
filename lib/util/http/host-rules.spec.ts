@@ -903,6 +903,33 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it("does not let a fallback hostType's trustedHeaderNames leak onto a rule's own untrusted headers", () => {
+    // the inverse of the previous test: `hostRules.find()` sets `trustedHeaderNames: undefined` on a rule with only untrusted headers so that it shadows a fallback's `trustedHeaderNames` during `{ ...fallbackResult, ...res }` - otherwise, if `allowedHeaders` narrows after registration, a repository's already-registered untrusted header could inherit the admin's `trustedHeaderNames` from a `github` hostType fallback and wrongly bypass the new, narrower `allowedHeaders`
+    GlobalConfig.set({ allowedHeaders: ['Authorization'] });
+    hostRules.add(
+      {
+        hostType: 'github',
+        matchHost: 'github.com',
+        headers: { Authorization: 'from-admin' },
+      },
+      { trusted: true },
+    );
+    hostRules.add({
+      hostType: 'github-tags',
+      matchHost: 'github.com',
+      headers: { Authorization: 'from-repo' },
+    });
+
+    // simulate `allowedHeaders` narrowing after both rules were registered - the repo's header must not be grandfathered in as the admin's trusted one
+    GlobalConfig.set({ allowedHeaders: [] });
+
+    const opts: GotOptions = { ...options, hostType: 'github-tags' };
+    const hostRule = findMatchingRule(url, opts);
+
+    // dropped, not `{ Authorization: 'from-repo' }` - if the fallback's `trustedHeaderNames` had leaked through, this untrusted header would have wrongly bypassed `allowedHeaders`
+    expect(applyHostRule(url, opts, hostRule).headers).toEqual({});
+  });
+
   it('enabled=false with noAuth', () => {
     hostRules.add({
       hostType: 'docker',
