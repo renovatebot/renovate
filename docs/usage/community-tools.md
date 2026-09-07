@@ -46,4 +46,4 @@ There are some additional utilities in the project, including the ability to gen
 renovate-pretty-log -path /path/to/debug.log -html > report.html
 ```
 
-You can see [a live example of what this looks like from one of Renovate's own runs](https://www.jvt.me/casts/2026-08-renovate-pretty-log/renovate-debug-out.html)..
+You can see [a live example of what this looks like from one of Renovate's own runs](https://www.jvt.me/casts/2026-08-renovate-pretty-log/renovate-debug-out.html).
