@@ -2078,7 +2078,6 @@ describe('modules/manager/gomod/artifacts', () => {
         config: {
           ...config,
           updateType: 'major',
-          newMajor: 28,
           postUpdateOptions: ['gomodTidy'],
         },
       }),
@@ -2116,7 +2115,6 @@ describe('modules/manager/gomod/artifacts', () => {
         config: {
           ...config,
           updateType: 'major',
-          newMajor: 28,
         },
       }),
     ).resolves.toEqual([

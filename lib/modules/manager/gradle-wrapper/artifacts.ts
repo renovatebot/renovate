@@ -143,6 +143,9 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
+    // A `gradle-wrapper.properties` file holds a single Gradle version, so the
+    // update of this package file is always the first one.
+    const [gradleUpdate] = updatedDeps;
     const localGradleDir = upath.join(upath.dirname(packageFileName), '../../');
     const gradlewFile = upath.join(localGradleDir, gradleWrapperFileName());
 
@@ -182,7 +185,7 @@ export async function updateArtifacts({
         cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
     } else {
-      cmd += ` --gradle-version ${quote(config.newValue!)}`;
+      cmd += ` --gradle-version ${quote(gradleUpdate.newValue!)}`;
     }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
@@ -194,7 +197,7 @@ export async function updateArtifacts({
           toolName: 'java',
           constraint:
             config.constraints?.java ??
-            (await getJavaConstraint(config.currentValue, gradlewFile)),
+            (await getJavaConstraint(gradleUpdate.currentValue, gradlewFile)),
         },
       ],
     };
@@ -212,7 +215,7 @@ export async function updateArtifacts({
     }
 
     const buildFileName = await updateBuildFile(localGradleDir, {
-      gradleVersion: config.newValue,
+      gradleVersion: gradleUpdate.newValue,
       distributionSha256Sum: checksum,
       distributionUrl,
     });

@@ -15,7 +15,11 @@ import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
-import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
+import type {
+  PackageDependency,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types.ts';
 import { updateBuildFile, updateLockFiles } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -37,9 +41,11 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {
-  newValue: '5.6.4',
-};
+const config: UpdateArtifactsConfig = {};
+
+const updatedDeps: PackageDependency[] = [
+  { depName: 'gradle', newValue: '5.6.4' },
+];
 
 const osPlatformSpy = vi.spyOn(os, 'platform');
 
@@ -99,7 +105,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps,
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
         config,
       });
@@ -134,11 +140,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const res = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '6.3' }],
         newPackageFileContent: Fixtures.get(
           'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
-        config: { ...config, newValue: '6.3' },
+        config,
       });
 
       expect(res).toEqual(
@@ -178,12 +184,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '6.3' }],
         // distributionUrl as it would be parsed from an attacker-controlled
         // gradle-wrapper.properties
         newPackageFileContent:
           'distributionUrl=https\\://example.com/gradle.zip;touch pwned',
-        config: { ...config, newValue: '6.3' },
+        config,
       });
 
       expect(execSnapshots).toMatchObject([
@@ -212,11 +218,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const res = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '6.3' }],
         newPackageFileContent: Fixtures.get(
           'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
-        config: { ...config, newValue: '6.3' },
+        config,
       });
 
       expect(res).toBeNull();
@@ -237,13 +243,38 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps,
         newPackageFileContent: '',
         config: {},
       });
 
       expect(result).toBeNull();
       expect(execSnapshots).toBeEmptyArray();
+    });
+
+    it('uses the first updated dependency', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+
+      await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [
+          { depName: 'gradle', currentValue: '5.6.4', newValue: '8.2' },
+          { depName: 'gradle', currentValue: '1.0.0', newValue: '2.0.0' },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-version 8.2',
+        },
+      ]);
     });
 
     it('gradlew failed', async () => {
@@ -255,7 +286,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       );
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps,
         newPackageFileContent: '',
         config,
       });
@@ -291,7 +322,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps,
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
         config,
       });
@@ -346,7 +377,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps,
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
         config,
       });
@@ -378,7 +409,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps,
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
         config,
       });
@@ -409,11 +440,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const res = await updateArtifacts({
         packageFileName: 'sub/gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '6.3' }],
         newPackageFileContent: Fixtures.get(
           'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
-        config: { ...config, newValue: '6.3' },
+        config,
       });
 
       expect(res).toEqual(
@@ -554,9 +585,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const res = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '8.2' }],
         newPackageFileContent: '',
-        config: { ...config, newValue: '8.2' },
+        config,
       });
 
       expect(res).toStrictEqual(updatedArtifacts);

@@ -1267,9 +1267,7 @@ describe('util/exec/index', () => {
   });
 
   describe('getToolSettingsOptions()', () => {
-    const config: UpdateArtifactsConfig = {
-      newValue: '5.6.4',
-    };
+    const config: UpdateArtifactsConfig = {};
 
     describe('for JVM settings', () => {
       beforeEach(() => {
