@@ -8,53 +8,6 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const runnerTestWorkflowMacos = codeBlock`
-jobs:
-  test1:
-     runs-on: \${{ env.RUNNER }}
-  test2:
-      runs-on: abc-123
-  test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-      runs-on: macos-15-intel
-  test6:
-      runs-on: macos-26-intel
-`;
-
-const runnerTestWorkflowUbuntu = codeBlock`
-jobs:
-  test1:
-    runs-on: ubuntu-latest
-  test2:
-    runs-on:
-      ubuntu-22.04
-  test3:
-     runs-on:
-       group: ubuntu-runners
-       labels: ubuntu-20.04-16core
-  test4:
-      runs-on: ubuntu-22.04-arm
-`;
-
-const runnerTestWorkflowWindows = codeBlock`
-jobs:
-  test1:
-    runs-on: |
-      windows-2019
-  test2:
-    runs-on: >
-      windows-2022
-  test3:
-    runs-on: [windows-2022, selfhosted]
-  test4:
-      runs-on: windows-11-arm
-  test5:
-      runs-on: windows-2025
-`;
-
 describe('modules/manager/github-actions/extract', () => {
   beforeEach(() => {
     GlobalConfig.reset();
@@ -62,15 +15,15 @@ describe('modules/manager/github-actions/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(
-        await extractPackageFile('nothing here', 'empty-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'empty-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid yaml', async () => {
-      expect(
-        await extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts multiple docker image lines from yaml configuration file', async () => {
@@ -78,10 +31,99 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_1.yml'),
         'workflow_1.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
-        6,
-      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'replicated/dockerfilelint',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'actions/docker',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          currentValue: '6',
+          currentDigest:
+            'sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'redis',
+          currentValue: '5',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'postgres',
+          currentValue: '10',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
     });
 
     it('extracts multiple action tag lines from yaml configuration file', async () => {
@@ -89,13 +131,90 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-tags'),
-      ).toHaveLength(7);
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-digest'),
-      ).toHaveLength(1);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentValue: 'v1.1.0',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: '1.0.0',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          enabled: false,
+          skipReason: 'unversioned-reference',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145',
+        },
+        {
+          depName: 'docker/build-push-action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: 'v2.4.0',
+          currentDigest: 'ec3a7ce113134d7a93b817d10a8272cb61118579',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0',
+        },
+        {
+          depName: 'actions-rs/toolchain',
+          currentValue: 'v1.0.7',
+          currentDigest: '16499b5e05bf2e26879000db0c1d13f7e13fa3af',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7',
+        },
+        {
+          depName: 'actions-rs/cargo',
+          currentValue: 'v1.0.3',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
     });
 
     it('use github.com as registry when no settings provided', async () => {
@@ -778,6 +897,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple macos action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowMacos = codeBlock`
+      jobs:
+        test1:
+           runs-on: \${{ env.RUNNER }}
+        test2:
+            runs-on: abc-123
+        test3:
+          runs-on: "macos-12-large"
+        test4:
+          runs-on: 'macos-latest'
+        test5:
+            runs-on: macos-15-intel
+        test6:
+            runs-on: macos-26-intel
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowMacos,
         'workflow.yml',
@@ -824,6 +958,20 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowUbuntu = codeBlock`
+      jobs:
+        test1:
+          runs-on: ubuntu-latest
+        test2:
+          runs-on:
+            ubuntu-22.04
+        test3:
+           runs-on:
+             group: ubuntu-runners
+             labels: ubuntu-20.04-16core
+        test4:
+            runs-on: ubuntu-22.04-arm
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowUbuntu,
         'workflow.yml',
@@ -862,6 +1010,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple windows action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowWindows = codeBlock`
+      jobs:
+        test1:
+          runs-on: |
+            windows-2019
+        test2:
+          runs-on: >
+            windows-2022
+        test3:
+          runs-on: [windows-2022, selfhosted]
+        test4:
+            runs-on: windows-11-arm
+        test5:
+            runs-on: windows-2025
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowWindows,
         'workflow.yml',
@@ -1202,7 +1365,9 @@ describe('modules/manager/github-actions/extract', () => {
           using: 'node20'
           main: 'index.js'
         `;
-      expect(await extractPackageFile(yamlContent, 'action.yml')).toBeNull();
+      await expect(
+        extractPackageFile(yamlContent, 'action.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts actions and with-version inputs nested in a parallel block', async () => {

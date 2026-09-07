@@ -34,8 +34,8 @@ async function validateOptimizeForDisabled(
     }
     /*
      * The following is to support a use case within Mend customers where:
-     *  - Bot admins configure install the bot into every repo
-     *  - Bot admins configure `extends: [':disableRenovate'] in order to skip repos by default
+     *  - Admins configure and install Renovate into every repo
+     *  - Admins configure `extends: [':disableRenovate'] in order to skip repos by default
      *  - Repo users can push a `renovate.json` containing `extends: [':enableRenovate']` to re-enable Renovate
      */
     if (config.extends?.includes(':disableRenovate')) {

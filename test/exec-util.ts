@@ -35,7 +35,7 @@ function execSnapshot(
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
       const val = v
-        .replace(regEx(/\\(\w)/g), '/$1')
+        .replace(regEx(/\\(?<char>\w)/g), '/$<char>')
         .replace(regEx(/^[A-Z]:\//), '/') // replace windows paths
         .replace(regEx(/"[A-Z]:\//g), '"/') // replace windows paths
         .replace(cwd, '/root/project');

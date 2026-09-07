@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
-import { isFunction, isNullOrUndefined } from '@sindresorhus/is';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { join, split } from 'shlex';
 import { instrument } from '../../instrumentation/index.ts';
@@ -142,16 +142,12 @@ export function exec(
       detached: process.platform !== 'win32',
       shell,
       extendEnv: false,
+      // Suppress execa's internal promise rejection (e.g., from timeout).
+      // We handle all exit scenarios via 'exit' and 'error' event listeners below,
+      // so the promise rejection would otherwise surface as an unhandledRejection.
+      // TODO: Refactor to await execa result (#45650)
+      reject: false,
     });
-
-    // Suppress execa's internal promise rejection (e.g., from timeout).
-    // We handle all exit scenarios via 'exit' and 'error' event listeners below,
-    // so the promise rejection would otherwise surface as an unhandledRejection.
-    if (isFunction(cp.catch)) {
-      cp.catch((err) =>
-        logger.warn({ err }, 'execa promise rejection suppressed'),
-      );
-    }
 
     // handle streams
     const [stdout, stderr] = initStreamListeners(cp, {

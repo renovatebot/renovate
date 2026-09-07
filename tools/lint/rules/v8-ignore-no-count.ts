@@ -12,7 +12,7 @@ import { defineRule } from '@oxlint/plugins';
  * The fixer drops the count, which preserves the actual (keyword-only)
  * behavior.
  */
-const countRegex = /(v8 ignore\s+next)\s+\d+/;
+const countRegex = /(?<keyword>v8 ignore\s+next)\s+\d+/;
 
 export default defineRule({
   meta: {
@@ -34,7 +34,7 @@ export default defineRule({
           // comment.value excludes the leading `/*` or `//` (2 characters)
           const start = comment.start + 2 + match.index;
           const end = start + match[0].length;
-          const keyword = match[1];
+          const keyword = match.groups!.keyword;
           context.report({
             loc: comment.loc,
             messageId: 'noCount',

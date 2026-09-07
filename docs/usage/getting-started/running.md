@@ -10,14 +10,14 @@ If you're using the Mend Renovate App, or if someone else is hosting Renovate fo
 
 ## Self-Hosting Renovate
 
-When self-hosting Renovate you're the "administrator" of the bot, this means you:
+When self-hosting Renovate you're the "administrator" of that deployment, this means you:
 
 - provide the infrastructure that Renovate runs on,
 - provision Renovate's global config,
-- make sure Renovate bot runs regularly,
-- make sure Renovate bot itself is updated
+- make sure Renovate runs regularly,
+- make sure Renovate itself is updated
 
-If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
+If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate.
 
 If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository](https://github.com/mend/renovate-ce-ee).
 
@@ -164,11 +164,11 @@ Any other (`*.js`, `*.ts`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is sup
 Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
 Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
 
-Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
+Some config is global-only, meaning that either it is only applicable to the administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
-Your bot's global config can include both global as well as non-global configuration options, while user/repo config can only include non-global options.
+Your global config can include both global as well as non-global configuration options, while user/repo config can only include non-global options.
 We recommend that you keep as much of the non-global config as possible in repository config files.
-This way the Renovate end users can see as much of the bot's configuration as possible.
+This way the Renovate end users can see as much of the configuration as possible.
 
 If you are configuring Renovate using environment variables, there are two possibilities:
 
@@ -226,10 +226,10 @@ The `.mts` extension is always treated as an ES module, and `.cts` is always tre
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
 We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
-We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@some.domain.test>"`.
+We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate <renovate@some.domain.test>"`.
 
 !!! warning
-  We recommend you use a single, dedicated username for your Renovate bot.
+  We recommend you use a single, dedicated username for your Renovate.
   Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
 #### Docs

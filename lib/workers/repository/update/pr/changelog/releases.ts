@@ -8,7 +8,6 @@ import {
 } from '../../../../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../../../../modules/versioning/index.ts';
 import { get } from '../../../../../modules/versioning/index.ts';
-import { coerceArray } from '../../../../../util/array.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 
 function matchesMMP(
@@ -47,11 +46,18 @@ export async function getInRangeReleases(
     try {
       const pkgReleases = (await getPkgReleases(config))!.releases;
       const version = get(versioning);
+      const compatibilityVersion = version.valueToVersion
+        ? (config.currentValue ?? currentVersion)
+        : currentVersion;
 
       const previousReleases = pkgReleases
         .filter((release) =>
-          version.isCompatible(release.version, currentVersion),
+          version.isCompatible(release.version, compatibilityVersion),
         )
+        .map((release) => ({
+          ...release,
+          version: version.valueToVersion?.(release.version) ?? release.version,
+        }))
         .filter(
           (release) => !version.isGreaterThan(release.version, newVersion),
         )
@@ -91,11 +97,6 @@ export async function getInRangeReleases(
         }
       }
 
-      if (version.valueToVersion) {
-        for (const release of coerceArray(releases)) {
-          release.version = version.valueToVersion(release.version);
-        }
-      }
       return releases;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getInRangeReleases err');

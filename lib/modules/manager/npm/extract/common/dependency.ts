@@ -17,7 +17,7 @@ import {
 import type { PackageDependency } from '../../../types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
-  /(?:git@)github.com:([^/]+)\/([^/]+?)(?:\.git)?$/,
+  /(?:git@)github.com:(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
 );
 
 export function parseDepName(depType: string, key: string): string {
@@ -44,7 +44,7 @@ export function parseDepName(depType: string, key: string): string {
 
   const lastSegment = segments.at(-1);
   const [, depName] = coerceArray(
-    regEx(/^((?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? ''),
+    regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? ''),
   );
   return depName;
 }
@@ -85,6 +85,9 @@ export function extractDependency(
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
       dep.versioning = npmVersioningId;
+    } else if (depName === 'bun') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Bun';
     } else {
       dep.skipReason = 'unknown-engines';
     }
@@ -174,8 +177,8 @@ export function extractDependency(
     }
     [githubOwner, githubRepo] = githubRepoSplit;
   } else {
-    githubOwner = matchUrlSshFormat[1];
-    githubRepo = matchUrlSshFormat[2];
+    githubOwner = matchUrlSshFormat.groups!.owner;
+    githubRepo = matchUrlSshFormat.groups!.repo;
     githubOwnerRepo = `${githubOwner}/${githubRepo}`;
   }
   // combined with the length check below, this is equivalent to
@@ -235,6 +238,7 @@ export function getExtractedConstraints(
 ): Partial<Record<ConstraintName, string>> {
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   const constraints: ConstraintName[] = [
+    'bun',
     'node',
     'yarn',
     'npm',

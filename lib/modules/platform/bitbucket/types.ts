@@ -26,11 +26,8 @@ export interface PagedResult<T = any> {
 }
 
 export interface RepoBranchingModel {
-  development: {
+  development?: {
     name: string;
-    branch?: {
-      name: string;
-    };
   };
 }
 

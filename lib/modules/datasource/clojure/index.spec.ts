@@ -95,7 +95,19 @@ describe('modules/datasource/clojure/index', () => {
 
     const res = await get('org.example:package', baseUrlCustom);
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://custom.registry.renovatebot.com',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('collects releases from all registry urls', async () => {
@@ -154,7 +166,19 @@ describe('modules/datasource/clojure/index', () => {
       baseUrl,
     );
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://clojars.org/repo',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('ignores unsupported protocols', async () => {
@@ -167,7 +191,32 @@ describe('modules/datasource/clojure/index', () => {
       base,
     ))!;
 
-    expect(releases).toMatchSnapshot();
+    expect(releases).toEqual([
+      {
+        version: '0.0.1',
+      },
+      {
+        version: '1.0.0',
+      },
+      {
+        version: '1.0.1',
+      },
+      {
+        version: '1.0.2',
+      },
+      {
+        version: '1.0.3-SNAPSHOT',
+      },
+      {
+        version: '1.0.4-SNAPSHOT',
+      },
+      {
+        version: '1.0.5-SNAPSHOT',
+      },
+      {
+        version: '2.0.0',
+      },
+    ]);
   });
 
   it('skips registry with invalid metadata structure', async () => {
@@ -186,7 +235,19 @@ describe('modules/datasource/clojure/index', () => {
       baseUrl,
     );
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://clojars.org/repo',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('skips registry with invalid XML', async () => {
@@ -202,7 +263,19 @@ describe('modules/datasource/clojure/index', () => {
       baseUrl,
     );
 
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://clojars.org/repo',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
   });
 
   it('handles optional slash at the end of registry url', async () => {

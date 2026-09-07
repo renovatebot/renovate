@@ -15,6 +15,9 @@ export interface ConstraintDefinition {
  */
 export const toolDefinitions = [
   {
+    name: 'apm',
+  },
+  {
     name: 'bazelisk',
   },
   {
