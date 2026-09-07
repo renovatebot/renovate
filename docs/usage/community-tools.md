@@ -47,3 +47,20 @@ renovate-pretty-log -path /path/to/debug.log -html > report.html
 ```
 
 You can see [a live example of what this looks like from one of Renovate's own runs](https://www.jvt.me/casts/2026-08-renovate-pretty-log/renovate-debug-out.html).
+
+## Renovate Config Debugger
+
+The [Renovate Config Debugger](https://renovate.secustor.dev/) shows what Renovate does with a config before you commit it.
+It runs Renovate's own code in the browser, so the config never leaves the page.
+
+![Renovate Config Debugger simulating a minor update of @aws-sdk/client-s3 and showing which packageRules set groupName](assets/images/renovate-config-debugger.jpg)
+
+- Runs the full config pipeline, parsing, migration, validation and preset resolution, and shows the intermediate result of each stage
+- Expands `extends` into the full preset tree
+- Shows per-option provenance: which default, preset or config layer set a value
+- Simulates a hypothetical update and shows which `packageRules` match and why
+- Loads a repository and runs Renovate's managers over its package files to list the extracted dependencies
+- Is also available as a [CLI, MCP server and Docker image](https://github.com/secustor/renovate-config-debugger) for self-hosting
+
+The project is maintained by Renovate maintainer Sebastian Poxhofer ( @secustor ).
+The blog post [Renovate: It was a packageRule all along](https://secustor.dev/blog/renovate_config_debugger/) walks through debugging a config with it.
