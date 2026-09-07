@@ -7,58 +7,54 @@ import {
 } from '../../../util/cache/repository/index.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { GiteaPrCache } from './pr-cache.ts';
-import type { PR, Repo } from './types.ts';
+import type { PR, Repo } from './schema.ts';
 import { toRenovatePR } from './utils.ts';
 
 const http = new GiteaHttp();
 const ignorePrAuthor = false;
 
-const baseUrl = 'https://gitea.com/api/v1';
-setBaseUrl('https://gitea.com/');
+const baseUrl = 'https://gitea.renovatebot.com/api/v1';
+setBaseUrl('https://gitea.renovatebot.com');
 
 const pr1: PR = {
   number: 1,
-  title: 'Some PR',
-  body: 'some random pull request',
+  title: 'title',
+  body: 'other random pull request',
   state: 'open',
-  diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
-  created_at: '2015-03-22T20:36:16Z',
-  closed_at: '2015-03-22T21:36:16Z',
-  updated_at: '2015-03-22T21:36:16Z',
+  diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
+  created_at: '2011-08-18T22:30:38Z',
+  updated_at: '2011-08-18T22:30:38Z',
+  closed_at: undefined,
   mergeable: true,
-  base: { ref: 'some-base-branch' },
+  base: { ref: 'third-party-base-branch' },
   head: {
-    label: 'some-head-branch',
-    sha: fakeSha('some-head-sha'),
-    repo: partial<Repo>({ full_name: 'some/repo' }),
+    label: 'other-head-branch',
+    sha: fakeSha('other-head-sha'),
+    repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
+  user: { id: 1, login: 'some-author' },
 };
 
 const pr2: PR = {
   number: 2,
-  title: 'Other PR',
+  title: 'title',
   body: 'other random pull request',
-  state: 'closed',
-  diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/2.diff',
+  state: 'open',
+  diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
   created_at: '2011-08-18T22:30:38Z',
-  closed_at: '2016-01-09T10:03:21Z',
-  updated_at: '2016-01-09T10:03:21Z',
+  updated_at: '2011-08-18T22:30:38Z',
+  closed_at: undefined,
   mergeable: true,
-  base: { ref: 'other-base-branch' },
+  base: { ref: 'third-party-base-branch' },
   head: {
     label: 'other-head-branch',
     sha: fakeSha('other-head-sha'),
-    repo: partial<Repo>({ full_name: 'some/repo' }),
+    repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
-  labels: [
-    {
-      id: 1,
-      name: 'bug',
-    },
-  ],
+  user: { id: 1, login: 'some-author' },
 };
 
-describe('modules/platform/gitea/pr-cache', () => {
+describe('modules/platform/gitea-common/pr-cache', () => {
   let cache = getCache();
 
   beforeEach(() => {
@@ -83,6 +79,7 @@ describe('modules/platform/gitea/pr-cache', () => {
 
     const res = await GiteaPrCache.getPrs(
       http,
+      'gitea',
       'SOME/repo',
       ignorePrAuthor,
       'some-author',
@@ -91,11 +88,11 @@ describe('modules/platform/gitea/pr-cache', () => {
     expect(res).toMatchObject([
       {
         number: 2,
-        title: 'Other PR',
+        title: 'title',
       },
       {
         number: 1,
-        title: 'Some PR',
+        title: 'title',
       },
     ]);
     expect(cache).toEqual({
@@ -107,7 +104,7 @@ describe('modules/platform/gitea/pr-cache', () => {
               '1': toRenovatePR(pr1, 'some-author'),
               '2': toRenovatePR(pr2, 'some-author'),
             },
-            updated_at: '2016-01-09T10:03:21Z',
+            updated_at: '2011-08-18T22:30:38Z',
           },
         },
       },
@@ -136,6 +133,7 @@ describe('modules/platform/gitea/pr-cache', () => {
 
     const res = await GiteaPrCache.getPrs(
       http,
+      'gitea',
       'SOME/repo',
       ignorePrAuthor,
       'some-author',
@@ -144,7 +142,7 @@ describe('modules/platform/gitea/pr-cache', () => {
     expect(res).toMatchObject([
       {
         number: 1,
-        title: 'Some PR',
+        title: 'title',
       },
     ]);
     expect(cache).toEqual({
@@ -155,7 +153,7 @@ describe('modules/platform/gitea/pr-cache', () => {
             items: {
               '1': toRenovatePR(pr1, 'some-author'),
             },
-            updated_at: '2015-03-22T21:36:16Z',
+            updated_at: '2011-08-18T22:30:38Z',
           },
         },
       },
@@ -184,6 +182,7 @@ describe('modules/platform/gitea/pr-cache', () => {
 
     const res = await GiteaPrCache.getPrs(
       http,
+      'gitea',
       'SOME/repo',
       ignorePrAuthor,
       'some-author',
@@ -192,11 +191,11 @@ describe('modules/platform/gitea/pr-cache', () => {
     expect(res).toMatchObject([
       {
         number: 2,
-        title: 'Other PR',
+        title: 'title',
       },
       {
         number: 1,
-        title: 'Some PR',
+        title: 'title',
       },
     ]);
     expect(cache).toEqual({
@@ -208,7 +207,7 @@ describe('modules/platform/gitea/pr-cache', () => {
               '1': toRenovatePR(pr1, 'some-author'),
               '2': toRenovatePR(pr2, 'some-author'),
             },
-            updated_at: '2016-01-09T10:03:21Z',
+            updated_at: '2011-08-18T22:30:38Z',
           },
         },
       },

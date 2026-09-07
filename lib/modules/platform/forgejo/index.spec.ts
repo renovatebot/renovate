@@ -16,9 +16,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { EnsureIssueConfig, RepoParams } from '../index.ts';
-import * as helper from './forgejo-helper.ts';
-import * as forgejo from './index.ts';
+import * as helper from '../gitea-common/helper.ts';
 import type {
   Comment,
   CommitStatus,
@@ -28,7 +26,9 @@ import type {
   PR,
   Repo,
   User,
-} from './schema.ts';
+} from '../gitea-common/schema.ts';
+import type { EnsureIssueConfig, RepoParams } from '../index.ts';
+import * as forgejo from './index.ts';
 
 /**
  * latest tested forgejo version.
@@ -1931,8 +1931,8 @@ describe('modules/platform/forgejo/index', () => {
       });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        expect.objectContaining({ prNumber: 42 }),
-        'Forgejo-native automerge: fail',
+        expect.objectContaining({ prNumber: 42, platform: 'forgejo' }),
+        'Platform-native automerge: fail',
       );
     });
 

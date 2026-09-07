@@ -1,6 +1,6 @@
 import { ContentsListResponse, Issue, Repo, User } from './schema.ts';
 
-describe('modules/platform/forgejo/schema', () => {
+describe('modules/platform/gitea-common/schema', () => {
   it('ContentsListResponse', () => {
     expect(ContentsListResponse.parse([])).toBeEmptyArray();
   });

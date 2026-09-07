@@ -1,9 +1,6 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types.ts';
-import {
-  CONFIG_GIT_URL_UNAVAILABLE,
-  REPOSITORY_BLOCKED,
-} from '../../../constants/error-messages.ts';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -11,7 +8,8 @@ import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
-import type { PR, PRMergeMethod, Repo } from './types.ts';
+import type { PR, PRMergeMethod, Repo } from './schema.ts';
+import type { GiteaPlatformKey } from './types.ts';
 
 export function smartLinks(body: string): string {
   return body
@@ -27,6 +25,7 @@ export function getRepoUrl(
   repo: Repo,
   gitUrl: GitUrlOption | undefined,
   endpoint: string,
+  hostType: string,
 ): string {
   if (gitUrl === 'ssh') {
     if (!repo.ssh_url) {
@@ -38,7 +37,7 @@ export function getRepoUrl(
 
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
-    hostType: 'gitea',
+    hostType,
     url: endpoint,
   });
 
@@ -89,14 +88,16 @@ export function getMergeMethod(
 
 export const API_PATH = '/api/v1';
 
+/** Human readable name of each platform, used in log messages. */
+export const platformDisplayName = {
+  gitea: 'Gitea',
+  forgejo: 'Forgejo',
+} as const satisfies Record<GiteaPlatformKey, string>;
+
 export const DRAFT_PREFIX = 'WIP: ';
 const reconfigurePrRegex = regEx(/reconfigure$/);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
-  if (!data) {
-    return null;
-  }
-
   if (
     !data.base?.ref ||
     !data.head?.label ||
@@ -125,7 +126,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title = title.substring(DRAFT_PREFIX.length);
     isDraft = true;
   }
-  const labels = coerceArray(data?.labels).map((l) => l.name);
+  const labels = coerceArray(data.labels).map((l) => l.name);
 
   return {
     labels,
@@ -189,6 +190,4 @@ export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
     case 'fast-forward-only':
       return repo.allow_fast_forward_only_merge;
   }
-  logger.debug('Repo has unknown merge style - aborting renovation');
-  throw new Error(REPOSITORY_BLOCKED);
 }
