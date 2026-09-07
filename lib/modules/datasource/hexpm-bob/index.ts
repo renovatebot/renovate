@@ -21,8 +21,6 @@ export class HexpmBobDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  override readonly caching = true;
-
   override readonly defaultVersioning = semverId;
 
   override readonly releaseTimestampSupport = true;
