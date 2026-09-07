@@ -1,3 +1,4 @@
+import { HOST_BLOCKED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -25,6 +26,11 @@ export async function getPreset({
     response = await http.getText(url, { cacheProvider: memCacheProvider });
   } catch (err) {
     if (err instanceof ExternalHostError) {
+      throw err;
+    }
+
+    // keep the block distinguishable from a plain 404, so it surfaces as its own config validation error
+    if (err.message === HOST_BLOCKED) {
       throw err;
     }
 
