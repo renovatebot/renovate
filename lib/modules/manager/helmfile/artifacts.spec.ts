@@ -86,25 +86,25 @@ describe('modules/manager/helmfile/artifacts', () => {
 
   it('returns null if no helmfile.lock found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -116,14 +116,14 @@ describe('modules/manager/helmfile/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps: [{ depName: 'dep1' }],
         newPackageFileContent: helmfileYaml,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'helmfile deps -f helmfile.yaml' },
     ]);
@@ -139,14 +139,14 @@ describe('modules/manager/helmfile/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYaml,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -197,14 +197,14 @@ describe('modules/manager/helmfile/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYamlWithoutRepositories,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -263,14 +263,14 @@ describe('modules/manager/helmfile/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYamlOCIPrivateRepo,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -320,6 +320,7 @@ describe('modules/manager/helmfile/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+            '-e CI ' +
             '-e HELM_EXPERIMENTAL_OCI ' +
             '-e HELM_REGISTRY_CONFIG ' +
             '-e HELM_REPOSITORY_CONFIG ' +
@@ -370,14 +371,14 @@ describe('modules/manager/helmfile/artifacts', () => {
       const updatedDeps = [
         { depName: 'dep1', managerData: { needKustomize: true } },
       ];
-      expect(
-        await helmfile.updateArtifacts({
+      await expect(
+        helmfile.updateArtifacts({
           packageFileName: 'helmfile.yaml',
           updatedDeps,
           newPackageFileContent: helmfileYaml,
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -403,14 +404,14 @@ describe('modules/manager/helmfile/artifacts', () => {
       throw new Error(errorMessage);
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: helmfileYaml,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'helmfile.lock',
@@ -489,14 +490,14 @@ describe('modules/manager/helmfile/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'metallb' }];
-    expect(
-      await helmfile.updateArtifacts({
+    await expect(
+      helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
         newPackageFileContent: multidocYaml,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',

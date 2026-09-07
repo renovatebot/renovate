@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -19,6 +19,7 @@ import type {
 } from '../../../util/http/types.ts';
 import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
 import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import {
@@ -55,7 +56,7 @@ export async function getAuthHeaders(
   registryHost: string,
   dockerRepository: string,
   apiCheckUrl = `${registryHost}/v2/`,
-): Promise<OutgoingHttpHeaders | null> {
+): Promise<OutgoingHttpHeaders | undefined> {
   try {
     const options = {
       throwHttpErrors: false,
@@ -96,7 +97,7 @@ export async function getAuthHeaders(
         { apiCheckUrl, res: apiCheckResponse },
         'Invalid registry response',
       );
-      return null;
+      return undefined;
     }
 
     const rule = hostRules.find({
@@ -118,9 +119,9 @@ export async function getAuthHeaders(
       }
     } else if (
       googleRegex.test(registryHost) &&
-      typeof rule.username === 'undefined' &&
-      typeof rule.password === 'undefined' &&
-      typeof rule.token === 'undefined'
+      isUndefined(rule.username) &&
+      isUndefined(rule.password) &&
+      isUndefined(rule.token)
     ) {
       logger.once.debug(`hostRules: google auth for ${registryHost}`);
       logger.trace(
@@ -180,7 +181,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository, authenticateHeader },
         `Invalid realm, testing direct auth`,
       );
-      return opts.headers ?? null;
+      return opts.headers ?? undefined;
     }
 
     // already guarded by above clause
@@ -217,7 +218,7 @@ export async function getAuthHeaders(
     /* v8 ignore next -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
-      return null;
+      return undefined;
     }
     // sanitize token
     addSecretForSanitizing(token);
@@ -228,7 +229,7 @@ export async function getAuthHeaders(
     /* v8 ignore if -- quay.io errors are swallowed pending #9604, not reproduced in specs */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
-      return null;
+      return undefined;
     }
     /* v8 ignore if -- registry auth rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 401) {
@@ -237,7 +238,7 @@ export async function getAuthHeaders(
         'Unauthorized docker lookup',
       );
       logger.debug({ err });
-      return null;
+      return undefined;
     }
     /* v8 ignore if -- registry permission rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 403) {
@@ -246,7 +247,7 @@ export async function getAuthHeaders(
         'Not allowed to access docker registry',
       );
       logger.debug({ err });
-      return null;
+      return undefined;
     }
     if (err.name === 'RequestError' && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
@@ -265,13 +266,13 @@ export async function getAuthHeaders(
     /* v8 ignore if -- hostRules-disabled host is swallowed silently, not mocked in specs */
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
-      return null;
+      return undefined;
     }
     logger.warn(
       { registryHost, dockerRepository, err },
       'Error obtaining docker token',
     );
-    return null;
+    return undefined;
   }
 }
 
@@ -314,9 +315,9 @@ export function getRegistryRepository(
     registryHost = `https://${registryHost}`;
   }
 
-  const { path, base } =
-    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)
-      ?.groups ?? {};
+  const { path, base } = coerceObject(
+    regEx(/^(?<base>https:\/\/[^/]+)\/(?<path>.+)$/).exec(registryHost)?.groups,
+  );
   if (base && path) {
     registryHost = base;
     dockerRepository = `${trimTrailingSlash(path)}/${dockerRepository}`;

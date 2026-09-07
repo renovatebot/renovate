@@ -54,7 +54,11 @@ function processHelmCharts(
     const image = trimTrailingSlash(removeOCIPrefix(source.repositoryURL));
 
     dep.datasource = DockerDatasource.id;
-    dep.packageName = getDep(image, false, registryAliases).packageName;
+    dep.packageName = getDep(
+      `${image}/${source.chartName}`,
+      false,
+      registryAliases,
+    ).packageName;
   } else {
     dep.packageName = removeRepositoryName(
       source.repositoryName,

@@ -21,6 +21,7 @@ import type {
 } from '../../../modules/manager/types.ts';
 import type { VersioningApi } from '../../../modules/versioning/index.ts';
 import { get as getVersioning } from '../../../modules/versioning/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { sanitizeMarkdown } from '../../../util/markdown.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -239,7 +240,7 @@ export class Vulnerabilities {
           osvVulnerability,
         );
 
-        for (const affected of osvVulnerability.affected ?? []) {
+        for (const affected of coerceArray(osvVulnerability.affected)) {
           const isVulnerable = this.isPackageVulnerable(
             ecosystem,
             osvPackageName,
@@ -298,7 +299,7 @@ export class Vulnerabilities {
     // the OpenSSF's Malicious Packages (https://github.com/ossf/malicious-packages) is a source of advisories through osv.dev, which takes various sources of advisories, and will re-publish them with more specific information about their malicious usage
     if (osvVulnerability.id.startsWith('MAL-')) {
       // is the current dependency vulnerable?
-      for (const affected of osvVulnerability.affected ?? []) {
+      for (const affected of coerceArray(osvVulnerability.affected)) {
         // is the current dependency vulnerable?
         const isVulnerable = this.isPackageVulnerable(
           ecosystem,
@@ -325,7 +326,7 @@ export class Vulnerabilities {
         }
 
         // or are any of the updates vulnerable?
-        for (const update of dep.updates ?? []) {
+        for (const update of coerceArray(dep.updates)) {
           const newVersion = update.newVersion ?? update.newValue!;
 
           const isUpdateVulnerable = this.isPackageVulnerable(
@@ -432,7 +433,7 @@ export class Vulnerabilities {
     affected: Osv.Affected,
     versioningApi: VersioningApi,
   ): boolean {
-    for (const range of affected.ranges ?? []) {
+    for (const range of coerceArray(affected.ranges)) {
       if (range.type === 'GIT') {
         continue;
       }
@@ -490,7 +491,7 @@ export class Vulnerabilities {
     const fixedVersions: string[] = [];
     const lastAffectedVersions: string[] = [];
 
-    for (const range of affected.ranges ?? []) {
+    for (const range of coerceArray(affected.ranges)) {
       if (range.type === 'GIT') {
         continue;
       }
@@ -641,7 +642,9 @@ export class Vulnerabilities {
     vulnerability: Osv.Vulnerability,
     affected: Osv.Affected,
   ): string[] {
-    let aliases = [vulnerability.id].concat(vulnerability.aliases ?? []).sort();
+    let aliases = [vulnerability.id]
+      .concat(coerceArray(vulnerability.aliases))
+      .sort();
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
         return `[${id}](https://nvd.nist.gov/vuln/detail/${id})`;

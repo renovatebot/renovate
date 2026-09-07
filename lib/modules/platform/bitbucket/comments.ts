@@ -4,7 +4,7 @@ import type {
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
 } from '../types.ts';
-import type { Account, Config, PagedResult } from './types.ts';
+import type { Account, CommentsConfig, PagedResult } from './types.ts';
 
 export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
 
@@ -15,8 +15,6 @@ interface Comment {
   id: number;
   user: Account;
 }
-
-export type CommentsConfig = Pick<Config, 'repository'>;
 
 interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
   config: CommentsConfig;

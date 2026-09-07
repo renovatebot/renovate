@@ -154,7 +154,7 @@ export async function updateArtifacts({
       // TODO: should include a version constraint
       MIX_ARCHIVES: await ensureCacheDir('mix_archives'),
     },
-    cwdFile: packageFileName,
+    cwdFile: lockFileName,
     docker: {},
     toolConstraints: [
       {

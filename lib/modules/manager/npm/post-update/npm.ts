@@ -32,17 +32,12 @@ import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { PackageLock } from '../schema.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
-import type { GenerateLockFileResult } from './types.ts';
+import type { GenerateLockFileResult, NpmrcCooldownResult } from './types.ts';
 import {
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
-
-export interface NpmrcCooldownResult {
-  date: DateTime<true>;
-  source: 'before' | 'min-release-age';
-}
 
 export function parseNpmrcCooldownDate(
   npmrcContent: string | null,
@@ -275,6 +270,18 @@ export async function generateLockFile(
 
     if (upgrades.some((upgrade) => upgrade.isRemediation)) {
       // We need to run twice to get the correct lock file
+      commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
+    }
+
+    // Lock file maintenance recreates the lock file from scratch, and a single
+    // `npm install` can generate a lock file which is out of sync with
+    // package.json, so we need to run the install a second time (#37531).
+    // Skipped if `npmInstallTwice` is configured, as that doubles all install
+    // commands already.
+    if (
+      upgrades.some((upgrade) => upgrade.isLockFileMaintenance) &&
+      !postUpdateOptions?.includes('npmInstallTwice')
+    ) {
       commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
     }
 

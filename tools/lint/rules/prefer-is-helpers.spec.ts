@@ -20,7 +20,10 @@ ruleTester.run('prefer-is-helpers', rule, {
 
     // --- typeof string ---
     `is.string(x);`,
+    // `isNumber()` also excludes `NaN`, so this isn't a safe rewrite
     `typeof x === 'number';`,
+    // `isObject()` excludes `null` and includes functions, so this isn't a
+    // safe rewrite
     `typeof x === 'object';`,
     `x === 'string';`,
     // `+` is not a comparison operator
@@ -74,24 +77,50 @@ ruleTester.run('prefer-is-helpers', rule, {
     // --- typeof string ---
     {
       code: `typeof x === 'string';`,
-      errors: [{ messageId: 'preferIsString' }],
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
     },
     {
       code: `typeof x !== 'string';`,
-      errors: [{ messageId: 'preferIsString' }],
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
     },
     {
       code: `typeof x == 'string';`,
-      errors: [{ messageId: 'preferIsString' }],
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
     },
     {
       code: `typeof x != 'string';`,
-      errors: [{ messageId: 'preferIsString' }],
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
     },
     // reversed operand order
     {
       code: `'string' === typeof x;`,
-      errors: [{ messageId: 'preferIsString' }],
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
+    },
+
+    // --- typeof boolean/function/symbol/bigint/undefined ---
+    {
+      code: `typeof x === 'boolean';`,
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
+    },
+    {
+      code: `typeof fn === 'function';`,
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
+    },
+    {
+      code: `typeof x === 'symbol';`,
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
+    },
+    {
+      code: `typeof x === 'bigint';`,
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
+    },
+    {
+      code: `typeof x === 'undefined';`,
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
+    },
+    {
+      code: `typeof x !== 'undefined';`,
+      errors: [{ messageId: 'preferIsHelperForTypeof' }],
     },
 
     // --- null/undefined comparisons ---

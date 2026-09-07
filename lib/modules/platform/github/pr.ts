@@ -1,6 +1,7 @@
 import { isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global.ts';
+import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../../constants/error-messages.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -227,6 +228,9 @@ export async function isPrInMergeQueue(
     }
     return res?.data?.repository?.pullRequest?.isInMergeQueue === true;
   } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.debug({ prNo, err }, 'Error fetching PR merge queue status');
     return false;
   }

@@ -53,7 +53,7 @@ describe('modules/manager/deno/compat', () => {
           },
         }),
       );
-      expect(await collectPackageJson('deno.lock')).toEqual([
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
         {
           deps: [
             {
@@ -140,7 +140,7 @@ describe('modules/manager/deno/compat', () => {
             },
           }),
         );
-      expect(await collectPackageJson('deno.lock')).toEqual([
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
         {
           deps: [
             {

@@ -32,12 +32,16 @@ describe('modules/datasource/bazel/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(defaultRegistryUrl).get(path).reply(404);
-      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
       httpMock.scope(defaultRegistryUrl).get(path).reply(200, {});
-      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -45,7 +49,9 @@ describe('modules/datasource/bazel/index', () => {
         .scope(defaultRegistryUrl)
         .get(path)
         .reply(200, '{ "versions": [], "yanked_versions": {} }');
-      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

@@ -10,6 +10,7 @@ import {
 } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import { clone } from '../../util/clone.ts';
 import { regEx } from '../../util/regex.ts';
@@ -242,7 +243,7 @@ export async function resolveConfigPresets(
 
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets ?? [];
+    ignorePresets = coerceArray(inputConfig.ignorePresets);
   }
   logger.trace(
     { config: inputConfig, existingPresets, mergeInternalPresets },
@@ -284,10 +285,6 @@ export async function resolveConfigPresets(
             existingPresets.concat([preset]),
             mergeInternalPresets,
           );
-        if (inputConfig?.ignoreDeps?.length === 0) {
-          delete presetConfig.description;
-        }
-
         config = mergeChildConfig(config, presetConfig);
         allVisitedPresets.merged.add(preset);
 
@@ -307,6 +304,12 @@ export async function resolveConfigPresets(
   config = mergeChildConfig(config, inputConfig);
   delete config.extends;
   delete config.ignorePresets;
+  // Any description of this config replaces the ones collated from its presets.
+  // Check the length, because array options default to an empty array.
+  if (config.overrideDescription?.length) {
+    config.description = config.overrideDescription;
+  }
+  delete config.overrideDescription;
   logger.trace({ config }, `Post-merge resolve config`);
   for (const [key, val] of Object.entries(config) as [
     keyof AllConfig,

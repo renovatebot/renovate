@@ -74,7 +74,7 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
-      uses: pnpm/setup@84cb39b217b10273981911c288cd62326dc7c6d2 # v2.0.2
+      uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
       with:
         install: false
         runtime: node@${{ inputs.node-version }}
@@ -128,4 +128,4 @@ runs:
         git config --global core.autocrlf false
         git config --global core.symlinks true
         git config --global user.email 'renovate@whitesourcesoftware.com'
-        git config --global user.name  'Renovate Bot'
+        git config --global user.name  'Renovate'

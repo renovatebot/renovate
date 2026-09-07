@@ -13,7 +13,7 @@ function cleanRegistryUrls(registryUrls: string[]): string[] {
     }
     // interpolate any environment variables
     return cleaned.replace(
-      regEx(/(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g),
+      regEx(/(?:\$[A-Za-z\d_]+)|(?:\${[A-Za-z\d_]+})/g),
       (match) => {
         const envvar = match
           .substring(1)

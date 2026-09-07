@@ -17,14 +17,8 @@ import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
-import type { PackageDependency } from '../types.ts';
 import type { MiseToolOptions } from './schema.ts';
-
-export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
-  Required<
-    | Pick<PackageDependency, 'packageName' | 'datasource'>
-    | Pick<PackageDependency, 'packageName' | 'skipReason'>
-  >;
+import type { BackendToolingConfig } from './types.ts';
 
 /**
  * Create a tooling config for aqua backend
