@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { Result } from '../../../util/result.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { OrbDatasource } from '../../datasource/orb/index.ts';
@@ -61,7 +62,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const registryAliases = config?.registryAliases ?? {};
+  const registryAliases = coerceObject(config?.registryAliases);
   const deps: PackageDependency[] = [];
   extractDefinition(deps, parsed, registryAliases);
 

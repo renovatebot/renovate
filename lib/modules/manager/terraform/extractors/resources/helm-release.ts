@@ -31,7 +31,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
       return [];
     }
 
-    /* v8 ignore next 7 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!isPlainObject(helmReleases)) {
       logger.debug(
         { helmReleases },

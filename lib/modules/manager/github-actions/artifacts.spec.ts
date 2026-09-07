@@ -281,6 +281,22 @@ describe('modules/manager/github-actions/artifacts', () => {
       expect(execSnapshots).toHaveLength(2);
     });
 
+    it('runs for a reusable workflow call', async () => {
+      const execSnapshots = mockExecAll();
+      mockLockfileRegenerated();
+
+      // the lockfile records `OWNER/REPO@REF` pins, and a reusable workflow call is one
+      const res = await updateActionsLockfile(
+        makeConfig({
+          upgrades: [{ ...checkoutUpgrade, depType: 'workflow' }],
+        }),
+        packageFiles,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(1);
+      expect(execSnapshots).toHaveLength(2);
+    });
+
     it('runs for a `docker://` uses dep', async () => {
       const execSnapshots = mockExecAll();
       mockLockfileRegenerated();

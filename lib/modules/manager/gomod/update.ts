@@ -25,13 +25,13 @@ export function updateDependency({
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!currentName || !upgrade.managerData) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
-    /* v8 ignore next 4 -- hard to test */
+    /* v8 ignore next -- hard to test */
     if (lines.length <= upgrade.managerData.lineNumber) {
       logger.warn('go.mod current line no longer exists after update');
       return null;
@@ -52,7 +52,7 @@ export function updateDependency({
 
     if (depType === 'golang' || depType === 'toolchain') {
       updateLineExp = regEx(
-        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)([^\s]+|[\w]+)/,
+        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)(?:[^\s]+|[\w]+)/,
       );
     }
     if (depType === 'replace') {

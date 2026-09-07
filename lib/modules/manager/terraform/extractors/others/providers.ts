@@ -20,7 +20,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
       return [];
     }
 
-    /* v8 ignore next 7 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!isPlainObject(providerTypes)) {
       logger.debug(
         { providerTypes },

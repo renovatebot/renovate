@@ -17,6 +17,7 @@ export const defaultConfig = {
   managerFilePatterns: [
     '/^.devcontainer/devcontainer.json$/',
     '/^.devcontainer.json$/',
+    '/^.devcontainer/[^/]+/devcontainer.json$/',
   ],
 };
 

@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as git from '../../../util/git/index.ts';
 import { getBaseUrl, setBaseUrl } from '../../../util/http/scm-manager.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -179,7 +180,7 @@ export async function getPrList(): Promise<Pr[]> {
     }
   }
 
-  return config.prList ?? [];
+  return coerceArray(config.prList);
 }
 
 export async function createPr({

@@ -37,16 +37,38 @@ function fixSnapshots(snapshots: ExecSnapshots): ExecSnapshots {
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
+const yarn1Install =
+  'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts';
+const berryEnv = {
+  CI: 'true',
+  YARN_ENABLE_GLOBAL_CACHE: '1',
+  YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+  YARN_ENABLE_SCRIPTS: '0',
+  YARN_HTTP_TIMEOUT: '100000',
+};
+const berryV3Env = {
+  CI: 'true',
+  YARN_ENABLE_GLOBAL_CACHE: '1',
+  YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+  YARN_HTTP_TIMEOUT: '100000',
+};
+function expectedExec(
+  cmds: string[],
+  env: Record<string, string>,
+  cwd = 'some-dir',
+): { cmd: string; options: { cwd: string; env: Record<string, string> } }[] {
+  return cmds.map((cmd) => ({ cmd, options: { cwd, env } }));
+}
 
 describe('modules/manager/npm/post-update/yarn', () => {
   const removeDockerContainer = vi.spyOn(docker, 'removeDockerContainer');
 
   beforeEach(() => {
-    delete process.env.BUILDPACK;
-    delete process.env.HTTP_PROXY;
-    delete process.env.HTTPS_PROXY;
-    delete process.env.RENOVATE_X_YARN_PROXY;
+    util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    vi.stubEnv('BUILDPACK', undefined);
+    vi.stubEnv('HTTP_PROXY', undefined);
+    vi.stubEnv('HTTPS_PROXY', undefined);
+    vi.stubEnv('RENOVATE_X_YARN_PROXY', undefined);
     Fixtures.reset();
     GlobalConfig.set({
       localDir: '.',
@@ -102,7 +124,43 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
+      const expectedByVersion: Record<
+        string,
+        { cmds: string[]; env: Record<string, string> }
+      > = {
+        '1.22.0': {
+          cmds: [
+            yarn1Install,
+            'npx yarn-deduplicate --strategy fewer',
+            yarn1Install,
+            'npx yarn-deduplicate --strategy highest',
+            yarn1Install,
+          ],
+          env: { CI: 'true', YARN_CACHE_FOLDER: '/tmp/renovate/cache/yarn' },
+        },
+        '2.1.0': {
+          cmds: ['yarn install'],
+          env: { ...berryEnv, YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry' },
+        },
+        '2.2.0': {
+          cmds: ['yarn install', 'yarn dedupe --strategy highest'],
+          env: { ...berryEnv, YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry' },
+        },
+        '3.0.0': {
+          cmds: [
+            'yarn install --mode=update-lockfile',
+            'yarn dedupe --strategy highest --mode=update-lockfile',
+          ],
+          env: {
+            ...berryV3Env,
+            YARN_GLOBAL_FOLDER: '/tmp/renovate/cache/berry',
+          },
+        },
+      };
+      const { cmds, env } = expectedByVersion[yarnVersion];
+      expect(fixSnapshots(execSnapshots)).toMatchObject(
+        expectedExec(cmds, env, '/some-dir'),
+      );
     },
   );
 
@@ -220,7 +278,15 @@ describe('modules/manager/npm/post-update/yarn', () => {
     };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    expect(fixSnapshots(execSnapshots)).toMatchObject(
+      expectedExec(
+        [
+          'yarn install --mode=skip-build',
+          'yarn dedupe --strategy highest --mode=skip-build',
+        ],
+        berryV3Env,
+      ),
+    );
   });
 
   it('allows and ignore scripts', async () => {
@@ -248,13 +314,17 @@ describe('modules/manager/npm/post-update/yarn', () => {
     };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    expect(fixSnapshots(execSnapshots)).toMatchObject(
+      expectedExec(['yarn install --mode=update-lockfile'], berryV3Env),
+    );
+    // scripts must not be explicitly disabled because allowScripts is set
+    expect(execSnapshots[0].options?.env?.YARN_ENABLE_SCRIPTS).toBeUndefined();
   });
 
   it('sets http proxy', async () => {
-    process.env.HTTP_PROXY = 'http://proxy';
-    process.env.HTTPS_PROXY = 'http://proxy';
-    process.env.RENOVATE_X_YARN_PROXY = 'true';
+    vi.stubEnv('HTTP_PROXY', 'http://proxy');
+    vi.stubEnv('HTTPS_PROXY', 'http://proxy');
+    vi.stubEnv('RENOVATE_X_YARN_PROXY', 'true');
     GlobalConfig.set({
       localDir: '.',
       allowScripts: true,
@@ -307,7 +377,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
     };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    expect(fixSnapshots(execSnapshots)).toMatchObject(
+      expectedExec(['yarn install'], {
+        CI: 'true',
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+        YARN_ENABLE_SCRIPTS: '0',
+        YARN_HTTP_TIMEOUT: '100000',
+      }),
+    );
+    // the global cache must not be used when zero install is detected
+    expect(
+      execSnapshots[0].options?.env?.YARN_ENABLE_GLOBAL_CACHE,
+    ).toBeUndefined();
   });
 
   it.each([
@@ -345,7 +426,33 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
+      const expectedByVersion: Record<
+        string,
+        { cmds: string[]; env: Record<string, string> }
+      > = {
+        '1.22.0': {
+          cmds: [
+            yarn1Install,
+            'yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
+          ],
+          env: { CI: 'true' },
+        },
+        '2.1.0': {
+          cmds: ['yarn install', 'yarn up -R some-dep'],
+          env: berryEnv,
+        },
+        '3.0.0': {
+          cmds: [
+            'yarn install --mode=update-lockfile',
+            'yarn up -R some-dep --mode=update-lockfile',
+          ],
+          env: berryV3Env,
+        },
+      };
+      const { cmds, env } = expectedByVersion[yarnVersion];
+      expect(fixSnapshots(execSnapshots)).toMatchObject(
+        expectedExec(cmds, env),
+      );
     },
   );
 
@@ -369,7 +476,15 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
+      expect(fixSnapshots(execSnapshots)).toMatchObject(
+        expectedExec(
+          [
+            yarn1Install,
+            'yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
+          ],
+          { CI: 'true' },
+        ),
+      );
     },
   );
 
@@ -405,7 +520,33 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
       // expected the lock file not to be deleted.
       expect(res.lockFile).toBe('');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
+      const expectedByVersion: Record<
+        string,
+        { cmds: string[]; env: Record<string, string> }
+      > = {
+        '1.22.0': {
+          cmds: [
+            yarn1Install,
+            'npx yarn-deduplicate --strategy fewer',
+            yarn1Install,
+            'npx yarn-deduplicate --strategy highest',
+            yarn1Install,
+          ],
+          env: { CI: 'true' },
+        },
+        '2.1.0': {
+          cmds: ['yarn install'],
+          env: berryEnv,
+        },
+        '2.2.0': {
+          cmds: ['yarn install', 'yarn dedupe --strategy highest'],
+          env: berryEnv,
+        },
+      };
+      const { cmds, env } = expectedByVersion[yarnVersion];
+      expect(fixSnapshots(execSnapshots)).toMatchObject(
+        expectedExec(cmds, env),
+      );
     },
   );
 
@@ -456,7 +597,40 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(vi.mocked(fs.outputFile).mock.calls[0][0]).toEndWith(
         'some-dir/sub_workspace/yarn.lock',
       );
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
+      const expectedByVersion: Record<
+        string,
+        { cmds: string[]; env: Record<string, string> }
+      > = {
+        '1.22.0': {
+          cmds: [
+            yarn1Install,
+            'npx yarn-deduplicate --strategy fewer',
+            yarn1Install,
+            'npx yarn-deduplicate --strategy highest',
+            yarn1Install,
+          ],
+          env: { CI: 'true' },
+        },
+        '2.1.0': {
+          cmds: ['yarn install'],
+          env: berryEnv,
+        },
+        '2.2.0': {
+          cmds: ['yarn install', 'yarn dedupe --strategy highest'],
+          env: berryEnv,
+        },
+        '3.0.0': {
+          cmds: [
+            'yarn install --mode=update-lockfile',
+            'yarn dedupe --strategy highest --mode=update-lockfile',
+          ],
+          env: berryV3Env,
+        },
+      };
+      const { cmds, env } = expectedByVersion[yarnVersion];
+      expect(fixSnapshots(execSnapshots)).toMatchObject(
+        expectedExec(cmds, env, 'some-dir/sub_workspace'),
+      );
     },
   );
 
@@ -489,7 +663,12 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
+      expect(fixSnapshots(execSnapshots)).toMatchObject(
+        expectedExec(
+          ['yarn set version 3.0.1', 'yarn install --mode=update-lockfile'],
+          berryV3Env,
+        ),
+      );
     },
   );
 
@@ -500,11 +679,13 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(fs.readFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
-    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    expect(fixSnapshots(execSnapshots)).toMatchObject(
+      expectedExec([yarn1Install], { CI: 'true' }),
+    );
   });
 
   it('supports corepack', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -550,7 +731,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports packageManager url corepack', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -599,7 +780,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports corepack on grouping', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -648,7 +829,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('supports customizing corepack version via config constraints', async () => {
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
 
     GlobalConfig.set({
       localDir: '.',
@@ -709,7 +890,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses slim yarn instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -748,7 +929,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses devEngine.packageManager(object) instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -787,7 +968,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('uses devEngine.packageManager(array) instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
@@ -936,7 +1117,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         cacheDir: '/tmp/cache',
         binarySource: 'global',
       });
-      expect(await yarnHelper.checkYarnrc('.')).toEqual({
+      await expect(yarnHelper.checkYarnrc('.')).resolves.toEqual({
         offlineMirror: true,
         yarnPath: '.yarn/cli.js',
       });
@@ -950,7 +1131,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir',
       );
-      expect(await yarnHelper.checkYarnrc('some-dir')).toEqual({
+      await expect(yarnHelper.checkYarnrc('some-dir')).resolves.toEqual({
         offlineMirror: false,
         yarnPath: 'some-dir/.yarn/cli.js',
       });
@@ -968,7 +1149,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         cacheDir: '/tmp/cache',
         binarySource: 'global',
       });
-      expect(await yarnHelper.checkYarnrc('.')).toEqual({
+      await expect(yarnHelper.checkYarnrc('.')).resolves.toEqual({
         offlineMirror: true,
         yarnPath: null,
       });
@@ -987,7 +1168,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         cacheDir: '/tmp/cache',
         binarySource: 'global',
       });
-      expect(await yarnHelper.checkYarnrc('renovate')).toEqual({
+      await expect(yarnHelper.checkYarnrc('renovate')).resolves.toEqual({
         offlineMirror: false,
         yarnPath: null,
       });

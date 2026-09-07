@@ -13,6 +13,7 @@ import { streamToString } from '../../../util/streams.ts';
 import { getNewBranchName } from '../util.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import { WrappedException } from './schema.ts';
+import type { AzureBranchObj } from './types.ts';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
@@ -32,11 +33,6 @@ export async function getRefs(
     getBranchNameWithoutRefsPrefix(branchName),
   );
   return refs;
-}
-
-export interface AzureBranchObj {
-  name: string;
-  oldObjectId: string;
 }
 
 export async function getAzureBranchObj(

@@ -32,7 +32,7 @@ This was a useful feature to leverage for a shared service.
 If you are running a self-hosted Renovate service, we recommend you:
 
 - Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they don't otherwise have access to
-- If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can't be invited to projects or groups you don't intend
+- If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that Renovate can't be invited to projects or groups you don't intend
 
 ## Security solutions and workarounds
 
@@ -44,7 +44,7 @@ If you only run a bot service on _public_ projects, the risk of unauthorized use
 But malicious users can still spoof or spam packages to any other public project they are not a member of, this rules out this approach for a public hosted service.
 
 A public-visibility-only bot service should be low risk for most self-hosted GitLab instances.
-But you _can't stop users_ from inviting the bot into _private_ projects by accident, which is risky.
+But you _can't stop users_ from inviting Renovate into _private_ projects by accident, which is risky.
 
 ### Project Access Tokens
 
@@ -80,7 +80,7 @@ The above solution/workaround will be actively researched in collaboration with 
 ### OAuth
 
 An alternative to a bot service running with a bot PAT would be to have it run using user OAuth tokens.
-In this scenario, an OAuth app would be needed to allow users to "install" the bot into projects with members they trust not to exploit them, and then commits and Merge Requests would appear to be authored by the _user_, not any bot.
+In this scenario, an OAuth app would be needed to allow users to "install" Renovate into projects with members they trust not to exploit them, and then commits and Merge Requests would appear to be authored by the _user_, not any bot.
 Bot services are better if they are provisioned with a "bot identity" so that users can quickly distinguish bot activity from real user activity.
 
 ## Recommended migration

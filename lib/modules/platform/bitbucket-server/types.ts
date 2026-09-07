@@ -78,3 +78,20 @@ export interface BbsPrCacheData {
   updatedDate: number | null;
   author: string | null;
 }
+
+export interface BitbucketCommitStatus {
+  failed: number;
+  inProgress: number;
+  successful: number;
+}
+
+export type BitbucketBranchState =
+  | 'SUCCESSFUL'
+  | 'FAILED'
+  | 'INPROGRESS'
+  | 'STOPPED';
+
+export interface BitbucketStatus {
+  key: string;
+  state: BitbucketBranchState;
+}

@@ -55,7 +55,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -305,7 +305,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           };
           return newBuild;
         } catch (err) {
-          /* v8 ignore next 3 -- hard to test */
+          /* v8 ignore next -- hard to test */
           if (err instanceof ExternalHostError) {
             throw err;
           }
@@ -424,7 +424,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     try {
       rawHashData = (await this.http.getText(zipHashUrl)).body;
     } catch (err) {
-      /* v8 ignore next 3 -- hard to test */
+      /* v8 ignore next -- hard to test */
       if (err instanceof ExternalHostError) {
         throw err;
       }

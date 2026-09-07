@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
+import type { StaticTooling } from '../asdf/types.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { ProtoToolsFile } from './schema.ts';
 import { protoTooling } from './upgradeable-tooling.ts';

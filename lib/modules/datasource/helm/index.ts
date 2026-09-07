@@ -60,7 +60,7 @@ export class HelmDatasource extends Datasource {
     packageName,
     registryUrl: helmRepository,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!helmRepository) {
       return null;
     }
