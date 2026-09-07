@@ -3,6 +3,7 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../../constants/error-messages.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type { PostUpdateConfig } from '../../types.ts';
 import {
@@ -159,9 +160,9 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalFiles,
         ),
       ).toStrictEqual({
-        npmLockDirs: ['package-lock.json', 'randomFolder/package-lock.json'],
-        pnpmLockFileDirs: ['packages/pnpm/pnpm-lock.yaml'],
-        yarnLockDirs: ['yarn.lock'],
+        npmLock: ['package-lock.json', 'randomFolder/package-lock.json'],
+        pnpmLockFile: ['packages/pnpm/pnpm-lock.yaml'],
+        yarnLock: ['yarn.lock'],
       });
     });
 
@@ -182,9 +183,9 @@ describe('modules/manager/npm/post-update/index', () => {
           {},
         ),
       ).toStrictEqual({
-        npmLockDirs: [],
-        pnpmLockFileDirs: [],
-        yarnLockDirs: ['yarn.lock'],
+        npmLock: [],
+        pnpmLockFile: [],
+        yarnLock: ['yarn.lock'],
       });
     });
   });
@@ -610,7 +611,7 @@ describe('modules/manager/npm/post-update/index', () => {
         },
       ]);
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { npmLock: 'package-lock.json' },
+        { lockFile: 'package-lock.json' },
         'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.',
       );
     });
@@ -861,6 +862,36 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactNotices: [],
         updatedArtifacts: [],
       });
+    });
+
+    it('throws for npm if the updated dependency is missing', async () => {
+      spyNpm.mockResolvedValueOnce({
+        error: true,
+        stderr: 'No matching version found for postcss@1.2.3',
+      });
+      await expect(
+        getAdditionalFiles({ ...updateConfig }, additionalFiles),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for yarn if the updated dependency is missing', async () => {
+      spyYarn.mockResolvedValueOnce({
+        error: true,
+        stderr: 'error Couldn\'t find any versions for \\"postcss\\"',
+      });
+      await expect(
+        getAdditionalFiles({ ...updateConfig }, additionalFiles),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for pnpm if the updated dependency is missing', async () => {
+      spyPnpm.mockResolvedValueOnce({
+        error: true,
+        stdout: 'No compatible version found: postcss',
+      });
+      await expect(
+        getAdditionalFiles({ ...updateConfig }, additionalFiles),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     describe('should fuzzy merge yarn npmRegistries', () => {
