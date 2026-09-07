@@ -3,6 +3,8 @@ import {
   isNonEmptyObject,
   isPlainObject,
 } from '@sindresorhus/is';
+import type { GitHostFamilyId } from '../../../constants/index.ts';
+import { GIT_HOST_FAMILIES } from '../../../constants/index.ts';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -10,9 +12,6 @@ import { detectPlatform } from '../../../util/common.ts';
 import { find } from '../../../util/host-rules.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { parseLine } from '../gomod/line-parser.ts';
 import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency.ts';
 import { pep508ToPackageDependency } from '../pep621/utils.ts';
@@ -22,6 +21,13 @@ import {
   matchesPrecommitDependencyHeuristic,
 } from './parsing.ts';
 import type { PreCommitConfig } from './types.ts';
+
+/** The git host families pre-commit can resolve `rev:` tags on. */
+const supportedFamilies = [
+  'forgejo',
+  'github',
+  'gitlab',
+] as const satisfies GitHostFamilyId[];
 
 /**
  * Determines the datasource(id) to be used for this dependency
@@ -45,17 +51,17 @@ function determineDatasource(
       'Found forgejo dependency with custom registryUrl',
     );
     return {
-      datasource: ForgejoTagsDatasource.id,
+      datasource: GIT_HOST_FAMILIES.forgejo.tagsDatasource,
       registryUrls: [`https://${hostname}`],
     };
   }
   if (hostname === 'github.com' || platform === 'github') {
     logger.debug({ repository, hostname }, 'Found github dependency');
-    return { datasource: GithubTagsDatasource.id };
+    return { datasource: GIT_HOST_FAMILIES.github.tagsDatasource };
   }
   if (hostname === 'gitlab.com') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
-    return { datasource: GitlabTagsDatasource.id };
+    return { datasource: GIT_HOST_FAMILIES.gitlab.tagsDatasource };
   }
   if (platform === 'gitlab') {
     logger.debug(
@@ -63,7 +69,7 @@ function determineDatasource(
       'Found gitlab dependency with custom registryUrl',
     );
     return {
-      datasource: GitlabTagsDatasource.id,
+      datasource: GIT_HOST_FAMILIES.gitlab.tagsDatasource,
       registryUrls: [`https://${hostname}`],
     };
   }
@@ -77,17 +83,16 @@ function determineDatasource(
     );
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
-  for (const [hostType, sourceId] of [
-    ['forgejo', ForgejoTagsDatasource.id],
-    ['github', GithubTagsDatasource.id],
-    ['gitlab', GitlabTagsDatasource.id],
-  ]) {
+  for (const hostType of supportedFamilies) {
     if (isNonEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
         { repository, hostUrl, hostType },
         `Provided hostname matches a ${hostType} hostrule.`,
       );
-      return { datasource: sourceId, registryUrls: [hostname] };
+      return {
+        datasource: GIT_HOST_FAMILIES[hostType].tagsDatasource,
+        registryUrls: [hostname],
+      };
     }
   }
   logger.debug(

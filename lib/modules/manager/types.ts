@@ -5,7 +5,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../../config/types.ts';
-import type { Category } from '../../constants/index.ts';
+import type { Category, GitHostFamilyId } from '../../constants/index.ts';
 import type {
   MaybePromise,
   ModuleApi,
@@ -428,4 +428,10 @@ export interface PostUpdateConfig<T = Record<string, any>>
 
   minimumReleaseAge?: Nullish<string>;
   isLockFileMaintenance?: boolean;
+}
+
+export interface GitHostTagsSource {
+  family: GitHostFamilyId;
+  /** The family's tags datasource, from `GIT_HOST_FAMILIES`. */
+  datasource: string;
 }

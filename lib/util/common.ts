@@ -5,15 +5,8 @@ import type { JsonValue } from 'type-fest';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig, NOT_PRESENT } from '../config/inherit.ts';
 import type { GlobalInheritableConfig } from '../config/types.ts';
-import {
-  AZURE_API_USING_HOST_TYPES,
-  BITBUCKET_API_USING_HOST_TYPES,
-  BITBUCKET_SERVER_API_USING_HOST_TYPES,
-  FORGEJO_API_USING_HOST_TYPES,
-  GITEA_API_USING_HOST_TYPES,
-  GITHUB_API_USING_HOST_TYPES,
-  GITLAB_API_USING_HOST_TYPES,
-} from '../constants/index.ts';
+import type { GitHostFamilyId } from '../constants/index.ts';
+import { GIT_HOST_FAMILIES } from '../constants/index.ts';
 import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
 import * as hostRules from './host-rules.ts';
@@ -26,17 +19,7 @@ import { parseUrl } from './url.ts';
  * @param url the url to detect `platform` from
  * @returns matched `platform` if found, otherwise `null`
  */
-export function detectPlatform(
-  url: string,
-):
-  | 'azure'
-  | 'bitbucket'
-  | 'bitbucket-server'
-  | 'forgejo'
-  | 'gitea'
-  | 'github'
-  | 'gitlab'
-  | null {
+export function detectPlatform(url: string): GitHostFamilyId | null {
   const { hostname } = coerceObject(parseUrl(url));
   if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
     return 'azure';
@@ -72,27 +55,12 @@ export function detectPlatform(
     return null;
   }
 
-  if (AZURE_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'azure';
-  }
-
-  if (BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'bitbucket-server';
-  }
-  if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'bitbucket';
-  }
-  if (FORGEJO_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'forgejo';
-  }
-  if (GITEA_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'gitea';
-  }
-  if (GITHUB_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'github';
-  }
-  if (GITLAB_API_USING_HOST_TYPES.includes(hostType)) {
-    return 'gitlab';
+  for (const [family, { apiUsingHostTypes }] of Object.entries(
+    GIT_HOST_FAMILIES,
+  )) {
+    if (apiUsingHostTypes.includes(hostType)) {
+      return family as GitHostFamilyId;
+    }
   }
 
   return null;

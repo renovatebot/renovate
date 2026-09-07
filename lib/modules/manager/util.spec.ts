@@ -1,10 +1,20 @@
+import type { GitHostFamilyId } from '../../constants/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
+import { BitbucketTagsDatasource } from '../datasource/bitbucket-tags/index.ts';
+import { ForgejoTagsDatasource } from '../datasource/forgejo-tags/index.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
+import { GiteaTagsDatasource } from '../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
+import type { GitHostTagsSource } from './types.ts';
 import { type PackageDependency } from './types.ts';
-import { applyGitSource, artifactErrorMessageFromExecError } from './util.ts';
+import {
+  applyGitSource,
+  artifactErrorMessageFromExecError,
+  gitHostTagsSource,
+  isPublicGitHost,
+} from './util.ts';
 
 describe('modules/manager/util', () => {
   beforeEach(() => {
@@ -222,5 +232,60 @@ describe('modules/manager/util', () => {
     );
 
     expect(message).toBe('fallback message');
+  });
+
+  describe('gitHostTagsSource', () => {
+    // One row per family a manager may allow-list, so the shared lookup keeps
+    // returning what the managers used to derive for themselves.
+    it.each`
+      url                                     | families                            | expected
+      ${'https://github.com/foo/bar'}         | ${['github', 'gitlab']}             | ${{ family: 'github', datasource: GithubTagsDatasource.id }}
+      ${'https://gitlab.com/foo/bar'}         | ${['github', 'gitlab']}             | ${{ family: 'gitlab', datasource: GitlabTagsDatasource.id }}
+      ${'https://gitlab.example.com/foo/bar'} | ${['github', 'gitlab']}             | ${{ family: 'gitlab', datasource: GitlabTagsDatasource.id }}
+      ${'https://bitbucket.org/foo/bar'}      | ${['github', 'gitlab']}             | ${null}
+      ${'https://bitbucket.org/foo/bar'}      | ${['gitlab', 'bitbucket', 'gitea']} | ${{ family: 'bitbucket', datasource: BitbucketTagsDatasource.id }}
+      ${'https://gitea.com/foo/bar'}          | ${['gitlab', 'bitbucket', 'gitea']} | ${{ family: 'gitea', datasource: GiteaTagsDatasource.id }}
+      ${'https://codeberg.org/foo/bar'}       | ${['forgejo', 'gitea', 'github']}   | ${{ family: 'forgejo', datasource: ForgejoTagsDatasource.id }}
+      ${'https://example.com/foo/bar'}        | ${['forgejo', 'gitea', 'github']}   | ${null}
+      ${'not a url'}                          | ${['github', 'gitlab']}             | ${null}
+    `(
+      'resolves $url within $families',
+      ({
+        url,
+        families,
+        expected,
+      }: {
+        url: string;
+        families: GitHostFamilyId[];
+        expected: GitHostTagsSource | null;
+      }) => {
+        expect(gitHostTagsSource(url, families)).toEqual(expected);
+      },
+    );
+  });
+
+  describe('isPublicGitHost', () => {
+    it.each`
+      family                | host                    | expected
+      ${'github'}           | ${'github.com'}         | ${true}
+      ${'github'}           | ${'github.example.com'} | ${false}
+      ${'gitlab'}           | ${'gitlab.com'}         | ${true}
+      ${'gitlab'}           | ${'gitlab.example.com'} | ${false}
+      ${'bitbucket'}        | ${'bitbucket.com'}      | ${true}
+      ${'bitbucket-server'} | ${'stash.example.com'}  | ${false}
+    `(
+      'reports $host as public=$expected for $family',
+      ({
+        family,
+        host,
+        expected,
+      }: {
+        family: GitHostFamilyId;
+        host: string;
+        expected: boolean;
+      }) => {
+        expect(isPublicGitHost(family, host)).toBe(expected);
+      },
+    );
   });
 });

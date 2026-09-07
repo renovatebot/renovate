@@ -2,12 +2,9 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
-import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
@@ -23,6 +20,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { gitHostTagsSource } from '../util.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { UsesStep } from './schema.ts';
@@ -202,25 +200,25 @@ function extractWithRegex(
 }
 
 function detectDatasource(registryUrl: string): PackageDependency {
-  const platform = detectPlatform(registryUrl);
+  const tagsSource = gitHostTagsSource(registryUrl, [
+    'forgejo',
+    'gitea',
+    'github',
+  ]);
 
-  switch (platform) {
-    case 'forgejo':
-      return {
-        registryUrls: [registryUrl],
-        datasource: ForgejoTagsDatasource.id,
-      };
-    case 'gitea':
-      return {
-        registryUrls: [registryUrl],
-        datasource: GiteaTagsDatasource.id,
-      };
-    case 'github':
-      return { registryUrls: [registryUrl] };
+  if (!tagsSource) {
+    return {
+      skipReason: 'unsupported-url',
+    };
   }
 
+  // GitHub is left without a datasource on purpose: `extractRepositoryAction`
+  // then picks `github-digest` or `github-tags` from the ref it parsed.
   return {
-    skipReason: 'unsupported-url',
+    registryUrls: [registryUrl],
+    ...(tagsSource.family !== 'github' && {
+      datasource: tagsSource.datasource,
+    }),
   };
 }
 

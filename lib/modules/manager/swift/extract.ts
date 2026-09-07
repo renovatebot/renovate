@@ -1,11 +1,9 @@
-import { detectPlatform } from '../../../util/common.ts';
 import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { gitHostTagsSource, isPublicGitHost } from '../util.ts';
 import type { MatchResult } from './types.ts';
 
 const regExps = {
@@ -153,19 +151,15 @@ function parseDependencyUrl(
     return null;
   }
   const { host, pathname, protocol } = parsedUrl;
-  const platform = detectPlatform(normalizedUrl);
-  if (platform === 'github' || platform === 'gitlab') {
+  const tagsSource = gitHostTagsSource(normalizedUrl, ['github', 'gitlab']);
+  if (tagsSource) {
     const depName = pathname
       .replace(regEx(/^\//), '')
       .replace(regEx(/\.git$/), '')
       .replace(regEx(/\/$/), '');
-    const datasource =
-      platform === 'github' ? GithubTagsDatasource.id : GitlabTagsDatasource.id;
+    const { datasource } = tagsSource;
 
-    const isGitHubPublic = host === 'github.com';
-    const isGitLabPublic = host === 'gitlab.com';
-
-    if (!isGitHubPublic && !isGitLabPublic) {
+    if (!isPublicGitHost(tagsSource.family, host)) {
       const baseUrl = `${protocol}//${host}`;
       return { depName, datasource, registryUrls: [baseUrl] };
     }

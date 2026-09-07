@@ -9,7 +9,7 @@ const webUrlRegex = regEx('/projects/(?<project>[^/]+)/repos/(?<repo>[^/]+)');
 
 export class BitbucketServerChangeLogSource extends ChangeLogSource {
   constructor() {
-    super('bitbucket-server', 'bitbucket-server-tags');
+    super('bitbucket-server');
   }
 
   override getBaseUrl(config: BranchUpgradeConfig): string {
@@ -23,10 +23,6 @@ export class BitbucketServerChangeLogSource extends ChangeLogSource {
     }
 
     return '';
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return `${this.getBaseUrl(config)}rest/api/1.0/`;
   }
 
   getCompareURL(
@@ -54,6 +50,11 @@ export class BitbucketServerChangeLogSource extends ChangeLogSource {
     return '';
   }
 
+  /**
+   * Bitbucket Server does not lay the path out as `<repository>/…`: it expands
+   * the repository into `projects/<key>/repos/<slug>` and takes the ref from a
+   * query parameter.
+   */
   override getNotesSourceUrl(
     baseUrl: string,
     repository: string,
@@ -66,7 +67,7 @@ export class BitbucketServerChangeLogSource extends ChangeLogSource {
       projectKey,
       'repos',
       repositorySlug,
-      'browse',
+      this.family.webFilePath,
       changelogFile,
       '?at=HEAD',
     );

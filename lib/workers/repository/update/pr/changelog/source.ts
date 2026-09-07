@@ -5,6 +5,7 @@ import {
   isNullOrUndefined,
   isTruthy,
 } from '@sindresorhus/is';
+import { GIT_HOST_FAMILIES } from '../../../../../constants/index.ts';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
@@ -34,26 +35,13 @@ import type {
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
   private readonly platform: ChangeLogPlatform;
-  private readonly datasource:
-    | 'bitbucket-tags'
-    | 'bitbucket-server-tags'
-    | 'forgejo-tags'
-    | 'gitea-tags'
-    | 'github-tags'
-    | 'gitlab-tags';
+  protected readonly family: (typeof GIT_HOST_FAMILIES)[ChangeLogPlatform];
+  private readonly datasource: string;
 
-  constructor(
-    platform: ChangeLogPlatform,
-    datasource:
-      | 'bitbucket-tags'
-      | 'bitbucket-server-tags'
-      | 'forgejo-tags'
-      | 'gitea-tags'
-      | 'github-tags'
-      | 'gitlab-tags',
-  ) {
+  constructor(platform: ChangeLogPlatform) {
     this.platform = platform;
-    this.datasource = datasource;
+    this.family = GIT_HOST_FAMILIES[platform];
+    this.datasource = this.family.tagsDatasource;
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -64,7 +52,9 @@ export abstract class ChangeLogSource {
     nextHead: string,
   ): string;
 
-  abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return this.family.apiBaseUrl(this.getBaseUrl(config));
+  }
 
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
     const tags = (
@@ -337,14 +327,20 @@ export abstract class ChangeLogSource {
 
   /**
    * Build the URL to the changelog markdown file for the release notes.
-   * Platform sources can override this to match their web UI conventions.
+   * Platform sources can override this when their web UI does not lay the path
+   * out as `<repository>/<webFilePath>/<file>`.
    */
   getNotesSourceUrl(
     baseUrl: string,
     repository: string,
     changelogFile: string,
   ): string {
-    return joinUrlParts(baseUrl, repository, 'blob', 'HEAD', changelogFile);
+    return joinUrlParts(
+      baseUrl,
+      repository,
+      this.family.webFilePath,
+      changelogFile,
+    );
   }
 
   /**

@@ -1,11 +1,40 @@
+import type { GitHostFamilyId } from '../../constants/index.ts';
+import { GIT_HOST_FAMILIES } from '../../constants/index.ts';
 import { detectPlatform } from '../../util/common.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
-import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
-import type { PackageDependency } from './types.ts';
+import type { GitHostTagsSource, PackageDependency } from './types.ts';
+
+/**
+ * Resolve which host-family tags datasource covers a git URL.
+ *
+ * Managers pass the families they support; any other host returns `null` so the
+ * caller can fall back to its own default, usually the generic `git-tags`
+ * datasource.
+ */
+export function gitHostTagsSource(
+  url: string,
+  families: readonly GitHostFamilyId[],
+): GitHostTagsSource | null {
+  const family = detectPlatform(url);
+  if (!family || !families.includes(family)) {
+    return null;
+  }
+  return { family, datasource: GIT_HOST_FAMILIES[family].tagsDatasource };
+}
+
+/**
+ * Whether `host` is one of the vendor-run instances of `family`, which its
+ * datasource already uses by default so the dependency needs no `registryUrls`.
+ */
+export function isPublicGitHost(
+  family: GitHostFamilyId,
+  host: string,
+): boolean {
+  return GIT_HOST_FAMILIES[family].publicHosts.includes(host);
+}
 
 export function applyGitSource(
   dep: PackageDependency,
@@ -15,12 +44,9 @@ export function applyGitSource(
   branch: string | undefined,
 ): void {
   if (tag) {
-    const platform = detectPlatform(git);
-    if (platform === 'github' || platform === 'gitlab') {
-      dep.datasource =
-        platform === 'github'
-          ? GithubTagsDatasource.id
-          : GitlabTagsDatasource.id;
+    const tagsSource = gitHostTagsSource(git, ['github', 'gitlab']);
+    if (tagsSource) {
+      dep.datasource = tagsSource.datasource;
       const { host, full_name } = parseGitUrl(git);
 
       // Always use HTTPS for GitHub/GitLab API endpoints, even if the git URL protocol is SSH.

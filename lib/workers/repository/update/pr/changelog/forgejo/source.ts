@@ -1,13 +1,8 @@
-import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { ChangeLogSource } from '../source.ts';
 
 export class ForgejoChangeLogSource extends ChangeLogSource {
   constructor() {
-    super('forgejo', 'forgejo-tags');
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return `${this.getBaseUrl(config)}api/v1/`;
+    super('forgejo');
   }
 
   getCompareURL(

@@ -7,14 +7,7 @@ import { ChangeLogSource } from '../source.ts';
 import type { ChangeLogError } from '../types.ts';
 export class GitHubChangeLogSource extends ChangeLogSource {
   constructor() {
-    super('github', 'github-tags');
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    const baseUrl = this.getBaseUrl(config);
-    return baseUrl.startsWith('https://github.com/')
-      ? 'https://api.github.com/'
-      : `${baseUrl}api/v3/`;
+    super('github');
   }
 
   getCompareURL(

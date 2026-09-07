@@ -1,14 +1,11 @@
 import { logger } from '../../../logger/index.ts';
-import { detectPlatform } from '../../../util/common.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module/index.ts';
 import type { PackageDependency } from '../types.ts';
+import { gitHostTagsSource } from '../util.ts';
 import { extractTerragruntProvider } from './providers.ts';
 import type { ExtractionResult, TerraformManagerData } from './types.ts';
 
@@ -39,17 +36,12 @@ export function extractTerragruntModule(
 }
 
 function detectGitTagDatasource(registryUrl: string): string {
-  const platform = detectPlatform(registryUrl);
-  switch (platform) {
-    case 'gitlab':
-      return GitlabTagsDatasource.id;
-    case 'bitbucket':
-      return BitbucketTagsDatasource.id;
-    case 'gitea':
-      return GiteaTagsDatasource.id;
-    default:
-      return GitTagsDatasource.id;
-  }
+  const tagsSource = gitHostTagsSource(registryUrl, [
+    'gitlab',
+    'bitbucket',
+    'gitea',
+  ]);
+  return tagsSource?.datasource ?? GitTagsDatasource.id;
 }
 
 export function analyseTerragruntModule(

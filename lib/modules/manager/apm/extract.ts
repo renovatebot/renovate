@@ -1,14 +1,16 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  GitHostTagsSource,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
+import { gitHostTagsSource, isPublicGitHost } from '../util.ts';
 import { ApmManifest } from './schema.ts';
 
 interface DatasourceResult {
@@ -19,29 +21,23 @@ interface DatasourceResult {
 
 /**
  * Determine which Renovate datasource to use for an APM dependency, based on
- * the git host `platform` (already resolved via `detectPlatform`, which honors
+ * the git host family (already resolved via `gitHostTagsSource`, which honors
  * `hostRules`). github/gitlab (and their self-hosted variants) map to the
  * `github-tags` / `gitlab-tags` datasources; every other host (Bitbucket, Azure
  * DevOps, etc.) falls back to the generic `git-tags` datasource.
  */
 function determineDatasource(
   host: string,
-  platform: string | null,
+  tagsSource: GitHostTagsSource | null,
   repoPath: string,
 ): DatasourceResult {
-  if (platform === 'github') {
+  if (tagsSource) {
     return {
-      datasource: GithubTagsDatasource.id,
+      datasource: tagsSource.datasource,
       packageName: repoPath,
-      ...(host === 'github.com' ? {} : { registryUrls: [`https://${host}`] }),
-    };
-  }
-
-  if (platform === 'gitlab') {
-    return {
-      datasource: GitlabTagsDatasource.id,
-      packageName: repoPath,
-      ...(host === 'gitlab.com' ? {} : { registryUrls: [`https://${host}`] }),
+      ...(isPublicGitHost(tagsSource.family, host)
+        ? {}
+        : { registryUrls: [`https://${host}`] }),
     };
   }
 
@@ -81,13 +77,13 @@ const virtualFileRegex = regEx(/\.(?:prompt|instructions|chatmode|agent)\.md$/);
  * `null` when there is no `owner/repo` (fewer than two segments).
  */
 function resolveRepoPath(
-  platform: string | null,
+  tagsSource: GitHostTagsSource | null,
   segments: string[],
 ): string | null {
   if (segments.length < 2) {
     return null;
   }
-  if (platform === 'github') {
+  if (tagsSource?.family === 'github') {
     return segments.slice(0, 2).join('/');
   }
   let boundary = segments.length;
@@ -186,9 +182,9 @@ export function parseApmDependency(
   const segments = pathPart.split('/').filter(isTruthy);
   const hasHost = (segments[0] ?? '').includes('.');
   const host = hasHost ? segments[0] : 'github.com';
-  const platform = detectPlatform(`https://${host}`);
+  const tagsSource = gitHostTagsSource(`https://${host}`, ['github', 'gitlab']);
   const repoPath = resolveRepoPath(
-    platform,
+    tagsSource,
     hasHost ? segments.slice(1) : segments,
   );
 
@@ -203,7 +199,7 @@ export function parseApmDependency(
 
   const { datasource, packageName, registryUrls } = determineDatasource(
     host,
-    platform,
+    tagsSource,
     repoPath,
   );
   const dep: PackageDependency = {
