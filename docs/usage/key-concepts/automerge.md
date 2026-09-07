@@ -141,7 +141,6 @@ In that case the "Allow auto-merge" checkbox is not needed.
 PRs that are already waiting in the merge queue are left untouched on later runs.
 We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
 
-<!-- prettier-ignore -->
 !!! warning
   Branch automerge (`automergeType=branch`) cannot work if the base branch has a merge queue, because pushing directly to the base branch is not possible.
   Renovate detects this misconfiguration, logs a warning, and creates a PR instead.
