@@ -13,8 +13,6 @@ export class GitlabPackagesDatasource extends Datasource {
 
   protected override http: GitlabHttp;
 
-  override caching = true;
-
   override customRegistrySupport = true;
 
   override defaultRegistryUrls = ['https://gitlab.com'];

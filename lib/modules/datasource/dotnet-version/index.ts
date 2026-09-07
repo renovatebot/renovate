@@ -14,8 +14,6 @@ export class DotnetVersionDatasource extends Datasource {
     super(DotnetVersionDatasource.id);
   }
 
-  override readonly caching = true;
-
   override readonly customRegistrySupport = false;
 
   override readonly defaultRegistryUrls = [

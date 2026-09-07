@@ -19,7 +19,6 @@ export class BazelDatasource extends Datasource {
   override readonly defaultRegistryUrls = [BazelDatasource.bazelCentralRepoUrl];
   override readonly registryStrategy = 'hunt';
   override readonly customRegistrySupport = true;
-  override readonly caching = true;
   override readonly defaultVersioning = bazelVersioningId;
 
   static packageMetadataPath(packageName: string): string {

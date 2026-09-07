@@ -10,8 +10,6 @@ import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 export class AwsRdsDatasource extends Datasource {
   static readonly id = 'aws-rds';
 
-  override readonly caching = true;
-
   private readonly rds: Lazy<RDSClient>;
 
   constructor() {

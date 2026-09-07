@@ -10,7 +10,6 @@ export class EndoflifeDateDatasource extends Datasource {
   static readonly id = datasource;
 
   override readonly defaultRegistryUrls = [registryUrl];
-  override readonly caching = true;
   override readonly defaultVersioning = 'loose';
 
   override readonly releaseTimestampSupport = true;
