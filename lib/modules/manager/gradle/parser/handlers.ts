@@ -3,6 +3,7 @@ import { logger } from '../../../../logger/index.ts';
 import { getSiblingFileName } from '../../../../util/fs/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { parseUrl } from '../../../../util/url.ts';
+import { api as gradleVersioning } from '../../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { parseGradle as parseGradleCallback } from '../parser.ts';
 import type {
@@ -10,8 +11,13 @@ import type {
   ContentDescriptorSpec,
   Ctx,
   GradleManagerData,
+  RichVersionConstraint,
 } from '../types.ts';
-import { isDependencyString, parseDependencyString } from '../utils.ts';
+import {
+  isDependencyString,
+  isGroupArtifactString,
+  parseDependencyString,
+} from '../utils.ts';
 import {
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
@@ -217,6 +223,138 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
       fileReplacePosition: versionTokens[0].offset,
       packageFile: ctx.packageFile,
     };
+  }
+
+  ctx.deps.push(dep);
+
+  return ctx;
+}
+
+function resolveRichVersionDepName(ctx: Ctx): string | null {
+  if (ctx.tokenMap.templateStringTokens) {
+    return interpolateString(
+      loadFromTokenMap(ctx, 'templateStringTokens'),
+      ctx,
+    );
+  }
+
+  const groupId = interpolateString(loadFromTokenMap(ctx, 'groupId'), ctx);
+  const artifactId = interpolateString(
+    loadFromTokenMap(ctx, 'artifactId'),
+    ctx,
+  );
+  if (!groupId || !artifactId) {
+    return null;
+  }
+
+  return `${groupId}:${artifactId}`;
+}
+
+function pushSkippedRichVersionDep(
+  ctx: Ctx,
+  depName: string,
+  skipReason: 'multiple-constraint-dep' | 'unsupported-version',
+): Ctx {
+  ctx.deps.push({
+    depName,
+    skipReason,
+    managerData: { packageFile: ctx.packageFile },
+  });
+
+  return ctx;
+}
+
+/**
+ * Extracts a dependency whose version comes from a rich version constraint,
+ * e.g. `implementation('foo:bar') { version { strictly '1.2.3' } }`.
+ *
+ * Renovate can only rewrite a single version literal per dependency, so any
+ * combination of constraints whose parts would have to move together is
+ * skipped instead of updated.
+ *
+ * @see https://docs.gradle.org/current/userguide/dependency_versions.html#sec:rich-version-constraints
+ */
+export function handleRichVersionDep(ctx: Ctx): Ctx {
+  const depName = resolveRichVersionDepName(ctx);
+  if (!depName) {
+    return ctx;
+  }
+
+  // A version block alongside a fully qualified dependency string is invalid
+  // Gradle, so keep extracting the dependency string as we always have
+  if (ctx.tokenMap.templateStringTokens && isDependencyString(depName)) {
+    return handleDepString(ctx);
+  }
+
+  if (!isGroupArtifactString(depName)) {
+    return ctx;
+  }
+
+  // Renovate cannot tell which versions an arbitrary rejection leaves available
+  if (ctx.tokenMap.reject) {
+    return pushSkippedRichVersionDep(ctx, depName, 'unsupported-version');
+  }
+
+  const hasStrictly = !!ctx.tokenMap.strictly;
+  const hasRequire = !!ctx.tokenMap.require;
+  const hasPrefer = !!ctx.tokenMap.prefer;
+
+  // Gradle applies `require()` before `strictly()`, so bumping only `strictly`
+  // would leave the `require` literal behind as stale text
+  if (hasStrictly && hasRequire) {
+    return pushSkippedRichVersionDep(ctx, depName, 'multiple-constraint-dep');
+  }
+
+  // `prefer` is only a hint, so `require` is the constraint worth bumping
+  let versionConstraint: RichVersionConstraint = 'prefer';
+  if (hasStrictly) {
+    versionConstraint = 'strictly';
+  } else if (hasRequire) {
+    versionConstraint = 'require';
+  }
+
+  const versionTokens = loadFromTokenMap(ctx, versionConstraint);
+  const currentValue = interpolateString(versionTokens, ctx);
+  if (!currentValue) {
+    return ctx;
+  }
+
+  // A strict single version makes `prefer` inert, so it can stay untouched.
+  // A strict range does not: `prefer` has to keep pointing inside it.
+  if (
+    hasStrictly &&
+    hasPrefer &&
+    !gradleVersioning.isSingleVersion(currentValue)
+  ) {
+    return pushSkippedRichVersionDep(ctx, depName, 'multiple-constraint-dep');
+  }
+
+  const managerData: GradleManagerData = {
+    packageFile: ctx.packageFile,
+    versionConstraint,
+  };
+  const dep: PackageDependency<GradleManagerData> = {
+    depName,
+    currentValue,
+    managerData,
+  };
+
+  // `strictly` and `prefer` pin a version on purpose, so updating them is opt-in
+  if (versionConstraint !== 'require') {
+    dep.enabled = false;
+  }
+
+  if (versionTokens.length > 1) {
+    // = template string with multiple variables
+    dep.skipReason = 'unspecified-version';
+  } else if (versionTokens[0].type === 'symbol') {
+    // interpolateString above already proved this variable resolves
+    const varData = findVariable(versionTokens[0].value, ctx)!;
+    dep.sharedVariableName = varData.key;
+    managerData.fileReplacePosition = varData.fileReplacePosition;
+    managerData.packageFile = varData.packageFile;
+  } else {
+    managerData.fileReplacePosition = versionTokens[0].offset;
   }
 
   ctx.deps.push(dep);

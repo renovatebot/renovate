@@ -613,6 +613,39 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
+    describe('rich version constraints', () => {
+      it.each`
+        def                   | str                                                                                   | output
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '1.2.3' } }"}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'strictly', fileReplacePosition: 48 } }}
+        ${''}                 | ${'implementation("foo:bar") { version { strictly("1.2.3") } }'}                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'strictly', fileReplacePosition: 48 } }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '[1.7, 1.8[' } }"}                  | ${{ depName: 'foo:bar', currentValue: '[1.7, 1.8[', enabled: false, managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3' } }"}                        | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'require', fileReplacePosition: 47 } }}
+        ${''}                 | ${"implementation('foo:bar') { version { prefer '1.2.3' } }"}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'prefer' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '[1.0, 2.0['; prefer '1.5' } }"}     | ${{ depName: 'foo:bar', currentValue: '[1.0, 2.0[', managerData: { versionConstraint: 'require' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '1.2.3'; prefer '1.2.0' } }"}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '[1.7, 1.8['; prefer '1.7.25' } }"} | ${{ depName: 'foo:bar', skipReason: 'multiple-constraint-dep' }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3'; strictly '1.2.4' } }"}      | ${{ depName: 'foo:bar', skipReason: 'multiple-constraint-dep' }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3'; reject '1.2.4' } }"}        | ${{ depName: 'foo:bar', skipReason: 'unsupported-version' }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3'; rejectAll() } }"}           | ${{ depName: 'foo:bar', skipReason: 'unsupported-version' }}
+        ${''}                 | ${"implementation('foo:bar') { exclude group: 'baz'; version { strictly '1.2.3' } }"} | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${"implementation(group: 'foo', name: 'bar') { version { strictly '1.2.3' } }"}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${'implementation(group = "foo", name = "bar") { version { strictly("1.2.3") } }'}    | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'strictly' } }}
+        ${'baz = "1.2.3"'}    | ${"implementation('foo:bar') { version { strictly baz } }"}                           | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz', managerData: { fileReplacePosition: 7 } }}
+        ${'baz = "1.2.3"'}    | ${'implementation("foo:bar") { version { strictly("${baz}") } }'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz', managerData: { fileReplacePosition: 7 } }}
+        ${'a = "1"; b = "2"'} | ${'implementation("foo:bar") { version { strictly("$a.$b.3") } }'}                    | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'unspecified-version' }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly baz } }"}                           | ${null}
+        ${''}                 | ${'implementation("${baz}") { version { strictly("1.2.3") } }'}                       | ${null}
+        ${''}                 | ${"implementation(group: 'foo', name: baz) { version { strictly '1.2.3' } }"}         | ${null}
+        ${''}                 | ${"implementation('foo:bar:baz:qux') { version { strictly '1.2.3' } }"}               | ${null}
+        ${''}                 | ${'implementation(libs.foo) { version { strictly "1.2.3" } }'}                        | ${null}
+        ${''}                 | ${"implementation('foo:bar') { version { } }"}                                        | ${null}
+        ${''}                 | ${"implementation('foo:bar:1.2.3') { version { strictly '1.2.4' } }"}                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      `('$def | $str', ({ def, str, output }) => {
+        const { deps } = parseGradle([def, str].filter(isTruthy).join('\n'));
+        expect(deps).toMatchObject([output].filter(isTruthy));
+      });
+    });
+
     describe('dependencySubstitution constructs', () => {
       it.each`
         input                                                                   | output

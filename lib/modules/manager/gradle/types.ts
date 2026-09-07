@@ -1,9 +1,17 @@
 import type { lexer } from '@renovatebot/good-enough-parser';
 import type { PackageDependency } from '../types.ts';
 
+/**
+ * The rich version constraint a dependency's `currentValue` was extracted from.
+ *
+ * @see https://docs.gradle.org/current/userguide/dependency_versions.html#sec:rich-version-constraints
+ */
+export type RichVersionConstraint = 'strictly' | 'require' | 'prefer';
+
 export interface GradleManagerData {
   fileReplacePosition?: number;
   packageFile?: string;
+  versionConstraint?: RichVersionConstraint;
 }
 
 export interface VariableData extends GradleManagerData {
