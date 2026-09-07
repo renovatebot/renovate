@@ -1,13 +1,14 @@
 import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, OptionsInit, RetryObject } from 'got';
-import type { Merge, SetRequired } from 'type-fest';
+import type { SetRequired } from 'type-fest';
 import type { z } from 'zod/v4';
 import { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import type { HostRule } from '../../types/index.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
@@ -28,7 +29,6 @@ import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
 import { getThrottle } from './throttle.ts';
 import type {
   GotOptions,
-  GotStreamOptions,
   GotTask,
   HttpMethod,
   HttpOptions,
@@ -102,6 +102,49 @@ export abstract class HttpBase<
     );
   }
 
+  /**
+   * Builds the final got options for a request to a given `url`
+   *
+   * This merges instance options, applies default headers, host rules and authorization, and rejects requests to disabled hosts.
+   *
+   * Both the `request()` and `stream()` paths must use this single entry point so that policy applied here covers every outbound request.
+   */
+  private prepareOptions(
+    url: string,
+    httpOptions: InternalHttpOptions,
+  ): {
+    options: InternalGotOptions & InternalHttpOptions;
+    hostRule: HostRule;
+  } {
+    let options = merge<InternalGotOptions, InternalHttpOptions>(
+      {
+        ...this.options,
+        hostType: this.hostType,
+      },
+      httpOptions,
+      { isMergeableObject: isPlainObject },
+    );
+
+    applyDefaultHeaders(options);
+
+    if (
+      isUndefined(options.readOnly) &&
+      ['head', 'get'].includes(options.method.toLowerCase())
+    ) {
+      options.readOnly = true;
+    }
+
+    const hostRule = findMatchingRule(url, options);
+    options = applyHostRule(url, options, hostRule);
+    if (options.enabled === false) {
+      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
+      throw new Error(HOST_DISABLED);
+    }
+    options = applyAuthorization(options);
+
+    return { options, hostRule };
+  }
+
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
@@ -128,33 +171,13 @@ export abstract class HttpBase<
 
     this.processOptions(resolvedUrl, httpOptions);
 
-    let options = merge<InternalGotOptions, InternalHttpOptions>(
-      {
-        ...this.options,
-        hostType: this.hostType,
-      },
-      httpOptions,
-      { isMergeableObject: isPlainObject },
-    );
+    const { options, hostRule } = this.prepareOptions(url, httpOptions);
 
     const method = options.method.toLowerCase();
     const isReadMethod = ['head', 'get'].includes(method);
 
     logger.trace(`HTTP request: ${method.toUpperCase()} ${url}`);
 
-    applyDefaultHeaders(options);
-
-    if (isUndefined(options.readOnly) && isReadMethod) {
-      options.readOnly = true;
-    }
-
-    const hostRule = findMatchingRule(url, options);
-    options = applyHostRule(url, options, hostRule);
-    if (options.enabled === false) {
-      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
-      throw new Error(HOST_DISABLED);
-    }
-    options = applyAuthorization(options);
     const timeout = options.timeout ?? 60000;
     options.timeout = timeout;
 
@@ -659,34 +682,12 @@ export abstract class HttpBase<
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    let combinedOptions: Merge<
-      GotStreamOptions,
-      SetRequired<InternalHttpOptions, 'method'>
-    > = {
-      ...this.options,
-      hostType: this.hostType,
-      ...options,
-      method: 'get',
-    };
-
     const resolvedUrl = this.resolveUrl(url, options).toString();
 
-    applyDefaultHeaders(combinedOptions);
-
-    // v8 ignore else -- TODO: add test #40625
-    if (
-      isUndefined(combinedOptions.readOnly) &&
-      ['head', 'get'].includes(combinedOptions.method)
-    ) {
-      combinedOptions.readOnly = true;
-    }
-
-    const hostRule = findMatchingRule(url, combinedOptions);
-    combinedOptions = applyHostRule(resolvedUrl, combinedOptions, hostRule);
-    if (combinedOptions.enabled === false) {
-      throw new Error(HOST_DISABLED);
-    }
-    combinedOptions = applyAuthorization(combinedOptions);
+    const { options: combinedOptions } = this.prepareOptions(resolvedUrl, {
+      ...options,
+      method: 'get',
+    });
 
     return stream(resolvedUrl, this._normalizeOptions(combinedOptions));
   }
