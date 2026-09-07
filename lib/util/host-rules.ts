@@ -258,6 +258,13 @@ function headersOfLastRuleToSetThem(
     .pop();
 }
 
+/**
+ * The last defined value, following the same "most specific rule wins" ordering as {@link headersOfLastRuleToSetThem}.
+ */
+function lastDefined<T>(values: (T | undefined)[]): T | undefined {
+  return values.filter((value) => !isUndefined(value)).pop();
+}
+
 export function find(search: HostRuleSearch): CombinedHostRule {
   if ([search.hostType, search.url].every(isFalsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
@@ -316,6 +323,17 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   if (untrustedHeaders ?? trustedHeaders) {
     // the admin's own headers are applied last, so a repository cannot override one they set for this host either
     res.headers = { ...untrustedHeaders, ...trustedHeaders };
+  }
+
+  // `enabled` is resolved per trust tier like `headers`: a repository or preset rule must not be able to re-enable a host the administrator's own rules disabled (or vice versa) by out-specifying them with a longer `matchHost`
+  const trustedRules = matchedRules.filter((rule) => rule.trusted);
+  const untrustedEnabled = lastDefined(
+    matchedRules.filter((rule) => !rule.trusted).map((rule) => rule.enabled),
+  );
+  const trustedEnabled = lastDefined(trustedRules.map((rule) => rule.enabled));
+  const enabled = trustedEnabled ?? untrustedEnabled;
+  if (!isUndefined(enabled)) {
+    res.enabled = enabled;
   }
 
   delete res.hostType;

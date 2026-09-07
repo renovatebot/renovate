@@ -2182,6 +2182,10 @@ To match specific ports you have to add a protocol to `matchHost`:
   Disabling a host is only 100% effective if added to self-hosted config.
   Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same Renovate deployment has successfully queried for the same dependency recently.
 
+!!! note
+  `enabled` is not resolved by specificity alone: host rules from the self-hosted administrator's own config are resolved at a higher trust level than those from repository config or a preset.
+  So if the administrator's own rules set `enabled` for a host, repository config or a preset cannot re-enable - or disable - that host, no matter how specific its `matchHost` is.
+
 ### `hostRules.abortIgnoreStatusCodes`
 
 This field can be used to configure status codes that Renovate ignores and passes through when `abortOnError` is set to `true`.
