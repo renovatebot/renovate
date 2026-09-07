@@ -509,6 +509,26 @@ describe('util/http/github', () => {
         );
       });
 
+      it('when the rate limit is exceeded, and a github-scoped host rule is set, a warn is logged', async () => {
+        // the shape `GITHUB_COM_TOKEN` is registered as
+        hostRules.add({
+          hostType: 'github',
+          matchHost: 'github.com',
+          token: 'x-access-token:123test',
+        });
+
+        await expect(
+          fail(403, {
+            message:
+              'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          'Rate limit exceeded for api.github.com, even though we are authenticated',
+        );
+      });
+
       it('when the rate limit is exceeded, but no host rules are set for GitHub.com, a warn is logged', async () => {
         hostRules.clear();
 

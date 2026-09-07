@@ -16,6 +16,7 @@ import {
 } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { HexDatasource } from '../../datasource/hex/index.ts';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
@@ -134,7 +135,7 @@ export async function updateArtifacts({
 
   const preCommands = Array.from(organizations).reduce((acc, organization) => {
     const url = `${hexRepoUrl}api/repos/${organization}/`;
-    const { token } = hostRules.find({ url });
+    const { token } = hostRules.find({ hostType: HexDatasource.id, url });
 
     if (token) {
       logger.debug(`Authenticating to hex organization ${organization}`);

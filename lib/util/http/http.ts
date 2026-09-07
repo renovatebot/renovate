@@ -222,10 +222,10 @@ export abstract class HttpBase<
         }
       };
 
-      const throttle = getThrottle(url);
+      const throttle = getThrottle(url, this.hostType);
       const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
 
-      const queue = getQueue(url);
+      const queue = getQueue(url, this.hostType);
       const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;

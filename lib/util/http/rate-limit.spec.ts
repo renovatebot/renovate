@@ -51,6 +51,18 @@ describe('util/http/rate-limit', () => {
       setHttpRateLimits([{ matchHost: '*', concurrency: 123 }], undefined);
       expect(getConcurrentRequestsLimit('https://example.com')).toBe(123);
     });
+
+    it('gets the limit from a hostType-scoped host rule', () => {
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'example.com',
+        concurrentRequestLimit: 123,
+      });
+      expect(getConcurrentRequestsLimit('https://example.com')).toBeNull();
+      expect(getConcurrentRequestsLimit('https://example.com', 'npm')).toBe(
+        123,
+      );
+    });
   });
 
   describe('getThrottleIntervalMs', () => {
@@ -90,6 +102,16 @@ describe('util/http/rate-limit', () => {
     it('matches wildcard host', () => {
       setHttpRateLimits(undefined, [{ matchHost: '*', throttleMs: 123 }]);
       expect(getThrottleIntervalMs('https://example.com')).toBe(123);
+    });
+
+    it('gets the limit from a hostType-scoped host rule', () => {
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'example.com',
+        maxRequestsPerSecond: 8,
+      });
+      expect(getThrottleIntervalMs('https://example.com')).toBeNull();
+      expect(getThrottleIntervalMs('https://example.com', 'npm')).toBe(125);
     });
   });
 });

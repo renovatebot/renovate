@@ -22,7 +22,14 @@ export class Throttle {
   }
 }
 
-export function getThrottle(url: string): Throttle | null {
+/**
+ * The throttle pacing requests to `url`'s host.
+ *
+ * As with `getQueue`, `hostType` only selects which host rules the interval is
+ * read from: the throttle stays keyed by host alone, so a host reached under
+ * several `hostType`s keeps the interval of whichever request created it.
+ */
+export function getThrottle(url: string, hostType?: string): Throttle | null {
   const host = parseUrl(url)?.host;
   if (!host) {
     // should never happen
@@ -33,7 +40,7 @@ export function getThrottle(url: string): Throttle | null {
   let throttle = hostThrottles.get(host);
   if (throttle === undefined) {
     throttle = null; // null represents "no throttle", as opposed to undefined
-    const throttleMs = getThrottleIntervalMs(url);
+    const throttleMs = getThrottleIntervalMs(url, hostType);
     if (throttleMs) {
       logger.debug(`Using throttle ${throttleMs} intervalMs for host ${host}`);
       throttle = new Throttle(throttleMs);

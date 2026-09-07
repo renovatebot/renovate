@@ -33,4 +33,18 @@ describe('util/http/throttle', () => {
     expect(t1b).not.toBe(t2a);
     expect(t1b).not.toBe(t2b);
   });
+
+  it('reads the interval from a hostType-scoped rule', () => {
+    hostRules.clear();
+    hostRules.add({
+      hostType: 'npm',
+      matchHost: 'example.com',
+      maxRequestsPerSecond: 143,
+    });
+
+    expect(getThrottle('https://example.com')).toBeNull();
+
+    clear();
+    expect(getThrottle('https://example.com', 'npm')).not.toBeNull();
+  });
 });

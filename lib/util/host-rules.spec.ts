@@ -426,6 +426,29 @@ describe('util/host-rules', () => {
       ).toBe('abc');
     });
 
+    it('applies generic rules to a scoped search, but not scoped rules to a generic one', () => {
+      add({
+        matchHost: 'https://registry.example.com',
+        username: 'generic',
+      });
+      add({
+        hostType: 'pypi',
+        matchHost: 'https://registry.example.com',
+        token: 'scoped',
+      });
+
+      // a search naming the hostType sees both rules
+      expect(
+        find({ hostType: 'pypi', url: 'https://registry.example.com/simple/' }),
+      ).toEqual({ username: 'generic', token: 'scoped' });
+
+      // a search without one silently misses the `pypi` rule, so every call
+      // site that has a hostType must pass it
+      expect(find({ url: 'https://registry.example.com/simple/' })).toEqual({
+        username: 'generic',
+      });
+    });
+
     it('matches if hostType is configured and host rule is filtered with datasource', () => {
       add({
         hostType: 'github',

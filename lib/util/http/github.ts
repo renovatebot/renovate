@@ -154,7 +154,7 @@ function handleGotError(
 
     const parsed = parseUrl(baseUrl);
 
-    const rule = hostRules.find({ url: baseUrl });
+    const rule = hostRules.find({ hostType: 'github', url: baseUrl });
     if (rule.token || rule.password) {
       logger.once.warn(
         'Rate limit exceeded for api.github.com, even though we are authenticated',

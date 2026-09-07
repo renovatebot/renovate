@@ -13,6 +13,7 @@ import { ensureLocalPath } from '../../../util/fs/util.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
 import type {
   CommandType,
@@ -348,7 +349,10 @@ function getRegistryCredEnvVars(
   url: URL,
   index: number,
 ): Record<string, string> {
-  const hostRule = hostRules.find({ url: url.href });
+  const hostRule = hostRules.find({
+    hostType: PypiDatasource.id,
+    url: url.href,
+  });
   logger.debug(hostRule, `Found host rule for url ${url.href}`);
   const ret: Record<string, string> = {};
   if (!!hostRule.username || !!hostRule.password) {

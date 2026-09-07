@@ -325,6 +325,27 @@ describe('modules/manager/pip-compile/common', () => {
       });
     });
 
+    it('handles pypi-scoped host rules', () => {
+      hostRules.add({
+        hostType: 'pypi',
+        matchHost: 'example.com',
+        username: 'user1',
+        password: 'password1',
+      });
+      expect(
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: ['https://example.com/pypi/simple'],
+          },
+        ]),
+      ).toEqual({
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user1',
+        KEYRING_SERVICE_PASSWORD_0: 'password1',
+      });
+    });
+
     it('handles invalid URLs', () => {
       expect(
         getRegistryCredVarsFromPackageFiles([

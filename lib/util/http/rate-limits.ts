@@ -68,10 +68,16 @@ function matches(url: string, host: string): boolean {
   return matchesHost(url, host);
 }
 
-export function getConcurrentRequestsLimit(url: string): number | null {
+export function getConcurrentRequestsLimit(
+  url: string,
+  hostType?: string,
+): number | null {
   let result: number | null = null;
 
-  const { concurrentRequestLimit: hostRuleLimit } = hostRules.find({ url });
+  const { concurrentRequestLimit: hostRuleLimit } = hostRules.find({
+    hostType,
+    url,
+  });
   if (
     isNumber(hostRuleLimit) &&
     hostRuleLimit > 0 &&
@@ -96,10 +102,13 @@ export function getConcurrentRequestsLimit(url: string): number | null {
   return result;
 }
 
-export function getThrottleIntervalMs(url: string): number | null {
+export function getThrottleIntervalMs(
+  url: string,
+  hostType?: string,
+): number | null {
   let result: number | null = null;
 
-  const { maxRequestsPerSecond } = hostRules.find({ url });
+  const { maxRequestsPerSecond } = hostRules.find({ hostType, url });
   if (isNumber(maxRequestsPerSecond) && maxRequestsPerSecond > 0) {
     result = Math.ceil(1000 / maxRequestsPerSecond);
   }
