@@ -690,6 +690,45 @@ describe('util/host-rules', () => {
       });
     });
 
+    describe('enabled trust tiers', () => {
+      it('does not let a more specific repository rule re-enable a host the admin disabled', () => {
+        add(
+          { matchHost: 'bad.example.com', enabled: false },
+          { trusted: true },
+        );
+        add({ matchHost: 'https://bad.example.com/deeper', enabled: true });
+
+        expect(
+          find({ url: 'https://bad.example.com/deeper/path' }).enabled,
+        ).toBeFalse();
+      });
+
+      it('does not let a repository rule disable a host the admin enabled', () => {
+        add(
+          { matchHost: 'good.example.com', enabled: true },
+          { trusted: true },
+        );
+        add({ matchHost: 'https://good.example.com/deeper', enabled: false });
+
+        expect(
+          find({ url: 'https://good.example.com/deeper/path' }).enabled,
+        ).toBeTrue();
+      });
+
+      it('keeps repository rules able to disable a host of their own', () => {
+        add({ matchHost: 'flaky.example.com', enabled: false });
+
+        expect(find({ url: 'https://flaky.example.com' }).enabled).toBeFalse();
+      });
+
+      it('lets the most specific rule of a tier win', () => {
+        add({ matchHost: 'example.com', enabled: false });
+        add({ matchHost: 'https://ok.example.com', enabled: true });
+
+        expect(find({ url: 'https://ok.example.com' }).enabled).toBeTrue();
+      });
+    });
+
     it('prefers the longest matchHost for a header they both set', () => {
       add({
         matchHost: 'https://registry.example.com',
