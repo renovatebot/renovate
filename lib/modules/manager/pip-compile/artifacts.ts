@@ -142,7 +142,7 @@ export async function updateArtifacts({
         config,
         compileArgs.commandType,
         cwd,
-        getRegistryCredVarsFromPackageFiles(packageFiles),
+        await getRegistryCredVarsFromPackageFiles(packageFiles),
         pythonVersion,
       );
       logger.trace({ cwd, cmd }, 'pip-compile command');

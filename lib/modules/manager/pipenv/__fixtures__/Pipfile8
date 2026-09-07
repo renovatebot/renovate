@@ -1,0 +1,7 @@
+[[source]]
+url = "https://$GAR_USERNAME:${GAR_PASSWORD}@someregion-python.pkg.dev/some-project/some-repo/simple"
+verify_ssl = true
+name = "gar"
+
+[packages]
+requests = {version = "==0.21.0", index = "gar"}

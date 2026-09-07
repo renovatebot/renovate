@@ -10,9 +10,9 @@ import type {
 } from '../../../util/exec/types.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
+import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
 import type {
   CommandType,
@@ -344,34 +344,23 @@ function throwForUnknownOption(commandType: CommandType, arg: string): void {
   throw new Error(`Option ${arg} not supported (yet)`);
 }
 
-function getRegistryCredEnvVars(
+async function getRegistryCredEnvVars(
   url: URL,
   index: number,
-): Record<string, string> {
-  const hostRule = hostRules.find({ url: url.href });
-  logger.debug(hostRule, `Found host rule for url ${url.href}`);
+): Promise<Record<string, string>> {
+  const { username, password } = await findPypiIndexCredentials(url.href);
   const ret: Record<string, string> = {};
-  if (!!hostRule.username || !!hostRule.password) {
+  if (!!username || !!password) {
     ret[`KEYRING_SERVICE_NAME_${index}`] = url.hostname;
-    ret[`KEYRING_SERVICE_USERNAME_${index}`] = hostRule.username ?? '';
-    ret[`KEYRING_SERVICE_PASSWORD_${index}`] = hostRule.password ?? '';
+    ret[`KEYRING_SERVICE_USERNAME_${index}`] = username ?? '';
+    ret[`KEYRING_SERVICE_PASSWORD_${index}`] = password ?? '';
   }
   return ret;
 }
 
-function cleanUrl(url: string): URL | null {
-  // Strip everything but protocol, host, and port
-  const urlObj = parseUrl(url);
-  if (!urlObj) {
-    return null;
-  }
-  // origin of a valid URL is always parseable
-  return parseUrl(urlObj.origin);
-}
-
-export function getRegistryCredVarsFromPackageFiles(
+export async function getRegistryCredVarsFromPackageFiles(
   packageFiles: PackageFileContent[],
-): ExtraEnv<string> {
+): Promise<ExtraEnv<string>> {
   const urls: string[] = [];
   for (const packageFile of packageFiles) {
     urls.push(
@@ -381,13 +370,12 @@ export function getRegistryCredVarsFromPackageFiles(
   }
   logger.debug(urls, 'Extracted registry URLs from package files');
 
-  const uniqueHosts = new Set<URL>(
-    urls.map(cleanUrl).filter(isNotNullOrUndefined),
-  );
+  // The full URL is kept, so that a `matchHost` narrowed to a path still matches
+  const parsedUrls = urls.map(parseUrl).filter(isNotNullOrUndefined);
 
   let allCreds: ExtraEnv<string> = {};
-  for (const [index, host] of [...uniqueHosts].entries()) {
-    const hostCreds = getRegistryCredEnvVars(host, index);
+  for (const [index, url] of parsedUrls.entries()) {
+    const hostCreds = await getRegistryCredEnvVars(url, index);
     allCreds = {
       ...allCreds,
       ...hostCreds,

@@ -1,14 +1,8 @@
-import {
-  isNonEmptyArray,
-  isNonEmptyObject,
-  isNumber,
-  isString,
-} from '@sindresorhus/is';
+import { isNonEmptyArray, isNumber, isString } from '@sindresorhus/is';
 import { Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import type { HostRule } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
@@ -19,7 +13,6 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
-import { find } from '../../../util/host-rules.ts';
 import { toMs } from '../../../util/pretty-time.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
@@ -27,9 +20,7 @@ import {
   massage as massageToml,
   parse as parseToml,
 } from '../../../util/toml.ts';
-import { parseUrl } from '../../../util/url.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
-import { getGoogleAuthHostRule } from '../../datasource/util.ts';
+import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 import type { PoetryFile, PoetrySource } from './types.ts';
@@ -131,30 +122,6 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   return sourceArray;
 }
 
-async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
-  const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  const hostRule = isNonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
-  if (hostRule && Object.keys(hostRule).length !== 0) {
-    return hostRule;
-  }
-
-  const parsedUrl = parseUrl(url);
-  if (!parsedUrl) {
-    logger.once.debug(`Failed to parse URL ${url}`);
-    return {};
-  }
-
-  if (parsedUrl.hostname.endsWith('.pkg.dev')) {
-    const hostRule = await getGoogleAuthHostRule();
-    if (hostRule && Object.keys(hostRule).length !== 0) {
-      return hostRule;
-    }
-    logger.once.debug(`Could not get Google access token (url=${url})`);
-  }
-
-  return {};
-}
-
 async function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string,
@@ -163,7 +130,7 @@ async function getSourceCredentialVars(
   const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = await getMatchingHostRule(source.url);
+    const matchingHostRule = await findPypiIndexCredentials(source.url);
     const formattedSourceName = source.name
       .replace(regEx(/(?:\.|-)+/g), '_')
       .toUpperCase();

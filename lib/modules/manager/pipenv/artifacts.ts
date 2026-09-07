@@ -5,7 +5,6 @@ import {
 } from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import type { HostRule } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types.ts';
@@ -19,24 +18,11 @@ import {
 } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
-import { find } from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { extractPackageFile } from './extract.ts';
-
-export function getMatchingHostRule(url: string): HostRule | null {
-  const parsedUrl = parseUrl(url);
-  if (parsedUrl) {
-    parsedUrl.username = '';
-    parsedUrl.password = '';
-    const urlWithoutCredentials = parsedUrl.toString();
-
-    return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
-  }
-  return null;
-}
 
 async function findPipfileSourceUrlsWithCredentials(
   pipfileContent: string,
@@ -100,28 +86,20 @@ async function addCredentialsForSourceUrls(
   );
   for (const parsedSourceUrl of sourceUrls) {
     logger.trace(`Trying to add credentials for ${parsedSourceUrl.toString()}`);
-    const matchingHostRule = getMatchingHostRule(parsedSourceUrl.toString());
-    if (matchingHostRule) {
-      const usernameVariableName = extractEnvironmentVariableName(
-        parsedSourceUrl.username,
-      );
-      if (matchingHostRule.username && usernameVariableName) {
-        addExtraEnvVariable(
-          extraEnv,
-          usernameVariableName,
-          matchingHostRule.username,
-        );
-      }
-      const passwordVariableName = extractEnvironmentVariableName(
-        parsedSourceUrl.password,
-      );
-      if (matchingHostRule.password && passwordVariableName) {
-        addExtraEnvVariable(
-          extraEnv,
-          passwordVariableName,
-          matchingHostRule.password,
-        );
-      }
+    const credentials = await findPypiIndexCredentials(
+      parsedSourceUrl.toString(),
+    );
+    const usernameVariableName = extractEnvironmentVariableName(
+      parsedSourceUrl.username,
+    );
+    if (credentials.username && usernameVariableName) {
+      addExtraEnvVariable(extraEnv, usernameVariableName, credentials.username);
+    }
+    const passwordVariableName = extractEnvironmentVariableName(
+      parsedSourceUrl.password,
+    );
+    if (credentials.password && passwordVariableName) {
+      addExtraEnvVariable(extraEnv, passwordVariableName, credentials.password);
     }
   }
 }

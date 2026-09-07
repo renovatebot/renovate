@@ -2,7 +2,6 @@ import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import type { HostRule } from '../../../../types/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import type {
   ExecOptions,
@@ -13,12 +12,11 @@ import {
   readLocalFile,
 } from '../../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
-import { find } from '../../../../util/host-rules.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
+import { findPypiIndexCredentials } from '../../../datasource/pypi/host-rules.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
-import { getGoogleAuthHostRule } from '../../../datasource/util.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -298,29 +296,6 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
 }
 
-function getMatchingHostRule(url: string | undefined): HostRule {
-  return find({ hostType: PypiDatasource.id, url });
-}
-
-async function getUsernamePassword(
-  url: URL,
-): Promise<{ username?: string; password?: string }> {
-  const rule = getMatchingHostRule(url.toString());
-  if (rule.username || rule.password) {
-    return rule;
-  }
-
-  if (url.hostname.endsWith('.pkg.dev')) {
-    const hostRule = await getGoogleAuthHostRule();
-    if (hostRule) {
-      return hostRule;
-    }
-    logger.once.debug({ url }, 'Could not get Google access token');
-  }
-
-  return {};
-}
-
 async function getUvExtraIndexUrl(
   project: PyProject,
   deps: Upgrade[],
@@ -355,7 +330,9 @@ async function getUvExtraIndexUrl(
       continue;
     }
 
-    const { username, password } = await getUsernamePassword(parsedUrl);
+    const { username, password } = await findPypiIndexCredentials(
+      parsedUrl.toString(),
+    );
     if (username || password) {
       if (username) {
         parsedUrl.username = username;
@@ -396,7 +373,9 @@ async function getUvIndexCredentials(
       continue;
     }
 
-    const { username, password } = await getUsernamePassword(parsedUrl);
+    const { username, password } = await findPypiIndexCredentials(
+      parsedUrl.toString(),
+    );
 
     const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 

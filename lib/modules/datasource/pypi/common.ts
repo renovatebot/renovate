@@ -1,5 +1,7 @@
 import { regEx } from '../../../util/regex.ts';
 
+export const pypiDatasourceId = 'pypi';
+
 const githubRepoPattern = regEx(
   /^https?:\/\/github\.com\/(?<owner>[^/]+)\/[^/]+$/,
 );
