@@ -4605,7 +4605,7 @@ By default this label is `"rebase"` but you can configure it to anything you wan
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead. On GitHub, if the experimental environment variable `RENOVATE_X_GITHUB_MERGE_QUEUE` is set and the base branch has a merge queue, `conflicted` is used because the merge queue already tests PRs against the head of the base branch. The same applies on GitLab if merge trains are enabled on the project
+- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead. On GitHub, if the base branch has a merge queue, `conflicted` is used because the merge queue already tests PRs against the head of the base branch. The same applies on GitLab if merge trains are enabled on the project
 - `automerging`: Renovate will use `behind-base-branch` if configured to automerge, Otherwise, `never` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
