@@ -5,6 +5,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import * as cacheFs from '../../../util/fs/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
 import { cacheSubDir } from './common.ts';
@@ -14,19 +15,14 @@ import {
 } from './index.spec.ts';
 import { downloadAndExtractPackage } from './packages.ts';
 import { getComponentUrl, getPackageUrl } from './url.ts';
-import * as utils from './utils.ts';
 
 const debBaseUrl = 'http://deb.debian.org';
 
 describe('modules/datasource/deb/packages', () => {
-  // const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
   const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
-  // const fixturePackagesPath = Fixtures.getPath(`Packages`);
-  // let fixturePackagesArchiveHash: string;
   let fixturePackagesArchiveHash2: string;
 
   let cacheDir: DirectoryResult | null;
-  // let cfg: GetPkgReleasesConfig;
   let extractionFolder: string;
   let extractedPackageFile: string;
 
@@ -37,33 +33,21 @@ describe('modules/datasource/deb/packages', () => {
     extractionFolder = await fs.ensureCacheDir(cacheSubDir);
     extractedPackageFile = upath.join(
       extractionFolder,
-      `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
+      `${toSha256(getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
     );
 
-    // cfg = {
-    //   datasource: 'deb',
-    //   packageName: 'album',
-    //   registryUrls: [
-    //     getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
-    //   ],
-    // };
-
-    // fixturePackagesArchiveHash = await computeFileChecksum(
-    //   fixturePackagesArchivePath,
-    // );
     fixturePackagesArchiveHash2 = await computeFileChecksum(
       fixturePackagesArchivePath2,
     );
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await cacheDir?.cleanup();
     cacheDir = null;
   });
 
   describe('downloadAndExtractPackage', () => {
-    const debBaseUrl = 'http://deb.debian.org';
-
     it('should ignore error when fetching the InRelease content fails', async () => {
       const packageArgs: [release: string, component: string, arch: string] = [
         'stable',
@@ -106,7 +90,13 @@ describe('modules/datasource/deb/packages', () => {
     });
 
     it('should throw error for when extracting fails', async () => {
-      vi.spyOn(utils, 'extract').mockRejectedValueOnce(new Error());
+      const originalPipeline = cacheFs.pipeline;
+      vi.spyOn(cacheFs, 'pipeline')
+        .mockImplementationOnce(
+          (...args: Parameters<typeof cacheFs.pipeline>) =>
+            originalPipeline(...args),
+        )
+        .mockRejectedValueOnce(new Error('extract failed'));
 
       httpMock
         .scope(debBaseUrl)

@@ -1,10 +1,4 @@
-import * as httpMock from '~test/http-mock.ts';
-import { Http } from '../../../util/http/index.ts';
-import {
-  checkIfModified,
-  constructComponentUrls,
-  getPackageUrl,
-} from './url.ts';
+import { constructComponentUrls } from './url.ts';
 
 describe('modules/datasource/deb/url', () => {
   describe('constructComponentUrls', () => {
@@ -40,40 +34,6 @@ describe('modules/datasource/deb/url', () => {
 
     it('returns empty array for invalid registry URL', () => {
       expect(constructComponentUrls('not-a-valid-url')).toEqual([]);
-    });
-  });
-
-  describe('checkIfModified', () => {
-    const debBaseUrl = 'http://deb.debian.org';
-
-    it('should return true for different status code', async () => {
-      httpMock
-        .scope(debBaseUrl)
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
-        .reply(200);
-
-      await expect(
-        checkIfModified(
-          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
-          new Date(),
-          new Http('default'),
-        ),
-      ).resolves.toBe(true);
-    });
-
-    it('should return true if request failed', async () => {
-      httpMock
-        .scope(debBaseUrl)
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
-        .replyWithError('Unexpected Error');
-
-      await expect(
-        checkIfModified(
-          getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
-          new Date(),
-          new Http('default'),
-        ),
-      ).resolves.toBe(true);
     });
   });
 });

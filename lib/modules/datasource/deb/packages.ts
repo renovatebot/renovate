@@ -1,141 +1,73 @@
-import { randomUUID } from 'node:crypto';
-import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import * as fs from '../../../util/fs/index.ts';
-import { toSha256 } from '../../../util/hash.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
+import { getCachedGunzippedFile } from '../cached-index.ts';
+import type { CachedIndexFile } from '../types.ts';
 import {
   computeFileChecksum,
   parseChecksumsFromInRelease,
 } from './checksum.ts';
 import { cacheSubDir } from './common.ts';
-import { checkIfModified, getBaseSuiteUrl } from './url.ts';
-import { extract, getFileCreationTime } from './utils.ts';
+import { getBaseSuiteUrl } from './url.ts';
 
 /**
  * Downloads and extracts a package file from a component URL.
  *
  * @param componentUrl - The URL of the component.
  * @returns The path to the extracted file and the last modification timestamp.
- * @throws Will throw an error if no valid compression method is found.
  */
-export async function downloadAndExtractPackage(
+export function downloadAndExtractPackage(
   componentUrl: string,
   http: Http,
-): Promise<{ extractedFile: string; lastTimestamp: Date }> {
-  const packageUrlHash = toSha256(componentUrl);
-  const fullCacheDir = await fs.ensureCacheDir(cacheSubDir);
-  const extractedFile = upath.join(fullCacheDir, `${packageUrlHash}.txt`);
-  let lastTimestamp = await getFileCreationTime(extractedFile);
+): Promise<CachedIndexFile> {
+  const baseSuiteUrl = getBaseSuiteUrl(componentUrl);
+  const packageUrl = joinUrlParts(componentUrl, 'Packages.gz');
 
-  const compression = 'gz';
-  const compressedFile = upath.join(
-    fullCacheDir,
-    `${randomUUID()}_${packageUrlHash}.${compression}`,
-  );
-
-  const wasUpdated = await downloadPackageFile(
-    componentUrl,
-    compression,
-    compressedFile,
-    http,
-    lastTimestamp,
-  );
-
-  if (wasUpdated || !lastTimestamp) {
-    try {
-      await extract(compressedFile, compression, extractedFile);
-      lastTimestamp = await getFileCreationTime(extractedFile);
-    } catch (error) {
-      logger.warn(
-        {
-          compressedFile,
-          componentUrl,
-          compression,
-          error: error.message,
-        },
-        'Failed to extract package file from compressed file',
-      );
-    } finally {
-      await fs.rmCache(compressedFile);
-    }
-  }
-
-  if (!lastTimestamp) {
-    //extracting went wrong
-    throw new Error('Missing metadata in extracted package index file!');
-  }
-
-  return { extractedFile, lastTimestamp };
+  return getCachedGunzippedFile(http, packageUrl, {
+    cacheSubDir,
+    extension: 'txt',
+    description: 'package index file',
+    beforeExtract: (compressedFile) =>
+      verifyPackageChecksum(baseSuiteUrl, packageUrl, compressedFile, http),
+  });
 }
 
 /**
- * Downloads a package file if it has been modified since the last download timestamp.
+ * Verifies the downloaded package index against the checksum published in the
+ * InRelease file of the suite.
  *
- * @param basePackageUrl - The base URL of the package.
- * @param compression - The compression method used (e.g., 'gz').
- * @param compressedFile - The path where the compressed file will be saved.
- * @param lastDownloadTimestamp - The timestamp of the last download.
- * @returns True if the file was downloaded, otherwise false.
+ * Repositories which do not serve an InRelease file are accepted as is.
+ *
+ * @throws Will throw an error if the checksums do not match.
  */
-export async function downloadPackageFile(
-  basePackageUrl: string,
-  compression: string,
+async function verifyPackageChecksum(
+  baseSuiteUrl: string,
+  packageUrl: string,
   compressedFile: string,
   http: Http,
-  lastDownloadTimestamp?: Date,
-): Promise<boolean> {
-  const baseSuiteUrl = getBaseSuiteUrl(basePackageUrl);
-  const packageUrl = joinUrlParts(basePackageUrl, `Packages.${compression}`);
-  let needsToDownload = true;
-
-  if (lastDownloadTimestamp) {
-    needsToDownload = await checkIfModified(
-      packageUrl,
-      lastDownloadTimestamp,
-      http,
-    );
-  }
-
-  if (!needsToDownload) {
-    logger.debug(`No need to download ${packageUrl}, file is up to date.`);
-    return false;
-  }
-  const readStream = http.stream(packageUrl);
-  const writeStream = fs.createCacheWriteStream(compressedFile);
-  await fs.pipeline(readStream, writeStream);
-  logger.debug(
-    { url: packageUrl, targetFile: compressedFile },
-    'Downloading Debian package file',
-  );
-
+): Promise<void> {
   let inReleaseContent = '';
 
   try {
     inReleaseContent = await fetchInReleaseFile(baseSuiteUrl, http);
-  } catch (error) {
+  } catch (err) {
     // This is expected to fail for Artifactory if GPG verification is not enabled
-    logger.debug(
-      { url: baseSuiteUrl, err: error },
-      'Could not fetch InRelease file',
-    );
+    logger.debug({ url: baseSuiteUrl, err }, 'Could not fetch InRelease file');
   }
 
-  if (inReleaseContent) {
-    const actualChecksum = await computeFileChecksum(compressedFile);
-    const expectedChecksum = parseChecksumsFromInRelease(
-      inReleaseContent,
-      // path to the Package.gz file
-      packageUrl.replace(`${baseSuiteUrl}/`, ''),
-    );
-    if (actualChecksum !== expectedChecksum) {
-      await fs.rmCache(compressedFile);
-      throw new Error('SHA256 checksum validation failed');
-    }
+  if (!inReleaseContent) {
+    return;
   }
 
-  return needsToDownload;
+  const actualChecksum = await computeFileChecksum(compressedFile);
+  const expectedChecksum = parseChecksumsFromInRelease(
+    inReleaseContent,
+    // path to the Package.gz file
+    packageUrl.replace(`${baseSuiteUrl}/`, ''),
+  );
+  if (actualChecksum !== expectedChecksum) {
+    throw new Error('SHA256 checksum validation failed');
+  }
 }
 
 /**
@@ -145,7 +77,7 @@ export async function downloadPackageFile(
  * @returns resolves to the content of the InRelease file.
  * @throws An error if the InRelease file could not be downloaded.
  */
-export async function fetchInReleaseFile(
+async function fetchInReleaseFile(
   baseReleaseUrl: string,
   http: Http,
 ): Promise<string> {

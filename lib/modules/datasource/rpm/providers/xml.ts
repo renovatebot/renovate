@@ -2,12 +2,10 @@ import sax from 'sax';
 import { logger } from '../../../../logger/index.ts';
 import * as fs from '../../../../util/fs/index.ts';
 import type { Http } from '../../../../util/http/index.ts';
+import { getCachedGunzippedFile } from '../../cached-index.ts';
 import type { ReleaseResult } from '../../types.ts';
-import {
-  buildReleaseResult,
-  formatRpmVersion,
-  getCachedGunzippedFile,
-} from './common.ts';
+import { datasource } from '../common.ts';
+import { buildReleaseResult, formatRpmVersion } from './common.ts';
 
 export class RpmXmlMetadataProvider {
   private readonly http: Http;
@@ -20,10 +18,14 @@ export class RpmXmlMetadataProvider {
     primaryGzipUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    const primaryXmlFile = await getCachedGunzippedFile(
+    const { extractedFile: primaryXmlFile } = await getCachedGunzippedFile(
       this.http,
       primaryGzipUrl,
-      'xml',
+      {
+        cacheSubDir: datasource,
+        extension: 'xml',
+        description: 'RPM metadata file',
+      },
     );
     const releases = new Set<string>();
     let insidePackage = false;

@@ -224,3 +224,40 @@ export interface DatasourceApi extends ModuleApi {
     release: Release,
   ): Promise<PostprocessReleaseResult>;
 }
+
+export interface CachedIndexOptions {
+  /**
+   * Directory below the Renovate cache dir the files are kept in.
+   */
+  cacheSubDir: string;
+
+  /**
+   * Extension of the extracted file, without the leading dot.
+   */
+  extension: string;
+
+  /**
+   * Name of the file kind, used in the error thrown when no extracted file is
+   * available.
+   */
+  description: string;
+
+  /**
+   * Called with the freshly downloaded file before it is extracted, so that the
+   * caller can reject it. Throwing leaves any previously extracted file in place.
+   */
+  beforeExtract?: (compressedFile: string) => Promise<void>;
+}
+
+export interface CachedIndexFile {
+  /**
+   * Path of the extracted file inside the Renovate cache dir.
+   */
+  extractedFile: string;
+
+  /**
+   * Creation time of the extracted file, usable as a cache key for anything
+   * derived from its content.
+   */
+  lastTimestamp: Date;
+}

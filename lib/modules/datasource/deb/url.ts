@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import type { Http, HttpOptions } from '../../../util/http/index.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 
 /**
@@ -96,37 +95,6 @@ function getReleaseParam(url: URL, optionalParams: string[]): string {
     }
   }
   throw new Error(`Missing one of suite query parameter`);
-}
-
-/**
- * Checks if a packageUrl content has been modified since the specified timestamp.
- *
- * @param packageUrl - The URL to check.
- * @param lastDownloadTimestamp - The timestamp of the last download.
- * @returns True if the content has been modified, otherwise false.
- * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
- */
-export async function checkIfModified(
-  packageUrl: string,
-  lastDownloadTimestamp: Date,
-  http: Http,
-): Promise<boolean> {
-  const options: HttpOptions = {
-    headers: {
-      'If-Modified-Since': lastDownloadTimestamp.toUTCString(),
-    },
-  };
-
-  try {
-    const response = await http.head(packageUrl, options);
-    return response.statusCode !== 304;
-  } catch (error) {
-    logger.warn(
-      { packageUrl, lastDownloadTimestamp, errorMessage: error.message },
-      'Could not determine if package file is modified since last download',
-    );
-    return true; // Assume it needs to be downloaded if check fails
-  }
 }
 
 /**

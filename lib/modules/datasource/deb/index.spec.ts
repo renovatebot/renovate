@@ -44,7 +44,7 @@ describe('modules/datasource/deb/index', () => {
     extractionFolder = await fs.ensureCacheDir(cacheSubDir);
     extractedPackageFile = upath.join(
       extractionFolder,
-      `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
+      `${toSha256(getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
     );
 
     cfg = {
