@@ -30,7 +30,7 @@ export function extractPep723(
 
   if (error) {
     logger.debug(
-      { packageFile, error },
+      { packageFile, err: error },
       `Error parsing PEP 723 inline script metadata`,
     );
     return null;

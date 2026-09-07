@@ -193,7 +193,7 @@ export async function renovateRepository(
     }
   } else {
     logger.debug(
-      { error },
+      { err: error },
       'Skipping the rest to the Renovate run due to error in `init` phase',
     );
   }

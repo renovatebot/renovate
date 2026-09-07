@@ -209,6 +209,7 @@
     {
       "files": ["lib/**"],
       "rules": {
+        "renovate/logger-err-key": "error",
         "renovate/logger-static-message": "error",
         "renovate/no-new-url": "error",
         "renovate/no-stateful-global-regex": "error",
