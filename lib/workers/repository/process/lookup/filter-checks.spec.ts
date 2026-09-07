@@ -19,6 +19,7 @@ import {
   filterInternalChecks,
   isMinimumConfidenceApplicable,
   isMinimumReleaseAgeApplicable,
+  resolveUpdateTypeConfig,
 } from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
@@ -449,6 +450,56 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
       );
       expect(res).toEqual({ isPending: false });
+    });
+  });
+
+  describe('.resolveUpdateTypeConfig()', () => {
+    it('sets the updateType', async () => {
+      const res = await resolveUpdateTypeConfig({ depName: 'foo' }, 'digest');
+
+      expect(res).toEqual({ depName: 'foo', updateType: 'digest' });
+    });
+
+    it('merges the updateType-scoped sub-config', async () => {
+      const res = await resolveUpdateTypeConfig(
+        {
+          minimumReleaseAge: '1 day',
+          digest: { minimumReleaseAge: '3 days' },
+          patch: { minimumReleaseAge: '7 days' },
+        },
+        'digest',
+      );
+
+      expect(res).toMatchObject({
+        updateType: 'digest',
+        minimumReleaseAge: '3 days',
+      });
+    });
+
+    it('applies packageRules which match on updateType', async () => {
+      const res = await resolveUpdateTypeConfig(
+        {
+          minimumReleaseAge: '1 day',
+          packageRules: [
+            { matchUpdateTypes: ['digest'], minimumReleaseAge: '5 days' },
+            { matchUpdateTypes: ['patch'], minimumReleaseAge: '9 days' },
+          ],
+        },
+        'digest',
+      );
+
+      expect(res).toMatchObject({
+        updateType: 'digest',
+        minimumReleaseAge: '5 days',
+      });
+    });
+
+    it('does not mutate the input config', async () => {
+      const config = { minimumReleaseAge: '1 day' };
+
+      await resolveUpdateTypeConfig(config, 'digest');
+
+      expect(config).toEqual({ minimumReleaseAge: '1 day' });
     });
   });
 });
