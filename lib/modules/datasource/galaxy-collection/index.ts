@@ -110,7 +110,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${config.packageName}`,
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
       () => this.fetchReleases(config),

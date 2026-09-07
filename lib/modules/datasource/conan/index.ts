@@ -26,8 +26,6 @@ export class ConanDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
-  override readonly caching = true;
-
   override readonly registryStrategy = 'merge';
 
   githubHttp: GithubHttp;
