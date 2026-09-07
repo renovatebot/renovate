@@ -1693,7 +1693,19 @@ describe('modules/platform/github/index', () => {
       expect(secondResult).toBeTrue();
     });
 
-    it('should return false if the query returns errors', async () => {
+    it('should reuse the default branch result from initRepo', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', {
+        mergeQueue: { id: 'MQ_kwDOBJLedM0dmQ' },
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.isBranchMergeQueueEnabled('master');
+
+      expect(res).toBeTrue();
+    });
+
+    it('should assume a merge queue if the query returns errors', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.post('/graphql').reply(200, {
@@ -1707,10 +1719,10 @@ describe('modules/platform/github/index', () => {
 
       const res = await github.isBranchMergeQueueEnabled('main');
 
-      expect(res).toBeFalse();
+      expect(res).toBeTrue();
     });
 
-    it('should return false on request error', async () => {
+    it('should assume a merge queue on request error', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.post('/graphql').replyWithError('unknown error');
@@ -1718,11 +1730,7 @@ describe('modules/platform/github/index', () => {
 
       const res = await github.isBranchMergeQueueEnabled('main');
 
-      expect(res).toBeFalse();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { err: expect.any(Error) },
-        'Merge queue detection: request error',
-      );
+      expect(res).toBeTrue();
     });
   });
 
