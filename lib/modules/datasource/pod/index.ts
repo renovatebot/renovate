@@ -1,10 +1,14 @@
 import crypto from 'node:crypto';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
 import { massageGithubUrl } from '../metadata.ts';
@@ -67,8 +71,8 @@ function handleError(packageName: string, err: HttpError): void {
     logger.debug(errorData, 'Authorization error');
   } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
-  } else if (err.message === HOST_DISABLED) {
-    logger.trace(errorData, 'Host disabled');
+  } else if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+    logger.trace(errorData, refusedHostMessage(err));
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
   }

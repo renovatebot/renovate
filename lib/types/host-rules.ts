@@ -10,6 +10,11 @@ export interface HostRule {
   /**
    * Whether requests to this host may reach internal addresses.
    *
+   * As they have been marked as trusted by the administrator:
+   *
+   * - when `internalHostAccess=block`, these are not blocked
+   * - when `internalHostAccess=warn`, no warning occurs
+   *
    * This is only allowed in global self-hosted configuration, and if found in repository or preset config, it is stripped.
    */
   allowInternal?: boolean;

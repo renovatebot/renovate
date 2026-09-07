@@ -1039,6 +1039,16 @@ export async function validateConfig(
               });
             }
 
+            if (configType !== 'global' && !isUndefined(rule.allowInternal)) {
+              errors.push({
+                // like disallowed `headers` below, `Security` only where the rules are actually applied - see the comment there
+                topic: parentPath
+                  ? ConfigValidationTopic.Error
+                  : ConfigValidationTopic.Security,
+                message: `hostRules \`allowInternal\` is only allowed in the self-hosted administrator's own configuration.`,
+              });
+            }
+
             if (!rule.headers) {
               continue;
             }

@@ -34,6 +34,7 @@ export type RenovateSplit =
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
+export type InternalHostAccess = 'allow' | 'warn' | 'block';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
@@ -252,6 +253,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
+  internalHostAccess?: InternalHostAccess;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;

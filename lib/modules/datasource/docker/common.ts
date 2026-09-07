@@ -1,5 +1,6 @@
 import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import {
+  HOST_BLOCKED,
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
 } from '../../../constants/error-messages.ts';
@@ -17,6 +18,7 @@ import type {
   HttpResponse,
   OutgoingHttpHeaders,
 } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
 import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
 import { coerceObject } from '../../../util/object.ts';
@@ -264,8 +266,11 @@ export async function getAuthHeaders(
       throw err;
     }
     /* v8 ignore if -- hostRules-disabled host is swallowed silently, not mocked in specs */
-    if (err.message === HOST_DISABLED) {
-      logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
+    if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+      logger.trace(
+        { registryHost, dockerRepository, err },
+        refusedHostMessage(err),
+      );
       return undefined;
     }
     logger.warn(

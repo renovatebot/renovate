@@ -885,7 +885,109 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 These `hostRules` fields are only allowed in self-hosted config, and are ignored (or rejected with a config error) if set in repository config or a preset.
 See [`hostRules`](./configuration-options.md#hostrules) for the rest of the available fields.
 
+When Renovate prepares outgoing HTTP traffic, it considers:
+
+> could this outbound HTTP call lead to configuration being included? (i.e. it's part of an `extends`, but _not_ part of i.e. `customDatasources`)
+
+If it is, Renovate treats it more cautiously, alongside the current configuration for [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess).
+
+| Could request become config | `internalHostAccess` setting | Host being requested                                                    | Result                   | How to allow traffic                                                                                                       |
+| --------------------------- | ---------------------------- | ----------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Yes                         | `internalHostAccess=block`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| Yes                         | `internalHostAccess=block`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| Yes                         | `internalHostAccess=block`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Blocked                  | Create a host rule setting `allowInternal=true`, scoped with a `hostType` or a URL-prefix `matchHost`                      |
+| No                          | `internalHostAccess=block`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| No                          | `internalHostAccess=block`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| No                          | `internalHostAccess=block`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Blocked                  | Create a host rule naming the host with `matchHost` (trusted<sup>1</sup>), or one setting `allowInternal=true`             |
+| Yes                         | `internalHostAccess=warn`    | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| Yes                         | `internalHostAccess=warn`    | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| Yes                         | `internalHostAccess=warn`    | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, with a WARN log | Create a host rule setting `allowInternal=true`, scoped with a `hostType` or a URL-prefix `matchHost`<sup>2</sup>          |
+| No                          | `internalHostAccess=warn`    | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| No                          | `internalHostAccess=warn`    | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| No                          | `internalHostAccess=warn`    | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, with a WARN log | Create a host rule naming the host with `matchHost` (trusted<sup>1</sup>), or one setting `allowInternal=true`<sup>2</sup> |
+| Yes                         | `internalHostAccess=allow`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| Yes                         | `internalHostAccess=allow`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| Yes                         | `internalHostAccess=allow`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, no warning      | Already allowed - no host rule needed                                                                                      |
+| No                          | `internalHostAccess=allow`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| No                          | `internalHostAccess=allow`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| No                          | `internalHostAccess=allow`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, no warning      | Already allowed - no host rule needed                                                                                      |
+
+<sup>1</sup>: a "trusted" host rule is one that's configured by the self-hosted administrator
+
+<sup>2</sup>: under `internalHostAccess=warn`, the request is allowed either way - the host rule only silences the WARN log, it isn't required for the request to go through
+
 ### `hostRules.allowInternal`
+
+As seen above, specifying `allowInternal` is required when Renovate interacts with private addresses, and is dependent on how [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess) is configured.
+
+If a host is being used i.e. in a `customDatasources` or a `registryUrl` configuration, then an _implicit_ grant is sufficient.
+For instance, if the self-hosted configuration authenticates to a private Artifactory deployment:
+
+```json {configType=global}
+{
+  "hostRules": [
+    {
+      "matchHost": "http://172.16.1.5:8081/artifactory",
+      "username": "renovate-user",
+      "password": "{{ secrets.ARTIFACTORY_PASSWORD }}"
+    }
+  ]
+}
+```
+
+!!! warning
+  An implicit grant does not depend on the rule carrying credentials.
+  _Any_ host rule in your own configuration whose `matchHost` matches the host grants internal access to it, even a rule that only sets something like `timeout` or `concurrentRequestLimit`.
+  This means that when you upgrade, the `hostRules` you already have silently become internal-access grants for the hosts they name.
+
+If there are hosts that you do not want Renovate to access, it is worth explicitly blocking them with:
+
+```json {configType=global}
+{
+  "hostRules": [
+    {
+      "matchHost": "http://localhost:8500/v1/flags/",
+      "allowInternal": false
+    }
+  ]
+}
+```
+
+Setting `allowInternal=false` is also how you keep a rule you need for another reason - credentials, for instance - without it granting internal access to the host it names.
+
+It is recommended to use a URL-prefix `matchHost` (as above) over a bare hostname when permitting loopback addresses, so that only the intended service - and not everything else running on the same host - becomes reachable.
+Include the port in that prefix for the same reason.
+A bare hostname `matchHost` also matches every subdomain of that host, so prefer a URL prefix whenever you want the grant to stay narrow.
+
+If a host is being used i.e. in an `extends`, an _explicit_ grant is required to permit fetching that configuration.
+This covers HTTP presets, and `npm:` presets - whose registry a repository can point at any host with its own `npmrc`.
+The grant must be deliberately scoped, by setting `allowInternal` on a rule with a `hostType`, or on one with a URL-prefix `matchHost`:
+
+```json {configType=global}
+{
+  "hostRules": [
+    {
+      "hostType": "preset",
+      "matchHost": "https://config-server.corp/renovate-presets/",
+      "allowInternal": true
+    },
+    {
+      "hostType": "npm",
+      "matchHost": "https://registry.corp/",
+      "allowInternal": true
+    }
+  ]
+}
+```
+
+The first rule permits HTTP presets from that server, the second `npm:` presets from that registry.
+
+!!! note
+  A URL-form `matchHost` is scoped enough on its own, so a `hostType` is not required.
+  A rule such as `{ "matchHost": "http://10.1.2.3", "allowInternal": true }` therefore permits config-fetching requests - such as HTTP presets - to that URL prefix, and not only lookups.
+  A bare hostname such as `{ "matchHost": "10.1.2.3", "allowInternal": true }` is not scoped, and permits lookups only.
+
+Cloud instance-metadata endpoints are always blocked, and cannot be permitted with this field.
 
 ## `httpCacheTtlDays`
 
@@ -961,6 +1063,55 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 
 !!! warning
   Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
+
+## `internalHostAccess`
+
+Controls whether Renovate may make HTTP requests to internal hosts: loopback, RFC1918 private ranges, link-local, carrier-grade NAT, IPv6 unique-local, and similar special-use addresses.
+This applies whether the URL names an IP address directly, or a hostname which resolves to one, and covers redirects too.
+
+- `warn` (default): requests to internal hosts are permitted, but each request that `block` would refuse is logged as a warning
+- `block`: requests to internal hosts are refused, unless the host is your configured platform `endpoint`, or is permitted by a `hostRule` in your own (self-hosted administrator) configuration
+- `allow`: requests to internal hosts are permitted, and not logged
+
+The default will become `block` in a future major release, so treat the warnings as the work to do before then.
+Hosted platforms, such as the Mend Renovate App, may run with `block` regardless of this setting.
+
+!!! warning
+  `allow` is a migration escape hatch, and we plan to remove it in a future major release.
+  After that, every internal host Renovate should reach needs a `hostRules` entry permitting it, and there is no way to silence the warnings in bulk.
+  Use the time before then to add those grants, rather than to keep `allow` set.
+
+The policy applies no matter where the URL came from - repository configuration such as `extends` presets or `registryUrls`, package file contents, or your own configuration - if Renovate should be able to reach an internal host, you need to permit it with a `hostRule` rather than setting `allow`.
+
+For most deployments there is nothing to do: internal registries nearly always already have a `hostRules` entry carrying their credentials, which permits them implicitly, and so are never warned about.
+Hosts without one only need naming:
+
+```json {configType=global}
+{
+  "hostRules": [
+    { "matchHost": "artifactory.corp" },
+    {
+      "hostType": "preset",
+      "matchHost": "https://config-server.corp/renovate-presets/",
+      "allowInternal": true
+    }
+  ]
+}
+```
+
+The first rule permits an internal registry the same way a credentialed rule would, and the second deliberately permits fetching HTTP presets from an internal host.
+Anything whose response becomes configuration - HTTP presets, and `npm:` presets - always requires such an explicit, scoped [`allowInternal`](./self-hosted-configuration.md#hostrulesallowinternal) grant, even for a host your other rules already permit.
+
+Once your grants are in place and the warnings have stopped, set `internalHostAccess=block` to enforce the policy today, rather than waiting for the default to change.
+Set `internalHostAccess=allow` only as a temporary escape hatch while you work out which hosts to permit.
+
+Cloud instance-metadata endpoints (such as `169.254.169.254`, `169.254.170.2` and `metadata.google.internal`) are **always** blocked, regardless of `internalHostAccess`' setting, as Renovate's HTTP layer never has a legitimate reason to request them.
+This does not affect Renovate's cloud environment detection or cloud SDK authentication, which do not use Renovate's HTTP layer - see [`useCloudMetadataServices`](#usecloudmetadataservices).
+
+If you run Renovate behind a proxy (`HTTP_PROXY` or `HTTPS_PROXY`), the proxy resolves the target hostname, so Renovate cannot check the address it actually connects to.
+Renovate still checks the URL itself and every redirect target, and resolves the hostname up front as a best-effort check, but as the proxy resolves the name again the two answers can differ - such as with DNS rebinding, or split-horizon DNS.
+Renovate lets the request through when it cannot resolve the hostname itself, which is common in locked-down proxy environments.
+Restrict what your proxy may reach with egress controls on the proxy, for defense in depth.
 
 ## `logContext`
 

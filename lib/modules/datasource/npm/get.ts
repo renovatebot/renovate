@@ -1,6 +1,9 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -184,6 +187,7 @@ export async function getDependency(
     const ignoredStatusCodes = [401, 402, 403, 404];
     const ignoredResponseCodes = ['ENOTFOUND'];
     if (
+      actualError.message === HOST_BLOCKED ||
       actualError.message === HOST_DISABLED ||
       ignoredStatusCodes.includes(actualError.statusCode) ||
       ignoredResponseCodes.includes(actualError.code)

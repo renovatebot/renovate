@@ -7,7 +7,8 @@ import { parseUrl } from '../../../util/url.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import { PRESET_DEP_NOT_FOUND, parsePreset } from '../util.ts';
 
-const http = new Http('preset');
+// every response this instance fetches becomes Renovate configuration, so an internal host needs a deliberately-scoped `allowInternal` grant
+const http = new Http('preset', { responseBecomesConfig: true });
 
 export async function getPreset({
   repo: url,
