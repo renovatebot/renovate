@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -25,7 +26,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)Cargo\\.toml$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   CrateDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,

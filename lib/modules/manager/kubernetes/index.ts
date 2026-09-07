@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { KubernetesApiDatasource } from '../../datasource/kubernetes-api/index.ts';
 
@@ -11,7 +12,7 @@ export const defaultConfig = {
   managerFilePatterns: [],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DockerDatasource.id,
   KubernetesApiDatasource.id,
 ];

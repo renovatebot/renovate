@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -21,7 +22,7 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DockerDatasource.id,
   GolangVersionDatasource.id,
   NodeVersionDatasource.id,

@@ -192,7 +192,7 @@ describe('other/validate-supported-datasources', () => {
   // custom managers support every datasource and declare `['*']`
   for (const manager of getManagerList()) {
     it(`${manager} declares every datasource it can emit`, async () => {
-      const declared = get(manager, 'supportedDatasources')!;
+      const declared: string[] = get(manager, 'supportedDatasources')!;
 
       const { emitted, unknownHelpers } = await getEmittedDatasources(
         manager,

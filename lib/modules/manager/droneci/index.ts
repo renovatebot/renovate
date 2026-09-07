@@ -1,8 +1,10 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { extractPackageFile } from './extract.ts';
 
 export { knownDepTypes } from './dep-types.ts';
+
 export { extractPackageFile };
 
 export const url = 'https://docs.drone.io';
@@ -12,4 +14,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)\\.drone\\.yml$/'],
 };
 
-export const supportedDatasources = [DockerDatasource.id];
+export const supportedDatasources: DatasourceName[] = [DockerDatasource.id];

@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import * as nodeVersioning from '../../versioning/node/index.ts';
 
@@ -14,4 +15,6 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const supportedDatasources = [NodeVersionDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  NodeVersionDatasource.id,
+];

@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -25,7 +26,7 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   BitbucketTagsDatasource.id,
   DockerDatasource.id,
   GitTagsDatasource.id,

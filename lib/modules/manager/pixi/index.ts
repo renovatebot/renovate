@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
@@ -20,7 +21,7 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   CondaDatasource.id,
   GitRefsDatasource.id,
   PypiDatasource.id,

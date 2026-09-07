@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 
@@ -11,7 +12,7 @@ export const defaultConfig = {
 };
 
 export const categories: Category[] = ['docker', 'ci', 'cd'];
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DockerDatasource.id,
   BuildpacksRegistryDatasource.id,
 ];

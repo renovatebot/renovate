@@ -3,6 +3,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 
 export const categories: Category[] = ['python'];
 
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -16,6 +17,6 @@ export const defaultConfig = {
   versioning: pep440.id,
 };
 
-export const supportedDatasources = [GitTagsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [GitTagsDatasource.id];
 
 export { knownDepTypes } from './dep-types.ts';

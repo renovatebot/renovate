@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { TypstDatasource } from '../../datasource/typst/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -9,4 +10,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/\\.typ$/'],
 };
 
-export const supportedDatasources = [TypstDatasource.id];
+export const supportedDatasources: DatasourceName[] = [TypstDatasource.id];

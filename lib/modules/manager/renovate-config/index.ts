@@ -1,4 +1,5 @@
 import { getConfigFileNames } from '../../../config/app-strings.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { allToolConfig } from '../../../util/exec/containerbase.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -12,7 +13,7 @@ export const defaultConfig = {
   ),
 };
 
-export const supportedDatasources = Array.from(
+export const supportedDatasources: DatasourceName[] = Array.from(
   new Set([
     GithubTagsDatasource.id,
     GitlabTagsDatasource.id,

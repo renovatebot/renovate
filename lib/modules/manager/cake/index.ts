@@ -1,5 +1,6 @@
 import moo from 'moo';
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { regEx } from '../../../util/regex.ts';
 import { isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
@@ -14,7 +15,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/\\.cake$/'],
 };
 
-export const supportedDatasources = [NugetDatasource.id];
+export const supportedDatasources: DatasourceName[] = [NugetDatasource.id];
 
 /* oxlint-disable renovate/require-regex-util -- moo lexer patterns must be native RegExp: moo recompiles their source with the native engine and rejects RE2 instances (TODO #12870) */
 const lexer = moo.states({

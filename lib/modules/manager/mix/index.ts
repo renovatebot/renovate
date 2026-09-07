@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexDatasource } from '../../datasource/hex/index.ts';
@@ -18,7 +19,7 @@ export const defaultConfig = {
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['mix.lock'];
 export const lockFileMaintenanceIsDelegatedToPackageManager = true;
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GithubTagsDatasource.id,
   GitTagsDatasource.id,
   HexDatasource.id,

@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -12,6 +13,6 @@ export const defaultConfig = {
   managerFilePatterns: ['/\\.gitlab-ci\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [GitlabTagsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [GitlabTagsDatasource.id];
 
 export { knownDepTypes } from './dep-types.ts';

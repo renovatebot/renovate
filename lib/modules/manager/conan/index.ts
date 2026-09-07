@@ -6,6 +6,7 @@ import type { Category } from '../../../constants/index.ts';
 
 export { getRangeStrategy } from './range.ts';
 
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { ConanDatasource } from '../../datasource/conan/index.ts';
 import * as conan from '../../versioning/conan/index.ts';
 
@@ -21,4 +22,4 @@ export const defaultConfig = {
   versioning: conan.id,
 };
 
-export const supportedDatasources = [ConanDatasource.id];
+export const supportedDatasources: DatasourceName[] = [ConanDatasource.id];

@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import type { RangeStrategy } from '../../../types/index.ts';
 import { HackageDatasource } from '../../datasource/hackage/index.ts';
 import * as pvpVersioning from '../../versioning/pvp/index.ts';
@@ -17,7 +18,7 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['haskell'];
 
-export const supportedDatasources = [HackageDatasource.id];
+export const supportedDatasources: DatasourceName[] = [HackageDatasource.id];
 
 export function extractPackageFile(content: string): PackageFileContent {
   const deps = [];

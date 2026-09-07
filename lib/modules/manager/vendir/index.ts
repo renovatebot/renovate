@@ -3,6 +3,7 @@ import { DockerDatasource } from '../../datasource/docker/index.ts';
 
 export const categories: Category[] = ['helm', 'kubernetes'];
 
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
@@ -22,7 +23,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)vendir\\.yml$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DockerDatasource.id,
   GithubReleasesDatasource.id,
   GitRefsDatasource.id,

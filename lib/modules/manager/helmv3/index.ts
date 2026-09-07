@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 
@@ -22,4 +23,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)Chart\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [DockerDatasource.id, HelmDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  DockerDatasource.id,
+  HelmDatasource.id,
+];

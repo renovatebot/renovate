@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -10,6 +11,7 @@ import { updateArtifacts } from './artifacts.ts';
 import { extractPackageFile } from './extract.ts';
 
 export { knownDepTypes } from './dep-types.ts';
+
 export { extractPackageFile, updateArtifacts };
 
 export const url = 'https://bazel.build/docs';
@@ -23,7 +25,7 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DockerDatasource.id,
   GithubReleasesDatasource.id,
   GithubTagsDatasource.id,

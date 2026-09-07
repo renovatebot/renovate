@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import * as gitVersioning from '../../versioning/git/index.ts';
 
@@ -13,4 +14,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)\\.gitmodules$/'],
 };
 
-export const supportedDatasources = [GitRefsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [GitRefsDatasource.id];

@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BazelDatasource } from '../../datasource/bazel/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -19,7 +20,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/|\\.)MODULE\\.bazel$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   BazelDatasource.id,
   CrateDatasource.id,
   DockerDatasource.id,

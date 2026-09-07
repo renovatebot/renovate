@@ -3,6 +3,7 @@ import { FlutterVersionDatasource } from '../../datasource/flutter-version/index
 
 export const categories: Category[] = ['dart'];
 
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 
 export { extractPackageFile } from './extract.ts';
@@ -15,4 +16,6 @@ export const defaultConfig = {
   versioning: semverVersioning.id,
 };
 
-export const supportedDatasources = [FlutterVersionDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  FlutterVersionDatasource.id,
+];

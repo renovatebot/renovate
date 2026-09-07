@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -17,4 +18,4 @@ export const defaultConfig = {
   datasource: GitTagsDatasource.id,
 };
 
-export const supportedDatasources = [GitTagsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [GitTagsDatasource.id];

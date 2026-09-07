@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
@@ -33,7 +34,7 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DockerDatasource.id,
   DotnetVersionDatasource.id,
   NugetDatasource.id,

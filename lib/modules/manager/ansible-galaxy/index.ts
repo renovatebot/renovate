@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GalaxyDatasource } from '../../datasource/galaxy/index.ts';
 import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -14,7 +15,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)(galaxy|requirements)(\\.ansible)?\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GalaxyCollectionDatasource.id,
   GalaxyDatasource.id,
   GithubTagsDatasource.id,

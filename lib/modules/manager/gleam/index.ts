@@ -3,6 +3,7 @@ import { HexDatasource } from '../../datasource/hex/index.ts';
 
 export const categories: Category[] = ['elixir'];
 
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -20,4 +21,4 @@ export const defaultConfig = {
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['manifest.toml'];
 export const lockFileMaintenanceIsDelegatedToPackageManager = true;
-export const supportedDatasources = [HexDatasource.id];
+export const supportedDatasources: DatasourceName[] = [HexDatasource.id];

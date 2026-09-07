@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DenoDatasource } from '../../datasource/deno/index.ts';
 import { JsrDatasource } from '../../datasource/jsr/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
@@ -18,7 +19,7 @@ export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['deno.lock'];
 export const lockFileMaintenanceIsDelegatedToPackageManager = true;
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   NpmDatasource.id,
   JsrDatasource.id,
   DenoDatasource.id,

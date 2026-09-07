@@ -1,4 +1,5 @@
 import type { XmlDocument } from 'xmldoc';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -65,7 +66,7 @@ function extractVersions(metadata: XmlDocument): MetadataResults {
 export const defaultRegistryUrls = [MAVEN_REPO];
 
 export class MavenDatasource extends Datasource {
-  static id = 'maven';
+  static readonly id: DatasourceName = 'maven';
 
   override readonly caching = true;
 
@@ -82,7 +83,7 @@ export class MavenDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `scm` tags in the results.';
 
-  constructor(id = MavenDatasource.id) {
+  constructor(id: string = MavenDatasource.id) {
     super(id);
   }
 

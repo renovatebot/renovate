@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -28,7 +29,7 @@ export const defaultConfig = {
   versioning: composerVersioningId,
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   BitbucketTagsDatasource.id,
   GithubTagsDatasource.id,
   GitTagsDatasource.id,

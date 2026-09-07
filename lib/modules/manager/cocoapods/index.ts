@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -17,7 +18,7 @@ export const defaultConfig = {
   versioning: rubyVersioning.id,
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GitTagsDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,

@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { id as versioning } from '../../versioning/semver/index.ts';
 
@@ -12,4 +13,6 @@ export const defaultConfig = {
   versioning,
 };
 
-export const supportedDatasources = [GithubReleasesDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  GithubReleasesDatasource.id,
+];

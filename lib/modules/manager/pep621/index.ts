@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -23,7 +24,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)pyproject\\.toml$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   GitRefsDatasource.id,

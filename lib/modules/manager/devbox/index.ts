@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DevboxDatasource } from '../../datasource/devbox/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -11,4 +12,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)devbox\\.json$/'],
 };
 
-export const supportedDatasources = [DevboxDatasource.id];
+export const supportedDatasources: DatasourceName[] = [DevboxDatasource.id];

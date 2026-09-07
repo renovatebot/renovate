@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 
 export { knownDepTypes } from './dep-types.ts';
@@ -16,4 +17,6 @@ export const defaultConfig = {
 };
 
 // Only from GitHub Releases: https://github.com/terraform-linters/tflint/blob/master/docs/developer-guide/plugins.md#4-creating-a-github-release
-export const supportedDatasources = [GithubReleasesDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  GithubReleasesDatasource.id,
+];

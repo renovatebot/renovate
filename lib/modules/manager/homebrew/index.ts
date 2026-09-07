@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
@@ -12,7 +13,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/^Formula/\\w*/?[^/]+[.]rb$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GithubTagsDatasource.id,
   GithubReleasesDatasource.id,
   NpmDatasource.id,

@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 
@@ -28,4 +29,7 @@ export const defaultConfig = {
   },
 };
 
-export const supportedDatasources = [GithubTagsDatasource.id, NpmDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  GithubTagsDatasource.id,
+  NpmDatasource.id,
+];

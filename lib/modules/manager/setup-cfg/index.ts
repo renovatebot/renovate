@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { id as versioning } from '../../versioning/pep440/index.ts';
 
@@ -14,6 +15,6 @@ export const defaultConfig = {
   versioning,
 };
 
-export const supportedDatasources = [PypiDatasource.id];
+export const supportedDatasources: DatasourceName[] = [PypiDatasource.id];
 
 export { knownDepTypes } from './dep-types.ts';

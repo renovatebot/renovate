@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { HermitDatasource } from '../../datasource/hermit/index.ts';
 import { id as versionId } from '../../versioning/hermit/index.ts';
 import { defaultConfig as partialDefaultConfig } from './default-config.ts';
@@ -14,4 +15,4 @@ export const defaultConfig = {
   versioning: versionId,
 };
 
-export const supportedDatasources = [HermitDatasource.id];
+export const supportedDatasources: DatasourceName[] = [HermitDatasource.id];

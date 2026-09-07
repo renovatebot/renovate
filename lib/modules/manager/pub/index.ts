@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DartDatasource } from '../../datasource/dart/index.ts';
 import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
@@ -19,7 +20,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)pubspec\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DartDatasource.id,
   DartVersionDatasource.id,
   FlutterVersionDatasource.id,

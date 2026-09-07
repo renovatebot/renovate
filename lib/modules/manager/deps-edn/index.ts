@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { ClojureDatasource } from '../../datasource/clojure/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -18,7 +19,7 @@ export const defaultConfig = {
   versioning: mavenVersioning.id,
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   BitbucketTagsDatasource.id,
   ClojureDatasource.id,
   GithubTagsDatasource.id,

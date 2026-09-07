@@ -1,5 +1,5 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { getEnv } from '../../../util/env.ts';
-
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -24,7 +24,7 @@ export const defaultConfig = {
       ],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   ForgejoTagsDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,

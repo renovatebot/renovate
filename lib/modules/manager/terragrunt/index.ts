@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
@@ -23,7 +24,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)terragrunt\\.hcl$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GitTagsDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,

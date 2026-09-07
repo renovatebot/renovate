@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 
@@ -13,4 +14,6 @@ export const defaultConfig = {
   extractVersion: '^v(?<version>.+)$',
 };
 
-export const supportedDatasources = [GithubReleasesDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  GithubReleasesDatasource.id,
+];

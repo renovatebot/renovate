@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
@@ -14,4 +15,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)[\\w-]*requirements([-._]\\w+)?\\.(txt|pip)$/'],
 };
 
-export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  PypiDatasource.id,
+  GitTagsDatasource.id,
+];

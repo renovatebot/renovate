@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { CpanDatasource } from '../../datasource/cpan/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 
@@ -14,7 +15,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)cpanfile$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   CpanDatasource.id,
   GithubTagsDatasource.id,
 ];

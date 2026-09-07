@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -19,7 +20,7 @@ export const defaultConfig = {
   managerFilePatterns: [`/${systemManifestFileNameRegex}/`],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GithubReleasesDatasource.id,
   GitRefsDatasource.id,
   GithubTagsDatasource.id,

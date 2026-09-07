@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { ClojureDatasource } from '../../datasource/clojure/index.ts';
 import * as mavenVersioning from '../../versioning/maven/index.ts';
 
@@ -13,4 +14,4 @@ export const defaultConfig = {
   versioning: mavenVersioning.id,
 };
 
-export const supportedDatasources = [ClojureDatasource.id];
+export const supportedDatasources: DatasourceName[] = [ClojureDatasource.id];

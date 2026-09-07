@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 
 export { extractPackageFile } from './extract.ts';
@@ -13,6 +14,6 @@ export const defaultConfig = {
   managerFilePatterns: [],
 };
 
-export const supportedDatasources = [GoDatasource.id];
+export const supportedDatasources: DatasourceName[] = [GoDatasource.id];
 
 export { knownDepTypes } from './dep-types.ts';

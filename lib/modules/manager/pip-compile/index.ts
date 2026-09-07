@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
@@ -24,7 +25,7 @@ export const defaultConfig = {
   },
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   GitTagsDatasource.id,
   PypiDatasource.id,
   PythonVersionDatasource.id,

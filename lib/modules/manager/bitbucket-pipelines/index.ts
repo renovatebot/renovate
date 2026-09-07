@@ -1,9 +1,11 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { extractPackageFile } from './extract.ts';
 
 export { knownDepTypes } from './dep-types.ts';
+
 export { extractPackageFile };
 
 export const url =
@@ -17,7 +19,7 @@ export const defaultConfig = {
   managerFilePatterns: ['**/*-pipelines.yml'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   BitbucketTagsDatasource.id,
   DockerDatasource.id,
 ];

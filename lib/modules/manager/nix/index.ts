@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -17,4 +18,4 @@ export const defaultConfig = {
   enabled: false,
 };
 
-export const supportedDatasources = [GitRefsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [GitRefsDatasource.id];

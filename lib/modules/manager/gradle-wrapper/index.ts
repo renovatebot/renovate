@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GradleVersionDatasource } from '../../datasource/gradle-version/index.ts';
 import { id as versioning } from '../../versioning/gradle/index.ts';
 
@@ -14,4 +15,6 @@ export const defaultConfig = {
   versioning,
 };
 
-export const supportedDatasources = [GradleVersionDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  GradleVersionDatasource.id,
+];

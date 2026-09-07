@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
+import type { DatasourceName } from '../../datasource-list.generated.ts';
 import type { VersioningName } from '../../versioning-list.generated.ts';
 
 export interface ConstraintDefinition {
@@ -278,7 +279,7 @@ export interface ToolConstraint {
 }
 
 export interface ToolConfig {
-  datasource: string;
+  datasource: DatasourceName;
   extractVersion?: string;
   packageName: string;
   versioning: VersioningName;

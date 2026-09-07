@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { deduplicateArray } from '../../../util/array.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -38,7 +39,7 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-const backendDatasources = {
+const backendDatasources: Record<string, DatasourceName[]> = {
   core: [
     GithubReleasesDatasource.id,
     GithubTagsDatasource.id,
@@ -79,6 +80,6 @@ export const maybeSupportedBackendDatasources = new Set<string>(
   ),
 );
 
-export const supportedDatasources = deduplicateArray(
+export const supportedDatasources: DatasourceName[] = deduplicateArray(
   Object.values(backendDatasources).flat(),
-).sort();
+).sort((a, b) => a.localeCompare(b));

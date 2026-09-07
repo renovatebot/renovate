@@ -1,3 +1,4 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
@@ -21,7 +22,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)\\.tool-versions$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   DartVersionDatasource.id,
   DockerDatasource.id,
   DotnetVersionDatasource.id,

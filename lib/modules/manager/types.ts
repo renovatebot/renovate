@@ -6,6 +6,7 @@ import type {
   ValidationMessage,
 } from '../../config/types.ts';
 import type { Category } from '../../constants/index.ts';
+import type { DatasourceName } from '../../datasource-list.generated.ts';
 import type {
   MaybePromise,
   ModuleApi,
@@ -353,7 +354,12 @@ interface ManagerApiBase extends ModuleApi {
 
   lockFileNames?: string[];
   supersedesManagers?: string[];
-  supportedDatasources: string[];
+  /**
+   * Every datasource this manager can set on an extracted dependency, or
+   * `['*']` for custom managers. Rendered into the manager docs and checked
+   * against the sources by `test/other/validate-supported-datasources.spec.ts`.
+   */
+  supportedDatasources: DatasourceName[] | ['*'];
 
   bumpPackageVersion?(
     content: string,

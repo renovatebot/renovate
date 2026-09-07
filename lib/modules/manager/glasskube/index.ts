@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages/index.ts';
 
 export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
@@ -10,4 +11,6 @@ export const defaultConfig = {
   managerFilePatterns: [],
 };
 
-export const supportedDatasources = [GlasskubePackagesDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  GlasskubePackagesDatasource.id,
+];

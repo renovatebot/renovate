@@ -14,7 +14,7 @@ export const categories: Category[] = ['custom'];
 export const defaultConfig = {
   pinDigests: false,
 };
-export const supportedDatasources = ['*'];
+export const supportedDatasources: ['*'] = ['*'];
 export const displayName = 'JSONata';
 
 export async function extractPackageFile(

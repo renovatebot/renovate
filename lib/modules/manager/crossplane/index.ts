@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 
 export { knownDepTypes } from './dep-types.ts';
@@ -12,4 +13,4 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['kubernetes', 'iac'];
 
-export const supportedDatasources = [DockerDatasource.id];
+export const supportedDatasources: DatasourceName[] = [DockerDatasource.id];

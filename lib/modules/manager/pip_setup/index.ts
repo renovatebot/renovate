@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
 export { extractPackageFile } from './extract.ts';
@@ -12,4 +13,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)setup\\.py$/'],
 };
 
-export const supportedDatasources = [PypiDatasource.id];
+export const supportedDatasources: DatasourceName[] = [PypiDatasource.id];

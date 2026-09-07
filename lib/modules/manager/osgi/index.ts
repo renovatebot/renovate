@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 
 export const categories: Category[] = ['java'];
@@ -11,4 +12,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)src/main/features/.+\\.json$/'],
 };
 
-export const supportedDatasources = [MavenDatasource.id];
+export const supportedDatasources: DatasourceName[] = [MavenDatasource.id];

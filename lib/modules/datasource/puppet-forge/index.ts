@@ -4,7 +4,7 @@ import { PUPPET_FORGE } from './common.ts';
 import { PuppetModule } from './schema.ts';
 
 export class PuppetForgeDatasource extends Datasource {
-  static id = 'puppet-forge';
+  static readonly id = 'puppet-forge';
 
   constructor() {
     super(PuppetForgeDatasource.id);

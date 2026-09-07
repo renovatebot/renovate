@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
@@ -12,4 +13,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)batect(-bundle)?\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [DockerDatasource.id, GitTagsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  DockerDatasource.id,
+  GitTagsDatasource.id,
+];

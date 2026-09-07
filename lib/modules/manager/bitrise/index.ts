@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { BitriseDatasource } from '../../datasource/bitrise/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { extractPackageFile } from './extract.ts';
@@ -15,7 +16,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)bitrise\\.ya?ml$/'],
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   BitriseDatasource.id,
   GitTagsDatasource.id,
 ];

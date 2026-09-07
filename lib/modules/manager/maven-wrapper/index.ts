@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -14,4 +15,4 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [MavenDatasource.id];
+export const supportedDatasources: DatasourceName[] = [MavenDatasource.id];

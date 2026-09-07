@@ -1,7 +1,7 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { id, isValid } from '../../versioning/npm/index.ts';
-
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 export const categories: Category[] = ['js'];
@@ -11,7 +11,7 @@ export const defaultConfig = {
   versioning: id,
 };
 
-export const supportedDatasources = [NpmDatasource.id];
+export const supportedDatasources: DatasourceName[] = [NpmDatasource.id];
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   if (!content) {

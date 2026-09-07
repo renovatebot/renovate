@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 
 export { knownDepTypes } from './dep-types.ts';
@@ -14,4 +15,6 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)rust-toolchain(\\.toml)?$/'],
 };
 
-export const supportedDatasources = [RustVersionDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  RustVersionDatasource.id,
+];

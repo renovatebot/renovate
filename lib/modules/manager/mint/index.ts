@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 
 export { extractPackageFile } from './extract.ts';
@@ -10,4 +11,4 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)Mintfile$/'],
 };
 
-export const supportedDatasources = [GitTagsDatasource.id];
+export const supportedDatasources: DatasourceName[] = [GitTagsDatasource.id];

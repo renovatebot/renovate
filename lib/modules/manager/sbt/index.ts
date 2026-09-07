@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import { SbtPackageDatasource } from '../../datasource/sbt-package/index.ts';
@@ -22,7 +23,7 @@ export const defaultConfig = {
   versioning: ivyVersioning.id,
 };
 
-export const supportedDatasources = [
+export const supportedDatasources: DatasourceName[] = [
   MavenDatasource.id,
   SbtPackageDatasource.id,
   SbtPluginDatasource.id,

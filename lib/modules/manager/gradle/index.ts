@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import * as gradleVersioning from '../../versioning/gradle/index.ts';
 
@@ -30,4 +31,4 @@ export const defaultConfig = {
   versioning: gradleVersioning.id,
 };
 
-export const supportedDatasources = [MavenDatasource.id];
+export const supportedDatasources: DatasourceName[] = [MavenDatasource.id];

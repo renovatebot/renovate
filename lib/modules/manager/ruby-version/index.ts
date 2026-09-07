@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as rubyVersioning from '../../versioning/ruby/index.ts';
 
@@ -12,4 +13,6 @@ export const defaultConfig = {
   versioning: rubyVersioning.id,
 };
 
-export const supportedDatasources = [RubyVersionDatasource.id];
+export const supportedDatasources: DatasourceName[] = [
+  RubyVersionDatasource.id,
+];

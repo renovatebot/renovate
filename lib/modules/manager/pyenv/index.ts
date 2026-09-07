@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import * as dockerVersioning from '../../versioning/docker/index.ts';
 
@@ -14,4 +15,4 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const supportedDatasources = [DockerDatasource.id];
+export const supportedDatasources: DatasourceName[] = [DockerDatasource.id];
