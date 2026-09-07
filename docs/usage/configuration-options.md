@@ -358,6 +358,7 @@ Define a list of policy UUIDs which are allowed to be bypassed when merging the 
   You can acquire list of the policy UUIDs by using the [Azure DevOps REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/policy/types/list) to list the policies for a repository.
 
 Specific API request to acquire the policy UUIDs configured within given organization and project:
+
 ```http request
 GET https://dev.azure.com/{organization}/{project}/_apis/policy/types?api-version=7.1
 ```
@@ -366,7 +367,7 @@ Example:
 
 ```json5
 {
-  "azureBypassPolicyTypeIds": [
+  azureBypassPolicyTypeIds: [
     "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd", // Approval count policy
     "0609b952-1397-4640-95ec-e00a01b2c241", // Build policy
     "fd2167ab-b0be-447a-8ec8-39368250530e", // Required reviewers policy

@@ -1466,7 +1466,7 @@ const options: Readonly<RenovateOptions>[] = [
     name: 'azureBypassPolicyReason',
     description: 'The `reason` to use when bypassing policies on Azure DevOps.',
     type: 'string',
-    default: "Auto-merge by Renovate",
+    default: 'Auto-merge by Renovate',
     supportedPlatforms: ['azure'],
   },
   {
