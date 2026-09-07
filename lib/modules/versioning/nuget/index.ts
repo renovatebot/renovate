@@ -7,11 +7,7 @@ import {
   rangeToString,
   tryBump,
 } from './range.ts';
-import type {
-  NugetBracketRange,
-  NugetFloatingRange,
-  NugetVersion,
-} from './types.ts';
+import type { NugetBracketRange, NugetFloatingRange } from './types.ts';
 import { compare, versionToString } from './version.ts';
 
 export const id = 'nuget';
@@ -163,110 +159,39 @@ class NugetVersioningApi implements VersioningApi {
   }
 
   getSatisfyingVersion(versions: string[], range: string): string | null {
-    const r = parseRange(range);
-    if (r) {
-      let result: string | null = null;
-      let vMax: NugetVersion | undefined;
-      for (const version of versions) {
-        const v = parseVersion(version);
-        if (!v) {
-          continue;
-        }
+    const candidates = versions.filter((version) =>
+      this.matches(version, range),
+    );
 
-        if (!matches(v, r)) {
-          continue;
-        }
-
-        if (!vMax || compare(v, vMax) > 0) {
-          vMax = v;
-          result = version;
-        }
+    let result: string | null = null;
+    for (const version of candidates) {
+      if (
+        !result ||
+        compare(parseVersion(version)!, parseVersion(result)!) > 0
+      ) {
+        result = version;
       }
-
-      return result;
     }
 
-    const u = parseVersion(range);
-    if (u) {
-      let result: string | null = null;
-      let vMax: NugetVersion | undefined;
-      for (const version of versions) {
-        const v = parseVersion(version);
-        if (!v) {
-          continue;
-        }
-
-        // A bare version acts as a min-version range, but it should
-        // still respect stability: a stable pin must not match a
-        // pre-release version.
-        if (v.prerelease && !u.prerelease) {
-          continue;
-        }
-
-        if (compare(v, u) < 0) {
-          continue;
-        }
-
-        if (!vMax || compare(v, vMax) > 0) {
-          vMax = v;
-          result = version;
-        }
-      }
-
-      return result;
-    }
-
-    return null;
+    return result;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
-    const r = parseRange(range);
-    if (r) {
-      let result: string | null = null;
-      let vMin: NugetVersion | undefined;
-      for (const version of versions) {
-        const v = parseVersion(version);
-        if (!v) {
-          continue;
-        }
+    const candidates = versions.filter((version) =>
+      this.matches(version, range),
+    );
 
-        if (!matches(v, r)) {
-          continue;
-        }
-
-        if (!vMin || compare(v, vMin) < 0) {
-          result = version;
-          vMin = v;
-        }
+    let result: string | null = null;
+    for (const version of candidates) {
+      if (
+        !result ||
+        compare(parseVersion(version)!, parseVersion(result)!) < 0
+      ) {
+        result = version;
       }
-
-      return result;
     }
 
-    const u = parseVersion(range);
-    if (u) {
-      let result: string | null = null;
-      let vMin: NugetVersion | undefined;
-      for (const version of versions) {
-        const v = parseVersion(version);
-        if (!v) {
-          continue;
-        }
-
-        if (compare(v, u) < 0) {
-          continue;
-        }
-
-        if (!vMin || compare(v, vMin) < 0) {
-          result = version;
-          vMin = v;
-        }
-      }
-
-      return result;
-    }
-
-    return null;
+    return result;
   }
 
   getPinnedValue(newVersion: string): string {

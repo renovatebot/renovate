@@ -411,6 +411,7 @@ describe('modules/versioning/nuget/index', () => {
       ${['5.0.17-preview.1', '5.0.17', '6.0.0-preview.1']}                        | ${'5.0.17'}                  | ${'5.0.17'}
       ${['4.0.0-preview.8', '5.0.17', '6.0.0-preview.1']}                         | ${'4.0.0-preview.8'}         | ${'6.0.0-preview.1'}
       ${['6.0.0-preview.4.21253.5', '6.0.0-preview.3.21201.13']}                  | ${'6.0.0-preview.4.21253.5'} | ${'6.0.0-preview.4.21253.5'}
+      ${['2.0.0', '1.5.0']}                                                       | ${'[1,3)'}                   | ${'2.0.0'}
     `(
       'getSatisfyingVersion($versions, $range) === "$expected"',
       ({ versions, range, expected }) => {
@@ -427,6 +428,7 @@ describe('modules/versioning/nuget/index', () => {
       ${['1', '2', '3']}                              | ${'foobar'} | ${null}
       ${['0.1', '1-beta', '1', '1.1', '2-beta', '2']} | ${'[1,2)'}  | ${'1'}
       ${['foobar', '0.9.0', '1.0.0', '1.0.1']}        | ${'1.0.0'}  | ${'1.0.0'}
+      ${['1.0.1-beta.1', '1.0.2']}                    | ${'1.0.0'}  | ${'1.0.2'}
     `(
       'minSatisfyingVersion($versions, $range) === $expected',
       ({ versions, range, expected }) => {
