@@ -19,7 +19,11 @@ import * as yaml from '../../../util/yaml.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { fileChangesToArtifactResults } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+} from '../util.ts';
 import { generateHelmEnvs, generateLoginCmd } from './common.ts';
 import { isOCIRegistry, removeOCIPrefix } from './oci.ts';
 import type { ChartDefinition, Repository, RepositoryRule } from './types.ts';
@@ -159,13 +163,7 @@ export async function updateArtifacts({
         !isString(newHelmLockContent) ||
         isHelmLockChanged(existingLockFileContent, newHelmLockContent);
       if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newHelmLockContent,
-          },
-        });
+        fileChanges.push(fileAddition(lockFileName, newHelmLockContent));
       } else {
         logger.debug('Chart.lock is unchanged');
       }
@@ -193,14 +191,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Helm lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }
 

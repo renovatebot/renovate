@@ -12,7 +12,7 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../types.ts';
-import { fileChangesToArtifactResults } from '../util.ts';
+import { artifactErrorResult, fileChangesToArtifactResults } from '../util.ts';
 
 function dependencyUrl(dep: PackageDependency): string {
   const url = dep.packageName!;
@@ -71,13 +71,6 @@ export async function updateArtifacts(
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.stderr,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

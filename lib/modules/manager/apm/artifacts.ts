@@ -12,7 +12,7 @@ import {
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { fileChangesToArtifactResults } from '../util.ts';
+import { artifactErrorResult, fileChangesToArtifactResults } from '../util.ts';
 
 export async function updateArtifacts({
   packageFileName,
@@ -74,13 +74,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, `Failed to update ${lockFileName}`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: `${err}`,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

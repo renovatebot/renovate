@@ -10,7 +10,11 @@ import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { fileChangesToArtifactResults } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+} from '../util.ts';
 
 const gitExec = withGitEnvironment();
 
@@ -53,13 +57,7 @@ export async function updateArtifacts({
     const newVendirLockContent = await readLocalFile(lockFileName, 'utf8');
     const isLockFileChanged = existingLockFileContent !== newVendirLockContent;
     if (isLockFileChanged) {
-      fileChanges.push({
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newVendirLockContent,
-        },
-      });
+      fileChanges.push(fileAddition(lockFileName, newVendirLockContent));
     }
 
     // add modified vendir archives to artifacts
@@ -79,13 +77,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Vendir lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

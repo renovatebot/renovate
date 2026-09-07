@@ -12,6 +12,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { artifactError, artifactErrorResult } from '../util.ts';
 import {
   getCopierVersionConstraint,
   getPythonVersionConstraint,
@@ -60,20 +61,6 @@ function buildCommand(
   return command.join(' ');
 }
 
-function artifactError(
-  packageFileName: string,
-  message: string,
-): UpdateArtifactsResult[] {
-  return [
-    {
-      artifactError: {
-        fileName: packageFileName,
-        stderr: message,
-      },
-    },
-  ];
-}
-
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -81,18 +68,22 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (updatedDeps?.length !== 1) {
     // Each answers file (~ packageFileName) has exactly one dependency to update.
-    return artifactError(
-      packageFileName,
-      `Unexpected number of dependencies: ${updatedDeps?.length} (should be 1)`,
-    );
+    return [
+      artifactError(
+        packageFileName,
+        `Unexpected number of dependencies: ${updatedDeps?.length} (should be 1)`,
+      ),
+    ];
   }
 
   const newValue = updatedDeps[0]?.newValue;
   if (!newValue) {
-    return artifactError(
-      packageFileName,
-      'Missing copier template version to update to',
-    );
+    return [
+      artifactError(
+        packageFileName,
+        'Missing copier template version to update to',
+      ),
+    ];
   }
 
   const command = buildCommand(config, packageFileName, newValue);
@@ -114,7 +105,7 @@ export async function updateArtifacts({
     await gitExec(command, execOptions);
   } catch (err) {
     logger.debug({ err }, `Failed to update copier template: ${err.message}`);
-    return artifactError(packageFileName, err.message);
+    return artifactErrorResult(packageFileName, err);
   }
 
   const status = await getRepoStatus();
@@ -129,7 +120,7 @@ export async function updateArtifacts({
     // Sometimes, Copier erroneously reports conflicts.
     const msg = `Updating the Copier template yielded ${status.conflicted.length} merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * ${status.conflicted.join('\n  * ')}`;
     logger.debug({ packageFileName, depName: updatedDeps[0]?.depName }, msg);
-    res.push(...artifactError(packageFileName, msg));
+    res.push(artifactError(packageFileName, msg));
   }
 
   const canReadFileMode = await isFileModeEnabled();

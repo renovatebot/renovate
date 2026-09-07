@@ -6,6 +6,7 @@ import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { artifactErrorResult, fileAddition } from '../util.ts';
 
 export async function updateArtifacts({
   config: { constraints, isLockFileMaintenance },
@@ -85,24 +86,9 @@ export async function updateArtifacts({
       return null;
     }
     logger.trace('Returning updated devbox.lock');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
-    ];
+    return [fileAddition(lockFileName, newLockFileContent)];
   } catch (err) {
     logger.warn({ err }, 'Error updating devbox.lock');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

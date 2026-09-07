@@ -18,6 +18,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { artifactError, artifactErrorResult, fileAddition } from '../util.ts';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
@@ -87,14 +88,7 @@ export async function updateArtifacts({
     }
   } catch (err) {
     logger.warn({ err }, 'mix.exs could not be written');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 
   if (!existingLockFileContent) {
@@ -197,14 +191,7 @@ export async function updateArtifacts({
       'Failed to update Mix lock file',
     );
 
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 
   const newMixLockContent = await readLocalFile(lockFileName, 'utf8');
@@ -213,29 +200,14 @@ export async function updateArtifacts({
     return null;
   }
   logger.debug('Returning updated mix.lock');
-  return [
-    {
-      file: {
-        type: 'addition',
-        path: lockFileName,
-        contents: newMixLockContent,
-      },
-    },
-  ];
+  return [fileAddition(lockFileName, newMixLockContent)];
 }
 
 async function checkLockFileReadError(
   lockFileName: string,
 ): Promise<UpdateArtifactsResult[] | null> {
   if (await localPathExists(lockFileName)) {
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: `Error reading ${lockFileName}`,
-        },
-      },
-    ];
+    return [artifactError(lockFileName, `Error reading ${lockFileName}`)];
   }
   return null;
 }

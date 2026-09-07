@@ -16,6 +16,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { artifactErrorResult, fileAddition } from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
 
 const gitExec = withGitEnvironment(['cargo']);
@@ -114,15 +115,7 @@ async function updateArtifactsImpl(
   const { isLockFileMaintenance } = config;
   if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No more dependencies to update');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: existingLockFileContent,
-        },
-      },
-    ];
+    return [fileAddition(lockFileName, existingLockFileContent)];
   }
 
   try {
@@ -166,15 +159,7 @@ async function updateArtifactsImpl(
       logger.debug('Cargo.lock is unchanged');
       return null;
     }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newCargoLockContent,
-        },
-      },
-    ];
+    return [fileAddition(lockFileName, newCargoLockContent)];
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
@@ -217,13 +202,6 @@ async function updateArtifactsImpl(
 
     logger.debug({ err }, 'Failed to update Cargo lock file');
 
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

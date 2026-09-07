@@ -283,7 +283,7 @@ describe('modules/manager/apm/artifacts', () => {
         {
           artifactError: {
             fileName: 'apm.lock.yaml',
-            stderr: 'Error: write failed',
+            stderr: 'write failed',
           },
         },
       ]);

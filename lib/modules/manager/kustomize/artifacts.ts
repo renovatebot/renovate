@@ -15,7 +15,11 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { fileChangesToArtifactResults } from '../util.ts';
+import {
+  artifactError,
+  artifactErrorResult,
+  fileChangesToArtifactResults,
+} from '../util.ts';
 import { generateHelmEnvs } from './common.ts';
 import { parseKustomize } from './extract.ts';
 
@@ -117,11 +121,7 @@ export async function updateArtifacts({
     config.postUpdateOptions?.includes('kustomizeInflateHelmCharts') === true;
   if (isNullOrUndefined(project)) {
     return [
-      {
-        artifactError: {
-          stderr: 'Failed to parse new package file content',
-        },
-      },
+      artifactError(undefined, 'Failed to parse new package file content'),
     ];
   }
 
@@ -201,12 +201,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to inflate helm chart');
-    return [
-      {
-        artifactError: {
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(undefined, err);
   }
 }

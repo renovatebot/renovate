@@ -236,7 +236,7 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
-  it('returns artifactError on exec failure with combined output', async () => {
+  it('returns artifactError on exec failure with the error output', async () => {
     fs.readLocalFile.mockResolvedValueOnce('existing content');
     const error = new Error('exec error');
     (error as any).stdout = 'stdout output';
@@ -254,7 +254,7 @@ describe('modules/manager/mise/artifacts', () => {
       {
         artifactError: {
           fileName: 'mise.lock',
-          stderr: `stdout output\nstderr output\nexec error`,
+          stderr: 'stderr output',
         },
       },
     ]);

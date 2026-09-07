@@ -1,3 +1,4 @@
+import { fs } from '~test/util.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
@@ -6,9 +7,15 @@ import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
 import { type PackageDependency } from './types.ts';
 import {
   applyGitSource,
+  artifactError,
   artifactErrorMessageFromExecError,
+  artifactErrorResult,
+  fileAddition,
   fileChangesToArtifactResults,
+  updateLockFile,
 } from './util.ts';
+
+vi.mock('../../util/fs/index.ts');
 
 describe('modules/manager/util', () => {
   beforeEach(() => {
@@ -238,5 +245,100 @@ describe('modules/manager/util', () => {
       { file: { type: 'addition', path: 'foo', contents: 'bar' } },
       { file: { type: 'deletion', path: 'baz' } },
     ]);
+  });
+
+  it('builds an addition result', () => {
+    expect(fileAddition('foo.lock', 'new')).toEqual({
+      file: { type: 'addition', path: 'foo.lock', contents: 'new' },
+    });
+  });
+
+  it('builds an artifact error result', () => {
+    expect(artifactError('foo.lock', 'boom')).toEqual({
+      artifactError: { fileName: 'foo.lock', stderr: 'boom' },
+    });
+  });
+
+  it('builds an artifact error result from an error', () => {
+    expect(
+      artifactErrorResult('foo.lock', Object.assign(new Error('msg'), {})),
+    ).toEqual([{ artifactError: { fileName: 'foo.lock', stderr: 'msg' } }]);
+
+    expect(
+      artifactErrorResult(
+        'foo.lock',
+        Object.assign(new Error('msg'), { stderr: 'from stderr' }),
+      ),
+    ).toEqual([
+      { artifactError: { fileName: 'foo.lock', stderr: 'from stderr' } },
+    ]);
+  });
+
+  describe('updateLockFile', () => {
+    it('writes the package file, deletes the lock file and returns the update', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('new content');
+      const run = vi.fn().mockResolvedValue(undefined);
+
+      const res = await updateLockFile({
+        lockFileName: 'foo.lock',
+        existingLockFileContent: 'old content',
+        packageFile: { path: 'foo.json', contents: 'new package file' },
+        deleteLockFile: true,
+        run,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'foo.lock',
+            contents: 'new content',
+          },
+        },
+      ]);
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'foo.json',
+        'new package file',
+      );
+      expect(fs.deleteLocalFile).toHaveBeenCalledWith('foo.lock');
+      expect(run).toHaveBeenCalledOnce();
+    });
+
+    it('keeps the package and lock file when not asked to touch them', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('new content');
+
+      await updateLockFile({
+        lockFileName: 'foo.lock',
+        existingLockFileContent: 'old content',
+        run: () => Promise.resolve(),
+      });
+
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('returns null when the lock file is gone', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      await expect(
+        updateLockFile({
+          lockFileName: 'foo.lock',
+          existingLockFileContent: 'old content',
+          run: () => Promise.resolve(),
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when the lock file is unchanged', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('old content');
+
+      await expect(
+        updateLockFile({
+          lockFileName: 'foo.lock',
+          existingLockFileContent: 'old content',
+          run: () => Promise.resolve(),
+        }),
+      ).resolves.toBeNull();
+    });
   });
 });
