@@ -100,11 +100,11 @@ describe('workers/repository/update/pr/changelog/index', () => {
     it('handles known platform with no changelog source', async () => {
       const saved = changelogApi.get('github')!;
       changelogApi.delete('github');
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       changelogApi.set('github', saved);
     });
 
