@@ -332,6 +332,27 @@ describe('modules/manager/xcodegen/extract', () => {
       });
     });
 
+    it('uses an HTTPS registryUrl for a self-hosted SSH URL', () => {
+      const content = codeBlock`
+        packages:
+          Yams:
+            url: ssh://git@github.example.com/jpsim/Yams.git
+            from: 2.0.0
+      `;
+      expect(extractPackageFile(content, 'project.yml')).toEqual({
+        deps: [
+          {
+            depName: 'Yams',
+            packageName: 'jpsim/Yams',
+            datasource: 'github-tags',
+            registryUrls: ['https://github.example.com'],
+            currentValue: '2.0.0',
+            depType: 'from',
+          },
+        ],
+      });
+    });
+
     it('uses git-tags datasource for non-GitHub/GitLab URLs', () => {
       const content = codeBlock`
         packages:

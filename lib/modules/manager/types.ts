@@ -28,6 +28,30 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
+/** Git host families which have a tags datasource of their own. */
+export type GitTagsPlatform = 'bitbucket' | 'gitea' | 'github' | 'gitlab';
+
+/** How a dependency pinned to a git tag is looked up. */
+export interface GitTagsSource {
+  datasource: string;
+  packageName: string;
+  registryUrls?: string[];
+}
+
+export interface ResolveGitTagsSourceConfig {
+  /**
+   * Host families whose own tags datasource may be used; every other host falls
+   * back to `git-tags`. Defaults to GitHub and GitLab.
+   */
+  platforms?: readonly GitTagsPlatform[];
+
+  /**
+   * Emit `registryUrls` even when they point at the host the datasource already
+   * defaults to, for managers which have always done so.
+   */
+  keepDefaultRegistryUrl?: boolean;
+}
+
 export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
   npmrc?: string;

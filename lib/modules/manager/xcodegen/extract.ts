@@ -1,11 +1,7 @@
 import { logger } from '../../../logger/index.ts';
-import { detectPlatform } from '../../../util/common.ts';
-import { parseGitUrl } from '../../../util/git/url.ts';
 import { coerceString } from '../../../util/string.ts';
-import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { resolveGitTagsSource } from '../util.ts';
 import type { XcodeGenSwiftPackage } from './schema.ts';
 import { XcodeGenProjectFile } from './schema.ts';
 
@@ -19,37 +15,6 @@ function resolvePackageUrl(pkg: XcodeGenSwiftPackage): string | null {
   }
 
   return null;
-}
-
-function resolveGitDep(
-  url: string,
-): Pick<PackageDependency, 'datasource' | 'packageName' | 'registryUrls'> {
-  const platform = detectPlatform(url);
-
-  switch (platform) {
-    case 'github': {
-      const { full_name, host, protocol } = parseGitUrl(url);
-      return {
-        datasource: GithubTagsDatasource.id,
-        packageName: full_name,
-        ...(host !== 'github.com' && {
-          registryUrls: [`${protocol}://${host}`],
-        }),
-      };
-    }
-    case 'gitlab': {
-      const { full_name, host, protocol } = parseGitUrl(url);
-      return {
-        datasource: GitlabTagsDatasource.id,
-        packageName: full_name,
-        ...(host !== 'gitlab.com' && {
-          registryUrls: [`${protocol}://${host}`],
-        }),
-      };
-    }
-    default:
-      return { datasource: GitTagsDatasource.id, packageName: url };
-  }
 }
 
 function resolveCurrentValue(
@@ -156,7 +121,7 @@ export function extractPackageFile(
     }
 
     const { datasource, packageName, registryUrls } =
-      resolveGitDep(resolvedUrl);
+      resolveGitTagsSource(resolvedUrl);
 
     deps.push({
       depName,

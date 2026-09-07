@@ -1,14 +1,10 @@
 import { logger } from '../../../logger/index.ts';
-import { detectPlatform } from '../../../util/common.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
-import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module/index.ts';
 import type { PackageDependency } from '../types.ts';
+import { resolveGitTagsSource } from '../util.ts';
 import { extractTerragruntProvider } from './providers.ts';
 import type { ExtractionResult, TerraformManagerData } from './types.ts';
 
@@ -38,20 +34,6 @@ export function extractTerragruntModule(
   return result;
 }
 
-function detectGitTagDatasource(registryUrl: string): string {
-  const platform = detectPlatform(registryUrl);
-  switch (platform) {
-    case 'gitlab':
-      return GitlabTagsDatasource.id;
-    case 'bitbucket':
-      return BitbucketTagsDatasource.id;
-    case 'gitea':
-      return GiteaTagsDatasource.id;
-    default:
-      return GitTagsDatasource.id;
-  }
-}
-
 export function analyseTerragruntModule(
   dep: PackageDependency<TerraformManagerData>,
 ): void {
@@ -78,7 +60,7 @@ export function analyseTerragruntModule(
       dep.skipReason = 'invalid-url';
       return;
     }
-    const { hostname, host, pathname, protocol } = parsedUrl;
+    const { hostname, pathname } = parsedUrl;
     const containsSubDirectory = pathname.includes('//');
     if (containsSubDirectory) {
       logger.debug('Terragrunt module contains subdirectory');
@@ -91,21 +73,16 @@ export function analyseTerragruntModule(
       .replace(regEx('.git$'), '');
     dep.depName = `${hostname}/${repositoryPath}`;
     dep.currentValue = tag;
-    dep.datasource = detectGitTagDatasource(url);
-    if (dep.datasource === GitTagsDatasource.id) {
-      if (containsSubDirectory) {
-        const tempLookupName = url.split('//');
-        dep.packageName = `${tempLookupName[0]}//${tempLookupName[1]}`;
-      } else {
-        dep.packageName = url;
-      }
-    } else {
-      // The packageName should only contain the path to the repository
-      dep.packageName = repositoryPath;
-      dep.registryUrls = [
-        protocol === 'https:' ? `https://${host}` : `https://${hostname}`,
-      ];
-    }
+    // Both datasources look up the repository itself, so drop the `//<subdir>`
+    // suffix before resolving the source.
+    const urlParts = url.split('//');
+    Object.assign(
+      dep,
+      resolveGitTagsSource(`${urlParts[0]}//${urlParts[1]}`, {
+        platforms: ['bitbucket', 'gitea', 'gitlab'],
+        keepDefaultRegistryUrl: true,
+      }),
+    );
   } else if (tfrVersionMatch?.groups) {
     dep.depType = 'terragrunt';
     dep.depName = `${tfrVersionMatch.groups.org}/${tfrVersionMatch.groups.name}/${tfrVersionMatch.groups.cloud}`;

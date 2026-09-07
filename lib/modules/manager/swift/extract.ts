@@ -1,11 +1,11 @@
-import { detectPlatform } from '../../../util/common.ts';
 import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
-import { parseUrl } from '../../../util/url.ts';
-import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  GitTagsSource,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
+import { resolveGitTagsSource } from '../util.ts';
 import type { MatchResult } from './types.ts';
 
 const regExps = {
@@ -132,47 +132,20 @@ function getMatch(str: string, state: string | null): MatchResult | null {
   return result;
 }
 
-function parseDependencyUrl(
-  url: string | null,
-): { depName: string; datasource: string; registryUrls?: string[] } | null {
+function parseDependencyUrl(url: string | null): GitTagsSource | null {
   // istanbul ignore if
   if (!url) {
     return null;
   }
 
-  let normalizedUrl: string;
   try {
-    normalizedUrl = getHttpUrl(url);
+    // Rejects entries which are not usable git URLs, such as a bare `ssh://`.
+    getHttpUrl(url);
   } catch {
     return null;
   }
 
-  const parsedUrl = parseUrl(normalizedUrl);
-  // v8 ignore if -- getHttpUrl always returns a parseable URL
-  if (!parsedUrl) {
-    return null;
-  }
-  const { host, pathname, protocol } = parsedUrl;
-  const platform = detectPlatform(normalizedUrl);
-  if (platform === 'github' || platform === 'gitlab') {
-    const depName = pathname
-      .replace(regEx(/^\//), '')
-      .replace(regEx(/\.git$/), '')
-      .replace(regEx(/\/$/), '');
-    const datasource =
-      platform === 'github' ? GithubTagsDatasource.id : GitlabTagsDatasource.id;
-
-    const isGitHubPublic = host === 'github.com';
-    const isGitLabPublic = host === 'gitlab.com';
-
-    if (!isGitHubPublic && !isGitLabPublic) {
-      const baseUrl = `${protocol}//${host}`;
-      return { depName, datasource, registryUrls: [baseUrl] };
-    }
-
-    return { depName, datasource };
-  }
-  return { depName: url, datasource: GitTagsDatasource.id };
+  return resolveGitTagsSource(url);
 }
 
 export function extractPackageFile(content: string): PackageFileContent | null {
@@ -197,9 +170,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     if (!packageName) {
       return;
     }
-    const parsedUrl = parseDependencyUrl(packageName);
-    if (parsedUrl && currentValue) {
-      const { depName, datasource, registryUrls } = parsedUrl;
+    const source = parseDependencyUrl(packageName);
+    if (source && currentValue) {
+      const { datasource, packageName: depName, registryUrls } = source;
 
       const dep: PackageDependency = {
         datasource,

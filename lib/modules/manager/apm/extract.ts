@@ -5,51 +5,9 @@ import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
-import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
-import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { resolveGitTagsSource } from '../util.ts';
 import { ApmManifest } from './schema.ts';
-
-interface DatasourceResult {
-  datasource: string;
-  packageName: string;
-  registryUrls?: string[];
-}
-
-/**
- * Determine which Renovate datasource to use for an APM dependency, based on
- * the git host `platform` (already resolved via `detectPlatform`, which honors
- * `hostRules`). github/gitlab (and their self-hosted variants) map to the
- * `github-tags` / `gitlab-tags` datasources; every other host (Bitbucket, Azure
- * DevOps, etc.) falls back to the generic `git-tags` datasource.
- */
-function determineDatasource(
-  host: string,
-  platform: string | null,
-  repoPath: string,
-): DatasourceResult {
-  if (platform === 'github') {
-    return {
-      datasource: GithubTagsDatasource.id,
-      packageName: repoPath,
-      ...(host === 'github.com' ? {} : { registryUrls: [`https://${host}`] }),
-    };
-  }
-
-  if (platform === 'gitlab') {
-    return {
-      datasource: GitlabTagsDatasource.id,
-      packageName: repoPath,
-      ...(host === 'gitlab.com' ? {} : { registryUrls: [`https://${host}`] }),
-    };
-  }
-
-  return {
-    datasource: GitTagsDatasource.id,
-    packageName: `https://${host}/${repoPath}`,
-  };
-}
 
 /** A trailing ` # <tag>` comment on a manifest line. */
 const commentTagRegex = regEx(/^\s+#\s*(?<tag>\S.*?)\s*$/);
@@ -201,10 +159,10 @@ export function parseApmDependency(
     };
   }
 
-  const { datasource, packageName, registryUrls } = determineDatasource(
-    host,
-    platform,
-    repoPath,
+  // An APM entry names a host and a repository path rather than a URL, so the
+  // source is resolved from the HTTPS URL those describe.
+  const { datasource, packageName, registryUrls } = resolveGitTagsSource(
+    `https://${host}/${repoPath}`,
   );
   const dep: PackageDependency = {
     ...base,

@@ -3,8 +3,13 @@ import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
+import type { GitTagsSource, ResolveGitTagsSourceConfig } from './types.ts';
 import { type PackageDependency } from './types.ts';
-import { applyGitSource, artifactErrorMessageFromExecError } from './util.ts';
+import {
+  applyGitSource,
+  artifactErrorMessageFromExecError,
+  resolveGitTagsSource,
+} from './util.ts';
 
 describe('modules/manager/util', () => {
   beforeEach(() => {
@@ -222,5 +227,67 @@ describe('modules/manager/util', () => {
     );
 
     expect(message).toBe('fallback message');
+  });
+});
+
+describe('modules/manager/util', () => {
+  describe('resolveGitTagsSource', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it.each`
+      url                                                | config                              | expected
+      ${'https://github.com/foo/bar'}                    | ${undefined}                        | ${{ datasource: 'github-tags', packageName: 'foo/bar' }}
+      ${'https://github.com/foo/bar.git'}                | ${undefined}                        | ${{ datasource: 'github-tags', packageName: 'foo/bar' }}
+      ${'ssh://git@github.com/foo/bar'}                  | ${undefined}                        | ${{ datasource: 'github-tags', packageName: 'foo/bar' }}
+      ${'git@github.com:foo/bar.git'}                    | ${undefined}                        | ${{ datasource: 'github-tags', packageName: 'foo/bar' }}
+      ${'https://github.example.com/foo/bar'}            | ${undefined}                        | ${{ datasource: 'github-tags', packageName: 'foo/bar', registryUrls: ['https://github.example.com'] }}
+      ${'ssh://git@github.example.com/foo/bar'}          | ${undefined}                        | ${{ datasource: 'github-tags', packageName: 'foo/bar', registryUrls: ['https://github.example.com'] }}
+      ${'git@github.example.com:foo/bar.git'}            | ${undefined}                        | ${{ datasource: 'github-tags', packageName: 'foo/bar', registryUrls: ['https://github.example.com'] }}
+      ${'https://gitlab.com/foo/bar'}                    | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'foo/bar' }}
+      ${'ssh://git@gitlab.com/foo/bar'}                  | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'foo/bar' }}
+      ${'git@gitlab.com:foo/bar.git'}                    | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'foo/bar' }}
+      ${'https://gitlab.example.com/group/sub/bar'}      | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'group/sub/bar', registryUrls: ['https://gitlab.example.com'] }}
+      ${'ssh://git@gitlab.example.com/group/sub/bar'}    | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'group/sub/bar', registryUrls: ['https://gitlab.example.com'] }}
+      ${'git@gitlab.example.com:group/sub/bar.git'}      | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'group/sub/bar', registryUrls: ['https://gitlab.example.com'] }}
+      ${'https://bitbucket.org/foo/bar'}                 | ${{ platforms: ['bitbucket'] }}     | ${{ datasource: 'bitbucket-tags', packageName: 'foo/bar' }}
+      ${'git@bitbucket.org:foo/bar.git'}                 | ${{ platforms: ['bitbucket'] }}     | ${{ datasource: 'bitbucket-tags', packageName: 'foo/bar' }}
+      ${'https://bitbucket.com/foo/bar'}                 | ${{ platforms: ['bitbucket'] }}     | ${{ datasource: 'bitbucket-tags', packageName: 'foo/bar', registryUrls: ['https://bitbucket.com'] }}
+      ${'https://gitea.com/foo/bar'}                     | ${{ platforms: ['gitea'] }}         | ${{ datasource: 'gitea-tags', packageName: 'foo/bar' }}
+      ${'ssh://git@gitea.example.com/foo/bar'}           | ${{ platforms: ['gitea'] }}         | ${{ datasource: 'gitea-tags', packageName: 'foo/bar', registryUrls: ['https://gitea.example.com'] }}
+      ${'https://github.com/foo/bar'}                    | ${{ platforms: ['gitlab'] }}        | ${{ datasource: 'git-tags', packageName: 'https://github.com/foo/bar' }}
+      ${'https://example.com/foo/bar.git'}               | ${undefined}                        | ${{ datasource: 'git-tags', packageName: 'https://example.com/foo/bar.git' }}
+      ${'not a url'}                                     | ${undefined}                        | ${{ datasource: 'git-tags', packageName: 'not a url' }}
+      ${'ssh://'}                                        | ${undefined}                        | ${{ datasource: 'git-tags', packageName: 'ssh://' }}
+      ${'https://github.com/foo/bar'}                    | ${{ keepDefaultRegistryUrl: true }} | ${{ datasource: 'github-tags', packageName: 'foo/bar', registryUrls: ['https://github.com'] }}
+      ${'https://gitlab.example.com:8443/foo/bar'}       | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'foo/bar', registryUrls: ['https://gitlab.example.com:8443'] }}
+      ${'ssh://git@gitlab.example.com:2222/foo/bar.git'} | ${undefined}                        | ${{ datasource: 'gitlab-tags', packageName: 'foo/bar', registryUrls: ['https://gitlab.example.com'] }}
+    `(
+      'resolves $url',
+      ({
+        url,
+        config,
+        expected,
+      }: {
+        url: string;
+        config: ResolveGitTagsSourceConfig | undefined;
+        expected: GitTagsSource;
+      }) => {
+        expect(resolveGitTagsSource(url, config)).toStrictEqual(expected);
+      },
+    );
+
+    it('detects a self-hosted platform via hostRules', () => {
+      hostRules.add({ hostType: 'gitlab', matchHost: 'git.example.com' });
+
+      expect(
+        resolveGitTagsSource('git@git.example.com:foo/bar.git'),
+      ).toStrictEqual({
+        datasource: 'gitlab-tags',
+        packageName: 'foo/bar',
+        registryUrls: ['https://git.example.com'],
+      });
+    });
   });
 });
