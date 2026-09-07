@@ -53,8 +53,16 @@ import * as _schedule from './schedule.ts';
 
 vi.mock('./get-updated.ts');
 vi.mock('./schedule.ts');
-vi.mock('./check-existing.ts');
-vi.mock('./reuse.ts');
+// only mock the functions which reach out to the platform, the pure decisions
+// of these modules are exercised through `processBranch()` itself
+vi.mock('./check-existing.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof _checkExisting>()),
+  prAlreadyExisted: vi.fn(),
+}));
+vi.mock('./reuse.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof _reuse>()),
+  shouldReuseExistingBranch: vi.fn(),
+}));
 vi.mock('../../../../modules/manager/github-actions/artifacts.ts');
 vi.mock('../../../../modules/manager/npm/post-update/index.ts');
 vi.mock('./automerge.ts');
