@@ -8,7 +8,8 @@ import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
-import type { HostRule } from '../../types/index.ts';
+import type { CombinedHostRule } from '../../types/index.ts';
+import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
@@ -23,6 +24,7 @@ import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
 import { fetch, normalize, stream } from './got.ts';
+import { applyHostGuard } from './host-guard.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
@@ -110,12 +112,14 @@ export abstract class HttpBase<
    * Both the `request()` and `stream()` paths must use this single entry point so that policy applied here covers every outbound request.
    */
   private prepareOptions(
-    url: string,
+    resolvedUrl: URL,
     httpOptions: InternalHttpOptions,
   ): {
     options: InternalGotOptions & InternalHttpOptions;
-    hostRule: HostRule;
+    hostRule: CombinedHostRule;
   } {
+    const url = resolvedUrl.toString();
+
     let options = merge<InternalGotOptions, InternalHttpOptions>(
       {
         ...this.options,
@@ -141,6 +145,28 @@ export abstract class HttpBase<
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
+
+    // enforced here so it runs before anything else - including cache lookups - can act on the URL, and for the stream path too
+    const guard = applyHostGuard(
+      resolvedUrl,
+      options.hostType,
+      hostRule.internalHostGrant,
+      options.responseBecomesConfig,
+    );
+    options.dnsLookup = guard.dnsLookup;
+    options.hooks = {
+      ...options.hooks,
+      beforeRedirect: [
+        ...coerceArray(options.hooks?.beforeRedirect),
+        guard.beforeRedirect,
+      ],
+    };
+    if (guard.beforeRequest) {
+      options.hooks.beforeRequest = [
+        ...coerceArray(options.hooks.beforeRequest),
+        guard.beforeRequest,
+      ];
+    }
 
     return { options, hostRule };
   }
@@ -171,7 +197,7 @@ export abstract class HttpBase<
 
     this.processOptions(resolvedUrl, httpOptions);
 
-    const { options, hostRule } = this.prepareOptions(url, httpOptions);
+    const { options, hostRule } = this.prepareOptions(resolvedUrl, httpOptions);
 
     const method = options.method.toLowerCase();
     const isReadMethod = ['head', 'get'].includes(method);
@@ -303,7 +329,12 @@ export abstract class HttpBase<
    * @returns extra Renovate options.
    */
   protected extraOptions(): readonly string[] {
-    return ['baseUrl', 'cacheProvider', 'readOnly'] as (keyof HttpOptions)[];
+    return [
+      'baseUrl',
+      'cacheProvider',
+      'readOnly',
+      'responseBecomesConfig',
+    ] as (keyof HttpOptions)[];
   }
 
   protected processOptions(_url: URL, _options: InternalHttpOptions): void {
@@ -682,14 +713,17 @@ export abstract class HttpBase<
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    const resolvedUrl = this.resolveUrl(url, options).toString();
+    const resolvedUrl = this.resolveUrl(url, options);
 
     const { options: combinedOptions } = this.prepareOptions(resolvedUrl, {
       ...options,
       method: 'get',
     });
 
-    return stream(resolvedUrl, this._normalizeOptions(combinedOptions));
+    return stream(
+      resolvedUrl.toString(),
+      this._normalizeOptions(combinedOptions),
+    );
   }
 
   async getToml<Schema extends ZodType<any, any, any>>(

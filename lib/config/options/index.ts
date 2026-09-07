@@ -101,6 +101,17 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'internalHostAccess',
+    description:
+      'Whether Renovate may make HTTP requests to internal hosts, such as loopback, private-range and link-local addresses. `warn` logs the requests which `block` would refuse.',
+    type: 'string',
+    allowedValues: ['allow', 'warn', 'block'],
+    default: 'warn',
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
+  },
+  {
     name: 'useCloudMetadataServices',
     description:
       'If `false`, Renovate does not try to access cloud metadata services.',
@@ -2906,7 +2917,8 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'allowInternal',
-    description: 'Whether requests to this host may reach internal addresses',
+    description:
+      "Whether requests to this host may reach internal addresses when `internalHostAccess=block`. Only honored from the self-hosted administrator's own configuration.",
     type: 'boolean',
     stage: 'repository',
     parents: ['hostRules'],

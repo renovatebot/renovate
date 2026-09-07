@@ -4,6 +4,7 @@ import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
+  HOST_BLOCKED,
   HOST_DISABLED,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
@@ -851,6 +852,25 @@ describe('modules/datasource/index', () => {
           const registries: RegistriesMock = {
             'https://reg1.com': () => {
               throw new ExternalHostError(new Error(HOST_DISABLED));
+            },
+            'https://reg2.com': { releases: [{ version: '1.0.0' }] },
+          };
+          const registryUrls = Object.keys(registries);
+          datasources.set(datasource, new HuntRegistriyDatasource(registries));
+
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryUrls,
+          });
+
+          expect(res).toBeNull();
+        });
+
+        it('returns null for HOST_BLOCKED', async () => {
+          const registries: RegistriesMock = {
+            'https://reg1.com': () => {
+              throw new ExternalHostError(new Error(HOST_BLOCKED));
             },
             'https://reg2.com': { releases: [{ version: '1.0.0' }] },
           };
