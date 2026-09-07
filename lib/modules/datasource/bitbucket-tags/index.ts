@@ -17,24 +17,23 @@ export class BitbucketTagsDatasource extends Datasource {
 
   bitbucketHttp = new BitbucketHttp(BitbucketTagsDatasource.id);
 
-  static readonly customRegistrySupport = true;
-
-  static readonly registryStrategy = 'first';
-
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
-
-  static readonly releaseTimestampSupport = true;
-  static readonly releaseTimestampNote =
-    'The release timestamp is determined from the `date` field in the results.';
-  static readonly sourceUrlSupport = 'package';
-  static readonly sourceUrlNote =
-    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
   constructor() {
     super(BitbucketTagsDatasource.id);
   }
+
+  override readonly defaultRegistryUrls =
+    BitbucketTagsDatasource.defaultRegistryUrls;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `date` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static getRegistryURL(registryUrl?: string): string {
     // fallback to default API endpoint if custom not provided

@@ -20,6 +20,9 @@ export class ForgejoReleasesDatasource extends Datasource {
 
   private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${ForgejoReleasesDatasource.id}`;
 
+  override readonly defaultRegistryUrls =
+    ForgejoReleasesDatasource.defaultRegistryUrls;
+
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `published_at` field in the results.';

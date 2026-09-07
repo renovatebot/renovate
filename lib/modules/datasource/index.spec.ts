@@ -9,7 +9,6 @@ import {
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import * as _packageCache from '../../util/cache/package/index.ts';
-import { loadModules } from '../../util/modules.ts';
 import datasources from './api.ts';
 import { getDefaultVersioning } from './common.ts';
 import { Datasource } from './datasource.ts';
@@ -21,7 +20,6 @@ import {
   supportsDigests,
 } from './index.ts';
 import type {
-  DatasourceApi,
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
@@ -171,39 +169,41 @@ describe('modules/datasource/index', () => {
       expect(getDatasourceList()).toEqual(managerList);
     });
 
-    it('validates datasource', async () => {
-      function validateDatasource(
-        module: DatasourceApi,
-        name: string,
-      ): boolean {
-        if (!module.getReleases) {
-          return false;
+    it('has consistent metadata', () => {
+      // Fields whose contract (DatasourceApi) requires them to be instance
+      // fields. Declaring one as a class `static` only is invisible to the
+      // registry (registry-URL resolution, caching) and to the docs
+      // generator, both of which read instances.
+      const metadataNames = [
+        'customRegistrySupport',
+        'registryStrategy',
+        'defaultRegistryUrls',
+        'defaultVersioning',
+        'defaultConfig',
+        'releaseTimestampSupport',
+        'releaseTimestampNote',
+        'sourceUrlSupport',
+        'sourceUrlNote',
+        'caching',
+      ];
+
+      for (const [name, ds] of getDatasources()) {
+        expect(ds.id).toBe(name);
+        expect(isFunction(ds.getReleases)).toBeTrue();
+
+        const ownInstanceProps = Object.getOwnPropertyNames(ds);
+        const ownStaticProps = Object.getOwnPropertyNames(ds.constructor);
+        for (const metadataName of metadataNames) {
+          const isStaticOnly =
+            ownStaticProps.includes(metadataName) &&
+            !ownInstanceProps.includes(metadataName);
+          expect(isStaticOnly).toBeFalse();
         }
-        return module.id === name;
-      }
 
-      function filterClassBasedDatasources(name: string): boolean {
-        return !(getDatasources().get(name) instanceof Datasource);
-      }
-
-      const dss = new Map(getDatasources());
-
-      for (const ds of dss.values()) {
-        if (ds instanceof Datasource) {
-          dss.delete(ds.id);
-        }
-      }
-
-      const loadedDs = await loadModules(
-        import.meta.dirname,
-        validateDatasource,
-        filterClassBasedDatasources,
-      );
-      expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
-
-      for (const dsName of dss.keys()) {
-        const ds = dss.get(dsName)!;
-        expect(validateDatasource(ds, dsName)).toBeTrue();
+        expect(!ds.releaseTimestampNote || ds.releaseTimestampSupport).toBe(
+          true,
+        );
+        expect(!ds.sourceUrlNote || ds.sourceUrlSupport !== 'none').toBe(true);
       }
     });
 
