@@ -348,7 +348,7 @@
     "semantic-release": "25.0.9",
     "tmp-promise": "3.0.3",
     "tsdown": "0.22.14",
-    "type-fest": "5.8.0",
+    "type-fest": "5.9.0",
     "typescript": "7.0.2",
     "unified": "11.0.5",
     "vite": "catalog:",
