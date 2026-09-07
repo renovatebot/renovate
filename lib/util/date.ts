@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 
 const ONE_MINUTE_MS = 60 * 1000;
@@ -18,10 +19,9 @@ export function getElapsedMinutes(date: Date): number {
 }
 
 export function getElapsedHours(date: Date | string): number {
-  const pastDate =
-    typeof date === 'string'
-      ? DateTime.fromISO(date)
-      : DateTime.fromJSDate(date);
+  const pastDate = isString(date)
+    ? DateTime.fromISO(date)
+    : DateTime.fromJSDate(date);
 
   if (!pastDate.isValid) {
     return 0;

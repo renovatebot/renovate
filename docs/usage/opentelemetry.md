@@ -23,9 +23,6 @@ OpenTelemetry has three types of observability data it supports within the OpenT
   <br /> <br />
   This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
 
-Renovate uses [`@opentelemetry/exporter-trace-otlp-http`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-http) under the hood.
-This means that Renovate sends traces via [OTLP/HTTP](https://opentelemetry.io/docs/reference/specification/protocol/otlp/#otlphttp) in JSON-encoded protobuf format only.
-
 ## Examples
 
 ![A screenshot of the Jaeger OpenTelemetry tracing UI, which shows an in-depth tracing view of a Renovate run against a single repository. The trace view shows the Renovate "splits", i.e. `init`, `extract`, `lookup` and `update` shown, with a view of how long each of the splits take overall. The trace view also shows HTTP calls, calls to the `git` command-line tools, some function names like `extractAllDependencies`, package manager names like `composer` or `github-actions` under the `extract` and `lookup` splits, and general execution of commands (prefixed by `rawExec:`. The view also shows that under the `update` split, there is a trace per branch, so we can see that the `renovate/actions-checkout-6.x` took less time to process than the `renovate/phpstan-phpstan-2.x-lockfile` branch.](assets/images/opentelemetry_trace_viewer.png)
@@ -62,6 +59,30 @@ The default values is `all`, which means all of the above detectors are used. Se
 - `gcp`
 - `github`
 - `env`
+
+### OpenTelemetry exporter protocol
+
+Renovate supports sending traces via OTLP/gRPC (via [`@opentelemetry/exporter-trace-otlp-grpc`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-grpc)), OTLP/HTTP with protobuf encoding (via [`@opentelemetry/exporter-trace-otlp-proto`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-proto)), or OTLP/HTTP with JSON encoding (via [`@opentelemetry/exporter-trace-otlp-http`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-http)).
+
+Set the `OTEL_EXPORTER_OTLP_PROTOCOL` (or the signal-specific `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL`, which takes precedence) environment variable to one of `grpc`, `http/protobuf`, or `http/json` to choose the protocol.
+
+If neither variable is set, Renovate defaults to `http/json`
+
+### File exporter
+
+The OpenTelemetry data can also be exported into a newline-delimited JSON (NDJSON) file, in OTLP JSON format.
+
+This is configured using the `RENOVATE_TRACING_FILE_EXPORTER_PATH` environment variable.
+
+You can then ingest this data into other tools, for instance:
+
+```sh title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
+while IFS= read -r line; do
+  curl -s -X POST http://localhost:4318/v1/traces \
+    -H 'Content-Type: application/json' \
+    -d "$line"
+done < /tmp/traces.jsonl
+```
 
 ## Supported OTLP data
 

@@ -2,7 +2,10 @@ import { codeBlock } from 'common-tags';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
@@ -10,7 +13,7 @@ import { updateArtifacts } from './artifacts.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const globalConfig: RepoGlobalConfig = {
+const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
   binarySource: 'global',
 };
@@ -37,19 +40,19 @@ describe('modules/manager/devbox/artifacts', () => {
     });
 
     it('skips if no updatedDeps and no lockFileMaintenance', async () => {
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips if no lock file in config', async () => {
       updateArtifact.updatedDeps = [{}];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips if cannot read lock file', async () => {
       updateArtifact.updatedDeps = [
         { manager: 'devbox', lockFiles: ['devbox.lock'] },
       ];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('returns installed devbox.lock', async () => {
@@ -60,8 +63,8 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -73,7 +76,7 @@ describe('modules/manager/devbox/artifacts', () => {
           ],
           config: {},
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -106,8 +109,8 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -123,7 +126,7 @@ describe('modules/manager/devbox/artifacts', () => {
             },
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -156,8 +159,8 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -174,7 +177,7 @@ describe('modules/manager/devbox/artifacts', () => {
           ],
           config: {},
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -218,14 +221,14 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [{}],
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if no updatedDeps have depNames', async () => {
@@ -235,8 +238,8 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -247,7 +250,7 @@ describe('modules/manager/devbox/artifacts', () => {
           ],
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns updated devbox.lock', async () => {
@@ -263,8 +266,8 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [{}],
@@ -272,7 +275,7 @@ describe('modules/manager/devbox/artifacts', () => {
             isLockFileMaintenance: true,
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -310,8 +313,8 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [{}],
@@ -322,7 +325,7 @@ describe('modules/manager/devbox/artifacts', () => {
             },
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -356,14 +359,14 @@ describe('modules/manager/devbox/artifacts', () => {
         }),
       );
       mockExecAll();
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [],
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if devbox.lock not found after update', async () => {
@@ -377,8 +380,8 @@ describe('modules/manager/devbox/artifacts', () => {
       mockExecAll();
       const oldLockFileContent = Buffer.from('Old devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -390,7 +393,7 @@ describe('modules/manager/devbox/artifacts', () => {
           ],
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if devbox.lock not found', async () => {
@@ -403,8 +406,8 @@ describe('modules/manager/devbox/artifacts', () => {
       );
       mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce(null);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -416,7 +419,7 @@ describe('modules/manager/devbox/artifacts', () => {
           ],
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if no lock file changes are found', async () => {
@@ -431,8 +434,8 @@ describe('modules/manager/devbox/artifacts', () => {
       const oldLockFileContent = Buffer.from('Old devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -444,7 +447,7 @@ describe('modules/manager/devbox/artifacts', () => {
           ],
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns an artifact error on failure', async () => {
@@ -452,9 +455,9 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = `{}`;
       const oldLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
-      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
-      expect(
-        await updateArtifacts({
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+      await expect(
+        updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [
@@ -466,7 +469,7 @@ describe('modules/manager/devbox/artifacts', () => {
           ],
           config: {},
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           artifactError: {
             fileName: 'devbox.lock',

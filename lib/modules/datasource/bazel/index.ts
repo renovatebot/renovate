@@ -3,6 +3,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
 import { id as bazelVersioningId } from '../../versioning/bazel-module/index.ts';
@@ -49,7 +50,7 @@ export class BazelDatasource extends Datasource {
         if (!fileContent) {
           return null;
         }
-        metadata = BazelModuleMetadata.parse(JSON.parse(fileContent));
+        metadata = Json.pipe(BazelModuleMetadata).parse(fileContent);
       } else {
         const response = await this.http.getJson(url, BazelModuleMetadata);
         metadata = response.body;

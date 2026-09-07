@@ -16,6 +16,7 @@ export interface GitlabComment {
 export interface GitLabUser {
   id: number;
   username: string;
+  access_level?: number; // present on project/group member responses
 }
 
 export interface GitlabPr extends Pr {

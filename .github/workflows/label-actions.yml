@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   reaction:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: dessant/label-actions@65225c179d3b2502f6eda7b3d15101a3f412366b # v5.0.3
         with:

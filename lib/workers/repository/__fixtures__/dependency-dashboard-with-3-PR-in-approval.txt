@@ -12,7 +12,7 @@ The following branches exist but PR creation requires approval. To approve PR cr
 
 The following updates await pending status checks. To force their creation now, click on a checkbox below.
 
- - [ ] <!-- approvePr-branch=branchName4 -->pr4
+ - [ ] <!-- unpend-branch=branchName4 -->pr4
 
 ## Detected Dependencies
 

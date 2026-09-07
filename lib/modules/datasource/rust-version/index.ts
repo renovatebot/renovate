@@ -4,7 +4,8 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import * as rustVersioning from '../../versioning/rust-release-channel/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { type ParsedManifestUrl, parseManifestUrl } from './parse.ts';
+import { parseManifestUrl } from './parse.ts';
+import type { ParsedManifestUrl } from './types.ts';
 
 export class RustVersionDatasource extends Datasource {
   static readonly id = 'rust-version';

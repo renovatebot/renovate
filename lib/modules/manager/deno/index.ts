@@ -17,6 +17,7 @@ export const categories: Category[] = ['js'];
 export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['deno.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const supportedDatasources = [
   NpmDatasource.id,
   JsrDatasource.id,

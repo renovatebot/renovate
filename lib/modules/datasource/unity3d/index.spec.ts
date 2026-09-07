@@ -13,7 +13,7 @@ describe('modules/datasource/unity3d/index', () => {
     ]),
   );
 
-  const mockUnityReleasesApi = (streams: Record<string, string>) => {
+  function mockUnityReleasesApi(streams: Record<string, string>) {
     for (const stream in streams) {
       const content = fixtures[stream];
 
@@ -23,7 +23,7 @@ describe('modules/datasource/unity3d/index', () => {
         .get(`${uri.pathname}${uri.search}`)
         .reply(200, content);
     }
-  };
+  }
 
   function createUnityReleases(
     total: number,
@@ -298,7 +298,7 @@ describe('modules/datasource/unity3d/index', () => {
           }),
         ]),
         homepage: 'https://unity.com/',
-        registryUrl: expect.stringMatching(/(releases|lts)/),
+        registryUrl: expect.stringMatching(/(?:releases|lts)/),
       }),
     );
   });

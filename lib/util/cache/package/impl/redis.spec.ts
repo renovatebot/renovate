@@ -143,7 +143,9 @@ describe('util/cache/package/impl/redis', () => {
         });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        await expect(cache.get('_test-namespace', 'key')).resolves.toEqual(
+          value,
+        );
         // Redis cleanup uses native TTL, so it must not rewrite on read.
         expect(clientMock.set).not.toHaveBeenCalled();
       });
@@ -156,7 +158,9 @@ describe('util/cache/package/impl/redis', () => {
           await encodeEntry(value, DateTime.local()),
         );
 
-        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        await expect(cache.get('_test-namespace', 'key')).resolves.toEqual(
+          value,
+        );
       });
 
       // TODO: Delete this legacy JSON-wrapper expiry case once legacy.ts is
@@ -172,7 +176,9 @@ describe('util/cache/package/impl/redis', () => {
         });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
@@ -186,7 +192,9 @@ describe('util/cache/package/impl/redis', () => {
         const payload = JSON.stringify({ value: payloadValue });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
@@ -203,7 +211,9 @@ describe('util/cache/package/impl/redis', () => {
         });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
@@ -212,7 +222,9 @@ describe('util/cache/package/impl/redis', () => {
 
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(logger.once.debug).toHaveBeenCalledWith(
           { err: expect.any(Error) },
           'Error while reading package cache value',
@@ -226,7 +238,9 @@ describe('util/cache/package/impl/redis', () => {
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
         clientMock.del.mockRejectedValueOnce(new Error('delete failed'));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(logger.once.debug).toHaveBeenCalledWith(
           { err: expect.any(Error) },
           'Error while removing package cache value',
@@ -238,7 +252,9 @@ describe('util/cache/package/impl/redis', () => {
 
         binaryClientMock.get.mockResolvedValueOnce(null);
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
       });
 
       it('returns undefined on error', async () => {
@@ -248,7 +264,9 @@ describe('util/cache/package/impl/redis', () => {
           new Error('connection lost'),
         );
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
       });
     });
 
@@ -279,7 +297,9 @@ describe('util/cache/package/impl/redis', () => {
         const [, rawPayload] = vi.mocked(clientMock.set).mock.calls[0];
         binaryClientMock.get.mockResolvedValueOnce(rawPayload);
 
-        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        await expect(cache.get('_test-namespace', 'key')).resolves.toEqual(
+          value,
+        );
       });
 
       it('deletes entry with non-positive TTL', async () => {

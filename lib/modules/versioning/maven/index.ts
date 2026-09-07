@@ -31,7 +31,9 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-const equals = (a: string, b: string): boolean => compare(a, b) === 0;
+function equals(a: string, b: string): boolean {
+  return compare(a, b) === 0;
+}
 
 function matches(a: string, b: string): boolean {
   if (!b) {
@@ -72,16 +74,16 @@ function matches(a: string, b: string): boolean {
   }, false);
 }
 
-const getMajor = (version: string): number | null => {
+function getMajor(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const majorToken = tokens[0];
     return +majorToken.val;
   }
   return null;
-};
+}
 
-const getMinor = (version: string): number | null => {
+function getMinor(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
@@ -91,9 +93,9 @@ const getMinor = (version: string): number | null => {
     return 0;
   }
   return null;
-};
+}
 
-const getPatch = (version: string): number | null => {
+function getPatch(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
@@ -108,11 +110,13 @@ const getPatch = (version: string): number | null => {
     return 0;
   }
   return null;
-};
+}
 
-const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
+function isGreaterThan(a: string, b: string): boolean {
+  return compare(a, b) === 1;
+}
 
-const isStable = (version: string): boolean => {
+function isStable(version: string): boolean {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     for (const token of tokens) {
@@ -126,14 +130,14 @@ const isStable = (version: string): boolean => {
     return true;
   }
   return false;
-};
+}
 
 // istanbul ignore next
-const getSatisfyingVersion = (
+function getSatisfyingVersion(
   versions: string[],
   range: string,
-): string | null =>
-  versions.reduce((result: string | null, version) => {
+): string | null {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -144,6 +148,7 @@ const getSatisfyingVersion = (
     }
     return result;
   }, null);
+}
 
 function getNewValue({
   currentValue,

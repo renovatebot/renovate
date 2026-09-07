@@ -24,7 +24,7 @@ You are allowed to use our logo as:
 
 - an icon in your repository readme, that says you are using Renovate
 - part of a badge in your repository readme, that says you are using Renovate
-- an avatar image for your self-hosted version of Renovate, but give your bot a _different_ name
+- an avatar image for your self-hosted version of Renovate, but give it a _different_ name
 
 ## Allowed uses of the Renovate branding
 

@@ -1,6 +1,6 @@
 import { GTE, LT, PGTE } from '../operator.ts';
-import type { Range } from '../range.ts';
 import { parseRanges, satisfiesRange, stringifyRanges } from '../range.ts';
+import type { Range } from '../types.ts';
 import { increment, pgteUpperBound } from '../version.ts';
 import { replacePart } from './replace.ts';
 

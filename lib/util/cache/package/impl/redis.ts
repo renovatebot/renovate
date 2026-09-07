@@ -7,7 +7,10 @@ import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
 export function normalizeRedisUrl(url: string): string {
-  return url.replace(regEx(/^(rediss?)\+cluster:\/\//), '$1://');
+  return url.replace(
+    regEx(/^(?<scheme>rediss?)\+cluster:\/\//),
+    '$<scheme>://',
+  );
 }
 
 type RedisClient =

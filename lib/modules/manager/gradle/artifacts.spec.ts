@@ -4,7 +4,10 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { env, fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
@@ -19,7 +22,7 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -141,14 +144,14 @@ describe('modules/manager/gradle/artifacts', () => {
       const execSnapshots = mockExecAll();
       scm.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No Gradle dependency lockfiles or verification metadata found - skipping update',
@@ -160,14 +163,14 @@ describe('modules/manager/gradle/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.findUpLocal.mockResolvedValue(null);
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Found Gradle dependency lockfiles but no gradlew - aborting update',
@@ -183,8 +186,8 @@ describe('modules/manager/gradle/artifacts', () => {
 
       const execSnapshots = mockExecAll();
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [
             { depName: 'org.junit.jupiter:junit-jupiter-api' },
@@ -193,7 +196,7 @@ describe('modules/manager/gradle/artifacts', () => {
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Not allowed to execute gradle due to allowedUnsafeExecutions - aborting update',
@@ -378,14 +381,14 @@ describe('modules/manager/gradle/artifacts', () => {
     });
 
     it('aborts lock file maintenance if packageFileName is not build.gradle(.kts) in root project', async () => {
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'somedir/settings.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',
@@ -458,15 +461,16 @@ describe('modules/manager/gradle/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q properties' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties' +
+            "'",
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -475,15 +479,16 @@ describe('modules/manager/gradle/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
+            "'",
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',
@@ -581,27 +586,27 @@ describe('modules/manager/gradle/artifacts', () => {
       mockExecAll();
       fs.readLocalFile.mockResolvedValue('Current gradle.lockfile');
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('gradlew failed', async () => {
       const execSnapshots = mockExecAll(new Error('failed'));
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           artifactError: {
             fileName: 'build.gradle',
@@ -749,8 +754,8 @@ describe('modules/manager/gradle/artifacts', () => {
         }),
       );
 
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'build.gradle',
           updatedDeps: [
             { depName: 'org.junit.jupiter:junit-jupiter-api' },
@@ -759,7 +764,7 @@ describe('modules/manager/gradle/artifacts', () => {
           newPackageFileContent: '',
           config: {},
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       expect(execSnapshots).toBeEmptyArray();
     });

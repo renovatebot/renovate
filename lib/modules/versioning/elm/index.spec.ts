@@ -287,7 +287,7 @@ describe('modules/versioning/elm/index', () => {
       expect(
         elm.getNewValue({
           currentValue: '1.0.0 <= v < 2.0.0',
-          rangeStrategy: 'auto' as never,
+          rangeStrategy: 'auto',
           newVersion: '1.5.0',
         }),
       ).toBeNull();

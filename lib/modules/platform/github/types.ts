@@ -87,12 +87,30 @@ export interface UserDetails {
   email: EmailAddress | null;
 }
 
+interface GithubHostBase {
+  apiUrl: URL;
+}
+
+export interface GithubComHost extends GithubHostBase {
+  type: 'github';
+}
+
+export interface GithubEnterpriseCloudHost extends GithubHostBase {
+  type: 'ghec';
+}
+
+export interface GithubEnterpriseServerHost extends GithubHostBase {
+  type: 'ghes';
+  version: string | null;
+}
+
+export type GithubHost =
+  | GithubComHost
+  | GithubEnterpriseCloudHost
+  | GithubEnterpriseServerHost;
+
 export interface PlatformConfig {
-  hostType: string;
-  endpoint: string;
-  isGhe?: boolean;
-  isGheCloud?: boolean;
-  gheVersion?: string | null;
+  host: GithubHost;
   isGHApp?: boolean;
   existingRepos?: string[];
   userDetails?: UserDetails;
@@ -120,6 +138,7 @@ export interface LocalRepoConfig {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
+  mergeQueueEnabled: Record<string, boolean>;
 }
 
 export interface GhRepo {
@@ -134,6 +153,7 @@ export interface GhRepo {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
+  mergeQueue?: { id: string } | null;
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;

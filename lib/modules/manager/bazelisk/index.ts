@@ -18,3 +18,4 @@ export const supportedDatasources = [GithubReleasesDatasource.id];
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['MODULE.bazel.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;

@@ -1,0 +1,129 @@
+{
+  "files": [
+    {
+      "core-metadata": false,
+      "data-dist-info-metadata": false,
+      "filename": "numpy-1.5.0.tar.gz",
+      "hashes": {
+        "sha256": "06d2181c884c5937c7c475103dd55de4fe4842a9d91bab1ed0965dd973a4661a"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 2276377,
+      "upload-time": "2010-09-15T14:44:53.723687Z",
+      "url": "https://files.pythonhosted.org/packages/f4/7e/ee0605be5f922a85f798bf8ff1849d4d043b08229b026e55527110384c6d/numpy-1.5.0.tar.gz",
+      "yanked": false
+    },
+    {
+      "core-metadata": false,
+      "data-dist-info-metadata": false,
+      "filename": "numpy-1.5.0.win32-py2.6.exe",
+      "hashes": {
+        "sha256": "ba4d6b5d59e0646b6b82098db087ee2f9aedeca968354492f125ebb62f091f69"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 2338968,
+      "upload-time": "2010-08-31T18:15:09.478131Z",
+      "url": "https://files.pythonhosted.org/packages/bd/bd/20b14b780f26876796fa7d33ac4e7d59adcd462c8c08006f5aeb11e67a10/numpy-1.5.0.win32-py2.6.exe",
+      "yanked": false
+    },
+    {
+      "core-metadata": {
+        "sha256": "e3e359893ffc9080f1fd2b8f140cefea87e033744504e87f926a637216783fbd"
+      },
+      "data-dist-info-metadata": {
+        "sha256": "e3e359893ffc9080f1fd2b8f140cefea87e033744504e87f926a637216783fbd"
+      },
+      "filename": "numpy-1.5.1-cp27-none-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.whl",
+      "hashes": {
+        "sha256": "2d19469a94eadd002b1596cb0ec22e4f27f4f96dd6c83391220d0e187041bd36"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 10720015,
+      "upload-time": "2014-07-30T22:27:08.796621Z",
+      "url": "https://files.pythonhosted.org/packages/ad/d6/0cee332656a0633ff062c13408734dc3c617d5d45d174c491033063668eb/numpy-1.5.1-cp27-none-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.whl",
+      "yanked": false
+    },
+    {
+      "core-metadata": false,
+      "data-dist-info-metadata": false,
+      "filename": "numpy-1.5.1.tar.gz",
+      "hashes": {
+        "sha256": "c36789ec381fec09f519249744ea36a77e5534b69446a59ee73b06cac29542eb"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 2280220,
+      "upload-time": "2010-11-18T14:16:58.801332Z",
+      "url": "https://files.pythonhosted.org/packages/73/e1/88932bb0420a0fbe1547ee96d4e7332de5c1ed5a846a6c96ea422c6bf753/numpy-1.5.1.tar.gz",
+      "yanked": false
+    },
+    {
+      "core-metadata": false,
+      "data-dist-info-metadata": false,
+      "filename": "numpy-1.5.1.win32-py2.5-nosse.exe",
+      "hashes": {
+        "sha256": "e45623a65625a22e8c59d5feacc02bdc360eed4ab9f01f3dc619dc58c56336ad"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 2881052,
+      "upload-time": "2011-01-28T15:33:59.749000Z",
+      "url": "https://files.pythonhosted.org/packages/8b/8e/e20ca84e30db2d93d85370ba23efbe54037bb45348dd6496185e7bbb15fa/numpy-1.5.1.win32-py2.5-nosse.exe",
+      "yanked": false
+    },
+    {
+      "core-metadata": false,
+      "data-dist-info-metadata": false,
+      "filename": "numpy-1.5.1.win32-py2.6-nosse.exe",
+      "hashes": {
+        "sha256": "bea35acebd89855529f52e418f2b5d5976b50982651a7e1b97d4d6b68ba83130"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 2342045,
+      "upload-time": "2011-01-28T15:31:25.757819Z",
+      "url": "https://files.pythonhosted.org/packages/d2/fe/2d765a8f923db9a2254f398af2cafdd777b39611e90ac28d5fc3b8fd9cfa/numpy-1.5.1.win32-py2.6-nosse.exe",
+      "yanked": false
+    },
+    {
+      "core-metadata": false,
+      "data-dist-info-metadata": false,
+      "filename": "numpy-1.5.1.win32-py2.7-nosse.exe",
+      "hashes": {
+        "sha256": "37d8363be1e76b855ef27eb140caccd00e250244a6a3536dce9cd06a1e56ddbb"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 2341138,
+      "upload-time": "2011-01-28T15:25:56.453527Z",
+      "url": "https://files.pythonhosted.org/packages/eb/a9/af5807aeefbc05d574e103212cfc71423ac255ad326de651ed01ddf7f995/numpy-1.5.1.win32-py2.7-nosse.exe",
+      "yanked": false
+    },
+    {
+      "core-metadata": false,
+      "data-dist-info-metadata": false,
+      "filename": "numpy-1.5.1.win32-py3.1-nosse.exe",
+      "hashes": {
+        "sha256": "8821b7d0c926858e81d11b13336edd6e0d4569d0179c9568ae08011658912823"
+      },
+      "provenance": null,
+      "requires-python": null,
+      "size": 2496332,
+      "upload-time": "2011-01-28T15:32:39.341520Z",
+      "url": "https://files.pythonhosted.org/packages/3f/c9/2aa4f6426c7b8e4a227834ecb10da666c35791510bc1ae11bf6e87398c18/numpy-1.5.1.win32-py3.1-nosse.exe",
+      "yanked": false
+    }
+  ],
+  "meta": {
+    "_last-serial": 39847699,
+    "api-version": "1.4"
+  },
+  "name": "numpy",
+  "versions": [
+    "1.5.0",
+    "1.5.1"
+  ]
+}

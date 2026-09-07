@@ -1,20 +1,15 @@
+import * as fragments from './fragments.ts';
 import type {
   AllFragments,
   ArrayFragment,
+  CtxCompatible,
   ExtensionTagFragment,
   PreparedExtensionTagFragment,
   RepoRuleCallFragment,
   ResultFragment,
   RuleFragment,
   UseRepoRuleFragment,
-} from './fragments.ts';
-import * as fragments from './fragments.ts';
-
-// Represents the fields that the context must have.
-export interface CtxCompatible {
-  results: ResultFragment[];
-  stack: AllFragments[];
-}
+} from './types.ts';
 
 export class CtxProcessingError extends Error {
   readonly current: AllFragments;

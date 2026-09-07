@@ -81,6 +81,13 @@ describe('workers/global/config/parse/cli', () => {
       expect(cli.getConfig(argv)).toEqual({ labels: ['a', 'b', 'c'] });
     });
 
+    it('supports base branch patterns', () => {
+      argv.push('--base-branch-patterns=main,develop');
+      expect(cli.getConfig(argv)).toEqual({
+        baseBranchPatterns: ['main', 'develop'],
+      });
+    });
+
     it('supports string', () => {
       argv.push('--token=a');
       expect(cli.getConfig(argv)).toEqual({ token: 'a' });

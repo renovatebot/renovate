@@ -39,7 +39,7 @@ describe('workers/repository/process/libyear', () => {
                 depName: 'dep1',
                 datasource: 'npm',
                 currentVersion: '0.1.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 updates: [
                   {
                     newVersion: '1.0.0',
@@ -65,7 +65,7 @@ describe('workers/repository/process/libyear', () => {
                 depName: 'dep2',
                 currentVersion: '1.0.0',
                 datasource: 'rubygems',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 updates: [
                   {
                     newVersion: '2.0.0',
@@ -151,7 +151,7 @@ describe('workers/repository/process/libyear', () => {
                 depName: 'dep1',
                 datasource: 'npm',
                 currentVersion: '0.1.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 updates: [
                   {
                     newVersion: '1.0.0',
@@ -171,7 +171,7 @@ describe('workers/repository/process/libyear', () => {
                 enabled: false,
                 datasource: 'npm',
                 currentVersion: '0.1.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 // NOTE that updates shouldn't be set when `enabled: false`, but this clarifies that the existing behaviour is to take that into effect
                 updates: [
                   {

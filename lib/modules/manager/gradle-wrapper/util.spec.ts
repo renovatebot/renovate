@@ -33,7 +33,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
       `(
         '$gradleVersion | $javaConstraint',
         async ({ gradleVersion, javaConstraint }) => {
-          expect(await getJavaConstraint(gradleVersion, '')).toBe(
+          await expect(getJavaConstraint(gradleVersion, '')).resolves.toBe(
             javaConstraint,
           );
         },
@@ -46,7 +46,9 @@ describe('modules/manager/gradle-wrapper/util', () => {
         toolchainVersion=999
       `;
       fs.readLocalFile.mockResolvedValue(daemonJvm);
-      expect(await getJavaConstraint('8.8', './gradlew')).toBe('^999.0.0');
+      await expect(getJavaConstraint('8.8', './gradlew')).resolves.toBe(
+        '^999.0.0',
+      );
     });
 
     it('returns languageVersion constraint if found', async () => {
@@ -55,7 +57,9 @@ describe('modules/manager/gradle-wrapper/util', () => {
       `;
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.readLocalFile.mockResolvedValue(buildGradle);
-      expect(await getJavaConstraint('6.7', './gradlew')).toBe('^456.0.0');
+      await expect(getJavaConstraint('6.7', './gradlew')).resolves.toBe(
+        '^456.0.0',
+      );
     });
   });
 
@@ -66,12 +70,12 @@ describe('modules/manager/gradle-wrapper/util', () => {
         toolchainVersion=21
       `;
       fs.readLocalFile.mockResolvedValue(daemonJvm);
-      expect(await getJvmConfiguration('')).toBe('21');
+      await expect(getJvmConfiguration('')).resolves.toBe('21');
     });
 
     it('returns null if gradle-daemon-jvm.properties file not found', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
-      expect(await getJvmConfiguration('sub/gradlew')).toBeNull();
+      await expect(getJvmConfiguration('sub/gradlew')).resolves.toBeNull();
       expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
         'sub/gradle/gradle-daemon-jvm.properties',
         'utf8',
@@ -86,13 +90,13 @@ describe('modules/manager/gradle-wrapper/util', () => {
       `;
       fs.localPathExists.mockResolvedValue(true);
       fs.readLocalFile.mockResolvedValue(buildGradle);
-      expect(await getJavaLanguageVersion('')).toBe('21');
+      await expect(getJavaLanguageVersion('')).resolves.toBe('21');
     });
 
     it('returns null if build.gradle or build.gradle.kts file not found', async () => {
       fs.localPathExists.mockResolvedValue(false);
       fs.readLocalFile.mockResolvedValue(null);
-      expect(await getJavaLanguageVersion('sub/gradlew')).toBeNull();
+      await expect(getJavaLanguageVersion('sub/gradlew')).resolves.toBeNull();
       expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
         'sub/build.gradle.kts',
         'utf8',
@@ -105,7 +109,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
       `;
       fs.localPathExists.mockResolvedValue(true);
       fs.readLocalFile.mockResolvedValue(buildGradle);
-      expect(await getJavaLanguageVersion('')).toBeNull();
+      await expect(getJavaLanguageVersion('')).resolves.toBeNull();
     });
   });
 
@@ -152,7 +156,9 @@ describe('modules/manager/gradle-wrapper/util', () => {
           mode: 0o550,
         }),
       );
-      expect(await prepareGradleCommand('./gradlew')).toBe('./gradlew');
+      await expect(prepareGradleCommand('./gradlew')).resolves.toBe(
+        './gradlew',
+      );
     });
 
     it('returns null', async () => {
@@ -161,7 +167,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
           isFile: () => false,
         }),
       );
-      expect(await prepareGradleCommand('./gradlew')).toBeNull();
+      await expect(prepareGradleCommand('./gradlew')).resolves.toBeNull();
     });
   });
 });

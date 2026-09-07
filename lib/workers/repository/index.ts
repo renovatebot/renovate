@@ -1,4 +1,3 @@
-import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
 import type { RenovateConfig } from '../../config/types.ts';
@@ -15,7 +14,12 @@ import { logger, setMeta } from '../../logger/index.ts';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap.ts';
 import { getInheritedOrGlobal } from '../../util/common.ts';
 import { removeDanglingContainers } from '../../util/exec/docker/index.ts';
-import { deleteLocalFile, privateCacheDir } from '../../util/fs/index.ts';
+import {
+  deleteLocalFile,
+  ensureDir,
+  privateCacheDir,
+  rmCache,
+} from '../../util/fs/index.ts';
 import { isCloned } from '../../util/git/index.ts';
 import { detectSemanticCommits } from '../../util/git/semantic.ts';
 import * as queue from '../../util/http/queue.ts';
@@ -44,7 +48,7 @@ import { OnboardingState } from './onboarding/common.ts';
 import { ensureOnboardingPr } from './onboarding/pr/index.ts';
 import type { ExtractResult } from './process/extract-update.ts';
 import { extractDependencies, updateRepo } from './process/index.ts';
-import type { ProcessResult } from './result.ts';
+import type { ProcessResult, RepositoryResult } from './result.ts';
 import { processResult } from './result.ts';
 
 // istanbul ignore next
@@ -78,7 +82,7 @@ export async function renovateRepository(
       const localDir = GlobalConfig.get('localDir');
 
       try {
-        await fs.ensureDir(localDir);
+        await ensureDir(localDir);
         logger.debug(`Using localDir: ${localDir}`);
         config = await initRepo(config);
         addSplit('init');
@@ -129,26 +133,27 @@ export async function renovateRepository(
         GlobalConfig.get('dryRun') !== 'lookup' &&
         GlobalConfig.get('dryRun') !== 'extract'
       ) {
-        await instrument(
-          'onboarding',
-          () => ensureOnboardingPr(config, packageFiles, branches),
-          {
-            attributes: {
-              [ATTR_RENOVATE_SPLIT]: 'onboarding',
-            },
-          },
-        );
-        addSplit('onboarding');
-        const res = await instrument(
-          'update',
-          () => updateRepo(config, branches),
-          {
+        let res: RepositoryResult;
+        if (config.repoIsOnboarded) {
+          addSplit('onboarding'); // no onboarding work was needed
+          res = await instrument('update', () => updateRepo(config, branches), {
             attributes: {
               [ATTR_RENOVATE_SPLIT]: 'update',
             },
-          },
-        );
-        setMeta({ repository: config.repository });
+          });
+          setMeta({ repository: config.repository });
+        } else {
+          res = await instrument(
+            'onboarding',
+            () => ensureOnboardingPr(config, packageFiles, branches),
+            {
+              attributes: {
+                [ATTR_RENOVATE_SPLIT]: 'onboarding',
+              },
+            },
+          );
+          addSplit('onboarding');
+        }
         addSplit('update');
         if (performExtract) {
           await setBranchCache(branches); // update branch cache if performed extraction
@@ -170,8 +175,7 @@ export async function renovateRepository(
           );
         }
         await finalizeRepo(config, branchList, repoConfig);
-        // TODO #22198
-        repoResult = processResult(config, res!);
+        repoResult = processResult(config, res);
       }
       printRepositoryProblems(config.repository);
     } catch (err) /* istanbul ignore next */ {
@@ -202,7 +206,7 @@ export async function renovateRepository(
     }
   }
   try {
-    await fs.remove(privateCacheDir());
+    await rmCache(privateCacheDir());
   } catch (err) /* istanbul ignore if */ {
     logger.warn({ err }, 'privateCacheDir deletion error');
   }
@@ -218,7 +222,7 @@ export async function renovateRepository(
   AbandonedPackageStats.report();
   GitOperationStats.report();
   const cloned = isCloned();
-  /* v8 ignore next 11 -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
+  /* v8 ignore next -- coverage not required of these `undefined` checks, as we're happy receiving an `undefined` in the logs */
   logger.info(
     {
       cloned,

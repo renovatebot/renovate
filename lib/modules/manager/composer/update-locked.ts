@@ -15,7 +15,7 @@ export function updateLockedDependency(
   try {
     const lockfile = Json.pipe(Lockfile).parse(lockFileContent);
     if (
-      lockfile?.packages.find(
+      [...lockfile.packages, ...lockfile.packagesDev].find(
         ({ name, version }) =>
           name === depName && composer.equals(version, newVersion),
       )

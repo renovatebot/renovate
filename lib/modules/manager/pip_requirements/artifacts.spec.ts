@@ -4,7 +4,10 @@ import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
@@ -17,7 +20,7 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
@@ -50,39 +53,39 @@ describe('modules/manager/pip_requirements/artifacts', () => {
   });
 
   it('returns null if no updatedDeps were provided', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [],
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no hashes', async () => {
     fs.readLocalFile.mockResolvedValueOnce('eventlet==0.30.2\npbr>=1.9\n');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [{ depName: 'eventlet' }],
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce(newPackageFileContent);
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toMatchObject([
       {
@@ -99,14 +102,14 @@ describe('modules/manager/pip_requirements/artifacts', () => {
   it('returns updated file', async () => {
     fs.readLocalFile.mockResolvedValueOnce('new content');
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -131,8 +134,8 @@ describe('modules/manager/pip_requirements/artifacts', () => {
   it('ignores falsy depNames', async () => {
     fs.readLocalFile.mockResolvedValueOnce('new content');
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [
           { depName: '' },
@@ -142,7 +145,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -165,14 +168,14 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     fs.readLocalFile.mockImplementation(() => {
       throw new Error('some-error');
     });
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'requirements.txt',
@@ -203,14 +206,14 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -228,17 +231,18 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e CI ' +
           '-e PIP_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool hashin 0.17.0 ' +
           '&& ' +
           'hashin atomicwrites==1.4.0 -r requirements.txt' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -252,14 +256,14 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'requirements.txt',
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',

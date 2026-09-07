@@ -26,3 +26,4 @@ export const supportedDatasources = [
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['MODULE.bazel.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;

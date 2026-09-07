@@ -8,7 +8,7 @@ vi.mock('glob', () => ({
   glob: vi.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
 }));
 vi.mock('../../../util/exec/common.ts');
-const execSync = vi.mocked(_rawExec);
+const execMock = vi.mocked(_rawExec);
 
 describe('modules/platform/local/scm', () => {
   let localFs: LocalFs;
@@ -19,66 +19,70 @@ describe('modules/platform/local/scm', () => {
 
   describe('dummy functions', () => {
     it('behindBaseBranch', async () => {
-      expect(await localFs.isBranchBehindBase('', '')).toBe(false);
+      await expect(localFs.isBranchBehindBase('', '')).resolves.toBe(false);
     });
 
     it('isBranchModified', async () => {
-      expect(await localFs.isBranchModified('', '')).toBe(false);
+      await expect(localFs.isBranchModified('', '')).resolves.toBe(false);
     });
 
     it('isBranchConflicted', async () => {
-      expect(await localFs.isBranchConflicted('', '')).toBe(false);
+      await expect(localFs.isBranchConflicted('', '')).resolves.toBe(false);
     });
 
     it('branchExists', async () => {
-      expect(await localFs.branchExists('')).toBe(true);
+      await expect(localFs.branchExists('')).resolves.toBe(true);
     });
 
     it('getBranchCommit', async () => {
-      expect(await localFs.getBranchCommit('')).toBeNull();
+      await expect(localFs.getBranchCommit('')).resolves.toBeNull();
     });
 
     it('getBranchUpdateDate', async () => {
-      expect(await localFs.getBranchUpdateDate('')).toBeNull();
+      await expect(localFs.getBranchUpdateDate('')).resolves.toBeNull();
+    });
+
+    it('getAllBranchUpdateDates', async () => {
+      await expect(localFs.getAllBranchUpdateDates()).resolves.toEqual({});
     });
 
     it('deleteBranch', async () => {
-      expect(await localFs.deleteBranch('')).toBeUndefined();
+      await expect(localFs.deleteBranch('')).resolves.toBeUndefined();
     });
 
     it('commitAndPush', async () => {
-      expect(
-        await localFs.commitAndPush(partial<CommitFilesConfig>()),
-      ).toBeNull();
+      await expect(
+        localFs.commitAndPush(partial<CommitFilesConfig>()),
+      ).resolves.toBeNull();
     });
 
     it('checkoutBranch', async () => {
-      expect(await localFs.checkoutBranch('')).toBeNull();
+      await expect(localFs.checkoutBranch('')).resolves.toBeNull();
     });
   });
 
   describe('getFileList', () => {
     it('should return file list using git', async () => {
-      execSync.mockReturnValueOnce(
+      execMock.mockReturnValueOnce(
         Promise.resolve(
           partial<ExecResult>({
             stdout: 'file1\nfile2',
           }),
         ),
       );
-      expect(await localFs.getFileList()).toHaveLength(2);
+      await expect(localFs.getFileList()).resolves.toHaveLength(2);
 
-      expect(execSync).toHaveBeenCalledExactlyOnceWith('git ls-files', {
+      expect(execMock).toHaveBeenCalledExactlyOnceWith('git ls-files', {
         maxBuffer: 1024 * 1024 * 10,
       });
     });
 
     it('should return file list using glob', async () => {
-      execSync.mockImplementationOnce(() => {
+      execMock.mockImplementationOnce(() => {
         throw new Error();
       });
 
-      expect(await localFs.getFileList()).toHaveLength(2);
+      await expect(localFs.getFileList()).resolves.toHaveLength(2);
     });
   });
 

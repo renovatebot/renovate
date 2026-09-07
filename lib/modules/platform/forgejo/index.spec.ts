@@ -186,7 +186,7 @@ describe('modules/platform/forgejo/index', () => {
       state: 'closed',
       body: 'other-content',
       assignees: [],
-      labels: undefined as never, // coverage
+      labels: undefined, // coverage
     },
     {
       number: 3,
@@ -303,7 +303,9 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
+      await expect(
+        forgejo.initPlatform({ token: 'some-token' }),
+      ).resolves.toEqual({
         endpoint: 'https://code.forgejo.org/',
         gitAuthor: 'renovate <renovate@example.com>',
       });
@@ -317,12 +319,12 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(
-        await forgejo.initPlatform({
+      await expect(
+        forgejo.initPlatform({
           token: 'some-token',
           endpoint: 'https://forgejo.renovatebot.com',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://forgejo.renovatebot.com/',
         gitAuthor: 'Renovate Bot <renovate@example.com>',
       });
@@ -336,12 +338,12 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(
-        await forgejo.initPlatform({
+      await expect(
+        forgejo.initPlatform({
           token: 'some-token',
           endpoint: 'https://forgejo.renovatebot.com',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://forgejo.renovatebot.com/',
         gitAuthor: 'Renovate Bot <renovate@example.com>',
       });
@@ -358,7 +360,9 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
+      await expect(
+        forgejo.initPlatform({ token: 'some-token' }),
+      ).resolves.toEqual({
         endpoint: 'https://code.forgejo.org/',
         gitAuthor: 'renovate <renovate@example.com>',
       });
@@ -978,14 +982,16 @@ describe('modules/platform/forgejo/index', () => {
   });
 
   describe('getBranchStatus', () => {
-    const commitStatus = (status: CommitStatusType): CommitStatus => ({
-      id: 1,
-      status,
-      context: '',
-      description: '',
-      target_url: '',
-      created_at: '',
-    });
+    function commitStatus(status: CommitStatusType): CommitStatus {
+      return {
+        id: 1,
+        status,
+        context: '',
+        description: '',
+        target_url: '',
+        created_at: '',
+      };
+    }
 
     it('should return yellow for unknown result', async () => {
       const scope = httpMock
@@ -1119,9 +1125,9 @@ describe('modules/platform/forgejo/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      expect(
-        await forgejo.getBranchStatusCheck('some-branch', 'some-context'),
-      ).toBeNull();
+      await expect(
+        forgejo.getBranchStatusCheck('some-branch', 'some-context'),
+      ).resolves.toBeNull();
     });
 
     it('should return null with no matching results', async () => {
@@ -2985,7 +2991,7 @@ describe('modules/platform/forgejo/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      expect(await forgejo.getBranchPr('missing')).toBeNull();
+      await expect(forgejo.getBranchPr('missing')).resolves.toBeNull();
     });
   });
 
@@ -3198,7 +3204,7 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, { type: 'dir', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      expect(await forgejo.getJsonFile('file.json')).toBeNull();
+      await expect(forgejo.getJsonFile('file.json')).resolves.toBeNull();
     });
 
     it('throws on errors', async () => {

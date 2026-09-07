@@ -2,7 +2,10 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import { minimatchFilter } from '../../../util/minimatch.ts';
+import {
+  getMatchingFiles,
+  resolveRelativePathToRoot,
+} from '../../../util/fs/util.ts';
 import { scm } from '../../platform/scm.ts';
 import type { ProjectFile } from './types.ts';
 import { readFileAsXmlDocument } from './util.ts';
@@ -67,7 +70,7 @@ export async function getDependentPackageFiles(
       upath.normalize(a),
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      reframeRelativePathToRootOfRepo(f, r),
+      resolveRelativePathToRoot(f, r),
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -119,36 +122,13 @@ function recursivelyGetDependentPackageFiles(
 }
 
 /**
- * Take the path relative from a project file, and make it relative from the root of the repo
- */
-function reframeRelativePathToRootOfRepo(
-  dependentProjectRelativePath: string,
-  projectReference: string,
-): string {
-  const virtualRepoRoot = '/';
-  const absoluteDependentProjectPath = upath.resolve(
-    virtualRepoRoot,
-    dependentProjectRelativePath,
-  );
-  const absoluteProjectReferencePath = upath.resolve(
-    upath.dirname(absoluteDependentProjectPath),
-    projectReference,
-  );
-  const relativeProjectReferencePath = upath.relative(
-    virtualRepoRoot,
-    absoluteProjectReferencePath,
-  );
-
-  return relativeProjectReferencePath;
-}
-
-/**
  * Get a list of package files in localDir
  */
 async function getAllPackageFiles(): Promise<string[]> {
   const allFiles = await scm.getFileList();
-  const filteredPackageFiles = allFiles.filter(
-    minimatchFilter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true }),
+  const filteredPackageFiles = getMatchingFiles(
+    '**/*.{cs,vb,fs}proj',
+    allFiles,
   );
 
   logger.trace({ filteredPackageFiles }, 'Found package files');

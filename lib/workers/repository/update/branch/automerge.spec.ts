@@ -18,34 +18,36 @@ describe('workers/repository/update/branch/automerge', () => {
 
     it('returns false if not configured for automerge', async () => {
       config.automerge = false;
-      expect(await tryBranchAutomerge(config)).toBe('no automerge');
+      await expect(tryBranchAutomerge(config)).resolves.toBe('no automerge');
     });
 
     it('returns false if automergeType is pr', async () => {
       config.automerge = true;
       config.automergeType = 'pr';
-      expect(await tryBranchAutomerge(config)).toBe('no automerge');
+      await expect(tryBranchAutomerge(config)).resolves.toBe('no automerge');
     });
 
     it('returns false if off schedule', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       isScheduledSpy.mockReturnValueOnce(false);
-      expect(await tryBranchAutomerge(config)).toBe('off schedule');
+      await expect(tryBranchAutomerge(config)).resolves.toBe('off schedule');
     });
 
     it('returns false if branch status is not success', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce('yellow');
-      expect(await tryBranchAutomerge(config)).toBe('no automerge');
+      await expect(tryBranchAutomerge(config)).resolves.toBe('no automerge');
     });
 
     it('returns branch status error if branch status is failure', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce('red');
-      expect(await tryBranchAutomerge(config)).toBe('branch status error');
+      await expect(tryBranchAutomerge(config)).resolves.toBe(
+        'branch status error',
+      );
     });
 
     it('returns false if PR exists', async () => {
@@ -53,7 +55,7 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
-      expect(await tryBranchAutomerge(config)).toBe(
+      await expect(tryBranchAutomerge(config)).resolves.toBe(
         'automerge aborted - PR exists',
       );
     });
@@ -90,7 +92,7 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automergeType = 'branch';
       GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchStatus.mockResolvedValueOnce('green');
-      expect(await tryBranchAutomerge(config)).toBe('automerged');
+      await expect(tryBranchAutomerge(config)).resolves.toBe('automerged');
     });
   });
 });

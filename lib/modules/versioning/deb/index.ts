@@ -1,7 +1,7 @@
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type { VersioningApi } from '../types.ts';
+import type { DebVersion } from './types.ts';
 
 export const id = 'deb';
 export const displayName = 'Deb version';
@@ -18,24 +18,6 @@ const numericPattern = regEx(/\d+/g);
 const characterOrder =
   '~ ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-.:';
 const numericChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-export interface DebVersion extends GenericVersion {
-  /**
-   * epoch, defaults to 0 if not present, are used to leave version mistakes and previous
-   * versioning schemes behind.
-   */
-  epoch: number;
-  /**
-   * upstreamVersion is the main version part: it defines the version of origin software
-   * that was packaged.
-   */
-  upstreamVersion: string;
-  /**
-   * debianRevision is used to distinguish between different versions of packaging for the
-   * same upstream version.
-   */
-  debianRevision: string;
-}
 
 class DebVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): DebVersion | null {

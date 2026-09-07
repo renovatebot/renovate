@@ -1,7 +1,7 @@
 import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../../../../../logger/index.ts';
-import { escapeRegExp, regEx } from '../../../../../util/regex.ts';
+import { regEx } from '../../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../../util/string.ts';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types.ts';
 import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
@@ -83,7 +83,7 @@ function replaceAsString(
   const searchString = `"${oldValue}"`;
   let newString = `"${newValue}"`;
 
-  const escapedDepName = escapeRegExp(depName);
+  const escapedDepName = RegExp.escape(depName);
   const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
   const match = patchRe.exec(oldValue);
   if (match && depType === 'resolutions') {

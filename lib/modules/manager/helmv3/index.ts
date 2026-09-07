@@ -8,6 +8,7 @@ export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['Chart.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const displayName = 'Helm v3';
 export const url = 'https://helm.sh/docs';

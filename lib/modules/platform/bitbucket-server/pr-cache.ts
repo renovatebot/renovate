@@ -9,7 +9,7 @@ import { getQueryString } from '../../../util/url.ts';
 import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types.ts';
 import { prInfo } from './utils.ts';
 
-/* v8 ignore next */
+/* v8 ignore next -- one-off cache-schema migration shim, only runs against real legacy repo caches */
 function migrateBitbucketServerCache(platform: unknown): void {
   if (!isPlainObject(platform)) {
     return;

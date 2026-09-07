@@ -41,8 +41,8 @@ describe('config/presets/internal/index', () => {
           );
           const configType = groupName === 'global' ? 'global' : 'repo';
           const res = await validateConfig(configType, config, true);
-          expect(res.errors).toHaveLength(0);
-          expect(res.warnings).toHaveLength(0);
+          expect(res.errors).toBeEmptyArray();
+          expect(res.warnings).toBeEmptyArray();
         } catch (err) {
           if (err.validationError) {
             throw new Error(err.validationError);

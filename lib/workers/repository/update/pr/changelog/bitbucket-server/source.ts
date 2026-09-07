@@ -1,5 +1,5 @@
 import { regEx } from '../../../../../../util/regex.ts';
-import { parseUrl } from '../../../../../../util/url.ts';
+import { joinUrlParts, parseUrl } from '../../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { ChangeLogSource } from '../source.ts';
 
@@ -52,5 +52,23 @@ export class BitbucketServerChangeLogSource extends ChangeLogSource {
     }
 
     return '';
+  }
+
+  override getNotesSourceUrl(
+    baseUrl: string,
+    repository: string,
+    changelogFile: string,
+  ): string {
+    const [projectKey, repositorySlug] = repository.split('/');
+    return joinUrlParts(
+      baseUrl,
+      'projects',
+      projectKey,
+      'repos',
+      repositorySlug,
+      'browse',
+      changelogFile,
+      '?at=HEAD',
+    );
   }
 }

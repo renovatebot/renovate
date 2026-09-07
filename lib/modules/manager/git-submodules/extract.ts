@@ -24,7 +24,7 @@ async function getUrl(
       `submodule.${submoduleName}.url`,
     ])
   )?.trim();
-  if (!path?.startsWith('../')) {
+  if (!path?.startsWith('../') && !path?.startsWith('./')) {
     return path;
   }
   const remoteUrl = (
@@ -73,7 +73,9 @@ async function getModules(
       .filter((s) => !!s);
 
     for (const line of modules) {
-      const [, name, path] = line.split(regEx(/submodule\.(.+?)\.path\s(.+)/));
+      const [, name, path] = line.split(
+        regEx(/submodule\.(?<name>.+?)\.path\s(?<path>.+)/),
+      );
       res.push({ name, path });
     }
   } catch (err) /* istanbul ignore next */ {
@@ -112,7 +114,7 @@ export default async function extractPackageFile(
       deps.push({
         depName: path,
         packageName: httpSubModuleUrl,
-        sourceUrl: httpSubModuleUrl.replace(/\.git$/, ''),
+        sourceUrl: httpSubModuleUrl.replace(regEx(/\.git$/), ''),
         currentValue: branch ?? undefined,
         currentDigest,
         ...(semVerVersioning.api.isVersion(branch)

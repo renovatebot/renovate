@@ -3,7 +3,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as hashicorp from '../../versioning/hashicorp/index.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -20,7 +23,7 @@ const lockedVersionLockfile = Fixtures.get('rangeStrategy.hcl');
 const terraformBlock = Fixtures.get('terraformBlock.tf');
 const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -37,7 +40,9 @@ describe('modules/manager/terraform/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', '1.tf', {}),
+      ).resolves.toBeNull();
     });
 
     it('returns null for no deps', async () => {
@@ -48,7 +53,7 @@ describe('modules/manager/terraform/extract', () => {
         }
         `;
 
-      expect(await extractPackageFile(src, '1.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '1.tf', {})).resolves.toBeNull();
     });
 
     it('extracts  modules', async () => {
@@ -759,7 +764,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
         deps: [{ skipReason: 'local' }],
       });
     });
@@ -770,7 +775,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toBeNull();
     });
 
     it('extract helm releases', async () => {

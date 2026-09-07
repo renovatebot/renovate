@@ -1,18 +1,20 @@
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '~test/util.ts';
-import { git, partial, platform, scm } from '~test/util.ts';
+import { fakeSha, git, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { InheritConfig } from '../../../../config/inherit.ts';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import { isOnboarded } from './check.ts';
 
 vi.mock('../../../../util/cache/repository/index.ts');
 
 const cache = vi.mocked(_cache);
+
+const defaultSha = fakeSha('default-sha');
+const onboardingSha = fakeSha('onboarding-sha');
 
 describe('workers/repository/onboarding/branch/check', () => {
   beforeEach(() => {
@@ -36,15 +38,15 @@ describe('workers/repository/onboarding/branch/check', () => {
   it('skips normal onboarding check if onboardingCache is valid', async () => {
     cache.getCache.mockReturnValueOnce({
       onboardingBranchCache: {
-        defaultBranchSha: 'default-sha',
-        onboardingBranchSha: 'onboarding-sha',
+        defaultBranchSha: defaultSha,
+        onboardingBranchSha: onboardingSha,
         isConflicted: false,
         isModified: false,
       },
     });
     git.getBranchCommit
-      .mockReturnValueOnce('default-sha' as LongCommitSha)
-      .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
+      .mockReturnValueOnce(defaultSha)
+      .mockReturnValueOnce(onboardingSha);
     const res = await isOnboarded(config);
     expect(res).toBeFalse();
 
@@ -56,8 +58,8 @@ describe('workers/repository/onboarding/branch/check', () => {
   it('continues with normal logic if onboardingCache is invalid', async () => {
     cache.getCache.mockReturnValueOnce({
       onboardingBranchCache: {
-        defaultBranchSha: 'default-sha',
-        onboardingBranchSha: 'onboarding-sha',
+        defaultBranchSha: defaultSha,
+        onboardingBranchSha: onboardingSha,
         isConflicted: false,
         isModified: false,
       },

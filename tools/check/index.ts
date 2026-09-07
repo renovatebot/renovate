@@ -1,20 +1,10 @@
 /**
  * Fast local CI check script
- *
- * Usage: pnpm check [options] [targets...]
- *
- * Arguments:
- *   targets           Files or directories to scope checks to
- *
- * Options:
- *   --all             Run fixers first, then all lint checks and tests
- *   --fix             Run fixers only (oxlint-fix, biome-fix, prettier-fix)
- *   --no-test         Skip tests
  */
 
-import { readdirSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import { extname } from 'node:path';
-import { parseArgs } from 'node:util';
+import { Command } from 'commander';
 import {
   getCoverageForDir,
   getCoverageForFiles,
@@ -142,11 +132,10 @@ function toSpecPath(file: string): string {
   return file.replace(/\.ts$/, '.spec.ts');
 }
 
-function countSpecFiles(dir: string): number {
+async function countSpecFiles(dir: string): Promise<number> {
   try {
-    return readdirSync(dir, { recursive: true, encoding: 'utf-8' }).filter(
-      (f) => f.endsWith('.spec.ts'),
-    ).length;
+    const files = await readdir(dir, { recursive: true, encoding: 'utf-8' });
+    return files.filter((f) => f.endsWith('.spec.ts')).length;
   } catch {
     return 0;
   }
@@ -187,24 +176,28 @@ async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
 }
 
 function parseCliArgs(): CliArgs {
-  const { values, positionals } = parseArgs({
-    options: {
-      all: { type: 'boolean', default: false },
-      fix: { type: 'boolean', default: false },
-      'no-test': { type: 'boolean', default: false },
-    },
-    allowPositionals: true,
-  });
+  let args: CliArgs | undefined;
 
-  return {
-    all: values.all ?? false,
-    fix: values.fix ?? false,
-    noTest: values['no-test'] ?? false,
-    targets: positionals,
-  };
+  new Command('pnpm check')
+    .description('Fast local CI check script')
+    .argument('[targets...]', 'files or directories to scope checks to')
+    .option('--all', 'run fixers first, then all lint checks and tests')
+    .option('--fix', 'run fixers only (oxlint-fix, biome-fix, prettier-fix)')
+    .option('--no-test', 'skip tests')
+    .action((targets, opts) => {
+      args = {
+        all: opts.all ?? false,
+        fix: opts.fix ?? false,
+        noTest: !opts.test,
+        targets,
+      };
+    })
+    .parse();
+
+  return args!;
 }
 
-function buildTestChecks(args: CliArgs): ParallelCheck[] {
+async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
   if (args.noTest || (args.fix && !args.all)) {
     return [];
   }
@@ -225,7 +218,7 @@ function buildTestChecks(args: CliArgs): ParallelCheck[] {
   }
   let fileCount = 0;
   for (const p of patterns) {
-    fileCount += extname(p) === '' ? countSpecFiles(p) : 1;
+    fileCount += extname(p) === '' ? await countSpecFiles(p) : 1;
   }
   if (fileCount === 0) {
     return [];
@@ -239,7 +232,7 @@ function buildTestChecks(args: CliArgs): ParallelCheck[] {
 async function main(): Promise<void> {
   const startTime = Date.now();
   const args = parseCliArgs();
-  const testChecks = buildTestChecks(args);
+  const testChecks = await buildTestChecks(args);
 
   let fixChecks: ParallelCheck[];
   let lintChecks: ParallelCheck[];

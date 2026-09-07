@@ -3,6 +3,7 @@ import { PreToolUseHookInput } from './utils/schemas.ts';
 import { readStdin } from './utils/stdin.ts';
 
 const raw = await readStdin();
+// oxlint-disable-next-line renovate/prefer-json-pipe -- hook scripts must stay dependency-light and fast to start; `Json` lives in lib/util/schema-utils, which drags in the full lib import graph (logger, yaml, toml)
 const result = PreToolUseHookInput.safeParse(JSON.parse(raw));
 
 if (result.success) {

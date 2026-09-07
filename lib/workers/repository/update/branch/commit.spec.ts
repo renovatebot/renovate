@@ -1,6 +1,5 @@
-import { logger, scm } from '~test/util.ts';
+import { fakeSha, logger, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { commitFilesToBranch } from './commit.ts';
 
@@ -22,7 +21,7 @@ describe('workers/repository/update/branch/commit', () => {
         upgrades: [],
         platformCommit: 'auto',
       } satisfies BranchConfig;
-      scm.commitAndPush.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.commitAndPush.mockResolvedValueOnce(fakeSha('123test'));
       GlobalConfig.reset();
     });
 
@@ -57,6 +56,25 @@ describe('workers/repository/update/branch/commit', () => {
           },
         ],
       ]);
+    });
+
+    it('passes commit trailers', async () => {
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.commitTrailers = [
+        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+      ];
+
+      await commitFilesToBranch(config);
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
     });
 
     it('dry runs', async () => {

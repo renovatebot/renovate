@@ -240,11 +240,11 @@ describe('config/presets/internal/workarounds', () => {
   describe('javaLTSVersions', () => {
     const preset = presets.javaLTSVersions;
     const packageRules = preset.packageRules!;
-    // Indices: 0 regex+names, 1 regex+deps, 2 docker major-only+names, 3 docker major-only+deps, 4 liberica
+    // Indices: 0 regex+names, 1 regex+deps, 2 docker major-only+names, 3 docker major-only+deps, 4 mise partial, 5 liberica
     const regexPackageRule = packageRules[0];
     const majorOnlyPackageRule = packageRules[2];
     const majorOnlyDepRule = packageRules[3];
-    const libericaRule = packageRules[4];
+    const libericaRule = packageRules[5];
     const javaRegexVersioning = regexPackageRule.versioning;
 
     describe('major-only docker tag override', () => {
@@ -275,42 +275,75 @@ describe('config/presets/internal/workarounds', () => {
       });
 
       it('applies docker versioning for major-only current values', async () => {
-        const res = await applyPackageRules({
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
           datasource: 'docker',
           depName: 'eclipse-temurin',
           packageName: 'eclipse-temurin',
           currentValue: '21-jre',
           packageRules,
-        } as PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>);
+        });
 
         expect(res.versioning).toEqual('docker');
         expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
       });
 
       it('keeps regex versioning for full-precision current values', async () => {
-        const res = await applyPackageRules({
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
           datasource: 'docker',
           depName: 'eclipse-temurin',
           packageName: 'eclipse-temurin',
           currentValue: '21.0.9_10-jre',
           packageRules,
-        } as PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>);
+        });
 
         expect(res.versioning).toEqual(javaRegexVersioning);
         expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
       });
 
-      it('keeps regex versioning for java-version major-only values', async () => {
-        const res = await applyPackageRules({
+      it('keeps regex versioning for java-version values outside mise', async () => {
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
           datasource: 'java-version',
           depName: 'java',
           packageName: 'java-jdk',
           currentValue: '21',
           packageRules,
-        } as PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>);
+        });
 
         expect(res.versioning).toEqual(javaRegexVersioning);
       });
+
+      it.each`
+        currentValue | expectedVersioning
+        ${'21'}      | ${'semver-partial'}
+        ${'21.0'}    | ${'semver-partial'}
+        ${'21.0.9'}  | ${javaRegexVersioning}
+      `(
+        'uses $expectedVersioning versioning for mise Java version $currentValue',
+        async ({ currentValue, expectedVersioning }) => {
+          const res = await applyPackageRules<
+            PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+          >({
+            datasource: 'java-version',
+            depName: 'java',
+            manager: 'mise',
+            packageName: 'java-jdk',
+            currentValue,
+            packageRules,
+            versioning: 'semver-partial',
+          });
+
+          expect(res.versioning).toEqual(expectedVersioning);
+          expect(res.allowedVersions).toEqual(
+            '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
+          );
+        },
+      );
     });
 
     describe('bellsoft/liberica-runtime-container', () => {

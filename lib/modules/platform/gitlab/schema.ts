@@ -15,6 +15,14 @@ const GitlabUser = z.object({
   username: z.string(),
 });
 
+export const GitLabProjectMembers = LooseArray(
+  z.object({
+    username: z.string(),
+    access_level: z.number().optional(),
+  }),
+);
+export type GitLabProjectMember = z.infer<typeof GitLabProjectMembers>[number];
+
 export const GitLabMergeRequest = DeepNullish(
   z.object({
     iid: z.number(),

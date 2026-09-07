@@ -14,7 +14,9 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
-const isVersion = (input: string): boolean => npm.isVersion(input);
+function isVersion(input: string): boolean {
+  return npm.isVersion(input);
+}
 
 function convertToCaret(item: string): string {
   // In Cargo, caret versions are used by default, so "1.2.3" actually means ^1.2.3.
@@ -56,14 +58,17 @@ function npm2cargo(input: string): string {
   return res.join(', ');
 }
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  !!npm.isLessThanRange?.(version, cargo2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return !!npm.isLessThanRange?.(version, cargo2npm(range));
+}
 
-export const isValid = (input: string): boolean =>
-  npm.isValid(cargo2npm(input));
+export function isValid(input: string): boolean {
+  return npm.isValid(cargo2npm(input));
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(version, cargo2npm(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(version, cargo2npm(range));
+}
 
 function getSatisfyingVersion(
   versions: string[],
@@ -79,9 +84,12 @@ function minSatisfyingVersion(
   return npm.minSatisfyingVersion(versions, cargo2npm(range));
 }
 
-const isSingleVersion = (constraint: string): boolean =>
-  constraint.trim().startsWith('=') &&
-  isVersion(constraint.trim().substring(1).trim());
+function isSingleVersion(constraint: string): boolean {
+  return (
+    constraint.trim().startsWith('=') &&
+    isVersion(constraint.trim().substring(1).trim())
+  );
+}
 
 function getPinnedValue(newVersion: string): string {
   return `=${newVersion}`;
@@ -151,6 +159,24 @@ function getNewValue({
   return newCargo;
 }
 
+function subset(subRange: string, superRange: string): boolean | undefined {
+  try {
+    return npm.subset!(cargo2npm(subRange), cargo2npm(superRange));
+  } catch (err) {
+    logger.debug({ err }, 'cargo.subset error');
+    return false;
+  }
+}
+
+function intersects(subRange: string, superRange: string): boolean {
+  try {
+    return npm.intersects!(cargo2npm(subRange), cargo2npm(superRange));
+  } catch (err) {
+    logger.debug({ err }, 'cargo.intersects error');
+    return false;
+  }
+}
+
 function isBreaking(current: string, version: string): boolean {
   // The change may be breaking if either version is unstable
   if (!semver.is(version) || !semver.is(current)) {
@@ -180,5 +206,7 @@ export const api: VersioningApi = {
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
+  subset,
+  intersects,
 };
 export default api;

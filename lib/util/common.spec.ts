@@ -241,7 +241,7 @@ describe('util/common', () => {
     // is not possiblle as config validation will error out: only for coverage
     it('handles undefined inherited values', () => {
       InheritConfig.set({
-        configFileNames: undefined as never,
+        configFileNames: undefined,
       });
       GlobalConfig.set({
         configFileNames: ['global'],

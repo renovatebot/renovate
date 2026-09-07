@@ -6,6 +6,7 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -23,10 +24,12 @@ import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import {
   diffCommitTree,
@@ -79,14 +82,16 @@ import {
   enableAutoMergeMutation,
   getIssuesQuery,
   repoInfoQuery,
+  repoMergeQueueQuery,
 } from './graphql.ts';
-import { GithubIssueCache, GithubIssue as Issue } from './issue.ts';
+import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
-import { getPrCache, updatePrCache } from './pr.ts';
+import { getPrCache, isPrInMergeQueue, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubVulnerabilityAlerts,
+  GithubIssue as Issue,
 } from './schema.ts';
 import type {
   AggregatedVulnerabilities,
@@ -98,16 +103,23 @@ import type {
   GhRepo,
   GhRestPr,
   GhRestRepo,
+  GithubHost,
   LocalRepoConfig,
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
-import { getRepoUrl, warnIfDefaultGitAuthorEmail } from './utils.ts';
+import {
+  getRepoUrl,
+  isGithubEnterpriseServer,
+  warnIfDefaultGitAuthorEmail,
+} from './utils.ts';
 
 export const id = 'github';
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
+
+const defaultGithubApiUrl = 'https://api.github.com/';
 
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
@@ -115,8 +127,10 @@ const GitHubMaxPrBodyLen = 58000;
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
-    hostType: 'github',
-    endpoint: 'https://api.github.com/',
+    host: {
+      type: 'github',
+      apiUrl: parseUrl(defaultGithubApiUrl)!,
+    },
   };
 }
 
@@ -130,28 +144,31 @@ export function isGHApp(): boolean {
   return !!platformConfig.isGHApp;
 }
 
-export async function detectGhe(token: string): Promise<void> {
-  const parsedEndpoint = parseUrl(platformConfig.endpoint);
-  /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
-  if (!parsedEndpoint) {
-    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+async function detectGithubHost(
+  apiUrl: URL,
+  token: string,
+): Promise<GithubHost> {
+  const { hostname } = apiUrl;
+
+  if (hostname === 'api.github.com') {
+    return { type: 'github', apiUrl };
   }
-  const host = parsedEndpoint.host;
-  platformConfig.isGhe = host !== 'api.github.com';
-  platformConfig.isGheCloud = host.endsWith('.ghe.com');
-  if (platformConfig.isGhe) {
-    const gheHeaderKey = 'x-github-enterprise-version';
-    const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders = coerceObject(gheQueryRes?.headers);
-    const [, gheVersion] =
-      Object.entries(gheHeaders).find(
-        ([k]) => k.toLowerCase() === gheHeaderKey,
-      ) ?? [];
-    platformConfig.gheVersion = semver.valid(gheVersion as string) ?? null;
-    logger.debug(
-      `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`,
-    );
+
+  if (hostname.endsWith('.ghe.com')) {
+    logger.debug('Detected GitHub Enterprise Cloud');
+    return { type: 'ghec', apiUrl };
   }
+
+  const gheHeaderKey = 'x-github-enterprise-version';
+  const gheQueryRes = await githubApi.headJson('/', { token });
+  const gheHeaders = coerceObject(gheQueryRes?.headers);
+  const gheVersionHeader = Object.entries(gheHeaders).find(
+    ([k]) => k.toLowerCase() === gheHeaderKey,
+  );
+
+  const version = semver.valid(gheVersionHeader?.[1] as string) ?? null;
+  logger.debug(`Detected GitHub Enterprise Server, version: ${version}`);
+  return { type: 'ghes', apiUrl, version };
 }
 
 export async function initPlatform({
@@ -164,29 +181,31 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
+  token = token.replace(regEx(/^ghs_/), 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
+  let githubApiUrl = platformConfig.host.apiUrl;
   if (endpoint) {
-    if (!isHttpUrl(endpoint)) {
+    const parsedApiUrl = parseUrl(ensureTrailingSlash(endpoint));
+    if (!parsedApiUrl || !isHttpUrl(parsedApiUrl)) {
       throw new Error(`Init: Invalid GitHub endpoint URL: ${endpoint}`);
     }
-    platformConfig.endpoint = ensureTrailingSlash(endpoint);
-    githubHttp.setBaseUrl(platformConfig.endpoint);
+    githubApiUrl = parsedApiUrl;
+    githubHttp.setBaseUrl(githubApiUrl.href);
   } else {
-    logger.debug(`Using default github endpoint: ${platformConfig.endpoint}`);
+    logger.debug(`Using default github endpoint: ${githubApiUrl.href}`);
   }
 
-  await detectGhe(token);
+  platformConfig.host = await detectGithubHost(githubApiUrl, token);
   /**
    * GHE requires version >=3.10 to support fine-grained access tokens
    * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
    */
   if (
     isGithubFineGrainedPersonalAccessToken(token) &&
-    platformConfig.isGhe &&
-    (!platformConfig.gheVersion ||
-      semver.lt(platformConfig.gheVersion, '3.10.0'))
+    isGithubEnterpriseServer(platformConfig.host) &&
+    (!platformConfig.host.version ||
+      semver.lt(platformConfig.host.version, '3.10.0'))
   ) {
     throw new Error(
       'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.',
@@ -201,50 +220,55 @@ export async function initPlatform({
     renovateUsername = platformConfig.userDetails.username;
   } else {
     platformConfig.userDetails ??= await getUserDetails(
-      platformConfig.endpoint,
+      platformConfig.host.apiUrl.href,
       token,
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+
+  let ghHostname: string;
+  if (platformConfig.host.type === 'ghec') {
+    ghHostname = 'ghe.com';
+  } else if (platformConfig.host.type === 'ghes') {
+    ghHostname = platformConfig.host.apiUrl.hostname;
+  } else {
+    ghHostname = 'github.com';
+  }
+
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      let ghHostname: string;
-      /* v8 ignore next -- false negative due to V8/source-map artifact */
-      if (platformConfig.isGheCloud) {
-        ghHostname = 'ghe.com';
-      } else if (platformConfig.isGhe) {
-        // valid url ensured at the function start
-        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
-        ghHostname = parsedEndpoint.hostname;
-      } else {
-        ghHostname = 'github.com';
-      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
-        platformConfig.endpoint,
+        platformConfig.host.apiUrl.href,
         token,
       );
       // v8 ignore next -- TODO: coverage error #40625
       platformConfig.userEmail =
         platformConfig.userDetails.email ??
-        (await getUserEmail(platformConfig.endpoint, token));
+        (await getUserEmail(platformConfig.host.apiUrl.href, token));
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
     }
   }
+
+  git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
+
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
-    endpoint: platformConfig.endpoint,
+    endpoint: platformConfig.host.apiUrl.href,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
   };
 
-  warnIfDefaultGitAuthorEmail(platformResult.gitAuthor, platformConfig.isGhe);
+  warnIfDefaultGitAuthorEmail(
+    platformResult.gitAuthor,
+    platformConfig.host.type !== 'github',
+  );
 
   if (
     getEnv().RENOVATE_X_GITHUB_HOST_RULES &&
@@ -256,14 +280,14 @@ export async function initPlatform({
         matchHost: 'ghcr.io',
         hostType: 'docker',
         username: 'USERNAME',
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       },
     ];
     logger.debug('Adding GitHub token as npm.pkg.github.com Basic token');
     platformResult.hostRules.push({
       matchHost: 'npm.pkg.github.com',
       hostType: 'npm',
-      token: token.replace(/^x-access-token:/, ''),
+      token: token.replace(regEx(/^x-access-token:/), ''),
     });
     const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
     for (const hostType of usernamePasswordHostTypes) {
@@ -274,7 +298,7 @@ export async function initPlatform({
         hostType,
         matchHost: `${hostType}.pkg.github.com`,
         username: renovateUsername,
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       });
     }
   }
@@ -297,7 +321,7 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
       { paginate: 'all' },
     );
     return res.body;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: repo listing failures are logged and rethrown, not simulated in specs */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
   }
@@ -457,7 +481,10 @@ export async function findFork(
   }
   logger.debug(`Searching for forked repo in user account`);
   try {
-    const { username } = await getUserDetails(platformConfig.endpoint, token);
+    const { username } = await getUserDetails(
+      platformConfig.host.apiUrl.href,
+      token,
+    );
     const forkedRepo = forks.find((repo) => repo.owner.login === username);
     if (forkedRepo) {
       logger.debug(`Found repo in user account: ${forkedRepo.full_name}`);
@@ -517,10 +544,11 @@ export async function initRepo({
     cloneSubmodules,
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
+    mergeQueueEnabled: {},
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
-    url: platformConfig.endpoint,
+    url: platformConfig.host.apiUrl.href,
     readOnly: true,
   });
   config.renovateUsername = renovateUsername;
@@ -533,22 +561,31 @@ export async function initRepo({
     // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     // TODO #22198
     if (
-      platformConfig.isGhe &&
-      // semver not null safe, accepts null and undefined
-      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+      isGithubEnterpriseServer(platformConfig.host) &&
+      semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
     ) {
-      infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
-      infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*autoMergeAllowed\s*\n/), '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
     if (
-      platformConfig.isGhe &&
-      // semver not null safe, accepts null and undefined
-      semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
+      isGithubEnterpriseServer(platformConfig.host) &&
+      semver.satisfies(platformConfig.host.version ?? '', '<3.9.0')
     ) {
       infoQuery = infoQuery.replace(
-        /\n\s*hasVulnerabilityAlertsEnabled\s*\n/,
+        regEx(/\n\s*hasVulnerabilityAlertsEnabled\s*\n/),
+        '\n',
+      );
+    }
+
+    // GitHub Enterprise Server <3.12.0 doesn't support merge queues
+    if (
+      isGithubEnterpriseServer(platformConfig.host) &&
+      semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
+    ) {
+      infoQuery = infoQuery.replace(
+        regEx(/\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/),
         '\n',
       );
     }
@@ -566,21 +603,17 @@ export async function initRepo({
     });
 
     if (res?.errors) {
-      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
-        logger.debug({ res }, 'GraphQL rate limit exceeded.');
-        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
-      }
       logger.debug({ res }, 'Unexpected GraphQL errors');
       throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
 
     repo = res?.data?.repository;
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: GraphQL errors are handled above, a null repository is not mocked in specs */
     if (!repo) {
       logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    /* v8 ignore next */
+    /* v8 ignore next -- empty-repo detection via missing defaultBranchRef is not mocked in specs */
     if (!repo.defaultBranchRef?.name) {
       logger.debug(
         { res },
@@ -622,12 +655,15 @@ export async function initRepo({
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
     config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
+    config.mergeQueueEnabled[config.defaultBranch] = isNonEmptyObject(
+      repo.mergeQueue,
+    );
 
     const recentIssues = Issue.array()
       .catch([])
       .parse(res?.data?.repository?.issues?.nodes);
     GithubIssueCache.addIssuesToReconcile(recentIssues);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping needs failure shapes not mocked in specs */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
@@ -664,7 +700,7 @@ export async function initRepo({
   config.prList = null;
 
   if (forkToken) {
-    logger.debug('Bot is in fork mode');
+    logger.debug('Renovate is in fork mode');
     if (repo.isFork) {
       logger.debug(
         `Forked repos cannot be processed when running with a forkToken, so this repo will be skipped`,
@@ -703,7 +739,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Created new default branch in fork');
-        } catch (err) /* v8 ignore next */ {
+        } catch (err) /* v8 ignore next -- fork default-branch creation failures are not mocked in specs */ {
           if (err.response?.body?.message === 'Reference already exists') {
             logger.debug(
               `Branch ${config.defaultBranch} already exists in the fork`,
@@ -727,7 +763,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
-        } catch (err) /* v8 ignore next */ {
+        } catch (err) /* v8 ignore next -- defensive: fork default-branch update failures are logged and swallowed, not simulated in specs */ {
           logger.warn({ err }, 'Could not set default branch');
         }
       }
@@ -746,21 +782,19 @@ export async function initRepo({
   if (forkToken) {
     logger.debug('Using forkToken for git init');
     authToken = coerceToNull(config.forkToken);
-  } /* v8 ignore next */ else {
+  } /* v8 ignore next -- token-type detection depends on opts.token shapes not varied in specs */ else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
     authToken = opts.token ?? null;
   }
-  // endpoint is validated during initPlatform
-  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
   const workingSshUrl = forkToken ? forkSshUrl : repo.sshUrl;
   const url = getRepoUrl(
     config.repository!,
     gitUrl,
     workingSshUrl,
-    parsedEndpoint,
+    platformConfig.host.apiUrl,
     authToken,
   );
   let upstreamUrl: string | undefined;
@@ -769,7 +803,7 @@ export async function initRepo({
       config.parentRepo,
       gitUrl,
       repo.sshUrl,
-      parsedEndpoint,
+      platformConfig.host.apiUrl,
       authToken,
     );
   }
@@ -781,7 +815,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
-    repoFingerprint: repoFingerprint(repo.id, platformConfig.endpoint),
+    repoFingerprint: repoFingerprint(repo.id, platformConfig.host.apiUrl.href),
   };
   return repoConfig;
 }
@@ -1142,7 +1176,7 @@ export async function getBranchStatus(
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for deleted branches is not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted',
@@ -1195,10 +1229,10 @@ export async function getBranchStatus(
         conclusion: run.conclusion,
       }));
       logger.debug({ checkRuns }, 'check runs result');
-    } /* v8 ignore next */ else {
+    } /* v8 ignore next -- specs always mock a non-empty check_runs response */ else {
       logger.debug({ result: checkRunsRaw }, 'No check runs found');
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- check-run permission errors (403) are mapped to empty results, not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1272,7 +1306,7 @@ export async function getBranchStatusCheck(
       }
     }
     return null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for missing commits is not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
@@ -1288,7 +1322,7 @@ export async function setBranchStatus({
   state,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs do not run setBranchStatus in forking mode */
   if (config.parentRepo) {
     logger.debug('Cannot set branch status when in forking mode');
     return;
@@ -1321,7 +1355,7 @@ export async function setBranchStatus({
     // update status cache
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: status POST failures abort with REPOSITORY_CHANGED, not simulated in specs */ {
     logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
   }
@@ -1348,7 +1382,7 @@ async function getIssues(): Promise<Issue[]> {
 }
 
 export async function getIssueList(): Promise<Issue[]> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     return [];
   }
@@ -1431,7 +1465,7 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     logger.info(
       'Cannot ensure issue because issues are disabled in this repository',
@@ -1506,7 +1540,7 @@ export async function ensureIssue({
         body: {
           title,
           body,
-          labels: labels ?? [],
+          labels: coerceArray(labels),
         },
       },
       Issue,
@@ -1515,7 +1549,10 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
     return 'created';
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
@@ -1527,7 +1564,7 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     return;
   }
@@ -1564,7 +1601,7 @@ async function tryAddMilestone(
     );
     GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: the raw-error fallback is for non-HTTP failures not seen in specs */
     const actualError = err.response?.body ?? err;
     logger.warn(
       {
@@ -1631,7 +1668,7 @@ export async function addReviewers(
         },
       },
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: reviewer assignment failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Failed to assign reviewer');
   }
 }
@@ -1648,7 +1685,7 @@ export async function addLabels(
         body: labels,
       });
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label-adding failures are logged and swallowed, not simulated in specs */ {
     logger.warn(
       { err, issueNo, labels },
       'Error while adding labels. Skipping',
@@ -1666,7 +1703,7 @@ export async function deleteLabel(
     await githubApi.deleteJson(
       `repos/${repository}/issues/${issueNo}/labels/${label}`,
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }
@@ -1719,7 +1756,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     );
     logger.debug(`Found ${comments.length} comments`);
     return comments;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- comment-fetch 404s are wrapped as ExternalHostError, not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, 'github');
@@ -1775,7 +1812,7 @@ export async function ensureComment({
       logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- comment API failure handling (locked issues) is not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1786,6 +1823,14 @@ export async function ensureComment({
     }
     return false;
   }
+}
+
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.body.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.body.trim() === content;
 }
 
 export async function ensureCommentRemoval(
@@ -1802,13 +1847,11 @@ export async function ensureCommentRemoval(
 
   // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
-    const byTopic = (comment: Comment): boolean =>
-      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
-    commentId = comments.find(byTopic)?.id;
+    const topic = deleteConfig.topic;
+    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
   } else if (deleteConfig.type === 'by-content') {
-    const byContent = (comment: Comment): boolean =>
-      comment.body.trim() === deleteConfig.content;
-    commentId = comments.find(byContent)?.id;
+    const content = deleteConfig.content;
+    commentId = comments.find((comment) => byContent(comment, content))?.id;
   }
 
   try {
@@ -1817,7 +1860,7 @@ export async function ensureCommentRemoval(
       logger.debug(`Removing comment from issueNo: ${issueNo}`);
       await deleteComment(commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error deleting comment');
   }
 }
@@ -1835,10 +1878,9 @@ async function tryPrAutomerge(
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
-  // semver not null safe, accepts null and undefined
   if (
-    platformConfig.isGhe &&
-    semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+    isGithubEnterpriseServer(platformConfig.host) &&
+    semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
   ) {
     logger.debug(
       { prNumber },
@@ -1856,7 +1898,11 @@ async function tryPrAutomerge(
   }
 
   try {
-    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
+    const mergeMethod =
+      (
+        mapMergeStartegy(platformPrOptions.automergeStrategy) ??
+        config.mergeMethod
+      )?.toUpperCase() || 'MERGE';
 
     let commitHeadline: string | undefined;
     let commitBody: string | undefined;
@@ -1900,7 +1946,10 @@ async function tryPrAutomerge(
     }
 
     logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
-  } catch (err) /* v8 ignore next: missing test #22198 */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
 }
@@ -1931,7 +1980,7 @@ export async function createPr({
       draft: draftPR,
     },
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in createPr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
@@ -1961,6 +2010,85 @@ export async function createPr({
   return result;
 }
 
+async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
+  const cachedResult = config.mergeQueueEnabled[baseBranch];
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+
+  // TODO #22198
+  if (
+    isGithubEnterpriseServer(platformConfig.host) &&
+    semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
+  ) {
+    // Merge queues are only supported on GHES >=3.12.0
+    config.mergeQueueEnabled[baseBranch] = false;
+    return false;
+  }
+
+  // Assume enabled unless proven otherwise, so the merge queue check is not
+  // skipped by mistake
+  let result = true;
+  try {
+    const res = await githubApi.requestGraphql<{
+      repository: { mergeQueue: { id: string } | null };
+    }>(repoMergeQueueQuery, {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        branch: baseBranch,
+      },
+      readOnly: true,
+      count: 1, // bypass graphql check
+    });
+    if (res?.errors) {
+      logger.debug(
+        { baseBranch, errors: res.errors },
+        'Failed to fetch merge queue status - assuming merge queue is enabled',
+      );
+    } else {
+      result = isNonEmptyObject(res?.data?.repository?.mergeQueue);
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    logger.debug(
+      { baseBranch, err },
+      'Error fetching merge queue status - assuming merge queue is enabled',
+    );
+  }
+
+  config.mergeQueueEnabled[baseBranch] = result;
+  return result;
+}
+
+export async function assertPrNotInMergeQueue(
+  branchName: string,
+  baseBranch?: string,
+): Promise<void> {
+  if (!(await isMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
+    return;
+  }
+
+  const pr = await findPr({ branchName, state: 'open' });
+  if (!pr) {
+    return;
+  }
+
+  if (
+    await isPrInMergeQueue(
+      githubApi,
+      config.repositoryOwner,
+      config.repositoryName,
+      pr.number,
+    )
+  ) {
+    logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
+    throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
+  }
+}
+
 export async function updatePr({
   number: prNo,
   prTitle: title,
@@ -1986,7 +2114,7 @@ export async function updatePr({
   const options: any = {
     body: patchBody,
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in updatePr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -2010,7 +2138,7 @@ export async function updatePr({
     const result = coerceRestPr(ghPr);
     cachePr(result);
     logger.debug(`PR updated...prNo: ${prNo}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- non-host update failures are logged and swallowed, not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -2029,7 +2157,10 @@ export async function reattemptPlatformAutomerge({
     await tryPrAutomerge(number, node_id, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
@@ -2046,7 +2177,7 @@ export async function mergePr({
   const options: GithubHttpOptions = {
     body: {},
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in mergePr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -2063,7 +2194,7 @@ export async function mergePr({
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
-    } catch (err) /* v8 ignore next */ {
+    } catch (err) /* v8 ignore next -- merge rejection handling (404/405 status-check bodies) is not fully mocked in specs */ {
       if (err.statusCode === 404 || err.statusCode === 405) {
         const body = err.response?.body;
         if (
@@ -2079,7 +2210,10 @@ export async function mergePr({
         if (
           isNonEmptyString(body?.message) &&
           (body.message.includes('approving review') ||
-            body.message.includes('code owner review'))
+            body.message.includes('code owner review') ||
+            body.message.includes(
+              'New changes require approval from someone other than the last pusher',
+            ))
         ) {
           logger.debug(
             { response: body },
@@ -2138,7 +2272,7 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  if (platformConfig.isGhe) {
+  if (platformConfig.host.type !== 'github') {
     return smartTruncate(input, maxBodyLength());
   }
   const massagedInput = massageMarkdownLinks(input)
@@ -2169,7 +2303,7 @@ export function maxBodyLength(): number {
 }
 
 export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with vulnerability alerts enabled */
   if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
@@ -2187,7 +2321,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
         GithubVulnerabilityAlerts,
       )
     ).body;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- alert-permission failures are logged and swallowed, not mocked in specs */ {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
@@ -2231,14 +2365,14 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
     } else {
       logger.debug('No vulnerability alerts found');
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: processing already-parsed alerts does not throw in specs */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
-  return vulnerabilityAlerts ?? [];
+  return coerceArray(vulnerabilityAlerts);
 }
 
 async function pushFiles(
-  { branchName, message }: CommitFilesConfig,
+  { branchName, message, trailers }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
@@ -2270,10 +2404,18 @@ async function pushFiles(
     );
     const treeSha = treeRes.body.sha;
 
+    const commitMessage = formatCommitMessage(message, trailers);
+
     // Now we recreate the commit using the tree we recreated the step before
     const commitRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/commits`,
-      { body: { message, tree: treeSha, parents: [parentCommitSha] } },
+      {
+        body: {
+          message: commitMessage,
+          tree: treeSha,
+          parents: [parentCommitSha],
+        },
+      },
     );
     incLimitedValue('Commits');
     const remoteCommitSha = toLongCommitSha(commitRes.body.sha);

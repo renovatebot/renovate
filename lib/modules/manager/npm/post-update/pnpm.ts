@@ -88,7 +88,7 @@ export async function generateLockFile(
         pnpmToolConstraint,
       ],
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -131,11 +131,7 @@ export async function generateLockFile(
 
     if (lockUpdates.length !== upgrades.length) {
       // This command updates the lock file based on package.json.
-      // `--no-frozen-lockfile` overrides a `frozenLockfile: true` setting from
-      // `pnpm-workspace.yaml`, which pnpm applies even to `--lockfile-only`
-      // installs and which otherwise makes this command always fail with
-      // ERR_PNPM_OUTDATED_LOCKFILE. Only CLI flags take precedence over
-      // settings from `pnpm-workspace.yaml`. `pnpm update` is not affected.
+      // Pass `--no-frozen-lockfile` to ensure the lockfile is updated
       commands.push(`pnpm install ${args} --no-frozen-lockfile`);
     }
 
@@ -154,7 +150,7 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      commands.push('pnpm dedupe --ignore-scripts');
+      commands.push(`pnpm dedupe ${args.replace(' --recursive', '')}`);
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {

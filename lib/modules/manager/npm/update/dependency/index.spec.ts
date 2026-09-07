@@ -3,7 +3,9 @@ import { Fixtures } from '~test/fixtures.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
 
-const readFixture = (x: string): string => Fixtures.get(x, '../..');
+function readFixture(x: string): string {
+  return Fixtures.get(x, '../..');
+}
 
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
@@ -117,7 +119,9 @@ describe('modules/manager/npm/update/dependency/index', () => {
         packageFile: 'package.json',
         upgrade,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toBe(
+        '{"dependencies":{"n":"git+https://github.com/owner/n#v1.1.0"}}',
+      );
       expect(res).toContain('v1.1.0');
     });
 

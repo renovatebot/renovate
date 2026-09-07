@@ -4,7 +4,7 @@ import {
   isUndefined,
   isUrlString,
 } from '@sindresorhus/is';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -16,14 +16,9 @@ import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
-import type { PackageDependency } from '../types.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { MiseToolOptions } from './schema.ts';
-
-export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
-  Required<
-    | Pick<PackageDependency, 'packageName' | 'datasource'>
-    | Pick<PackageDependency, 'packageName' | 'skipReason'>
-  >;
+import type { BackendToolingConfig } from './types.ts';
 
 /**
  * Create a tooling config for aqua backend
@@ -59,6 +54,9 @@ export function createCargoToolConfig(
     return {
       packageName: name,
       datasource: CrateDatasource.id,
+      // A mise tool version is a concrete version, not a Cargo dependency requirement,
+      // so the crate datasource default of cargo versioning does not apply
+      versioning: semverVersioning.id,
     };
   }
   // tag: branch: or rev: is required for git repository url
@@ -128,7 +126,7 @@ export function createGithubToolConfig(
   const prefix = toolOptions.version_prefix;
 
   if (isNonEmptyString(prefix)) {
-    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+    extractVersion = `^${RegExp.escape(prefix)}(?<version>.+)`;
   }
 
   return {
@@ -184,7 +182,9 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
       // If the url is not a github repo, treat the version as a git ref
       if (isUndefined(repoName)) {
         return {
-          packageName: name.replace(/^git\+/g, '').replaceAll(/\.git$/g, ''),
+          packageName: name
+            .replace(regEx(/^git\+/g), '')
+            .replaceAll(regEx(/\.git$/g), ''),
           datasource: GitRefsDatasource.id,
         };
       }
@@ -248,10 +248,10 @@ export function createUbiToolConfig(
     // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
     if (isString(toolOptions.tag_regex)) {
       // Remove the leading '^' if it exists to avoid duplication
-      tagRegex = toolOptions.tag_regex.replace(/^\^/, '');
+      tagRegex = toolOptions.tag_regex.replace(regEx(/^\^/), '');
       if (!hasVPrefix) {
         // Remove the leading 'v?' if it exists to avoid duplication
-        tagRegex = tagRegex.replace(/^v\??/, '');
+        tagRegex = tagRegex.replace(regEx(/^v\??/), '');
       }
     }
 

@@ -2,7 +2,7 @@ import readline from 'node:readline';
 import type { AllConfig } from '../../../../config/types.ts';
 import { getEnv } from '../../../../util/env.ts';
 
-/* v8 ignore next */
+/* v8 ignore next -- Codespaces-only bootstrap that prompts on interactive stdin, untestable in CI */
 export async function setConfig(config: AllConfig): Promise<AllConfig> {
   const env = getEnv();
   if (env.CODESPACES !== 'true') {

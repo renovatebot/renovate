@@ -1,4 +1,4 @@
-// v8 ignore file
+// v8 ignore file -- constant namespace list, no executable logic to cover
 /* IMPORTANT:
  * These namespaces below are used as part of the cacheTtlOverride feature
  * It's OK to add to them (e.g. for new datasources) but we should avoid
@@ -19,6 +19,7 @@ export const packageCacheNamespaces = [
   'changelog-github-release',
   'changelog-gitlab-notes@v2',
   'changelog-gitlab-release',
+  'datasource-apk',
   'datasource-artifactory',
   'datasource-aws-machine-image',
   'datasource-aws-rds',
