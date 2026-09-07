@@ -37,7 +37,23 @@ describe('modules/platform/gerrit/utils', () => {
           undefined,
           'abc',
         );
-        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
+        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web/apps');
+      });
+
+      it('preserves slashes for deeply nested repository paths', () => {
+        hostRules.add({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'group/subgroup/my-repo',
+          baseUrl,
+          undefined,
+          'abc',
+        );
+        expect(repoUrl).toBe(
+          'https://abc:123@gerrit.example.com/a/group/subgroup/my-repo',
+        );
       });
 
       it('create a git url without username/password', () => {
@@ -64,7 +80,7 @@ describe('modules/platform/gerrit/utils', () => {
           'default',
           'abc',
         );
-        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
+        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web/apps');
       });
     });
     describe('endpoint gitUrl', () => {
@@ -79,7 +95,7 @@ describe('modules/platform/gerrit/utils', () => {
           'endpoint',
           'abc',
         );
-        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
+        expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web/apps');
       });
     });
     describe('ssh gitUrl', () => {
@@ -119,6 +135,20 @@ describe('modules/platform/gerrit/utils', () => {
         const repoUrl = utils.getGerritRepoUrl(
           'web/apps',
           'https://gerrit.example.com/context',
+          'ssh',
+          'abc',
+        );
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
+      });
+
+      it('ignores non-default HTTP port from the endpoint', () => {
+        vi.spyOn(hostRules, 'find').mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          'http://gerrit.example.com:8080/',
           'ssh',
           'abc',
         );

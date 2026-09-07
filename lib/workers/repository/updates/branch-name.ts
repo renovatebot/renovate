@@ -50,8 +50,8 @@ function cleanBranchName(
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
     .replace(regEx(/[[\]?:\\^~<>]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~ < >
-    .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
-    .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
+    .replace(regEx(/(?<pre>^|\/)-+/g), '$<pre>') // leading dashes
+    .replace(regEx(/-+(?<post>\/|$)/g), '$<post>') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 

@@ -179,16 +179,17 @@ requires-pixi = ">=0.40,<0.41"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e PIXI_CACHE_DIR ' +
             '-e RATTLER_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool pixi 0.40.1 ' +
             '&& ' +
             'pixi lock --no-progress --color=never --quiet' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -248,16 +249,17 @@ requires-pixi = ">=0.38,<0.39"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e PIXI_CACHE_DIR ' +
             '-e RATTLER_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool pixi 0.40.1 ' +
             '&& ' +
             'pixi lock --no-progress --color=never --quiet' +
-            '"',
+            "'",
         },
       ]);
     });

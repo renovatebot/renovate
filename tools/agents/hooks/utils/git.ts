@@ -6,6 +6,7 @@ const config: Partial<SimpleGitOptions> = {
   unsafe: {
     allowUnsafePager: true,
     allowUnsafeEditor: true,
+    allowUnsafeAskPass: true, // set by vscode
   },
 };
 

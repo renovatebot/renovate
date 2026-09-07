@@ -1,5 +1,6 @@
 import { isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { getDep } from '../dockerfile/extract.ts';
@@ -56,7 +57,7 @@ export function extractPackageFile(
     // become optional and can no longer be used to differentiate
     // between v1 and v2.
     const services = config.services ?? config;
-    const extensions = config.extensions ?? {};
+    const extensions = coerceObject(config.extensions);
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally

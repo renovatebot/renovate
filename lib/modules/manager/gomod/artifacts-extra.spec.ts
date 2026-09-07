@@ -81,20 +81,20 @@ describe('modules/manager/gomod/artifacts-extra', () => {
 
   describe('getExtraDepsNotice', () => {
     it('returns null when one of files is missing', () => {
-      expect(getExtraDepsNotice(null, goModAfter, [])).toBeNull();
-      expect(getExtraDepsNotice(goModBefore, null, [])).toBeNull();
+      expect(getExtraDepsNotice(null, goModAfter, [], {})).toBeNull();
+      expect(getExtraDepsNotice(goModBefore, null, [], {})).toBeNull();
     });
 
     it('returns null when all dependencies are excluded', () => {
       const excludeDeps = ['go', 'github.com/foo/foo', 'github.com/bar/bar'];
-      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps, {});
       expect(res).toBeNull();
     });
 
     it('returns a notice when there is an extra dependency', () => {
       const excludeDeps = ['go', 'github.com/foo/foo'];
 
-      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps, {});
 
       expect(res).toEqual(
         [
@@ -117,7 +117,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
     it('returns a notice when there are extra dependencies', () => {
       const excludeDeps = ['go'];
 
-      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps, {});
 
       expect(res).toEqual(
         [
@@ -141,7 +141,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
     it('adds special notice for updated `go` version', () => {
       const excludeDeps = ['github.com/foo/foo'];
 
-      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps, {});
 
       expect(res).toEqual(
         [
@@ -190,6 +190,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
         toolChainUpdategoModBefore,
         toolChainUpdategoModAfter,
         [],
+        {},
       );
 
       expect(res).toEqual(
@@ -239,6 +240,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
         toolChainUpdategoModBefore,
         toolChainUpdategoModAfter,
         [],
+        {},
       );
 
       expect(res).toEqual(
@@ -288,6 +290,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
         toolChainUpdategoModBefore,
         toolChainUpdategoModAfter,
         [],
+        {},
       );
 
       expect(res).toEqual(
@@ -304,6 +307,61 @@ describe('modules/manager/gomod/artifacts-extra', () => {
           '| **Package**          | **Change**           |',
           '| :------------------- | :------------------- |',
           '| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
+    });
+
+    it('indicates that there are no Minimum Release Age concerns, if `minimumReleaseAge` is set', () => {
+      const excludeDeps = ['github.com/foo/foo'];
+
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps, {
+        minimumReleaseAge: '2 days',
+      });
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- 1 additional dependency was updated',
+          '- The `go` directive was updated for compatibility reasons',
+          '',
+          '',
+          "Due to Go's usage of [Minimal Version Selection (MVS)](https://go.dev/ref/mod#minimal-version-selection), these packages have been updated to the minimum version available, so will still abide by `minimumReleaseAge=2 days`",
+          '',
+          '',
+          'Details:',
+          '',
+          '',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `go`                 | `1.22.0` -> `1.22.2` |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
+    });
+
+    it('does not indicates that there are no Minimum Release Age concerns, if `minimumReleaseAge=null`', () => {
+      const excludeDeps = ['go', 'github.com/foo/foo'];
+
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps, {
+        minimumReleaseAge: null,
+      });
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- 1 additional dependency was updated',
+          '',
+          '',
+          'Details:',
+          '',
+          '',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
           '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
         ].join('\n'),
       );

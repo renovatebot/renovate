@@ -43,7 +43,7 @@ export class NugetV3Api {
       resultCacheKey,
     );
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (cachedResult) {
       return cachedResult;
     }

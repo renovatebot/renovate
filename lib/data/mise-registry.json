@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.7.13 linux-x64 (2026-07-24)"
+    "version": "2026.9.1 linux-x64 (2026-09-02)"
   },
   "tools": {
     "1password": {
@@ -10,6 +10,14 @@
     "1password-cli": {
       "aqua": "1password/cli",
       "vfox": "mise-plugins/vfox-1password"
+    },
+    "7z": {
+      "aqua": "ip7z/7zip",
+      "github": "ip7z/7zip"
+    },
+    "7zip": {
+      "aqua": "ip7z/7zip",
+      "github": "ip7z/7zip"
     },
     "aapt2": {
       "vfox": "mise-plugins/vfox-aapt2"
@@ -94,6 +102,9 @@
     "amplify": {
       "asdf": "LozanoMatheus/asdf-aws-amplify-cli",
       "github": "aws-amplify/amplify-cli"
+    },
+    "android-cli": {
+      "http": "android-cli"
     },
     "android-sdk": {
       "vfox": "mise-plugins/vfox-android-sdk"
@@ -209,6 +220,9 @@
     "aws-amplify": {
       "asdf": "LozanoMatheus/asdf-aws-amplify-cli",
       "github": "aws-amplify/amplify-cli"
+    },
+    "aws-cdk": {
+      "npm": "aws-cdk"
     },
     "aws-cli": {
       "aqua": "aws/aws-cli",
@@ -397,6 +411,9 @@
       "asdf": "mise-plugins/mise-bpkg",
       "vfox": "mise-plugins/vfox-bpkg"
     },
+    "broot": {
+      "github": "canop/broot"
+    },
     "btop": {
       "aqua": "aristocratos/btop"
     },
@@ -476,6 +493,9 @@
       "asdf": "asdf-community/asdf-ccache",
       "github": "ccache/ccache"
     },
+    "cdk": {
+      "npm": "aws-cdk"
+    },
     "certstrap": {
       "asdf": "carnei-ro/asdf-certstrap",
       "github": "square/certstrap"
@@ -512,6 +532,9 @@
     "checkov": {
       "aqua": "bridgecrewio/checkov",
       "asdf": "bosmak/asdf-checkov"
+    },
+    "checkstyle": {
+      "aqua": "checkstyle/checkstyle"
     },
     "chezmoi": {
       "aqua": "twpayne/chezmoi",
@@ -586,6 +609,9 @@
     "claude-squad": {
       "aqua": "smtg-ai/claude-squad"
     },
+    "cliamp": {
+      "github": "bjarneo/cliamp"
+    },
     "clickhouse": {
       "asdf": "mise-plugins/mise-clickhouse",
       "vfox": "mise-plugins/vfox-clickhouse"
@@ -597,6 +623,9 @@
     "cljstyle": {
       "asdf": "abogoyavlensky/asdf-cljstyle",
       "github": "greglook/cljstyle"
+    },
+    "cloc": {
+      "github": "AlDanial/cloc"
     },
     "clojure": {
       "asdf": "mise-plugins/mise-clojure",
@@ -788,12 +817,18 @@
     "curlie": {
       "aqua": "rs/curlie"
     },
+    "cursor-agent": {
+      "http": "cursor-agent"
+    },
+    "cursor-cli": {
+      "http": "cursor-agent"
+    },
     "cyclonedx": {
       "aqua": "CycloneDX/cyclonedx-cli",
       "asdf": "xeedio/asdf-cyclonedx"
     },
     "d2": {
-      "aqua": "terrastruct/d2",
+      "aqua": "d2lang/d2",
       "github": "terrastruct/d2"
     },
     "dagger": {
@@ -801,7 +836,7 @@
       "asdf": "virtualstaticvoid/asdf-dagger"
     },
     "dagu": {
-      "aqua": "dagu-org/dagu"
+      "aqua": "dagucloud/dagu"
     },
     "danger-js": {
       "npm": "danger"
@@ -1030,6 +1065,10 @@
       "asdf": "mise-plugins/mise-emsdk",
       "vfox": "jdx/vfox-emsdk"
     },
+    "engram": {
+      "aqua": "Gentleman-Programming/engram",
+      "github": "Gentleman-Programming/engram"
+    },
     "entire": {
       "aqua": "entireio/cli",
       "github": "entireio/cli",
@@ -1059,6 +1098,9 @@
     "evans": {
       "aqua": "ktr0731/evans",
       "asdf": "goki90210/asdf-evans"
+    },
+    "exiftool": {
+      "conda": "exiftool"
     },
     "expert": {
       "aqua": "expert-lsp/expert",
@@ -1187,6 +1229,10 @@
     "gemini-cli": {
       "npm": "@google/gemini-cli"
     },
+    "gentle-ai": {
+      "aqua": "Gentleman-Programming/gentle-ai",
+      "github": "Gentleman-Programming/gentle-ai"
+    },
     "getenvoy": {
       "asdf": "mise-plugins/mise-getenvoy",
       "github": "tetratelabs-attic/getenvoy"
@@ -1221,6 +1267,9 @@
     "ghtkn": {
       "aqua": "suzuki-shunsuke/ghtkn",
       "github": "suzuki-shunsuke/ghtkn"
+    },
+    "ghui": {
+      "npm": "@kitlangton/ghui"
     },
     "ginkgo": {
       "asdf": "mise-plugins/mise-ginkgo",
@@ -1268,7 +1317,7 @@
       "cargo": "gitu"
     },
     "gitui": {
-      "aqua": "extrawurst/gitui",
+      "aqua": "gitui-org/gitui",
       "asdf": "looztra/asdf-gitui",
       "cargo": "gitui"
     },
@@ -1389,7 +1438,7 @@
       "vfox": "jdx/vfox-graalvm"
     },
     "gradle": {
-      "aqua": "gradle/gradle",
+      "aqua": "gradle/gradle-distributions",
       "vfox": "mise-plugins/vfox-gradle"
     },
     "grafana-kubernetes-plugin": {
@@ -1407,6 +1456,10 @@
       "aqua": "pemistahl/grex",
       "asdf": "ouest/asdf-grex",
       "cargo": "grex"
+    },
+    "grok": {
+      "aqua": "x.ai/cli/grok",
+      "http": "grok"
     },
     "gron": {
       "aqua": "tomnomnom/gron"
@@ -1505,15 +1558,16 @@
       "asdf": "feniix/asdf-helmfile"
     },
     "helmsman": {
+      "aqua": "mkubaczyk/helmsman",
       "asdf": "luisdavim/asdf-helmsman",
-      "github": "Praqma/helmsman"
+      "github": "mkubaczyk/helmsman"
     },
     "helmwave": {
       "aqua": "helmwave/helmwave"
     },
     "herdr": {
-      "aqua": "ogulcancelik/herdr",
-      "github": "ogulcancelik/herdr"
+      "aqua": "herdrdev/herdr",
+      "github": "herdrdev/herdr"
     },
     "heroku": {
       "npm": "heroku"
@@ -1524,6 +1578,9 @@
     "hexyl": {
       "aqua": "sharkdp/hexyl",
       "cargo": "hexyl"
+    },
+    "hey-cli": {
+      "github": "basecamp/hey-cli"
     },
     "hishtory": {
       "asdf": "asdf-community/asdf-hishtory",
@@ -1569,6 +1626,9 @@
     },
     "hugo-extended": {
       "aqua": "gohugoio/hugo/hugo-extended"
+    },
+    "hugo-extended-withdeploy": {
+      "aqua": "gohugoio/hugo/hugo-extended-withdeploy"
     },
     "hunk": {
       "aqua": "modem-dev/hunk",
@@ -1801,9 +1861,6 @@
       "aqua": "microsoft/kiota",
       "asdf": "asdf-community/asdf-kiota"
     },
-    "kiro-cli": {
-      "aqua": "kiro.dev/kiro-cli"
-    },
     "kn": {
       "aqua": "knative/client",
       "asdf": "joke/asdf-kn"
@@ -1850,7 +1907,7 @@
       "asdf": "janpieper/asdf-ksops"
     },
     "ktlint": {
-      "aqua": "pinterest/ktlint",
+      "aqua": "ktlint/ktlint",
       "asdf": "mise-plugins/mise-ktlint"
     },
     "kube-capacity": {
@@ -1931,7 +1988,7 @@
       "asdf": "NeoHsu/asdf-kubergrunt"
     },
     "kubeseal": {
-      "aqua": "bitnami-labs/sealed-secrets",
+      "aqua": "bitnami/sealed-secrets",
       "asdf": "stefansedich/asdf-kubeseal"
     },
     "kubesec": {
@@ -1959,7 +2016,7 @@
       "asdf": "gustavclausen/asdf-kubevela"
     },
     "kubie": {
-      "aqua": "sbstp/kubie",
+      "aqua": "kubie-org/kubie",
       "asdf": "johnhamelink/asdf-kubie"
     },
     "kustomize": {
@@ -2092,10 +2149,14 @@
       "asdf": "mathew-fleisch/asdf-mage"
     },
     "magika": {
-      "cargo": "magika-cli"
+      "cargo": "magika-cli",
+      "github": "google/magika"
     },
     "mago": {
       "aqua": "carthage-software/mago"
+    },
+    "mailpit": {
+      "aqua": "axllent/mailpit"
     },
     "make": {
       "asdf": "mise-plugins/mise-make",
@@ -2161,6 +2222,9 @@
     "meson": {
       "asdf": "mise-plugins/mise-meson",
       "pipx": "meson"
+    },
+    "micro": {
+      "aqua": "micro-editor/micro"
     },
     "micromamba": {
       "github": "mamba-org/micromamba-releases"
@@ -2236,8 +2300,14 @@
       "asdf": "itspngu/asdf-mongosh",
       "github": "mongodb-js/mongosh"
     },
+    "mosh": {
+      "conda": "mosh"
+    },
     "mprocs": {
-      "aqua": "pvolok/mprocs"
+      "aqua": "pvolok/dekit"
+    },
+    "mr-boxington": {
+      "github": "jdx/mr-boxington"
     },
     "mssqldef": {
       "aqua": "sqldef/sqldef/mssqldef"
@@ -2263,6 +2333,9 @@
     "nancy": {
       "aqua": "sonatype-nexus-community/nancy",
       "asdf": "iilyak/asdf-nancy"
+    },
+    "native-sdk": {
+      "github": "vercel-labs/native"
     },
     "navi": {
       "aqua": "denisidoro/navi",
@@ -2350,7 +2423,7 @@
       "go": "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen"
     },
     "oauth2c": {
-      "aqua": "cloudentity/oauth2c"
+      "aqua": "SecureAuthCorp/oauth2c"
     },
     "oc": {
       "asdf": "mise-plugins/mise-oc",
@@ -2371,6 +2444,9 @@
     "odo": {
       "aqua": "redhat-developer/odo",
       "asdf": "rm3l/asdf-odo"
+    },
+    "oh-my-pi": {
+      "github": "can1357/oh-my-pi"
     },
     "oh-my-posh": {
       "aqua": "JanDeDobbeleer/oh-my-posh"
@@ -2395,12 +2471,19 @@
       "aqua": "ollama/ollama",
       "asdf": "virtualstaticvoid/asdf-ollama"
     },
+    "ols": {
+      "github": "DanielGavin/ols"
+    },
     "om": {
       "aqua": "pivotal-cf/om",
       "asdf": "mise-plugins/tanzu-plug-in-for-asdf"
     },
     "omnictl": {
       "aqua": "siderolabs/omni/omnictl"
+    },
+    "onefetch": {
+      "aqua": "o2sh/onefetch",
+      "github": "o2sh/onefetch"
     },
     "onyx": {
       "asdf": "jtakakura/asdf-onyx",
@@ -2454,6 +2537,9 @@
       "aqua": "oras-project/oras",
       "asdf": "bodgit/asdf-oras"
     },
+    "ori": {
+      "aqua": "OpenRouterLabs/ori-releases"
+    },
     "ormolu": {
       "github": "tweag/ormolu"
     },
@@ -2493,6 +2579,10 @@
     "pandoc": {
       "asdf": "Fbrisset/asdf-pandoc",
       "github": "jgm/pandoc"
+    },
+    "pastel": {
+      "aqua": "sharkdp/pastel",
+      "github": "sharkdp/pastel"
     },
     "patat": {
       "asdf": "airtonix/asdf-patat",
@@ -2558,9 +2648,16 @@
     "pixi": {
       "github": "prefix-dev/pixi"
     },
+    "pkgx": {
+      "aqua": "pkgxdev/pkgx",
+      "github": "pkgxdev/pkgx"
+    },
     "pkl": {
       "aqua": "apple/pkl",
       "asdf": "mise-plugins/asdf-pkl"
+    },
+    "playwright": {
+      "npm": "playwright"
     },
     "please": {
       "aqua": "thought-machine/please",
@@ -2773,6 +2870,15 @@
       "cargo": "release-plz",
       "github": "release-plz/release-plz"
     },
+    "restate": {
+      "github": "restatedev/restate"
+    },
+    "restate-server": {
+      "github": "restatedev/restate"
+    },
+    "restatectl": {
+      "github": "restatedev/restate"
+    },
     "restic": {
       "aqua": "restic/restic",
       "asdf": "xataz/asdf-restic"
@@ -2867,7 +2973,8 @@
     },
     "sbt": {
       "asdf": "mise-plugins/mise-sbt",
-      "conda": "sbt"
+      "conda": "sbt",
+      "github": "sbt/sbt"
     },
     "scala": {
       "asdf": "mise-plugins/mise-scala",
@@ -2985,6 +3092,11 @@
     "skeema": {
       "aqua": "skeema/skeema"
     },
+    "skim": {
+      "aqua": "skim-rs/skim",
+      "cargo": "skim",
+      "github": "skim-rs/skim"
+    },
     "sloth": {
       "aqua": "slok/sloth",
       "asdf": "slok/asdf-sloth"
@@ -3056,6 +3168,12 @@
     "spin": {
       "aqua": "spinnaker/spin",
       "asdf": "pavloos/asdf-spin"
+    },
+    "spin-framework": {
+      "github": "spinframework/spin"
+    },
+    "spotify-player": {
+      "github": "aome510/spotify-player"
     },
     "spring-boot": {
       "asdf": "mise-plugins/mise-spring-boot",
@@ -3182,11 +3300,19 @@
       "aqua": "anchore/syft",
       "asdf": "davidgp1701/asdf-syft"
     },
+    "syncthing": {
+      "aqua": "syncthing/syncthing",
+      "github": "syncthing/syncthing"
+    },
     "systemctl-tui": {
       "aqua": "rgwood/systemctl-tui"
     },
     "tailpipe": {
       "aqua": "turbot/tailpipe"
+    },
+    "tak": {
+      "cargo": "tak-cli",
+      "github": "jdx/tak"
     },
     "talhelper": {
       "aqua": "budimanjojo/talhelper",
@@ -3210,7 +3336,7 @@
       "cargo": "taplo-cli"
     },
     "tart": {
-      "aqua": "cirruslabs/tart"
+      "aqua": "openai/tart"
     },
     "task": {
       "aqua": "go-task/task",
@@ -3222,6 +3348,10 @@
     "tctl": {
       "aqua": "temporalio/tctl",
       "asdf": "eko/asdf-tctl"
+    },
+    "tealdeer": {
+      "aqua": "tealdeer-rs/tealdeer",
+      "github": "tealdeer-rs/tealdeer"
     },
     "tekton": {
       "aqua": "tektoncd/cli",
@@ -3334,6 +3464,9 @@
     "tfupdate": {
       "aqua": "minamijoyo/tfupdate",
       "asdf": "yuokada/asdf-tfupdate"
+    },
+    "ticker": {
+      "github": "achannarasappa/ticker"
     },
     "tigerbeetle": {
       "github": "tigerbeetle/tigerbeetle"
@@ -3478,7 +3611,7 @@
       "github": "typst/typst"
     },
     "typstyle": {
-      "aqua": "Enter-tainer/typstyle",
+      "aqua": "typstyle-rs/typstyle",
       "cargo": "typstyle"
     },
     "ubi": {
@@ -3551,7 +3684,7 @@
       "github": "kubevela/velad"
     },
     "velero": {
-      "aqua": "vmware-tanzu/velero",
+      "aqua": "velero-io/velero",
       "asdf": "looztra/asdf-velero"
     },
     "vendir": {
@@ -3594,7 +3727,8 @@
       "cargo": "vivid"
     },
     "vlang": {
-      "vfox": "mise-plugins/vfox-vlang"
+      "asdf": "mise-plugins/mise-v",
+      "vfox": "jdx/vfox-v"
     },
     "vp": {
       "npm": "vite-plus"
@@ -3651,6 +3785,12 @@
     },
     "werf": {
       "aqua": "werf/werf"
+    },
+    "witr": {
+      "aqua": "pranshuparmar/witr"
+    },
+    "workerd": {
+      "github": "cloudflare/workerd"
     },
     "workmux": {
       "cargo": "workmux",
@@ -3746,6 +3886,9 @@
       "asdf": "duhow/asdf-yt-dlp",
       "github": "yt-dlp/yt-dlp"
     },
+    "yt-dlp-nightly": {
+      "github": "yt-dlp/yt-dlp-nightly-builds"
+    },
     "ytt": {
       "aqua": "carvel-dev/ytt",
       "asdf": "vmware-tanzu/asdf-carvel"
@@ -3773,6 +3916,9 @@
     "zizmor": {
       "aqua": "zizmorcore/zizmor",
       "cargo": "zizmor"
+    },
+    "zk": {
+      "aqua": "zk-org/zk"
     },
     "zls": {
       "aqua": "zigtools/zls"

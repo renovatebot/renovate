@@ -202,7 +202,7 @@ describe('modules/datasource/npm/npmrc', () => {
 
   it('sanitize _authtoken with high trust', () => {
     GlobalConfig.set({ exposeAllEnv: true });
-    process.env.TEST_TOKEN = 'test';
+    vi.stubEnv('TEST_TOKEN', 'test');
     setNpmrc(
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost',
     );

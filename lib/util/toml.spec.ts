@@ -21,6 +21,21 @@ describe('util/toml', () => {
     });
   });
 
+  it('parses toml 1.1 syntax', () => {
+    const input = codeBlock`
+      [tool.poetry]
+      include = { path = "README.md", }
+    `;
+
+    expect(parseToml(input)).toStrictEqual({
+      tool: {
+        poetry: {
+          include: { path: 'README.md' },
+        },
+      },
+    });
+  });
+
   it('handles invalid toml', () => {
     const input = codeBlock`
       !@#$%^&*()

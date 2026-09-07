@@ -33,6 +33,7 @@ import {
 } from '../../instrumentation/reporting.ts';
 import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
 import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
+import type { HostRule } from '../../types/index.ts';
 import { getEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import * as queue from '../../util/http/queue.ts';
@@ -165,6 +166,12 @@ export async function start(): Promise<number> {
     if (isNonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
       addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
+    if (isNonEmptyStringAndNotWhitespace(env.COREPACK_NPM_TOKEN)) {
+      addSecretForSanitizing(env.COREPACK_NPM_TOKEN, 'global');
+    }
+    if (isNonEmptyStringAndNotWhitespace(env.COREPACK_NPM_PASSWORD)) {
+      addSecretForSanitizing(env.COREPACK_NPM_PASSWORD, 'global');
+    }
 
     await instrument('config', async () => {
       // read global config from file, env and cli args
@@ -210,6 +217,10 @@ export async function start(): Promise<number> {
       return 0;
     }
 
+    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so we drop them here too, with a WARN, rather than leave them to be silently discarded at request time
+    // filtered once, outside the loop, rather than for every repository it processes
+    let filteredGlobalHostRules: HostRule[] | undefined;
+
     // Iterate through repositories sequentially
     for (const repository of config.repositories!) {
       if (haveReachedLimits()) {
@@ -217,7 +228,7 @@ export async function start(): Promise<number> {
       }
 
       const { owner, repo } = repositoryToOwnerAndRepo(
-        typeof repository === 'string' ? repository : repository.repository,
+        isString(repository) ? repository : repository.repository,
       );
 
       await instrument(
@@ -227,7 +238,30 @@ export async function start(): Promise<number> {
           if (repoConfig.hostRules) {
             logger.debug('Reinitializing hostRules for repo');
             hostRules.clear();
-            repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+            // `GlobalConfig` still reflects the previous repository at this point, so filter with this repository's own `allowedHeaders`: usually the global allowlist (filtered once, above), re-filtered only for a `repositories[]` entry carrying an override of its own
+            const rules =
+              // reuse the memo only for the exact global inputs it was computed from - today `repoConfig.hostRules` is always the global array, but nothing should break if that ever changes
+              repoConfig.hostRules === config.hostRules &&
+              repoConfig.allowedHeaders === config.allowedHeaders
+                ? (filteredGlobalHostRules ??= hostRules.filterAllowedHeaders(
+                    repoConfig.hostRules,
+                    config.allowedHeaders,
+                    // `globalInitialize` already registered these very rules against this very allowlist, and warned about whatever it dropped
+                    false,
+                  ))
+                : hostRules.filterAllowedHeaders(
+                    repoConfig.hostRules,
+                    repoConfig.allowedHeaders,
+                  );
+            for (const rule of rules) {
+              // already filtered: pass the same allowlist through so `add()` does not re-filter against a stale `GlobalConfig`
+              // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host
+              hostRules.add(rule, {
+                // we haven't yet set `GlobalConfig`, so we need to explicitly pass these in
+                allowedHeaders: repoConfig.allowedHeaders,
+                trusted: true,
+              });
+            }
             repoConfig.hostRules = [];
           }
 
@@ -244,10 +278,9 @@ export async function start(): Promise<number> {
             [ATTR_VCS_OWNER_NAME]: owner,
             [ATTR_VCS_REPOSITORY_NAME]: repo,
             /** @deprecated TODO remove */
-            repository:
-              typeof repository === 'string'
-                ? repository
-                : repository.repository,
+            repository: isString(repository)
+              ? repository
+              : repository.repository,
           },
         },
       );

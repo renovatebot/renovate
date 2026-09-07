@@ -51,10 +51,6 @@ const datasource = new GoDatasource();
 
 describe('modules/datasource/go/index', () => {
   describe('getReleases', () => {
-    afterEach(() => {
-      delete process.env.GOPROXY;
-    });
-
     it('fetches releases', async () => {
       const expected = { releases: [{ version: '0.0.1' }] };
       getReleasesProxyMock.mockResolvedValue(expected);
@@ -211,12 +207,8 @@ describe('modules/datasource/go/index', () => {
     });
 
     describe('GOPROXY', () => {
-      afterEach(() => {
-        delete process.env.GOPROXY;
-      });
-
       it('returns null when GOPROXY contains off', async () => {
-        process.env.GOPROXY = 'https://proxy.golang.org,off';
+        vi.stubEnv('GOPROXY', 'https://proxy.golang.org,off');
         const res = await datasource.getDigest(
           { packageName: 'golang.org/x/text' },
           'v1.2.3',
@@ -227,10 +219,6 @@ describe('modules/datasource/go/index', () => {
   });
 
   describe('using getPkgReleases', () => {
-    afterEach(() => {
-      delete process.env.GOPROXY;
-    });
-
     describe('constraints', () => {
       // TODO deprecated #42600
       it('are respected based on an exact match on the `go` constraint', async () => {

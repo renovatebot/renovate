@@ -1,3 +1,4 @@
+import { isBoolean, isUndefined } from '@sindresorhus/is';
 import type { ZodError, output as ZodOutput, ZodType } from 'zod/v4';
 import { NEVER } from 'zod/v4';
 import { logger } from '../logger/index.ts';
@@ -32,21 +33,18 @@ function isZodResult<Output extends Val>(
   input: unknown,
 ): input is ZodSafeParseResult<Output> {
   if (
+    // oxlint-disable-next-line renovate/prefer-is-object -- guards arbitrary callback results; isObject() matches functions, which must never be classified as zod results
     typeof input !== 'object' ||
     input === null ||
     Object.keys(input).length !== 2 ||
     !('success' in input) ||
-    typeof input.success !== 'boolean'
+    !isBoolean(input.success)
   ) {
     return false;
   }
 
   if (input.success) {
-    return (
-      'data' in input &&
-      typeof input.data !== 'undefined' &&
-      input.data !== null
-    );
+    return 'data' in input && !isUndefined(input.data) && input.data !== null;
   }
   return 'error' in input;
 }

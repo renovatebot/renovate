@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils/index.ts';
 import { CondaDatasource } from '../../datasource/conda//index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -13,7 +14,11 @@ export type Channels = z.infer<typeof Channel>[];
 
 const Channel = z.union([
   z.string(),
-  z.object({ channel: z.string(), priority: z.number() }),
+  z.object({
+    channel: z.string(),
+    priority: z.number().optional(),
+    'exclude-newer': z.string().optional(),
+  }),
 ]);
 
 export interface PixiPackageDependency extends PackageDependency {
@@ -44,7 +49,7 @@ const PypiDependency = z
       datasource: PypiDatasource.id,
     };
     if (version.startsWith('==')) {
-      dep.currentVersion = version.replace(/^==\s*/, '');
+      dep.currentVersion = version.replace(regEx(/^==\s*/), '');
     }
     return dep;
   });

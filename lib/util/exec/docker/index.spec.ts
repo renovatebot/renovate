@@ -1,3 +1,5 @@
+import { execa } from 'execa';
+import { quote } from 'shlex';
 import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
@@ -148,7 +150,7 @@ describe('util/exec/docker/index', () => {
       envVars,
     };
     function command(img: string, vol?: string, opts?: string): string {
-      return `docker run --rm --name=renovate_${img} --label=renovate_child --user=some-user ${vol ? `${vol} ` : ''}${opts ? `${opts} ` : ''}-e FOO -e BAR -w "/tmp/foobar" ghcr.io/renovatebot/base-image bash -l -c "foo && bar"`;
+      return `docker run --rm --name=renovate_${img} --label=renovate_child --user=some-user ${vol ? `${vol} ` : ''}${opts ? `${opts} ` : ''}-e FOO -e BAR -w "/tmp/foobar" ghcr.io/renovatebot/base-image bash -l -c 'foo && bar'`;
     }
 
     beforeEach(() => {
@@ -167,6 +169,50 @@ describe('util/exec/docker/index', () => {
         'ghcr.io/renovatebot/base-image',
       );
       expect(res).toBe(command(sideCarName));
+    });
+
+    it('keeps shell metacharacters inert in the outer command', async () => {
+      mockExecAll();
+      // A manager quotes untrusted values with shlex before handing them over.
+      // Wrapping the result in double quotes used to leave `$`, backticks and `\`
+      // live in the outer context, so the host shell substituted them before
+      // `docker run` was even reached. The `-c` argument must stay fully literal.
+      const res = await generateDockerCommand(
+        [`echo ${quote('$(touch pwned)')} ${quote('`touch pwned`')}`],
+        [],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+      );
+
+      // What the host actually executes. `printf` stands in for `docker`, so the
+      // arguments it receives are exactly the ones docker would have received.
+      const { stdout } = await execa(
+        res.replace(/^.*base-image /, `printf '%s\n' `),
+        [],
+        { shell: true },
+      );
+
+      expect(stdout.split('\n')).toEqual([
+        'bash',
+        '-l',
+        '-c',
+        // one argument, still holding the payload verbatim
+        `echo '$(touch pwned)' '\`touch pwned\`'`,
+      ]);
+    });
+
+    it('escapes embedded double quotes without relying on backslashes', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        ['./gradlew -Dorg.gradle.jvmargs="-Xms512m"'],
+        [],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+      );
+
+      expect(res).toEndWith(
+        `bash -l -c './gradlew -Dorg.gradle.jvmargs="-Xms512m"'`,
+      );
     });
 
     it('adds `|| true` if ignoreFailure is set on a pre-command', async () => {
@@ -195,7 +241,7 @@ describe('util/exec/docker/index', () => {
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
           `ghcr.io/renovatebot/base-image ` +
-          `bash -l -c "foo && bar || true && bleh && baz && ls"`,
+          `bash -l -c 'foo && bar || true && bleh && baz && ls'`,
       );
     });
 
@@ -225,7 +271,7 @@ describe('util/exec/docker/index', () => {
           `-e FOO -e BAR ` +
           `-w "/tmp/foobar" ` +
           `ghcr.io/renovatebot/base-image ` +
-          `bash -l -c "pre && foo && bar || true && bleh && baz"`,
+          `bash -l -c 'pre && foo && bar || true && bleh && baz'`,
       );
     });
 

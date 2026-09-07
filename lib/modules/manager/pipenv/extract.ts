@@ -1,6 +1,6 @@
 import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import { isArray, isObject, isString } from '@sindresorhus/is';
+import { isArray, isObject, isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
@@ -106,7 +106,7 @@ function extractFromSection(
       }
       return dep;
     })
-    .filter(Boolean);
+    .filter(isTruthy);
   return deps;
 }
 

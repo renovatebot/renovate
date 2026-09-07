@@ -9,6 +9,7 @@ import { scm } from '../../../../modules/platform/scm.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { checkIfConfigured } from '../../configured.ts';
 import { extractAllDependencies } from '../../extract/index.ts';
 import { mergeRenovateConfig } from '../../init/merge.ts';
@@ -142,7 +143,7 @@ export async function checkOnboardingBranch(
 
 function handleOnboardingManualRebase(onboardingPr: Pr): void {
   const pl = GlobalConfig.get('platform');
-  const { rebaseRequested } = onboardingPr.bodyStruct ?? {};
+  const { rebaseRequested } = coerceObject(onboardingPr.bodyStruct);
   if (!['github', 'gitlab', 'gitea'].includes(pl)) {
     logger.trace(`Platform '${pl}' does not support extended markdown`);
     OnboardingState.prUpdateRequested = true;

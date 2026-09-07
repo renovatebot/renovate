@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { defaultConfig, extractPackageFile } from './index.ts';
 import type { JsonataExtractConfig } from './types.ts';
 
@@ -11,9 +11,13 @@ describe('modules/manager/custom/jsonata/index', () => {
   });
 
   it('returns null when content does not match specified file format', async () => {
-    const res = await extractPackageFile('not-json', 'foo-file', {
-      fileFormat: 'json',
-    } as JsonataExtractConfig);
+    const res = await extractPackageFile(
+      'not-json',
+      'foo-file',
+      partial<JsonataExtractConfig>({
+        fileFormat: 'json',
+      }),
+    );
     expect(res).toBeNull();
 
     expect(logger.logger.debug).toHaveBeenCalledWith(

@@ -1,4 +1,6 @@
+import { isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import type { Range, Token } from './types.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
@@ -6,25 +8,6 @@ const ALPHA_SUFFIX = '-alpha';
 
 const TYPE_NUMBER = 'TYPE_NUMBER';
 const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
-
-export interface BaseToken {
-  prefix: string;
-  type: typeof TYPE_NUMBER | typeof TYPE_QUALIFIER;
-  val: number | string;
-  isTransition?: boolean;
-}
-
-export interface NumberToken extends BaseToken {
-  type: typeof TYPE_NUMBER;
-  val: number;
-}
-
-export interface QualifierToken extends BaseToken {
-  type: typeof TYPE_QUALIFIER;
-  val: string;
-}
-
-export type Token = NumberToken | QualifierToken;
 
 function iterateChars(
   str: string,
@@ -280,7 +263,7 @@ function compare(left: string, right: string): number {
 }
 
 function isVersion(version: unknown): version is string {
-  if (!version || typeof version !== 'string') {
+  if (!version || !isString(version)) {
     return false;
   }
   if (!regEx(/^[-.a-z_+0-9]+$/i).test(version)) {
@@ -419,15 +402,6 @@ function isValid(str: string): boolean {
     return false;
   }
   return isVersion(str) || !!parseRange(str);
-}
-
-export interface Range {
-  leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT | null;
-  leftValue: string | null;
-  leftBracket: string | null;
-  rightType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT | null;
-  rightValue: string | null;
-  rightBracket: string | null;
 }
 
 function rangeToStr(fullRange: Range[] | null): string | null {

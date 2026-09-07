@@ -1,3 +1,4 @@
+import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { loadModules } from '../../util/modules.ts';
 import { getDatasourceList } from '../datasource/index.ts';
@@ -40,7 +41,7 @@ describe('modules/manager/index', () => {
     )) {
       it(`has lockFileMaintenanceIsDelegatedToPackageManager for ${name}`, () => {
         expect(mgr.lockFileMaintenanceIsDelegatedToPackageManager).toSatisfy(
-          (value) => typeof value === 'boolean' || typeof value === 'string',
+          (value) => isBoolean(value) || isString(value),
         );
       });
     }
@@ -118,7 +119,7 @@ describe('modules/manager/index', () => {
 
   describe('detectGlobalConfig()', () => {
     it('iterates through managers', async () => {
-      expect(await manager.detectAllGlobalConfig()).toEqual({});
+      await expect(manager.detectAllGlobalConfig()).resolves.toEqual({});
     });
   });
 
@@ -128,10 +129,12 @@ describe('modules/manager/index', () => {
         defaultConfig: {},
         supportedDatasources: [],
       });
-      expect(
-        await manager.extractAllPackageFiles('unknown', {}, []),
-      ).toBeNull();
-      expect(await manager.extractAllPackageFiles('dummy', {}, [])).toBeNull();
+      await expect(
+        manager.extractAllPackageFiles('unknown', {}, []),
+      ).resolves.toBeNull();
+      await expect(
+        manager.extractAllPackageFiles('dummy', {}, []),
+      ).resolves.toBeNull();
     });
 
     it('returns non-null', async () => {
@@ -140,9 +143,9 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
         extractAllPackageFiles: () => Promise.resolve([]),
       });
-      expect(
-        await manager.extractAllPackageFiles('dummy', {}, []),
-      ).not.toBeNull();
+      await expect(
+        manager.extractAllPackageFiles('dummy', {}, []),
+      ).resolves.not.toBeNull();
     });
 
     afterEach(() => {

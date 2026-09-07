@@ -3,8 +3,7 @@ import { regEx } from './regex.ts';
 import { stripTemplates } from './string.ts';
 
 export function parse(input: string): unknown {
-  // toml-eslint-parser v4 parses as toml v1.1
-  const ast = parseTOML(input, { tomlVersion: '1.0' });
+  const ast = parseTOML(input, { tomlVersion: '1.1' });
   return getStaticTOMLValue(ast);
 }
 

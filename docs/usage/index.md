@@ -34,7 +34,7 @@ Multi-platform and multi-language.
 
   ---
 
-  You can customize the bot's behavior with configuration files.
+  You can customize Renovate's behavior with configuration files.
 
 -   :octicons-share-24:{ .lg .middle } __Share your configuration__
 

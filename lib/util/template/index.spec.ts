@@ -1,4 +1,5 @@
 import { getOptions } from '../../config/options/index.ts';
+import { pkg } from '../../expose.ts';
 import * as _execUtils from '../exec/utils.ts';
 import * as template from './index.ts';
 
@@ -38,6 +39,11 @@ describe('util/template/index', () => {
     };
     const output = template.compile(userTemplate, input);
     expect(output).toBe('github token = ""');
+  });
+
+  it('exposes renovateVersion to every template, without needing to pass it explicitly', () => {
+    const output = template.compile('{{renovateVersion}}', {});
+    expect(output).toBe(pkg.version);
   });
 
   it('containsString', () => {
@@ -116,7 +122,7 @@ describe('util/template/index', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
     const output = template.compile(userTemplate, {});
-    expect(output).toMatchSnapshot();
+    expect(output).toBe('{\n  "some": {\n    "fancy": "json"\n  }\n}');
   });
 
   it('to JSON', () => {
