@@ -1,10 +1,10 @@
-import { isFunction, isTruthy } from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { isSkipComment } from '../../../util/ignore.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { StaticTooling } from './types.ts';
 import { upgradeableTooling } from './upgradeable-tooling.ts';
+import { resolveToolingConfig } from './utils.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`asdf.extractPackageFile()`);
@@ -21,13 +21,10 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     const depName = groups.toolName.trim();
     const version = groups.version.trim();
 
-    const toolConfig = upgradeableTooling[depName];
-    let toolDefinition: StaticTooling | undefined;
-    if (toolConfig) {
-      toolDefinition = isFunction(toolConfig.config)
-        ? toolConfig.config(version)
-        : toolConfig.config;
-    }
+    const toolDefinition = resolveToolingConfig(
+      upgradeableTooling[depName],
+      version,
+    );
 
     if (toolDefinition) {
       const dep: PackageDependency = {

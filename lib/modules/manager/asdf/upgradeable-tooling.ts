@@ -14,7 +14,16 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
-import type { ToolingDefinition } from './types.ts';
+import type { JavaDistribution, ToolingDefinition } from './types.ts';
+import { matchJavaDistribution } from './utils.ts';
+
+/** Ordered so that the `-jre-` variants win over their `-jdk` prefixes. */
+const asdfJavaDistributions: readonly JavaDistribution[] = [
+  { prefix: 'adoptopenjdk-jre-', packageName: 'java-jre' },
+  { prefix: 'adoptopenjdk-', packageName: 'java-jdk' },
+  { prefix: 'temurin-jre-', packageName: 'java-jre' },
+  { prefix: 'temurin-', packageName: 'java-jdk' },
+];
 
 const hugoDefinition: ToolingDefinition = {
   // This plugin supports the names `hugo` & `gohugo`
@@ -400,48 +409,11 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   java: {
     asdfPluginUrl: 'https://github.com/halcyon/asdf-java',
     config: (version) => {
-      const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (adoptOpenJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: adoptOpenJdkMatches.version,
-        };
+      const match = matchJavaDistribution(version, asdfJavaDistributions);
+      if (!match) {
+        return undefined;
       }
-      const adoptOpenJreMatches = regEx(
-        /^adoptopenjdk-jre-(?<version>\d\S+)/,
-      ).exec(version)?.groups;
-      if (adoptOpenJreMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jre',
-          currentValue: adoptOpenJreMatches.version,
-        };
-      }
-      const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (temurinJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: temurinJdkMatches.version,
-        };
-      }
-      const temurinJreMatches = regEx(/^temurin-jre-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (temurinJreMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jre',
-          currentValue: temurinJreMatches.version,
-        };
-      }
-
-      return undefined;
+      return { datasource: JavaVersionDatasource.id, ...match };
     },
   },
   julia: {

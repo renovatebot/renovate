@@ -3,20 +3,29 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
-import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
-import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
-import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
-import * as regexVersioning from '../../versioning/regex/index.ts';
-import * as semverVersioning from '../../versioning/semver/index.ts';
 import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
+import type { JavaDistribution } from '../asdf/types.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
+import { matchJavaDistribution } from '../asdf/utils.ts';
 import { MiseRegistryJson } from './schema.ts';
 import type { MiseRegistryData, ToolingDefinition } from './types.ts';
 
 export const asdfTooling = upgradeableTooling;
+
+/**
+ * Declare a mise short name that resolves exactly like an asdf plugin, reusing
+ * the asdf config so both managers stay in sync. Never copy an asdf config
+ * into the tables below: `upgradeable-tooling.spec.ts` rejects duplicates.
+ */
+function fromAsdfTooling(
+  asdfName: string,
+  misePluginUrl = 'https://mise.jdx.dev/registry.html#tools',
+): ToolingDefinition {
+  return { misePluginUrl, config: asdfTooling[asdfName].config };
+}
 
 function shortJavaVersioning(version: string): { versioning?: string } {
   if (regEx(/^\d+(?:\.\d+)?$/).test(version)) {
@@ -25,128 +34,35 @@ function shortJavaVersioning(version: string): { versioning?: string } {
   return {};
 }
 
+/** mise ships a single jdk per distribution; an empty prefix means openjdk. */
+const miseJavaDistributions: readonly JavaDistribution[] = [
+  { prefix: '', packageName: 'java-jdk' },
+  { prefix: 'openjdk-', packageName: 'java-jdk' },
+  { prefix: 'adoptopenjdk-', packageName: 'java-jdk' },
+  { prefix: 'temurin-', packageName: 'java-jdk' },
+  { prefix: 'corretto-', packageName: 'java-jdk' },
+  { prefix: 'zulu-', packageName: 'java-jdk' },
+  { prefix: 'oracle-graalvm-', packageName: 'java-jdk' },
+];
+
 const miseCoreTooling: Record<string, ToolingDefinition> = {
-  bun: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/bun.html',
-    config: {
-      packageName: 'oven-sh/bun',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^bun-v(?<version>\\S+)',
-    },
-  },
-  deno: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/deno.html',
-    config: {
-      packageName: 'denoland/deno',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
-  elixir: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/elixir.html',
-    config: {
-      datasource: HexpmBobDatasource.id,
-    },
-  },
-  erlang: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/erlang.html',
-    config: {
-      packageName: 'erlang/otp',
-      datasource: GithubTagsDatasource.id,
-      extractVersion: '^OTP-(?<version>\\S+)',
-      versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$`,
-    },
-  },
-  go: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/go.html',
-    config: {
-      packageName: 'golang/go',
-      datasource: GithubTagsDatasource.id,
-      extractVersion: '^go(?<version>\\S+)',
-    },
-  },
+  bun: fromAsdfTooling('bun', 'https://mise.jdx.dev/lang/bun.html'),
+  deno: fromAsdfTooling('deno', 'https://mise.jdx.dev/lang/deno.html'),
+  elixir: fromAsdfTooling('elixir', 'https://mise.jdx.dev/lang/elixir.html'),
+  erlang: fromAsdfTooling('erlang', 'https://mise.jdx.dev/lang/erlang.html'),
+  go: fromAsdfTooling('golang', 'https://mise.jdx.dev/lang/go.html'),
   java: {
     misePluginUrl: 'https://mise.jdx.dev/lang/java.html',
     config: (version) => {
-      // no prefix is shorthand for openjdk
-      const versionMatch =
-        regEx(/^(?<version>\d\S+)/).exec(version)?.groups?.version;
-      if (versionMatch) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: versionMatch,
-          ...shortJavaVersioning(versionMatch),
-        };
+      const match = matchJavaDistribution(version, miseJavaDistributions);
+      if (!match) {
+        return undefined;
       }
-      const openJdkMatches = regEx(/^openjdk-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (openJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: openJdkMatches.version,
-          ...shortJavaVersioning(openJdkMatches.version),
-        };
-      }
-      const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (adoptOpenJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: adoptOpenJdkMatches.version,
-          ...shortJavaVersioning(adoptOpenJdkMatches.version),
-        };
-      }
-      const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (temurinJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: temurinJdkMatches.version,
-          ...shortJavaVersioning(temurinJdkMatches.version),
-        };
-      }
-      const correttoJdkMatches = regEx(/^corretto-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (correttoJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: correttoJdkMatches.version,
-          ...shortJavaVersioning(correttoJdkMatches.version),
-        };
-      }
-      const zuluJdkMatches = regEx(/^zulu-(?<version>\d\S+)/).exec(
-        version,
-      )?.groups;
-      if (zuluJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: zuluJdkMatches.version,
-          ...shortJavaVersioning(zuluJdkMatches.version),
-        };
-      }
-      const oracleGraalvmJdkMatches = regEx(
-        /^oracle-graalvm-(?<version>\d\S+)/,
-      ).exec(version)?.groups;
-      if (oracleGraalvmJdkMatches) {
-        return {
-          datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
-          currentValue: oracleGraalvmJdkMatches.version,
-          ...shortJavaVersioning(oracleGraalvmJdkMatches.version),
-        };
-      }
-
-      return undefined;
+      return {
+        datasource: JavaVersionDatasource.id,
+        ...match,
+        ...shortJavaVersioning(match.currentValue),
+      };
     },
   },
   node: {
@@ -156,29 +72,9 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
       datasource: NodeVersionDatasource.id,
     },
   },
-  python: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/python.html',
-    config: {
-      packageName: 'python/cpython',
-      datasource: GithubTagsDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
-  ruby: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/ruby.html',
-    config: {
-      packageName: 'ruby-version',
-      datasource: RubyVersionDatasource.id,
-      versioning: semverVersioning.id,
-    },
-  },
-  rust: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/rust.html',
-    config: {
-      packageName: 'rust',
-      datasource: RustVersionDatasource.id,
-    },
-  },
+  python: fromAsdfTooling('python', 'https://mise.jdx.dev/lang/python.html'),
+  ruby: fromAsdfTooling('ruby', 'https://mise.jdx.dev/lang/ruby.html'),
+  rust: fromAsdfTooling('rust', 'https://mise.jdx.dev/lang/rust.html'),
   swift: {
     misePluginUrl: 'https://mise.jdx.dev/lang/swift.html',
     config: {
@@ -187,24 +83,11 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^swift-(?<version>\\S+)',
     },
   },
-  zig: {
-    misePluginUrl: 'https://mise.jdx.dev/lang/zig.html',
-    config: {
-      packageName: 'ziglang/zig',
-      datasource: GithubTagsDatasource.id,
-    },
-  },
+  zig: fromAsdfTooling('zig', 'https://mise.jdx.dev/lang/zig.html'),
 };
 
 const miseRegistryTooling: Record<string, ToolingDefinition> = {
-  actionlint: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: {
-      packageName: 'rhysd/actionlint',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
+  actionlint: fromAsdfTooling('actionlint'),
   astro: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -371,14 +254,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: NpmDatasource.id,
     },
   },
-  opentofu: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: {
-      packageName: 'opentofu/opentofu',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
+  opentofu: fromAsdfTooling('opentofu'),
   openfga: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -387,14 +263,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
-  packer: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: {
-      packageName: 'hashicorp/packer',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
+  packer: fromAsdfTooling('packer'),
   pipx: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -416,14 +285,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
     },
   },
-  protoc: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: {
-      packageName: 'protocolbuffers/protobuf',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
+  protoc: fromAsdfTooling('protoc'),
   pnpm: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -452,14 +314,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
     },
   },
-  shellcheck: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: {
-      packageName: 'koalaman/shellcheck',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
+  shellcheck: fromAsdfTooling('shellcheck'),
   skeema: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -520,14 +375,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
     },
   },
-  terragrunt: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: {
-      packageName: 'gruntwork-io/terragrunt',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
+  terragrunt: fromAsdfTooling('terragrunt'),
   tilt: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {

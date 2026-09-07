@@ -1,6 +1,5 @@
 import {
   isArray,
-  isFunction,
   isNonEmptyObject,
   isNonEmptyString,
   isObject,
@@ -11,6 +10,7 @@ import { readLocalFile } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { StaticTooling } from '../asdf/types.ts';
+import { resolveToolingConfig } from '../asdf/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   createAquaToolConfig,
@@ -239,16 +239,7 @@ function getConfigFromTooling(
   name: string,
   version: string,
 ): StaticTooling | null {
-  const toolDefinition = toolingSource[name];
-  if (!toolDefinition) {
-    return null;
-  } // Return null if no toolDefinition is found
-
-  return (
-    (isFunction(toolDefinition.config)
-      ? toolDefinition.config(version)
-      : toolDefinition.config) ?? null
-  ); // Ensure null is returned instead of undefined
+  return resolveToolingConfig(toolingSource[name], version);
 }
 
 function extractToolEntry(

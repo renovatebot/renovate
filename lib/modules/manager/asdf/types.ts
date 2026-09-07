@@ -11,3 +11,9 @@ export interface ToolingDefinition {
   config: ToolingConfig;
   asdfPluginUrl: string;
 }
+
+export interface JavaDistribution {
+  /** Version prefix used by the plugin, e.g. `temurin-jre-`. */
+  prefix: string;
+  packageName: string;
+}
