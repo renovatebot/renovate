@@ -41,6 +41,7 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
+import { findCommentByContent, findCommentByTopic } from '../utils/comments.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
 import { giteaHttp } from './gitea-helper.ts';
@@ -121,18 +122,8 @@ function matchesState(actual: string, expected: string): boolean {
   return actual === expected;
 }
 
-function findCommentByTopic(
-  comments: Comment[],
-  topic: string,
-): Comment | null {
-  return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`)) ?? null;
-}
-
-function findCommentByContent(
-  comments: Comment[],
-  content: string,
-): Comment | null {
-  return comments.find((c) => c.body.trim() === content) ?? null;
+function getCommentBody(comment: Comment): string {
+  return comment.body;
 }
 
 function getLabelList(): Promise<Label[]> {
@@ -978,10 +969,10 @@ const platform: Platform = {
       // Search comment by either topic or exact body
       let comment: Comment | null = null;
       if (topic) {
-        comment = findCommentByTopic(commentList, topic);
+        comment = findCommentByTopic(commentList, topic, getCommentBody);
         body = `### ${topic}\n\n${body}`;
       } else {
-        comment = findCommentByContent(commentList, body);
+        comment = findCommentByContent(commentList, body, getCommentBody);
       }
 
       // Create a new comment if no match has been found, otherwise update if necessary
@@ -1022,10 +1013,14 @@ const platform: Platform = {
     let comment: Comment | null = null;
     // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
-      comment = findCommentByTopic(commentList, deleteConfig.topic);
+      comment = findCommentByTopic(
+        commentList,
+        deleteConfig.topic,
+        getCommentBody,
+      );
     } else if (deleteConfig.type === 'by-content') {
       const body = sanitize(deleteConfig.content);
-      comment = findCommentByContent(commentList, body);
+      comment = findCommentByContent(commentList, body, getCommentBody);
     }
 
     // Abort and do nothing if no matching comment was found

@@ -3,7 +3,6 @@ import { isString } from '@sindresorhus/is';
 import type {
   GitItem,
   GitPullRequest,
-  GitPullRequestCommentThread,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -49,6 +48,10 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { getNewBranchName, repoFingerprint } from '../util.ts';
+import {
+  ensureCommentRemovalWith,
+  ensureCommentWith,
+} from '../utils/comments.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as azureApi from './azure-got-wrapper.ts';
@@ -724,104 +727,58 @@ export async function ensureComment({
   content,
 }: EnsureCommentConfig): Promise<boolean> {
   logger.debug(`ensureComment(${number}, ${topic!}, content)`);
-  const header = topic ? `### ${topic}\n\n` : '';
-  const body = `${header}${sanitize(massageMarkdown(content))}`;
   const azureApiGit = await azureApi.gitApi();
-
-  const threads = await azureApiGit.getThreads(config.repoId, number);
-  let threadIdFound: number | undefined;
-  let commentIdFound: number | undefined;
-  let commentNeedsUpdating = false;
-  threads.forEach((thread) => {
-    const firstCommentContent = thread.comments?.[0].content;
-    if (
-      (topic && firstCommentContent?.startsWith(header)) === true ||
-      (!topic && firstCommentContent === body)
-    ) {
-      threadIdFound = thread.id;
-      commentIdFound = thread.comments?.[0].id;
-      commentNeedsUpdating = firstCommentContent !== body;
-    }
-  });
-
-  if (!threadIdFound) {
-    await azureApiGit.createThread(
-      {
-        comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
-        status: 1,
+  return await ensureCommentWith(
+    { number, topic, content: sanitize(massageMarkdown(content)) },
+    {
+      getComments: () => azureApiGit.getThreads(config.repoId, number),
+      getBody: (thread) => thread.comments?.[0].content,
+      addComment: async (body) => {
+        await azureApiGit.createThread(
+          {
+            comments: [{ content: body, commentType: 1, parentCommentId: 0 }],
+            status: 1,
+          },
+          config.repoId,
+          number,
+        );
       },
-      config.repoId,
-      number,
-    );
-    logger.info(
-      { repository: config.repository, issueNo: number, topic },
-      'Comment added',
-    );
-  } else if (commentNeedsUpdating) {
-    await azureApiGit.updateComment(
-      {
-        content: body,
+      editComment: async (thread, body) => {
+        await azureApiGit.updateComment(
+          {
+            content: body,
+          },
+          config.repoId,
+          number,
+          // TODO #22198
+          thread.id!,
+          thread.comments![0].id!,
+        );
       },
-      config.repoId,
-      number,
-      threadIdFound,
-      // TODO #22198
-      commentIdFound!,
-    );
-    logger.debug(
-      { repository: config.repository, issueNo: number, topic },
-      'Comment updated',
-    );
-  } else {
-    logger.debug(
-      { repository: config.repository, issueNo: number, topic },
-      'Comment is already up-to-date',
-    );
-  }
-
-  return true;
+    },
+  );
 }
 
 export async function ensureCommentRemoval(
   removeConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   const { number: issueNo } = removeConfig;
-  const key =
-    removeConfig.type === 'by-topic'
-      ? removeConfig.topic
-      : removeConfig.content;
-  logger.debug(`Ensuring comment "${key}" in #${issueNo} is removed`);
-
   const azureApiGit = await azureApi.gitApi();
-  const threads = await azureApiGit.getThreads(config.repoId, issueNo);
-
-  let threadIdFound: number | null | undefined = null;
-  if (removeConfig.type === 'by-topic') {
-    const thread = threads.find(
-      (thread: GitPullRequestCommentThread): boolean =>
-        !!thread.comments?.[0].content?.startsWith(
-          `### ${removeConfig.topic}\n\n`,
-        ),
-    );
-    threadIdFound = thread?.id;
-  } else {
-    const thread = threads.find(
-      (thread: GitPullRequestCommentThread): boolean =>
-        thread.comments?.[0].content?.trim() === removeConfig.content,
-    );
-    threadIdFound = thread?.id;
-  }
-
-  if (threadIdFound) {
-    await azureApiGit.updateThread(
-      {
-        status: 4, // close
-      },
-      config.repoId,
-      issueNo,
-      threadIdFound,
-    );
-  }
+  await ensureCommentRemovalWith(removeConfig, {
+    getComments: () => azureApiGit.getThreads(config.repoId, issueNo),
+    getBody: (thread) => thread.comments?.[0].content,
+    deleteComment: async (thread) => {
+      await azureApiGit.updateThread(
+        {
+          status: 4, // close
+        },
+        config.repoId,
+        issueNo,
+        // TODO #22198
+        thread.id!,
+      );
+    },
+  });
 }
 
 const renovateToAzureStatusMapping: Record<BranchStatus, GitStatusState> = {

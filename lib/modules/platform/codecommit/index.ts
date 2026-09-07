@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import type {
+  Comment,
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
 } from '@aws-sdk/client-codecommit';
@@ -33,6 +34,7 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { getNewBranchName, repoFingerprint } from '../util.ts';
+import { ensureCommentRemovalWith } from '../utils/comments.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as client from './codecommit-client.ts';
 import type { CodeCommitPr } from './types.ts';
@@ -689,22 +691,33 @@ export async function ensureCommentRemoval(
     removeConfig.type === 'by-topic'
       ? removeConfig.topic
       : removeConfig.content;
-  logger.debug(`Ensuring comment "${key}" in #${prNo} is removed`);
 
+  await ensureCommentRemovalWith(removeConfig, {
+    getComments: () => getPrCommentList(prNo),
+    getBody: (comment) => comment.content,
+    deleteComment: async (comment) => {
+      // TODO #22198
+      await client.deleteComment(comment.commentId!);
+      logger.debug(`comment "${key}" in PR #${prNo} was removed`);
+    },
+  });
+}
+
+async function getPrCommentList(prNo: number): Promise<Comment[]> {
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
     prCommentsResponse = await client.getPrComments(`${prNo}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
-    return;
+    return [];
   }
 
   if (!prCommentsResponse?.commentsForPullRequestData) {
     logger.debug('commentsForPullRequestData not found');
-    return;
+    return [];
   }
 
-  let commentIdToRemove: string | undefined;
+  const comments: Comment[] = [];
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
     if (!commentObj?.comments) {
       logger.debug(
@@ -712,25 +725,7 @@ export async function ensureCommentRemoval(
       );
       continue;
     }
-
-    for (const comment of commentObj.comments) {
-      // v8 ignore else -- TODO: add test #40625
-      if (
-        (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
-          true ||
-        (removeConfig.type === 'by-content' &&
-          removeConfig.content === comment.content?.trim())
-      ) {
-        commentIdToRemove = comment.commentId;
-        break;
-      }
-    }
-    // v8 ignore else -- TODO: add test #40625
-    if (commentIdToRemove) {
-      await client.deleteComment(commentIdToRemove);
-      logger.debug(`comment "${key}" in PR #${prNo} was removed`);
-      break;
-    }
+    comments.push(...commentObj.comments);
   }
+  return comments;
 }

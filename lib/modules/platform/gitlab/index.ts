@@ -58,6 +58,10 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
+import {
+  ensureCommentRemovalWith,
+  ensureCommentWith,
+} from '../utils/comments.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
@@ -1370,101 +1374,42 @@ async function deleteComment(
   );
 }
 
-export async function ensureComment({
-  number,
-  topic,
-  content,
-}: EnsureCommentConfig): Promise<boolean> {
-  const sanitizedContent = sanitize(content);
-  const massagedTopic = topic
-    ? topic
-        .replace(regEx(/Pull Request/g), 'Merge Request')
-        .replace(regEx(/PR/g), 'MR')
-    : topic;
-  const comments = await getComments(number);
-  let body: string;
-  let commentId: number | undefined;
-  let commentNeedsUpdating: boolean | undefined;
-  // TODO: types (#22198)
-  if (topic) {
-    logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
-    body = `### ${topic}\n\n${sanitizedContent}`;
-    body = smartTruncate(
-      body
-        .replace(regEx(/Pull Request/g), 'Merge Request')
-        .replace(regEx(/PR/g), 'MR'),
-      maxBodyLength(),
-    );
-    comments.forEach((comment: { body: string; id: number }) => {
-      // v8 ignore else -- TODO: add test #40625
-      if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
-        commentId = comment.id;
-        commentNeedsUpdating = comment.body !== body;
-      }
-    });
-  } else {
-    logger.debug(`Ensuring content-only comment in #${number}`);
-    body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
-    comments.forEach((comment: { body: string; id: number }) => {
-      // v8 ignore else -- TODO: add test #40625
-      if (comment.body === body) {
-        commentId = comment.id;
-        commentNeedsUpdating = false;
-      }
-    });
-  }
-  if (!commentId) {
-    await addComment(number, body);
-    logger.debug(
-      { repository: config.repository, issueNo: number },
-      'Added comment',
-    );
-  } else if (commentNeedsUpdating) {
-    await editComment(number, commentId, body);
-    logger.debug(
-      { repository: config.repository, issueNo: number },
-      'Updated comment',
-    );
-  } else {
-    logger.debug('Comment is already up-to-date');
-  }
-  return true;
+function massageMergeRequestText(text: string): string {
+  return text
+    .replace(regEx(/Pull Request/g), 'Merge Request')
+    .replace(regEx(/PR/g), 'MR');
 }
 
-function byTopic(comment: GitlabComment, topic: string): boolean {
-  return comment.body.startsWith(`### ${topic}\n\n`);
-}
-
-function byContent(comment: GitlabComment, content: string): boolean {
-  return comment.body.trim() === content;
+export function ensureComment(
+  ensureConfig: EnsureCommentConfig,
+): Promise<boolean> {
+  const { number, topic } = ensureConfig;
+  return ensureCommentWith(
+    { ...ensureConfig, content: sanitize(ensureConfig.content) },
+    {
+      getComments: () => getComments(number),
+      getBody: (comment) => comment.body,
+      addComment: (body) => addComment(number, body),
+      editComment: (comment, body) => editComment(number, comment.id, body),
+      massageTopic: massageMergeRequestText,
+      massageBody: (body) =>
+        smartTruncate(
+          topic ? massageMergeRequestText(body) : body,
+          maxBodyLength(),
+        ),
+    },
+  );
 }
 
 export async function ensureCommentRemoval(
   deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   const { number: issueNo } = deleteConfig;
-  const key =
-    deleteConfig.type === 'by-topic'
-      ? deleteConfig.topic
-      : deleteConfig.content;
-  logger.debug(`Ensuring comment "${key}" in #${issueNo} is removed`);
-
-  const comments = await getComments(issueNo);
-  let commentId: number | null | undefined = null;
-
-  // v8 ignore else -- TODO: add test #40625
-  if (deleteConfig.type === 'by-topic') {
-    const topic = deleteConfig.topic;
-    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
-  } else if (deleteConfig.type === 'by-content') {
-    const content = deleteConfig.content;
-    commentId = comments.find((comment) => byContent(comment, content))?.id;
-  }
-
-  // v8 ignore else -- TODO: add test #40625
-  if (commentId) {
-    await deleteComment(issueNo, commentId);
-  }
+  await ensureCommentRemovalWith(deleteConfig, {
+    getComments: () => getComments(issueNo),
+    getBody: (comment) => comment.body,
+    deleteComment: (comment) => deleteComment(issueNo, comment.id),
+  });
 }
 
 export async function filterUnavailableUsers(

@@ -75,6 +75,10 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
+import {
+  ensureCommentRemovalWith,
+  ensureCommentWith,
+} from '../utils/comments.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
@@ -1765,53 +1769,20 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   }
 }
 
-export async function ensureComment({
-  number,
-  topic,
-  content,
-}: EnsureCommentConfig): Promise<boolean> {
-  const sanitizedContent = sanitize(content);
+export async function ensureComment(
+  ensureConfig: EnsureCommentConfig,
+): Promise<boolean> {
+  const { number } = ensureConfig;
   try {
-    const comments = await getComments(number);
-    let body: string;
-    let commentId: number | null = null;
-    let commentNeedsUpdating = false;
-    if (topic) {
-      logger.debug(`Ensuring comment "${topic}" in #${number}`);
-      body = `### ${topic}\n\n${sanitizedContent}`;
-      comments.forEach((comment) => {
-        if (comment.body.startsWith(`### ${topic}\n\n`)) {
-          commentId = comment.id;
-          commentNeedsUpdating = comment.body !== body;
-        }
-      });
-    } else {
-      logger.debug(`Ensuring content-only comment in #${number}`);
-      body = `${sanitizedContent}`;
-      comments.forEach((comment) => {
-        // v8 ignore else -- TODO: add test #40625
-        if (comment.body === body) {
-          commentId = comment.id;
-          commentNeedsUpdating = false;
-        }
-      });
-    }
-    if (!commentId) {
-      await addComment(number, body);
-      logger.info(
-        { repository: config.repository, issueNo: number, topic },
-        'Comment added',
-      );
-    } else if (commentNeedsUpdating) {
-      await editComment(commentId, body);
-      logger.debug(
-        { repository: config.repository, issueNo: number },
-        'Comment updated',
-      );
-    } else {
-      logger.debug('Comment is already up-to-date');
-    }
-    return true;
+    return await ensureCommentWith(
+      { ...ensureConfig, content: sanitize(ensureConfig.content) },
+      {
+        getComments: () => getComments(number),
+        getBody: (comment) => comment.body,
+        addComment: (body) => addComment(number, body),
+        editComment: (comment, body) => editComment(comment.id, body),
+      },
+    );
   } catch (err) /* v8 ignore next -- comment API failure handling (locked issues) is not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
@@ -1825,44 +1796,22 @@ export async function ensureComment({
   }
 }
 
-function byTopic(comment: Comment, topic: string): boolean {
-  return comment.body.startsWith(`### ${topic}\n\n`);
-}
-
-function byContent(comment: Comment, content: string): boolean {
-  return comment.body.trim() === content;
-}
-
 export async function ensureCommentRemoval(
   deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   const { number: issueNo } = deleteConfig;
-  const key =
-    deleteConfig.type === 'by-topic'
-      ? deleteConfig.topic
-      : deleteConfig.content;
-  logger.trace(`Ensuring comment "${key}" in #${issueNo} is removed`);
-  const comments = await getComments(issueNo);
-  let commentId: number | null | undefined = null;
-
-  // v8 ignore else -- TODO: add test #40625
-  if (deleteConfig.type === 'by-topic') {
-    const topic = deleteConfig.topic;
-    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
-  } else if (deleteConfig.type === 'by-content') {
-    const content = deleteConfig.content;
-    commentId = comments.find((comment) => byContent(comment, content))?.id;
-  }
-
-  try {
-    // v8 ignore else -- TODO: add test #40625
-    if (commentId) {
-      logger.debug(`Removing comment from issueNo: ${issueNo}`);
-      await deleteComment(commentId);
-    }
-  } catch (err) /* v8 ignore next -- defensive: comment deletion failures are logged and swallowed, not simulated in specs */ {
-    logger.warn({ err }, 'Error deleting comment');
-  }
+  await ensureCommentRemovalWith(deleteConfig, {
+    getComments: () => getComments(issueNo),
+    getBody: (comment) => comment.body,
+    deleteComment: async (comment) => {
+      try {
+        logger.debug(`Removing comment from issueNo: ${issueNo}`);
+        await deleteComment(comment.id);
+      } catch (err) /* v8 ignore next -- defensive: comment deletion failures are logged and swallowed, not simulated in specs */ {
+        logger.warn({ err }, 'Error deleting comment');
+      }
+    },
+  });
 }
 
 // Pull Request
