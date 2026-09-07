@@ -3,6 +3,7 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger/index.ts';
 import { PagedSourceResults } from '../../../../../../modules/platform/bitbucket/schema.ts';
+import { getRepoFile } from '../../../../../../util/bitbucket/files.ts';
 import { BitbucketHttp } from '../../../../../../util/http/bitbucket.ts';
 import { joinUrlParts } from '../../../../../../util/url.ts';
 import { compareChangelogFilePath } from '../common.ts';
@@ -61,18 +62,15 @@ export async function getReleaseNotesMd(
     );
   }
 
-  const fileRes = await bitbucketHttp.getText(
-    joinUrlParts(
-      apiBaseUrl,
-      '2.0/repositories',
-      repository,
-      'src',
-      changelogFile.commit.hash,
-      changelogFile.path,
-    ),
+  const fileContent = await getRepoFile(
+    bitbucketHttp,
+    apiBaseUrl,
+    repository,
+    changelogFile.path,
+    changelogFile.commit.hash,
   );
 
-  const changelogMd = `${fileRes.body}\n#\n##`;
+  const changelogMd = `${fileContent}\n#\n##`;
   return { changelogFile: changelogFile.path, changelogMd };
 }
 

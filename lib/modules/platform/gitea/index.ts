@@ -15,6 +15,7 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
+import { API_BASE_PATH, getRepoFile } from '../../../util/gitea/contents.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -254,8 +255,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       branchOrTag?: string,
     ): Promise<string | null> {
       const repo = repoName ?? config.repository;
-      const contents = await helper.getRepoContents(
+      const contents = await getRepoFile(
         http,
+        API_BASE_PATH,
         repo,
         fileName,
         branchOrTag,

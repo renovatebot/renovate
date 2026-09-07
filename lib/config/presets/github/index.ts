@@ -1,10 +1,9 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
+import { getRepoFile } from '../../../util/github/contents.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
-import { fromBase64 } from '../../../util/string.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
 
@@ -18,15 +17,9 @@ export async function fetchJSONFile(
   endpoint: string,
   tag?: string,
 ): Promise<Nullish<Preset>> {
-  let ref = '';
-  if (isNonEmptyString(tag)) {
-    ref = `?ref=${tag}`;
-  }
-  const url = `${endpoint}repos/${repo}/contents/${fileName}${ref}`;
-  logger.trace({ url }, `Preset URL`);
-  let res: { body: { content: string } };
+  let content: string;
   try {
-    res = await http.getJsonUnchecked(url, {
+    content = await getRepoFile(http, endpoint, repo, fileName, tag, {
       cacheProvider: repoCacheProvider,
     });
   } catch (err) {
@@ -39,7 +32,7 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(fromBase64(res.body.content), fileName);
+  return parsePreset(content, fileName);
 }
 
 export function getPresetFromEndpoint(
