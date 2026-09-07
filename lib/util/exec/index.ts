@@ -1,7 +1,7 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
-import type { RepoToolSettingsOptions } from '../../config/types.ts';
+import type { ToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { coerceArray } from '../array.ts';
@@ -231,12 +231,12 @@ export async function exec(
  * We do not have a default that is set for `nodeMaxMemory`, so it must remain as optional.
  */
 type ResolvedToolSettingsOptions = Required<
-  Omit<RepoToolSettingsOptions, 'nodeMaxMemory'>
+  Omit<ToolSettingsOptions, 'nodeMaxMemory'>
 > &
-  Pick<RepoToolSettingsOptions, 'nodeMaxMemory'>;
+  Pick<ToolSettingsOptions, 'nodeMaxMemory'>;
 
 export function getToolSettingsOptions(
-  repoConfig?: RepoToolSettingsOptions,
+  repoConfig?: ToolSettingsOptions,
 ): ResolvedToolSettingsOptions {
   let defaults = GlobalConfig.get('toolSettings');
   defaults ??= {
@@ -304,6 +304,6 @@ export function getToolSettingsOptions(
   return options;
 }
 
-export function gradleJvmArg(config: RepoToolSettingsOptions): string {
+export function gradleJvmArg(config: ToolSettingsOptions): string {
   return ` -Dorg.gradle.jvmargs="-Xms${config.jvmMemory}m -Xmx${config.jvmMaxMemory}m"`;
 }

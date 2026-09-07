@@ -279,7 +279,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   onboardingAutoCloseAge?: number;
   productLinks?: Record<string, string>;
   rebaseAllOpenBranches?: boolean;
-  toolSettings?: GlobalToolSettingsOptions;
+  toolSettings?: ToolSettingsOptions;
 }
 
 /**
@@ -436,6 +436,7 @@ export interface RenovateConfig
   mode?: 'silent' | 'full';
   packageFile?: string;
   packageRules?: PackageRule[];
+  ignoreScripts?: boolean;
   postUpdateOptions?: string[];
   branchConcurrentLimit?: number | null;
   parentOrg?: string;
@@ -500,7 +501,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
-  toolSettings?: RepoToolSettingsOptions;
+  toolSettings?: ToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -793,31 +794,23 @@ export type RenovateOptions =
   | RenovateObjectOption;
 
 export interface PackageRuleInputConfig extends RenovateConfig {
-  versioning?: string;
-  packageFile?: string;
   lockFiles?: string[];
   depType?: string;
   depTypes?: string[];
-  depName?: string;
   packageName?: string | null;
   newValue?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
   lockedVersion?: string;
-  updateType?: UpdateType;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
   categories?: string[];
-  baseBranch?: string;
-  manager?: string;
-  datasource?: string;
+  /** Narrowed from {@link RenovateConfig.packageRules} to also allow the matching fields declared here. */
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: Timestamp | null;
-  repository?: string;
   currentVersionAgeInDays?: number;
   currentVersionTimestamp?: string;
-  enabled?: boolean;
   skipReason?: SkipReason;
   skipStage?: StageName;
 }
@@ -866,26 +859,15 @@ export interface BumpVersionConfig {
 }
 
 /**
- * Global Config for specified `toolSettings` options.
+ * The `toolSettings` options.
  *
+ * Used both for the global (self-hosted) configuration, where each value is an upper limit that repositories may not exceed, and for the repository configuration, where each value is the setting to use as long as it is `<=` the global limit.
  */
-export interface GlobalToolSettingsOptions {
-  /** An upper limit on what the Java Virtual Machine's maximum memory can be set to. Repositories can specify <= this value */
+export interface ToolSettingsOptions {
+  /** The maximum memory the Java Virtual Machine can use. */
   jvmMaxMemory?: number;
-  /** An upper limit on what the Java Virtual Machine's starting memory can be set to. Repositories can specify <= this value */
+  /** The starting memory the Java Virtual Machine can use. */
   jvmMemory?: number;
-  /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
-  nodeMaxMemory?: number;
-}
-
-/**
- * Repository config options for `toolSettings` options.
- */
-export interface RepoToolSettingsOptions {
-  /** The maximum memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
-  jvmMaxMemory?: number;
-  /** The starting memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
-  jvmMemory?: number;
-  /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  /** The maximum memory child Node.JS processes can use. */
   nodeMaxMemory?: number;
 }

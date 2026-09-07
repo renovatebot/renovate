@@ -1,7 +1,8 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  RepoToolSettingsOptions,
+  RenovateConfig,
+  ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
 } from '../../config/types.ts';
@@ -28,34 +29,43 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface ExtractConfig extends CustomExtractConfig {
-  registryAliases?: Record<string, string>;
-  npmrc?: string;
-  npmrcMerge?: boolean;
-  skipInstalls?: boolean | null;
-  repository?: string;
+export interface ExtractConfig
+  extends
+    CustomExtractConfig,
+    Pick<
+      RenovateConfig,
+      'registryAliases' | 'npmrc' | 'npmrcMerge' | 'skipInstalls' | 'repository'
+    > {
   currentDigest?: string;
   newDigest?: string | null;
 }
 
-export interface UpdateArtifactsConfig {
-  isLockFileMaintenance?: boolean;
-  constraints?: Partial<Record<ConstraintName, string>>;
+export interface UpdateArtifactsConfig
+  extends
+    Pick<
+      RenovateConfig,
+      | 'constraints'
+      | 'ignoreScripts'
+      | 'minimumReleaseAge'
+      | 'postUpdateOptions'
+      | 'registryAliases'
+      | 'skipArtifactsUpdate'
+      | 'toolSettings'
+      | 'updateType'
+    >,
+    Pick<
+      Upgrade,
+      | 'isLockFileMaintenance'
+      | 'lockFiles'
+      | 'newMajor'
+      | 'newValue'
+      | 'newVersion'
+    > {
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
-  currentValue?: string;
-  postUpdateOptions?: string[];
   ignorePlugins?: boolean;
-  ignoreScripts?: boolean;
-  updateType?: UpdateType;
-  newValue?: string;
-  newVersion?: string;
-  newMajor?: number;
-  registryAliases?: Record<string, string>;
-  skipArtifactsUpdate?: boolean;
-  lockFiles?: string[];
-  toolSettings?: RepoToolSettingsOptions;
-  minimumReleaseAge?: Nullish<string>;
+  /** Narrowed from {@link Upgrade.currentValue}: artifact updates always run against a resolved value. */
+  currentValue?: string;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -424,7 +434,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
-  toolSettings?: RepoToolSettingsOptions;
+  toolSettings?: ToolSettingsOptions;
 
   minimumReleaseAge?: Nullish<string>;
   isLockFileMaintenance?: boolean;

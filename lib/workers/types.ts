@@ -1,6 +1,5 @@
 import type { Merge } from 'type-fest';
 import type {
-  GroupConfig,
   LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
@@ -20,7 +19,6 @@ import type {
 } from '../modules/manager/types.ts';
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
-import type { ConstraintName } from '../util/exec/types.ts';
 import type { FileChange } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -40,14 +38,8 @@ export interface BranchUpgradeConfig
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
   artifactNotices?: ArtifactNotice[];
-  autoReplaceStringTemplate?: string;
   baseDeps?: PackageDependency[];
   branchName: string;
-  commitBody?: string;
-  commitMessage?: string;
-  commitMessageExtra?: string;
-  currentDigest?: string;
-  currentDigestShort?: string;
   currentValue?: string;
 
   currentValueTemplate?: string;
@@ -65,9 +57,6 @@ export interface BranchUpgradeConfig
 
   excludeCommitPaths?: string[];
   githubName?: string;
-  group?: GroupConfig;
-  groupName?: string;
-  groupSlug?: string;
 
   isDigest?: boolean;
   isGroup?: boolean;
@@ -81,20 +70,13 @@ export interface BranchUpgradeConfig
   newDigestShort?: string;
   newNameLinked?: string;
 
-  packageFile?: string;
   packageFileDir?: string;
   parentDir?: string;
 
   lockFile?: string;
   lockFiles?: string[];
   reuseExistingBranch?: boolean;
-  prHeader?: string;
-  prFooter?: string;
-  prBodyNotes?: string[];
   prBodyTemplate?: string;
-  prPriority?: number;
-  prTitle?: string;
-  prTitleStrict?: boolean;
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   references?: string;
@@ -117,16 +99,12 @@ export interface BranchUpgradeConfig
   homepage?: string;
 
   changelogContent?: string;
-  changelogUrl?: string;
   dependencyUrl?: string;
-  minimumGroupSize?: number;
   releaseNotesSummaryTitle?: string;
   sourceUrl?: string;
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
-
-  constraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -256,13 +234,15 @@ export interface BaseBranchUpdateSummary {
 
 export type UpdateSummary = BaseBranchUpdateSummary[];
 
-export interface WorkerExtractConfig extends ExtractConfig {
+export interface WorkerExtractConfig
+  extends
+    ExtractConfig,
+    Pick<
+      RenovateConfig,
+      'managerFilePatterns' | 'includePaths' | 'ignorePaths' | 'enabled'
+    > {
   manager: string;
   fileList: string[];
-  managerFilePatterns?: string[];
-  includePaths?: string[];
-  ignorePaths?: string[];
-  enabled?: boolean;
 }
 
 export interface DepWarnings {
