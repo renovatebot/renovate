@@ -1,35 +1,17 @@
-import { logger } from '../../../logger/index.ts';
 import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper.ts';
-import type { RepoContents } from '../../../modules/platform/gitea/types.ts';
-import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';
-import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
+import * as common from './common.ts';
 
 export const Endpoint = 'https://gitea.com/';
 
-export async function fetchJSONFile(
+export function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
   tag?: string | null,
 ): Promise<Nullish<Preset>> {
-  let res: RepoContents;
-  try {
-    res = await getRepoContents(repo, fileName, tag, {
-      baseUrl: endpoint,
-    });
-  } catch (err) {
-    if (err instanceof ExternalHostError) {
-      throw err;
-    }
-    logger.debug(
-      `Preset file ${fileName} not found in ${repo}: ${err.message}`,
-    );
-    throw new Error(PRESET_DEP_NOT_FOUND);
-  }
-
-  return parsePreset(res.contentString, fileName);
+  return common.fetchJSONFile(getRepoContents, repo, fileName, endpoint, tag);
 }
 
 export function getPresetFromEndpoint(
@@ -39,14 +21,14 @@ export function getPresetFromEndpoint(
   endpoint = Endpoint,
   tag?: string,
 ): Promise<Nullish<Preset>> {
-  return fetchPreset({
+  return common.getPresetFromEndpoint(
+    getRepoContents,
     repo,
     filePreset,
     presetPath,
     endpoint,
     tag,
-    fetch: fetchJSONFile,
-  });
+  );
 }
 
 export function getPreset({
