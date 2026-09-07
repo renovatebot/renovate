@@ -1,5 +1,4 @@
 import { lang, query as q } from '@renovatebot/good-enough-parser';
-import { isTruthy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -16,12 +15,12 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
-import type { StatusResult } from '../../../util/git/types.ts';
 import { Http } from '../../../util/http/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { replaceAt } from '../../../util/string.ts';
 import { isGradleExecutionAllowed } from '../gradle/artifacts.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
+import { collectModifiedFiles, javaToolConstraint } from '../jvm-wrapper.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -38,22 +37,6 @@ const http = new Http('gradle-wrapper');
 const groovy = lang.createLang('groovy');
 
 type Ctx = string[];
-
-async function addIfUpdated(
-  status: StatusResult,
-  fileProjectPath: string,
-): Promise<UpdateArtifactsResult | null> {
-  if (status.modified.includes(fileProjectPath)) {
-    return {
-      file: {
-        type: 'addition',
-        path: fileProjectPath,
-        contents: await readLocalFile(fileProjectPath),
-      },
-    };
-  }
-  return null;
-}
 
 function getDistributionUrl(newPackageFileContent: string): string | null {
   const distributionUrlLine = newPackageFileContent
@@ -190,12 +173,10 @@ export async function updateArtifacts({
       docker: {},
       extraEnv,
       toolConstraints: [
-        {
-          toolName: 'java',
-          constraint:
-            config.constraints?.java ??
-            (await getJavaConstraint(config.currentValue, gradlewFile)),
-        },
+        javaToolConstraint(
+          config,
+          await getJavaConstraint(config.currentValue, gradlewFile),
+        ),
       ],
     };
     try {
@@ -226,13 +207,10 @@ export async function updateArtifacts({
         (filename) => upath.join(localGradleDir, filename),
       ),
     ];
-    const updateArtifactsResult = (
-      await Promise.all(
-        artifactFileNames.map((fileProjectPath) =>
-          addIfUpdated(status, fileProjectPath),
-        ),
-      )
-    ).filter(isTruthy);
+    const updateArtifactsResult = await collectModifiedFiles(
+      status,
+      artifactFileNames,
+    );
     if (lockFiles) {
       updateArtifactsResult.push(...lockFiles);
     }

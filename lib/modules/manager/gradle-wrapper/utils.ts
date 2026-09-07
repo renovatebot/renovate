@@ -1,16 +1,10 @@
-import os from 'node:os';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import {
-  chmodLocalFile,
-  localPathExists,
-  readLocalFile,
-  statLocalFile,
-} from '../../../util/fs/index.ts';
+import { localPathExists, readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import gradleVersioning from '../../versioning/gradle/index.ts';
 import { parseJavaToolchainVersion } from '../gradle/parser.ts';
+import { prepareWrapperCommand, wrapperFileName } from '../jvm-wrapper.ts';
 import type { GradleVersionExtract } from './types.ts';
 
 export const extraEnv = {
@@ -19,29 +13,13 @@ export const extraEnv = {
 };
 
 export function gradleWrapperFileName(): string {
-  if (
-    os.platform() === 'win32' &&
-    GlobalConfig.get('binarySource') !== 'docker'
-  ) {
-    return 'gradlew.bat';
-  }
-  return './gradlew';
+  return wrapperFileName('./gradlew', 'gradlew.bat');
 }
 
 export async function prepareGradleCommand(
   gradlewFile: string,
 ): Promise<string | null> {
-  const gradlewStat = await statLocalFile(gradlewFile);
-  if (gradlewStat?.isFile() === true) {
-    // if the file is not executable by others
-    if (os.platform() !== 'win32' && (gradlewStat.mode & 0o1) === 0) {
-      logger.debug('Gradle wrapper is missing the executable bit');
-      // add the execution permission to the owner, group and others
-      await chmodLocalFile(gradlewFile, gradlewStat.mode | 0o111);
-    }
-    return gradleWrapperFileName();
-  }
-  return null;
+  return await prepareWrapperCommand(gradlewFile, gradleWrapperFileName());
 }
 
 /**

@@ -25,6 +25,7 @@ import {
   gradleWrapperFileName,
   prepareGradleCommand,
 } from '../gradle-wrapper/utils.ts';
+import { javaToolConstraint } from '../jvm-wrapper.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   isGcvLockFile,
@@ -219,15 +220,13 @@ export async function updateArtifacts({
       docker: {},
       extraEnv,
       toolConstraints: [
-        {
-          toolName: 'java',
-          constraint:
-            config.constraints?.java ??
-            (await getJavaConstraint(
-              await getGradleVersion(gradlewFile),
-              gradlewFile,
-            )),
-        },
+        javaToolConstraint(
+          config,
+          await getJavaConstraint(
+            await getGradleVersion(gradlewFile),
+            gradlewFile,
+          ),
+        ),
       ],
     };
 

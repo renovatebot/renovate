@@ -1,26 +1,25 @@
-import type { Stats } from 'node:fs';
-import os from 'node:os';
-import { isTruthy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
 import {
-  chmodLocalFile,
   deleteLocalFile,
   readLocalFile,
-  statLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
-import type { StatusResult } from '../../../util/git/types.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import mavenVersioning from '../../versioning/maven/index.ts';
+import {
+  collectModifiedFiles,
+  javaToolConstraint,
+  prepareWrapperCommand,
+  wrapperFileName,
+} from '../jvm-wrapper.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -211,24 +210,7 @@ async function updateChecksums(
 
 interface MavenWrapperPaths {
   wrapperExecutableFileName: string;
-  localProjectDir: string;
   wrapperFullyQualifiedPath: string;
-}
-
-async function addIfUpdated(
-  status: StatusResult,
-  fileProjectPath: string,
-): Promise<UpdateArtifactsResult | null> {
-  if (status.modified.includes(fileProjectPath)) {
-    return {
-      file: {
-        type: 'addition',
-        path: fileProjectPath,
-        contents: await readLocalFile(fileProjectPath),
-      },
-    };
-  }
-  return null;
 }
 
 export async function updateArtifacts({
@@ -337,9 +319,10 @@ export async function updateArtifacts({
         packageFileName.replace('.mvn/wrapper/maven-wrapper.properties', '') +
         filename,
     );
-    const updateArtifactsResult = (
-      await getUpdatedArtifacts(status, artifactFileNames)
-    ).filter(isTruthy);
+    const updateArtifactsResult = await collectModifiedFiles(
+      status,
+      artifactFileNames,
+    );
 
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
@@ -357,20 +340,6 @@ export async function updateArtifacts({
       },
     ];
   }
-}
-
-async function getUpdatedArtifacts(
-  status: StatusResult,
-  artifactFileNames: string[],
-): Promise<UpdateArtifactsResult[]> {
-  const updatedResults: UpdateArtifactsResult[] = [];
-  for (const artifactFileName of artifactFileNames) {
-    const updatedResult = await addIfUpdated(status, artifactFileName);
-    if (updatedResult !== null) {
-      updatedResults.push(updatedResult);
-    }
-  }
-  return updatedResults;
 }
 
 /**
@@ -407,11 +376,7 @@ async function executeWrapperCommand(
     docker: {},
     extraEnv,
     toolConstraints: [
-      {
-        toolName: 'java',
-        constraint:
-          config.constraints?.java ?? getJavaConstraint(config.currentValue),
-      },
+      javaToolConstraint(config, getJavaConstraint(config.currentValue)),
     ],
   };
 
@@ -459,37 +424,23 @@ async function createWrapperCommand(
   packageFileName: string,
   distributionType: string | null,
 ): Promise<string | null> {
-  const {
-    wrapperExecutableFileName,
-    localProjectDir,
-    wrapperFullyQualifiedPath,
-  } = getMavenPaths(packageFileName);
+  const { wrapperExecutableFileName, wrapperFullyQualifiedPath } =
+    getMavenPaths(packageFileName);
 
   // Use existing distributionType or default to 'script' to preserve JAR-based mode
   // (prevents Maven 3.3.x from defaulting to only-script which doesn't support checksums)
   const type = distributionType ?? 'script';
   const args = `wrapper:wrapper -Dtype=${quote(type)}`;
 
-  return await prepareCommand(
+  return await prepareWrapperCommand(
+    wrapperFullyQualifiedPath,
     wrapperExecutableFileName,
-    localProjectDir,
-    await statLocalFile(wrapperFullyQualifiedPath),
     args,
   );
 }
 
-function mavenWrapperFileName(): string {
-  if (
-    os.platform() === 'win32' &&
-    GlobalConfig.get('binarySource') !== 'docker'
-  ) {
-    return 'mvnw.cmd';
-  }
-  return './mvnw';
-}
-
 function getMavenPaths(packageFileName: string): MavenWrapperPaths {
-  const wrapperExecutableFileName = mavenWrapperFileName();
+  const wrapperExecutableFileName = wrapperFileName('./mvnw', 'mvnw.cmd');
   const localProjectDir = upath.join(
     upath.dirname(packageFileName),
     packageFileName.includes('mvnw') ? '.' : '../../',
@@ -500,33 +451,6 @@ function getMavenPaths(packageFileName: string): MavenWrapperPaths {
   );
   return {
     wrapperExecutableFileName,
-    localProjectDir,
     wrapperFullyQualifiedPath,
   };
-}
-
-async function prepareCommand(
-  fileName: string,
-  cwd: string | undefined,
-  pathFileStats: Stats | null,
-  args: string | null,
-): Promise<string | null> {
-  /* v8 ignore next -- hard to test */
-  if (pathFileStats?.isFile() === true) {
-    // if the file is not executable by others
-    if (os.platform() !== 'win32' && (pathFileStats.mode & 0o1) === 0) {
-      // add the execution permission to the owner, group and others
-      logger.warn('Maven wrapper is missing the executable bit');
-      await chmodLocalFile(
-        // TODO: types (#22198)
-        upath.join(cwd!, fileName),
-        pathFileStats.mode | 0o111,
-      );
-    }
-    if (args === null) {
-      return fileName;
-    }
-    return `${fileName} ${args}`;
-  }
-  return null;
 }
