@@ -1,8 +1,6 @@
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
-import { regEx } from '../../../util/regex.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
@@ -10,15 +8,24 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { Commits, Tag, Tags } from './schema.ts';
+import { getApiUrl, getCacheKey, getSourceUrl } from './util.ts';
 
 export class GiteaTagsDatasource extends Datasource {
-  static readonly id = 'gitea-tags';
+  static readonly id: string = 'gitea-tags';
 
   override http = new GiteaHttp(GiteaTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://gitea.com'];
 
-  private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${GiteaTagsDatasource.id}`;
+  /**
+   * Default registry URL of the concrete datasource, mirrored on the instance
+   * so that inherited methods resolve it for the subclass.
+   */
+  protected readonly defaultRegistryUrl =
+    GiteaTagsDatasource.defaultRegistryUrls[0];
+
+  protected readonly cacheNamespace: PackageCacheNamespace =
+    'datasource-gitea-tags';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -27,35 +34,21 @@ export class GiteaTagsDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  constructor() {
-    super(GiteaTagsDatasource.id);
-  }
-
-  static getRegistryURL(registryUrl?: string): string {
-    // fallback to default API endpoint if custom not provided
-    return registryUrl ?? this.defaultRegistryUrls[0];
-  }
-
-  static getApiUrl(registryUrl?: string): string {
-    const res = GiteaTagsDatasource.getRegistryURL(registryUrl).replace(
-      regEx(/\/api\/v1$/),
-      '',
-    );
-    return `${ensureTrailingSlash(res)}api/v1/`;
-  }
-
-  static getCacheKey(
-    registryUrl: string | undefined,
-    repo: string,
-    type: string,
-  ): string {
-    return `${GiteaTagsDatasource.getRegistryURL(registryUrl)}:${repo}:${type}`;
+  constructor(id: string = GiteaTagsDatasource.id) {
+    super(id);
   }
 
   static getSourceUrl(packageName: string, registryUrl?: string): string {
-    const url = GiteaTagsDatasource.getRegistryURL(registryUrl);
-    const normalizedUrl = ensureTrailingSlash(url);
-    return `${normalizedUrl}${packageName}`;
+    // fallback to default API endpoint if custom not provided
+    return getSourceUrl(
+      packageName,
+      registryUrl ?? this.defaultRegistryUrls[0],
+    );
+  }
+
+  protected getRegistryUrl(registryUrl?: string): string {
+    // fallback to default API endpoint if custom not provided
+    return registryUrl ?? this.defaultRegistryUrl;
   }
 
   // getReleases fetches list of tags for the repository
@@ -63,9 +56,8 @@ export class GiteaTagsDatasource extends Datasource {
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl,
-    )}repos/${repo}/tags`;
+    const resolvedUrl = this.getRegistryUrl(registryUrl);
+    const url = `${getApiUrl(resolvedUrl)}repos/${repo}/tags`;
     const tags = (
       await this.http.getJson(
         url,
@@ -77,8 +69,8 @@ export class GiteaTagsDatasource extends Datasource {
     ).body;
 
     const dependency: ReleaseResult = {
-      sourceUrl: GiteaTagsDatasource.getSourceUrl(repo, registryUrl),
-      registryUrl: GiteaTagsDatasource.getRegistryURL(registryUrl),
+      sourceUrl: getSourceUrl(repo, resolvedUrl),
+      registryUrl: resolvedUrl,
       releases: tags.map(({ name, commit }) => ({
         version: name,
         gitRef: name,
@@ -93,9 +85,9 @@ export class GiteaTagsDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return withCache(
       {
-        namespace: GiteaTagsDatasource.cacheNamespace,
-        key: GiteaTagsDatasource.getCacheKey(
-          config.registryUrl,
+        namespace: this.cacheNamespace,
+        key: getCacheKey(
+          this.getRegistryUrl(config.registryUrl),
           config.packageName,
           'tags',
         ),
@@ -111,8 +103,8 @@ export class GiteaTagsDatasource extends Datasource {
     repo: string,
     tag: string,
   ): Promise<string | null> {
-    const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl,
+    const url = `${getApiUrl(
+      this.getRegistryUrl(registryUrl),
     )}repos/${repo}/tags/${tag}`;
 
     const { body } = await this.http.getJson(url, Tag);
@@ -127,8 +119,8 @@ export class GiteaTagsDatasource extends Datasource {
   ): Promise<string | null> {
     return withCache(
       {
-        namespace: GiteaTagsDatasource.cacheNamespace,
-        key: GiteaTagsDatasource.getCacheKey(registryUrl, repo, `tag-${tag}`),
+        namespace: this.cacheNamespace,
+        key: getCacheKey(this.getRegistryUrl(registryUrl), repo, `tag-${tag}`),
       },
       () => this._getTagCommit(registryUrl, repo, tag),
     );
@@ -144,8 +136,8 @@ export class GiteaTagsDatasource extends Datasource {
       return this.getTagCommit(registryUrl, repo, newValue);
     }
 
-    const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl,
+    const url = `${getApiUrl(
+      this.getRegistryUrl(registryUrl),
     )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
     const { body } = await this.http.getJson(url, Commits);
 
@@ -162,9 +154,9 @@ export class GiteaTagsDatasource extends Datasource {
   ): Promise<string | null> {
     return withCache(
       {
-        namespace: GiteaTagsDatasource.cacheNamespace,
-        key: GiteaTagsDatasource.getCacheKey(
-          config.registryUrl,
+        namespace: this.cacheNamespace,
+        key: getCacheKey(
+          this.getRegistryUrl(config.registryUrl),
           config.packageName,
           'digest',
         ),
