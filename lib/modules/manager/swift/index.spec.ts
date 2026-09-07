@@ -240,17 +240,21 @@ describe('modules/manager/swift/index', () => {
     });
 
     it('returns null when no Package.swift files supplied', async () => {
-      expect(await extractAllPackageFiles({}, [])).toBeNull();
+      await expect(extractAllPackageFiles({}, [])).resolves.toBeNull();
     });
 
     it('skips unreadable Package.swift files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
-      expect(await extractAllPackageFiles({}, ['Package.swift'])).toBeNull();
+      await expect(
+        extractAllPackageFiles({}, ['Package.swift']),
+      ).resolves.toBeNull();
     });
 
     it('skips Package.swift files that have content but yield no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('// no deps here');
-      expect(await extractAllPackageFiles({}, ['Package.swift'])).toBeNull();
+      await expect(
+        extractAllPackageFiles({}, ['Package.swift']),
+      ).resolves.toBeNull();
     });
 
     it('attaches discovered registry URLs to id-form deps', async () => {

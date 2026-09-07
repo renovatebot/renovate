@@ -26,39 +26,39 @@ describe('modules/datasource/swift-package-registry/index', () => {
 
   describe('getReleases', () => {
     it('returns null when no registryUrls supplied', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null when packageName has no scope separator', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'invalidIdentity',
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null when packageName starts or ends with the separator', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: '.somelib',
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
-      expect(
-        await getPkgReleases({
+      ).resolves.toBeNull();
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'acme.',
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('parses a happy-path SE-0292 response', async () => {
@@ -105,13 +105,13 @@ describe('modules/datasource/swift-package-registry/index', () => {
 
     it('returns null when releases map is empty', async () => {
       httpMock.scope(baseUrl).get('/acme/somelib').reply(200, { releases: {} });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null when every release is retracted', async () => {
@@ -123,13 +123,13 @@ describe('modules/datasource/swift-package-registry/index', () => {
             '1.0.0': { problem: { status: 410, title: 'Gone' } },
           },
         });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null when response shape does not match SE-0292', async () => {
@@ -137,13 +137,13 @@ describe('modules/datasource/swift-package-registry/index', () => {
         .scope(baseUrl)
         .get('/acme/somelib')
         .reply(200, { not: 'a swift registry response' });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null when the releases entries fail zod validation', async () => {
@@ -153,24 +153,24 @@ describe('modules/datasource/swift-package-registry/index', () => {
         .scope(baseUrl)
         .get('/acme/somelib')
         .reply(200, { releases: { '1.0.0': { url: 12345 } } });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null on 404', async () => {
       httpMock.scope(baseUrl).get('/acme/somelib').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws ExternalHostError on 5xx', async () => {
@@ -186,13 +186,13 @@ describe('modules/datasource/swift-package-registry/index', () => {
 
     it('returns null on connection error', async () => {
       httpMock.scope(baseUrl).get('/acme/somelib').replyWithError('boom');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
           registryUrls: [baseUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('hunts across multiple registryUrls and accepts the first 200', async () => {
