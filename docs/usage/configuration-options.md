@@ -4649,6 +4649,7 @@ The aliases support variables with default values (using the `:-` syntax) which 
 This feature works with the following managers:
 
 - [`ansible`](modules/manager/ansible/index.md)
+- [`argocd`](modules/manager/argocd/index.md)
 - [`bazel-module`](modules/manager/bazel-module/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
@@ -4663,6 +4664,7 @@ This feature works with the following managers:
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
 - [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
+- [`helmsman`](modules/manager/helmsman/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
 - [`terraform`](modules/manager/terraform/index.md)

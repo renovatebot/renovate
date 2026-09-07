@@ -2,9 +2,8 @@ import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { PackageDependency } from '../types.ts';
-import { removeOCIPrefix } from './oci.ts';
+import { getOciChartDep } from './oci.ts';
 import type { ChartDefinition, Repository } from './types.ts';
 
 export function parseRepository(
@@ -21,12 +20,7 @@ export function parseRepository(
   }
   switch (url.protocol) {
     case 'oci:':
-      res.datasource = DockerDatasource.id;
-      res.packageName = `${removeOCIPrefix(repositoryURL)}/${depName}`;
-      // https://github.com/helm/helm/issues/10312
-      // https://github.com/helm/helm/issues/10678
-      res.pinDigests = false;
-      break;
+      return getOciChartDep(repositoryURL, depName);
     case 'file:':
       res.skipReason = 'local-dependency';
       break;
