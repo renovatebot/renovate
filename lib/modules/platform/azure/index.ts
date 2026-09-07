@@ -4,6 +4,7 @@ import type {
   GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
+  GitPullRequestCompletionOptions,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -511,7 +512,7 @@ async function getMergeStrategy(
   );
 }
 
-async function getPendingBlockingPolicyEvaluations(
+async function getPrPendingBlockingPolicyEvaluations(
   pullRequestId: number,
 ): Promise<PolicyEvaluationRecord[]> {
   const artifactId = `vstfs:///CodeReview/CodeReviewId/${config.projectId}/${pullRequestId}`;
@@ -864,23 +865,59 @@ export async function mergePr({
   branchName,
   id: pullRequestId,
   strategy,
+  platformOptions,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
 
   const pendingPolicyEvaluations =
-    await getPendingBlockingPolicyEvaluations(pullRequestId);
+    await getPrPendingBlockingPolicyEvaluations(pullRequestId);
+
+  let extraCompletionOptions: GitPullRequestCompletionOptions = {};
   if (pendingPolicyEvaluations.length) {
-    logger.debug(
-      {
-        pullRequestId,
-        pendingPolicies: pendingPolicyEvaluations.map((evaluation) => ({
-          name: evaluation.configuration?.type?.displayName,
-          status: PolicyEvaluationStatus[evaluation.status!],
-        })),
-      },
-      'Not completing PR because branch policies have not been satisfied yet',
+    const bypassedPolicyTypeIds = new Set(
+      platformOptions?.azureBypassPolicyTypeIds,
     );
-    return false;
+    const bypassedEvaluations: PolicyEvaluationRecord[] = [];
+    const enforcedEvaluations: PolicyEvaluationRecord[] = [];
+
+    for (const evaluation of pendingPolicyEvaluations) {
+      const policyTypeId = evaluation.configuration?.type?.id;
+      if (policyTypeId && bypassedPolicyTypeIds.has(policyTypeId)) {
+        bypassedEvaluations.push(evaluation);
+      } else {
+        enforcedEvaluations.push(evaluation);
+      }
+    }
+
+    if (bypassedEvaluations.length) {
+      logger.debug(
+        {
+          pullRequestId,
+          bypassedPolicies: bypassedEvaluations.map((evaluation) => ({
+            name: evaluation.configuration?.type?.displayName,
+            status: PolicyEvaluationStatus[evaluation.status!],
+          })),
+        },
+        'The listed branch policies have been bypassed as per configuration',
+      );
+      extraCompletionOptions = {
+        bypassPolicy: true,
+        bypassReason: platformOptions?.azureBypassPolicyReason
+      };
+    }
+    if (enforcedEvaluations.length) {
+      logger.debug(
+        {
+          pullRequestId,
+          pendingPolicies: enforcedEvaluations.map((evaluation) => ({
+            name: evaluation.configuration?.type?.displayName,
+            status: PolicyEvaluationStatus[evaluation.status!],
+          })),
+        },
+        'Not completing PR because branch policies have not been satisfied yet',
+      );
+      return false;
+    }
   }
 
   const azureApiGit = await azureApi.gitApi();
@@ -898,6 +935,7 @@ export async function mergePr({
       mergeStrategy,
       deleteSourceBranch: true,
       mergeCommitMessage: pr.title,
+      ...extraCompletionOptions,
     },
   };
 

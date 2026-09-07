@@ -2096,6 +2096,67 @@ describe('modules/platform/azure/index', () => {
       expect(res).toBeFalse();
     });
 
+    it('should complete the PR by bypassing configured pending policies', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      const updatePullRequestMock = vi.fn().mockResolvedValue({
+        status: PullRequestStatus.Completed,
+      });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
+          updatePullRequest: updatePullRequestMock,
+        }),
+      );
+      azureHelper.getMergeMethod = vi
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+      azureHelper.getPolicyEvaluations.mockResolvedValueOnce([
+        partial<PolicyEvaluationRecord>({
+          configuration: partial<PolicyConfiguration>({
+            isBlocking: true,
+            type: partial<PolicyTypeRef>({
+              id: 'minimum-reviewers',
+              displayName: 'Minimum number of reviewers',
+            }),
+          }),
+          status: PolicyEvaluationStatus.Running,
+        }),
+      ]);
+
+      const res = await azure.mergePr({
+        branchName: 'test',
+        id: pullRequestIdMock,
+        strategy: 'auto',
+        platformOptions: {
+          azureBypassPolicyTypeIds: ['minimum-reviewers'],
+          azureBypassPolicyReason: 'Renovate automerge',
+        },
+      });
+
+      expect(updatePullRequestMock).toHaveBeenCalledExactlyOnceWith(
+        {
+          status: PullRequestStatus.Completed,
+          lastMergeSourceCommit: lastMergeSourceCommitMock,
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'title',
+            bypassPolicy: true,
+            bypassReason: 'Renovate automerge',
+          },
+        },
+        '1',
+        pullRequestIdMock,
+      );
+      expect(res).toBeTrue();
+    });
+
     it('should complete the PR if blocking policies have been approved or are not applicable', async () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;

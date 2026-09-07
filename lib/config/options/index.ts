@@ -1454,6 +1454,22 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: ['azure'],
   },
   {
+    name: 'azureBypassPolicyTypeIds',
+    description: 'A list of policy type IDs (UUID) allowed to be bypassed',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    default: [],
+    supportedPlatforms: ['azure'],
+  },
+  {
+    name: 'azureBypassPolicyReason',
+    description: 'The `reason` to use when bypassing policies on Azure DevOps.',
+    type: 'string',
+    default: "Auto-merge by Renovate",
+    supportedPlatforms: ['azure'],
+  },
+  {
     name: 'autoApprove',
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',

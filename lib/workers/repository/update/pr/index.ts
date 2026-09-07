@@ -68,6 +68,8 @@ export function getPlatformPrOptions(
     automergeCommitMessage: config.commitMessage,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
+    azureBypassPolicyTypeIds: config.azureBypassPolicyTypeIds ?? [],
+    azureBypassPolicyReason: config.azureBypassPolicyReason,
     bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
