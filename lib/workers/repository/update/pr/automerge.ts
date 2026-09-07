@@ -147,7 +147,6 @@ export async function checkAutoMerge(
     branchName,
     id: pr.number,
     strategy: automergeStrategy,
-    targetBranch: baseBranch,
   });
   if (res) {
     if (mergeQueueEnabled) {
