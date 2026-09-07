@@ -54,6 +54,7 @@ import {
   validatePrCache,
 } from './pr-fingerprint.ts';
 import { tryReuseAutoclosedPr } from './pr-reuse.ts';
+import { coerceArray } from '../../../../util/array.ts';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
@@ -69,7 +70,7 @@ export function getPlatformPrOptions(
     automergeCommitMessage: config.commitMessage,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
-    azureBypassPolicyTypeIds: config.azureBypassPolicyTypeIds ?? [],
+    azureBypassPolicyTypeIds: coerceArray(config.azureBypassPolicyTypeIds),
     azureBypassPolicyReason: config.azureBypassPolicyReason,
     bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,

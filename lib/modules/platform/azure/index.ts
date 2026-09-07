@@ -965,7 +965,7 @@ export async function mergePr({
       );
       extraCompletionOptions = {
         bypassPolicy: true,
-        bypassReason: platformOptions?.azureBypassPolicyReason
+        bypassReason: platformOptions?.azureBypassPolicyReason,
       };
     }
     if (enforcedEvaluations.length) {
