@@ -880,6 +880,13 @@ Use the `extends` field instead of this if, for example, you need the ability fo
   When Renovate resolves `globalExtends` it does not fully process the configuration.
   This means that Renovate does not have the authentication it needs to fetch private things.
 
+## `hostRules`
+
+These `hostRules` fields are only allowed in self-hosted config, and are ignored (or rejected with a config error) if set in repository config or a preset.
+See [`hostRules`](./configuration-options.md#hostrules) for the rest of the available fields.
+
+### `hostRules.allowInternal`
+
 ## `httpCacheTtlDays`
 
 This option sets the number of days that Renovate will cache HTTP responses.
