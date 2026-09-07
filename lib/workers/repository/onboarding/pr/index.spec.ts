@@ -23,7 +23,7 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     // NOTE that when the test below fails, these will need to be updated
     const ONBOARDING_PR_BODY_HASH_WITH_REBASE =
-      '27ff79952198b2914554e4f4400205617ac226bb87abc8da7ca4579e3cfd8155';
+      '8b3ef0d627bc051bbee8349df6423acc6e73fcbb15681810a0c464b5cf3cf208';
     const ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE =
       '64fdbed75ebbbf9f5c0eaafadc9793657a6484940dcf33966fbf3f95a4622023';
 
@@ -249,7 +249,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         expect(res).toBe('onboarding');
         expect(platform.createPr).toHaveBeenCalledTimes(1);
         const prBody = platform.createPr.mock.calls[0][0].prBody;
-        expect(prBody).toStartWith('\n\nWelcome to [Renovate]');
+        expect(prBody).toStartWith('Welcome to [Renovate]');
         expect(prBody).toContain('### Detected Package Files');
         expect(prBody).toEndWith(
           '<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->\n',
@@ -763,7 +763,8 @@ describe('workers/repository/onboarding/pr/index', () => {
         ).resolves.toBe('onboarding');
 
         expect(logger.warn).toHaveBeenCalledWith(
-          'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
+          { err, branchName: 'renovate/configure' },
+          'PR already exists but cannot find it. It was probably created by a different user.',
         );
         expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
       });

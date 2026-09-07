@@ -276,10 +276,13 @@ describe('workers/repository/update/pr/index', () => {
         });
 
         it('handles error for PR that already exists', async () => {
-          const err: Error & { body?: unknown } = new Error('unknown');
-          err.body = {
-            message: 'Validation failed',
-            errors: [{ message: 'A pull request already exists' }],
+          const err: Error & { response?: unknown } = new Error('unknown');
+          err.response = {
+            statusCode: 422,
+            body: {
+              message: 'Validation Failed',
+              errors: [{ message: 'A pull request already exists' }],
+            },
           };
           platform.createPr.mockRejectedValueOnce(err);
 
