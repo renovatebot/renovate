@@ -141,7 +141,10 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
+    // `extractConstraints()` re-reads the updated package file, so it wins over
+    // what extraction saw on the base branch.
     const constraints = {
+      ...config.extractedConstraints,
       ...extractConstraints(file, lockfile),
       ...config.constraints,
     };

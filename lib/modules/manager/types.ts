@@ -40,7 +40,19 @@ export interface ExtractConfig extends CustomExtractConfig {
 
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
+  /**
+   * Constraints as configured by the user, so they always win over anything a
+   * manager derives itself.
+   */
   constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Constraints collected during extraction, merged over all upgrades of the
+   * branch. They describe the package files as they were on the base branch, so
+   * they are a fallback for a manager that cannot derive the constraint from
+   * the files it is called with. Use {@link resolveToolConstraint} instead of
+   * reading this directly.
+   */
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;

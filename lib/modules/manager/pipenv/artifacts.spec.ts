@@ -765,6 +765,38 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted python constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    statMock.mockResolvedValueOnce(partial<Stats>());
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+
+    mockFiles({
+      '/Pipfile.lock': ['{}', 'new lock'],
+    });
+
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      }),
+    );
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: { ...config, extractedConstraints: { python: '== 3.9.*' } },
+      }),
+    ).resolves.not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.9.1' },
+      { cmd: 'install-tool pipenv 2013.6.12' },
+      { cmd: 'pipenv lock' },
+    ]);
+  });
+
   it('catches errors', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
     statMock.mockResolvedValueOnce(partial<Stats>());

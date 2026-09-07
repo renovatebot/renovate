@@ -18,6 +18,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { PdmLockfile, type PyProject } from '../schema.ts';
 import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
@@ -100,8 +101,11 @@ export class PdmProcessor extends BasePyProjectProcessor {
 
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
-        constraint:
-          config.constraints?.python ?? project.project?.['requires-python'],
+        constraint: await resolveToolConstraint(
+          config,
+          'python',
+          () => project.project?.['requires-python'],
+        ),
       };
       const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',

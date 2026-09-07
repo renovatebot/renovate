@@ -4,7 +4,11 @@ import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
 import { type PackageDependency } from './types.ts';
-import { applyGitSource, artifactErrorMessageFromExecError } from './util.ts';
+import {
+  applyGitSource,
+  artifactErrorMessageFromExecError,
+  resolveToolConstraint,
+} from './util.ts';
 
 describe('modules/manager/util', () => {
   beforeEach(() => {
@@ -222,5 +226,55 @@ describe('modules/manager/util', () => {
     );
 
     expect(message).toBe('fallback message');
+  });
+
+  describe('resolveToolConstraint()', () => {
+    it('prefers the user configured constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '==3.12' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '==3.11',
+      );
+
+      expect(constraint).toBe('==3.12');
+    });
+
+    it('prefers the derived constraint over the extracted one', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => Promise.resolve('==3.11'),
+      );
+
+      expect(constraint).toBe('==3.11');
+    });
+
+    it('falls back to the extracted constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => null,
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns the extracted constraint when nothing can be derived', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns undefined when no constraint is known', async () => {
+      const constraint = await resolveToolConstraint({}, 'python', () => null);
+
+      expect(constraint).toBeUndefined();
+    });
   });
 });

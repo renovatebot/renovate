@@ -31,6 +31,7 @@ import { parseUrl } from '../../../util/url.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { getGoogleAuthHostRule } from '../../datasource/util.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 import type { PoetryFile, PoetrySource } from './types.ts';
 
@@ -220,12 +221,12 @@ export async function updateArtifacts({
           .join(' ')}`,
       );
     }
-    const pythonConstraint =
-      config?.constraints?.python ??
-      getPythonConstraint(newPackageFileContent, existingLockFileContent);
-    const poetryConstraint =
-      config.constraints?.poetry ??
-      getPoetryRequirement(newPackageFileContent, existingLockFileContent);
+    const pythonConstraint = await resolveToolConstraint(config, 'python', () =>
+      getPythonConstraint(newPackageFileContent, existingLockFileContent),
+    );
+    const poetryConstraint = await resolveToolConstraint(config, 'poetry', () =>
+      getPoetryRequirement(newPackageFileContent, existingLockFileContent),
+    );
     const extraEnv: NodeJS.ProcessEnv = {
       ...(await getSourceCredentialVars(
         newPackageFileContent,

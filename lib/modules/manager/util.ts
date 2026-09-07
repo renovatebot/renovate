@@ -1,11 +1,13 @@
+import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
-import type { PackageDependency } from './types.ts';
+import type { PackageDependency, UpdateArtifactsConfig } from './types.ts';
 
 export function applyGitSource(
   dep: PackageDependency,
@@ -65,4 +67,29 @@ export function artifactErrorMessageFromExecError(
   }
 
   return message;
+}
+
+/**
+ * Resolve the constraint for a tool that `updateArtifacts()` has to run.
+ *
+ * The precedence is:
+ *
+ * 1. `constraints`, because the user asked for it explicitly
+ * 2. `derive`, because it reads the package files as the branch changed them,
+ *    so it can be newer than what extraction saw
+ * 3. `extractedConstraints`, as collected while extracting the base branch
+ *
+ * Managers that have no way to derive the constraint at artifact time can omit
+ * `derive`.
+ */
+export async function resolveToolConstraint(
+  config: UpdateArtifactsConfig,
+  toolName: ConstraintName,
+  derive?: () => MaybePromise<string | null | undefined>,
+): Promise<string | undefined> {
+  const constraint =
+    config.constraints?.[toolName] ??
+    (await derive?.()) ??
+    config.extractedConstraints?.[toolName];
+  return constraint ?? undefined;
 }
