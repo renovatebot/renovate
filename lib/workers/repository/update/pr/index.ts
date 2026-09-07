@@ -42,6 +42,7 @@ import type {
 import { embedChangelogs } from '../../changelog/index.ts';
 import { resolveBranchStatus } from '../branch/status-checks.ts';
 import { getPrBody } from './body/index.ts';
+import { isPrAlreadyExistsError } from './errors.ts';
 import {
   getChangedLabels,
   prepareLabels,
@@ -391,12 +392,14 @@ export async function ensurePr(
     }
   }
 
+  const configuredLabels = prepareLabels(config);
+
   const prBody = getPrBody(
     config,
     {
       debugData: updatePrDebugData(
         config.baseBranch,
-        prepareLabels(config), // include labels in debug data
+        configuredLabels, // include labels in debug data
         existingPr?.bodyStruct?.debugData,
       ),
     },
@@ -425,7 +428,6 @@ export async function ensurePr(
 
       const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
       const prCurrentLabels = existingPr.labels;
-      const configuredLabels = prepareLabels(config);
 
       const labelsNeedUpdate = shouldUpdateLabels(
         prInitialLabels,
@@ -541,7 +543,7 @@ export async function ensurePr(
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { labels: prepareLabels(config) },
+        { labels: configuredLabels },
         `DRY-RUN: Would create PR: ${prTitle}`,
       );
       pr = { number: 0 } as never;
@@ -560,7 +562,7 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: prepareLabels(config),
+          labels: configuredLabels,
           platformPrOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
           milestone: config.milestone,
@@ -578,13 +580,7 @@ export async function ensurePr(
         );
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
-        if (
-          err.body?.message === 'Validation failed' &&
-          err.body.errors?.length &&
-          err.body.errors.some((error: { message?: string }) =>
-            error.message?.startsWith('A pull request already exists'),
-          )
-        ) {
+        if (isPrAlreadyExistsError(err)) {
           logger.warn('A pull requests already exists');
           return { type: 'without-pr', prBlockedBy: 'Error' };
         }
