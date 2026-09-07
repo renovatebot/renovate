@@ -3,6 +3,7 @@ import {
   isNonEmptyObject,
   isNonEmptyString,
   isString,
+  isUndefined,
 } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { getConfigFileNames } from '../../../config/app-strings.ts';
@@ -335,6 +336,8 @@ function migrateConfigOrWarn(config: RenovateConfig): MigratedConfig {
 interface AdminSuppliedValues {
   env: Set<string>;
   headers: Map<string, Set<string | null>>;
+  /** the `allowInternal` values ('true'/'false') the admin set, recording the `matchHost` values each is set for (`null` for a host-less rule) */
+  internalGrants: Map<string, Set<string | null>>;
 }
 
 /**
@@ -359,25 +362,33 @@ function adminSuppliedValues(
 ): AdminSuppliedValues {
   const env = new Set<string>();
   const headers = new Map<string, Set<string | null>>();
+  const internalGrants = new Map<string, Set<string | null>>();
 
   for (const adminConfig of adminConfigs) {
     for (const source of [adminConfig, adminConfig.force]) {
       for (const [name, value] of Object.entries(coerceObject(source?.env))) {
         env.add(nameValueIdentity(name, value));
       }
-      for (const [identity, matchHosts] of headersByIdentity(
-        migratedHostRules(source?.hostRules),
-      )) {
+      const rules = migratedHostRules(source?.hostRules);
+      for (const [identity, matchHosts] of headersByIdentity(rules)) {
         const hosts = headers.get(identity) ?? new Set<string | null>();
         for (const matchHost of matchHosts) {
           hosts.add(matchHost);
         }
         headers.set(identity, hosts);
       }
+      for (const rule of rules) {
+        if (!isUndefined(rule.allowInternal)) {
+          const key = rule.allowInternal.toString();
+          const hosts = internalGrants.get(key) ?? new Set<string | null>();
+          hosts.add(rule.matchHost ?? null);
+          internalGrants.set(key, hosts);
+        }
+      }
     }
   }
 
-  return { env, headers };
+  return { env, headers, internalGrants };
 }
 
 /**
@@ -403,30 +414,56 @@ function withoutAdminSuppliedValues(
 
   // A header is the admin's own when its name and value match one the admin set for hosts that already cover this rule's hosts - the exact `matchHost` spelling must not matter, as migration and presets can re-spell (e.g. add a scheme) or narrow (e.g. a subpath) it
   if (result.hostRules) {
-    result.hostRules = result.hostRules.map((rule) => ({
-      ...rule,
-      headers: Object.fromEntries(
-        Object.entries(coerceObject(rule.headers)).filter(([name, value]) => {
-          const adminHosts = admin.headers.get(nameValueIdentity(name, value));
-          if (!adminHosts) {
-            // not a header the admin set - report it
-            return true;
-          }
-          if (adminHosts.has(null)) {
-            // the admin already sends it to every host
-            return false;
-          }
-          // a host-less rule reaches every host, so only a host-less admin header (above) can exempt it
-          return !(
-            rule.matchHost &&
-            [...adminHosts].some(
-              (adminHost) =>
-                adminHost !== null && isWithinHost(rule.matchHost!, adminHost),
-            )
-          );
-        }),
-      ),
-    }));
+    result.hostRules = result.hostRules.map((rule) => {
+      const filtered: HostRule = {
+        ...rule,
+        headers: Object.fromEntries(
+          Object.entries(coerceObject(rule.headers)).filter(([name, value]) => {
+            const adminHosts = admin.headers.get(
+              nameValueIdentity(name, value),
+            );
+            if (!adminHosts) {
+              // not a header the admin set - report it
+              return true;
+            }
+            if (adminHosts.has(null)) {
+              // the admin already sends it to every host
+              return false;
+            }
+            // a host-less rule reaches every host, so only a host-less admin header (above) can exempt it
+            return !(
+              rule.matchHost &&
+              [...adminHosts].some(
+                (adminHost) =>
+                  adminHost !== null &&
+                  isWithinHost(rule.matchHost!, adminHost),
+              )
+            );
+          }),
+        ),
+      };
+
+      // same principle for `allowInternal`: the admin's own value, for hosts their own rules already cover, is not a violation
+      if (!isUndefined(filtered.allowInternal)) {
+        const adminHosts = admin.internalGrants.get(
+          filtered.allowInternal.toString(),
+        );
+        const covered =
+          adminHosts &&
+          (adminHosts.has(null) ||
+            (!!filtered.matchHost &&
+              [...adminHosts].some(
+                (adminHost) =>
+                  adminHost !== null &&
+                  isWithinHost(filtered.matchHost!, adminHost),
+              )));
+        if (covered) {
+          delete filtered.allowInternal;
+        }
+      }
+
+      return filtered;
+    });
   }
 
   // `mergeChildConfig` promotes `force` values into the config it returns, so the admin's own `force.env`/`force.hostRules[].headers` are applied - and exempted - the same way their top-level equivalents are
