@@ -3,19 +3,19 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   getSiblingFileName,
   localPathExists,
-  readLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { fileChangesToArtifactResults } from '../util.ts';
 import { generateHelmEnvs } from './common.ts';
 import { parseKustomize } from './extract.ts';
 
@@ -187,37 +187,13 @@ export async function updateArtifacts({
     }
 
     const status = await getRepoStatus();
-    const chartsAddition = coerceArray(status?.not_added);
-    const chartsDeletion = coerceArray(status?.deleted);
-
-    const fileChanges: UpdateArtifactsResult[] = [];
-
-    for (const file of chartsAddition) {
-      // only add artifacts in the chartHome path
-      if (!file.startsWith(chartHome)) {
-        continue;
-      }
-      fileChanges.push({
-        file: {
-          type: 'addition',
-          path: file,
-          contents: await readLocalFile(file),
-        },
-      });
-    }
-
-    for (const file of chartsDeletion) {
-      // only add artifacts in the chartHome path
-      if (!file.startsWith(chartHome)) {
-        continue;
-      }
-      fileChanges.push({
-        file: {
-          type: 'deletion',
-          path: file,
-        },
-      });
-    }
+    const fileChanges = fileChangesToArtifactResults(
+      await collectFileChanges(status, {
+        include: ['not_added', 'deleted'],
+        // only add artifacts in the chartHome path
+        filter: (file) => file.startsWith(chartHome),
+      }),
+    );
 
     return fileChanges.length > 0 ? fileChanges : null;
   } catch (err) {

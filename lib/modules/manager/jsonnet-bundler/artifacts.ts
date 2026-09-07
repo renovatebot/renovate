@@ -1,10 +1,10 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type {
@@ -12,6 +12,7 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { fileChangesToArtifactResults } from '../util.ts';
 
 function dependencyUrl(dep: PackageDependency): string {
   const url = dep.packageName!;
@@ -65,36 +66,7 @@ export async function updateArtifacts(
       return null;
     }
 
-    const res: UpdateArtifactsResult[] = [];
-
-    for (const f of coerceArray(status.modified)) {
-      res.push({
-        file: {
-          type: 'addition',
-          path: f,
-          contents: await readLocalFile(f),
-        },
-      });
-    }
-    for (const f of coerceArray(status.not_added)) {
-      res.push({
-        file: {
-          type: 'addition',
-          path: f,
-          contents: await readLocalFile(f),
-        },
-      });
-    }
-    for (const f of coerceArray(status.deleted)) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
-    }
-
-    return res;
+    return fileChangesToArtifactResults(await collectFileChanges(status));
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;

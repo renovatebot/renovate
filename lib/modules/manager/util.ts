@@ -1,11 +1,12 @@
 import { detectPlatform } from '../../util/common.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
+import type { FileChange } from '../../util/git/types.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
-import type { PackageDependency } from './types.ts';
+import type { PackageDependency, UpdateArtifactsResult } from './types.ts';
 
 export function applyGitSource(
   dep: PackageDependency,
@@ -65,4 +66,14 @@ export function artifactErrorMessageFromExecError(
   }
 
   return message;
+}
+
+/**
+ * Wraps {@link FileChange}s, e.g. the result of `collectFileChanges()`, into the
+ * result shape returned by `updateArtifacts()`.
+ */
+export function fileChangesToArtifactResults(
+  changes: FileChange[],
+): UpdateArtifactsResult[] {
+  return changes.map((file) => ({ file }));
 }

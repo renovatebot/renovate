@@ -45,6 +45,7 @@ describe('modules/manager/kustomize/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
+    git.getRepoStatus.mockResolvedValue(partial<StatusResult>({}));
   });
 
   it('returns null if newPackageFileContent is not parseable', async () => {

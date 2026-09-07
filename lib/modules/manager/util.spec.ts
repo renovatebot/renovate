@@ -4,7 +4,11 @@ import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
 import { type PackageDependency } from './types.ts';
-import { applyGitSource, artifactErrorMessageFromExecError } from './util.ts';
+import {
+  applyGitSource,
+  artifactErrorMessageFromExecError,
+  fileChangesToArtifactResults,
+} from './util.ts';
 
 describe('modules/manager/util', () => {
   beforeEach(() => {
@@ -222,5 +226,17 @@ describe('modules/manager/util', () => {
     );
 
     expect(message).toBe('fallback message');
+  });
+
+  it('wraps file changes into artifact results', () => {
+    expect(
+      fileChangesToArtifactResults([
+        { type: 'addition', path: 'foo', contents: 'bar' },
+        { type: 'deletion', path: 'baz' },
+      ]),
+    ).toEqual([
+      { file: { type: 'addition', path: 'foo', contents: 'bar' } },
+      { file: { type: 'deletion', path: 'baz' } },
+    ]);
   });
 });

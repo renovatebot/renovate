@@ -2,7 +2,6 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
@@ -11,9 +10,11 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { fileChangesToArtifactResults } from '../util.ts';
 
 const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
@@ -123,25 +124,15 @@ export async function updateArtifacts({
   const podsDir = upath.join(upath.dirname(packageFileName), 'Pods');
   const podsManifestFileName = upath.join(podsDir, 'Manifest.lock');
   if (await readLocalFile(podsManifestFileName, 'utf8')) {
-    for (const f of status.modified.concat(status.not_added)) {
-      if (f.startsWith(podsDir)) {
-        res.push({
-          file: {
-            type: 'addition',
-            path: f,
-            contents: await readLocalFile(f),
-          },
-        });
-      }
-    }
-    for (const f of coerceArray(status.deleted)) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
-    }
+    res.push(
+      ...fileChangesToArtifactResults([
+        ...(await collectFileChanges(status, {
+          include: ['modified', 'not_added'],
+          filter: (f) => f.startsWith(podsDir),
+        })),
+        ...(await collectFileChanges(status, { include: ['deleted'] })),
+      ]),
+    );
   }
   return res;
 }

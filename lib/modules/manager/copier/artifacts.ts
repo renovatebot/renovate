@@ -3,8 +3,9 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile, statLocalFile } from '../../../util/fs/index.ts';
+import { statLocalFile } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus, isFileModeEnabled } from '../../../util/git/index.ts';
 import type {
   UpdateArtifact,
@@ -133,55 +134,27 @@ export async function updateArtifacts({
 
   const canReadFileMode = await isFileModeEnabled();
 
-  for (const f of [
-    ...status.modified,
-    ...status.not_added,
-    ...status.conflicted,
-  ]) {
-    const fileRes: UpdateArtifactsResult = {
-      file: {
-        type: 'addition',
-        path: f,
-        contents: await readLocalFile(f),
-        isExecutable: await detectExecutable(f, canReadFileMode),
-      },
-    };
-    if (status.conflicted.includes(f)) {
+  // `git status` might detect a rename, which is then not contained
+  // in not_added/deleted. Ensure we respect renames as well if they happen.
+  const changes = await collectFileChanges(status, {
+    include: ['modified', 'not_added', 'conflicted', 'deleted', 'renamed'],
+    additionMetadata: async (f) => ({
+      isExecutable: await detectExecutable(f, canReadFileMode),
+    }),
+  });
+
+  for (const change of changes) {
+    const fileRes: UpdateArtifactsResult = { file: change };
+    if (change.type === 'addition' && status.conflicted.includes(change.path)) {
       // Make the reviewer aware of the conflicts.
       // This will be posted in a comment.
       fileRes.notice = {
-        file: f,
+        file: change.path,
         message:
           'This file had merge conflicts. Please check the proposed changes carefully!',
       };
     }
     res.push(fileRes);
-  }
-  for (const f of status.deleted) {
-    res.push({
-      file: {
-        type: 'deletion',
-        path: f,
-      },
-    });
-  }
-  // `git status` might detect a rename, which is then not contained
-  // in not_added/deleted. Ensure we respect renames as well if they happen.
-  for (const f of status.renamed) {
-    res.push({
-      file: {
-        type: 'deletion',
-        path: f.from,
-      },
-    });
-    res.push({
-      file: {
-        type: 'addition',
-        path: f.to,
-        contents: await readLocalFile(f.to),
-        isExecutable: await detectExecutable(f.to, canReadFileMode),
-      },
-    });
   }
   return res;
 }
