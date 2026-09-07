@@ -111,7 +111,8 @@ export function parseNpmrc(content: string): NpmrcDocument {
   const lines: NpmrcLine[] = [];
   let detectedLineEnding: DetectedNpmrcLineEnding | null = null;
   let section: string | null = null;
-  const parts = content.split(regEx(/(?:\r\n|\r|\n)/));
+  // oxlint-disable-next-line prefer-named-capture-group -- split needs captured separators, not named groups.
+  const parts = content.split(regEx(/(\r\n|\r|\n)/));
 
   for (let index = 0; index < parts.length; index += 2) {
     const raw = parts[index];

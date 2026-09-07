@@ -25,7 +25,8 @@ interface SanitizedRepoNpmrc {
  * procedural because RE2 does not support lookbehind.
  */
 const environmentVariableReferenceRegex = regEx(
-  /\$\{(?<name>[^${}?]+)(?<modifier>\?)?\}/g,
+  // oxlint-disable-next-line prefer-named-capture-group -- Only the full match and its position are used.
+  /\$\{([^${}?]+)(\?)?\}/g,
 );
 
 function containsEnvironmentVariableReference(value: unknown): boolean {
