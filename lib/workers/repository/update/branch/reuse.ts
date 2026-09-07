@@ -1,8 +1,119 @@
 import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import type { RangeStrategy } from '../../../../types/index.ts';
 import type { BranchConfig } from '../../../types.ts';
+
+/**
+ * What should happen to an existing branch:
+ *
+ * - `no-reuse`: the branch must be recreated from the base branch
+ * - `unchanged`: leave `reuseExistingBranch` at its configured value
+ * - `check-reuse`: let `shouldReuseExistingBranch()` decide
+ * - `skip-update`: the branch must not be updated at all
+ */
+export type BranchReuseAction =
+  | 'no-reuse'
+  | 'unchanged'
+  | 'check-reuse'
+  | 'skip-update';
+
+export interface BranchReuseDecision {
+  action: BranchReuseAction;
+  userRebaseRequested: boolean;
+}
+
+export interface BranchReuseDecisionInput {
+  config: BranchConfig;
+  branchPr: Pr | null;
+  branchExists: boolean;
+  dependencyDashboardCheck: string | undefined;
+  forceRebase: boolean;
+}
+
+/**
+ * Decides whether an existing branch may be reused, based on the user's
+ * requests and the branch's configuration alone. Anything which needs to
+ * inspect the branch itself is left to `shouldReuseExistingBranch()`.
+ */
+export function decideBranchReuse({
+  config,
+  branchPr,
+  branchExists,
+  dependencyDashboardCheck,
+  forceRebase,
+}: BranchReuseDecisionInput): BranchReuseDecision {
+  const userRebaseRequested =
+    dependencyDashboardCheck === 'rebase' ||
+    !!config.dependencyDashboardRebaseAllOpen ||
+    !!config.rebaseRequested;
+
+  if (forceRebase) {
+    logger.debug('Force rebase because branch needs updating');
+    return { action: 'no-reuse', userRebaseRequested };
+  }
+
+  if (userRebaseRequested) {
+    logger.debug('User has requested rebase');
+    return { action: 'no-reuse', userRebaseRequested };
+  }
+
+  if (dependencyDashboardCheck === 'global-config') {
+    logger.debug(`Manual create/rebase requested via checkedBranches`);
+    return { action: 'no-reuse', userRebaseRequested: true };
+  }
+
+  if (config.dependencyDashboardAllPending) {
+    logger.debug(
+      'A user manually approved all pending PRs via the Dependency Dashboard.',
+    );
+    return { action: 'unchanged', userRebaseRequested };
+  }
+
+  if (config.dependencyDashboardAllRateLimited) {
+    logger.debug(
+      'A user manually approved all rate-limited PRs via the Dependency Dashboard.',
+    );
+    return { action: 'unchanged', userRebaseRequested };
+  }
+
+  if (config.dependencyDashboardAllAwaitingSchedule) {
+    logger.debug(
+      'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
+    );
+    return { action: 'unchanged', userRebaseRequested };
+  }
+
+  const keepUpdatedLabel = config.keepUpdatedLabel;
+  if (
+    branchExists &&
+    config.rebaseWhen === 'never' &&
+    !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
+    !dependencyDashboardCheck
+  ) {
+    logger.debug('rebaseWhen=never so skipping branch update check');
+    return { action: 'skip-update', userRebaseRequested };
+  }
+
+  // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+  // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+  if (branchPr?.targetBranch && branchPr.targetBranch !== config.baseBranch) {
+    logger.debug(
+      'Base branch changed by user, rebasing the branch onto new base',
+    );
+    return { action: 'no-reuse', userRebaseRequested };
+  }
+
+  if (config.cacheFingerprintMatch === 'no-match') {
+    logger.debug(
+      'Cache fingerprint does not match, cannot reuse existing branch',
+    );
+    return { action: 'no-reuse', userRebaseRequested };
+  }
+
+  return { action: 'check-reuse', userRebaseRequested };
+}
 
 async function shouldKeepUpdated(
   config: BranchConfig,

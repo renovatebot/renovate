@@ -1,7 +1,8 @@
-import { platform, scm } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import type { BranchConfig } from '../../../types.ts';
-import { shouldReuseExistingBranch } from './reuse.ts';
+import type { BranchReuseDecisionInput } from './reuse.ts';
+import { decideBranchReuse, shouldReuseExistingBranch } from './reuse.ts';
 
 describe('workers/repository/update/branch/reuse', () => {
   describe('shouldReuseExistingBranch(config)', () => {
@@ -308,6 +309,121 @@ describe('workers/repository/update/branch/reuse', () => {
       const result = await shouldReuseExistingBranch(config);
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('behind-base-branch');
+    });
+  });
+
+  describe('decideBranchReuse()', () => {
+    let input: BranchReuseDecisionInput;
+
+    beforeEach(() => {
+      input = {
+        config: {
+          manager: 'some-manager',
+          branchName: 'renovate/some-branch',
+          baseBranch: 'base',
+          upgrades: [],
+        },
+        branchPr: null,
+        branchExists: true,
+        dependencyDashboardCheck: undefined,
+        forceRebase: false,
+      };
+    });
+
+    it('does not reuse the branch if a rebase is forced', () => {
+      input.forceRebase = true;
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'no-reuse',
+        userRebaseRequested: false,
+      });
+    });
+
+    it.each`
+      scenario                            | key
+      ${'via the dashboard'}              | ${'dependencyDashboardRebaseAllOpen'}
+      ${'via the PR title, label or box'} | ${'rebaseRequested'}
+    `(
+      'does not reuse the branch if the user requested a rebase $scenario',
+      ({ key }: { key: 'dependencyDashboardRebaseAllOpen' }) => {
+        input.config[key] = true;
+        expect(decideBranchReuse(input)).toEqual({
+          action: 'no-reuse',
+          userRebaseRequested: true,
+        });
+      },
+    );
+
+    it('does not reuse the branch if the user checked the branch on the dashboard', () => {
+      input.dependencyDashboardCheck = 'rebase';
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'no-reuse',
+        userRebaseRequested: true,
+      });
+    });
+
+    it('flags a rebase request for checkedBranches', () => {
+      input.dependencyDashboardCheck = 'global-config';
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'no-reuse',
+        userRebaseRequested: true,
+      });
+    });
+
+    it.each`
+      key
+      ${'dependencyDashboardAllPending'}
+      ${'dependencyDashboardAllRateLimited'}
+      ${'dependencyDashboardAllAwaitingSchedule'}
+    `(
+      'leaves the branch untouched for $key',
+      ({ key }: { key: 'dependencyDashboardAllPending' }) => {
+        input.config[key] = true;
+        expect(decideBranchReuse(input)).toEqual({
+          action: 'unchanged',
+          userRebaseRequested: false,
+        });
+      },
+    );
+
+    it('skips the update if rebaseWhen=never', () => {
+      input.config.rebaseWhen = 'never';
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'skip-update',
+        userRebaseRequested: false,
+      });
+    });
+
+    it('does not skip the update if the branch is labelled keep-updated', () => {
+      input.config.rebaseWhen = 'never';
+      input.config.keepUpdatedLabel = 'keep-updated';
+      input.branchPr = partial<Pr>({ labels: ['keep-updated'] });
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'check-reuse',
+        userRebaseRequested: false,
+      });
+    });
+
+    it('does not reuse the branch if the base branch was changed', () => {
+      input.branchPr = partial<Pr>({ targetBranch: 'other-base' });
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'no-reuse',
+        userRebaseRequested: false,
+      });
+    });
+
+    it('does not reuse the branch if the cache fingerprint does not match', () => {
+      input.config.cacheFingerprintMatch = 'no-match';
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'no-reuse',
+        userRebaseRequested: false,
+      });
+    });
+
+    it('checks the branch itself otherwise', () => {
+      expect(decideBranchReuse(input)).toEqual({
+        action: 'check-reuse',
+        userRebaseRequested: false,
+      });
     });
   });
 });

@@ -2,12 +2,26 @@ import type { RenovateConfig } from '~test/util.ts';
 import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
+import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import type { ConfidenceConfig, StabilityConfig } from './status-checks.ts';
 import {
+  computeInternalChecksStatus,
   resolveBranchStatus,
   setConfidence,
   setStability,
 } from './status-checks.ts';
+
+vi.mock(
+  '../../../../util/merge-confidence/index.ts',
+  async (importOriginal) => ({
+    ...(await importOriginal<typeof _mergeConfidence>()),
+    getMergeConfidenceLevel: vi.fn(),
+  }),
+);
+
+const mergeConfidence = vi.mocked(_mergeConfidence);
 
 describe('workers/repository/update/branch/status-checks', () => {
   describe('setStability', () => {
@@ -344,6 +358,128 @@ describe('workers/repository/update/branch/status-checks', () => {
     it('should return green if ignoreTests=true', async () => {
       await expect(resolveBranchStatus('somebranch', true, true)).resolves.toBe(
         'green',
+      );
+    });
+  });
+
+  describe('computeInternalChecksStatus', () => {
+    function branchConfig(upgrades: Partial<BranchUpgradeConfig>[]) {
+      return partial<BranchConfig>({
+        branchName: 'renovate/some-branch',
+        upgrades: partial<BranchUpgradeConfig>(upgrades),
+      });
+    }
+
+    it('returns null if no internal check is configured', async () => {
+      const config = branchConfig([{ depName: 'some-dep' }]);
+      await expect(computeInternalChecksStatus(config)).resolves.toBeNull();
+    });
+
+    it('returns green if the minimum release age is met', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          minimumReleaseAge: '1 day',
+          releaseTimestamp: '2020-01-01T00:00:00.000Z' as Timestamp,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+      });
+    });
+
+    it('returns yellow if the minimum release age is not met', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          minimumReleaseAge: '100 days',
+          releaseTimestamp: new Date().toISOString() as Timestamp,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'yellow',
+      });
+    });
+
+    it('returns yellow if a release timestamp is required but missing', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          updateType: 'major',
+          minimumReleaseAge: '1 day',
+          releaseTimestamp: undefined,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'yellow',
+      });
+      expect(logger.once.debug).toHaveBeenCalledWith(
+        { updates: [{ depName: 'some-dep', updateType: 'major' }] },
+        `Marking 1 release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
+      );
+    });
+
+    it('returns green if a release timestamp is optional and missing', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          updateType: 'major',
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeBehaviour: 'timestamp-optional',
+          releaseTimestamp: undefined,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+      });
+      expect(logger.once.warn).toHaveBeenCalledWith(
+        "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+    });
+
+    it('returns green if the minimum confidence is met', async () => {
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('high');
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          datasource: 'npm',
+          packageName: 'some-dep',
+          currentVersion: '1.0.0',
+          newVersion: '2.0.0',
+          updateType: 'major',
+          minimumConfidence: 'high',
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+        confidenceStatus: 'green',
+      });
+    });
+
+    it('returns yellow if the minimum confidence is not met', async () => {
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce(undefined);
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          datasource: 'npm',
+          packageName: 'some-dep',
+          currentVersion: '1.0.0',
+          newVersion: '2.0.0',
+          updateType: 'major',
+          minimumConfidence: 'high',
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'green',
+        confidenceStatus: 'yellow',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          depName: 'some-dep',
+          confidence: 'neutral',
+          minimumConfidence: 'high',
+        },
+        'Update does not meet minimum confidence scores',
       );
     });
   });

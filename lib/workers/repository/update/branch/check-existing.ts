@@ -1,4 +1,6 @@
 // TODO #22198
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import { REPOSITORY_CHANGED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
@@ -51,4 +53,54 @@ export async function prAlreadyExisted(
   }
   logger.debug('prAlreadyExisted=false');
   return null;
+}
+
+/**
+ * Checks whether the user requested a rebase of the branch, either via the PR
+ * title, a PR label or the rebase checkbox in the PR body.
+ */
+export async function rebaseCheck(
+  config: RenovateConfig,
+  branchPr: Pr,
+): Promise<boolean> {
+  const titleRebase = branchPr.title?.startsWith('rebase!');
+  if (titleRebase) {
+    logger.debug(
+      `Manual rebase requested via PR title for #${branchPr.number}`,
+    );
+    return true;
+  }
+  const labelRebase = !!branchPr.labels?.includes(config.rebaseLabel!);
+  if (labelRebase) {
+    logger.debug(
+      `Manual rebase requested via PR labels for #${branchPr.number}`,
+    );
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
+          branchPr.number
+        }`,
+      );
+    } else {
+      await platform.deleteLabel(branchPr.number, config.rebaseLabel!);
+    }
+    return true;
+  }
+  const prRebaseChecked = !!branchPr.bodyStruct?.rebaseRequested;
+  if (prRebaseChecked) {
+    logger.debug(
+      `Manual rebase requested via PR checkbox for #${branchPr.number}`,
+    );
+    return true;
+  }
+
+  return false;
+}
+
+export function userChangedTargetBranch(pr: Pr): boolean {
+  const oldTargetBranch = pr.bodyStruct?.debugData?.targetBranch;
+  if (oldTargetBranch && pr.targetBranch) {
+    return pr.targetBranch !== oldTargetBranch;
+  }
+  return false;
 }
