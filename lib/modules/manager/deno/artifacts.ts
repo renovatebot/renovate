@@ -124,7 +124,7 @@ export async function updateArtifacts(
       'gist.githubusercontent.com:443',
     ];
     const additionalImportHosts = hostRules
-      .findAll({ hostType: 'npm' })
+      .findAllForHostType('npm')
       .filter((rule) => rule.resolvedHost)
       .map((rule) => rule.resolvedHost);
 

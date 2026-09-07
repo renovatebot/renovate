@@ -24,7 +24,7 @@ For example:
 
 Important notes:
 
-- `hostType` is a required field, set `hostType=rubygems`
+- `hostType` is optional: a rule with only a `matchHost` is used as well. Set `hostType=rubygems` to keep the credentials from being passed to other package managers
 - If you use the same registry for more than one package type, you may need more than one `hostRules` entry
 - Instead of `token`, you can use a `username` and `password`
 

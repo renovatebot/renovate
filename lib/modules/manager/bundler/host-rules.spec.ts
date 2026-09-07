@@ -109,5 +109,14 @@ describe('modules/manager/bundler/host-rules', () => {
         hostRule,
       ]);
     });
+
+    it('returns a hostRule without a hostType', () => {
+      delete hostRule.hostType;
+
+      add(hostRule);
+      expect(findAllAuthenticatable({ hostType: 'nuget' })).toMatchObject([
+        hostRule,
+      ]);
+    });
   });
 });

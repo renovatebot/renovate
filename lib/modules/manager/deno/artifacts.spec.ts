@@ -298,6 +298,12 @@ describe('modules/manager/deno/artifacts', () => {
         hostType: 'npm',
         matchHost: 'https://private-registry.example',
       });
+      // a rule without a hostType applies to npm lookups too, so it is
+      // allowed as an import host as well
+      hostRules.add({
+        token: 'another-token',
+        matchHost: 'https://generic-registry.example',
+      });
       const execSnapshots = mockExecAll();
       await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
@@ -310,7 +316,7 @@ describe('modules/manager/deno/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'deno install --frozen=false --allow-import=deno.land:443,esm.sh:443,jsr.io:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443,private-registry.example',
+          cmd: 'deno install --frozen=false --allow-import=deno.land:443,esm.sh:443,jsr.io:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443,private-registry.example,generic-registry.example',
         },
       ]);
     });

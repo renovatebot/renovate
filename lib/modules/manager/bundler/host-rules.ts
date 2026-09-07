@@ -1,5 +1,5 @@
 import type { HostRule } from '../../../types/index.ts';
-import { findAll } from '../../../util/host-rules.ts';
+import { findAllForHostType } from '../../../util/host-rules.ts';
 
 function isAuthenticatable(rule: HostRule): boolean {
   return (
@@ -13,7 +13,7 @@ export function findAllAuthenticatable({
 }: {
   hostType: string;
 }): HostRule[] {
-  return findAll({ hostType }).filter(isAuthenticatable);
+  return findAllForHostType(hostType).filter(isAuthenticatable);
 }
 
 export function getAuthenticationHeaderValue(hostRule: HostRule): string {

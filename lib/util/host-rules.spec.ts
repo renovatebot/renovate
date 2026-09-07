@@ -10,6 +10,7 @@ import {
   filterAllowedHeaders,
   find,
   findAll,
+  findAllForHostType,
   getAll,
   hostType,
   hosts,
@@ -870,6 +871,42 @@ describe('util/host-rules', () => {
           username: 'root',
           matchHost: 'nuget.org',
         },
+      ]);
+    });
+  });
+
+  describe('findAllForHostType()', () => {
+    it('returns nothing when no rule applies', () => {
+      add({ hostType: 'nuget', matchHost: 'nuget.org', token: 'abc' });
+      expect(findAllForHostType('npm')).toBeEmptyArray();
+    });
+
+    it('returns typed rules and matchHost-only rules', () => {
+      add({ hostType: 'npm', matchHost: 'npm.example.com', token: 'typed' });
+      add({ matchHost: 'generic.example.com', token: 'generic' });
+      add({
+        hostType: 'nuget',
+        matchHost: 'nuget.example.com',
+        token: 'other',
+      });
+
+      expect(findAllForHostType('npm')).toMatchObject([
+        { hostType: 'npm', matchHost: 'npm.example.com', token: 'typed' },
+        { matchHost: 'generic.example.com', token: 'generic' },
+      ]);
+    });
+
+    it('ignores a rule without a matchHost', () => {
+      add({ token: 'no-host' });
+      expect(findAllForHostType('npm')).toBeEmptyArray();
+    });
+
+    it('prefers the typed rule when both name the same matchHost', () => {
+      add({ matchHost: 'registry.example.com', token: 'generic' });
+      add({ hostType: 'npm', matchHost: 'registry.example.com', token: 'npm' });
+
+      expect(findAllForHostType('npm')).toMatchObject([
+        { hostType: 'npm', matchHost: 'registry.example.com', token: 'npm' },
       ]);
     });
   });

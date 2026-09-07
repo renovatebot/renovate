@@ -91,9 +91,9 @@ function getAuthJson(): string | null {
     }
   }
 
-  for (const packagistHostRule of hostRules.findAll({
-    hostType: PackagistDatasource.id,
-  })) {
+  for (const packagistHostRule of hostRules.findAllForHostType(
+    PackagistDatasource.id,
+  )) {
     if (!isArtifactAuthEnabled(packagistHostRule)) {
       continue;
     }

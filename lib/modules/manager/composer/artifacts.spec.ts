@@ -154,6 +154,12 @@ describe('modules/manager/composer/artifacts', () => {
       matchHost: 'https://packages-bearer.example.com/',
       token: 'abcdef0123456789',
     });
+    // a rule without a hostType authenticates packagist lookups, so it must
+    // reach COMPOSER_AUTH too
+    hostRules.add({
+      matchHost: 'https://packages-generic.example.com/',
+      token: '9876543210fedcba',
+    });
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -184,7 +190,8 @@ describe('modules/manager/composer/artifacts', () => {
               '"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},' +
               '"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}' +
               '},' +
-              '"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}',
+              '"bearer":{"packages-bearer.example.com":"abcdef0123456789",' +
+              '"packages-generic.example.com":"9876543210fedcba"}}',
             COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
           },
         },
