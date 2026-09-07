@@ -386,8 +386,8 @@ importers:
         specifier: 3.4.0
         version: 3.4.0
       zod:
-        specifier: 4.5.2
-        version: 4.5.2
+        specifier: 4.5.4
+        version: 4.5.4
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.11
@@ -5850,8 +5850,8 @@ packages:
   yuku-parser@0.8.7:
     resolution: {integrity: sha512-vRD9nwt4L3aYpxNqeSC4WqLv58xrXef0Ong1Mc45CTXTIpvLafx7JO05sczmQZwdLEZvywrLOGdNC5+Rp5N1BQ==}
 
-  zod@4.5.2:
-    resolution: {integrity: sha512-XkYXCol10+ba/6F/cueWV+TezUeOqXW0hdeJt5CdXjTYeAgAQg5N03RQdJ80mhfFE72+pblvYMW4wy2Qp4Qbrg==}
+  zod@4.5.4:
+    resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -7094,7 +7094,7 @@ snapshots:
       fs-extra: 11.4.0
       toml-eslint-parser: 1.0.3
       upath: 3.0.8
-      zod: 4.5.2
+      zod: 4.5.4
 
   '@renovatebot/good-enough-parser@2.0.1':
     dependencies:
@@ -11243,6 +11243,6 @@ snapshots:
       '@yuku-parser/binding-win32-arm64': 0.8.7
       '@yuku-parser/binding-win32-x64': 0.8.7
 
-  zod@4.5.2: {}
+  zod@4.5.4: {}
 
   zwitch@2.0.4: {}

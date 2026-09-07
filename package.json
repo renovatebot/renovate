@@ -270,7 +270,7 @@
     "xmldoc": "2.0.3",
     "yaml": "2.9.0",
     "yauzl": "3.4.0",
-    "zod": "4.5.2"
+    "zod": "4.5.4"
   },
   "optionalDependencies": {
     "openpgp": "6.3.1",
