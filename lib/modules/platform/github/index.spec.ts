@@ -5564,6 +5564,10 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  it('returns the maximum PR body length', () => {
+    expect(github.maxBodyLength()).toBe(50000);
+  });
+
   describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
       const input =
