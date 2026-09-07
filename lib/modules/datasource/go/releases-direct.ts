@@ -130,13 +130,13 @@ export class GoDirectDatasource extends Datasource {
         res = await this.bitbucket.getReleases(source);
         break;
       }
-      /* v8 ignore next 3 -- should never happen */
+      /* v8 ignore next -- should never happen */
       default: {
         return null;
       }
     }
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!res) {
       return null;
     }

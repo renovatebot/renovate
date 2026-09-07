@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as gradleVersioning } from '../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -194,7 +195,7 @@ export function updateVars(
   dir: string,
   newVars: PackageVariables,
 ): void {
-  const oldVars = registry[dir] ?? {};
+  const oldVars = coerceObject(registry[dir]);
   registry[dir] = { ...oldVars, ...newVars };
 }
 
@@ -209,7 +210,7 @@ export function updateVarsFromDefaultCatalog(
   }
 
   const rootDir = upath.dirname(dir);
-  const oldVars = registry[rootDir] ?? {};
+  const oldVars = coerceObject(registry[rootDir]);
   let defaultLibsExtName = 'libs';
   if (
     oldVars.defaultLibrariesExtensionName?.packageFile &&

@@ -5,6 +5,7 @@ import {
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { find } from '../../../util/host-rules.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -198,7 +199,7 @@ function findDependencies(
   for (const item of precommitFile.repos) {
     // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
     if (item.repo !== 'meta') {
-      for (const hook of item.hooks ?? []) {
+      for (const hook of coerceArray(item.hooks)) {
         // normally language are not defined in yaml
         // only support it when it's explicitly defined.
         // this avoid to parse hooks from pre-commit-hooks.yaml from git repo

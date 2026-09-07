@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { parse } from '../../../util/html.ts';
 import type { HttpError } from '../../../util/http/index.ts';
@@ -45,8 +46,9 @@ export class RubyVersionDatasource extends Datasource {
       const response = await this.http.getText(rubyVersionsUrl);
 
       const root = parse(response.body);
-      const rows =
-        root.querySelector('.release-list')?.querySelectorAll('tr') ?? [];
+      const rows = coerceArray(
+        root.querySelector('.release-list')?.querySelectorAll('tr'),
+      );
       rows.forEach((row) => {
         const tds = row.querySelectorAll('td');
         const columns: string[] = [];

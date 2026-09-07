@@ -26,29 +26,29 @@ describe('modules/manager/bazel-module/artifacts', () => {
   });
 
   it('returns null if no updated deps and not lockfile maintenance', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'MODULE.bazel',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no MODULE.bazel.lock found', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'MODULE.bazel',
         updatedDeps: [{ depName: 'rules_go' }],
         newPackageFileContent:
           'bazel_dep(name = "rules_go", version = "0.42.0")',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('writes package file and delegates to updateBazelLockfile', async () => {

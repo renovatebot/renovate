@@ -26,7 +26,7 @@ import {
 } from './util.ts';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!releases?.length) {
     return null;
   }
@@ -106,7 +106,7 @@ export class MavenDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

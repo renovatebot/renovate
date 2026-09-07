@@ -158,6 +158,7 @@ export class PackageFiles {
     data: Map<string, Record<string, PackageFile[]> | null>,
   ): boolean {
     // get detected managers list of the last listed base branch
+    // oxlint-disable-next-line renovate/prefer-coerce-array -- tuple destructuring default; coerceArray() widens the tuple to a union array
     const [branch, managers] = Array.from(data).pop() ?? [];
     if (!branch) {
       return false;

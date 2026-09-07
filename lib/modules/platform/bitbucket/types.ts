@@ -10,7 +10,6 @@ export interface MergeRequestBody {
 
 export interface Config {
   defaultBranch: string;
-  has_issues: boolean;
   mergeMethod: string;
   owner: string;
   repository: string;
@@ -27,11 +26,8 @@ export interface PagedResult<T = any> {
 }
 
 export interface RepoBranchingModel {
-  development: {
+  development?: {
     name: string;
-    branch?: {
-      name: string;
-    };
   };
 }
 
@@ -91,3 +87,5 @@ export interface BitbucketPrCacheData {
   updated_on: string | null;
   author: string | null;
 }
+
+export type CommentsConfig = Pick<Config, 'repository'>;

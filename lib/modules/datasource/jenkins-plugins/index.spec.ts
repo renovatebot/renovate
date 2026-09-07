@@ -63,7 +63,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .get('/current/update-center.actual.json')
         .reply(200, jenkinsPluginsInfo);
 
-      expect(await getPkgReleases(newparams)).toBeNull();
+      await expect(getPkgReleases(newparams)).resolves.toBeNull();
     });
 
     it('returns package releases for a hit for info and releases', async () => {
@@ -125,7 +125,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .get('/current/update-center.actual.json')
         .reply(200, {});
 
-      expect(await getPkgReleases(params)).toBeNull();
+      await expect(getPkgReleases(params)).resolves.toBeNull();
     });
 
     it('returns package releases from a custom registry', async () => {

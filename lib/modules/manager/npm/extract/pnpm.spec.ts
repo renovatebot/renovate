@@ -118,86 +118,90 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = partial<PackageFile<NpmManagerData>>([
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/nested-group-a',
           },
         },
         {
           packageFile: 'nested-packages/group/b/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/nested-group-b',
           },
         },
         {
           packageFile: 'non-nested-packages/a/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/non-nested-a',
           },
         },
         {
           packageFile: 'non-nested-packages/b/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/non-nested-b',
           },
         },
         {
           packageFile: 'solo-package/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo',
           },
         },
         {
           packageFile: 'solo-package-leading-dot-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo-leading-dot-slash',
           },
         },
         {
           packageFile: 'solo-package-leading-double-dot-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo-leading-double-dot-slash',
           },
         },
         {
           packageFile: 'solo-package-trailing-slash/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/solo-trailing-slash',
           },
         },
         {
           packageFile: 'test/test-package/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/test-package',
           },
         },
         {
           packageFile: 'tests/test-package2/package.json',
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             packageJsonName: '@demo/test-package2',
           },
         },
       ]);
 
       await detectPnpmWorkspaces(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
+      // every workspace package file gets associated with the root lockfile
+      expect(packageFiles).toMatchObject(
+        packageFiles.map(() => ({
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+        })),
+      );
       expect(
         packageFiles.every(
-          (packageFile) =>
-            packageFile.managerData?.pnpmShrinkwrap !== undefined,
+          (packageFile) => packageFile.managerData?.pnpmLockFile !== undefined,
         ),
       ).toBeTrue();
     });
@@ -206,7 +210,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
       ];
 
@@ -214,7 +218,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(packageFiles).toEqual([
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
       ]);
     });
@@ -225,12 +229,12 @@ describe('modules/manager/npm/extract/pnpm', () => {
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          managerData: { pnpmShrinkwrap: undefined },
+          managerData: { pnpmLockFile: undefined },
         },
       ];
 
       await detectPnpmWorkspaces(packageFiles);
-      expect(packageFiles[0].managerData.pnpmShrinkwrap).toBeUndefined();
+      expect(packageFiles[0].managerData.pnpmLockFile).toBeUndefined();
     });
 
     it('filters none matching packages', async () => {
@@ -238,17 +242,17 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          managerData: { pnpmShrinkwrap: undefined },
+          managerData: { pnpmLockFile: undefined },
         },
         {
           packageFile: 'not-matching/b/package.json',
           packageJsonName: '@not-matching/b',
-          managerData: { pnpmShrinkwrap: undefined },
+          managerData: { pnpmLockFile: undefined },
         },
       ];
 
@@ -256,24 +260,24 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(packageFiles).toEqual([
         {
           packageFile: 'package.json',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+          managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'not-matching/b/package.json',
           packageJsonName: '@not-matching/b',
-          managerData: { pnpmShrinkwrap: undefined },
+          managerData: { pnpmLockFile: undefined },
         },
       ]);
       expect(
         packageFiles.find(
           (packageFile) =>
             packageFile.packageFile === 'not-matching/b/package.json',
-        )?.managerData.pnpmShrinkwrap,
+        )?.managerData.pnpmLockFile,
       ).toBeUndefined();
     });
   });
@@ -417,19 +421,19 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
   describe('.extractPnpmWorkspaceFile()', () => {
     it('handles empty catalog entries', async () => {
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           { catalog: {}, catalogs: {} },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [],
       });
     });
 
     it('parses valid pnpm-workspace.yaml file', async () => {
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           {
             catalog: {
               react: '18.3.0',
@@ -442,7 +446,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
           },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [
           {
             currentValue: '18.3.0',
@@ -463,8 +467,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
 
     it('parses overrides in pnpm-workspace.yaml file', async () => {
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           {
             overrides: {
               'foo>bar': '2.0.0',
@@ -478,7 +482,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
           },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [
           {
             currentValue: '2.0.0',
@@ -534,8 +538,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
 
     it('applies scoped registry from registries to catalog deps', async () => {
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           {
             catalog: {
               '@my-org/pkg': '1.0.0',
@@ -547,7 +551,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
           },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         deps: [
           {
             depName: '@my-org/pkg',
@@ -672,8 +676,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
       `;
       fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-lock.yaml');
-      expect(
-        await extractPnpmWorkspaceFile(
+      await expect(
+        extractPnpmWorkspaceFile(
           {
             catalog: {
               react: '18.3.1',
@@ -681,9 +685,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
           },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          pnpmLockFile: 'pnpm-lock.yaml',
         },
       });
     });

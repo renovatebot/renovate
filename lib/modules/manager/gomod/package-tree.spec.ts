@@ -52,6 +52,17 @@ describe('modules/manager/gomod/package-tree', () => {
         parseLocalReplacePaths('// replace example.com/a => ../a\n'),
       ).toEqual([]);
     });
+
+    it('parses bare ../ and ./ replace paths pointing to a parent or current directory', () => {
+      const content = codeBlock`
+        module example.com/e2e
+
+        replace example.com/root => ../
+        replace example.com/sibling => ./
+      `;
+
+      expect(parseLocalReplacePaths(content)).toEqual(['../', './']);
+    });
   });
 
   describe('getGoModulesInTidyOrder', () => {
@@ -61,7 +72,7 @@ describe('modules/manager/gomod/package-tree', () => {
         Promise.resolve(monorepo[f]),
       );
 
-      expect(await getGoModulesInTidyOrder('shared/go.mod')).toEqual([
+      await expect(getGoModulesInTidyOrder('shared/go.mod')).resolves.toEqual([
         'api/go.mod',
         'cmd/go.mod',
       ]);
@@ -71,15 +82,38 @@ describe('modules/manager/gomod/package-tree', () => {
       scm.getFileList.mockResolvedValue(['a/go.mod']);
       fs.readLocalFile.mockResolvedValue('module example.com/a\n');
 
-      expect(await getGoModulesInTidyOrder('a/go.mod')).toEqual([]);
-      expect(await getGoModulesInTidyOrder('nowhere/go.mod')).toEqual([]);
+      await expect(getGoModulesInTidyOrder('a/go.mod')).resolves.toEqual([]);
+      await expect(getGoModulesInTidyOrder('nowhere/go.mod')).resolves.toEqual(
+        [],
+      );
     });
 
     it('skips go.mod files which cannot be read', async () => {
       scm.getFileList.mockResolvedValue(Object.keys(monorepo));
       fs.readLocalFile.mockResolvedValue(null);
 
-      expect(await getGoModulesInTidyOrder('shared/go.mod')).toEqual([]);
+      await expect(getGoModulesInTidyOrder('shared/go.mod')).resolves.toEqual(
+        [],
+      );
+    });
+
+    it('traverses bare ../ replace directives pointing to a parent module', async () => {
+      const files: Record<string, string> = {
+        'go.mod': 'module example.com/root\n',
+        'e2e/go.mod': codeBlock`
+          module example.com/e2e
+
+          replace example.com/root => ../
+        `,
+      };
+      scm.getFileList.mockResolvedValue(Object.keys(files));
+      fs.readLocalFile.mockImplementation((f: string) =>
+        Promise.resolve(files[f]),
+      );
+
+      await expect(getGoModulesInTidyOrder('go.mod')).resolves.toEqual([
+        'e2e/go.mod',
+      ]);
     });
   });
 });

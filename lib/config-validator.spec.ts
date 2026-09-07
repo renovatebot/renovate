@@ -325,4 +325,73 @@ describe.concurrent('config-validator', () => {
       });
     });
   });
+
+  describe('hostRules', () => {
+    it("filters the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
+      await withTmpDir(async (dirPath) => {
+        const configFile = await writeGlobalConfig(dirPath, 'config.json', {
+          allowedHeaders: ['X-*'],
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { 'X-Allowed': 'yes', Authorization: 'denied' },
+            },
+          ],
+        });
+
+        const { all } = await runValidator([], {
+          cwd: dirPath,
+          env: { RENOVATE_CONFIG_FILE: configFile },
+        });
+
+        expect(all).toContain(
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+        );
+        expect(all).toContain('Authorization');
+      });
+    });
+
+    it("honors a CLI-arg global config file's own allowedHeaders", async () => {
+      // a global config file brings its own `allowedHeaders`, and its hostRules should be filtered against those - not the surrounding environment's - as a real run would after parsing it
+      await withTmpDir(async (dirPath) => {
+        const configFile = await writeGlobalConfig(dirPath, 'config.json', {
+          allowedHeaders: ['Authorization'],
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { Authorization: 'Bearer token' },
+            },
+          ],
+        });
+
+        const { all } = await runValidator([configFile], { cwd: dirPath });
+
+        expect(all).not.toContain(
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+        );
+      });
+    });
+
+    it('filters hostRules headers of a validated config file against allowedHeaders', async () => {
+      await withTmpDir(async (dirPath) => {
+        const file = await writeRepoConfig(dirPath, 'renovate.json', {
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { 'X-Allowed': 'yes', Authorization: 'denied' },
+            },
+          ],
+        });
+
+        const { all } = await runValidator(['--no-global', file], {
+          env: { RENOVATE_ALLOWED_HEADERS: '["X-*"]' },
+        });
+
+        expect(all).toContain(
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+        );
+        expect(all).toContain('Authorization');
+      });
+    });
+  });
 });

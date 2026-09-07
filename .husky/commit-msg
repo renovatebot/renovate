@@ -1,12 +1,26 @@
 #!/bin/sh
-if git stripspace --strip-comments <"$1" |
-  grep -Eiq '(closes|fixes|resolves|fixed|closed|resolved):?[[:space:]]+#[0-9]+'; then
+msg=$(git stripspace --strip-comments <"$1")
+
+abort() {
   echo
   echo "Aborting commit."
-  echo "The commit message contains an issue closing keyword (closes, fixes, resolves, ...)."
-  echo "Put it in the pull request description instead, otherwise CI fails."
+  echo "$1"
+  echo "$2"
   echo
   echo "If you're sure you want to keep it, run git commit with the --no-verify flag."
   echo
   exit 1
+}
+
+if printf '%s\n' "$msg" |
+  grep -Eiq '(closes|fixes|resolves|fixed|closed|resolved):?[[:space:]]+#[0-9]+'; then
+  abort "The commit message contains an issue closing keyword (closes, fixes, resolves, ...)." \
+    "Put it in the pull request description instead, otherwise CI fails."
+fi
+
+# A 'BREAKING CHANGE' footer makes semantic-release publish a major version,
+# see .releaserc.json.
+if printf '%s\n' "$msg" | grep -Eiq '^[[:space:]*]*BREAKING[ -]CHANGE[:[:space:]]'; then
+  abort "The commit message contains a 'BREAKING CHANGE:' footer." \
+    "This triggers a major release, which we prepare deliberately, see docs/development/major-release.md."
 fi

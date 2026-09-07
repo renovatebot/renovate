@@ -1,8 +1,8 @@
 import { isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type { VersioningApi } from '../types.ts';
+import type { ApkVersion } from './types.ts';
 
 export const id = 'apk';
 export const displayName = 'Alpine Package Keeper (APK)';
@@ -18,20 +18,7 @@ const versionRegex = regEx(
 );
 
 // Regex for splitting version strings into alphanumeric parts
-const alphaNumRegex = regEx(/([a-zA-Z]+)|(\d+)/g);
-
-export interface ApkVersion extends GenericVersion {
-  /**
-   * version is the main version part: it defines the version of origin software
-   * that was packaged.
-   */
-  version: string;
-  /**
-   * releaseString is used to distinguish between different versions of packaging for the
-   * same upstream version.
-   */
-  releaseString: string;
-}
+const alphaNumRegex = regEx(/(?:[a-zA-Z]+)|(?:\d+)/g);
 
 class ApkVersioningApi extends GenericVersioningApi {
   /**
@@ -251,13 +238,15 @@ class ApkVersioningApi extends GenericVersioningApi {
     range: string,
   ): string | null {
     // Handle range expressions like >5.2.37-r0, <5.2.37-r0, ~5.2.37-r0, etc.
-    const rangeMatch = regEx(/^([><=~]+)(.+)$/).exec(range);
+    const rangeMatch = regEx(/^(?<operator>[><=~]+)(?<targetVersion>.+)$/).exec(
+      range,
+    );
     if (!rangeMatch) {
       // If no range operator, look for exact match
       return versions.find((v) => this.equals(v, range)) ?? null;
     }
 
-    const [, operator, targetVersion] = rangeMatch;
+    const { operator, targetVersion } = rangeMatch.groups!;
 
     // Filter versions that satisfy the range
     const satisfyingVersions = versions.filter((version) => {

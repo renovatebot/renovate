@@ -10,7 +10,6 @@ export function lazyLoadPackageJson(
 ): Lazy<Promise<PackageJson>> {
   return new Lazy(() => loadPackageJson(lockFileDir));
 }
-export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;
 
 export function getPackageManagerVersion(
   name: string,

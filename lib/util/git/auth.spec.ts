@@ -5,10 +5,6 @@ import {
 } from './auth.ts';
 
 describe('util/git/auth', () => {
-  afterEach(() => {
-    delete process.env.GIT_CONFIG_COUNT;
-  });
-
   describe('getGitAuthenticatedEnvironmentVariables()', () => {
     it('returns url with token', () => {
       expect(
@@ -132,7 +128,7 @@ describe('util/git/auth', () => {
     });
 
     it('returns url with token and already existing GIT_CONFIG_COUNT from parameter over environment', () => {
-      process.env.GIT_CONFIG_COUNT = '54';
+      vi.stubEnv('GIT_CONFIG_COUNT', '54');
       expect(
         getGitAuthenticatedEnvironmentVariables(
           { GIT_CONFIG_COUNT: '1' },
@@ -155,7 +151,7 @@ describe('util/git/auth', () => {
     });
 
     it('does not inherit GIT_CONFIG_COUNT from the process environment', () => {
-      process.env.GIT_CONFIG_COUNT = '1';
+      vi.stubEnv('GIT_CONFIG_COUNT', '1');
       expect(
         getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
           token: 'token1234',

@@ -84,9 +84,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await fs.writeFile(`${base.path}/master_file`, defaultBranch);
     await fs.writeFile(`${base.path}/file_to_delete`, 'bye');
     await repo.add(['master_file', 'file_to_delete']);
-    process.env.GIT_COMMITTER_DATE = masterCommitDate.toISOString();
+    vi.stubEnv('GIT_COMMITTER_DATE', masterCommitDate.toISOString());
     await repo.commit('master message');
-    delete process.env.GIT_COMMITTER_DATE;
+    vi.stubEnv('GIT_COMMITTER_DATE', undefined);
 
     await repo.checkout(['-b', 'renovate/future_branch', defaultBranch]);
     await fs.writeFile(`${base.path}/future_file`, 'future');
@@ -173,10 +173,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   let tmpDir: tmp.DirectoryResult;
 
-  const OLD_ENV = process.env;
-
   beforeEach(async () => {
-    process.env = { ...OLD_ENV };
     setCustomEnv({});
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(origin.path);
@@ -211,7 +208,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   afterAll(async () => {
     setCustomEnv({});
-    process.env = OLD_ENV;
     await base?.cleanup();
   });
 
@@ -254,13 +250,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
         }
         return 'different result';
       });
-      expect(await git.gitRetry(() => gitFunc())).toBe('some result');
-      expect(await git.gitRetry(() => gitFunc('arg'))).toBe('different result');
+      await expect(git.gitRetry(() => gitFunc())).resolves.toBe('some result');
+      await expect(git.gitRetry(() => gitFunc('arg'))).resolves.toBe(
+        'different result',
+      );
       expect(gitFunc).toHaveBeenCalledTimes(2);
     });
 
     it('retries the func call if ExternalHostError thrown', async () => {
-      process.env.NODE_ENV = '';
+      vi.stubEnv('NODE_ENV', '');
       const gitFunc = vi
         .fn()
         .mockImplementationOnce(() => {
@@ -270,12 +268,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
           throw new Error('The remote end hung up unexpectedly');
         })
         .mockImplementationOnce(() => 'some result');
-      expect(await git.gitRetry(() => gitFunc())).toBe('some result');
+      await expect(git.gitRetry(() => gitFunc())).resolves.toBe('some result');
       expect(gitFunc).toHaveBeenCalledTimes(3);
     });
 
     it('retries the func call up to retry count if ExternalHostError thrown', async () => {
-      process.env.NODE_ENV = '';
+      vi.stubEnv('NODE_ENV', '');
       const gitFunc = vi.fn().mockImplementation(() => {
         throw new Error('The remote end hung up unexpectedly');
       });
@@ -373,7 +371,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('getFileList()', () => {
     it('should return the correct files', async () => {
-      expect(await git.getFileList()).toEqual([
+      await expect(git.getFileList()).resolves.toEqual([
         'file_to_delete',
         'master_file',
         'past_file',
@@ -392,8 +390,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
       expect(git.isCloned()).toBeFalse();
       await git.syncGit();
-      expect(await fs.pathExists(`${tmpDir.path}/.gitmodules`)).toBeTruthy();
-      expect(await git.getFileList()).toEqual([
+      await expect(
+        fs.pathExists(`${tmpDir.path}/.gitmodules`),
+      ).resolves.toBeTruthy();
+      await expect(git.getFileList()).resolves.toEqual([
         '.gitmodules',
         'file_to_delete',
         'master_file',
@@ -424,24 +424,28 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('isBranchBehindBase()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(
-        await git.isBranchBehindBase('renovate/future_branch', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchBehindBase('renovate/future_branch', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return true if SHA different from master', async () => {
-      expect(
-        await git.isBranchBehindBase('renovate/past_branch', defaultBranch),
-      ).toBeTrue();
+      await expect(
+        git.isBranchBehindBase('renovate/past_branch', defaultBranch),
+      ).resolves.toBeTrue();
     });
 
     it('should return result even if non-default and not under branchPrefix', async () => {
-      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      await expect(
+        git.isBranchBehindBase('develop', defaultBranch),
+      ).resolves.toBeTrue();
     });
 
     it('returns cached value', async () => {
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(true);
-      expect(await git.isBranchBehindBase('develop', defaultBranch)).toBeTrue();
+      await expect(
+        git.isBranchBehindBase('develop', defaultBranch),
+      ).resolves.toBeTrue();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'branch.isBehindBase(): using cached result "true"',
@@ -455,57 +459,54 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should return false when branch is not found', async () => {
-      expect(
-        await git.isBranchModified('renovate/not_found', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/not_found', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return false when author matches', async () => {
-      expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
-      ).toBeFalse();
-      expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).resolves.toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return false when author is ignored', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
-      expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return false when author matches ignored regex', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['/^custom@e.+\\.com$/'],
       });
-      expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return false when author matches ignored case-insensitive regex', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['/^CUSTOM@E.+\\.COM$/i'],
       });
-      expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return false when ignored author contains literal brackets', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['29139614+renovate[bot]@users.noreply.github.com'],
       });
-      expect(
-        await git.isBranchModified(
-          'renovate/custom_author_brackets',
-          defaultBranch,
-        ),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/custom_author_brackets', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return false when author matches ignored regex with escaped brackets', async () => {
@@ -514,95 +515,86 @@ describe('util/git/index', { timeout: 30000 }, () => {
           '/renovate\\[bot\\]@users\\.noreply\\.github\\.com$/',
         ],
       });
-      expect(
-        await git.isBranchModified(
-          'renovate/custom_author_brackets',
-          defaultBranch,
-        ),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/custom_author_brackets', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return true when author does not match ignored regex', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['/^other@example\\.com$/'],
       });
-      expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
-      ).toBeTrue();
+      await expect(
+        git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).resolves.toBeTrue();
     });
 
     it('should return false when author matches ignored glob pattern', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@*'],
       });
-      expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return true when author does not match bracketed email pattern', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['29139614+renovate[bxy]@users.noreply.github.com'],
       });
-      expect(
-        await git.isBranchModified(
-          'renovate/custom_author_brackets',
-          defaultBranch,
-        ),
-      ).toBeTrue();
+      await expect(
+        git.isBranchModified('renovate/custom_author_brackets', defaultBranch),
+      ).resolves.toBeTrue();
     });
 
     it('should return true when non-ignored authors commit followed by an ignored author', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['author1@example.com'],
       });
-      expect(
-        await git.isBranchModified(
+      await expect(
+        git.isBranchModified(
           'renovate/branch_with_multiple_authors',
           defaultBranch,
         ),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('should return false with multiple authors that are each ignored', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['author1@example.com', 'author2@example.com'],
       });
-      expect(
-        await git.isBranchModified(
+      await expect(
+        git.isBranchModified(
           'renovate/branch_with_multiple_authors',
           defaultBranch,
         ),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should return true when custom author is unknown', async () => {
-      expect(
-        await git.isBranchModified('renovate/custom_author', defaultBranch),
-      ).toBeTrue();
+      await expect(
+        git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).resolves.toBeTrue();
     });
 
     it('should return true when committer is different from author', async () => {
-      expect(
-        await git.isBranchModified(
-          'renovate/different_committer',
-          defaultBranch,
-        ),
-      ).toBeTrue();
+      await expect(
+        git.isBranchModified('renovate/different_committer', defaultBranch),
+      ).resolves.toBeTrue();
     });
 
     it('should return false for ignored platformCommit committer', async () => {
       git.setPlatformIgnoredAuthors(['noreply@github.com']);
-      expect(
-        await git.isBranchModified('renovate/platform_commit', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/platform_commit', defaultBranch),
+      ).resolves.toBeFalse();
     });
 
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
-      expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
-      ).toBeTrue();
+      await expect(
+        git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).resolves.toBeTrue();
     });
 
     it('should not be affected by new commits on the base branch', async () => {
@@ -620,9 +612,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
       git.setGitAuthor('Jest <Jest@example.com>');
       await git.syncGit();
 
-      expect(
-        await git.isBranchModified('renovate/future_branch', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).resolves.toBeFalse();
     });
   });
 
@@ -653,7 +645,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should return null when branch does not exist', async () => {
-      expect(await git.getBranchUpdateDate('not_found')).toBeNull();
+      await expect(git.getBranchUpdateDate('not_found')).resolves.toBeNull();
     });
 
     it('should return null and log error when git show fails', async () => {
@@ -839,12 +831,16 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('mergeToLocal(branchName)', () => {
     it('should perform a branch merge without push', async () => {
-      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeFalse();
+      await expect(
+        fs.pathExists(`${tmpDir.path}/future_file`),
+      ).resolves.toBeFalse();
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/future_branch');
 
-      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeTrue();
+      await expect(
+        fs.pathExists(`${tmpDir.path}/future_file`),
+      ).resolves.toBeTrue();
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
@@ -866,13 +862,17 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const local = simpleGit(tmpDir.path);
       await local.checkout(defaultBranch);
 
-      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      await expect(
+        fs.pathExists(`${tmpDir.path}/local_only_file`),
+      ).resolves.toBeFalse();
       const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/local_only_branch');
 
-      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      await expect(
+        fs.pathExists(`${tmpDir.path}/local_only_file`),
+      ).resolves.toBeTrue();
       expect(fetchSpy).not.toHaveBeenCalled();
       expect(pushSpy).not.toHaveBeenCalled();
     });
@@ -959,7 +959,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('returns null for 404', async () => {
-      expect(await git.getFile('some-path', 'some-branch')).toBeNull();
+      await expect(git.getFile('some-path', 'some-branch')).resolves.toBeNull();
     });
 
     it('logs a warning if hidden Unciode characters are found', async () => {
@@ -1462,7 +1462,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       expect(git.branchExists('test')).toBeFalsy();
 
-      expect(await git.getCommitMessages()).toEqual([
+      await expect(git.getCommitMessages()).resolves.toEqual([
         'master message',
         'past message',
       ]);
@@ -1529,7 +1529,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.pathExists(`${tmpDir.path}/.gitmodules`)).toBeTruthy();
+      await expect(
+        fs.pathExists(`${tmpDir.path}/.gitmodules`),
+      ).resolves.toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
     });
 
@@ -1573,6 +1575,18 @@ describe('util/git/index', { timeout: 30000 }, () => {
   describe('setGitAuthor()', () => {
     it('throws for invalid', () => {
       expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
+    });
+
+    it('defaults to "Renovate" when undefined', async () => {
+      git.setGitAuthor(undefined);
+      await git.writeGitAuthor();
+      const local = simpleGit(tmpDir.path);
+      expect((await local.raw(['config', 'user.name'])).trim()).toBe(
+        'Renovate',
+      );
+      expect((await local.raw(['config', 'user.email'])).trim()).toBe(
+        'renovate@whitesourcesoftware.com',
+      );
     });
   });
 
@@ -1745,9 +1759,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
 
-      expect(await lsRenovateRefs()).not.toBeEmpty();
+      await expect(lsRenovateRefs()).resolves.not.toBeEmpty();
       await git.clearRenovateRefs();
-      expect(await lsRenovateRefs()).toBeEmpty();
+      await expect(lsRenovateRefs()).resolves.toBeEmpty();
     });
 
     it('clears remote Renovate refs', async () => {
@@ -1766,9 +1780,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
-      expect(await lsRenovateRefs()).not.toBeEmpty();
+      await expect(lsRenovateRefs()).resolves.not.toBeEmpty();
       await git.clearRenovateRefs();
-      expect(await lsRenovateRefs()).toBeEmpty();
+      await expect(lsRenovateRefs()).resolves.toBeEmpty();
       expect(pushSpy).toHaveBeenCalledExactlyOnceWith([
         '--delete',
         'origin',
@@ -1784,7 +1798,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await tmpGit.raw(['update-ref', 'refs/renovate/foo/bar', commit]);
       await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/foo/bar']);
       await git.clearRenovateRefs();
-      expect(await lsRenovateRefs()).toEqual(['refs/renovate/foo/bar']);
+      await expect(lsRenovateRefs()).resolves.toEqual([
+        'refs/renovate/foo/bar',
+      ]);
     });
 
     it('falls back to sequential ref deletion if bulk changes are disallowed', async () => {
@@ -1800,9 +1816,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         );
       });
 
-      expect(await lsRenovateRefs()).not.toBeEmpty();
+      await expect(lsRenovateRefs()).resolves.not.toBeEmpty();
       await git.clearRenovateRefs();
-      expect(await lsRenovateRefs()).toBeEmpty();
+      await expect(lsRenovateRefs()).resolves.toBeEmpty();
       expect(pushSpy).toHaveBeenCalledTimes(4);
     });
   });
@@ -1975,7 +1991,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('getSubmodules', () => {
     it('should return empty array', async () => {
-      expect(await git.getSubmodules()).toHaveLength(0);
+      await expect(git.getSubmodules()).resolves.toHaveLength(0);
     });
   });
 
@@ -2013,7 +2029,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
-      process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+      vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', 'true');
       await git.initRepo({
         url: origin.path,
       });
@@ -2026,17 +2042,20 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const tmpGit = simpleGit(tmpDir.path);
       const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
       expect(hooksPath).toBe('/dev/null');
-      delete process.env.RENOVATE_X_CLEAR_HOOKS;
+      vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', undefined);
     });
 
     it('should not inherit unsafe git environment variables from process.env', async () => {
-      process.env.GIT_CONFIG_COUNT = '1';
-      process.env.GIT_CONFIG_KEY_0 = 'core.hooksPath';
-      process.env.GIT_CONFIG_VALUE_0 = '/tmp/hooks';
-      process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
-      process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
-      process.env.PAGER = 'less';
-      process.env.GIT_ASKPASS = '/tmp/.git-askpass';
+      vi.stubEnv('GIT_CONFIG_COUNT', '1');
+      vi.stubEnv('GIT_CONFIG_KEY_0', 'core.hooksPath');
+      vi.stubEnv('GIT_CONFIG_VALUE_0', '/tmp/hooks');
+      vi.stubEnv('GIT_CONFIG_GLOBAL', '/tmp/global-gitconfig');
+      vi.stubEnv('GIT_CONFIG_SYSTEM', '/tmp/system-gitconfig');
+      vi.stubEnv('PAGER', 'less');
+      vi.stubEnv('GIT_ASKPASS', '/tmp/.git-askpass');
+      // process.env deliberately overrides the default GIT_SSH_COMMAND, so an
+      // ambient value would be forwarded instead of the one asserted below.
+      vi.stubEnv('GIT_SSH_COMMAND', undefined);
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
@@ -2064,6 +2083,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       // + GIT_CONFIG_VALUE_n via customEnvVariables.
       // simple-git >=3.36.0 blocks git operations when these vars are present unless
       // allowUnsafeConfigEnvCount is enabled in the simple-git config.
+      vi.stubEnv('GIT_SSH_COMMAND', undefined);
       setCustomEnv({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',
@@ -2138,7 +2158,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('should allow process.env GIT_SSH_COMMAND to override the default', async () => {
       // GIT_SSH_COMMAND is declared in extraEnv, so the key is inherited
       // from process.env via parentEnv (higher priority than extraEnv).
-      process.env.GIT_SSH_COMMAND = 'ssh -o SomeHostOption=yes';
+      vi.stubEnv('GIT_SSH_COMMAND', 'ssh -o SomeHostOption=yes');
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
@@ -2552,9 +2572,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         commit,
       );
 
-      expect(
-        await git.isBranchModified('renovate/virtual-test', defaultBranch),
-      ).toBeFalse();
+      await expect(
+        git.isBranchModified('renovate/virtual-test', defaultBranch),
+      ).resolves.toBeFalse();
     });
   });
 });

@@ -16,6 +16,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import * as template from '../../../util/template/index.ts';
 import { applyHostRules } from './merge.ts';
 
@@ -122,8 +123,8 @@ export async function mergeInheritedConfig(
   if (isNullOrUndefined(filteredConfig.extends)) {
     filteredConfig = applySecretsAndVariablesToConfig({
       config: filteredConfig,
-      secrets: config.secrets ?? {},
-      variables: config.variables ?? {},
+      secrets: coerceObject(config.secrets),
+      variables: coerceObject(config.variables),
     });
     applyHostRules(filteredConfig);
     filteredConfig = InheritConfig.set(filteredConfig);
@@ -167,8 +168,8 @@ export async function mergeInheritedConfig(
 
   filteredConfig = applySecretsAndVariablesToConfig({
     config: filteredConfig,
-    secrets: config.secrets ?? {},
-    variables: config.variables ?? {},
+    secrets: coerceObject(config.secrets),
+    variables: coerceObject(config.variables),
   });
   applyHostRules(filteredConfig);
   filteredConfig = InheritConfig.set(filteredConfig);
