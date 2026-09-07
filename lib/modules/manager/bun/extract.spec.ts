@@ -313,146 +313,117 @@ describe('modules/manager/bun/extract', () => {
   });
 
   describe('bunfig.toml registry support', () => {
-    it('applies default registry from bunfig.toml', async () => {
-      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
-        JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
-          dependencies: { lodash: '1.0.0' },
-        }),
-      );
-      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
-        (_packageFile, configFile): Promise<string | null> => {
-          if (configFile === 'bunfig.toml') {
-            return Promise.resolve('bunfig.toml');
-          }
-          return Promise.resolve(null);
-        },
-      );
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
+    const packageJson = JSON.stringify({
+      name: 'test',
+      version: '0.0.1',
+      dependencies: { lodash: '1.0.0', '@myorg/utils': '2.0.0' },
+    });
+
+    it('applies the default registry', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
         [install]
         registry = "https://registry.example.com"
       `);
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
 
-      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'bunfig.toml',
+      ]);
 
-      expect(packageFiles[0].deps[0].registryUrls).toEqual([
-        'https://registry.example.com',
+      expect(packageFiles).toMatchObject([
+        {
+          deps: [
+            {
+              depName: 'lodash',
+              registryUrls: ['https://registry.example.com'],
+            },
+            {
+              depName: '@myorg/utils',
+              registryUrls: ['https://registry.example.com'],
+            },
+          ],
+        },
       ]);
     });
 
-    it('applies scoped registry from bunfig.toml', async () => {
-      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
-        JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
-          dependencies: {
-            lodash: '1.0.0',
-            '@myorg/utils': '2.0.0',
-          },
-        }),
-      );
-      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
-        (_packageFile, configFile): Promise<string | null> => {
-          if (configFile === 'bunfig.toml') {
-            return Promise.resolve('bunfig.toml');
-          }
-          return Promise.resolve(null);
-        },
-      );
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
+    it('applies scoped registries', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
         [install]
         registry = "https://registry.example.com"
 
         [install.scopes]
         myorg = "https://registry.myorg.com"
       `);
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
 
-      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'bunfig.toml',
+      ]);
 
-      const lodashDep = packageFiles[0].deps.find(
-        (d) => d.depName === 'lodash',
-      );
-      const myorgDep = packageFiles[0].deps.find(
-        (d) => d.depName === '@myorg/utils',
-      );
-
-      expect(lodashDep?.registryUrls).toEqual(['https://registry.example.com']);
-      expect(myorgDep?.registryUrls).toEqual(['https://registry.myorg.com']);
+      expect(packageFiles).toMatchObject([
+        {
+          deps: [
+            {
+              depName: 'lodash',
+              registryUrls: ['https://registry.example.com'],
+            },
+            {
+              depName: '@myorg/utils',
+              registryUrls: ['https://registry.myorg.com'],
+            },
+          ],
+        },
+      ]);
     });
 
-    it('handles missing bunfig.toml gracefully', async () => {
-      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
-        JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
-          dependencies: { lodash: '1.0.0' },
-        }),
-      );
-      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(() =>
-        Promise.resolve(null),
-      );
+    it('ignores an invalid bunfig.toml file', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [install]
+        registry = 123
+      `);
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
 
-      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'bunfig.toml',
+      ]);
 
       expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
     });
 
-    it('handles empty bunfig.toml file gracefully', async () => {
-      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
-        JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
-          dependencies: { lodash: '1.0.0' },
-        }),
-      );
-      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
-        (_packageFile, configFile): Promise<string | null> => {
-          if (configFile === 'bunfig.toml') {
-            return Promise.resolve('bunfig.toml');
-          }
-          return Promise.resolve(null);
-        },
-      );
-      // bunfig.toml exists but is empty/null
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(null);
+    it('ignores a bunfig.toml file which is not next to the lock file', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
 
-      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'packages/pkg1/bunfig.toml',
+      ]);
 
       expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
     });
 
-    it('applies bunfig.toml registry to workspace packages', async () => {
-      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
-      vi.mocked(fs.readLocalFile)
-        // Root package.json with workspaces
-        .mockResolvedValueOnce(
-          JSON.stringify({
-            name: 'root',
-            version: '1.0.0',
-            workspaces: ['packages/*'],
-            dependencies: { lodash: '1.0.0' },
-          }),
-        );
-      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
-        (_packageFile, configFile): Promise<string | null> => {
-          if (configFile === 'bunfig.toml') {
-            return Promise.resolve('bunfig.toml');
-          }
-          return Promise.resolve(null);
-        },
-      );
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
+    it('applies the workspace root registries to workspace packages', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
         [install]
         registry = "https://registry.example.com"
       `);
-      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
-      // Workspace package.json
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'root',
+          version: '1.0.0',
+          workspaces: ['packages/*'],
+          dependencies: { lodash: '1.0.0' },
+        }),
+      );
+      fs.getParentDir.mockReturnValueOnce('');
+      fs.readLocalFile.mockResolvedValueOnce(
         JSON.stringify({
           name: 'pkg1',
           version: '1.0.0',
@@ -460,57 +431,33 @@ describe('modules/manager/bun/extract', () => {
         }),
       );
 
-      const matchedFiles = [
+      const packageFiles = await extractAllPackageFiles({}, [
         'bun.lock',
+        'bunfig.toml',
         'package.json',
         'packages/pkg1/package.json',
-      ];
-
-      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
-
-      // Root package should have registry applied
-      const rootPkg = packageFiles.find(
-        (p) => p.packageFile === 'package.json',
-      );
-      expect(rootPkg?.deps[0].registryUrls).toEqual([
-        'https://registry.example.com',
       ]);
 
-      // Workspace package should also have registry applied
-      const workspacePkg = packageFiles.find(
-        (p) => p.packageFile === 'packages/pkg1/package.json',
-      );
-      expect(workspacePkg?.deps[0].registryUrls).toEqual([
-        'https://registry.example.com',
-      ]);
-    });
-
-    it('handles invalid bunfig.toml schema gracefully', async () => {
-      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
-        JSON.stringify({
-          name: 'test',
-          version: '0.0.1',
-          dependencies: { lodash: '1.0.0' },
-        }),
-      );
-      vi.mocked(fs.findLocalSiblingOrParent).mockImplementation(
-        (_packageFile, configFile): Promise<string | null> => {
-          if (configFile === 'bunfig.toml') {
-            return Promise.resolve('bunfig.toml');
-          }
-          return Promise.resolve(null);
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          deps: [
+            {
+              depName: 'lodash',
+              registryUrls: ['https://registry.example.com'],
+            },
+          ],
         },
-      );
-      // Valid TOML but invalid schema (registry should be string or object with url)
-      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(codeBlock`
-        [install]
-        registry = 123
-      `);
-
-      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
-
-      expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
+        {
+          packageFile: 'packages/pkg1/package.json',
+          deps: [
+            {
+              depName: 'axios',
+              registryUrls: ['https://registry.example.com'],
+            },
+          ],
+        },
+      ]);
     });
   });
 });

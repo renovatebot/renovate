@@ -1,112 +1,125 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+import ini from 'ini';
 import { logger } from '../../../logger/index.ts';
-import {
-  findLocalSiblingOrParent,
-  readLocalFile,
-} from '../../../util/fs/index.ts';
-import { parse as parseToml } from '../../../util/toml.ts';
-import {
-  type BunfigConfig,
-  type BunfigRegistryConfig,
-  BunfigSchema,
-  type RawBunfigConfig,
-} from './schema.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
+import { isHttpUrl, parseUrl } from '../../../util/url.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { BunfigConfig } from './schema.ts';
 
-function getRegistryUrl(config: BunfigRegistryConfig): string {
-  return typeof config === 'string' ? config : config.url;
-}
-
-function normalizeBunfigConfig(config: RawBunfigConfig): BunfigConfig {
-  const install = config.install;
-  if (!install) {
-    return {};
-  }
-
-  return {
-    install: {
-      registry: install.registry ? getRegistryUrl(install.registry) : undefined,
-      scopes: install.scopes
-        ? Object.fromEntries(
-            Object.entries(install.scopes).map(([scope, registryConfig]) => [
-              scope,
-              getRegistryUrl(registryConfig),
-            ]),
-          )
-        : undefined,
-    },
-  };
-}
-
-/**
- * Resolves the registry URL for a given package name based on bunfig.toml config.
- * Scoped packages (@org/pkg) are matched against scoped registries first.
- */
-export function resolveRegistryUrl(
-  packageName: string,
-  bunfigConfig: BunfigConfig,
-): string | null {
-  const install = bunfigConfig.install;
-  if (!install) {
+export async function loadBunfigToml(
+  bunfigFile: string,
+): Promise<BunfigConfig | null> {
+  const content = await readLocalFile(bunfigFile, 'utf8');
+  if (!content) {
     return null;
   }
 
-  // Check scoped registries first
-  if (install.scopes) {
-    for (const [scope, registryUrl] of Object.entries(install.scopes)) {
-      // Bun scopes in bunfig.toml don't include the @ prefix
-      const scopePrefix = scope.startsWith('@') ? scope : `@${scope}`;
-      if (packageName.startsWith(`${scopePrefix}/`)) {
-        return registryUrl;
-      }
+  return Result.parse(content, BunfigConfig)
+    .onError((err) => {
+      logger.debug({ bunfigFile, err }, 'Failed to parse bunfig.toml');
+    })
+    .unwrapOrNull();
+}
+
+/**
+ * Bun accepts credentials inside the registry URL, but Renovate resolves
+ * credentials through host rules instead, so they are dropped here to keep them
+ * out of logs and pull request bodies.
+ */
+function sanitizeRegistryUrl(registryUrl: string): string | null {
+  const parsedUrl = parseUrl(registryUrl);
+  if (!parsedUrl || !isHttpUrl(parsedUrl)) {
+    logger.debug({ registryUrl }, 'Invalid bunfig.toml registry URL');
+    return null;
+  }
+
+  if (!parsedUrl.username && !parsedUrl.password) {
+    return registryUrl;
+  }
+
+  logger.debug('Removing credentials from bunfig.toml registry URL');
+  parsedUrl.username = '';
+  parsedUrl.password = '';
+  return parsedUrl.href;
+}
+
+/**
+ * Returns the scopes which the `.npmrc` file configures a registry for, like
+ * `@myorg` for `@myorg:registry=https://registry.myorg.com`.
+ */
+function getNpmrcScopes(npmrc: string | undefined): string[] {
+  if (!npmrc) {
+    return [];
+  }
+
+  const scopes: string[] = [];
+  for (const [key, value] of Object.entries(ini.parse(npmrc))) {
+    const scope = key.replace(regEx(/:registry$/), '');
+    if (scope !== key && scope.startsWith('@') && isNonEmptyString(value)) {
+      scopes.push(scope);
+    }
+  }
+  return scopes;
+}
+
+/**
+ * Resolves the registry URL for a package name, following Bun's precedence: a
+ * matching scoped registry first, then the default registry.
+ *
+ * Bun merges `bunfig.toml` over `.npmrc` key by key, so a scoped registry from
+ * `.npmrc` still wins over the default registry from `bunfig.toml`.
+ */
+function resolveRegistryUrl(
+  packageName: string,
+  install: NonNullable<BunfigConfig['install']>,
+  npmrcScopes: string[],
+): string | null {
+  for (const [scope, registryUrl] of Object.entries(
+    coerceObject(install.scopes),
+  )) {
+    // Bun accepts scopes with and without the leading `@`
+    const scopePrefix = scope.startsWith('@') ? scope : `@${scope}`;
+    if (packageName.startsWith(`${scopePrefix}/`)) {
+      return sanitizeRegistryUrl(registryUrl);
     }
   }
 
-  // Fall back to default registry
+  if (npmrcScopes.some((scope) => packageName.startsWith(`${scope}/`))) {
+    return null;
+  }
+
   if (install.registry) {
-    return install.registry;
+    return sanitizeRegistryUrl(install.registry);
   }
 
   return null;
 }
 
-/**
- * Loads and parses bunfig.toml from the filesystem.
- * Returns null if file not found or parsing fails.
- */
-export async function loadBunfigToml(
-  packageFile: string,
-): Promise<BunfigConfig | null> {
-  const bunfigFileName = await findLocalSiblingOrParent(
-    packageFile,
-    'bunfig.toml',
-  );
-
-  if (!bunfigFileName) {
-    return null;
+export function applyBunfigRegistries(
+  deps: PackageDependency[],
+  bunfig: BunfigConfig | null,
+  npmrc?: string,
+): void {
+  const install = bunfig?.install;
+  if (!install) {
+    return;
   }
 
-  const content = await readLocalFile(bunfigFileName, 'utf8');
-  if (!content) {
-    return null;
-  }
+  const npmrcScopes = getNpmrcScopes(npmrc);
 
-  return parseBunfigToml(content);
-}
-
-/**
- * Parses bunfig.toml content string into a typed config object.
- */
-export function parseBunfigToml(content: string): BunfigConfig | null {
-  try {
-    const parsed = parseToml(content);
-    const res = BunfigSchema.safeParse(parsed);
-    if (res.success) {
-      return normalizeBunfigConfig(res.data);
+  for (const dep of deps) {
+    const lookupName = dep.packageName ?? dep.depName;
+    if (!lookupName || dep.datasource !== NpmDatasource.id) {
+      continue;
     }
 
-    logger.debug({ err: res.error }, 'Failed to parse bunfig.toml');
-    return null;
-  } catch (err) {
-    logger.debug({ err }, 'Failed to parse bunfig.toml TOML syntax');
-    return null;
+    const registryUrl = resolveRegistryUrl(lookupName, install, npmrcScopes);
+    if (registryUrl) {
+      dep.registryUrls = [registryUrl];
+    }
   }
 }

@@ -1,28 +1,25 @@
-import { z } from 'zod';
+import { isString } from '@sindresorhus/is';
+import { z } from 'zod/v4';
+import { Toml } from '../../../util/schema-utils/index.ts';
 
-const BunfigRegistryConfigSchema = z.union([
-  z.string(),
-  z.object({ url: z.string() }),
-]);
+/**
+ * A registry is either the URL as a string, or an object which pairs the URL
+ * with credentials. Only the URL is of interest to us.
+ *
+ * @see https://bun.com/docs/pm/scopes-registries
+ */
+const BunfigRegistry = z
+  .union([z.string(), z.object({ url: z.string() })])
+  .transform((val) => (isString(val) ? val : val.url));
 
-const BunfigInstallSchema = z.object({
-  registry: BunfigRegistryConfigSchema.optional(),
-  scopes: z.record(z.string(), BunfigRegistryConfigSchema).optional(),
-});
-
-export const BunfigSchema = z.object({
-  install: BunfigInstallSchema.optional(),
-});
-
-const ResolvedBunfigInstallSchema = z.object({
-  registry: z.string().optional(),
-  scopes: z.record(z.string(), z.string()).optional(),
-});
-
-export const ResolvedBunfigSchema = z.object({
-  install: ResolvedBunfigInstallSchema.optional(),
-});
-
-export type BunfigConfig = z.infer<typeof ResolvedBunfigSchema>;
-export type BunfigRegistryConfig = z.infer<typeof BunfigRegistryConfigSchema>;
-export type RawBunfigConfig = z.infer<typeof BunfigSchema>;
+export const BunfigConfig = Toml.pipe(
+  z.object({
+    install: z
+      .object({
+        registry: BunfigRegistry.optional(),
+        scopes: z.record(z.string(), BunfigRegistry).optional(),
+      })
+      .optional(),
+  }),
+);
+export type BunfigConfig = z.infer<typeof BunfigConfig>;

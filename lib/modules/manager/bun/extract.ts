@@ -1,45 +1,24 @@
 import { isArray, isObject, isString } from '@sindresorhus/is';
+import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/fs/index.ts';
-import { NpmDatasource } from '../../datasource/npm/index.ts';
 
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
-import { loadBunfigToml, resolveRegistryUrl } from './bunfig.ts';
-import type { BunfigConfig } from './schema.ts';
+import { applyBunfigRegistries, loadBunfigToml } from './bunfig.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
     fileNameWithPath === fileName || fileNameWithPath.endsWith(`/${fileName}`)
   );
-}
-
-/**
- * Applies registry URLs from bunfig.toml to dependencies.
- */
-function applyRegistryUrls(
-  packageFile: PackageFile,
-  bunfigConfig: BunfigConfig,
-): void {
-  for (const dep of packageFile.deps) {
-    if (dep.depName && dep.datasource === NpmDatasource.id) {
-      const registryUrl = resolveRegistryUrl(
-        dep.packageName ?? dep.depName,
-        bunfigConfig,
-      );
-      if (registryUrl) {
-        dep.registryUrls = [registryUrl];
-      }
-    }
-  }
 }
 
 export async function processPackageFile(
@@ -88,19 +67,23 @@ export async function extractAllPackageFiles(
   const allPackageJson = matchedFiles.filter((file) =>
     matchesFileName(file, 'package.json'),
   );
+  const allBunfigToml = matchedFiles.filter((file) =>
+    matchesFileName(file, 'bunfig.toml'),
+  );
   for (const lockFile of allLockFiles) {
     const packageFile = getSiblingFileName(lockFile, 'package.json');
+    // Bun reads `bunfig.toml` from the directory it runs in only, so a single
+    // file next to the lock file applies to the whole workspace
+    const lockFileDir = upath.dirname(lockFile);
+    const bunfigFile = allBunfigToml.find(
+      (file) => upath.dirname(file) === lockFileDir,
+    );
+    const bunfig = bunfigFile ? await loadBunfigToml(bunfigFile) : null;
+
     const res = await processPackageFile(packageFile, config);
     if (res) {
+      applyBunfigRegistries(res.deps, bunfig, res.npmrc);
       packageFiles.push({ ...res, lockFiles: [lockFile] });
-    }
-
-    // Load bunfig.toml for registry configuration
-    const bunfigConfig = await loadBunfigToml(packageFile);
-
-    // Apply registry URLs from bunfig.toml if present
-    if (bunfigConfig && res) {
-      applyRegistryUrls(res, bunfigConfig);
     }
 
     // Check if package.json contains workspaces
@@ -127,10 +110,7 @@ export async function extractAllPackageFiles(
       for (const workspaceFile of workspacePackageFiles) {
         const res = await processPackageFile(workspaceFile, config);
         if (res) {
-          // Apply registry URLs from root bunfig.toml to workspace packages
-          if (bunfigConfig) {
-            applyRegistryUrls(res, bunfigConfig);
-          }
+          applyBunfigRegistries(res.deps, bunfig, res.npmrc);
           packageFiles.push({ ...res, lockFiles: [lockFile] });
         }
       }
