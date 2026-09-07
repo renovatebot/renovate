@@ -2,6 +2,7 @@ import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { api as npm } from '../npm/index.ts';
+import { wrapNpmRanges } from '../npm/wrap.ts';
 import { api as pep440 } from '../pep440/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
@@ -242,9 +243,7 @@ function sortVersions(a: string, b: string): number {
   return pep440.sortVersions(a, b);
 }
 
-function subset(subRange: string, superRange: string): boolean | undefined {
-  return npm.subset!(poetry2npm(subRange), poetry2npm(superRange));
-}
+const { subset } = wrapNpmRanges({ id, toNpmRange: poetry2npm });
 
 export const api: VersioningApi = {
   equals,

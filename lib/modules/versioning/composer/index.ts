@@ -5,6 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as npm } from '../npm/index.ts';
+import { wrapNpmRanges } from '../npm/wrap.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'composer';
@@ -188,9 +189,12 @@ function isGreaterThan(a: string, b: string): boolean {
   return sortVersions(a, b) === 1;
 }
 
-function isLessThanRange(version: string, range: string): boolean {
-  return !!npm.isLessThanRange?.(composer2npm(version), composer2npm(range));
-}
+const { isLessThanRange, matches, subset, intersects } = wrapNpmRanges({
+  id,
+  toNpmRange: composer2npm,
+  toNpmVersion: composer2npm,
+  onRangeError: 'false',
+});
 
 function isSingleVersion(input: string): boolean {
   return !!input && npm.isSingleVersion(composer2npm(input));
@@ -215,10 +219,6 @@ export function isVersion(input: string): boolean {
   return !!input && npm.isVersion(composer2npm(input));
 }
 
-function matches(version: string, range: string): boolean {
-  return npm.matches(composer2npm(version), composer2npm(range));
-}
-
 function getSatisfyingVersion(
   versions: string[],
   range: string,
@@ -231,24 +231,6 @@ function minSatisfyingVersion(
   range: string,
 ): string | null {
   return calculateSatisfyingVersionIntenal(versions, range, true);
-}
-
-function subset(subRange: string, superRange: string): boolean | undefined {
-  try {
-    return npm.subset!(composer2npm(subRange), composer2npm(superRange));
-  } catch (err) {
-    logger.trace({ err }, 'composer.subset error');
-    return false;
-  }
-}
-
-function intersects(subRange: string, superRange: string): boolean {
-  try {
-    return npm.intersects!(composer2npm(subRange), composer2npm(superRange));
-  } catch (err) {
-    logger.trace({ err }, 'composer.intersects error');
-    return false;
-  }
 }
 
 function getNewValue({

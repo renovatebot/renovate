@@ -2,6 +2,7 @@ import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
 import { api as npm } from '../npm/index.ts';
+import { wrapNpmRanges } from '../npm/wrap.ts';
 import { api as pep440 } from '../pep440/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
@@ -80,9 +81,12 @@ function isLessThanRange(version: string, range: string): boolean {
   );
 }
 
-export function isValid(input: string): boolean {
-  return npm.isValid(rez2npm(input));
-}
+const { isValid, getSatisfyingVersion, minSatisfyingVersion } = wrapNpmRanges({
+  id,
+  toNpmRange: rez2npm,
+});
+
+export { isValid };
 
 function isStable(version: string): boolean {
   return npm.isStable(padZeroes(version));
@@ -97,20 +101,6 @@ function matches(version: string, range: string): boolean {
     npm.isVersion(padZeroes(version)) &&
     npm.matches(padZeroes(version), rez2npm(range))
   );
-}
-
-function getSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.getSatisfyingVersion(versions, rez2npm(range));
-}
-
-function minSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.minSatisfyingVersion(versions, rez2npm(range));
 }
 
 function isSingleVersion(constraint: string): boolean {

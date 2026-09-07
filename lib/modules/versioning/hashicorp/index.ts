@@ -2,6 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { getExcludedVersions, getFilteredRange } from '../common.ts';
 import { api as npm } from '../npm/index.ts';
+import { wrapNpmRanges } from '../npm/wrap.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { hashicorp2npm, npm2hashicorp } from './convertor.ts';
 
@@ -17,9 +18,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-function isLessThanRange(version: string, range: string): boolean {
-  return !!npm.isLessThanRange?.(version, hashicorp2npm(range));
-}
+const npmRanges = wrapNpmRanges({ id, toNpmRange: hashicorp2npm });
 
 export function isValid(input: string): boolean {
   if (input) {
@@ -40,9 +39,7 @@ function matches(version: string, range: string): boolean {
   }
 
   const filteredRange = getFilteredRange(range);
-  return (
-    isValid(filteredRange) && npm.matches(version, hashicorp2npm(filteredRange))
-  );
+  return isValid(filteredRange) && npmRanges.matches(version, filteredRange);
 }
 
 function getSatisfyingVersion(
@@ -55,10 +52,7 @@ function getSatisfyingVersion(
     (version) => !excludedVersions.includes(version),
   );
 
-  return npm.getSatisfyingVersion(
-    filteredVersions,
-    hashicorp2npm(filteredRange),
-  );
+  return npmRanges.getSatisfyingVersion(filteredVersions, filteredRange);
 }
 
 function minSatisfyingVersion(
@@ -70,10 +64,7 @@ function minSatisfyingVersion(
   const filteredVersions = versions.filter(
     (version) => !excludedVersions.includes(version),
   );
-  return npm.minSatisfyingVersion(
-    filteredVersions,
-    hashicorp2npm(filteredRange),
-  );
+  return npmRanges.minSatisfyingVersion(filteredVersions, filteredRange);
 }
 
 function getNewValue({
@@ -99,7 +90,7 @@ function getNewValue({
 
 export const api: VersioningApi = {
   ...npm,
-  isLessThanRange,
+  isLessThanRange: npmRanges.isLessThanRange,
   isValid,
   matches,
   getSatisfyingVersion,

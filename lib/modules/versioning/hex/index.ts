@@ -1,6 +1,7 @@
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as npm } from '../npm/index.ts';
+import { wrapNpmRanges } from '../npm/wrap.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'hex';
@@ -53,13 +54,17 @@ function npm2hex(input: string): string {
   return output;
 }
 
-function isLessThanRange(version: string, range: string): boolean {
-  return !!npm.isLessThanRange?.(hex2npm(version), hex2npm(range));
-}
-
-function isValid(input: string): boolean {
-  return !!npm.isValid(hex2npm(input));
-}
+const {
+  isLessThanRange,
+  isValid,
+  matches,
+  getSatisfyingVersion,
+  minSatisfyingVersion,
+} = wrapNpmRanges({
+  id,
+  toNpmRange: hex2npm,
+  toNpmVersion: hex2npm,
+});
 
 function isSingleVersion(constraint: string): boolean {
   return (
@@ -71,24 +76,6 @@ function isSingleVersion(constraint: string): boolean {
 
 function getPinnedValue(newVersion: string): string {
   return `== ${newVersion}`;
-}
-
-function matches(version: string, range: string): boolean {
-  return npm.matches(hex2npm(version), hex2npm(range));
-}
-
-function getSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.getSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
-}
-
-function minSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.minSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
 }
 
 function getNewValue({

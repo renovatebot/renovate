@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as npm } from '../npm/index.ts';
+import { wrapNpmRanges } from '../npm/wrap.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'cargo';
@@ -58,31 +59,15 @@ function npm2cargo(input: string): string {
   return res.join(', ');
 }
 
-function isLessThanRange(version: string, range: string): boolean {
-  return !!npm.isLessThanRange?.(version, cargo2npm(range));
-}
+const npmRanges = wrapNpmRanges({
+  id,
+  toNpmRange: cargo2npm,
+  onRangeError: 'false',
+});
 
-export function isValid(input: string): boolean {
-  return npm.isValid(cargo2npm(input));
-}
+const { isValid, matches } = npmRanges;
 
-function matches(version: string, range: string): boolean {
-  return npm.matches(version, cargo2npm(range));
-}
-
-function getSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.getSatisfyingVersion(versions, cargo2npm(range));
-}
-
-function minSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.minSatisfyingVersion(versions, cargo2npm(range));
-}
+export { isValid };
 
 function isSingleVersion(constraint: string): boolean {
   return (
@@ -159,24 +144,6 @@ function getNewValue({
   return newCargo;
 }
 
-function subset(subRange: string, superRange: string): boolean | undefined {
-  try {
-    return npm.subset!(cargo2npm(subRange), cargo2npm(superRange));
-  } catch (err) {
-    logger.debug({ err }, 'cargo.subset error');
-    return false;
-  }
-}
-
-function intersects(subRange: string, superRange: string): boolean {
-  try {
-    return npm.intersects!(cargo2npm(subRange), cargo2npm(superRange));
-  } catch (err) {
-    logger.debug({ err }, 'cargo.intersects error');
-    return false;
-  }
-}
-
 function isBreaking(current: string, version: string): boolean {
   // The change may be breaking if either version is unstable
   if (!semver.is(version) || !semver.is(current)) {
@@ -197,16 +164,10 @@ function isBreaking(current: string, version: string): boolean {
 
 export const api: VersioningApi = {
   ...npm,
+  ...npmRanges,
   getNewValue,
   getPinnedValue,
   isBreaking,
-  isLessThanRange,
   isSingleVersion,
-  isValid,
-  matches,
-  getSatisfyingVersion,
-  minSatisfyingVersion,
-  subset,
-  intersects,
 };
 export default api;

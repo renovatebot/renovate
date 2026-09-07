@@ -1,6 +1,7 @@
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as npm } from '../npm/index.ts';
+import { wrapNpmRanges } from '../npm/wrap.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'go-mod-directive';
@@ -19,6 +20,9 @@ function shorten(version: string): string {
   return version.split('.').slice(0, 2).join('.');
 }
 
+const { getSatisfyingVersion, isLessThanRange, matches, minSatisfyingVersion } =
+  wrapNpmRanges({ id, toNpmRange });
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -36,30 +40,8 @@ function getNewValue({
   return currentValue;
 }
 
-function getSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.getSatisfyingVersion(versions, toNpmRange(range));
-}
-
-function isLessThanRange(version: string, range: string): boolean {
-  return npm.isLessThanRange!(version, toNpmRange(range));
-}
-
 export function isValid(input: string): boolean {
   return !!input.match(validRegex);
-}
-
-function matches(version: string, range: string): boolean {
-  return npm.matches(version, toNpmRange(range));
-}
-
-function minSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return npm.minSatisfyingVersion(versions, toNpmRange(range));
 }
 
 export const api: VersioningApi = {
