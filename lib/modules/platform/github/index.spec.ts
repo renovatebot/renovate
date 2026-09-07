@@ -5692,6 +5692,7 @@ describe('modules/platform/github/index', () => {
       number: 1234,
       node_id: 'abcd',
       head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+      base: { ref: 'main' },
       state: 'open',
       title: 'Some PR',
       updated_at: '01-09-2022',
@@ -5736,16 +5737,15 @@ describe('modules/platform/github/index', () => {
       const res = await github.mergePr({
         id: 1234,
         branchName: 'somebranch',
-        targetBranch: 'main',
       });
 
       expect(res).toBeTrue();
       expect(httpMock.getTrace()).toMatchObject([
         { url: 'https://api.github.com/graphql' },
-        { url: 'https://api.github.com/graphql' },
         {
           url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         },
+        { url: 'https://api.github.com/graphql' },
         {
           url: 'https://api.github.com/graphql',
           graphql: {
@@ -5783,7 +5783,6 @@ describe('modules/platform/github/index', () => {
       const res = await github.mergePr({
         id: 1234,
         branchName: 'somebranch',
-        targetBranch: 'main',
       });
 
       expect(res).toBeTrue();
@@ -5811,7 +5810,6 @@ describe('modules/platform/github/index', () => {
       const res = await github.mergePr({
         id: 1234,
         branchName: 'somebranch',
-        targetBranch: 'main',
       });
 
       expect(res).toBeFalse();
@@ -5832,7 +5830,6 @@ describe('modules/platform/github/index', () => {
       const res = await github.mergePr({
         id: 1234,
         branchName: 'somebranch',
-        targetBranch: 'main',
       });
 
       expect(res).toBeFalse();
@@ -5842,37 +5839,43 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should return false if the PR cannot be found', async () => {
+    it('should merge directly if the PR cannot be found', async () => {
       const scope = httpMock.scope(githubApiHost);
-      mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
+      initRepoMock(scope, 'some/repo');
       scope
         .get(
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         )
         .reply(200, [])
         .get('/repos/some/repo/pulls/1234')
-        .reply(404);
+        .reply(404)
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
       await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.mergePr({
         id: 1234,
         branchName: 'somebranch',
-        targetBranch: 'main',
       });
 
-      expect(res).toBeFalse();
+      expect(res).toBeTrue();
     });
 
     it('should merge directly if the branch has no merge queue', async () => {
       const scope = httpMock.scope(githubApiHost);
       mergeQueueMock(scope, null);
-      scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
       await github.initRepo({ repository: 'some/repo' });
 
       const res = await github.mergePr({
         id: 1234,
         branchName: 'somebranch',
-        targetBranch: 'main',
       });
 
       expect(res).toBeTrue();

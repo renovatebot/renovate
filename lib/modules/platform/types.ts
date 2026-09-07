@@ -180,7 +180,6 @@ export interface MergePRConfig {
   branchName?: string;
   id: number;
   strategy?: MergeStrategy;
-  targetBranch?: string;
 }
 export interface EnsureCommentConfig {
   number: number;

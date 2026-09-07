@@ -2183,13 +2183,8 @@ export async function reattemptPlatformAutomerge({
   }
 }
 
-async function tryEnqueuePr(prNo: number): Promise<boolean> {
-  const pr = await getPr(prNo);
-  if (!pr) {
-    logger.debug(`Could not find PR #${prNo} to add to the merge queue`);
-    return false;
-  }
-
+async function tryEnqueuePr(pr: GhPr): Promise<boolean> {
+  const prNo = pr.number;
   try {
     const res = await githubApi.requestGraphql<GhEnqueuePullRequestResponse>(
       enqueuePullRequestMutation,
@@ -2227,14 +2222,21 @@ export async function mergePr({
   branchName,
   id: prNo,
   strategy,
-  targetBranch,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
-  if (targetBranch && (await isBranchMergeQueueEnabled(targetBranch))) {
-    // The PR is not merged directly but through the merge queue, so it must
-    // not be cached as merged nor may its branch be deleted yet
-    return tryEnqueuePr(prNo);
+  // Only look up the PR when merge queues are enabled, so the direct merge
+  // path stays free of extra requests
+  if (getEnv().RENOVATE_X_GITHUB_MERGE_QUEUE) {
+    const pr = await getPr(prNo);
+    if (
+      pr?.targetBranch &&
+      (await isBranchMergeQueueEnabled(pr.targetBranch))
+    ) {
+      // The PR is not merged directly but through the merge queue, so it must
+      // not be cached as merged nor may its branch be deleted yet
+      return tryEnqueuePr(pr);
+    }
   }
 
   const url = `repos/${

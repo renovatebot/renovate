@@ -94,9 +94,7 @@ describe('workers/repository/update/pr/automerge', () => {
         automerged: false,
         prAutomergeBlockReason: 'InMergeQueue',
       });
-      expect(platform.mergePr).toHaveBeenCalledWith(
-        expect.objectContaining({ targetBranch: 'base-branch' }),
-      );
+      expect(platform.mergePr).toHaveBeenCalledOnce();
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
     });
 
