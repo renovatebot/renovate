@@ -71,9 +71,14 @@ describe('workers/repository/init/inherited', () => {
 
   it('should throw an error if config includes an invalid option', async () => {
     platform.getRawFile.mockResolvedValue('{"something": "invalid"}');
-    await expect(mergeInheritedConfig(config)).rejects.toThrow(
-      CONFIG_VALIDATION,
-    );
+
+    // the detail names the inherited config, which the repository's owners may be unable to see, let alone fix
+    await expect(mergeInheritedConfig(config)).rejects.toMatchObject({
+      message: CONFIG_VALIDATION,
+      validationSource: 'Inherited config (`config.json` in `inherit/repo`)',
+      validationError: 'The inherited config contains some invalid settings',
+      validationMessage: 'Invalid configuration option: something',
+    });
   });
 
   it('should throw an error if config includes an invalid value', async () => {
@@ -284,9 +289,12 @@ describe('workers/repository/init/inherited', () => {
         unmerged: [],
       },
     });
-    await expect(mergeInheritedConfig(config)).rejects.toThrow(
-      CONFIG_VALIDATION,
-    );
+    await expect(mergeInheritedConfig(config)).rejects.toMatchObject({
+      message: CONFIG_VALIDATION,
+      validationSource: 'Inherited config (`config.json` in `inherit/repo`)',
+      validationError: 'The inherited config contains some invalid settings',
+      validationMessage: 'some error',
+    });
 
     expect(logger.warn).toHaveBeenCalledWith(
       {
