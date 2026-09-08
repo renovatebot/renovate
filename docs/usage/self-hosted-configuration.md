@@ -1042,6 +1042,9 @@ The inherited config may include all valid repository config and these config op
 
 This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 
+Configured `hostRules` in inherited config are treated as if they are repository configuration, when applying precedence and whether [`internalHostAccess`](#internalhostaccess) can be configured.
+If you trust each organisation onboarded to this Renovate deployment to be able to specify at an organisation level whether they should be able to access internal hosts, you can set [`inheritConfigTrusted=true`](#inheritconfigtrusted).
+
 We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
 This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
 We will add a smart/dynamic approach in future, so that we can selectively enable `inheritConfig` per organization.
@@ -1063,6 +1066,37 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 
 !!! warning
   Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
+
+## `inheritConfigTrusted`
+
+!!! warning
+  Only set this to `true` if everyone who can push to the `inheritConfigRepoName` repositories are trusted to control these additional settings.
+  This trust is transitive: `hostRules` defined in any preset the inherited config `extends` are trusted at the same level, so everyone who can change those preset sources must be trusted too.
+  If you're running a multi-tenant platform, it is recommended you leave this disabled.
+
+### Host Rules
+
+By default, `hostRules` in inherited config are treated like a repository's own: they may carry credentials or headers, but they cannot grant access to internal hosts.
+
+This is because the `inheritConfigRepoName` repository is controlled by each organization's administrators, rather than the self-hosted administrators themselves.
+As this repository is outside of the self-hosted administrator's control, there may be looser access control than may be wanted on the repository and its ability to provide settings, and so an additional level of opt-in trust is required.
+
+If you opt in by setting `inheritConfigTrusted=true`, this will permit the inherited config to set `hostRules`:
+
+- set [`allowInternal`](#hostrulesallowinternal), which is otherwise a fatal config error there
+- implicitly permit an internal host by naming it in a rule's `matchHost` - whether or not the rule carries credentials - the same way the self-hosted config's `hostRules` do
+
+A self-hosted administrator's configuration still takes precedence for:
+
+- specifying `allowInternal`, allowing you to "veto" access to any hosts
+- `headers`, which are applied last
+- `enabled`, which cannot be overridden by inherited config
+- inherited config still cannot change [`internalHostAccess`](#internalhostaccess), or any other option that is not marked `inheritConfigSupport`
+
+Inherited config cannot permit the hosts of its own `extends` presets, whatever this option is set to: those presets are resolved before its `hostRules` are registered.
+A preset that inherited config extends from an internal host still needs a grant in global config.
+
+Trust does however extend to the `hostRules` defined _in_ those presets: once the inherited config's `extends` are resolved, the `hostRules` they contribute are registered at the same inherited trust level, as if the inherited config had defined them itself.
 
 ## `internalHostAccess`
 
@@ -1100,10 +1134,13 @@ Hosts without one only need naming:
 ```
 
 The first rule permits an internal registry the same way a credentialed rule would, and the second deliberately permits fetching HTTP presets from an internal host.
-Anything whose response becomes configuration - HTTP presets, and `npm:` presets - always requires such an explicit, scoped [`allowInternal`](./self-hosted-configuration.md#hostrulesallowinternal) grant, even for a host your other rules already permit.
+Anything whose response becomes configuration - HTTP presets, and `npm:` presets - always requires such an explicit, scoped [`allowInternal`](#hostrulesallowinternal) grant, even for a host your other rules already permit.
 
 Once your grants are in place and the warnings have stopped, set `internalHostAccess=block` to enforce the policy today, rather than waiting for the default to change.
 Set `internalHostAccess=allow` only as a temporary escape hatch while you work out which hosts to permit.
+
+If you manage `hostRules` centrally through [`inheritConfig`](#inheritconfig), those rules do not grant anything by default, because that repository is the organization's rather than yours.
+Either opt into trusting them with [`inheritConfigTrusted=true`](#inheritconfigtrusted), or move the rules for internal hosts into your own global config or a `repositories[]` entry.
 
 Cloud instance-metadata endpoints (such as `169.254.169.254`, `169.254.170.2` and `metadata.google.internal`) are **always** blocked, regardless of `internalHostAccess`' setting, as Renovate's HTTP layer never has a legitimate reason to request them.
 This does not affect Renovate's cloud environment detection or cloud SDK authentication, which do not use Renovate's HTTP layer - see [`useCloudMetadataServices`](#usecloudmetadataservices).

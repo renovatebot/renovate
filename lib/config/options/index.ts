@@ -870,6 +870,16 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'inheritConfigTrusted',
+    description:
+      'If `true`, `hostRules` in inherited config may grant access to internal hosts.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
+  },
+  {
     name: 'requireConfig',
     description:
       "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
@@ -2918,7 +2928,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'allowInternal',
     description:
-      "Whether requests to this host may reach internal addresses when `internalHostAccess=block`. Only honored from the self-hosted administrator's own configuration.",
+      "Whether requests to this host may reach internal addresses when `internalHostAccess=block`. Only honored from the self-hosted administrator's own configuration, or from inherited config when `inheritConfigTrusted=true`.",
     type: 'boolean',
     stage: 'repository',
     parents: ['hostRules'],
@@ -2926,6 +2936,7 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
     advancedUse: true,
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'abortOnError',

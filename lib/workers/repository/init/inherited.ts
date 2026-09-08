@@ -2,6 +2,7 @@ import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { setUserConfigFileNames } from '../../../config/app-strings.ts';
 import { decryptConfig } from '../../../config/decrypt.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config/index.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import { parseFileConfig } from '../../../config/parse.ts';
@@ -19,6 +20,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
+import type { AddHostRuleOptions } from '../../../util/host-rules.ts';
 import { coerceObject } from '../../../util/object.ts';
 import * as template from '../../../util/template/index.ts';
 import { applyHostRules } from './merge.ts';
@@ -40,6 +42,18 @@ function throwInheritedConfigValidationError(
   error.validationError = inheritedConfigValidationError;
   error.validationMessage = errors.map((err) => err.message).join(', ');
   throw error;
+}
+
+/**
+ * How the inherited config's `hostRules` are registered.
+ *
+ * The inherited config repository is controlled by the organization's administrators rather than by the self-hosted administrator, so its rules are untrusted unless the administrator has opted into trusting them.
+ */
+function inheritedHostRuleOptions(): AddHostRuleOptions | undefined {
+  if (!GlobalConfig.get('inheritConfigTrusted')) {
+    return undefined;
+  }
+  return { inherited: true };
 }
 
 export async function mergeInheritedConfig(
@@ -149,7 +163,7 @@ export async function mergeInheritedConfig(
       secrets: coerceObject(config.secrets),
       variables: coerceObject(config.variables),
     });
-    applyHostRules(filteredConfig);
+    applyHostRules(filteredConfig, inheritedHostRuleOptions());
     filteredConfig = InheritConfig.set(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
@@ -197,7 +211,7 @@ export async function mergeInheritedConfig(
     secrets: coerceObject(config.secrets),
     variables: coerceObject(config.variables),
   });
-  applyHostRules(filteredConfig);
+  applyHostRules(filteredConfig, inheritedHostRuleOptions());
   filteredConfig = InheritConfig.set(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
 }

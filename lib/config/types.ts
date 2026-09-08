@@ -253,6 +253,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
+  inheritConfigTrusted?: boolean;
   internalHostAccess?: InternalHostAccess;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
