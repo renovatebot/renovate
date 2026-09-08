@@ -15,6 +15,10 @@ type TestConfig = PackageRuleInputConfig & {
 };
 
 describe('util/package-rules/index', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   const config1: TestConfig = {
     foo: 'bar',
 
@@ -949,6 +953,42 @@ describe('util/package-rules/index', () => {
       expect(error.validationMessage).toBe(
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
       );
+    });
+
+    it('does not throw when unauthenticated on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+          },
+        ],
+      };
+      hostRules.clear();
+
+      await expect(applyPackageRules(config)).resolves.not.toThrow();
+    });
+
+    it('returns null on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+          },
+        ],
+      };
+      hostRules.clear();
+
+      await expect(applyPackageRules(config)).resolves.toBeNull();
     });
 
     it('uses productLinks.documentation in error message URL', async () => {
