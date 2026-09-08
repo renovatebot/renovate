@@ -1,4 +1,9 @@
-import { isArray, isNonEmptyArray, isNumber } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyArray,
+  isNumber,
+  isUndefined,
+} from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import {
@@ -173,6 +178,9 @@ export async function ensurePr(
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
+  const dependencyDashboardApproved =
+    dependencyDashboardCheck === 'approvePr' ||
+    dependencyDashboardCheck === 'unpend';
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
@@ -201,7 +209,7 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
-  if (dependencyDashboardCheck === 'approvePr') {
+  if (dependencyDashboardApproved) {
     logger.debug('Forcing PR because of dependency dashboard approval');
     config.forcePr = true;
   }
@@ -244,7 +252,7 @@ export async function ensurePr(
       logger.debug('Branch status success');
     } else if (
       config.prCreation === 'approval' &&
-      dependencyDashboardCheck !== 'approvePr'
+      !dependencyDashboardApproved
     ) {
       return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
     } else if (config.prCreation === 'not-pending' && !config.forcePr) {
@@ -306,7 +314,7 @@ export async function ensurePr(
     const logJSON = upgrade.logJSON;
 
     if (logJSON) {
-      if (typeof logJSON.error === 'undefined') {
+      if (isUndefined(logJSON.error)) {
         if (logJSON.project) {
           upgrade.repoName = logJSON.project.repository;
         }
@@ -527,10 +535,10 @@ export async function ensurePr(
       pr = { number: 0 } as never;
     } else {
       try {
+        // for a vulnerability alert this checks the VulnerabilityConcurrentPRs count
         if (
           !dependencyDashboardCheck &&
-          isLimitReached('ConcurrentPRs', prConfig) &&
-          !config.isVulnerabilityAlert
+          isLimitReached('ConcurrentPRs', prConfig)
         ) {
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
@@ -546,7 +554,11 @@ export async function ensurePr(
           milestone: config.milestone,
         });
 
-        incCountValue('ConcurrentPRs');
+        incCountValue(
+          config.isVulnerabilityAlert
+            ? 'VulnerabilityConcurrentPRs'
+            : 'ConcurrentPRs',
+        );
         incCountValue('HourlyPRs');
         logger.info(
           { pr: pr?.number, prTitle, labels: pr?.labels },

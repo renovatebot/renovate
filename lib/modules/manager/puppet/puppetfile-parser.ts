@@ -2,7 +2,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { PuppetfileModule } from './types.ts';
 
-const forgeRegex = regEx(/^forge\s+['"]([^'"]+)['"]/);
+const forgeRegex = regEx(/^forge\s+['"](?<forge>[^'"]+)['"]/);
 const commentRegex = regEx(/#.*$/);
 
 /**
@@ -55,7 +55,7 @@ export function parsePuppetfile(content: string): Puppetfile {
 
       currentPuppetfileModule = {};
 
-      currentForge = forgeResult[1];
+      currentForge = forgeResult.groups!.forge;
       continue;
     }
 
@@ -66,12 +66,14 @@ export function parsePuppetfile(content: string): Puppetfile {
       currentPuppetfileModule = {};
     }
 
-    const moduleValueRegex = regEx(/(?:\s*:(\w+)\s+=>\s+)?['"]([^'"]+)['"]/g);
+    const moduleValueRegex = regEx(
+      /(?:\s*:(?<key>\w+)\s+=>\s+)?['"](?<value>[^'"]+)['"]/g,
+    );
     let moduleValue: RegExpExecArray | null;
 
     while ((moduleValue = moduleValueRegex.exec(line)) !== null) {
-      const key = moduleValue[1];
-      const value = moduleValue[2];
+      const key = moduleValue.groups!.key;
+      const value = moduleValue.groups!.value;
 
       if (key) {
         currentPuppetfileModule.tags =

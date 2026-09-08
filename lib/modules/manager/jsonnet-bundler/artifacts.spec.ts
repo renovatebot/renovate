@@ -31,14 +31,14 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
 
   it('returns null if jsonnetfile.lock does not exist', async () => {
     fs.readLocalFile.mockResolvedValueOnce('');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if there are no changes', async () => {
@@ -54,15 +54,15 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       }),
     );
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('updates the vendor dir when dependencies change', async () => {
@@ -82,8 +82,8 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('New foo/main.jsonnet');
     fs.readLocalFile.mockResolvedValueOnce('New bar/main.jsonnet');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [
           {
@@ -101,7 +101,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         newPackageFileContent: 'Updated jsonnetfile.json',
         config,
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -137,7 +137,12 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'jb update https://github.com/foo/foo.git ssh://git@github.com/foo/foo.git/bar',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('performs lock file maintenance', async () => {
@@ -152,8 +157,8 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
@@ -162,7 +167,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         file: {
           type: 'addition',
@@ -171,7 +176,12 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'jb update',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('returns error when jb update fails', async () => {
@@ -189,8 +199,8 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
@@ -199,7 +209,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           isLockFileMaintenance: true,
         },
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       {
         artifactError: {
           fileName: 'jsonnetfile.lock.json',
@@ -207,6 +217,11 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'jb update',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 });

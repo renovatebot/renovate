@@ -9,11 +9,11 @@ describe('util/http/got', () => {
   const rejectUnauth = 'NODE_TLS_REJECT_UNAUTHORIZED';
 
   beforeEach(() => {
-    delete process.env[rejectUnauth];
+    vi.stubEnv(rejectUnauth, undefined);
   });
 
   it('configures rejectUnauthorized when forced', () => {
-    process.env[rejectUnauth] = '0';
+    vi.stubEnv(rejectUnauth, '0');
     const opts = {};
     configureRejectUnauth(opts);
     expect(opts).toEqual({ https: { rejectUnauthorized: false } });

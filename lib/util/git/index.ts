@@ -37,10 +37,12 @@ import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
+import { coerceArray } from '../array.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
+import { coerceObject } from '../object.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
@@ -358,7 +360,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>',
+    gitAuthor ?? 'Renovate <renovate@whitesourcesoftware.com>',
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
@@ -406,7 +408,7 @@ export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
 }: RenovateConfig): void {
-  config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  config.ignoredAuthors = coerceArray(gitIgnoredAuthors);
   setGitAuthor(gitAuthor);
 }
 
@@ -603,7 +605,7 @@ export const syncGit = withInstrumenting(
     /* v8 ignore next -- TODO: add test #40625 */
     delete getCache()?.semanticCommits;
 
-    // If upstreamUrl is set then the bot is running in fork mode
+    // If upstreamUrl is set then Renovate is running in fork mode
     // The "upstream" remote is the original repository which was forked from
     if (config.upstreamUrl) {
       const { upstreamUrl } = config;
@@ -907,7 +909,7 @@ export async function getFileList(): Promise<string[]> {
 }
 
 export function getBranchList(): string[] {
-  return Object.keys(config.branchCommits ?? {});
+  return Object.keys(coerceObject(config.branchCommits));
 }
 
 export async function isBranchBehindBase(
@@ -1717,7 +1719,7 @@ export async function getCommitTreeSha(
   commitSha: LongCommitSha,
 ): Promise<LongCommitSha> {
   const commitOutput = await git.catFile(['-p', commitSha]);
-  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  const { treeSha } = coerceObject(treeShaRegex.exec(commitOutput)?.groups);
   if (!treeSha) {
     const snippet = commitOutput.split(newlineRegex)[0];
     /* v8 ignore next -- tested, but v8 reports template literal as partial */

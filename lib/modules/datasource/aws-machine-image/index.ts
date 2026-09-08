@@ -1,6 +1,7 @@
 import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -95,7 +96,7 @@ export class AwsMachineImageDatasource extends Datasource {
     const amiFilterCmd = this.getAmiFilterCommand(amiFilter);
     const ec2Client = this.getEC2Client(clientConfig);
     const matchingImages = await ec2Client.send(amiFilterCmd);
-    matchingImages.Images = matchingImages.Images ?? [];
+    matchingImages.Images = coerceArray(matchingImages.Images);
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate
         ? Date.parse(image1.CreationDate)
@@ -140,11 +141,7 @@ export class AwsMachineImageDatasource extends Datasource {
       return null;
     }
 
-    const res = await this.getReleases({ packageName: serializedAmiFilter });
-    return (
-      res?.releases?.[0]?.newDigest ??
-      /* v8 ignore next -- fallback when the AMI filter matches no image */ null
-    ); // TODO: needs test
+    return images.at(-1)!.Name ?? null;
   }
 
   override getDigest(
@@ -165,21 +162,17 @@ export class AwsMachineImageDatasource extends Datasource {
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    const latestImage = images.at(-1);
-    if (!latestImage?.ImageId) {
+    if (!images.length || !images.at(-1)!.ImageId) {
       return null;
     }
     return {
-      releases: [
-        {
-          version: latestImage.ImageId,
-          releaseTimestamp: asTimestamp(latestImage.CreationDate),
-          isDeprecated:
-            Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
-            this.now,
-          newDigest: latestImage.Name,
-        },
-      ],
+      releases: images.map((image) => ({
+        version: image.ImageId!,
+        releaseTimestamp: asTimestamp(image.CreationDate),
+        isDeprecated:
+          Date.parse(image.DeprecationTime ?? this.now.toString()) < this.now,
+        newDigest: image.Name,
+      })),
     };
   }
 

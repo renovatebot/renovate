@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
@@ -6,6 +7,7 @@ import {
   HOST_DISABLED,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import * as memCache from '../../util/cache/memory/index.ts';
 import * as _packageCache from '../../util/cache/package/index.ts';
 import { loadModules } from '../../util/modules.ts';
 import datasources from './api.ts';
@@ -21,6 +23,7 @@ import {
 import type {
   DatasourceApi,
   DigestConfig,
+  GetPkgReleasesConfig,
   GetReleasesConfig,
   ReleaseResult,
 } from './types.ts';
@@ -50,7 +53,7 @@ class DummyDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);
@@ -72,7 +75,7 @@ class DummyDatasource2 extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);
@@ -95,7 +98,7 @@ class DummyDatasource3 extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);
@@ -119,7 +122,7 @@ class DummyDatasource5 extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const fn = this.registriesMock[registryUrl!];
-    if (typeof fn === 'function') {
+    if (isFunction(fn)) {
       return Promise.resolve(fn());
     }
     return Promise.resolve(fn ?? null);
@@ -205,31 +208,31 @@ describe('modules/datasource/index', () => {
     });
 
     it('returns null for null datasource', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: null as never, // #22198
           packageName: 'some/dep',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for no packageName', async () => {
       datasources.set(datasource, new DummyDatasource());
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: null as never, // #22198
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown datasource', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: 'some-unknown-datasource',
           packageName: 'some/dep',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('ignores and warns for disabled custom registryUrls', async () => {
@@ -268,7 +271,7 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new TestDatasource());
 
       expect(supportsDigests(datasource)).toBeTrue();
-      expect(await getDigest({ datasource, packageName })).toBe('123');
+      await expect(getDigest({ datasource, packageName })).resolves.toBe('123');
     });
 
     it('returns replacementName if defined', async () => {
@@ -282,13 +285,13 @@ describe('modules/datasource/index', () => {
       }
       datasources.set(datasource, new TestDatasource());
 
-      expect(
-        await getDigest({
+      await expect(
+        getDigest({
           datasource,
           packageName: 'pkgName',
           replacementName: 'replacement',
         }),
-      ).toBe('replacement');
+      ).resolves.toBe('replacement');
     });
   });
 
@@ -298,19 +301,75 @@ describe('modules/datasource/index', () => {
     });
 
     it('adds changelogUrl', async () => {
-      expect(await getPkgReleases({ datasource, packageName })).toMatchObject({
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toMatchObject({
         changelogUrl: 'https://foo.bar/package/CHANGELOG.md',
       });
     });
 
     it('adds sourceUrl', async () => {
-      expect(await getPkgReleases({ datasource, packageName })).toMatchObject({
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toMatchObject({
         sourceUrl: 'https://foo.bar/package',
       });
     });
   });
 
   describe('Packages', () => {
+    describe('registry caching', () => {
+      beforeEach(() => memCache.init());
+      afterEach(() => memCache.reset());
+
+      it.each(['defaultRegistryUrls', 'additionalRegistryUrls'])(
+        'keeps releases separate for different %s',
+        async (registryOption) => {
+          const firstRegistry = vi.fn(() => ({
+            releases: [{ version: '1.0.0' }],
+          }));
+          const secondRegistry = vi.fn(() => ({
+            releases: [{ version: '2.0.0' }],
+          }));
+          datasources.set(
+            datasource,
+            new DummyDatasource({
+              'https://reg2.com': firstRegistry,
+              'https://reg3.com': secondRegistry,
+            }),
+          );
+          const firstConfig = {
+            datasource,
+            packageName,
+            registryStrategy: 'merge',
+            [registryOption]: ['https://reg2.com'],
+          } satisfies GetPkgReleasesConfig;
+          const secondConfig = {
+            ...firstConfig,
+            [registryOption]: ['https://reg3.com'],
+          };
+
+          const [first, second, repeated] = await Promise.all([
+            getPkgReleases(firstConfig),
+            getPkgReleases(secondConfig),
+            getPkgReleases(secondConfig),
+          ]);
+
+          expect(first).toMatchObject({
+            releases: [{ version: '1.0.0' }],
+            registryUrl: 'https://reg2.com',
+          });
+          expect(second).toMatchObject({
+            releases: [{ version: '2.0.0' }],
+            registryUrl: 'https://reg3.com',
+          });
+          expect(repeated).toEqual(second);
+          expect(firstRegistry).toHaveBeenCalledTimes(1);
+          expect(secondRegistry).toHaveBeenCalledTimes(1);
+        },
+      );
+    });
+
     it('supports defaultRegistryUrls parameter', async () => {
       const registries: RegistriesMock = {
         'https://foo.bar': { releases: [{ version: '0.0.1' }] },
@@ -748,13 +807,13 @@ describe('modules/datasource/index', () => {
         });
 
         it('merges registries and returns null for error', async () => {
-          expect(
-            await getPkgReleases({
+          await expect(
+            getPkgReleases({
               datasource,
               packageName,
               registryUrls: ['https://reg4.com', 'https://reg5.com'],
             }),
-          ).toBeNull();
+          ).resolves.toBeNull();
         });
       });
 

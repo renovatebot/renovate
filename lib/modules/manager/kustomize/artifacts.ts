@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
@@ -186,8 +187,8 @@ export async function updateArtifacts({
     }
 
     const status = await getRepoStatus();
-    const chartsAddition = status?.not_added ?? [];
-    const chartsDeletion = status?.deleted ?? [];
+    const chartsAddition = coerceArray(status?.not_added);
+    const chartsDeletion = coerceArray(status?.deleted);
 
     const fileChanges: UpdateArtifactsResult[] = [];
 

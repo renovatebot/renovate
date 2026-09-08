@@ -4,6 +4,7 @@ import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -80,9 +81,19 @@ export class AwsEKSAddonDataSource extends Datasource {
   private getClient({ region, profile }: EksAddonsFilter): EKSClient {
     const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
     if (!(cacheKey in this.clients)) {
+      const { password, token, username } = hostRules.find({
+        hostType: AwsEKSAddonDataSource.id,
+      });
       this.clients[cacheKey] = new EKSClient({
         ...(region && { region }),
-        credentials: fromNodeProviderChain(profile ? { profile } : undefined),
+        credentials:
+          username && password
+            ? {
+                accessKeyId: username,
+                secretAccessKey: password,
+                sessionToken: token,
+              }
+            : fromNodeProviderChain(profile ? { profile } : undefined),
       });
     }
     return this.clients[cacheKey];

@@ -42,6 +42,26 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 Actions pinned to a bare SHA without a version comment are disabled by default, because Renovate cannot determine which branch or tag the SHA belongs to.
 To enable updates, add a tag or branch name as a version comment, as shown above.
 
+### Reusable workflows
+
+A job-level `uses:` which points at `owner/repo/.github/workflows/<file>.yml@<ref>` calls a [reusable workflow](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows) instead of running an action, so Renovate gives it the `workflow` `depType`.
+Every other `uses:` reference to a repository keeps the `action` `depType`, including an action in a subdirectory such as `github/codeql-action/init@v3`.
+
+Use `matchDepTypes` to configure the two separately.
+For example, to keep pinning action digests but leave reusable workflow calls on their tag:
+
+```json
+{
+  "extends": ["helpers:pinGitHubActionDigests"],
+  "packageRules": [
+    {
+      "matchDepTypes": ["workflow"],
+      "pinDigests": false
+    }
+  ]
+}
+```
+
 ### GitHub Actions lockfile (`actions.lock`)
 
 !!! warning "This feature is flagged as experimental"

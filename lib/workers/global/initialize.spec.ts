@@ -1,4 +1,5 @@
-import { git } from '~test/util.ts';
+import { git, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
@@ -79,12 +80,36 @@ describe('workers/global/initialize', () => {
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });
+
+    it('filters headers against allowedHeaders', async () => {
+      // the self-hosted admin gets no exemption here either, as `applyHostRule` filters by header name whoever set it
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      const config: RenovateConfig = {
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
+          },
+        ],
+      };
+
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+
+      expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-Allowed': 'yes' },
+      });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['Authorization'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
+    });
   });
 
   describe('configureThirdPartyLibraries()', () => {
     beforeEach(() => {
-      delete process.env.AWS_EC2_METADATA_DISABLED;
-      delete process.env.METADATA_SERVER_DETECTION;
+      vi.stubEnv('AWS_EC2_METADATA_DISABLED', undefined);
+      vi.stubEnv('METADATA_SERVER_DETECTION', undefined);
     });
 
     it('sets env vars when cloud metadata services disabled', async () => {

@@ -29,9 +29,11 @@ function parseJsrScopeName(name: string): string | null {
   if (name.length > 100) {
     return null;
   }
-  if (name.length < 3) {
-    return null;
-  }
+  // JSR applies a three character minimum when a scope is registered, but
+  // shorter scopes exist and publish packages: `@db` holds the Deno database
+  // drivers, `@db/sqlite` among them. Reading a dependency is not the place
+  // to re-check registration policy, and a scope that doesn't exist simply
+  // 404s at the registry.
   if (!regEx(/^[a-zA-Z0-9-_]+$/).test(name)) {
     return null;
   }

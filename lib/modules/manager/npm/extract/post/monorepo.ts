@@ -4,6 +4,7 @@ import {
   getParentDir,
   getSiblingFileName,
 } from '../../../../../util/fs/index.ts';
+import { coerceObject } from '../../../../../util/object.ts';
 import type { PackageFile } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { detectPnpmWorkspaces } from '../pnpm.ts';
@@ -49,7 +50,7 @@ export async function detectMonorepos(
       });
 
       for (const subPackage of internalPackageFiles) {
-        subPackage.managerData = subPackage.managerData ?? {};
+        subPackage.managerData = coerceObject(subPackage.managerData);
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
         subPackage.managerData.hasPackageManager = hasPackageManager;
         subPackage.managerData.yarnLock ??= yarnLock;
