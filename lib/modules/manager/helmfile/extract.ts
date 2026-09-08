@@ -105,15 +105,13 @@ export async function extractPackageFile(
         } else {
           repoName = dep.chart;
         }
-        if (registryData[repoName]?.oci) {
-          const registryUrl = registryData[repoName]?.url;
-          if (registryUrl) {
-            ociDep = getOciChartDep(
-              registryUrl,
-              depName,
-              config.registryAliases,
-            );
-          }
+        const registry = registryData[repoName];
+        if (registry?.oci) {
+          ociDep = getOciChartDep(
+            registry.url,
+            depName,
+            config.registryAliases,
+          );
           repoName = null;
         }
       }
