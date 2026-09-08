@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { getUserPixiConfig } from './extract.ts';
 import { updatePixiLockfile } from './lockfile.ts';
 
@@ -12,8 +13,11 @@ export async function updateArtifacts({
   logger.debug(`pixi.updateArtifacts(${packageFileName})`);
 
   const pixiConfig = getUserPixiConfig(newPackageFileContent, packageFileName);
-  const constraint =
-    config.constraints?.pixi ?? pixiConfig?.project['requires-pixi'];
+  const constraint = await resolveToolConstraint(
+    config,
+    'pixi',
+    () => pixiConfig?.project['requires-pixi'],
+  );
 
   return await updatePixiLockfile({
     packageFileName,

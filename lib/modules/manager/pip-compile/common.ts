@@ -1,4 +1,3 @@
-import { isString } from '@sindresorhus/is';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -14,72 +13,53 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import type {
   CommandType,
   PipCompileArgs,
   SupportedManagers,
 } from './types.ts';
 
-export function getPythonVersionConstraint(
+export async function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
   extractedPythonVersion: string | undefined,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, 'python', () => {
+    if (extractedPythonVersion) {
+      logger.debug('Using python constraint extracted from the lock file');
+      return `==${extractedPythonVersion}`;
+    }
 
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  if (extractedPythonVersion) {
-    logger.debug('Using python constraint extracted from the lock file');
-    return `==${extractedPythonVersion}`;
-  }
-
-  return undefined;
+    return undefined;
+  });
 }
 
-export function getPipToolsVersionConstraint(
+export async function getPipToolsVersionConstraint(
   config: UpdateArtifactsConfig,
-): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (isString(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
+): Promise<string> {
+  return (await resolveToolConstraint(config, 'pipTools')) ?? '';
 }
 
-export function getUvVersionConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { uv } = constraints;
-
-  if (isString(uv)) {
-    logger.debug('Using uv constraint from config');
-    return uv;
-  }
-
-  return '';
+export async function getUvVersionConstraint(
+  config: UpdateArtifactsConfig,
+): Promise<string> {
+  return (await resolveToolConstraint(config, 'uv')) ?? '';
 }
 
-export function getToolVersionConstraint(
+export async function getToolVersionConstraint(
   config: UpdateArtifactsConfig,
   commandType: CommandType,
-): ToolConstraint {
+): Promise<ToolConstraint> {
   if (commandType === 'uv') {
     return {
       toolName: 'uv',
-      constraint: getUvVersionConstraint(config),
+      constraint: await getUvVersionConstraint(config),
     };
   }
 
   return {
     toolName: 'pip-tools',
-    constraint: getPipToolsVersionConstraint(config),
+    constraint: await getPipToolsVersionConstraint(config),
   };
 }
 
@@ -90,7 +70,10 @@ export async function getExecOptions(
   extraEnv: ExtraEnv<string>,
   extractedPythonVersion: string | undefined,
 ): Promise<ExecOptions> {
-  const constraint = getPythonVersionConstraint(config, extractedPythonVersion);
+  const constraint = await getPythonVersionConstraint(
+    config,
+    extractedPythonVersion,
+  );
   const execOptions: ExecOptions = {
     cwd: ensureLocalPath(cwd),
     docker: {},
@@ -99,7 +82,7 @@ export async function getExecOptions(
         toolName: 'python',
         constraint,
       },
-      getToolVersionConstraint(config, commandType),
+      await getToolVersionConstraint(config, commandType),
     ],
     extraEnv: {
       PIP_CACHE_DIR: await ensureCacheDir('pip'),

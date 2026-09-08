@@ -645,6 +645,86 @@ describe('modules/manager/pep621/processors/uv', () => {
       );
     });
 
+    it('falls back to the extracted uv constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          // no `required-version` in the pyproject, so the extracted one is used
+          config: {
+            constraints: {},
+            extractedConstraints: { uv: '>=0.2.30' },
+          },
+          updatedDeps: [{ packageName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd).join('\n')).toContain(
+        'install-tool uv 0.2.35',
+      );
+    });
+
+    it('prefers the required-version from the pyproject over the extracted uv constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }, { version: '0.2.28' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            constraints: {},
+            extractedConstraints: { uv: '<0.2.30' },
+          },
+          updatedDeps: [{ packageName: 'dep1' }],
+        },
+        parsePyProject(codeBlock`
+          [tool.uv]
+          required-version = ">=0.2.30"
+        `)!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd).join('\n')).toContain(
+        'install-tool uv 0.2.35',
+      );
+    });
+
     it('returns artifact error', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });

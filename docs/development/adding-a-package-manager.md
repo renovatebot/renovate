@@ -119,6 +119,17 @@ To _directly_ update dependencies in lock files: use `updateLockedDependency` in
 - after a dependency update (for a package file), or
 - during `lockfileMaintenance`
 
+#### Tool constraints
+
+When `updateArtifacts` runs a tool through `exec()`, resolve the tool's version constraint with `resolveToolConstraint()` from `lib/modules/manager/util.ts` instead of reading `config.constraints` yourself.
+The helper applies, in this order:
+
+1. the user's `constraints` config
+2. a value your manager derives from the updated package files, if you pass a callback
+3. the `extractedConstraints` that `extractPackageFile` collected on the base branch
+
+The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints` or `config.extractedConstraints` in managers.
+
 ### `updateDependency` (optional)
 
 Use `updateDependency` if _both_ conditions apply:

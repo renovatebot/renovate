@@ -149,6 +149,37 @@ describe('modules/manager/pep621/processors/pdm', () => {
       );
     });
 
+    it('falls back to the extracted pdm constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: { constraints: {}, extractedConstraints: { pdm: '2.6.1' } },
+          updatedDeps: [{ packageName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd).join('\n')).toContain(
+        'install-tool pdm 2.6.1',
+      );
+    });
+
     it('returns artifact error', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });

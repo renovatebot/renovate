@@ -216,8 +216,11 @@ export class UvProcessor extends BasePyProjectProcessor {
       };
       const uvConstraint: ToolConstraint = {
         toolName: 'uv',
-        constraint:
-          config.constraints?.uv ?? project.tool?.uv?.['required-version'],
+        constraint: await resolveToolConstraint(
+          config,
+          'uv',
+          () => project.tool?.uv?.['required-version'],
+        ),
       };
 
       const extraEnv = {

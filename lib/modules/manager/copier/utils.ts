@@ -1,31 +1,14 @@
-import { isNonEmptyString } from '@sindresorhus/is';
-import { logger } from '../../../logger/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
-export function getPythonVersionConstraint(
+export async function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (isNonEmptyString(python)) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  return undefined;
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, 'python');
 }
 
-export function getCopierVersionConstraint(
+export async function getCopierVersionConstraint(
   config: UpdateArtifactsConfig,
-): string {
-  const { constraints = {} } = config;
-  const { copier } = constraints;
-
-  if (isNonEmptyString(copier)) {
-    logger.debug('Using copier constraint from config');
-    return copier;
-  }
-
-  return '';
+): Promise<string> {
+  return (await resolveToolConstraint(config, 'copier')) ?? '';
 }

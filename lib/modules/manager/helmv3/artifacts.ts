@@ -19,6 +19,7 @@ import * as yaml from '../../../util/yaml.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { generateHelmEnvs, generateLoginCmd } from './common.ts';
 import { isOCIRegistry, removeOCIPrefix } from './oci.ts';
 import type { ChartDefinition, Repository, RepositoryRule } from './types.ts';
@@ -139,7 +140,7 @@ export async function updateArtifacts({
     logger.debug('Updating Helm artifacts');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',
-      constraint: config.constraints?.helm,
+      constraint: await resolveToolConstraint(config, 'helm'),
     };
 
     const execOptions: ExecOptions = {

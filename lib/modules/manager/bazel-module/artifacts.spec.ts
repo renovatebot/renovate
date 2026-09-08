@@ -135,6 +135,27 @@ describe('modules/manager/bazel-module/artifacts', () => {
     );
   });
 
+  it('passes the extracted bazelisk constraint to updateBazelLockfile', async () => {
+    const { updateBazelLockfile } = await import('./lockfile.ts');
+    vi.mocked(updateBazelLockfile).mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
+    fs.readLocalFile.mockResolvedValueOnce('old lock content');
+
+    await updateArtifacts({
+      packageFileName: 'MODULE.bazel',
+      updatedDeps: [{ depName: 'rules_go' }],
+      newPackageFileContent: 'bazel_dep(name = "rules_go", version = "0.42.0")',
+      config: { ...config, extractedConstraints: { bazelisk: '>=1.19.0' } },
+    });
+
+    expect(updateBazelLockfile).toHaveBeenCalledWith(
+      'MODULE.bazel.lock',
+      'MODULE.bazel',
+      undefined,
+      '>=1.19.0',
+    );
+  });
+
   it('handles subdirectory MODULE.bazel', async () => {
     const { updateBazelLockfile } = await import('./lockfile.ts');
     vi.mocked(updateBazelLockfile).mockResolvedValueOnce([

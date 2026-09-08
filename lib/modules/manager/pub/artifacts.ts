@@ -14,6 +14,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { parsePubspec, parsePubspecLock } from './utils.ts';
 
 const SDK_NAMES = ['dart', 'flutter'];
@@ -47,17 +48,17 @@ export async function updateArtifacts({
     const toolName = isFlutter ? 'flutter' : 'dart';
     const cmd = getExecCommand(toolName, updatedDeps, isLockFileMaintenance);
 
-    let constraint = config.constraints?.[toolName];
-    if (!constraint) {
+    const constraint = await resolveToolConstraint(config, toolName, () => {
       const pubspec = parsePubspec(packageFileName, newPackageFileContent);
       const pubspecToolName = isFlutter ? 'flutter' : 'sdk';
-      constraint = pubspec?.environment[pubspecToolName];
-
-      if (!constraint) {
-        const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
-        constraint = pubspecLock?.sdks[toolName];
+      const pubspecConstraint = pubspec?.environment[pubspecToolName];
+      if (pubspecConstraint) {
+        return pubspecConstraint;
       }
-    }
+
+      const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
+      return pubspecLock?.sdks[toolName];
+    });
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,

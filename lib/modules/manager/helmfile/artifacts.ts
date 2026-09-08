@@ -16,6 +16,7 @@ import { Result } from '../../../util/result.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { generateHelmEnvs } from '../helmv3/common.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { Doc, LockVersion } from './schema.ts';
 import { generateRegistryLoginCmd, isOCIRegistry } from './utils.ts';
 
@@ -50,13 +51,13 @@ export async function updateArtifacts({
     const toolConstraints: ToolConstraint[] = [
       {
         toolName: 'helm',
-        constraint: config.constraints?.helm,
+        constraint: await resolveToolConstraint(config, 'helm'),
       },
       {
         toolName: 'helmfile',
-        constraint:
-          config.constraints?.helmfile ??
+        constraint: await resolveToolConstraint(config, 'helmfile', () =>
           Result.parse(existingLockFileContent, LockVersion).unwrapOrNull(),
+        ),
       },
     ];
     const needKustomize = updatedDeps.some(
@@ -65,7 +66,7 @@ export async function updateArtifacts({
     if (needKustomize) {
       toolConstraints.push({
         toolName: 'kustomize',
-        constraint: config.constraints?.kustomize,
+        constraint: await resolveToolConstraint(config, 'kustomize'),
       });
     }
 

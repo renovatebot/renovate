@@ -276,5 +276,27 @@ describe('modules/manager/util', () => {
 
       expect(constraint).toBeUndefined();
     });
+
+    it('treats an empty string as not set', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('accepts the null constraints of a post-update config', async () => {
+      const constraint = await resolveToolConstraint(
+        { constraints: null, extractedConstraints: null },
+        'node',
+      );
+
+      expect(constraint).toBeUndefined();
+    });
   });
 });

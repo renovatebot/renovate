@@ -35,13 +35,13 @@ import { coerceString } from '../../../util/string.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { Lockfile, PackageFile } from './schema.ts';
 import type { AuthJson } from './types.ts';
 import {
   extractConstraints,
   getComposerArguments,
   getComposerUpdateArguments,
-  getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
 } from './utils.ts';
@@ -141,22 +141,26 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    // `extractConstraints()` re-reads the updated package file, so it wins over
-    // what extraction saw on the base branch.
-    const constraints = {
-      ...config.extractedConstraints,
-      ...extractConstraints(file, lockfile),
-      ...config.constraints,
-    };
+    // `extractConstraints()` re-reads the updated package file, so its values win
+    // over what extraction saw on the base branch.
+    const fileConstraints = extractConstraints(file, lockfile);
 
     const composerToolConstraint: ToolConstraint = {
       toolName: 'composer',
-      constraint: constraints.composer,
+      constraint: await resolveToolConstraint(
+        config,
+        'composer',
+        () => fileConstraints.composer,
+      ),
     };
 
     const phpToolConstraint: ToolConstraint = {
       toolName: 'php',
-      constraint: getPhpConstraint(constraints),
+      constraint: await resolveToolConstraint(
+        config,
+        'php',
+        () => fileConstraints.php,
+      ),
     };
 
     const execOptions: ExecOptions = {

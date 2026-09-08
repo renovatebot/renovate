@@ -101,11 +101,11 @@ export async function updateArtifacts({
     toolConstraints: [
       {
         toolName: 'python',
-        constraint: getPythonVersionConstraint(config),
+        constraint: await getPythonVersionConstraint(config),
       },
       {
         toolName: 'copier',
-        constraint: getCopierVersionConstraint(config),
+        constraint: await getCopierVersionConstraint(config),
       },
     ],
   };

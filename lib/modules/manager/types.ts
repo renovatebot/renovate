@@ -38,20 +38,31 @@ export interface ExtractConfig extends CustomExtractConfig {
   newDigest?: string | null;
 }
 
-export interface UpdateArtifactsConfig {
-  isLockFileMaintenance?: boolean;
+/**
+ * The part of a manager config that `resolveToolConstraint()` reads. Managers
+ * must not read these properties directly (enforced by the
+ * `renovate/prefer-resolve-tool-constraint` lint rule), so that user config, a
+ * value derived from the updated files and the extracted constraints are always
+ * applied in the same order.
+ */
+export interface ToolConstraintsConfig {
   /**
    * Constraints as configured by the user, so they always win over anything a
    * manager derives itself.
    */
-  constraints?: Partial<Record<ConstraintName, string>>;
+  constraints?: Partial<Record<ConstraintName, string>> | null;
   /**
    * Constraints collected during extraction, merged over all upgrades of the
    * branch. They describe the package files as they were on the base branch, so
    * they are a fallback for a manager that cannot derive the constraint from
-   * the files it is called with. Use {@link resolveToolConstraint} instead of
-   * reading this directly.
+   * the files it is called with.
    */
+  extractedConstraints?: Partial<Record<ConstraintName, string>> | null;
+}
+
+export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
+  isLockFileMaintenance?: boolean;
+  constraints?: Partial<Record<ConstraintName, string>>;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];

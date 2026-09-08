@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
@@ -7,7 +8,7 @@ import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
-import type { PackageDependency, UpdateArtifactsConfig } from './types.ts';
+import type { PackageDependency, ToolConstraintsConfig } from './types.ts';
 
 export function applyGitSource(
   dep: PackageDependency,
@@ -80,16 +81,26 @@ export function artifactErrorMessageFromExecError(
  * 3. `extractedConstraints`, as collected while extracting the base branch
  *
  * Managers that have no way to derive the constraint at artifact time can omit
- * `derive`.
+ * `derive`. An empty string counts as "not set" at every step, so it never
+ * shadows a value further down the list.
+ *
+ * This is the only place that reads `constraints` and `extractedConstraints`
+ * from the config; the `renovate/prefer-resolve-tool-constraint` lint rule
+ * keeps managers from reading them directly.
  */
 export async function resolveToolConstraint(
-  config: UpdateArtifactsConfig,
+  config: ToolConstraintsConfig,
   toolName: ConstraintName,
   derive?: () => MaybePromise<string | null | undefined>,
 ): Promise<string | undefined> {
-  const constraint =
-    config.constraints?.[toolName] ??
-    (await derive?.()) ??
-    config.extractedConstraints?.[toolName];
-  return constraint ?? undefined;
+  const configured = config.constraints?.[toolName];
+  if (isNonEmptyString(configured)) {
+    return configured;
+  }
+  const derived = await derive?.();
+  if (isNonEmptyString(derived)) {
+    return derived;
+  }
+  const extracted = config.extractedConstraints?.[toolName];
+  return isNonEmptyString(extracted) ? extracted : undefined;
 }

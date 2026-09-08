@@ -916,6 +916,38 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('prefers the php constraint of the updated package file over the extracted one', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+
+    const execSnapshots = mockExecAll();
+
+    fs.readLocalFile.mockResolvedValueOnce('{  }');
+
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+
+    await expect(
+      composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{"require":{"php":"7.4"}}',
+        config: {
+          ...config,
+          extractedConstraints: { php: '7.3' },
+          constraints: { composer: '^1.10.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool php 7.4' },
+      { cmd: 'install-tool composer 1.10.17' },
+      { cmd: expect.stringContaining('composer update') },
+    ]);
+  });
+
   it('supports global mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     fs.readLocalFile.mockResolvedValueOnce('{}');

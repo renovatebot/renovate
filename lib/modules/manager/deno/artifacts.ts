@@ -18,6 +18,7 @@ import {
   updateNpmrcContent,
 } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import type { DenoManagerData } from './types.ts';
 
 export async function updateArtifacts(
@@ -103,7 +104,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'deno',
-          constraint: config.constraints?.deno,
+          constraint: await resolveToolConstraint(config, 'deno'),
         },
       ],
     };

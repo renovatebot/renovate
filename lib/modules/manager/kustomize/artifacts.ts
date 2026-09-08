@@ -16,6 +16,7 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { generateHelmEnvs } from './common.ts';
 import { parseKustomize } from './extract.ts';
 
@@ -131,14 +132,15 @@ export async function updateArtifacts({
   );
 
   try {
+    const helmConstraint = await resolveToolConstraint(config, 'helm');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',
-      constraint: config.constraints?.helm,
+      constraint: helmConstraint,
     };
 
     const execOptions: ExecOptions = {
       docker: {},
-      extraEnv: generateHelmEnvs(config),
+      extraEnv: generateHelmEnvs(helmConstraint),
       toolConstraints: [helmToolConstraint],
     };
 

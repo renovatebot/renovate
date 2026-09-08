@@ -6,6 +6,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { updateBazelLockfile } from '../bazel-module/lockfile.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export async function updateArtifacts({
   packageFileName,
@@ -40,6 +41,6 @@ export async function updateArtifacts({
     lockFileName,
     moduleFileName,
     config.isLockFileMaintenance,
-    config.constraints?.bazelisk,
+    await resolveToolConstraint(config, 'bazelisk'),
   );
 }

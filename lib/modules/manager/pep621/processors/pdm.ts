@@ -109,7 +109,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
       };
       const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
-        constraint: config.constraints?.pdm,
+        constraint: await resolveToolConstraint(config, 'pdm'),
       };
 
       const execOptions: ExecOptions = {

@@ -31,30 +31,50 @@ describe('modules/manager/bundler/common', () => {
   });
 
   describe('getBundlerConstraint', () => {
-    it('uses existing constraint', () => {
+    it('uses existing constraint', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
         config: {
           constraints: { bundler: '2.1.0' },
         },
       };
-      const version = getBundlerConstraint(config, lockedContent);
+      const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('2.1.0');
     });
 
-    it('extracts from lockfile', () => {
+    it('extracts from lockfile', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
         config: {},
       };
-      const version = getBundlerConstraint(config, lockedContent);
+      const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('1.17.3');
     });
 
-    it('returns null', () => {
+    it('prefers the lockfile over the extracted constraint', async () => {
+      const config: Pick<UpdateArtifact, 'config'> = {
+        config: {
+          extractedConstraints: { bundler: '2.4.0' },
+        },
+      };
+      const version = await getBundlerConstraint(config, lockedContent);
+      expect(version).toBe('1.17.3');
+    });
+
+    it('falls back to the extracted constraint', async () => {
+      const config: Pick<UpdateArtifact, 'config'> = {
+        config: {
+          extractedConstraints: { bundler: '2.4.0' },
+        },
+      };
+      const version = await getBundlerConstraint(config, '');
+      expect(version).toBe('2.4.0');
+    });
+
+    it('returns undefined', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
         config: {},
       };
-      const version = getBundlerConstraint(config, '');
-      expect(version).toBeNull();
+      const version = await getBundlerConstraint(config, '');
+      expect(version).toBeUndefined();
     });
   });
 
@@ -120,14 +140,38 @@ describe('modules/manager/bundler/common', () => {
       expect(version).toBe('2.6.5');
     });
 
-    it('returns null', async () => {
+    it('prefers the gemfile over the extracted constraint', async () => {
+      const config = partial<UpdateArtifact>({
+        packageFileName: 'Gemfile',
+        newPackageFileContent: gemfile,
+        config: {
+          extractedConstraints: { ruby: '3.1.0' },
+        },
+      });
+      const version = await getRubyConstraint(config);
+      expect(version).toBe('~> 1.5.3');
+    });
+
+    it('falls back to the extracted constraint', async () => {
+      const config = partial<UpdateArtifact>({
+        packageFileName: 'Gemfile',
+        newPackageFileContent: '',
+        config: {
+          extractedConstraints: { ruby: '3.1.0' },
+        },
+      });
+      const version = await getRubyConstraint(config);
+      expect(version).toBe('3.1.0');
+    });
+
+    it('returns undefined', async () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: '',
         config: {},
       });
       const version = await getRubyConstraint(config);
-      expect(version).toBeNull();
+      expect(version).toBeUndefined();
     });
   });
 

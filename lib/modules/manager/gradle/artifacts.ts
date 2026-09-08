@@ -26,6 +26,7 @@ import {
   prepareGradleCommand,
 } from '../gradle-wrapper/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import {
   isGcvLockFile,
   isGcvPropsFile,
@@ -221,12 +222,9 @@ export async function updateArtifacts({
       toolConstraints: [
         {
           toolName: 'java',
-          constraint:
-            config.constraints?.java ??
-            (await getJavaConstraint(
-              await getGradleVersion(gradlewFile),
-              gradlewFile,
-            )),
+          constraint: await resolveToolConstraint(config, 'java', async () =>
+            getJavaConstraint(await getGradleVersion(gradlewFile), gradlewFile),
+          ),
         },
       ],
     };

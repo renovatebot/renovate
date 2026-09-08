@@ -449,6 +449,60 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
   });
 
+  it('uses the extracted dotnet constraint when global.json has none', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    findGlobalJson.mockResolvedValueOnce(null);
+    await expect(
+      nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config: { ...config, extractedConstraints: { dotnet: '8.0.100' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dotnet 8.0.100' },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
+  });
+
+  it('prefers the global.json version over the extracted dotnet constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    findGlobalJson.mockResolvedValueOnce({ sdk: { version: '7.0.100' } });
+    await expect(
+      nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config: { ...config, extractedConstraints: { dotnet: '8.0.100' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dotnet 7.0.100' },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
+  });
+
   it('supports global mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll();

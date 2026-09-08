@@ -506,6 +506,49 @@ describe('modules/manager/kustomize/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted helm constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+
+    fs.localPathExists.mockResolvedValueOnce(false);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.0.0/example/Chart.yaml'],
+        deleted: [],
+      }),
+    );
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: undefined,
+        currentVersion: '1.0.0',
+        packageName: 'github.com/example/example/example',
+        datasource: DockerDatasource.id,
+      },
+    ];
+
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '3.7.0' }, { version: '3.17.0' }],
+    });
+
+    await expect(
+      kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps,
+        newPackageFileContent,
+        config: { ...config, extractedConstraints: { helm: '3.7.0' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool helm 3.7.0' },
+      {
+        cmd: 'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example',
+        options: { env: { HELM_EXPERIMENTAL_OCI: '1' } },
+      },
+    ]);
+  });
+
   it('installs binaries on docker mode', async () => {
     GlobalConfig.set({
       ...adminConfig,
