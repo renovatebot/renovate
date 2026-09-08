@@ -243,6 +243,13 @@
       }
     },
     {
+      "files": ["lib/modules/manager/**"],
+      "excludeFiles": ["**/*.spec.ts", "lib/modules/manager/util.ts"],
+      "rules": {
+        "renovate/prefer-resolve-tool-constraint": "error"
+      }
+    },
+    {
       "files": ["lib/modules/datasource/**"],
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
