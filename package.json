@@ -284,7 +284,7 @@
     "@hyrious/marshal": "0.3.4",
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.3.1",
-    "@oxlint/plugins": "1.80.0",
+    "@oxlint/plugins": "1.81.0",
     "@semantic-release/exec": "7.1.0",
     "@smithy/util-stream": "4.8.2",
     "@types/adm-zip": "0.5.8",
