@@ -358,6 +358,36 @@ describe('modules/manager/gomod/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('extracts deps after a gofmt-style exclude block with unindented closing paren', () => {
+      const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        exclude (
+        \tgithub.com/pravesht/gocql v0.0.0
+        )
+
+        require (
+        \tk8s.io/cloud-provider v0.17.3
+        )
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            managerData: {
+              lineNumber: 7,
+              multiLine: true,
+            },
+            depName: 'k8s.io/cloud-provider',
+            depType: 'require',
+            currentValue: 'v0.17.3',
+            datasource: 'go',
+            skipReason: 'invalid-version',
+          },
+        ],
+      });
+    });
+
     it('extracts the toolchain directive', () => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod

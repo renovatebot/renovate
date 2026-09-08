@@ -1,8 +1,13 @@
-import { parseLine } from './line-parser.ts';
+import { endBlockRegex, parseLine } from './line-parser.ts';
 
 describe('modules/manager/gomod/line-parser', () => {
   it('should return null for invalid input', () => {
     expect(parseLine('invalid')).toBeNull();
+  });
+
+  it('endBlockRegex matches a gofmt-style unindented closing paren', () => {
+    expect(endBlockRegex.test(')')).toBeTrue();
+    expect(endBlockRegex.test('  )')).toBeTrue();
   });
 
   it('should parse go version', () => {
