@@ -19,13 +19,25 @@ import { matchRegexOrGlobList } from './string-match.ts';
 import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
 
 /**
+ * How much a host rule is trusted, according to the configuration it came from, from most to least trusted:
+ *
+ * - `admin`: the self-hosted administrator's own configuration - their global config, or a `repositories[]` entry
+ * - `inherit`: organization-inherited config, and only where the administrator has opted into trusting it through `inheritConfigTrusted`
+ * - `untrusted`: repository configuration, and the presets it extends
+ */
+type HostRuleTrustTier = 'admin' | 'inherit' | 'untrusted';
+
+/**
  * A host rule as registered through {@link add}.
  *
- * `trusted` is deliberately not a field of `HostRule`: it is set from {@link AddHostRuleOptions} at registration time and must never be settable through configuration.
+ * `trustTier` is deliberately not a field of `HostRule`: it is set from {@link AddHostRuleOptions} at registration time and must never be settable through configuration.
  */
 interface RegisteredHostRule extends HostRule {
-  /** whether the rule came from the self-hosted administrator's own global config, rather than from repository or preset config */
-  trusted?: boolean;
+  /** which configuration the rule came from - see {@link HostRuleTrustTier}. Always set by `add()`, but optional so that `find()` can delete it from its result */
+  trustTier?: HostRuleTrustTier;
+
+  /** never set by us, and declared only so that a `trusted` smuggled in through configuration can be deleted before the rule is registered. It was the boolean `trustTier` replaced, so a rule carrying one may well be an attempt at the administrator's precedence */
+  trusted?: never;
 }
 
 let hostRules: RegisteredHostRule[] = [];
@@ -140,24 +152,46 @@ export interface AddHostRuleOptions {
   allowedHeaders?: string[];
 
   /**
-   * Whether this rule comes from the self-hosted administrator's own global config, rather than from repository or preset config.
+   * Whether this rule comes from the self-hosted administrator's own configuration, rather than from repository or preset config.
    *
-   * Only affects how `headers` are combined (see {@link find}), and is deliberately opt-in: a caller that says nothing registers into the untrusted tier, so a new call site cannot grant itself the administrator's precedence by omission.
+   * Registers the rule into the `admin` tier - see {@link HostRuleTrustTier}.
    */
   trusted?: boolean;
+
+  /**
+   * Whether this rule comes from organization-inherited config which the administrator has opted into trusting, through `inheritConfigTrusted`.
+   *
+   * Registers the rule into the `inherit` tier - see {@link HostRuleTrustTier}. Ignored when `trusted` is also set.
+   */
+  inherited?: boolean;
+}
+
+/**
+ * The trust tier a caller asked for.
+ *
+ * Deliberately opt-in: a caller that says nothing registers into the untrusted tier, so a new call site cannot grant itself the administrator's precedence by omission.
+ */
+function trustTierFor(options?: AddHostRuleOptions): HostRuleTrustTier {
+  if (options?.trusted) {
+    return 'admin';
+  }
+  if (options?.inherited) {
+    return 'inherit';
+  }
+  return 'untrusted';
 }
 
 export function add(params: HostRule, options?: AddHostRuleOptions): void {
-  let rule: RegisteredHostRule = migrateRule(params);
-
-  // set only from `options`, and dropped first so that it cannot be carried over from `params`: `HostRule` has no `trusted` field, but configuration is parsed from JSON, so a repository could otherwise smuggle one in and have its headers treated as the administrator's
+  let rule: RegisteredHostRule = {
+    ...migrateRule(params),
+    // set only from `options`, and assigned unconditionally so that it cannot be carried over from `params`: `HostRule` has no `trustTier` field, but configuration is parsed from JSON, so a repository could otherwise smuggle one in and have its rules treated as the administrator's
+    trustTier: trustTierFor(options),
+  };
+  // as above, for the boolean this tier replaced
   delete rule.trusted;
-  if (options?.trusted) {
-    rule.trusted = true;
-  }
 
-  // like `trusted`, `allowInternal` may only come from the administrator's own config: a repository or preset rule must not be able to grant itself access to internal hosts
-  if (!isUndefined(rule.allowInternal) && !rule.trusted) {
+  // like the trust tier, `allowInternal` may only come from configuration the administrator trusts: a repository or preset rule must not be able to grant itself access to internal hosts
+  if (!isUndefined(rule.allowInternal) && rule.trustTier === 'untrusted') {
     logger.debug(
       `Ignoring hostRules allowInternal for ${rule.matchHost ?? rule.hostType} from untrusted config`,
     );
@@ -283,6 +317,15 @@ function lastDefined<T>(values: (T | undefined)[]): T | undefined {
   return values.filter((value) => !isUndefined(value)).pop();
 }
 
+/**
+ * The rules whose grant is deliberately scoped, by a `hostType` or by a URL-prefix `matchHost` - see {@link InternalHostGrant}.
+ */
+function scopedRules(rules: RegisteredHostRule[]): RegisteredHostRule[] {
+  return rules.filter(
+    (rule) => isNonEmptyString(rule.hostType) || isHttpUrl(rule.matchHost),
+  );
+}
+
 export function find(search: HostRuleSearch): CombinedHostRule {
   if ([search.hostType, search.url].every(isFalsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
@@ -330,43 +373,69 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   const res: RegisteredHostRule & Pick<CombinedHostRule, 'internalHostGrant'> =
     Object.assign({}, ...matchedRules);
 
+  // the sensitive fields below are resolved a trust tier at a time, so that the outcome cannot depend on how specific a rule from a less trusted tier makes itself
+  const trustedRules = matchedRules.filter(
+    (rule) => rule.trustTier === 'admin',
+  );
+  const inheritedRules = matchedRules.filter(
+    (rule) => rule.trustTier === 'inherit',
+  );
+  const untrustedRules = matchedRules.filter(
+    (rule) => rule.trustTier === 'untrusted',
+  );
+
   // `headers` are resolved per trust tier and then combined key by key, so that repository or preset config can no longer discard - or substitute - the headers a self-hosted admin configured for the same host
   // Within a tier nothing changes: the most specific rule's `headers` still replace those of the broader rules it is combined with, so an admin masking their own broad rule with a narrower one keeps working, as does a repository doing the same among its own rules
   // This is deliberately scoped to `headers` alone, as combining any more of the fields than we already do has caused authentication regressions before: an inherited `token` and a specific rule's `username`/`password` are not meant to be used together
-  const untrustedHeaders = headersOfLastRuleToSetThem(
-    matchedRules.filter((rule) => !rule.trusted),
-  );
-  const trustedHeaders = headersOfLastRuleToSetThem(
-    matchedRules.filter((rule) => rule.trusted),
-  );
-  if (untrustedHeaders ?? trustedHeaders) {
-    // the admin's own headers are applied last, so a repository cannot override one they set for this host either
-    res.headers = { ...untrustedHeaders, ...trustedHeaders };
+  const untrustedHeaders = headersOfLastRuleToSetThem(untrustedRules);
+  const inheritedHeaders = headersOfLastRuleToSetThem(inheritedRules);
+  const trustedHeaders = headersOfLastRuleToSetThem(trustedRules);
+  if (untrustedHeaders ?? inheritedHeaders ?? trustedHeaders) {
+    // the admin's own headers are applied last, so neither a repository nor inherited config can override one they set for this host
+    res.headers = {
+      ...untrustedHeaders,
+      ...inheritedHeaders,
+      ...trustedHeaders,
+    };
   }
 
   // `enabled` is resolved per trust tier like `headers`: a repository or preset rule must not be able to re-enable a host the administrator's own rules disabled (or vice versa) by out-specifying them with a longer `matchHost`
-  const trustedRules = matchedRules.filter((rule) => rule.trusted);
-  const untrustedEnabled = lastDefined(
-    matchedRules.filter((rule) => !rule.trusted).map((rule) => rule.enabled),
-  );
-  const trustedEnabled = lastDefined(trustedRules.map((rule) => rule.enabled));
-  const enabled = trustedEnabled ?? untrustedEnabled;
+  const enabled =
+    lastDefined(trustedRules.map((rule) => rule.enabled)) ??
+    lastDefined(inheritedRules.map((rule) => rule.enabled)) ??
+    lastDefined(untrustedRules.map((rule) => rule.enabled));
   if (!isUndefined(enabled)) {
     res.enabled = enabled;
   }
 
-  // computed here and never from configuration: `add()` strips `allowInternal` from untrusted registrations, so only the administrator's own rules can contribute
+  // computed here and never from configuration: `add()` strips `allowInternal` from untrusted registrations, so only rules from configuration the administrator trusts can contribute
+  // the admin's own rules are resolved first, and an `allowInternal: false` of theirs is an absolute veto: inherited config cannot talk an organization's way back in through any grant shape, whether scoped, unscoped, or merely implicit in naming the host
+  // each shape must therefore be resolved from the admin tier's verdict rather than falling through to the inherit tier on its own - a bare admin rule sets no scoped verdict, and an inherited scoped grant would otherwise fill the gap for exactly the requests which consult it, such as fetching config over HTTP
+  const trustedExplicit = lastDefined(
+    trustedRules.map((rule) => rule.allowInternal),
+  );
+  const trustedScoped = lastDefined(
+    scopedRules(trustedRules).map((rule) => rule.allowInternal),
+  );
+  // derived from the resolved values, so an admin masking a broad `allowInternal: false` of their own with a narrower `true` is not a veto
+  const adminVeto = trustedExplicit === false || trustedScoped === false;
+  // a vetoed request has no inherit tier left to fall through to, and is clamped to `false` rather than to undefined so that a consumer's `explicit ?? implicit` still short-circuits
+  const inheritedExplicit = adminVeto
+    ? false
+    : lastDefined(inheritedRules.map((rule) => rule.allowInternal));
+  const inheritedScoped = adminVeto
+    ? false
+    : lastDefined(
+        scopedRules(inheritedRules).map((rule) => rule.allowInternal),
+      );
   const internalHostGrant: InternalHostGrant = {
-    explicit: lastDefined(matchedRules.map((rule) => rule.allowInternal)),
-    scoped: lastDefined(
-      matchedRules
-        .filter(
-          (rule) =>
-            isNonEmptyString(rule.hostType) || isHttpUrl(rule.matchHost),
-        )
-        .map((rule) => rule.allowInternal),
-    ),
-    implicit: trustedRules.some((rule) => isNonEmptyString(rule.matchHost)),
+    explicit: trustedExplicit ?? inheritedExplicit,
+    scoped: trustedScoped ?? inheritedScoped,
+    implicit:
+      !adminVeto &&
+      [...trustedRules, ...inheritedRules].some((rule) =>
+        isNonEmptyString(rule.matchHost),
+      ),
   };
   if (
     !isUndefined(internalHostGrant.explicit) ||
@@ -380,6 +449,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   delete res.resolvedHost;
   delete res.matchHost;
   delete res.readOnly;
+  delete res.trustTier;
   delete res.trusted;
   delete res.allowInternal;
   return res;
