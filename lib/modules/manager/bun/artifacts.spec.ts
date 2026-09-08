@@ -131,8 +131,9 @@ describe('modules/manager/bun/artifacts', () => {
         await updateArtifacts(updateArtifact);
 
         expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
-        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          1,
+          '.npmrc',
           'registry=https://registry.example.com/\n',
         );
       });
@@ -155,8 +156,9 @@ describe('modules/manager/bun/artifacts', () => {
         await updateArtifacts(updateArtifact);
 
         expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
-        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          1,
+          '.npmrc',
           '@scope:registry=https://registry.example.com/\n',
         );
       });
@@ -193,13 +195,15 @@ describe('modules/manager/bun/artifacts', () => {
         await updateArtifacts(updateArtifact);
 
         expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
-        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          1,
+          '.npmrc',
           '@scope:registry=https://registry.example.com/\nregistry=https://repo.example.com/\n',
         );
         // original .npmrc is restored afterwards
-        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[2][1]).toBe(
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          3,
+          '.npmrc',
           'registry=https://repo.example.com/',
         );
       });
@@ -236,13 +240,15 @@ describe('modules/manager/bun/artifacts', () => {
         await updateArtifacts(updateArtifact);
 
         expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
-        expect(fs.writeLocalFile.mock.calls[0][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[0][1]).toBe(
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          1,
+          '.npmrc',
           '@scope:registry=https://registry.example.com/\n',
         );
         // original .npmrc is restored afterwards
-        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[2][1]).toBe(
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          3,
+          '.npmrc',
           'registry=https://repo.example.com/',
         );
       });
@@ -268,8 +274,11 @@ describe('modules/manager/bun/artifacts', () => {
           { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
         expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
-        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[2][1]).toBe('# dummy');
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          3,
+          '.npmrc',
+          '# dummy',
+        );
       });
 
       it('supports lockFileMaintenance', async () => {
@@ -334,8 +343,11 @@ describe('modules/manager/bun/artifacts', () => {
           TEMPORARY_ERROR,
         );
         expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
-        expect(fs.writeLocalFile.mock.calls[2][0]).toBe('.npmrc');
-        expect(fs.writeLocalFile.mock.calls[2][1]).toBe('# dummy');
+        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+          3,
+          '.npmrc',
+          '# dummy',
+        );
       });
 
       it('handles full error', async () => {
