@@ -7,7 +7,10 @@ import { InheritConfig } from '../../../config/inherit.ts';
 import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type {
+  RenovateConfig,
+  ValidationMessage,
+} from '../../../config/types.ts';
 import { validateConfig } from '../../../config/validation.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
@@ -19,6 +22,25 @@ import { platform } from '../../../modules/platform/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import * as template from '../../../util/template/index.ts';
 import { applyHostRules } from './merge.ts';
+
+const inheritedConfigValidationError =
+  'The inherited config contains some invalid settings';
+
+/**
+ * Report an inherited config validation failure against the inherited config, rather than the repository being processed.
+ *
+ * The inherited config repository is managed by the organization's administrators, so a fault there is not one the repository's owners have introduced - and they may not even be able to read the file to see it.
+ */
+function throwInheritedConfigValidationError(
+  validationSource: string,
+  errors: ValidationMessage[],
+): never {
+  const error = new Error(CONFIG_VALIDATION);
+  error.validationSource = validationSource;
+  error.validationError = inheritedConfigValidationError;
+  error.validationMessage = errors.map((err) => err.message).join(', ');
+  throw error;
+}
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
@@ -83,6 +105,7 @@ export async function mergeInheritedConfig(
     logger.debug({ parseResult }, 'Error parsing inherited config.');
     throw new Error(CONFIG_INHERIT_PARSE_ERROR);
   }
+  const inheritedConfigSource = `Inherited config (\`${config.inheritConfigFileName}\` in \`${inheritConfigRepoName}\`)`;
   const inheritedConfig = parseResult.parsedContents as RenovateConfig;
   logger.debug({ config: inheritedConfig }, `Inherited config`);
   const res = await validateConfig('inherit', inheritedConfig);
@@ -91,7 +114,7 @@ export async function mergeInheritedConfig(
       { errors: res.errors },
       'Found errors in inherited configuration.',
     );
-    throw new Error(CONFIG_VALIDATION);
+    throwInheritedConfigValidationError(inheritedConfigSource, res.errors);
   }
   if (res.warnings.length) {
     logger.warn(
@@ -145,7 +168,10 @@ export async function mergeInheritedConfig(
       { errors: validationRes.errors },
       'Found errors in presets inside the inherited configuration.',
     );
-    throw new Error(CONFIG_VALIDATION);
+    throwInheritedConfigValidationError(
+      inheritedConfigSource,
+      validationRes.errors,
+    );
   }
   if (validationRes.warnings.length) {
     logger.warn(
