@@ -2,6 +2,7 @@ import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { getHttpUrl, parseGitUrl } from '../../../util/git/url.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs/index.ts';
@@ -44,7 +45,7 @@ export async function extractPackageFile(
   // root mapping so updates use the user-facing input name as depName.
   const rootInputs = new Map<string, string>();
   for (const [inputName, nodeName] of Object.entries(
-    flakeLock.nodes[flakeLock.root]?.inputs ?? {},
+    coerceObject(flakeLock.nodes[flakeLock.root]?.inputs),
   )) {
     if (isString(nodeName)) {
       rootInputs.set(nodeName, inputName);
@@ -119,7 +120,7 @@ export async function extractPackageFile(
     };
 
     dep.currentValue = flakeOriginal.ref?.replace(
-      regEx(/^refs\/(heads|tags)\//),
+      regEx(/^refs\/(?:heads|tags)\//),
       '',
     );
     dep.currentDigest = flakeLocked.rev;
