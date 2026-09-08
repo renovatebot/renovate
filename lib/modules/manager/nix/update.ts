@@ -1,10 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type {
-  UpdateDependencyConfig,
-  UpdateDependencyResult,
-} from '../types.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
 
 type NixUpdateDependencyConfig = Pick<
   UpdateDependencyConfig,
@@ -165,7 +162,7 @@ function findInputUrl(
 export function updateDependency({
   fileContent,
   upgrade,
-}: NixUpdateDependencyConfig): string | UpdateDependencyResult | null {
+}: NixUpdateDependencyConfig): string | null {
   const { depName, currentValue, newValue, currentDigest, newDigest } = upgrade;
   logger.trace({ depName, currentValue, newValue }, 'nix.updateDependency()');
 
@@ -206,19 +203,6 @@ export function updateDependency({
   }
 
   if (newUrl === oldUrl) {
-    if (
-      currentValue === newValue &&
-      currentDigest &&
-      newDigest &&
-      currentDigest !== newDigest
-    ) {
-      logger.debug(
-        { depName, currentDigest, newDigest, currentValue },
-        'Digest-only update detected, requesting lock file update',
-      );
-      return { content: fileContent, updateArtifacts: true };
-    }
-
     logger.trace({ depName, url: oldUrl }, 'No changes made to URL');
     return fileContent;
   }

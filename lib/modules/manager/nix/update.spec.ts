@@ -427,39 +427,6 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
-    it('requests an artifact update for digest-only updates', () => {
-      const fileContent = codeBlock`
-        {
-          inputs = {
-            nixpkgs-tar.url = "https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz";
-          };
-        }
-      `;
-      const result = updateDependency({
-        fileContent,
-        upgrade: {
-          depName: 'nixpkgs-tar',
-          currentValue: 'nixpkgs-unstable',
-          newValue: 'nixpkgs-unstable',
-          currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
-          newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
-        },
-      });
-      expect(result).toEqual({
-        content: fileContent,
-        updateArtifacts: true,
-      });
-      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
-        {
-          depName: 'nixpkgs-tar',
-          currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
-          newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
-          currentValue: 'nixpkgs-unstable',
-        },
-        'Digest-only update detected, requesting lock file update',
-      );
-    });
-
     it('only replaces a version within the GitHub ref path', () => {
       const fileContent = codeBlock`
         {

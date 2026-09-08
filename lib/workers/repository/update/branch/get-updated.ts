@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -102,7 +102,6 @@ export async function getUpdatedPackageFiles(
   );
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
-  const artifactOnlyFileContents: Record<string, string> = {};
   const managerPackageFiles: Record<string, Set<string>> = {};
   const packageFileUpdatedDeps: Record<string, BranchUpgradeConfig[]> = {};
   const lockFileMaintenanceFiles: string[] = [];
@@ -260,21 +259,11 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      const updateResult = await updateDependency({
+      let newContent = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
-      let newContent: string | null;
-      let updateArtifacts = false;
-      if (isNullOrUndefined(updateResult)) {
-        newContent = null;
-      } else if (isString(updateResult)) {
-        newContent = updateResult;
-      } else {
-        newContent = updateResult.content;
-        updateArtifacts = updateResult.updateArtifacts ?? false;
-      }
       newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
@@ -309,21 +298,14 @@ export async function getUpdatedPackageFiles(
           `Updating ${depName} in ${coerceString(packageFile, lockFile)}`,
         );
         updatedFileContents[packageFile] = newContent;
-        delete artifactOnlyFileContents[packageFile];
         delete nonUpdatedFileContents[packageFile];
       }
-      if (newContent === packageFileContent) {
-        if (upgrade.manager === 'git-submodules') {
-          updatedFileContents[packageFile] = newContent;
-          delete nonUpdatedFileContents[packageFile];
-        }
-        if (updateArtifacts && !updatedFileContents[packageFile]) {
-          logger.debug(
-            { packageFile, depName },
-            'Manager requested an artifact update without a package file change',
-          );
-          artifactOnlyFileContents[packageFile] = newContent;
-        }
+      if (
+        newContent === packageFileContent &&
+        upgrade.manager === 'git-submodules'
+      ) {
+        updatedFileContents[packageFile] = newContent;
+        delete nonUpdatedFileContents[packageFile];
       }
     }
   }
@@ -334,26 +316,18 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: updatedFileContents[name],
   }));
-  const filesForArtifacts: FileAddition[] = [
-    ...updatedPackageFiles,
-    ...Object.keys(artifactOnlyFileContents).map((name) => ({
-      type: 'addition' as const,
-      path: name,
-      contents: artifactOnlyFileContents[name],
-    })),
-  ];
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
   const artifactNotices: ArtifactNotice[] = [];
-  if (isNonEmptyArray(filesForArtifacts)) {
+  if (isNonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
     const updatedPackageFileManagers = getManagersForPackageFiles(
-      filesForArtifacts,
+      updatedPackageFiles,
       managerPackageFiles,
     );
     for (const manager of updatedPackageFileManagers) {
       const packageFilesForManager = getPackageFilesForManager(
-        filesForArtifacts,
+        updatedPackageFiles,
         managerPackageFiles[manager],
       );
       sortPackageFiles(config, manager, packageFilesForManager);
