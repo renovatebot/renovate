@@ -973,7 +973,7 @@ describe('util/package-rules/index', () => {
       await expect(applyPackageRules(config)).resolves.not.toThrow();
     });
 
-    it('returns null on platform=local', async () => {
+    it('does not apply the packageRule on platform=local', async () => {
       GlobalConfig.set({
         platform: 'local',
       });
@@ -983,12 +983,15 @@ describe('util/package-rules/index', () => {
           {
             matchUpdateTypes: ['major'],
             matchConfidence: ['high'],
+            // @ts-expect-error -- testing
+            x: 1,
           },
         ],
       };
       hostRules.clear();
 
-      await expect(applyPackageRules(config)).resolves.toBeNull();
+      const res = await applyPackageRules(config);
+      expect(res.x).toBeUndefined();
     });
 
     it('uses productLinks.documentation in error message URL', async () => {
