@@ -39,11 +39,13 @@ export interface HostRule {
 }
 
 /**
- * How the self-hosted administrator's host rules treat internal-host access for a request, computed by `find()`. Never settable through configuration: only rules from the administrator's own config contribute to it.
+ * How the trusted host rules treat internal-host access for a request, computed by `find()`. Never settable through configuration: only rules from the administrator's own config, and from organization-inherited config the administrator has opted into trusting through `inheritConfigTrusted`, contribute to it.
+ *
+ * The administrator's own rules are resolved first, and an `allowInternal: false` of theirs vetoes every field below: inherited config can never re-grant a host the administrator refused, in any grant shape.
  */
 export interface InternalHostGrant {
   /**
-   * The `allowInternal` value of the administrator's matching rules, with the most specific rule winning. `undefined` when none of them set it.
+   * The `allowInternal` value of the matching trusted rules, with the most specific rule winning, and the administrator's own rules winning over inherited config's. `undefined` when none of them set it.
    */
   explicit?: boolean;
   /**
@@ -51,7 +53,7 @@ export interface InternalHostGrant {
    */
   scoped?: boolean;
   /**
-   * Whether any of the administrator's rules naming a host (`matchHost`) matched the request: hosts the administrator has named in their own config are implicitly permitted.
+   * Whether any trusted rule naming a host (`matchHost`) matched the request: hosts named in configuration the administrator trusts are implicitly permitted. Always `false` under an administrator's veto.
    */
   implicit: boolean;
 }
