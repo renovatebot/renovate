@@ -382,7 +382,6 @@ describe('modules/manager/gomod/extract', () => {
             depType: 'require',
             currentValue: 'v0.17.3',
             datasource: 'go',
-            skipReason: 'invalid-version',
           },
         ],
       });
