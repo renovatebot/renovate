@@ -1358,6 +1358,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     supportedManagers: [
       'ansible',
+      'argocd',
       'bitbucket-pipelines',
       'buildpacks',
       'crossplane',
@@ -1369,6 +1370,7 @@ const options: Readonly<RenovateOptions>[] = [
       'gitlabci',
       'helm-requirements',
       'helmfile',
+      'helmsman',
       'helmv3',
       'kubernetes',
       'kustomize',

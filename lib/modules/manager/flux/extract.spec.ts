@@ -263,6 +263,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'sealed-secrets',
             packageName: 'ghcr.io/charts/sealed-secrets',
+            pinDigests: false,
           },
         ],
       });
@@ -1757,6 +1758,7 @@ describe('modules/manager/flux/extract', () => {
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
               packageName:
                 'ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set',
+              pinDigests: false,
             },
           ],
           packageFile:
@@ -1778,6 +1780,7 @@ describe('modules/manager/flux/extract', () => {
               datasource: DockerDatasource.id,
               depName: 'kyverno',
               packageName: 'ghcr.io/kyverno/charts/kyverno',
+              pinDigests: false,
             },
           ],
           packageFile:
