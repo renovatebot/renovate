@@ -166,4 +166,18 @@ export const presets: Record<string, Preset> = {
     description:
       'Update `@tsconfig/node` extends  in `tsconfig.json` and `jsconfig.json` files.',
   },
+  valeVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        datasourceTemplate: 'github-releases',
+        managerFilePatterns: ['(^|/)\\.vale\\.ini$'],
+        matchStrings: [
+          'https://github\\.com/(?<packageName>[^/]+/[^/]+)/releases/download/(?<currentValue>[^/]+)/',
+        ],
+      },
+    ],
+    description:
+      'Update Vale package versions in `.vale.ini` configuration files.',
+  },
 };

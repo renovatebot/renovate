@@ -768,6 +768,67 @@ describe('config/presets/internal/custom-managers', () => {
     });
   });
 
+  describe('Update Vale package versions in .vale.ini', () => {
+    const customManager = presets.valeVersions.customManagers?.[0];
+
+    it('finds dependencies in file', async () => {
+      const fileContent = codeBlock`
+        StylesPath = styles
+
+        MinAlertLevel = suggestion
+
+        [*.{md,txt}]
+        BasedOnStyles = Vale
+
+        Packages = https://github.com/errata-ai/Google/releases/download/v1.0.0/Google.zip
+        Packages = https://github.com/errata-ai/Microsoft/releases/download/v0.1.0/Microsoft.zip, https://github.com/errata-ai/write-good/releases/download/v0.4.0/write-good.zip
+      `;
+
+      const res = await extractPackageFile(
+        fileContent,
+        '.vale.ini',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-releases',
+          packageName: 'errata-ai/Google',
+          replaceString:
+            'https://github.com/errata-ai/Google/releases/download/v1.0.0/',
+        },
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          packageName: 'errata-ai/Microsoft',
+          replaceString:
+            'https://github.com/errata-ai/Microsoft/releases/download/v0.1.0/',
+        },
+        {
+          currentValue: 'v0.4.0',
+          datasource: 'github-releases',
+          packageName: 'errata-ai/write-good',
+          replaceString:
+            'https://github.com/errata-ai/write-good/releases/download/v0.4.0/',
+        },
+      ]);
+    });
+
+    describe('matches regex patterns', () => {
+      it.each`
+        path                    | expected
+        ${'.vale.ini'}          | ${true}
+        ${'foo/.vale.ini'}      | ${true}
+        ${'foo/bar/.vale.ini'}  | ${true}
+        ${'vale.ini'}           | ${false}
+        ${'.vale.ini.bak'}      | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(regexMatches(path, customManager!.managerFilePatterns)).toBe(expected);
+      });
+    });
+  });
+
   describe('finds dependencies in pom.xml properties', () => {
     const customManager = presets.mavenPropertyVersions.customManagers?.[0];
 
