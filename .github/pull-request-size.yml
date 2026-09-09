@@ -1,0 +1,41 @@
+# Configuration for PR Size Labeler
+
+# List of files to exclude from size calculation
+# Files matching these patterns will not be considered when calculating PR size
+#exclude_files:
+#  - "foo.bar"  # Example: Exclude 'foo.bar' file
+#  - "*.xyz"
+# fixtures can't be easily excluded https://pkg.go.dev/path/filepath#Match
+
+# Configuration for labeling based on the size of the Pull Request
+# Each entry defines a size label, along with thresholds for diff and file count
+label_configs:
+  # Configuration for 'extra small' PRs
+  - size: xs
+    diff: 25 # Threshold for the total lines of code changed (additions + deletions)
+    files: 1 # Threshold for the total number of files changed
+    labels: ['size/xs'] # Labels to be applied for this size
+
+  # Configuration for 'small' PRs
+  - size: s
+    diff: 150
+    files: 10
+    labels: ['size/s']
+
+  # Configuration for 'medium' PRs
+  - size: m
+    diff: 600
+    files: 25
+    labels: ['size/m']
+
+  # Configuration for 'large' PRs
+  - size: l
+    diff: 2500
+    files: 50
+    labels: ['size/l']
+
+  # Configuration for 'extra large' PRs
+  - size: xl
+    diff: 5000
+    files: 100
+    labels: ['size/xl']

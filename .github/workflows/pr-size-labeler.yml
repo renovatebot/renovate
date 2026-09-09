@@ -1,0 +1,23 @@
+name: PR Size Labeler
+
+on:
+  pull_request: # Trigger the workflow when a pull request is opened or synchronized
+
+jobs:
+  auto-label-pr:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          filter: blob:none # we don't need all blobs
+          show-progress: false
+
+      - name: Label PR based on size
+        uses: cbrgm/pr-size-labeler-action@6b70abfe1f75f6f35ca24731f6d25fb7251b6127 # v1.3.13
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the GitHub token for authentication
+          github_repository: ${{ github.repository }} # Pass the repository name
+          github_pr_number: ${{ github.event.number }} # Pass the pull request number
+          config_file_path: '.github/pull-request-size.yml' # Specify the path to the configuration file
