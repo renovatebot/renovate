@@ -49,6 +49,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis://host', undefined);
 
         expect(createClient).toHaveBeenCalledWith({
+          RESP: 2,
           pingInterval: 30000,
           socket: { reconnectStrategy: expect.any(Function) },
           url: 'redis://host',
@@ -76,6 +77,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           rootNodes: [
             {
               pingInterval: 30000,
@@ -93,6 +95,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://user:pass@host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           defaults: { username: 'user', password: 'pass' },
           rootNodes: [
             expect.objectContaining({
@@ -106,6 +109,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://user@host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           defaults: { username: 'user' },
           rootNodes: [
             expect.objectContaining({
@@ -119,6 +123,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://:pass@host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           defaults: { password: 'pass' },
           rootNodes: [
             expect.objectContaining({

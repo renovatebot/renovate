@@ -1,4 +1,12 @@
-import type { RedisClusterOptions } from '@redis/client';
+import type {
+  RedisClientType,
+  RedisClusterOptions,
+  RedisClusterType,
+  RedisFunctions,
+  RedisModules,
+  RedisScripts,
+  TypeMapping,
+} from '@redis/client';
 import { RESP_TYPES, createClient, createCluster } from '@redis/client';
 import { logger } from '../../../../logger/index.ts';
 import { regEx } from '../../../regex.ts';
@@ -13,9 +21,25 @@ export function normalizeRedisUrl(url: string): string {
   );
 }
 
+// TODO: switch to RESP 3 (the @redis/client v6 default) in the next major
+// release, as it requires Redis server 6.0 or newer.
+const RESP = 2;
+
 type RedisClient =
-  | ReturnType<typeof createClient>
-  | ReturnType<typeof createCluster>;
+  | RedisClientType<
+      RedisModules,
+      RedisFunctions,
+      RedisScripts,
+      typeof RESP,
+      TypeMapping
+    >
+  | RedisClusterType<
+      RedisModules,
+      RedisFunctions,
+      RedisScripts,
+      typeof RESP,
+      TypeMapping
+    >;
 
 interface RedisBinaryClient {
   get(key: string): Promise<Buffer | null>;
@@ -43,7 +67,12 @@ export class PackageCacheRedis extends PackageCacheBase {
     let client: RedisClient;
 
     if (clusteredMode) {
-      const clusterConfig: RedisClusterOptions = { rootNodes: [config] };
+      const clusterConfig: RedisClusterOptions<
+        RedisModules,
+        RedisFunctions,
+        RedisScripts,
+        typeof RESP
+      > = { rootNodes: [config], RESP };
 
       const parsedUrl = parseUrl(rewrittenUrl);
       if (parsedUrl?.username) {
@@ -59,7 +88,7 @@ export class PackageCacheRedis extends PackageCacheBase {
 
       client = createCluster(clusterConfig);
     } else {
-      client = createClient(config);
+      client = createClient({ ...config, RESP });
     }
 
     await client.connect();
