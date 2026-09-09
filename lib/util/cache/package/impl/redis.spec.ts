@@ -72,6 +72,46 @@ describe('util/cache/package/impl/redis', () => {
         );
       });
 
+      it('sets socket.servername for rediss:// with a hostname', async () => {
+        await PackageCacheRedis.create('rediss://cache.example.com:6380', '');
+
+        expect(createClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            socket: expect.objectContaining({
+              servername: 'cache.example.com',
+            }),
+          }),
+        );
+      });
+
+      it('does not set socket.servername for rediss:// with an IPv4 address', async () => {
+        await PackageCacheRedis.create('rediss://127.0.0.1:6380', '');
+
+        const [config] = vi.mocked(createClient).mock.calls[0];
+        expect(config?.socket).not.toHaveProperty('servername');
+      });
+
+      it('does not set socket.servername for rediss:// with an IPv6 address', async () => {
+        await PackageCacheRedis.create('rediss://[::1]:6380', '');
+
+        const [config] = vi.mocked(createClient).mock.calls[0];
+        expect(config?.socket).not.toHaveProperty('servername');
+      });
+
+      it('does not set socket.servername for redis:// (non-TLS)', async () => {
+        await PackageCacheRedis.create('redis://cache.example.com:6379', '');
+
+        const [config] = vi.mocked(createClient).mock.calls[0];
+        expect(config?.socket).not.toHaveProperty('servername');
+      });
+
+      it('does not set socket.servername when URL cannot be parsed', async () => {
+        await PackageCacheRedis.create('not-a-valid-url', '');
+
+        const [config] = vi.mocked(createClient).mock.calls[0];
+        expect(config?.socket).not.toHaveProperty('servername');
+      });
+
       it('initializes cluster client', async () => {
         await PackageCacheRedis.create('redis+cluster://host', '');
 
