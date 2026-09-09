@@ -2199,6 +2199,33 @@ describe('modules/platform/gitea/index', () => {
         'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
       );
     });
+
+    it('should skip the cache when the updated pull request has no head or base', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate', limit: 100 })
+        .reply(200, mockPRs)
+        .patch('/repos/some/repo/pulls/1', { title: 'New Title' })
+        .reply(200, {
+          number: 1,
+          state: 'open',
+          title: 'New Title',
+          body: '',
+          mergeable: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        }); // no head/base => toRenovatePR returns null
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      await expect(
+        gitea.updatePr({ number: 1, prTitle: 'New Title' }),
+      ).toResolve();
+
+      const res = await gitea.getPr(1);
+      expect(res).toMatchObject({ number: 1, title: 'Some PR' });
+    });
   });
 
   describe('mergePr', () => {

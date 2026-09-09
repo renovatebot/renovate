@@ -1,5 +1,4 @@
-import type { GiteaHttpOptions } from '../../../util/http/gitea.ts';
-import type { HttpBase } from '../../../util/http/http.ts';
+import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import type { Platform, Pr, RepoSortMethod, SortMethod } from '../types.ts';
 import type {
   CommitStatus,
@@ -16,10 +15,10 @@ import type {
 export type GiteaPlatformKey = 'gitea' | 'forgejo';
 
 /**
- * Http client of a platform which speaks the Gitea API. Typed as the base class
- * so that both `GiteaHttp` and `ForgejoHttp` are accepted.
+ * Http client of a platform which speaks the Gitea API. `ForgejoHttp` extends
+ * `GiteaHttp`, so both are accepted.
  */
-export type GiteaLikeHttp = HttpBase<GiteaHttpOptions>;
+export type GiteaLikeHttp = GiteaHttp;
 
 export interface GiteaPlatformOptions {
   /** Platform id, also used as `hostType` and as cache key. */
