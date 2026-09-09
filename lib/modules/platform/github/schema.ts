@@ -81,7 +81,7 @@ export const GithubVulnerabilityAlerts = LooseArray(
   {
     onError: ({ error }) => {
       logger.debug(
-        { error },
+        { err: error },
         'Vulnerability Alert: Failed to parse some alerts',
       );
     },

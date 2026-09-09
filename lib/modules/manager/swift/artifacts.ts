@@ -186,7 +186,7 @@ export async function updateArtifacts({
     const parseResult = PackageResolvedJson.safeParse(content);
     if (!parseResult.success) {
       logger.debug(
-        { resolvedFile, error: parseResult.error },
+        { resolvedFile, err: parseResult.error },
         'swift: could not parse Package.resolved',
       );
       continue;
