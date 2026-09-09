@@ -210,7 +210,14 @@ export async function writeExistingFiles(
                 delete npmLockParsed.packages[packageName];
                 continue;
               }
-              if (!depName || !oldVersion) {
+              if (
+                !depName ||
+                !oldVersion ||
+                // Workspace entries (e.g. `packages/app`) and the root entry
+                // are link targets: `node_modules/<name>` points at them with
+                // `link: true`, so deleting one breaks npm with EMISSINGTARGET.
+                !packageName.startsWith('node_modules/')
+              ) {
                 continue;
               }
               // Lockstep monorepo siblings (e.g. vue -> @vue/server-renderer)
