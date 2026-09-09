@@ -15,7 +15,7 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
-import { setBaseUrl } from '../../../util/http/gitea.ts';
+import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -1171,6 +1171,8 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
 
 export const id = 'gitea';
 
+export const giteaHttp = new GiteaHttp();
+
 /**
  * Forgejo reports the Gitea version it is compatible with as part of its own
  * version, for example `11.0.1-99-c504062+gitea-1.22.0`.
@@ -1202,7 +1204,7 @@ function checkNativeAutomerge(version: string): string | null {
 const { platform, resetPlatform } = createPlatform({
   id,
   defaultEndpoint: 'https://gitea.com/',
-  http: helper.giteaHttp,
+  http: giteaHttp,
   setBaseUrl,
   logDetectedVersion,
   checkNativeAutomerge,

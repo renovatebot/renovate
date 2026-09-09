@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { forgejoHttp } from '../../../modules/platform/forgejo/forgejo-helper.ts';
+import { forgejoHttp } from '../../../modules/platform/forgejo/index.ts';
 import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper.ts';
 import type { RepoContents } from '../../../modules/platform/gitea/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';

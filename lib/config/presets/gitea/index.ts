@@ -1,8 +1,6 @@
 import { logger } from '../../../logger/index.ts';
-import {
-  getRepoContents,
-  giteaHttp,
-} from '../../../modules/platform/gitea/gitea-helper.ts';
+import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper.ts';
+import { giteaHttp } from '../../../modules/platform/gitea/index.ts';
 import type { RepoContents } from '../../../modules/platform/gitea/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';

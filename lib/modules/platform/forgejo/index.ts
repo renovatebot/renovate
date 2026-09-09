@@ -1,10 +1,11 @@
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
-import { setBaseUrl } from '../../../util/http/forgejo.ts';
+import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
 import { createPlatform } from '../gitea/index.ts';
-import { forgejoHttp } from './forgejo-helper.ts';
 
 export const id = 'forgejo';
+
+export const forgejoHttp = new ForgejoHttp();
 
 function logDetectedVersion(version: string): void {
   logger.debug(`Forgejo version: ${version}`);

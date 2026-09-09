@@ -3,7 +3,7 @@ import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-import { GiteaHttp, type GiteaHttpOptions } from '../../../util/http/gitea.ts';
+import type { GiteaHttpOptions } from '../../../util/http/gitea.ts';
 import { getQueryString } from '../../../util/url.ts';
 import {
   Branch,
@@ -36,8 +36,6 @@ import type {
   RepoSearchParams,
 } from './types.ts';
 import { API_PATH } from './utils.ts';
-
-export const giteaHttp = new GiteaHttp();
 
 function urlEscape(raw: string): string {
   return encodeURIComponent(raw);
