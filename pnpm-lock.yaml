@@ -158,8 +158,8 @@ importers:
         specifier: 1.13.2
         version: 1.13.2
       azure-devops-node-api:
-        specifier: 15.1.3
-        version: 15.1.3
+        specifier: 17.0.0
+        version: 17.0.0
       bunyan:
         specifier: 1.8.15
         version: 1.8.15
@@ -2671,8 +2671,8 @@ packages:
   aws4@1.13.2:
     resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
 
-  azure-devops-node-api@15.1.3:
-    resolution: {integrity: sha512-YMgxCjQDqBr//vGy658tXTrXAgS2BzIChJ2Mzrq+fzLK+dh42fODWO/kEQMmtp+Rw0jNgEoUA72cHYVBrxrjRw==}
+  azure-devops-node-api@17.0.0:
+    resolution: {integrity: sha512-Ej/C91R56m98p99B6RoePnCsWH2NEME1a7rYE7WWyX8AMuIILEDFyVlwRypfHOSJTTRJZVHkXISkPDqs6To/HQ==}
     engines: {node: '>= 16.0.0'}
 
   backslash@0.2.2:
@@ -5491,9 +5491,9 @@ packages:
     resolution: {integrity: sha512-yANm3Jr3GiJ1qgJlxGAVxTOIcEOk1rhQHamlXtnrCK7EHP4HeM9OGxtMg/W7HFdrVzw/ZWJKGVIJusVH85sLtw==}
     engines: {node: '>=20'}
 
-  typed-rest-client@2.1.0:
-    resolution: {integrity: sha512-Nel9aPbgSzRxfs1+4GoSB4wexCF+4Axlk7OSGVQCMa+4fWcyxIsN/YNmkp0xTT2iQzMD98h8yFLav/cNaULmRA==}
-    engines: {node: '>= 16.0.0'}
+  typed-rest-client@3.1.0:
+    resolution: {integrity: sha512-8fMeur8aKaJw8WsqYUZD4CsUfpMFH3zWlRQigM3KWs406KGjqPMdTBn7RfIpMvPjZ1bH+S8QwG+FK/VY/8ndKg==}
+    engines: {node: '>= 20.0.0'}
 
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
@@ -7878,10 +7878,10 @@ snapshots:
 
   aws4@1.13.2: {}
 
-  azure-devops-node-api@15.1.3:
+  azure-devops-node-api@17.0.0:
     dependencies:
       tunnel: 0.0.6
-      typed-rest-client: 2.1.0
+      typed-rest-client: 3.1.0
 
   backslash@0.2.2: {}
 
@@ -10869,7 +10869,7 @@ snapshots:
     dependencies:
       tagged-tag: 1.0.0
 
-  typed-rest-client@2.1.0:
+  typed-rest-client@3.1.0:
     dependencies:
       des.js: 1.1.0
       js-md4: 0.3.2
