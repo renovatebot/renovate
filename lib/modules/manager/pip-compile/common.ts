@@ -34,18 +34,6 @@ export async function getPythonVersionConstraint(
   });
 }
 
-export async function getPipToolsVersionConstraint(
-  config: UpdateArtifactsConfig,
-): Promise<string> {
-  return (await resolveToolConstraint(config, 'pipTools')) ?? '';
-}
-
-export async function getUvVersionConstraint(
-  config: UpdateArtifactsConfig,
-): Promise<string> {
-  return (await resolveToolConstraint(config, 'uv')) ?? '';
-}
-
 export async function getToolVersionConstraint(
   config: UpdateArtifactsConfig,
   commandType: CommandType,
@@ -53,13 +41,13 @@ export async function getToolVersionConstraint(
   if (commandType === 'uv') {
     return {
       toolName: 'uv',
-      constraint: await getUvVersionConstraint(config),
+      constraint: await resolveToolConstraint(config, 'uv'),
     };
   }
 
   return {
     toolName: 'pip-tools',
-    constraint: await getPipToolsVersionConstraint(config),
+    constraint: await resolveToolConstraint(config, 'pipTools'),
   };
 }
 

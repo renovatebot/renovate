@@ -11,10 +11,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
-import {
-  getCopierVersionConstraint,
-  getPythonVersionConstraint,
-} from './utils.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
 const ownerExecutePermission = 0o100;
@@ -101,11 +98,11 @@ export async function updateArtifacts({
     toolConstraints: [
       {
         toolName: 'python',
-        constraint: await getPythonVersionConstraint(config),
+        constraint: await resolveToolConstraint(config, 'python'),
       },
       {
         toolName: 'copier',
-        constraint: await getCopierVersionConstraint(config),
+        constraint: await resolveToolConstraint(config, 'copier'),
       },
     ],
   };
