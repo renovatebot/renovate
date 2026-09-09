@@ -271,6 +271,16 @@ export interface Platform {
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getBranchForceRebase?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the given branch is protected by a merge queue,
+   * so PRs targeting it must be merged through the queue.
+   */
+  isBranchMergeQueueEnabled?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the PR is currently waiting in a merge queue, so it must
+   * not be enqueued or modified again.
+   */
+  isPrInMergeQueue?(number: number): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;

@@ -170,6 +170,12 @@ export interface GhAutomergeResponse {
   };
 }
 
+export interface GhEnqueuePullRequestResponse {
+  enqueuePullRequest: {
+    mergeQueueEntry: { id: string; position: number } | null;
+  };
+}
+
 export interface ApiPageItem {
   number: number;
   updated_at: string;
