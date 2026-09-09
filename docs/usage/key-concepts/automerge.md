@@ -142,9 +142,9 @@ PRs that are already waiting in the merge queue are left untouched on later runs
 We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
 
 !!! warning
-  Branch automerge (`automergeType=branch`) cannot work if the base branch has a merge queue, because pushing directly to the base branch is not possible.
-  Renovate detects this misconfiguration, logs a warning, and creates a PR instead.
-  Configure `automergeType=pr` in such repositories.
+  Branch automerge (`automergeType=branch`) only works if the base branch has a merge queue when Renovate is on the merge queue's bypass list, because pushing directly to the base branch is not possible otherwise.
+  Renovate logs a warning and creates a PR instead if the merge queue rejects the push.
+  Configure `automergeType=pr` in such repositories, or add Renovate to the bypass list.
 
 !!! tip "GitHub Merge Queue overview page"
   GitHub has a page that shows all the PRs in the Merge Queue.
@@ -204,9 +204,9 @@ Renovate detects whether merge trains are enabled on the project and then:
 - `rebaseWhen=auto` resolves to `conflicted` instead of `behind-base-branch`, because the merge train already tests MRs against the head of the target branch.
 
 !!! warning
-  Branch automerge (`automergeType=branch`) cannot work if merge trains are enabled, because pushing directly to the target branch is not possible.
-  Renovate detects this misconfiguration, logs a warning, and creates a MR instead.
-  Configure `automergeType=pr` in such projects.
+  Branch automerge (`automergeType=branch`) only works with merge trains if Renovate is allowed to push to the protected target branch.
+  If the push is rejected, Renovate logs a warning and creates a MR instead.
+  Configure `automergeType=pr` in such projects, or allow Renovate to push to the target branch.
 
 ## Automerging and scheduling
 
