@@ -42,7 +42,7 @@ describe('workers/repository/result', () => {
       ${'config-validation'}   | ${5}
       ${'temporary-error'}     | ${6}
       ${'external-host-error'} | ${7}
-      ${'unknown-error'}       | ${7}
+      ${'unknown-error'}       | ${8}
     `('maps $res to exit code $exitCode', ({ res, exitCode }) => {
       expect(processResult(config, res).exitCode).toBe(exitCode);
     });

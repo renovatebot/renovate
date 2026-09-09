@@ -80,15 +80,8 @@ const exitCodes: [readonly string[], number][] = [
   [PlatformErrors, 4],
   [ConfigErrors, 5],
   [TemporaryErrors, 6],
-  [
-    [
-      EXTERNAL_HOST_ERROR,
-      MANAGER_LOCKFILE_ERROR,
-      MISSING_API_CREDENTIALS,
-      UNKNOWN_ERROR,
-    ],
-    7,
-  ],
+  [[EXTERNAL_HOST_ERROR, MANAGER_LOCKFILE_ERROR, MISSING_API_CREDENTIALS], 7],
+  [[UNKNOWN_ERROR], 8],
 ];
 
 function getExitCode(res: RepositoryResult): number {

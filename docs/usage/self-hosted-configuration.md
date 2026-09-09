@@ -722,21 +722,23 @@ If this option is not set, Renovate will fallback to 15 minutes.
 
 ## `exitCodeForErrors`
 
-By default Renovate exits with code `1` if anything was logged at error level, and `0` otherwise.
-Set `exitCodeForErrors` to `true` to instead exit with a code that says _which_ kind of error ended the repository run:
+Set `exitCodeForErrors` to `true` to exit with a code that says _which_ kind of error ended the repository run.
+The groups are the exported error constants in [`lib/constants/error-messages.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/constants/error-messages.ts):
 
-| Exit code | Meaning                                                                                        |
-| --------- | ---------------------------------------------------------------------------------------------- |
-| `0`       | Success                                                                                        |
-| `1`       | Renovate logged an error                                                                       |
-| `2`       | Renovate could not parse its own configuration                                                 |
-| `3`       | System error, see `SystemErrors` in `lib/constants/error-messages.ts`                          |
-| `4`       | Platform error, see `PlatformErrors`                                                           |
-| `5`       | Configuration error, see `ConfigErrors`                                                        |
-| `6`       | Temporary error, see `TemporaryErrors`                                                         |
-| `7`       | Other error: external host error, lockfile error, missing API credentials, or an unknown error |
+| Exit code | Repository result                                               |
+| --------- | --------------------------------------------------------------- |
+| `0`       | Success, or a `RepositoryErrors` result                         |
+| `3`       | `SystemErrors`                                                  |
+| `4`       | `PlatformErrors`                                                |
+| `5`       | `ConfigErrors`                                                  |
+| `6`       | `TemporaryErrors`                                               |
+| `7`       | External host error, lockfile error, or missing API credentials |
+| `8`       | Unknown error                                                   |
 
-The results in `RepositoryErrors` are _not_ mapped to an exit code, because they mean the repository is disabled, archived, empty and so on, and not that the run failed.
+The results in `RepositoryErrors` map to `0`, because they mean the repository is disabled, archived, empty and so on, and not that the run failed.
+
+This option only adds the codes above.
+Renovate's existing exit codes are unchanged: `1` when something was logged at error level, and `2` when Renovate could not parse its own configuration.
 
 When Renovate runs against multiple repositories, the exit code comes from the first repository that ended in an error state.
 Renovate still processes the remaining repositories.
