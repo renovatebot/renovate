@@ -331,7 +331,7 @@
     "emojibase-data": "17.0.0",
     "esbuild": "catalog:",
     "expect-more-jest": "5.5.0",
-    "graphql": "16.14.2",
+    "graphql": "17.0.2",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
     "lint-staged": "17.4.1",
