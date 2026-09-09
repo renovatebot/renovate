@@ -171,7 +171,7 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         datasourceTemplate: 'github-releases',
-        managerFilePatterns: ['(^|/)\\.vale\\.ini$'],
+        managerFilePatterns: ['/(^|/)\\.vale\\.ini$/'],
         matchStrings: [
           'https://github\\.com/(?<packageName>[^/]+/[^/]+)/releases/download/(?<currentValue>[^/]+)/',
         ],
