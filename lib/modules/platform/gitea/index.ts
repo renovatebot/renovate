@@ -78,11 +78,9 @@ interface GiteaRepoConfig {
   orgName: string;
 }
 
-interface FetchRepositoriesArgs {
-  topic?: string;
-  sort?: RepoSortMethod;
-  order?: SortMethod;
-}
+export const id = 'gitea';
+
+export const giteaHttp = new GiteaHttp();
 
 function toRenovateIssue(data: Issue): Issue {
   return {
@@ -116,6 +114,12 @@ function findCommentByContent(
   content: string,
 ): Comment | null {
   return comments.find((c) => c.body.trim() === content) ?? null;
+}
+
+interface FetchRepositoriesArgs {
+  topic?: string;
+  sort?: RepoSortMethod;
+  order?: SortMethod;
 }
 
 /**
@@ -229,10 +233,6 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       }),
     });
     return repos.filter(usableRepo).map((r) => r.full_name);
-  }
-
-  function maxBodyLength(): number {
-    return 1000000;
   }
 
   const platform: Platform = {
@@ -1171,12 +1171,12 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     maxBodyLength,
   };
 
+  function maxBodyLength(): number {
+    return 1000000;
+  }
+
   return { platform, resetPlatform };
 }
-
-export const id = 'gitea';
-
-export const giteaHttp = new GiteaHttp();
 
 /**
  * Forgejo reports the Gitea version it is compatible with as part of its own
