@@ -74,6 +74,7 @@ export async function extractPackageFile(
       let depName = dep.chart;
       let packageName: string | null = null;
       let repoName: string | null = null;
+      let currentDigest: string | undefined;
 
       // If it starts with ./ ../ or / then it's a local path
       if (isLocalPath(dep.chart)) {
@@ -91,7 +92,13 @@ export async function extractPackageFile(
       }
 
       if (isOCIRegistry(dep.chart)) {
-        packageName = depName = removeOCIPrefix(dep.chart);
+        // An OCI reference may carry a digest, e.g. oci://ghcr.io/org/chart@sha256:abc.
+        // Keep it out of the name, otherwise the chart name validation below rejects it.
+        const [chartWithoutDigest, digest] = removeOCIPrefix(dep.chart).split(
+          '@',
+        );
+        packageName = depName = chartWithoutDigest;
+        currentDigest = digest;
       } else {
         if (dep.chart.includes('/')) {
           const v = dep.chart.split('/');
@@ -121,6 +128,12 @@ export async function extractPackageFile(
         depName,
         currentValue: dep.version,
       };
+      if (currentDigest) {
+        res.currentDigest = currentDigest;
+        res.replaceString = dep.chart;
+        res.autoReplaceStringTemplate =
+          'oci://{{depName}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+      }
       if (kustomizationsKeysUsed(dep)) {
         needKustomize = true;
       }
