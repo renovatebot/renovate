@@ -128,6 +128,10 @@ The helper applies, in this order:
 2. a value your manager derives from the updated package files, if you pass a callback
 3. the `extractedConstraints` that `extractPackageFile` collected on the base branch
 
+The third step matters during `lockFileMaintenance`.
+Managers like `pipenv` delete the lock file before they run the tool, so a callback that reads the lock file at that point finds nothing.
+The value collected during extraction keeps the tool version constrained in that case.
+
 The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints` or `config.extractedConstraints` in managers.
 
 ### `updateDependency` (optional)
