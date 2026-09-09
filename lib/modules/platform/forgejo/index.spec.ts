@@ -16,7 +16,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
-import * as helper from '../gitea-common/helper.ts';
+import * as helper from '../gitea/gitea-helper.ts';
 import type {
   Comment,
   CommitStatus,
@@ -26,7 +26,7 @@ import type {
   PR,
   Repo,
   User,
-} from '../gitea-common/schema.ts';
+} from '../gitea/schema.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as forgejo from './index.ts';
 

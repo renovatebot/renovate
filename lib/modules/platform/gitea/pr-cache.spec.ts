@@ -54,7 +54,7 @@ const pr2: PR = {
   user: { id: 1, login: 'some-author' },
 };
 
-describe('modules/platform/gitea-common/pr-cache', () => {
+describe('modules/platform/gitea/pr-cache', () => {
   let cache = getCache();
 
   beforeEach(() => {

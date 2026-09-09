@@ -33,7 +33,7 @@ import {
   updateIssue,
   updateIssueLabels,
   updatePR,
-} from './helper.ts';
+} from './gitea-helper.ts';
 import type {
   Branch,
   Comment,
@@ -48,7 +48,7 @@ import type {
   User,
 } from './schema.ts';
 
-describe('modules/platform/gitea-common/helper', () => {
+describe('modules/platform/gitea/gitea-helper', () => {
   const giteaHttp = new GiteaHttp();
 
   const apiHost = 'https://gitea.renovatebot.com/';

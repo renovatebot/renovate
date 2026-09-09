@@ -27,7 +27,7 @@ describe('modules/platform/index', () => {
     const loadedMgr = await loadModules(
       import.meta.dirname,
       undefined,
-      (m) => !['utils', 'git', 'gitea-common'].includes(m),
+      (m) => !['utils', 'git'].includes(m),
     );
     expect(Array.from(platforms.keys())).toEqual(Object.keys(loadedMgr));
 

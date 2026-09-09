@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
-import { getRepoContents } from '../../../modules/platform/forgejo/forgejo-helper.ts';
-import type { RepoContents } from '../../../modules/platform/gitea-common/schema.ts';
+import { forgejoHttp } from '../../../modules/platform/forgejo/forgejo-helper.ts';
+import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper.ts';
+import type { RepoContents } from '../../../modules/platform/gitea/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';
@@ -21,7 +22,7 @@ export async function fetchJSONFile(
 ): Promise<Nullish<Preset>> {
   let res: RepoContents;
   try {
-    res = await getRepoContents(repo, fileName, tag, {
+    res = await getRepoContents(forgejoHttp, repo, fileName, tag, {
       baseUrl: endpoint,
     });
   } catch (err) {

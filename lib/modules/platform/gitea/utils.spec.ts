@@ -8,7 +8,7 @@ import {
   usableRepo,
 } from './utils.ts';
 
-describe('modules/platform/gitea-common/utils', () => {
+describe('modules/platform/gitea/utils', () => {
   const mockRepo = partial<Repo>({
     allow_rebase: true,
     clone_url: 'https://forgejo.renovatebot.com/some/repo.git',

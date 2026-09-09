@@ -1,7 +1,7 @@
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { setBaseUrl } from '../../../util/http/forgejo.ts';
-import { createPlatform } from '../gitea-common/index.ts';
+import { createPlatform } from '../gitea/index.ts';
 import { forgejoHttp } from './forgejo-helper.ts';
 
 export const id = 'forgejo';
