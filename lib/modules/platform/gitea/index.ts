@@ -43,6 +43,7 @@ import type {
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
+import { fetchLabelList } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
 import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
 import type {
@@ -156,41 +157,8 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     setBaseUrl(defaults.endpoint);
   }
 
-  async function fetchRepoLabels(): Promise<Label[]> {
-    const labels = await helper.getRepoLabels(http, config.repository, {
-      memCache: false,
-    });
-    logger.debug(`Retrieved ${labels.length} repo labels`);
-    return labels;
-  }
-
-  async function fetchOrgLabels(): Promise<Label[]> {
-    if (!config.isOrgRepo) {
-      return [];
-    }
-    try {
-      const labels = await helper.getOrgLabels(http, config.orgName, {
-        memCache: false,
-      });
-      logger.debug(`Retrieved ${labels.length} org labels`);
-      return labels;
-    } catch (err) {
-      // Will fail if owner of repo is not org
-      logger.debug({ err }, `Unable to fetch organization labels`);
-      return [];
-    }
-  }
-
-  async function fetchLabelList(): Promise<Label[]> {
-    const [repoLabels, orgLabels] = await Promise.all([
-      fetchRepoLabels(),
-      fetchOrgLabels(),
-    ]);
-    return [...repoLabels, ...orgLabels];
-  }
-
   function getLabelList(): Promise<Label[]> {
-    config.labelList ??= fetchLabelList();
+    config.labelList ??= fetchLabelList(http, config);
 
     return config.labelList;
   }

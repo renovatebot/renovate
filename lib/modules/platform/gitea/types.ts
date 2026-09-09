@@ -54,6 +54,13 @@ export interface GiteaPlatform {
   resetPlatform: () => void;
 }
 
+/** Repository details needed to fetch its labels. */
+export interface LabelListRepo {
+  repository: string;
+  isOrgRepo: boolean;
+  orgName: string;
+}
+
 export interface PrReviewersParams {
   reviewers?: string[];
   team_reviewers?: string[];
