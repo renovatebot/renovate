@@ -152,39 +152,55 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     setBaseUrl(defaults.endpoint);
   }
 
-  function getLabelList(): Promise<Label[]> {
-    if (config.labelList === null) {
-      const repoLabels = helper
-        .getRepoLabels(http, config.repository, {
-          memCache: false,
-        })
-        .then((labels) => {
-          logger.debug(`Retrieved ${labels.length} repo labels`);
-          return labels;
-        });
+  async function fetchRepoLabels(): Promise<Label[]> {
+    const labels = await helper.getRepoLabels(http, config.repository, {
+      memCache: false,
+    });
+    logger.debug(`Retrieved ${labels.length} repo labels`);
+    return labels;
+  }
 
-      const orgLabels = config.isOrgRepo
-        ? helper
-            .getOrgLabels(http, config.orgName, {
-              memCache: false,
-            })
-            .then((labels) => {
-              logger.debug(`Retrieved ${labels.length} org labels`);
-              return labels;
-            })
-            .catch((err) => {
-              // Will fail if owner of repo is not org
-              logger.debug({ err }, `Unable to fetch organization labels`);
-              return [] as Label[];
-            })
-        : Promise.resolve([]);
-
-      config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
-        ([] as Label[]).concat(...labels),
-      );
+  async function fetchOrgLabels(): Promise<Label[]> {
+    if (!config.isOrgRepo) {
+      return [];
     }
+    try {
+      const labels = await helper.getOrgLabels(http, config.orgName, {
+        memCache: false,
+      });
+      logger.debug(`Retrieved ${labels.length} org labels`);
+      return labels;
+    } catch (err) {
+      // Will fail if owner of repo is not org
+      logger.debug({ err }, `Unable to fetch organization labels`);
+      return [];
+    }
+  }
+
+  async function fetchLabelList(): Promise<Label[]> {
+    const [repoLabels, orgLabels] = await Promise.all([
+      fetchRepoLabels(),
+      fetchOrgLabels(),
+    ]);
+    return [...repoLabels, ...orgLabels];
+  }
+
+  function getLabelList(): Promise<Label[]> {
+    config.labelList ??= fetchLabelList();
 
     return config.labelList;
+  }
+
+  async function fetchIssueList(): Promise<Issue[]> {
+    const issues = await helper.searchIssues(
+      http,
+      config.repository,
+      { state: 'all' },
+      { memCache: false },
+    );
+    const issueList = issues.map(toRenovateIssue);
+    logger.debug(`Retrieved ${issueList.length} Issues`);
+    return issueList;
   }
 
   async function lookupLabelByName(name: string): Promise<number | null> {
@@ -812,18 +828,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       if (config.hasIssuesEnabled === false) {
         return Promise.resolve([]);
       }
-      config.issueList ??= helper
-        .searchIssues(
-          http,
-          config.repository,
-          { state: 'all' },
-          { memCache: false },
-        )
-        .then((issues) => {
-          const issueList = issues.map(toRenovateIssue);
-          logger.debug(`Retrieved ${issueList.length} Issues`);
-          return issueList;
-        });
+      config.issueList ??= fetchIssueList();
 
       return config.issueList;
     },
