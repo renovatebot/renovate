@@ -18,6 +18,11 @@ import {
 
 export { RequestError } from 'got';
 
+export const retryableErrorCodes = [
+  ...got.defaults.options.retry.errorCodes,
+  'EBADF',
+];
+
 type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
 
 export function configureRejectUnauth(options: OptionsInit): void {

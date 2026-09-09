@@ -21,7 +21,13 @@ import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
-import { fetch, normalize, stream } from './got.ts';
+import {
+  RequestError,
+  fetch,
+  normalize,
+  retryableErrorCodes,
+  stream,
+} from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
@@ -62,6 +68,24 @@ export interface InternalHttpOptions extends HttpOptions {
   parseJson?: Options['parseJson'];
 }
 
+const staleCacheStatusCodes = new Set([500, 502, 503, 504]);
+
+function canUseStaleCache(err: unknown): boolean {
+  if (!(err instanceof RequestError)) {
+    return false;
+  }
+
+  if (retryableErrorCodes.includes(err.code)) {
+    return true;
+  }
+
+  if (err.response && staleCacheStatusCodes.has(err.response.statusCode)) {
+    return true;
+  }
+
+  return false;
+}
+
 export function applyDefaultHeaders(options: OptionsInit): void {
   const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
@@ -93,6 +117,7 @@ export abstract class HttpBase<
         retry: {
           calculateDelay: (retryObject) =>
             this.calculateRetryDelay(retryObject),
+          errorCodes: retryableErrorCodes,
           limit: retryLimit,
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
         },
@@ -251,21 +276,33 @@ export abstract class HttpBase<
       return resCopy;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
-      if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
+      const shouldAbort =
+        abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode);
+      // Explicit host rules take precedence over cache fallback. A request-local
+      // default only aborts when no eligible stale response exists.
+      const abortBeforeStaleCache =
+        shouldAbort && hostRule.abortOnError === true;
+      if (abortBeforeStaleCache) {
         throw new ExternalHostError(err);
       }
 
-      const staleResponse = await cacheProvider?.bypassServer<string | Buffer>(
-        method,
-        url,
-        true,
-      );
-      if (staleResponse) {
-        logger.debug(
-          { err },
-          `Request error: returning stale cache instead for ${url}`,
+      if (canUseStaleCache(err)) {
+        const staleResponse = await cacheProvider?.bypassServer(
+          method,
+          url,
+          true,
         );
-        return staleResponse;
+        if (staleResponse) {
+          logger.debug(
+            { err },
+            `Request error: returning stale cache instead for ${url}`,
+          );
+          return staleResponse;
+        }
+      }
+
+      if (shouldAbort) {
+        throw new ExternalHostError(err);
       }
 
       this.handleError(requestUrl, httpOptions, err);

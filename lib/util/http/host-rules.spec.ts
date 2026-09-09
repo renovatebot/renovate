@@ -119,6 +119,18 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('applies abortOnError=false', () => {
+    const opts: GotOptions = {
+      ...options,
+      abortOnError: true,
+    };
+
+    expect(applyHostRule(url, opts, { abortOnError: false })).toEqual({
+      hostType: 'github',
+      abortOnError: false,
+    });
+  });
+
   it('skips', () => {
     const opts = { ...options, token: 'xxx' };
     const hostRule = findMatchingRule(url, opts);
