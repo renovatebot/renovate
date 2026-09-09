@@ -1,3 +1,4 @@
+import { AzureChangeLogSource } from './azure/source.ts';
 import { BitbucketChangeLogSource } from './bitbucket/source.ts';
 import { BitbucketServerChangeLogSource } from './bitbucket-server/source.ts';
 import { ForgejoChangeLogSource } from './forgejo/source.ts';
@@ -9,6 +10,7 @@ import type { ChangeLogSource } from './source.ts';
 const api = new Map<string, ChangeLogSource>();
 export default api;
 
+api.set('azure', new AzureChangeLogSource());
 api.set('bitbucket', new BitbucketChangeLogSource());
 api.set('bitbucket-server', new BitbucketServerChangeLogSource());
 api.set('forgejo', new ForgejoChangeLogSource());

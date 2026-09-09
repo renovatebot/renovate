@@ -35,6 +35,7 @@ export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
   private readonly platform: ChangeLogPlatform;
   private readonly datasource:
+    | 'azure-tags'
     | 'bitbucket-tags'
     | 'bitbucket-server-tags'
     | 'forgejo-tags'
@@ -45,6 +46,7 @@ export abstract class ChangeLogSource {
   constructor(
     platform: ChangeLogPlatform,
     datasource:
+      | 'azure-tags'
       | 'bitbucket-tags'
       | 'bitbucket-server-tags'
       | 'forgejo-tags'
