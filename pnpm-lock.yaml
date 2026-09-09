@@ -377,8 +377,8 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       xmldoc:
-        specifier: 2.0.3
-        version: 2.0.3
+        specifier: 3.0.0
+        version: 3.0.0
       yaml:
         specifier: 2.9.0
         version: 2.9.0
@@ -5757,9 +5757,9 @@ packages:
     resolution: {integrity: sha512-LwyucHy0uhWqbrOkh9cBluZBeNVxzHjDaE9mwepZG3n3ZlbM4v3ndrFw51zW/NXYFFqP+QWZ72ihtLWTh05e4Q==}
     engines: {node: '>=10.13'}
 
-  xmldoc@2.0.3:
-    resolution: {integrity: sha512-6gRk4NY/Jvg67xn7OzJuxLRsGgiXBaPUQplVJ/9l99uIugxh4FTOewYz5ic8WScj7Xx/2WvhENiQKwkK9RpE4w==}
-    engines: {node: '>=12.0.0'}
+  xmldoc@3.0.0:
+    resolution: {integrity: sha512-lwxfsv7+O+0vSVSDlfK60afS7kWWGMFeJmbZQwRfHPY37oPDBQ1iI4sCE14bE+NeJeNG0hC0M4RETUavPcvk6w==}
+    engines: {node: '>=22.0.0'}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -11107,7 +11107,7 @@ snapshots:
       js-yaml: 4.3.1
       write-file-atomic: 3.0.3
 
-  xmldoc@2.0.3:
+  xmldoc@3.0.0:
     dependencies:
       sax: 1.6.1
 
