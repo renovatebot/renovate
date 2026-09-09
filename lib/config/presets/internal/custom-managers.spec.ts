@@ -785,6 +785,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         '.vale.ini',
         customManager!,
@@ -817,14 +818,16 @@ describe('config/presets/internal/custom-managers', () => {
 
     describe('matches regex patterns', () => {
       it.each`
-        path                    | expected
-        ${'.vale.ini'}          | ${true}
-        ${'foo/.vale.ini'}      | ${true}
-        ${'foo/bar/.vale.ini'}  | ${true}
-        ${'vale.ini'}           | ${false}
-        ${'.vale.ini.bak'}      | ${false}
+        path                   | expected
+        ${'.vale.ini'}         | ${true}
+        ${'foo/.vale.ini'}     | ${true}
+        ${'foo/bar/.vale.ini'} | ${true}
+        ${'vale.ini'}          | ${false}
+        ${'.vale.ini.bak'}     | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.managerFilePatterns)).toBe(expected);
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
       });
     });
   });
