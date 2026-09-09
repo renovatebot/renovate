@@ -23,9 +23,22 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
+      'workarounds:aospTagVersioning',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
+    ],
+  },
+  aospTagVersioning: {
+    description: 'Use regex versioning for AOSP submodule tags.',
+    packageRules: [
+      {
+        matchDatasources: ['git-refs'],
+        matchManagers: ['git-submodules'],
+        matchSourceUrls: ['https://android.googlesource.com/**'],
+        versioning:
+          'regex:^android-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_r(?<build>\\d+)$',
+      },
     ],
   },
   bitnamiDockerImageVersioning: {
