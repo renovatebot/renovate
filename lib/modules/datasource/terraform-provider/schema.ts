@@ -16,12 +16,10 @@ const ProviderVersion = z
       'published-at': MaybeTimestamp,
     }),
   })
-  .transform(
-    (resource): Release => ({
-      version: resource.attributes.version,
-      releaseTimestamp: resource.attributes['published-at'],
-    }),
-  );
+  .transform((resource): Release => ({
+    version: resource.attributes.version,
+    releaseTimestamp: resource.attributes['published-at'],
+  }));
 
 export const TerraformProviderV2Response = z
   .object({
@@ -30,12 +28,10 @@ export const TerraformProviderV2Response = z
     }),
     included: LooseArray(ProviderVersion).catch([]),
   })
-  .transform(
-    (response): ReleaseResult => ({
-      sourceUrl: response.data.attributes.source,
-      releases: response.included,
-    }),
-  );
+  .transform((response): ReleaseResult => ({
+    sourceUrl: response.data.attributes.source,
+    releases: response.included,
+  }));
 
 export type TerraformProviderV2Response = z.infer<
   typeof TerraformProviderV2Response
@@ -46,22 +42,18 @@ const OpenTofuProviderVersion = z
     id: z.string(),
     published: MaybeTimestamp,
   })
-  .transform(
-    (version): Release => ({
-      version: version.id.replace(regEx(/^v/), ''),
-      releaseTimestamp: version.published,
-    }),
-  );
+  .transform((version): Release => ({
+    version: version.id.replace(regEx(/^v/), ''),
+    releaseTimestamp: version.published,
+  }));
 
 export const OpenTofuProviderDocsResponse = z
   .object({
     versions: LooseArray(OpenTofuProviderVersion).catch([]),
   })
-  .transform(
-    (response): ReleaseResult => ({
-      releases: response.versions,
-    }),
-  );
+  .transform((response): ReleaseResult => ({
+    releases: response.versions,
+  }));
 
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse

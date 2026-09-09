@@ -643,9 +643,8 @@ describe('modules/manager/npm/post-update/index', () => {
       const npmrcFilename = 'packages/core/.npmrc';
       const originalNpmrc = 'package-lock=false\r\nkeep = true';
       const files = new Map<string, string>([[npmrcFilename, originalNpmrc]]);
-      fs.readLocalFile.mockImplementation(
-        (fileName): Promise<string | null> =>
-          Promise.resolve(files.get(fileName) ?? null),
+      fs.readLocalFile.mockImplementation((fileName): Promise<string | null> =>
+        Promise.resolve(files.get(fileName) ?? null),
       );
       fs.writeLocalFile.mockImplementation((fileName, content) => {
         files.set(fileName, content.toString());
@@ -696,9 +695,8 @@ describe('modules/manager/npm/post-update/index', () => {
       const npmrcFilename = '.npmrc';
       const originalNpmrc = 'package-lock=false';
       let npmrcOnDisk = originalNpmrc;
-      fs.readLocalFile.mockImplementation(
-        (fileName): Promise<string | null> =>
-          Promise.resolve(fileName === npmrcFilename ? npmrcOnDisk : null),
+      fs.readLocalFile.mockImplementation((fileName): Promise<string | null> =>
+        Promise.resolve(fileName === npmrcFilename ? npmrcOnDisk : null),
       );
       fs.writeLocalFile.mockImplementation((fileName, content) => {
         if (fileName === npmrcFilename) {
