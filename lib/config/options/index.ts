@@ -17,7 +17,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'allowedHeaders',
     description:
-      'List of allowed patterns for header names in hostRules config.',
+      'List of allowed patterns for header names in repository hostRules config.',
     type: 'array',
     default: ['X-*'],
     subType: 'string',

@@ -16,6 +16,18 @@ import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
 interface RegisteredHostRule extends HostRule {
   /** whether the rule came from the self-hosted administrator's own global config, rather than from repository or preset config */
   trusted?: boolean;
+  /** set only by {@link find}; see {@link CombinedHostRuleWithTrustedHeaders.trustedHeaderNames} */
+  trustedHeaderNames?: string[];
+}
+
+/**
+ * A {@link CombinedHostRule} returned by {@link find}, additionally reporting which of its `headers` came from a `trusted` rule.
+ *
+ * `trustedHeaderNames` is deliberately not a field of `HostRule`, for the same reason `trusted` is not: it must never be settable through configuration.
+ */
+export interface CombinedHostRuleWithTrustedHeaders extends CombinedHostRule {
+  /** header names in `headers` that came from a `trusted` rule (the self-hosted administrator's own config), and so already bypassed `allowedHeaders` at registration - `applyHostRule`'s request-time defence-in-depth must not re-check, and drop, them */
+  trustedHeaderNames?: string[];
 }
 
 let hostRules: RegisteredHostRule[] = [];
@@ -70,22 +82,12 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
 /**
  * Enforce the `allowedHeaders` allowlist on a set of host rules.
  *
- * Loudly remove anything that's not permitted, logging a WARN.
- *
- * `add()` applies this to every rule it registers, so callers only need it themselves to pre-filter - e.g. to avoid repeating the WARN when the same rules are registered again and again.
- *
- * @param [allowedHeaders] the effective allowlist. Defaults to `GlobalConfig`, but must be passed explicitly when filtering before `GlobalConfig` reflects the repository being processed, i.e. for a `repositories[]` entry's own `allowedHeaders` override
- * @param [warnOnDenied=true] whether to log the WARN. Pass `false` where the very same rules are filtered again, so that it is logged once rather than repeated
+ * Loudly remove anything that's not permitted, logging a WARN. Used by `add()` for an untrusted rule's `headers`; a `trusted` rule's are exempt, so never reach this.
  *
  * Headers that survive this allowlist are still subject to how {@link find} combines them: an admin's headers for a host are applied over those of any repository or preset rule matching the same request, so a repository can neither drop nor substitute them.
  */
-export function filterAllowedHeaders(
-  rules: HostRule[],
-  allowedHeaders?: string[],
-  warnOnDenied = true,
-): HostRule[] {
-  // `??`, rather than a parameter default: a default only applies to `undefined`, and a `null` can reach us from user config
-  const allowlist = allowedHeaders ?? GlobalConfig.get('allowedHeaders');
+export function filterAllowedHeaders(rules: HostRule[]): HostRule[] {
+  const allowlist = GlobalConfig.get('allowedHeaders');
   const denied: string[] = [];
 
   const result = rules.map((rule) => {
@@ -116,7 +118,7 @@ export function filterAllowedHeaders(
     return filtered;
   });
 
-  if (denied.length && warnOnDenied) {
+  if (denied.length) {
     logger.warn(
       { denied },
       "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
@@ -126,9 +128,6 @@ export function filterAllowedHeaders(
 }
 
 export interface AddHostRuleOptions {
-  /** the effective allowlist. Defaults to `GlobalConfig`; pass it explicitly when `GlobalConfig` does not yet reflect the repository the rule is registered for */
-  allowedHeaders?: string[];
-
   /**
    * Whether this rule comes from the self-hosted administrator's own global config, rather than from repository or preset config.
    *
@@ -140,15 +139,17 @@ export interface AddHostRuleOptions {
 export function add(params: HostRule, options?: AddHostRuleOptions): void {
   let rule: RegisteredHostRule = migrateRule(params);
 
-  // set only from `options`, and dropped first so that it cannot be carried over from `params`: `HostRule` has no `trusted` field, but configuration is parsed from JSON, so a repository could otherwise smuggle one in and have its headers treated as the administrator's
+  // set only from `options`, and dropped first so that it cannot be carried over from `params`: `HostRule` has no `trusted`/`trustedHeaderNames` field, but configuration is parsed from JSON, so a repository could otherwise smuggle one in and have its headers treated as the administrator's
   delete rule.trusted;
+  delete rule.trustedHeaderNames;
   if (options?.trusted) {
     rule.trusted = true;
   }
 
-  if (rule.headers) {
+  if (rule.headers && !rule.trusted) {
     // enforced here, at the single registration chokepoint, so that no current or future caller can register a rule whose headers bypass `allowedHeaders`; `applyHostRule` filters by header name again at request time as defence in depth
-    [rule] = filterAllowedHeaders([rule], options?.allowedHeaders);
+    // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - the same exemption `filterAllowedEnv` gives the admin's own `env`, just enforced through `trusted` here rather than a name+value comparison, as `headers` are host-scoped
+    [rule] = filterAllowedHeaders([rule]);
   }
 
   if (rule.matchHost) {
@@ -258,7 +259,9 @@ function headersOfLastRuleToSetThem(
     .pop();
 }
 
-export function find(search: HostRuleSearch): CombinedHostRule {
+export function find(
+  search: HostRuleSearch,
+): CombinedHostRuleWithTrustedHeaders {
   if ([search.hostType, search.url].every(isFalsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
@@ -316,6 +319,12 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   if (untrustedHeaders ?? trustedHeaders) {
     // the admin's own headers are applied last, so a repository cannot override one they set for this host either
     res.headers = { ...untrustedHeaders, ...trustedHeaders };
+    // set as a pair with `headers`, even to `undefined`, rather than only when there are trusted headers: `findMatchingRule`'s hostType fallbacks build on `find()` with `{ ...fallbackResult, ...res }`, so `res`'s own `trustedHeaderNames` must shadow a fallback's own whenever `res.headers` does the same to a fallback's `headers` - otherwise a fallback's `trustedHeaderNames` could survive alongside `res`'s own, unrelated `headers`
+    // never set when `res.headers` isn't either, so a `find()` with no matching headers still returns `{}` rather than `{ trustedHeaderNames: undefined }`, which callers that check for an empty result (e.g. `isNonEmptyObject`) rely on
+    // tracked so that `applyHostRule`'s request-time defence-in-depth knows which of `res.headers` already bypassed `allowedHeaders` at registration as the administrator's own, and does not re-drop them
+    res.trustedHeaderNames = trustedHeaders
+      ? Object.keys(trustedHeaders)
+      : undefined;
   }
 
   delete res.hostType;

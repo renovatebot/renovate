@@ -81,8 +81,8 @@ describe('workers/global/initialize', () => {
       await expect(globalInitialize(config)).toResolve();
     });
 
-    it('filters headers against allowedHeaders', async () => {
-      // the self-hosted admin gets no exemption here either, as `applyHostRule` filters by header name whoever set it
+    it("does not filter the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
+      // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
       const config: RenovateConfig = {
         hostRules: [
@@ -97,12 +97,15 @@ describe('workers/global/initialize', () => {
       await expect(globalInitialize(config)).toResolve();
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
-        headers: { 'X-Allowed': 'yes' },
+        headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
+        trustedHeaderNames: ['X-Allowed', 'Authorization'],
       });
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['Authorization'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      const denialWarnings = logger.logger.warn.mock.calls.filter(
+        ([, message]) =>
+          message ===
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
       );
+      expect(denialWarnings).toHaveLength(0);
     });
   });
 
