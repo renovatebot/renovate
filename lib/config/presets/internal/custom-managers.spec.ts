@@ -780,8 +780,9 @@ describe('config/presets/internal/custom-managers', () => {
         [*.{md,txt}]
         BasedOnStyles = Vale
 
-        Packages = https://github.com/errata-ai/Google/releases/download/v1.0.0/Google.zip
-        Packages = https://github.com/errata-ai/Microsoft/releases/download/v0.1.0/Microsoft.zip, https://github.com/errata-ai/write-good/releases/download/v0.4.0/write-good.zip
+        Packages = https://github.com/vale-cli/Google/releases/download/v1.0.0/Google.zip
+        Packages = https://github.com/vale-cli/Microsoft/releases/download/v0.1.0/Microsoft.zip, https://github.com/vale-cli/write-good/releases/download/v0.4.0/write-good.zip
+        Packages = proselint
       `;
 
       const res = await extractPackageFile(
@@ -795,23 +796,23 @@ describe('config/presets/internal/custom-managers', () => {
         {
           currentValue: 'v1.0.0',
           datasource: 'github-releases',
-          packageName: 'errata-ai/Google',
+          packageName: 'vale-cli/Google',
           replaceString:
-            'https://github.com/errata-ai/Google/releases/download/v1.0.0/',
+            'https://github.com/vale-cli/Google/releases/download/v1.0.0/',
         },
         {
           currentValue: 'v0.1.0',
           datasource: 'github-releases',
-          packageName: 'errata-ai/Microsoft',
+          packageName: 'vale-cli/Microsoft',
           replaceString:
-            'https://github.com/errata-ai/Microsoft/releases/download/v0.1.0/',
+            'https://github.com/vale-cli/Microsoft/releases/download/v0.1.0/',
         },
         {
           currentValue: 'v0.4.0',
           datasource: 'github-releases',
-          packageName: 'errata-ai/write-good',
+          packageName: 'vale-cli/write-good',
           replaceString:
-            'https://github.com/errata-ai/write-good/releases/download/v0.4.0/',
+            'https://github.com/vale-cli/write-good/releases/download/v0.4.0/',
         },
       ]);
     });
