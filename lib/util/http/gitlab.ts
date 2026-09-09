@@ -72,8 +72,11 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           } else {
             // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
             logger.once.warn(
-              { requestHost: resolvedUrl.host, paginationHost: nextUrl.host },
-              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links.',
+              {
+                requestOrigin: resolvedUrl.origin,
+                paginationOrigin: nextUrl.origin,
+              },
+              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
             );
           }
         }
