@@ -24,6 +24,7 @@ import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
 import { DatasourceCacheStats } from '../../util/stats.ts';
+import { safeStringify } from '../../util/stringify.ts';
 import { trimTrailingSlash } from '../../util/url.ts';
 import * as versioning from '../versioning/index.ts';
 import datasources from './api.ts';
@@ -202,7 +203,10 @@ async function mergeRegistries(
   const releaseVersioning = versioning.get(config.versioning);
   for (const registryUrl of registryUrls) {
     try {
-      const res = await getRegistryReleases(datasource, config, registryUrl);
+      // Merging must not mutate responses shared by the package cache.
+      const res = clone(
+        await getRegistryReleases(datasource, config, registryUrl),
+      );
       if (!res) {
         continue;
       }
@@ -444,8 +448,8 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${String(
-    registryUrls,
+  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${safeStringify(
+    [registryUrls, config.defaultRegistryUrls, config.additionalRegistryUrls],
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);

@@ -379,7 +379,7 @@ describe('workers/global/index', () => {
         writeDiscoveredRepos: '/tmp/renovate-output.json',
       });
 
-      expect(await globalWorker.start()).toBe(0);
+      await expect(globalWorker.start()).resolves.toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
       expect(fs.writeFile).toHaveBeenCalledExactlyOnceWith(
         '/tmp/renovate-output.json',

@@ -165,7 +165,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         deploymentType: 1,
       });
 
-      expect(await azure.isHosted()).toBe(true);
+      await expect(azure.isHosted()).resolves.toBe(true);
     });
 
     it('returns true when deployment type is the serialized enum name', async () => {
@@ -173,7 +173,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         deploymentType: 'hosted' as unknown as DeploymentFlags,
       });
 
-      expect(await azure.isHosted()).toBe(true);
+      await expect(azure.isHosted()).resolves.toBe(true);
     });
 
     it('returns false when deployment type is OnPremises', async () => {
@@ -182,7 +182,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         deploymentType: 2,
       });
 
-      expect(await azure.isHosted()).toBe(false);
+      await expect(azure.isHosted()).resolves.toBe(false);
     });
 
     it('returns false when deployment type is the on-premises enum name', async () => {
@@ -190,7 +190,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         deploymentType: 'onPremises' as unknown as DeploymentFlags,
       });
 
-      expect(await azure.isHosted()).toBe(false);
+      await expect(azure.isHosted()).resolves.toBe(false);
     });
 
     it('returns false when connectionData cannot be read', async () => {
@@ -198,7 +198,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         new Error('boom'),
       );
 
-      expect(await azure.isHosted()).toBe(false);
+      await expect(azure.isHosted()).resolves.toBe(false);
     });
   });
 
@@ -215,9 +215,9 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         .spyOn(sdk.WebApi.prototype, 'connect')
         .mockResolvedValue({ authenticatedUser: { id: 'user-id' } });
 
-      expect(await azure.getAuthenticatedUserId({ token: '123test' })).toBe(
-        'user-id',
-      );
+      await expect(
+        azure.getAuthenticatedUserId({ token: '123test' }),
+      ).resolves.toBe('user-id');
       const context = connect.mock.contexts[0] as WebApi;
       expect(context.authHandler.constructor.name).toBe(
         'PersonalAccessTokenCredentialHandler',
@@ -234,7 +234,9 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         .spyOn(sdk.WebApi.prototype, 'connect')
         .mockResolvedValue({ authenticatedUser: { id: 'user-id' } });
 
-      expect(await azure.getAuthenticatedUserId({ token })).toBe('user-id');
+      await expect(azure.getAuthenticatedUserId({ token })).resolves.toBe(
+        'user-id',
+      );
       const context = connect.mock.contexts[0] as WebApi;
       expect(context.authHandler.constructor.name).toBe(
         'BearerCredentialHandler',
@@ -246,12 +248,12 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         .spyOn(sdk.WebApi.prototype, 'connect')
         .mockResolvedValue({ authenticatedUser: { id: 'user-id' } });
 
-      expect(
-        await azure.getAuthenticatedUserId({
+      await expect(
+        azure.getAuthenticatedUserId({
           username: 'user',
           password: 'pass',
         }),
-      ).toBe('user-id');
+      ).resolves.toBe('user-id');
       const context = connect.mock.contexts[0] as WebApi;
       expect(context.authHandler).toMatchObject({
         username: 'user',
@@ -262,9 +264,9 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
     it('returns undefined when the authenticated user ID is unavailable', async () => {
       vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({});
 
-      expect(
-        await azure.getAuthenticatedUserId({ token: '123test' }),
-      ).toBeUndefined();
+      await expect(
+        azure.getAuthenticatedUserId({ token: '123test' }),
+      ).resolves.toBeUndefined();
     });
 
     it('returns undefined when connection data cannot be read', async () => {
@@ -272,9 +274,9 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         new Error('boom'),
       );
 
-      expect(
-        await azure.getAuthenticatedUserId({ token: '123test' }),
-      ).toBeUndefined();
+      await expect(
+        azure.getAuthenticatedUserId({ token: '123test' }),
+      ).resolves.toBeUndefined();
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { err: new Error('boom') },
         'Azure: could not determine authenticated user ID',

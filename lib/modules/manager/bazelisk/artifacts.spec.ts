@@ -26,28 +26,28 @@ describe('modules/manager/bazelisk/artifacts', () => {
   });
 
   it('returns null if no updated deps and not lockfile maintenance', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: '.bazelversion',
         updatedDeps: [],
         newPackageFileContent: '7.7.1\n',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no MODULE.bazel found', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
     fs.readLocalFile.mockResolvedValueOnce(null);
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: '.bazelversion',
         updatedDeps: [{ depName: 'bazel' }],
         newPackageFileContent: '7.7.1\n',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no MODULE.bazel.lock found', async () => {
@@ -56,14 +56,14 @@ describe('modules/manager/bazelisk/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: '.bazelversion',
         updatedDeps: [{ depName: 'bazel' }],
         newPackageFileContent: '7.7.1\n',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('writes package file and delegates to updateBazelLockfile', async () => {

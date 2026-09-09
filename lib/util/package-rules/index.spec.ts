@@ -63,7 +63,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    expect(await applyPackageRules(config)).toEqual({
+    await expect(applyPackageRules(config)).resolves.toEqual({
       ...config,
       labels: ['bump'],
     });
@@ -1236,9 +1236,9 @@ describe('util/package-rules/index', () => {
   });
 
   it('empty rules', async () => {
-    expect(
-      await applyPackageRules({ ...config1, packageRules: null as never }),
-    ).toEqual({
+    await expect(
+      applyPackageRules({ ...config1, packageRules: null as never }),
+    ).resolves.toEqual({
       foo: 'bar',
       packageRules: null,
     });

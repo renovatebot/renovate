@@ -103,16 +103,23 @@ import type {
   GhRepo,
   GhRestPr,
   GhRestRepo,
+  GithubHost,
   LocalRepoConfig,
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
-import { getRepoUrl, warnIfDefaultGitAuthorEmail } from './utils.ts';
+import {
+  getRepoUrl,
+  isGithubEnterpriseServer,
+  warnIfDefaultGitAuthorEmail,
+} from './utils.ts';
 
 export const id = 'github';
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
+
+const defaultGithubApiUrl = 'https://api.github.com/';
 
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
@@ -120,8 +127,10 @@ const GitHubMaxPrBodyLen = 58000;
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
-    hostType: 'github',
-    endpoint: 'https://api.github.com/',
+    host: {
+      type: 'github',
+      apiUrl: parseUrl(defaultGithubApiUrl)!,
+    },
   };
 }
 
@@ -135,28 +144,31 @@ export function isGHApp(): boolean {
   return !!platformConfig.isGHApp;
 }
 
-export async function detectGhe(token: string): Promise<void> {
-  const parsedEndpoint = parseUrl(platformConfig.endpoint);
-  /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
-  if (!parsedEndpoint) {
-    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+async function detectGithubHost(
+  apiUrl: URL,
+  token: string,
+): Promise<GithubHost> {
+  const { hostname } = apiUrl;
+
+  if (hostname === 'api.github.com') {
+    return { type: 'github', apiUrl };
   }
-  const host = parsedEndpoint.host;
-  platformConfig.isGhe = host !== 'api.github.com';
-  platformConfig.isGheCloud = host.endsWith('.ghe.com');
-  if (platformConfig.isGhe) {
-    const gheHeaderKey = 'x-github-enterprise-version';
-    const gheQueryRes = await githubApi.headJson('/', { token });
-    const gheHeaders = coerceObject(gheQueryRes?.headers);
-    const gheVersionHeader = Object.entries(gheHeaders).find(
-      ([k]) => k.toLowerCase() === gheHeaderKey,
-    );
-    platformConfig.gheVersion =
-      semver.valid(gheVersionHeader?.[1] as string) ?? null;
-    logger.debug(
-      `Detected GitHub Enterprise Server, version: ${platformConfig.gheVersion}`,
-    );
+
+  if (hostname.endsWith('.ghe.com')) {
+    logger.debug('Detected GitHub Enterprise Cloud');
+    return { type: 'ghec', apiUrl };
   }
+
+  const gheHeaderKey = 'x-github-enterprise-version';
+  const gheQueryRes = await githubApi.headJson('/', { token });
+  const gheHeaders = coerceObject(gheQueryRes?.headers);
+  const gheVersionHeader = Object.entries(gheHeaders).find(
+    ([k]) => k.toLowerCase() === gheHeaderKey,
+  );
+
+  const version = semver.valid(gheVersionHeader?.[1] as string) ?? null;
+  logger.debug(`Detected GitHub Enterprise Server, version: ${version}`);
+  return { type: 'ghes', apiUrl, version };
 }
 
 export async function initPlatform({
@@ -172,26 +184,28 @@ export async function initPlatform({
   token = token.replace(regEx(/^ghs_/), 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
+  let githubApiUrl = platformConfig.host.apiUrl;
   if (endpoint) {
-    if (!isHttpUrl(endpoint)) {
+    const parsedApiUrl = parseUrl(ensureTrailingSlash(endpoint));
+    if (!parsedApiUrl || !isHttpUrl(parsedApiUrl)) {
       throw new Error(`Init: Invalid GitHub endpoint URL: ${endpoint}`);
     }
-    platformConfig.endpoint = ensureTrailingSlash(endpoint);
-    githubHttp.setBaseUrl(platformConfig.endpoint);
+    githubApiUrl = parsedApiUrl;
+    githubHttp.setBaseUrl(githubApiUrl.href);
   } else {
-    logger.debug(`Using default github endpoint: ${platformConfig.endpoint}`);
+    logger.debug(`Using default github endpoint: ${githubApiUrl.href}`);
   }
 
-  await detectGhe(token);
+  platformConfig.host = await detectGithubHost(githubApiUrl, token);
   /**
    * GHE requires version >=3.10 to support fine-grained access tokens
    * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
    */
   if (
     isGithubFineGrainedPersonalAccessToken(token) &&
-    platformConfig.isGhe &&
-    (!platformConfig.gheVersion ||
-      semver.lt(platformConfig.gheVersion, '3.10.0'))
+    isGithubEnterpriseServer(platformConfig.host) &&
+    (!platformConfig.host.version ||
+      semver.lt(platformConfig.host.version, '3.10.0'))
   ) {
     throw new Error(
       'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.',
@@ -206,20 +220,17 @@ export async function initPlatform({
     renovateUsername = platformConfig.userDetails.username;
   } else {
     platformConfig.userDetails ??= await getUserDetails(
-      platformConfig.endpoint,
+      platformConfig.host.apiUrl.href,
       token,
     );
     renovateUsername = platformConfig.userDetails.username;
   }
 
   let ghHostname: string;
-  /* v8 ignore next -- false negative due to V8/source-map artifact */
-  if (platformConfig.isGheCloud) {
+  if (platformConfig.host.type === 'ghec') {
     ghHostname = 'ghe.com';
-  } else if (platformConfig.isGhe) {
-    // valid url ensured at the function start
-    const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
-    ghHostname = parsedEndpoint.hostname;
+  } else if (platformConfig.host.type === 'ghes') {
+    ghHostname = platformConfig.host.apiUrl.hostname;
   } else {
     ghHostname = 'github.com';
   }
@@ -231,13 +242,13 @@ export async function initPlatform({
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
-        platformConfig.endpoint,
+        platformConfig.host.apiUrl.href,
         token,
       );
       // v8 ignore next -- TODO: coverage error #40625
       platformConfig.userEmail =
         platformConfig.userDetails.email ??
-        (await getUserEmail(platformConfig.endpoint, token));
+        (await getUserEmail(platformConfig.host.apiUrl.href, token));
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
@@ -248,13 +259,16 @@ export async function initPlatform({
 
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
-    endpoint: platformConfig.endpoint,
+    endpoint: platformConfig.host.apiUrl.href,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
   };
 
-  warnIfDefaultGitAuthorEmail(platformResult.gitAuthor, platformConfig.isGhe);
+  warnIfDefaultGitAuthorEmail(
+    platformResult.gitAuthor,
+    platformConfig.host.type !== 'github',
+  );
 
   if (
     getEnv().RENOVATE_X_GITHUB_HOST_RULES &&
@@ -467,7 +481,10 @@ export async function findFork(
   }
   logger.debug(`Searching for forked repo in user account`);
   try {
-    const { username } = await getUserDetails(platformConfig.endpoint, token);
+    const { username } = await getUserDetails(
+      platformConfig.host.apiUrl.href,
+      token,
+    );
     const forkedRepo = forks.find((repo) => repo.owner.login === username);
     if (forkedRepo) {
       logger.debug(`Found repo in user account: ${forkedRepo.full_name}`);
@@ -531,7 +548,7 @@ export async function initRepo({
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
-    url: platformConfig.endpoint,
+    url: platformConfig.host.apiUrl.href,
     readOnly: true,
   });
   config.renovateUsername = renovateUsername;
@@ -544,9 +561,8 @@ export async function initRepo({
     // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     // TODO #22198
     if (
-      platformConfig.isGhe &&
-      // semver not null safe, accepts null and undefined
-      semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+      isGithubEnterpriseServer(platformConfig.host) &&
+      semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
     ) {
       infoQuery = infoQuery.replace(regEx(/\n\s*autoMergeAllowed\s*\n/), '\n');
       infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
@@ -554,9 +570,8 @@ export async function initRepo({
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
     if (
-      platformConfig.isGhe &&
-      // semver not null safe, accepts null and undefined
-      semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
+      isGithubEnterpriseServer(platformConfig.host) &&
+      semver.satisfies(platformConfig.host.version ?? '', '<3.9.0')
     ) {
       infoQuery = infoQuery.replace(
         regEx(/\n\s*hasVulnerabilityAlertsEnabled\s*\n/),
@@ -566,9 +581,8 @@ export async function initRepo({
 
     // GitHub Enterprise Server <3.12.0 doesn't support merge queues
     if (
-      platformConfig.isGhe &&
-      // semver not null safe, accepts null and undefined
-      semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+      isGithubEnterpriseServer(platformConfig.host) &&
+      semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
     ) {
       infoQuery = infoQuery.replace(
         regEx(/\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/),
@@ -775,14 +789,12 @@ export async function initRepo({
     logger.debug(`Using ${tokenType} token for git init`);
     authToken = opts.token ?? null;
   }
-  // endpoint is validated during initPlatform
-  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
   const workingSshUrl = forkToken ? forkSshUrl : repo.sshUrl;
   const url = getRepoUrl(
     config.repository!,
     gitUrl,
     workingSshUrl,
-    parsedEndpoint,
+    platformConfig.host.apiUrl,
     authToken,
   );
   let upstreamUrl: string | undefined;
@@ -791,7 +803,7 @@ export async function initRepo({
       config.parentRepo,
       gitUrl,
       repo.sshUrl,
-      parsedEndpoint,
+      platformConfig.host.apiUrl,
       authToken,
     );
   }
@@ -803,7 +815,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
-    repoFingerprint: repoFingerprint(repo.id, platformConfig.endpoint),
+    repoFingerprint: repoFingerprint(repo.id, platformConfig.host.apiUrl.href),
   };
   return repoConfig;
 }
@@ -1866,10 +1878,9 @@ async function tryPrAutomerge(
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
-  // semver not null safe, accepts null and undefined
   if (
-    platformConfig.isGhe &&
-    semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+    isGithubEnterpriseServer(platformConfig.host) &&
+    semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
   ) {
     logger.debug(
       { prNumber },
@@ -2006,10 +2017,9 @@ async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
   }
 
   // TODO #22198
-  // semver not null safe, accepts null and undefined
   if (
-    platformConfig.isGhe &&
-    semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+    isGithubEnterpriseServer(platformConfig.host) &&
+    semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
   ) {
     // Merge queues are only supported on GHES >=3.12.0
     config.mergeQueueEnabled[baseBranch] = false;
@@ -2262,7 +2272,7 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
-  if (platformConfig.isGhe) {
+  if (platformConfig.host.type !== 'github') {
     return smartTruncate(input, maxBodyLength());
   }
   const massagedInput = massageMarkdownLinks(input)

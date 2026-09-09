@@ -141,6 +141,8 @@ Assume this config is used on the `github.com/some-other-org` repo:
 }
 ```
 
+If you use private Go modules hosted on GitLab, read [private Go modules hosted on GitLab](../golang.md#private-go-modules-hosted-on-gitlab) to learn how to authenticate the module resolution requests.
+
 ## Looking up changelogs
 
 When Renovate creates Pull Requests, its default behavior is to locate and embed release notes/changelogs of packages.

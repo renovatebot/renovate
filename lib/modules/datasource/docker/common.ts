@@ -56,7 +56,7 @@ export async function getAuthHeaders(
   registryHost: string,
   dockerRepository: string,
   apiCheckUrl = `${registryHost}/v2/`,
-): Promise<OutgoingHttpHeaders | null> {
+): Promise<OutgoingHttpHeaders | undefined> {
   try {
     const options = {
       throwHttpErrors: false,
@@ -97,7 +97,7 @@ export async function getAuthHeaders(
         { apiCheckUrl, res: apiCheckResponse },
         'Invalid registry response',
       );
-      return null;
+      return undefined;
     }
 
     const rule = hostRules.find({
@@ -181,7 +181,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository, authenticateHeader },
         `Invalid realm, testing direct auth`,
       );
-      return opts.headers ?? null;
+      return opts.headers ?? undefined;
     }
 
     // already guarded by above clause
@@ -218,7 +218,7 @@ export async function getAuthHeaders(
     /* v8 ignore next -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
-      return null;
+      return undefined;
     }
     // sanitize token
     addSecretForSanitizing(token);
@@ -229,7 +229,7 @@ export async function getAuthHeaders(
     /* v8 ignore if -- quay.io errors are swallowed pending #9604, not reproduced in specs */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
-      return null;
+      return undefined;
     }
     /* v8 ignore if -- registry auth rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 401) {
@@ -238,7 +238,7 @@ export async function getAuthHeaders(
         'Unauthorized docker lookup',
       );
       logger.debug({ err });
-      return null;
+      return undefined;
     }
     /* v8 ignore if -- registry permission rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 403) {
@@ -247,7 +247,7 @@ export async function getAuthHeaders(
         'Not allowed to access docker registry',
       );
       logger.debug({ err });
-      return null;
+      return undefined;
     }
     if (err.name === 'RequestError' && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
@@ -266,13 +266,13 @@ export async function getAuthHeaders(
     /* v8 ignore if -- hostRules-disabled host is swallowed silently, not mocked in specs */
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
-      return null;
+      return undefined;
     }
     logger.warn(
       { registryHost, dockerRepository, err },
       'Error obtaining docker token',
     );
-    return null;
+    return undefined;
   }
 }
 

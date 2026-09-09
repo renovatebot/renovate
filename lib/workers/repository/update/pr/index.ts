@@ -178,6 +178,9 @@ export async function ensurePr(
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
+  const dependencyDashboardApproved =
+    dependencyDashboardCheck === 'approvePr' ||
+    dependencyDashboardCheck === 'unpend';
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
@@ -206,7 +209,7 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
-  if (dependencyDashboardCheck === 'approvePr') {
+  if (dependencyDashboardApproved) {
     logger.debug('Forcing PR because of dependency dashboard approval');
     config.forcePr = true;
   }
@@ -249,7 +252,7 @@ export async function ensurePr(
       logger.debug('Branch status success');
     } else if (
       config.prCreation === 'approval' &&
-      dependencyDashboardCheck !== 'approvePr'
+      !dependencyDashboardApproved
     ) {
       return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
     } else if (config.prCreation === 'not-pending' && !config.forcePr) {

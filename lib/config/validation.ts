@@ -108,7 +108,7 @@ const ignoredNodes = [
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
 ];
-const tzRe = regEx(/^:timezone\((.+)\)$/);
+const tzRe = regEx(/^:timezone\((?<timezone>.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 const repoEntryRe = regEx(/^repositories\[\d+\]$/);
 

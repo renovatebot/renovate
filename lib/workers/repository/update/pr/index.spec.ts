@@ -190,6 +190,22 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
+      it('creates PR for unapproved dependencies which have been unpended', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          prCreation: 'approval',
+          dependencyDashboardChecks: {
+            'renovate-branch': 'unpend',
+          },
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
       it('skips PR creation before prNotPendingHours is hit', async () => {
         const now = DateTime.now();
         const then = now.minus({ hours: 1 });
@@ -598,6 +614,23 @@ describe('workers/repository/update/pr/index', () => {
           reviewers: ['somebody'],
           dependencyDashboardChecks: {
             'renovate-branch': 'approvePr',
+          },
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      it('forces PR on dashboard unpend check', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          reviewers: ['somebody'],
+          dependencyDashboardChecks: {
+            'renovate-branch': 'unpend',
           },
         });
 

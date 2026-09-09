@@ -36,55 +36,55 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
     });
 
     it('validates filename', async () => {
-      expect(
-        await updateLockedDependency({ ...config, lockFile: 'yarn.lock' }),
-      ).toMatchObject({});
-      expect(
-        await updateLockedDependency({ ...config, lockFile: 'yarn.lock2' }),
-      ).toMatchObject({});
+      await expect(
+        updateLockedDependency({ ...config, lockFile: 'yarn.lock' }),
+      ).resolves.toMatchObject({});
+      await expect(
+        updateLockedDependency({ ...config, lockFile: 'yarn.lock2' }),
+      ).resolves.toMatchObject({});
     });
 
     it('validates versions', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           newVersion: '^2.0.0',
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('returns null for unparseable files', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           lockFileContent: 'not json',
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('rejects lockFileVersion 2', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           lockFileContent: lockFileContent.replace(': 1,', ': 2,'),
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('returns null if no locked deps', async () => {
-      expect(await updateLockedDependency(config)).toMatchObject({});
+      await expect(updateLockedDependency(config)).resolves.toMatchObject({});
     });
 
     it('rejects null if no constraint found', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           lockFileContent: lockFileContent.replace('1.0.0', '10.0.0'),
           depName: 'accepts',
           currentVersion: '10.0.0',
           newVersion: '11.0.0',
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('remediates in-range', async () => {

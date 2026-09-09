@@ -10,6 +10,17 @@ describe('modules/versioning/apk/index', () => {
       ${'foo'}              | ${false}
       ${'a.39.0-'}          | ${false}
       ${'6.5_p20250503-r0'} | ${true}
+      ${'~2.39.0'}          | ${true}
+      ${'=~2.39.0'}         | ${true}
+      ${'~=2.39.0'}         | ${true}
+      ${'>~2.39.0'}         | ${true}
+      ${'<~2.39.0'}         | ${true}
+      ${'>=2.39.0'}         | ${true}
+      ${'<=2.39.0'}         | ${true}
+      ${'><2.39.0'}         | ${false}
+      ${'~foo'}             | ${false}
+      ${'~'}                | ${false}
+      ${''}                 | ${false}
     `('isValid($version) === $expected', ({ version, expected }) => {
       expect(apk.isValid(version)).toBe(expected);
     });
@@ -99,6 +110,10 @@ describe('modules/versioning/apk/index', () => {
   });
 
   describe('isGreaterThan', () => {
+    it('treats an unparseable version as greater', () => {
+      expect(apk.isGreaterThan('invalid', '2.39.0-r0')).toBe(true);
+    });
+
     it.each`
       a               | b               | expected
       ${'2.39.1-r0'}  | ${'2.39.0-r0'}  | ${true}
@@ -120,6 +135,89 @@ describe('modules/versioning/apk/index', () => {
       ${'2.39.0'}    | ${'2.39.1'}    | ${false}
     `('equals($a, $b) === $expected', ({ a, b, expected }) => {
       expect(apk.equals(a, b)).toBe(expected);
+    });
+  });
+
+  describe('matches', () => {
+    // the examples given for `busybox~1.6` in apk-world(5)
+    it.each`
+      version         | expected
+      ${'1.6'}        | ${true}
+      ${'1.6.0_pre1'} | ${true}
+      ${'1.6.0'}      | ${true}
+      ${'1.6.5'}      | ${true}
+      ${'1.6.9_p1'}   | ${true}
+      ${'1.6.0-r3'}   | ${true}
+      ${'1.60'}       | ${false}
+      ${'1.7.0'}      | ${false}
+      ${'1.5.9'}      | ${false}
+    `('matches($version, ~1.6) === $expected', ({ version, expected }) => {
+      expect(apk.matches(version, '~1.6')).toBe(expected);
+    });
+
+    it.each`
+      version           | range           | expected
+      ${'8.12.1-r0'}    | ${'=~8.12.1'}   | ${true}
+      ${'8.12.1-r5'}    | ${'=~8.12.1'}   | ${true}
+      ${'8.12.2-r0'}    | ${'=~8.12.1'}   | ${false}
+      ${'8.12.10-r0'}   | ${'=~8.12.1'}   | ${false}
+      ${'8.12.1-r0'}    | ${'8.12.1-r0'}  | ${true}
+      ${'8.12.1-r1'}    | ${'8.12.1-r0'}  | ${false}
+      ${'8.12.1-r0'}    | ${'=8.12.1-r0'} | ${true}
+      ${'8.13.0'}       | ${'>8.12.1'}    | ${true}
+      ${'8.12.1'}       | ${'>8.12.1'}    | ${false}
+      ${'8.12.1'}       | ${'>=8.12.1'}   | ${true}
+      ${'8.11.0'}       | ${'<8.12.1'}    | ${true}
+      ${'8.13.0'}       | ${'>~8.12.1'}   | ${true}
+      ${'8.12.1-r2'}    | ${'>~8.12.1'}   | ${true}
+      ${'8.11.0'}       | ${'>~8.12.1'}   | ${false}
+      ${'8.11.0'}       | ${'<~8.12.1'}   | ${true}
+      ${'8.12.1-r2'}    | ${'<~8.12.1'}   | ${true}
+      ${'8.13.0'}       | ${'<~8.12.1'}   | ${false}
+      ${'1.6_rc1'}      | ${'~1.6.0'}     | ${false}
+      ${'8.12.1'}       | ${'~invalid'}   | ${false}
+      ${'invalid'}      | ${'~8.12.1'}    | ${false}
+      ${'8.12.1'}       | ${'><8.12.1'}   | ${false}
+      ${'8.12.1'}       | ${''}           | ${false}
+      ${'1.6'}          | ${'~1.6.0'}     | ${false}
+      ${'1.2.3.4'}      | ${'~1.2.3'}     | ${true}
+      ${'1.2.3.4'}      | ${'~1.2.3.5'}   | ${false}
+      ${'1.2.3a'}       | ${'~1.2.3'}     | ${true}
+      ${'1.2.3b'}       | ${'~1.2.3a'}    | ${false}
+      ${'6.5_p2025-r0'} | ${'~6.5_p2025'} | ${true}
+    `(
+      'matches($version, $range) === $expected',
+      ({ version, range, expected }) => {
+        expect(apk.matches(version, range)).toBe(expected);
+      },
+    );
+  });
+
+  describe('isVersion', () => {
+    it.each`
+      input          | expected
+      ${'2.39.0-r0'} | ${true}
+      ${'2.39.0'}    | ${true}
+      ${'~2.39.0'}   | ${false}
+      ${'=2.39.0'}   | ${false}
+      ${'>=2.39.0'}  | ${false}
+      ${'invalid'}   | ${false}
+    `('isVersion($input) === $expected', ({ input, expected }) => {
+      expect(apk.isVersion(input)).toBe(expected);
+    });
+  });
+
+  describe('minSatisfyingVersion', () => {
+    const versions = ['2.39.0-r0', '2.39.0-r1', '2.39.1-r0', '2.40.0-r0'];
+
+    it.each`
+      range         | expected
+      ${'~2.39.0'}  | ${'2.39.0-r0'}
+      ${'~2.39'}    | ${'2.39.0-r0'}
+      ${'>=2.39.1'} | ${'2.39.1-r0'}
+      ${'~2.41'}    | ${null}
+    `('minSatisfyingVersion($range) === $expected', ({ range, expected }) => {
+      expect(apk.minSatisfyingVersion(versions, range)).toBe(expected);
     });
   });
 
@@ -163,10 +261,27 @@ describe('modules/versioning/apk/index', () => {
 
     it.each`
       range           | expected
-      ${'~2.39.0-r0'} | ${'2.39.1-r0'}
-      ${'~2.40.0-r0'} | ${'2.40.0-r1'}
+      ${'~2.39.0-r0'} | ${'2.39.0-r0'}
+      ${'~2.40.0-r0'} | ${'2.40.0-r0'}
+      ${'~2.39.0'}    | ${'2.39.0-r1'}
+      ${'~2.39'}      | ${'2.39.1-r0'}
+      ${'~2'}         | ${'2.40.0-r1'}
+      ${'=~2.39.0'}   | ${'2.39.0-r1'}
+      ${'~=2.39.0'}   | ${'2.39.0-r1'}
+      ${'~2.41'}      | ${null}
     `(
-      'getSatisfyingVersion with tilde range ($range) === $expected',
+      'getSatisfyingVersion with prefix range ($range) === $expected',
+      ({ range, expected }) => {
+        expect(apk.getSatisfyingVersion(versions, range)).toBe(expected);
+      },
+    );
+
+    it.each`
+      range         | expected
+      ${'>~2.39.0'} | ${'3.0.0-r0'}
+      ${'<~2.39.0'} | ${'2.39.0-r1'}
+    `(
+      'getSatisfyingVersion with combined prefix range ($range) === $expected',
       ({ range, expected }) => {
         expect(apk.getSatisfyingVersion(versions, range)).toBe(expected);
       },
@@ -195,6 +310,10 @@ describe('modules/versioning/apk/index', () => {
       ${'2.39.0'}     | ${true}
       ${'~2.39.0-r0'} | ${false}
       ${'>2.39.0-r0'} | ${false}
+      ${'=2.39.0-r0'} | ${true}
+      ${'=~2.39.0'}   | ${false}
+      ${'>~2.39.0'}   | ${false}
+      ${'><2.39.0'}   | ${false}
     `('isSingleVersion($version) === $expected', ({ version, expected }) => {
       expect(apk.isSingleVersion(version)).toBe(expected);
     });
@@ -208,11 +327,23 @@ describe('modules/versioning/apk/index', () => {
 
   describe('isLessThanRange', () => {
     it.each`
-      version        | range          | expected
-      ${'2.39.0-r0'} | ${'2.39.0-r1'} | ${true}
-      ${'2.39.0-r1'} | ${'2.39.0-r0'} | ${false}
-      ${'2.39.0-r0'} | ${'2.39.0-r0'} | ${false}
-      ${'2.38.0-r0'} | ${'2.39.0-r0'} | ${true}
+      version                 | range          | expected
+      ${'2.39.0-r0'}          | ${'2.39.0-r1'} | ${true}
+      ${'2.39.0-r1'}          | ${'2.39.0-r0'} | ${false}
+      ${'2.39.0-r0'}          | ${'2.39.0-r0'} | ${false}
+      ${'2.38.0-r0'}          | ${'2.39.0-r0'} | ${true}
+      ${'2.38.0'}             | ${'~2.39.0'}   | ${true}
+      ${'2.39.0-r0'}          | ${'~2.39.0'}   | ${false}
+      ${'2.40.0'}             | ${'~2.39.0'}   | ${false}
+      ${'2.39.0'}             | ${'>2.39.0'}   | ${true}
+      ${'2.39.0_git20240101'} | ${'~2.39.0'}   | ${false}
+      ${'1.6.9_p1'}           | ${'~1.6.9'}    | ${false}
+      ${'1.2.3a'}             | ${'~1.2.3'}    | ${false}
+      ${'1.2.3a'}             | ${'>~1.2.3'}   | ${false}
+      ${'2.39.0'}             | ${'>=2.39.0'}  | ${false}
+      ${'2.39.0'}             | ${'<2.40.0'}   | ${false}
+      ${'invalid'}            | ${'2.39.0'}    | ${false}
+      ${'2.39.0'}             | ${'><2.39.0'}  | ${false}
     `(
       'isLessThanRange($version, $range) === $expected',
       ({ version, range, expected }) => {
@@ -420,6 +551,113 @@ describe('modules/versioning/apk/index', () => {
         }),
       ).toBe('2.51.1');
     });
+
+    it.each`
+      currentValue    | newVersion     | expected
+      ${'~8.12.1'}    | ${'8.13.0-r0'} | ${'~8.13.0'}
+      ${'=~8.12.1'}   | ${'8.13.0-r0'} | ${'=~8.13.0'}
+      ${'~=8.12.1'}   | ${'8.13.0-r0'} | ${'~=8.13.0'}
+      ${'~8.12'}      | ${'8.13.0-r0'} | ${'~8.13'}
+      ${'~8'}         | ${'9.1.0-r0'}  | ${'~9'}
+      ${'~8.12.1-r0'} | ${'8.13.0-r2'} | ${'~8.13.0-r2'}
+      ${'=8.12.1'}    | ${'8.13.0-r0'} | ${'=8.13.0'}
+      ${'8.12.1'}     | ${'8.13.0-r0'} | ${'8.13.0'}
+    `(
+      'keeps the constraint precision for $currentValue',
+      ({ currentValue, newVersion, expected }) => {
+        expect(
+          apk.getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            newVersion,
+          }),
+        ).toBe(expected);
+      },
+    );
+
+    it('pins to the exact version when asked to', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '~8.12.1',
+          rangeStrategy: 'pin',
+          newVersion: '8.13.0-r0',
+        }),
+      ).toBe('8.13.0-r0');
+    });
+
+    it.each`
+      currentValue     | newVersion     | expected
+      ${'>=8.12.1'}    | ${'8.13.0-r0'} | ${'>=8.13.0-r0'}
+      ${'=>8.12.1'}    | ${'8.13.0-r0'} | ${'=>8.13.0-r0'}
+      ${'>=8.12.1-r0'} | ${'8.13.0-r2'} | ${'>=8.13.0-r2'}
+      ${'>=8.12'}      | ${'8.13.0-r0'} | ${'>=8.13.0-r0'}
+      ${'>~8.12'}      | ${'8.13.0-r0'} | ${'>~8.13.0-r0'}
+      ${'>=8.12'}      | ${'8.12.5-r0'} | ${'>=8.12.5-r0'}
+      ${'>=8.12.1'}    | ${'8.12.1-r5'} | ${'>=8.12.1-r5'}
+    `(
+      'bumps the lower bound of $currentValue',
+      ({ currentValue, newVersion, expected }) => {
+        expect(
+          apk.getNewValue({
+            currentValue,
+            rangeStrategy: 'bump',
+            newVersion,
+          }),
+        ).toBe(expected);
+      },
+    );
+
+    it.each`
+      currentValue  | reason
+      ${'>8.12.1'}  | ${'excludes its boundary, so bumping it would exclude the new version'}
+      ${'<8.12.1'}  | ${'is an upper bound'}
+      ${'<=8.12.1'} | ${'is an upper bound'}
+    `('has no bump for a constraint which $reason', ({ currentValue }) => {
+      expect(
+        apk.getNewValue({
+          currentValue,
+          rangeStrategy: 'bump',
+          newVersion: '8.13.0-r0',
+        }),
+      ).toBeNull();
+    });
+
+    it.each`
+      rangeStrategy
+      ${'replace'}
+      ${'pin'}
+      ${'bump'}
+    `(
+      'has no $rangeStrategy for a constraint on an unparseable version',
+      ({ rangeStrategy }) => {
+        expect(
+          apk.getNewValue({
+            currentValue: '~foo',
+            rangeStrategy,
+            newVersion: '8.13.0-r0',
+          }),
+        ).toBeNull();
+      },
+    );
+
+    it.each`
+      currentValue  | reason
+      ${'>8.12.1'}  | ${'greater than'}
+      ${'>=8.12.1'} | ${'greater than or equal'}
+      ${'<8.12.1'}  | ${'less than'}
+      ${'>~8.12.1'} | ${'greater than or prefix'}
+      ${'<~8.12.1'} | ${'less than or prefix'}
+      ${'><8.12.1'} | ${'identity hash'}
+      ${''}         | ${'empty'}
+    `('has no replacement for a $reason constraint', ({ currentValue }) => {
+      expect(
+        apk.getNewValue({
+          currentValue,
+          rangeStrategy: 'replace',
+          newVersion: '8.13.0-r0',
+        }),
+      ).toBeNull();
+    });
   });
 
   describe('version comparison with prerelease identifiers', () => {
@@ -453,15 +691,24 @@ describe('modules/versioning/apk/index', () => {
       expect(apk.getSatisfyingVersion(versions, '#2.39.0-r0')).toBe(null);
     });
 
-    it('should handle unhandled range operators that match regex', () => {
+    it('builds the operator from its characters, as apk does', () => {
       const versions = ['2.39.0-r0', '2.40.0-r0'];
 
-      // These operators match the regex pattern [><=~]+ but are not handled by switch cases
-      // They hit the fallback return false path
-      expect(apk.getSatisfyingVersion(versions, '>>2.39.0-r0')).toBe(null);
+      // apk ORs one flag per operator character, so a repeated character is just another spelling of the same operator
+      expect(apk.getSatisfyingVersion(versions, '>>2.39.0-r0')).toBe(
+        '2.40.0-r0',
+      );
+      expect(apk.getSatisfyingVersion(versions, '~~~2.39.0-r0')).toBe(
+        '2.39.0-r0',
+      );
+    });
+
+    it('does not resolve an identity hash constraint', () => {
+      const versions = ['2.39.0-r0', '2.40.0-r0'];
+
+      // `><` constrains to an identity hash rather than to a version
       expect(apk.getSatisfyingVersion(versions, '<>2.39.0-r0')).toBe(null);
       expect(apk.getSatisfyingVersion(versions, '><2.39.0-r0')).toBe(null);
-      expect(apk.getSatisfyingVersion(versions, '~~~2.39.0-r0')).toBe(null);
     });
 
     it('should handle tilde range with invalid target version', () => {

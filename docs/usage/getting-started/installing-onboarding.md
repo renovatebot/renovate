@@ -45,8 +45,12 @@ Once you're done selecting repositories for Renovate to run on, select the green
 
 ### Hosted GitLab.com App
 
-Unfortunately Mend's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
-For more details on GitLab security for bots, please see the [GitLab Bot Security](../gitlab-bot-security.md) doc.
+Mend relaunched its hosted Renovate app for GitLab.com in July 2026, using a more secure architecture than the original version.
+
+You can set it up [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
+
+We currently only support installing the app on a Group on GitLab.com.
+We do have plans to support User installations, but we do not have any planned timelines.
 
 ### Self-hosting on Windows
 
