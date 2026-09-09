@@ -199,7 +199,7 @@
     "cacache": "20.0.4",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
-    "commander": "14.0.3",
+    "commander": "15.0.0",
     "croner": "10.0.1",
     "cronstrue": "3.24.0",
     "deepmerge": "4.3.1",
