@@ -15,12 +15,9 @@ export function setOnboardingCache(
   isModified: boolean,
 ): void {
   // do not update cache if commit is null/undefined
-  if (
-    !(
-      isNonEmptyString(defaultBranchSha) &&
-      isNonEmptyString(onboardingBranchSha)
-    )
-  ) {
+  if (!(
+    isNonEmptyString(defaultBranchSha) && isNonEmptyString(onboardingBranchSha)
+  )) {
     logger.debug('Onboarding cache not updated');
     return;
   }

@@ -1076,14 +1076,13 @@ describe('util/exec/index', () => {
     process.env = processEnv;
     const stdout = 'out';
     const stderr = 'err';
-    cpExec.mockImplementation(
-      (): Promise<ExecResult> =>
-        // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
-        Promise.resolve({
-          stdout,
-          stderr,
-          exitCode: 10,
-        }),
+    cpExec.mockImplementation((): Promise<ExecResult> =>
+      // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
+      Promise.resolve({
+        stdout,
+        stderr,
+        exitCode: 10,
+      }),
     );
     GlobalConfig.set({ ...globalConfig });
     const promise = exec([
