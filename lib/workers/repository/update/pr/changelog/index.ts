@@ -49,12 +49,15 @@ export async function getChangeLogJSON(
       }
 
       return await changeLogSource.getChangeLogJSON(config);
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       // A changelog fetch is best-effort: on failure we return null and the
       // update proceeds. A transient external host error must not be logged at
       // error level, because logged errors alone cause a non-zero run exit.
-      const logLevel = err instanceof ExternalHostError ? 'warn' : 'error';
-      logger[logLevel]({ config, err }, 'getChangeLogJSON error');
+      if (err instanceof ExternalHostError) {
+        logger.warn({ config, err }, 'getChangeLogJSON error');
+      } else {
+        logger.error({ config, err }, 'getChangeLogJSON error');
+      }
       return null;
     }
   });
