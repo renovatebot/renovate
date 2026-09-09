@@ -724,6 +724,14 @@ const options: Readonly<RenovateOptions>[] = [
     default: ['./...'],
     supportedManagers: ['gomod'],
   },
+  {
+    name: 'pdmUpdateStrategy',
+    description: 'Update strategy to use for PDM lock file maintenance.',
+    type: 'string',
+    allowedValues: ['eager', 'all'],
+    default: 'eager',
+    supportedManagers: ['pep621'],
+  },
   // Log options
   {
     name: 'logContext',

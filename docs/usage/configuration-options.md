@@ -4055,6 +4055,14 @@ In the example above, a package name like `hashicorp/aws` will be transformed to
 
 Add to this object if you wish to define rules that apply only to patch updates.
 
+## `pdmUpdateStrategy`
+
+For PDM lock-file maintenance, Renovate uses PDM's `--update-eager` strategy by default.
+Set `pdmUpdateStrategy` to `"all"` to use `pdm update --no-sync --update-all` instead, which re-resolves all dependencies and sub-dependencies.
+
+This option only affects PDM lock-file maintenance.
+Targeted dependency updates continue to use `--update-eager`.
+
 ## `pin`
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
