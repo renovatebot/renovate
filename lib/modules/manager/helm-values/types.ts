@@ -14,5 +14,4 @@ export interface HelmDockerImageDependencyVersion extends HelmDockerImageDepende
 }
 
 export type HelmDockerImageDependency =
-  | HelmDockerImageDependencyTag
-  | HelmDockerImageDependencyVersion;
+  HelmDockerImageDependencyTag | HelmDockerImageDependencyVersion;

@@ -133,6 +133,19 @@ Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/reposi
 
 The steps to enable GitHub's Merge Queue differ based on whether you use GitHub Actions or another CI provider.
 
+With `platformAutomerge` enabled (which is the default), GitHub's auto-merge takes care of adding the PR to the merge queue.
+This requires the "Allow auto-merge" checkbox in the repository settings to be enabled, as described in the steps below.
+
+Merge queues also work with `platformAutomerge=false`: Renovate detects whether the base branch has a merge queue, configured via classic branch protection or repository rulesets, and adds the PR to the merge queue itself once all checks have passed.
+In that case the "Allow auto-merge" checkbox is not needed.
+PRs that are already waiting in the merge queue are left untouched on later runs.
+We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
+
+!!! warning
+  Branch automerge (`automergeType=branch`) only works if the base branch has a merge queue when Renovate is on the merge queue's bypass list, because pushing directly to the base branch is not possible otherwise.
+  Renovate logs a warning and creates a PR instead if the merge queue rejects the push.
+  Configure `automergeType=pr` in such repositories, or add Renovate to the bypass list.
+
 !!! tip "GitHub Merge Queue overview page"
   GitHub has a page that shows all the PRs in the Merge Queue.
   The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
@@ -180,6 +193,20 @@ Go to your repository's branch protection rules for your base branch (usually `m
 Confirm you've set the correct "required checks" for your base branch.
 
 Finally, allow Renovate to automerge by setting `automerge=true` in your Renovate config file (see earlier example).
+
+### GitLab Merge Trains
+
+Renovate supports GitLab's [merge trains](https://docs.gitlab.com/ci/pipelines/merge_trains/).
+Renovate detects whether merge trains are enabled on the project and then:
+
+- With `platformAutomerge` enabled (the default), Renovate asks GitLab to add the MR to the merge train once its pipeline succeeds. This requires GitLab 17.11 or later.
+- With `platformAutomerge=false`, Renovate adds the MR to the merge train itself once all checks have passed, instead of merging it directly.
+- `rebaseWhen=auto` resolves to `conflicted` instead of `behind-base-branch`, because the merge train already tests MRs against the head of the target branch.
+
+!!! warning
+  Branch automerge (`automergeType=branch`) only works with merge trains if Renovate is allowed to push to the protected target branch.
+  If the push is rejected, Renovate logs a warning and creates a MR instead.
+  Configure `automergeType=pr` in such projects, or allow Renovate to push to the target branch.
 
 ## Automerging and scheduling
 

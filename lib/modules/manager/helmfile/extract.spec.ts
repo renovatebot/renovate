@@ -351,6 +351,7 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/example',
+            pinDigests: false,
           },
           {
             currentValue: '3.3.0',
@@ -362,6 +363,48 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'ghcr.io/example/oci-repo/url-example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/url-example',
+            pinDigests: false,
+          },
+        ],
+      });
+    });
+
+    it('resolves registryAliases for OCI charts', async () => {
+      const content = codeBlock`
+        repositories:
+          - name: oci-repo
+            url: ghcr.io/example/oci-repo
+            oci: true
+        releases:
+          - name: example
+            version: 0.1.0
+            chart: oci-repo/example
+          - name: oci-url
+            version: 0.4.2
+            chart: oci://ghcr.io/example/oci-repo/url-example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          'ghcr.io': 'ghcr.proxy.test',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.1.0',
+            depName: 'example',
+            datasource: 'docker',
+            packageName: 'ghcr.proxy.test/example/oci-repo/example',
+            pinDigests: false,
+          },
+          {
+            currentValue: '0.4.2',
+            depName: 'ghcr.io/example/oci-repo/url-example',
+            datasource: 'docker',
+            packageName: 'ghcr.proxy.test/example/oci-repo/url-example',
+            pinDigests: false,
           },
         ],
       });
@@ -388,6 +431,7 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'nested/path/chart',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/nested/path/chart',
+            pinDigests: false,
           },
         ],
       });
@@ -419,6 +463,7 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/example',
+            pinDigests: false,
           },
         ],
       });
@@ -535,6 +580,7 @@ describe('modules/manager/helmfile/extract', () => {
             datasource: 'docker',
             depName: 'gitlab.example.com:5000/group/subgroup',
             packageName: 'gitlab.example.com:5000/group/subgroup',
+            pinDigests: false,
           },
         ],
       });

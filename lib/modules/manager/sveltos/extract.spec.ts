@@ -284,6 +284,7 @@ describe('modules/manager/sveltos/extract', () => {
             depType: 'Profile',
             depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
+            pinDigests: false,
           },
           {
             currentValue: '0.5.0',
@@ -291,6 +292,7 @@ describe('modules/manager/sveltos/extract', () => {
             depType: 'Profile',
             depName: 'vault-sidecar',
             packageName: 'custom-registry:443/charts/vault-sidecar',
+            pinDigests: false,
           },
         ],
       });
@@ -385,6 +387,7 @@ describe('modules/manager/sveltos/extract', () => {
             depType: 'ClusterProfile',
             depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
+            pinDigests: false,
           },
           {
             currentValue: '0.5.0',
@@ -392,6 +395,7 @@ describe('modules/manager/sveltos/extract', () => {
             depType: 'ClusterProfile',
             depName: 'vault-sidecar',
             packageName: 'custom-registry:443/charts/vault-sidecar',
+            pinDigests: false,
           },
         ],
       });
@@ -429,6 +433,7 @@ describe('modules/manager/sveltos/extract', () => {
             packageName: 'docker.proxy.test/some/path/bitnamicharts/vault',
             datasource: 'docker',
             depType: 'ClusterProfile',
+            pinDigests: false,
           },
         ],
       });
@@ -495,6 +500,7 @@ describe('modules/manager/sveltos/extract', () => {
             depType: 'ClusterPromotion',
             depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
+            pinDigests: false,
           },
         ],
       });
@@ -586,6 +592,7 @@ describe('modules/manager/sveltos/extract', () => {
             depType: 'EventTrigger',
             depName: 'vault',
             packageName: 'registry-1.docker.io/bitnamicharts/vault',
+            pinDigests: false,
           },
           {
             currentValue: '0.5.0',
@@ -593,6 +600,7 @@ describe('modules/manager/sveltos/extract', () => {
             depType: 'EventTrigger',
             depName: 'vault-sidecar',
             packageName: 'custom-registry:443/charts/vault-sidecar',
+            pinDigests: false,
           },
         ],
       });

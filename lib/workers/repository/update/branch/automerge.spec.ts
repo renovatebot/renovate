@@ -1,4 +1,4 @@
-import { partial, platform, scm } from '~test/util.ts';
+import { logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
@@ -57,6 +57,42 @@ describe('workers/repository/update/branch/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce('green');
       await expect(tryBranchAutomerge(config)).resolves.toBe(
         'automerge aborted - PR exists',
+      );
+    });
+
+    it('aborts if the push is rejected and the base branch has a merge queue', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      const err = new Error('Protected branch update failed');
+      scm.mergeAndPush.mockRejectedValueOnce(err);
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerge aborted - merge queue');
+      expect(platform.isBranchMergeQueueEnabled).toHaveBeenCalledWith(
+        'test-branch',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { baseBranch: 'test-branch', err },
+        'automergeType=branch is not possible because the base branch only accepts changes through its merge queue - falling back to creating a PR. Set automergeType=pr instead, or allow Renovate to bypass the merge queue.',
+      );
+    });
+
+    it('automerges if the base branch has a merge queue but the push is accepted', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerged');
+      expect(scm.mergeAndPush).toHaveBeenCalledExactlyOnceWith(
+        config.branchName,
       );
     });
 
