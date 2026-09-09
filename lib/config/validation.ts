@@ -825,9 +825,9 @@ export async function validateConfig(
                         message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
                       });
                     }
-                    if (
-                      !(isString(statusCheckValue) || null === statusCheckValue)
-                    ) {
+                    if (!(
+                      isString(statusCheckValue) || null === statusCheckValue
+                    )) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
@@ -896,9 +896,9 @@ export async function validateConfig(
                           });
                         }
                       } else if (subKey === 'description') {
-                        if (
-                          !(isString(subValue) || isArray(subValue, isString))
-                        ) {
+                        if (!(
+                          isString(subValue) || isArray(subValue, isString)
+                        )) {
                           errors.push({
                             topic: ConfigValidationTopic.Error,
                             message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,

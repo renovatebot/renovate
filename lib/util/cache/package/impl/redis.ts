@@ -14,8 +14,7 @@ export function normalizeRedisUrl(url: string): string {
 }
 
 type RedisClient =
-  | ReturnType<typeof createClient>
-  | ReturnType<typeof createCluster>;
+  ReturnType<typeof createClient> | ReturnType<typeof createCluster>;
 
 interface RedisBinaryClient {
   get(key: string): Promise<Buffer | null>;

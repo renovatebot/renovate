@@ -36,8 +36,7 @@ export class ForgejoPrCache {
     repoCache.platform ??= {};
     repoCache.platform.forgejo ??= {};
     let pullRequestCache = repoCache.platform.forgejo.pullRequestsCache as
-      | ForgejoPrCacheData
-      | undefined;
+      ForgejoPrCacheData | undefined;
     if (
       isNullOrUndefined(pullRequestCache) ||
       pullRequestCache.author !== author

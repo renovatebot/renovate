@@ -23,7 +23,7 @@ describe('modules/manager/nix/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce('{ invalid json');
     await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
     expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
-      { flakeLockFile: 'flake.lock', error: expect.any(ZodError) },
+      { flakeLockFile: 'flake.lock', err: expect.any(ZodError) },
       'invalid flake.lock file',
     );
   });

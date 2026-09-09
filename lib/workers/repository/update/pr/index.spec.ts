@@ -762,6 +762,32 @@ describe('workers/repository/update/pr/index', () => {
         });
       });
 
+      it('comments on automerge failure due to merge queue', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+        platform.massageMarkdown.mockReturnValueOnce('markdown content');
+
+        await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          branchAutomergeFailureMessage: 'automerge aborted - merge queue',
+          suppressNotifications: [],
+        });
+
+        expect(platform.massageMarkdown).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'The base branch only accepts changes through its merge queue and rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or allow Renovate to bypass the merge queue.',
+          ),
+          undefined,
+        );
+        expect(comment.ensureComment).toHaveBeenCalledExactlyOnceWith({
+          content: 'markdown content',
+          number: 123,
+          topic: 'Branch automerge failure',
+        });
+      });
+
       it('handles ensureComment error', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');

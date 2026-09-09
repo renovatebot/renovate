@@ -72,8 +72,11 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           } else {
             // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
             logger.once.warn(
-              { requestHost: resolvedUrl.host, paginationHost: nextUrl.host },
-              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links.',
+              {
+                requestOrigin: resolvedUrl.origin,
+                paginationOrigin: nextUrl.origin,
+              },
+              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
             );
           }
         }
@@ -150,11 +153,11 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 function isRetryablePostError(error: RequestError): boolean {
   const { response } = error;
   if (response?.statusCode === 409) {
-    return response.rawBody.toString().includes('Resource lock');
+    return Buffer.from(response.rawBody).toString().includes('Resource lock');
   }
 
   if (response?.statusCode === 400) {
-    const rawBody = response.rawBody.toString();
+    const rawBody = Buffer.from(response.rawBody).toString();
     return (
       rawBody.includes('source_branch') && rawBody.includes('does not exist')
     );

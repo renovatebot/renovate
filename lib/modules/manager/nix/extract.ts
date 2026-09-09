@@ -34,7 +34,7 @@ export async function extractPackageFile(
   const flakeLockParsed = NixFlakeLock.safeParse(flakeLockContents);
   if (!flakeLockParsed.success) {
     logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
+      { flakeLockFile, err: flakeLockParsed.error },
       'invalid flake.lock file',
     );
     return null;

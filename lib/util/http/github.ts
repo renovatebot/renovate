@@ -497,10 +497,10 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
               if (nextUrl.origin !== resolvedUrl.origin) {
                 logger.once.warn(
                   {
-                    requestHost: resolvedUrl.host,
-                    paginationHost: nextUrl.host,
+                    requestOrigin: resolvedUrl.origin,
+                    paginationOrigin: nextUrl.origin,
                   },
-                  'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+                  'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
                 );
                 break;
               }
@@ -555,10 +555,10 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
           // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
           logger.once.warn(
             {
-              requestHost: resolvedUrl.host,
-              paginationHost: firstPageUrl.host,
+              requestOrigin: resolvedUrl.origin,
+              paginationOrigin: firstPageUrl.origin,
             },
-            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
           );
         }
       }

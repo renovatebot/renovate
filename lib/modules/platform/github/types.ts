@@ -105,9 +105,7 @@ export interface GithubEnterpriseServerHost extends GithubHostBase {
 }
 
 export type GithubHost =
-  | GithubComHost
-  | GithubEnterpriseCloudHost
-  | GithubEnterpriseServerHost;
+  GithubComHost | GithubEnterpriseCloudHost | GithubEnterpriseServerHost;
 
 export interface PlatformConfig {
   host: GithubHost;
@@ -169,6 +167,12 @@ export interface GhRepo {
 export interface GhAutomergeResponse {
   enablePullRequestAutoMerge: {
     pullRequest: { number: number };
+  };
+}
+
+export interface GhEnqueuePullRequestResponse {
+  enqueuePullRequest: {
+    mergeQueueEntry: { id: string; position: number } | null;
   };
 }
 

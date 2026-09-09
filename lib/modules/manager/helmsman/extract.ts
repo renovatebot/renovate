@@ -2,9 +2,8 @@ import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -17,6 +16,7 @@ const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 function createDep(
   key: string,
   doc: HelmsmanDocument,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency | null {
   const dep: PackageDependency = {
     depName: key,
@@ -34,10 +34,11 @@ function createDep(
   dep.currentValue = anApp.version;
 
   // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-  if (isOCIRegistry(anApp.chart)) {
-    dep.datasource = DockerDatasource.id;
-    dep.packageName = removeOCIPrefix(anApp.chart!);
-    return dep;
+  if (anApp.chart && isOCIRegistry(anApp.chart)) {
+    return {
+      ...dep,
+      ...getOciChartDep(anApp.chart, undefined, registryAliases),
+    };
   }
 
   const regexResult = anApp.chart ? chartRegex.exec(anApp.chart) : null;
@@ -65,7 +66,7 @@ function createDep(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig,
+  config: ExtractConfig,
 ): PackageFileContent | null {
   try {
     // TODO: use schema (#9610)
@@ -76,7 +77,7 @@ export function extractPackageFile(
     }
 
     const deps = Object.keys(doc.apps)
-      .map((key) => createDep(key, doc))
+      .map((key) => createDep(key, doc, config.registryAliases))
       .filter(isTruthy); // filter null values
 
     if (deps.length === 0) {

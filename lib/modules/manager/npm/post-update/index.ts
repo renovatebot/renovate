@@ -315,13 +315,11 @@ export async function writeUpdatedPackageFiles(
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
-    if (
-      !(
-        packageFile.path.endsWith('package.json') ||
-        packageFile.path.endsWith('pnpm-workspace.yaml') ||
-        packageFile.path.endsWith('.yarnrc.yml')
-      )
-    ) {
+    if (!(
+      packageFile.path.endsWith('package.json') ||
+      packageFile.path.endsWith('pnpm-workspace.yaml') ||
+      packageFile.path.endsWith('.yarnrc.yml')
+    )) {
       continue;
     }
     const contents =
