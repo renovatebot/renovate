@@ -31,6 +31,25 @@ describe('config/presets/github/index', () => {
       expect(res).toEqual({ from: 'api' });
     });
 
+    it('fetches from the endpoint host even for a hostile repo string', async () => {
+      // the repo part of a preset string has no host component: whatever it contains only ever becomes a path on the configured endpoint (`..` segments are normalized within it)
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/evil.example.com/x/contents/default.json')
+        .reply(200, {
+          content: toBase64('{"from":"api"}'),
+        });
+
+      const res = await github.fetchJSONFile(
+        'some/repo/../../evil.example.com/x',
+        'default.json',
+        githubApiHost,
+        undefined,
+      );
+
+      expect(res).toEqual({ from: 'api' });
+    });
+
     it('throws external host error', async () => {
       httpMock
         .scope(githubApiHost)
