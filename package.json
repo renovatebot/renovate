@@ -220,7 +220,7 @@
     "glob": "13.0.6",
     "global-agent": "3.0.0",
     "google-auth-library": "10.9.1",
-    "got": "15.0.5",
+    "got": "15.1.0",
     "graph-data-structure": "4.5.0",
     "handlebars": "4.7.9",
     "ignore": "7.0.8",
