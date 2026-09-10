@@ -189,6 +189,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: 'rust',
     withSchema: valSchema('toolchain'),
   },
+  // https://github.com/expo/expo-github-action
+  'expo/expo-github-action': {
+    datasource: NpmDatasource.id,
+    packageName: 'eas-cli',
+    withSchema: valSchema('eas-version'),
+  },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
