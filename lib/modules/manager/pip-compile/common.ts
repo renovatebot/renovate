@@ -377,7 +377,6 @@ export function getRegistryUrlsFromPackageFiles(
 export function getRegistryCredVarsFromPackageFiles(
   packageFiles: PackageFileContent[],
 ): ExtraEnv<string> {
-  // pip's keyring matches origins, while uv also needs paths for host rules.
   const uniqueHosts = new Set<URL>(
     getRegistryUrlsFromPackageFiles(packageFiles)
       .map((url) => parseUrl(url.origin))
