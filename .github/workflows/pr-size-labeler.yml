@@ -1,10 +1,17 @@
 name: PR Size Labeler
 
 on:
-  pull_request: # Trigger the workflow when a pull request is opened or synchronized
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 
 jobs:
   auto-label-pr:
+    if: github.event.pull_request.draft != true
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
