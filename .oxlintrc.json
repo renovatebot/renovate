@@ -236,6 +236,7 @@
       "files": ["lib/**"],
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
+        "renovate/no-dev-dependency-import": "error",
         "renovate/no-exec-shell-option": "error",
         "renovate/no-hardcoded-docs-url": "error",
         "renovate/no-unquoted-exec-interpolation": "error",
