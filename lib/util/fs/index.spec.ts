@@ -596,6 +596,18 @@ describe('util/fs/index', () => {
   });
 
   describe('cachePathIsFile', () => {
+    it('returns true for file', async () => {
+      await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
+
+      await expect(cachePathIsFile(`foo/bar/file.txt`)).resolves.toBeTrue();
+    });
+
+    it('returns false for directory', async () => {
+      await fs.ensureDir(`${cacheDir}/foo/bar`);
+
+      await expect(cachePathIsFile(`foo/bar`)).resolves.toBeFalse();
+    });
+
     it('returns false if does not exist', async () => {
       await expect(cachePathIsFile(`a/a/file.txt`)).resolves.toBe(false);
     });
