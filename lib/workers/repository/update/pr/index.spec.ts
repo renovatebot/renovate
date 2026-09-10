@@ -971,8 +971,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(prBodyNotes).toEqual([
           codeBlock`
             > ❗ **Important**
-            > 
-            > Release Notes retrieval for this PR were skipped because no github.com credentials were available. 
+            >
+            > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
             > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
           `,
         ]);
@@ -1150,7 +1150,7 @@ describe('workers/repository/update/pr/index', () => {
                   prBodyNotes: [
                     codeBlock`
                       > 🛑 **Caution**
-                      > 
+                      >
                       > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
                       > Verify that release 2.3.4 was published by the expected author.
                     `,

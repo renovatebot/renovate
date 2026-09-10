@@ -149,7 +149,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
       emojify(
         codeBlock`
           > :stop_sign: **Caution**
-          > 
+          >
           > ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
           > Verify that release ${newVersion} was published by the expected author.
         `,
@@ -342,8 +342,8 @@ export async function ensurePr(
           emojify(
             codeBlock`
               > :exclamation: **Important**
-              > 
-              > Release Notes retrieval for this PR were skipped because no github.com credentials were available. 
+              >
+              > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
               > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
             `,
           ),
