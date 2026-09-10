@@ -226,6 +226,17 @@ describe('util/fs/index', () => {
       await deleteLocalFile('foo/bar/file.txt');
       await expect(fs.pathExists(filePath)).resolves.toBeFalse();
     });
+
+    it('does nothing if no localDir is configured', async () => {
+      const filePath = `${localDir}/foo/bar/file.txt`;
+      await fs.outputFile(filePath, 'foobar');
+      GlobalConfig.set({});
+
+      await expect(
+        deleteLocalFile('foo/bar/file.txt'),
+      ).resolves.toBeUndefined();
+      await expect(fs.pathExists(filePath)).resolves.toBeTrue();
+    });
   });
 
   describe('renameLocalFile', () => {
