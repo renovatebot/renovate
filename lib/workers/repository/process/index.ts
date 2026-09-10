@@ -44,7 +44,7 @@ async function resolveAndMerge(
   result = mergeChildConfig(config, result);
   result.baseBranchPatterns = config.baseBranchPatterns;
   result.baseBranches = config.baseBranches;
-  /* v8 ignore next */
+  /* v8 ignore if -- TODO: add test #40625 */
   if (config.printConfig) {
     logger.info({ config: result }, 'Base branch config after merge');
   }
