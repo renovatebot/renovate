@@ -1,11 +1,14 @@
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../config/global.ts';
+import { logger } from '../../../../../logger/index.ts';
 import * as semverVersioning from '../../../../../modules/versioning/semver/index.ts';
+import { ExternalHostError } from '../../../../../types/errors/external-host-error.ts';
 import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
 import * as hostRules from '../../../../../util/host-rules.ts';
 import type { Timestamp } from '../../../../../util/timestamp.ts';
 import type { BranchConfig } from '../../../../types.ts';
+import api from './api.ts';
 import { getChangeLogJSON } from './index.ts';
 import * as releases from './releases.ts';
 
@@ -76,6 +79,35 @@ describe('workers/repository/update/pr/changelog/index', () => {
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
+    });
+
+    it('logs a warning when changelog fetching fails with an external host error', async () => {
+      const changeLogSource = api.get('github')!;
+      vi.spyOn(changeLogSource, 'getChangeLogJSON').mockRejectedValueOnce(
+        new ExternalHostError(new Error('some error')),
+      );
+
+      await expect(getChangeLogJSON({ ...upgrade })).resolves.toBeNull();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'getChangeLogJSON error',
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs an error when changelog fetching fails unexpectedly', async () => {
+      const changeLogSource = api.get('github')!;
+      vi.spyOn(changeLogSource, 'getChangeLogJSON').mockRejectedValueOnce(
+        new Error('some error'),
+      );
+
+      await expect(getChangeLogJSON({ ...upgrade })).resolves.toBeNull();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        'getChangeLogJSON error',
+      );
     });
 
     it('returns null if @types', async () => {
