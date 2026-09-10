@@ -592,6 +592,70 @@ describe('modules/manager/npm/extract/pnpm', () => {
       });
     });
 
+    it('applies url-keyed registries to catalog deps', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        catalog:
+          "@my-org/pkg": 1.0.0
+          react: 18.3.0
+        registries:
+          https://private.example.com/:
+            serverType: artifactory
+            scopes: ["@my-org", "@my-other-org"]
+            prefix: work
+          https://default.example.com/:
+            scopes: ["@"]
+            supportsTimeField: true
+      `);
+
+      await expect(
+        extractPnpmWorkspaceFile(parsed.data!, 'pnpm-workspace.yaml'),
+      ).resolves.toMatchObject({
+        deps: [
+          {
+            depName: '@my-org/pkg',
+            registryUrls: ['https://private.example.com/'],
+          },
+          {
+            depName: 'react',
+            registryUrls: ['https://default.example.com/'],
+          },
+        ],
+      });
+    });
+
+    it('skips unusable url-keyed registries when parsing', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        registries:
+          https://\${TOKEN}.example.com/:
+            scopes: ["@env-var-org"]
+          https://user:pass@credentials.example.com/:
+            scopes: ["@credentials-org"]
+          not-a-url:
+            scopes: ["@invalid-url-org"]
+          https://unrouted.example.com/:
+          https://private.example.com/:
+            scopes: ["@my-org"]
+      `);
+
+      expect(parsed.data?.registries).toEqual({
+        '@my-org': 'https://private.example.com/',
+      });
+    });
+
+    it('ignores registries which mix both shapes', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        catalog:
+          react: 18.3.0
+        registries:
+          "@my-org": https://private.example.com/
+          https://default.example.com/:
+            scopes: ["@"]
+      `);
+
+      expect(parsed.data?.registries).toBeUndefined();
+      expect(parsed.data?.catalog).toEqual({ react: '18.3.0' });
+    });
+
     it('does not apply registries to non-npm catalog deps', async () => {
       const res = await extractPnpmWorkspaceFile(
         {
