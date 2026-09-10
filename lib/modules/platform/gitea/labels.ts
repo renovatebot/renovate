@@ -37,7 +37,7 @@ async function fetchOrgLabels(
 /**
  * Labels of the repository followed by the labels of its organization, if any.
  */
-export async function fetchLabelList(
+async function fetchLabelList(
   http: GiteaLikeHttp,
   repo: LabelListRepo,
 ): Promise<Label[]> {
@@ -46,4 +46,27 @@ export async function fetchLabelList(
     fetchOrgLabels(http, repo),
   ]);
   return [...repoLabels, ...orgLabels];
+}
+
+/**
+ * Cached labels of the repository. The lookup is stored on the repository,
+ * so resetting `labelList` to `null` refetches the labels on next use.
+ */
+export function getLabelList(
+  http: GiteaLikeHttp,
+  repo: LabelListRepo,
+): Promise<Label[]> {
+  repo.labelList ??= fetchLabelList(http, repo);
+
+  return repo.labelList;
+}
+
+export async function lookupLabelByName(
+  http: GiteaLikeHttp,
+  repo: LabelListRepo,
+  name: string,
+): Promise<number | null> {
+  logger.debug(`lookupLabelByName(${name})`);
+  const labelList = await getLabelList(http, repo);
+  return labelList.find((l) => l.name === name)?.id ?? null;
 }

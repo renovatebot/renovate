@@ -43,7 +43,7 @@ import type {
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
-import { fetchLabelList } from './labels.ts';
+import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
 import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
 import type {
@@ -157,12 +157,6 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     setBaseUrl(defaults.endpoint);
   }
 
-  function getLabelList(): Promise<Label[]> {
-    config.labelList ??= fetchLabelList(http, config);
-
-    return config.labelList;
-  }
-
   async function fetchIssueList(): Promise<Issue[]> {
     const issues = await helper.searchIssues(
       http,
@@ -173,12 +167,6 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     const issueList = issues.map(toRenovateIssue);
     logger.debug(`Retrieved ${issueList.length} Issues`);
     return issueList;
-  }
-
-  async function lookupLabelByName(name: string): Promise<number | null> {
-    logger.debug(`lookupLabelByName(${name})`);
-    const labelList = await getLabelList();
-    return labelList.find((l) => l.name === name)?.id ?? null;
   }
 
   async function fetchRepositories({
@@ -620,7 +608,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
       try {
         const labels = Array.isArray(labelNames)
-          ? await map(labelNames, lookupLabelByName)
+          ? await map(labelNames, (name) =>
+              lookupLabelByName(http, config, name),
+            )
           : [];
         const gpr = await helper.createPR(http, config.repository, {
           base,
@@ -751,9 +741,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
        * so a lookup is performed to fetch the details (including the ID) of each label.
        */
       if (Array.isArray(labels)) {
-        prUpdateParams.labels = (await map(labels, lookupLabelByName)).filter(
-          isNumber,
-        );
+        prUpdateParams.labels = (
+          await map(labels, (name) => lookupLabelByName(http, config, name))
+        ).filter(isNumber);
         if (labels.length !== prUpdateParams.labels.length) {
           logger.warn(
             'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
@@ -859,9 +849,11 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         }
 
         const labels = Array.isArray(labelNames)
-          ? (await Promise.all(labelNames.map(lookupLabelByName))).filter(
-              isNumber,
-            )
+          ? (
+              await Promise.all(
+                labelNames.map((name) => lookupLabelByName(http, config, name)),
+              )
+            ).filter(isNumber)
           : undefined;
 
         // Update any matching issues which currently exist
@@ -982,7 +974,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
 
     async deleteLabel(issue: number, labelName: string): Promise<void> {
       logger.debug(`Deleting label ${labelName} from Issue #${issue}`);
-      const label = await lookupLabelByName(labelName);
+      const label = await lookupLabelByName(http, config, labelName);
       if (label) {
         await helper.unassignLabel(http, config.repository, issue, label);
       } else {

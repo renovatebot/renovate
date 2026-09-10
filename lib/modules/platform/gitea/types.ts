@@ -4,6 +4,7 @@ import type {
   CommitStatus,
   CommitStatusType,
   IssueState,
+  Label,
   PRMergeMethod,
   PRState,
 } from './schema.ts';
@@ -54,11 +55,12 @@ export interface GiteaPlatform {
   resetPlatform: () => void;
 }
 
-/** Repository details needed to fetch its labels. */
+/** Repository details needed to fetch and cache its labels. */
 export interface LabelListRepo {
   repository: string;
   isOrgRepo: boolean;
   orgName: string;
+  labelList: Promise<Label[]> | null;
 }
 
 export interface PrReviewersParams {
