@@ -80,6 +80,40 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
 
+    it('should not report automerged if the PR was added to a merge queue', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      platform.isPrInMergeQueue.mockResolvedValueOnce(false);
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      });
+      expect(platform.mergePr).toHaveBeenCalledOnce();
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+
+    it('should skip a PR which is already in the merge queue', async () => {
+      config.automerge = true;
+      pr = partial<Pr>({ number: 123 });
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      platform.isPrInMergeQueue.mockResolvedValueOnce(true);
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      });
+      expect(platform.isPrInMergeQueue).toHaveBeenCalledWith(123);
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
+
     it('should skip branch deletion after automerge if prune is disabled', async () => {
       config.automerge = true;
       config.pruneBranchAfterAutomerge = false;

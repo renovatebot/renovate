@@ -128,7 +128,7 @@ export function massageBody(
   );
   // Reduce headings size
   body = body
-    .split(regEx(/(```[\s\S]*?```)/g))
+    .split(regEx(/(?<codeBlock>```[\s\S]*?```)/g))
     .map((part) =>
       part.startsWith('```') // do not modify # inside of codeblocks
         ? part
@@ -301,7 +301,7 @@ async function releaseNotesResult(
 function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
   const lines = text.split(newlineRegex);
-  const tokens = markdown.parse(text, undefined);
+  const tokens = markdown.parse(text, {});
   tokens.forEach((token) => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substring(1);
@@ -442,7 +442,7 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(isTruthy);
-          const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const body = section.replace(regEx(/.*?\n(?:-{3,}\n)?/), '').trim();
           const notesSourceUrl = source.getNotesSourceUrl(
             baseUrl,
             repository,
@@ -464,7 +464,7 @@ export async function getReleaseNotesMd(
             }
           }
           // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
-          const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+          const releasesRegex = regEx(/(?:[0-9]{4}-[0-9]{2}-[0-9]{2})/);
           if (packageName && heading.search(releasesRegex) !== -1) {
             // Now check if any line contains both the package name and the version
             // Skip Markdown link reference definitions (e.g. `[1.2.3]: https://…/compare/...`)

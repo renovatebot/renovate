@@ -107,6 +107,16 @@ module.exports = {
 `allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
 For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
 
+!!! note
+  `allowedEnv` constrains what a repository, and the presets it extends, may set - it does not constrain you, the self-hosted administrator.
+  <br>
+  The `env` you set in your own config is always applied, as is any `env` set by a preset you chose to `extends`, whether in your global config or in a `repositories[]` entry.
+  <br>
+  A repository can override one of your environment variables only where its name is in the `allowedEnv` allowlist.
+  <br>
+  A repository could override an allowlisted environment variable's value to the empty string, which may or may not disable it, depending on how the tool(s) that consume that environment variable respond.
+  Where the name is not permitted by `allowedEnv`, the self-hosted administrator's value is always used.
+
 ## `allowedHeaders`
 
 `allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
@@ -115,6 +125,11 @@ If needed, you can allow additional headers with the `allowedHeaders` option.
 Any set `allowedHeaders` overrides the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
 The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
+!!! note
+  Where more than one of your own rules matches a request, the `headers` of the most specific rule are used, and replace those of the broader rules it matched alongside.
+  So to keep a header away from a host that a broader rule of yours also matches, give that host a rule of its own which sets `headers`.
+  Whichever of your `headers` that leaves for a request are then applied over any a repository set, and always with the value you set: a repository's `hostRules` - or those of a preset it extends - can neither stop one of them being sent, nor replace its value.
 
 Examples:
 
@@ -428,6 +443,13 @@ Other valid cache namespaces are as follows:
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
 
+!!! warning
+  When using `checkedBranches`, Renovate treats this as you, the self-hosted administrator, consenting to any updates the given branch introduces.
+  This can lead to branches that have not yet passed their `internalChecksFilter` / `minimumReleaseAge` to be created.
+  <br>
+  There is [not currently](https://github.com/renovatebot/renovate/issues/45668) a way to control this.
+  <!-- TODO: #45668 -->
+
 It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
@@ -453,6 +475,12 @@ Example:
 ## `configValidationError`
 
 If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
+
+This applies to the repo configuration and any resolved `extends` presets - any validation issues in that resolved configuration will also abort the repository run.
+Leave this disabled if your repositories extend presets you do not control, as a problem introduced by a preset would then stop Renovate from running against your repository.
+
+!!! note
+  Violations of sensitive configuration options, like those governed by [`allowedEnv`](#allowedenv) and [`allowedHeaders`](#allowedheaders), will **always** abort the repository, regardless of the `configValidationError` setting.
 
 ## `containerbaseDir`
 
@@ -691,6 +719,33 @@ If set to a string value, Renovate will log warnings with the `encryptedWarning`
 
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
+
+## `exitCodeForErrors`
+
+Set `exitCodeForErrors` to `true` to exit with a code that says _which_ kind of error ended the repository run.
+The groups are the exported error constants in [`lib/constants/error-messages.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/constants/error-messages.ts):
+
+| Exit code | Repository result                                                            |
+| --------- | ---------------------------------------------------------------------------- |
+| `0`       | Success, or a `RepositoryErrors` result                                      |
+| `1`       | Renovate logged an error, but no repository ended in one of the states below |
+| `2`       | Renovate could not parse its own configuration                               |
+| `3`       | `SystemErrors`                                                               |
+| `4`       | `PlatformErrors`                                                             |
+| `5`       | `ConfigErrors`                                                               |
+| `6`       | `TemporaryErrors`                                                            |
+| `7`       | External host error, lockfile error, or missing API credentials              |
+| `8`       | Unknown error                                                                |
+
+Codes `3` to `8` take precedence over `1`, so a repository that ends in one of those states sets the exit code even if errors were logged as well.
+Renovate still exits `1` when no repository ended in an error state but something was logged at error level, such as a failed changelog fetch during an otherwise successful run.
+
+The results in `RepositoryErrors` map to `0`, because they mean the repository is disabled, archived, empty and so on, and not that the run failed.
+
+When Renovate runs against multiple repositories, the exit code comes from the first repository that ended in an error state.
+Renovate still processes the remaining repositories.
+
+The exit code a repository maps to is always logged in the `Repository finished` message, even when this option is disabled.
 
 ## `exposeAllEnv`
 

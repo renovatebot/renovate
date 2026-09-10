@@ -168,7 +168,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         branchName: 'some-branch',
         prTitle: 'some-title',
         isLockFileMaintenance: true,
@@ -227,7 +227,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         branchName: 'some-branch',
         prTitle: 'some-title',
         isLockfileUpdate: true,
@@ -1132,7 +1132,8 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeUndefined();
-      expect(generateBranchConfig(branch)).toMatchSnapshot({
+      expect(res).toMatchObject({
+        hasTypes: true,
         upgrades: [
           {
             manager: 'some-manager',
@@ -1147,6 +1148,7 @@ describe('workers/repository/updates/generate', () => {
             newValue: '1.0.0',
           },
           {
+            manager: 'some-manager',
             depName: '@types/some-dep',
             branchName: 'some-branch',
             newValue: '0.5.8',
@@ -1190,7 +1192,8 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
       ] satisfies BranchUpgradeConfig[];
-      expect(generateBranchConfig(branch)).toMatchSnapshot({
+      expect(generateBranchConfig(branch)).toMatchObject({
+        labels: ['a', 'c', 'b'],
         upgrades: [
           {
             manager: 'some-manager',
@@ -1207,6 +1210,7 @@ describe('workers/repository/updates/generate', () => {
             labels: ['a', 'b'],
           },
           {
+            manager: 'some-manager',
             depName: '@types/some-dep',
             branchName: 'some-branch',
             newValue: '0.5.7',

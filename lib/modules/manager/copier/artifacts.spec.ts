@@ -272,8 +272,8 @@ describe('modules/manager/copier/artifacts', () => {
         }
         const execSnapshots = mockExecAll();
 
-        expect(
-          await updateArtifacts({
+        await expect(
+          updateArtifacts({
             packageFileName: '.copier-answers.yml',
             updatedDeps: upgrades,
             newPackageFileContent: '',
@@ -282,7 +282,7 @@ describe('modules/manager/copier/artifacts', () => {
               constraints: constraintConfig,
             },
           }),
-        ).not.toBeNull();
+        ).resolves.not.toBeNull();
 
         expect(execSnapshots).toMatchObject([
           { cmd: `install-tool python ${pythonConstraint ?? '3.12.4'}` },

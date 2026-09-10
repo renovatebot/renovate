@@ -14,11 +14,11 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace(`ansible.extractPackageFile(${packageFile})`);
   let deps: PackageDependency[] = [];
-  const re = regEx(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
+  const re = regEx(/^\s*image:\s*'?"?(?<image>[^\s'"]+)'?"?\s*$/);
   for (const line of content.split(newlineRegex)) {
     const match = re.exec(line);
     if (match) {
-      const currentFrom = match[1];
+      const currentFrom = match.groups!.image;
       const dep = getDep(currentFrom, true, config.registryAliases);
       logger.debug(
         {

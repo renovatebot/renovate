@@ -10,6 +10,9 @@ export function getEnvName(option: EnvNameOption): string {
   if (option.env) {
     return option.env;
   }
-  const nameWithUnderscores = option.name.replace(regEx(/([A-Z])/g), '_$1');
+  const nameWithUnderscores = option.name.replace(
+    regEx(/(?<upper>[A-Z])/g),
+    '_$<upper>',
+  );
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;
 }

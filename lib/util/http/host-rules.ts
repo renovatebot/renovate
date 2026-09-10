@@ -21,7 +21,6 @@ import type { GotOptions } from './types.ts';
 export type HostRulesGotOptions = Pick<
   GotOptions & InternalHttpOptions,
   | 'hostType'
-  | 'url'
   | 'noAuth'
   | 'headers'
   | 'token'

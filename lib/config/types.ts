@@ -26,19 +26,10 @@ import type { Timestamp } from '../util/timestamp.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
-  | 'global'
-  | 'inherit'
-  | 'repository'
-  | 'package'
-  | 'branch'
-  | 'pr';
+  'global' | 'inherit' | 'repository' | 'package' | 'branch' | 'pr';
 
 export type RenovateSplit =
-  | 'init'
-  | 'onboarding'
-  | 'extract'
-  | 'lookup'
-  | 'update';
+  'init' | 'onboarding' | 'extract' | 'lookup' | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
@@ -204,6 +195,7 @@ export interface GlobalOnlyConfigLegacy {
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
+  exitCodeForErrors?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -344,8 +336,7 @@ export type RenovateRepository = string | RenovateRepositoryEntry;
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
-  | 'timestamp-required'
-  | 'timestamp-optional';
+  'timestamp-required' | 'timestamp-optional';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -585,11 +576,7 @@ export type MergeStrategy =
 
 // This list should be added to as any new unsafe execution commands should be permitted
 export type AllowedUnsafeExecution =
-  | 'bazelModDeps'
-  | 'goGenerate'
-  | 'gradleWrapper'
-  | 'mise'
-  | 'pixi';
+  'bazelModDeps' | 'goGenerate' | 'gradleWrapper' | 'mise' | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -651,6 +638,17 @@ export interface RenovateOptionBase {
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
   globalOnly?: boolean;
+
+  /**
+   * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
+   *
+   * This is in addition to any existing config validation, and ensures that these options are re-validated due to their sensitive nature.
+   *
+   * A failure of that check **must** lead to a {@link ConfigValidationTopic.Security} error (which is then a full config validation error), stopping the Renovate run.
+   *
+   * After this check has been performed, additional filtering (for defence in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
+   */
+  requiresCheckAtTrustBoundary?: boolean;
 
   inheritConfigSupport?: boolean;
 

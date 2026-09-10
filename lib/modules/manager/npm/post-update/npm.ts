@@ -364,8 +364,7 @@ export async function generateLockFile(
       ) {
         lockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
-            | 'dependencies'
-            | 'optionalDependencies';
+            'dependencies' | 'optionalDependencies';
 
           // TODO #22198
           // v8 ignore else -- TODO: add test #40625

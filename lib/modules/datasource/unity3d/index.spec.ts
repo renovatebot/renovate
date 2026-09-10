@@ -298,7 +298,7 @@ describe('modules/datasource/unity3d/index', () => {
           }),
         ]),
         homepage: 'https://unity.com/',
-        registryUrl: expect.stringMatching(/(releases|lts)/),
+        registryUrl: expect.stringMatching(/(?:releases|lts)/),
       }),
     );
   });

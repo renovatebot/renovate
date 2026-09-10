@@ -29,7 +29,11 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getRefs('123', 'branch');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          objectId: 132,
+        },
+      ]);
     });
 
     it('should not get ref', async () => {
@@ -49,7 +53,11 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getRefs('123', 'refs/head/branch1');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          objectId: '132',
+        },
+      ]);
     });
   });
 
@@ -65,7 +73,10 @@ describe('modules/platform/azure/azure-helper', () => {
         'branchName',
         'base',
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        name: 'refs/heads/branchName',
+        oldObjectId: '132',
+      });
     });
 
     it('should get the branch object when ref missing', async () => {
@@ -75,7 +86,10 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getAzureBranchObj('123', 'branchName');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        name: 'refs/heads/branchName',
+        oldObjectId: '0000000000000000000000000000000000000000',
+      });
     });
   });
 
@@ -161,7 +175,7 @@ describe('modules/platform/azure/azure-helper', () => {
         'repository',
         './myFilePath/test',
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toBe('{"hello"= "test"}');
     });
 
     it('should return null because the file is not readable', async () => {
@@ -192,7 +206,9 @@ describe('modules/platform/azure/azure-helper', () => {
         }),
       );
       const res = await azureHelper.getCommitDetails('123', '123456');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        parents: ['123456'],
+      });
     });
   });
 
@@ -203,7 +219,7 @@ describe('modules/platform/azure/azure-helper', () => {
           getPolicyConfigurations: vi.fn().mockResolvedValue([]),
         }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.NoFastForward,
       );
     });
@@ -228,7 +244,7 @@ describe('modules/platform/azure/azure-helper', () => {
           ]),
         }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.NoFastForward,
       );
     });
@@ -253,7 +269,7 @@ describe('modules/platform/azure/azure-helper', () => {
           ]),
         }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.RebaseMerge,
       );
     });
@@ -278,7 +294,7 @@ describe('modules/platform/azure/azure-helper', () => {
           ]),
         }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.Squash,
       );
     });
@@ -307,9 +323,9 @@ describe('modules/platform/azure/azure-helper', () => {
           ),
         }),
       );
-      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
-        GitPullRequestMergeStrategy.Squash,
-      );
+      await expect(
+        azureHelper.getMergeMethod('', '', refMock),
+      ).resolves.toEqual(GitPullRequestMergeStrategy.Squash);
     });
 
     it('should return default branch policy', async () => {
@@ -345,7 +361,7 @@ describe('modules/platform/azure/azure-helper', () => {
           ]),
         }),
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      await expect(azureHelper.getMergeMethod('', '')).resolves.toEqual(
         GitPullRequestMergeStrategy.Rebase,
       );
     });
@@ -413,9 +429,9 @@ describe('modules/platform/azure/azure-helper', () => {
           ]),
         }),
       );
-      expect(
-        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
-      ).toEqual(GitPullRequestMergeStrategy.Rebase);
+      await expect(
+        azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
+      ).resolves.toEqual(GitPullRequestMergeStrategy.Rebase);
     });
 
     it('should return most specific prefix branch policy', async () => {
@@ -468,9 +484,9 @@ describe('modules/platform/azure/azure-helper', () => {
           ]),
         }),
       );
-      expect(
-        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
-      ).toEqual(GitPullRequestMergeStrategy.Rebase);
+      await expect(
+        azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
+      ).resolves.toEqual(GitPullRequestMergeStrategy.Rebase);
     });
   });
 
