@@ -4,6 +4,7 @@ import enforceTsExtension from './rules/enforce-ts-extension.ts';
 import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.ts';
 import loggerErrKey from './rules/logger-err-key.ts';
 import loggerStaticMessage from './rules/logger-static-message.ts';
+import noDevDependencyImport from './rules/no-dev-dependency-import.ts';
 import noExecShellOption from './rules/no-exec-shell-option.ts';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.ts';
 import noHostRulesMock from './rules/no-host-rules-mock.ts';
@@ -44,6 +45,7 @@ export default definePlugin({
     'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-err-key': loggerErrKey,
     'logger-static-message': loggerStaticMessage,
+    'no-dev-dependency-import': noDevDependencyImport,
     'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-host-rules-mock': noHostRulesMock,
