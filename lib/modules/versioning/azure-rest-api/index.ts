@@ -1,13 +1,12 @@
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'azure-rest-api';
 export const displayName = 'azure-rest-api';
 
 export const urls = [
-  'https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#api-versioning',
+  '[Microsoft Azure API versioning guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#api-versioning)',
 ];
 
 export const supportsRanges = false;

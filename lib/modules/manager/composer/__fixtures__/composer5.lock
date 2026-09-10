@@ -24,5 +24,16 @@
         "reference": "3j5b345j3b45j345j345h34j5h345j34h5j34h5j"
       }
     }
+  ],
+  "packages-dev": [
+    {
+      "name": "awesome/dev-tool",
+      "version": "2.1.0",
+      "source": {
+        "type": "git",
+        "url": "https://my-vcs.example/my-dev-tool",
+        "reference": "3j5b345j3b45j345j345h34j5h345j34h5j34h5j"
+      }
+    }
   ]
 }

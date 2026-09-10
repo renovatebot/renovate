@@ -13,7 +13,7 @@ describe('util/http/jira', () => {
     httpMock.scope(siteUrl).post('/some-path').reply(200, {});
     setBaseUrl(siteUrl);
 
-    expect(await api.postJson('some-path')).toEqual({
+    await expect(api.postJson('some-path')).resolves.toEqual({
       authorization: false,
       body: {},
       headers: {

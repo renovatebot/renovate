@@ -16,6 +16,7 @@ ignore:
   - dist
   - vitest.config.ts
   - node_modules
+  - .pnpm-store
   - SECURITY.md
   - test/e2e/node_modules
   - tmp

@@ -23,6 +23,7 @@ export interface BranchUpgradeCache {
   depName?: string;
   depType?: string;
   displayPending?: unknown;
+  manager?: string;
   fixedVersion?: string;
   currentVersion?: string;
   packageName?: string;
@@ -33,6 +34,7 @@ export interface BranchUpgradeCache {
   packageFile?: string;
   remediationNotPossible?: unknown;
   updateType?: UpdateType;
+  isVulnerabilityAlert?: boolean;
 }
 
 export interface OnboardingBranchCache {

@@ -57,7 +57,7 @@ async function checkVersions(): Promise<void> {
   }
 }
 
-function setGlobalHostRules(config: RenovateConfig): void {
+function setGlobalHostRules(config: AllConfig, warnOnDenied = true): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
     applySecretsAndVariablesToConfig({
@@ -65,7 +65,21 @@ function setGlobalHostRules(config: RenovateConfig): void {
       deleteVariables: false,
       deleteSecrets: false,
     });
-    config.hostRules.forEach((rule) => hostRules.add(rule));
+    // filtered here, rather than left to `add()`, so that the WARN about any dropped header can be suppressed when the same rules are registered again
+    // `config.hostRules` is deliberately left as it is: a `repositories[]` entry can widen `allowedHeaders` for its own repository, and `start()` re-filters these rules with the entry's allowlist to honour that
+    const rules = hostRules.filterAllowedHeaders(
+      config.hostRules,
+      config.allowedHeaders,
+      warnOnDenied,
+    );
+    for (const rule of rules) {
+      // already filtered above, so `add()`'s own enforcement has nothing left to drop
+      // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host
+      hostRules.add(rule, {
+        allowedHeaders: config.allowedHeaders,
+        trusted: true,
+      });
+    }
   }
 }
 
@@ -91,7 +105,8 @@ export async function globalInitialize(
   await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
-  setGlobalHostRules(config);
+  // registered a second time in case initialization changed them; anything `allowedHeaders` drops was already warned about by the call above
+  setGlobalHostRules(config, false);
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);
   return config;

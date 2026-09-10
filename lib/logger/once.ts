@@ -34,7 +34,7 @@ function getCallSite(omitFn: OmitFn): string | null {
     if (callsite) {
       result = callsite.toString();
     }
-    /* v8 ignore next 2 -- should not happen */
+    /* v8 ignore next -- should not happen */
   } catch {
     // no-op
   } finally {
@@ -55,7 +55,7 @@ export function once(
 ): void {
   const callsite = getCallSite(omitFn);
 
-  /* v8 ignore next 3 -- should not happen */
+  /* v8 ignore next -- should not happen */
   if (!callsite) {
     return;
   }

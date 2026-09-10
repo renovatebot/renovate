@@ -30,9 +30,9 @@ function normalizeBodyIndent(bodyLines) {
     if (line.trim() === '') {
       continue;
     }
-    const m = /^(\s*)/.exec(line);
-    if (m) {
-      minIndent = Math.min(minIndent, m[1].length);
+    const m = /^(?<indent>\s*)/.exec(line);
+    if (m?.groups) {
+      minIndent = Math.min(minIndent, m.groups.indent.length);
     }
   }
   if (minIndent === Infinity || minIndent === 2) {
@@ -100,7 +100,7 @@ function maskAdmonitions(text) {
           bodyLines.push(lines[i]);
           i++;
         }
-        while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === '') {
+        while (bodyLines.length > 0 && bodyLines.at(-1) === '') {
           bodyLines.pop();
           i--;
         }
@@ -124,7 +124,7 @@ function maskAdmonitions(text) {
 
       // Strip trailing blank lines to avoid double-blank in prettier output;
       // they will be re-emitted to the masked stream as normal blank lines.
-      while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === '') {
+      while (bodyLines.length > 0 && bodyLines.at(-1) === '') {
         bodyLines.pop();
         i--;
       }
@@ -153,7 +153,7 @@ function unmaskAdmonitions(ast, placeholders) {
     if (node.type === 'html') {
       const match = PLACEHOLDER_RE.exec(node.value);
       if (match?.groups) {
-        node.value = placeholders[Number(match.groups.index)];
+        node.value = placeholders[parseInt(match.groups.index, 10)];
       }
       return;
     }

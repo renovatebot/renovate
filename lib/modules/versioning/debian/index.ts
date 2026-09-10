@@ -1,8 +1,11 @@
 import type { RangeStrategy } from '../../../types/index.ts';
 import { DistroInfo } from '../distro.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { NewValueConfig, VersioningApi } from '../types.ts';
+import type {
+  GenericVersion,
+  NewValueConfig,
+  VersioningApi,
+} from '../types.ts';
 import {
   RollingReleasesData,
   getDatedContainerImageCodename,
@@ -14,7 +17,7 @@ import {
 export const id = 'debian';
 export const displayName = 'Debian';
 export const urls = [
-  'https://debian.pages.debian.net/distro-info-data/debian.csv',
+  '[Debian distro info data](https://debian.pages.debian.net/distro-info-data/debian.csv)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['replace'];
@@ -63,7 +66,7 @@ export class DebianVersioningApi extends GenericVersioningApi {
 
     if (this._distroInfo.isCodename(currentValue)) {
       const di = this._rollingReleases.schedule(newVersion);
-      let ver = newVersion;
+      let ver = this._getBaseVersion(newVersion);
       if (di) {
         ver = di.version;
       }
@@ -75,6 +78,12 @@ export class DebianVersioningApi extends GenericVersioningApi {
     if (this._rollingReleases.has(newVersion)) {
       // should never `undefined` if it exists
       return this._rollingReleases.schedule(newVersion)!.version;
+    }
+
+    // current value is numeric, so keep a dated codename (e.g. trixie-20260406)
+    // as its numeric version rather than switching format
+    if (isDatedCodeName(newVersion, this._distroInfo)) {
+      return this._getBaseVersion(newVersion);
     }
 
     return this._distroInfo.getVersionByCodename(newVersion);

@@ -7,10 +7,11 @@ import type {
 import { mergeChildConfig } from '../../config/utils.ts';
 import { logger } from '../../logger/index.ts';
 import type { StageName } from '../../types/skip-reason.ts';
+import { coerceArray } from '../array.ts';
 import { compile } from '../template/index.ts';
 import matchers from './matchers.ts';
 
-const slugify = _slugify as unknown as typeof _slugify.default;
+const slugify = _slugify;
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
@@ -37,7 +38,13 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
   stageName?: StageName,
 ): Promise<T> {
   let config = { ...inputConfig };
-  const packageRules = config.packageRules ?? [];
+  const packageRules = coerceArray(config.packageRules);
+  // The `packageRules` array is invariant while rules are being applied, and
+  // can be very large (e.g. vulnerability alerts append rules embedding full
+  // advisory texts). Remove it from the working config so mergeChildConfig()
+  // does not deep-clone the whole array once per matched rule, then restore
+  // it afterwards.
+  delete config.packageRules;
   logger.trace(
     { dependency: config.depName, packageRules },
     `Checking against ${packageRules.length} packageRules`,
@@ -106,6 +113,14 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
       delete toApply.overridePackageName;
       config = mergeChildConfig(config, toApply);
     }
+  }
+  // Restore the rules. If any applied rule carried nested `packageRules`
+  // (e.g. from a resolved preset), preserve the concat-merge semantics that
+  // mergeChildConfig() would previously have applied.
+  if (config.packageRules) {
+    config.packageRules = packageRules.concat(config.packageRules);
+  } else if ('packageRules' in inputConfig) {
+    config.packageRules = inputConfig.packageRules;
   }
   return config;
 }

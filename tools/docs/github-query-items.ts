@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
 import { logger } from '../../lib/logger/index.ts';
+import { Json } from '../../lib/util/schema-utils/index.ts';
 import { exec } from '../utils/exec.ts';
 
 export interface ItemsEntity {
@@ -29,17 +30,19 @@ export interface Items {
   features: ItemsEntity[];
 }
 
-const GhOutput = z.array(
-  z.object({
-    url: z.string(),
-    title: z.string(),
-    labels: z.array(
-      z.object({
-        name: z.string(),
-      }),
-    ),
-    number: z.number(),
-  }),
+const GhOutput = Json.pipe(
+  z.array(
+    z.object({
+      url: z.string(),
+      title: z.string(),
+      labels: z.array(
+        z.object({
+          name: z.string(),
+        }),
+      ),
+      number: z.number(),
+    }),
+  ),
 );
 
 async function getIssuesByIssueType(
@@ -63,12 +66,9 @@ async function getIssuesByIssueType(
       },
     },
   );
-  const res = GhOutput.safeParse(JSON.parse(execRes.stdout));
-  if (res.error) {
-    throw res.error;
-  }
+  const res = GhOutput.parse(execRes.stdout);
 
-  return res.data.map((issue) => {
+  return res.map((issue) => {
     return { ...issue, issueType };
   });
 }
@@ -93,21 +93,20 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     return result;
   }
 
-  if (process.env.CI) {
-    if (
-      process.env.GITHUB_REF === 'main' &&
-      process.env.GITHUB_REPOSITORY !== 'renovatebot/renovatebot.github.io' &&
-      process.env.GITHUB_REPOSITORY !== 'renovatebot/renovate'
-    ) {
-      logger.warn(
-        {
-          repository: process.env.GITHUB_REPOSITORY,
-          ref: process.env.GITHUB_REF,
-        },
-        "Skipping collection of open GitHub Issues, as we're running CI on a non-HEAD branch of Renovate or its docs site",
-      );
-      return result;
-    }
+  if (
+    process.env.CI &&
+    process.env.GITHUB_REF === 'main' &&
+    process.env.GITHUB_REPOSITORY !== 'renovatebot/renovatebot.github.io' &&
+    process.env.GITHUB_REPOSITORY !== 'renovatebot/renovate'
+  ) {
+    logger.warn(
+      {
+        repository: process.env.GITHUB_REPOSITORY,
+        ref: process.env.GITHUB_REF,
+      },
+      "Skipping collection of open GitHub Issues, as we're running CI on a non-HEAD branch of Renovate or its docs site",
+    );
+    return result;
   }
 
   try {

@@ -3,9 +3,7 @@ import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as pythonVersioning from '../../versioning/python/index.ts';
 import * as rubyVersioning from '../../versioning/ruby/index.ts';
 import * as semver from '../../versioning/semver/index.ts';
-import type { VersioningApi } from '../../versioning/types.ts';
-
-export type ToolVersioning = Record<string, { api: VersioningApi; id: string }>;
+import type { ToolVersioning } from './types.ts';
 
 export const devboxToolVersioning: ToolVersioning = {
   nodejs: {

@@ -41,12 +41,9 @@ describe('modules/manager/gradle/extract', () => {
     };
     mockFs(fsMock);
 
-    expect(
-      await extractAllPackageFiles(
-        partial<ExtractConfig>(),
-        Object.keys(fsMock),
-      ),
-    ).toBeNull();
+    await expect(
+      extractAllPackageFiles(partial<ExtractConfig>(), Object.keys(fsMock)),
+    ).resolves.toBeNull();
   });
 
   it('logs a warning in case parseGradle throws an exception', async () => {
@@ -1308,12 +1305,9 @@ describe('modules/manager/gradle/extract', () => {
       };
       mockFs(fsMock);
 
-      expect(
-        await extractAllPackageFiles(
-          partial<ExtractConfig>(),
-          Object.keys(fsMock),
-        ),
-      ).toBeNull();
+      await expect(
+        extractAllPackageFiles(partial<ExtractConfig>(), Object.keys(fsMock)),
+      ).resolves.toBeNull();
     });
 
     it('prevents inclusion of non-Gradle files', async () => {
@@ -1322,12 +1316,9 @@ describe('modules/manager/gradle/extract', () => {
       };
       mockFs(fsMock);
 
-      expect(
-        await extractAllPackageFiles(
-          partial<ExtractConfig>(),
-          Object.keys(fsMock),
-        ),
-      ).toBeNull();
+      await expect(
+        extractAllPackageFiles(partial<ExtractConfig>(), Object.keys(fsMock)),
+      ).resolves.toBeNull();
     });
   });
 

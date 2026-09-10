@@ -1,4 +1,4 @@
-import { fs, partial } from '~test/util.ts';
+import { fs, logger, partial } from '~test/util.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
@@ -32,9 +32,11 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(true);
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis', skipReason: 'placeholder-url' },
+        { depName: 'postgresql', skipReason: 'invalid-url' },
+        { depName: 'broken', skipReason: 'no-repository' },
+      ]);
     });
 
     it('parses simple Chart.yaml correctly', async () => {
@@ -56,11 +58,21 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
-      expect(result).toMatchSnapshot({
+      expect(result).toEqual({
+        datasource: 'helm',
         deps: [
-          { depName: 'redis', currentValue: '0.9.0' },
-          { depName: 'postgresql', currentValue: '0.8.1' },
+          {
+            currentValue: '0.9.0',
+            depName: 'redis',
+            registryUrls: ['https://charts.helm.sh/stable'],
+          },
+          {
+            currentValue: '0.8.1',
+            depName: 'postgresql',
+            registryUrls: ['https://charts.helm.sh/stable'],
+          },
         ],
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -85,16 +97,18 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
-      expect(result).toMatchSnapshot({
-        deps: [
-          {
-            depName: 'library',
-            datasource: DockerDatasource.id,
-            currentValue: '0.1.0',
-          },
-          { depName: 'postgresql', currentValue: '0.8.1' },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: '0.1.0',
+          datasource: DockerDatasource.id,
+          depName: 'library',
+          packageName: 'ghcr.io/ankitabhopatkar13/library',
+        },
+        {
+          currentValue: '0.8.1',
+          depName: 'postgresql',
+        },
+      ]);
     });
 
     it('resolves aliased registry urls', async () => {
@@ -123,9 +137,21 @@ describe('modules/manager/helmv3/extract', () => {
           ociRegistry: 'oci://quay.example.com/organization',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(false);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'redis',
+          registryUrls: ['https://my-registry.gcr.io/'],
+        },
+        {
+          depName: 'example',
+          registryUrls: ['https://registry.example.com/'],
+        },
+        {
+          datasource: 'docker',
+          depName: 'oci-example',
+          packageName: 'quay.example.com/organization/oci-example',
+        },
+      ]);
     });
 
     it("doesn't fail if Chart.yaml is invalid", async () => {
@@ -156,12 +182,10 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
-      expect(result).toMatchSnapshot({
-        deps: [
-          { depName: 'redis' },
-          { depName: 'postgresql', skipReason: 'local-dependency' },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis' },
+        { depName: 'postgresql', skipReason: 'local-dependency' },
+      ]);
     });
 
     it('returns null if no dependencies key', async () => {
@@ -247,6 +271,40 @@ describe('modules/manager/helmv3/extract', () => {
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
       expect(result).toBeNull();
+    });
+
+    it('skips helm-git repos', async () => {
+      const content = `
+      apiVersion: v2
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      dependencies:
+        - name: csdp-add-cluster
+          version: 0.4.0
+          repository: git+https://github.com/codefresh-io/csdp-official@add-cluster/helm
+      `;
+      const fileName = 'Chart.yaml';
+      const result = await extractPackageFile(content, fileName, config);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          repository:
+            'git+https://github.com/codefresh-io/csdp-official@add-cluster/helm',
+          packageFile: 'Chart.yaml',
+        },
+        'Skipping unsupported helm-git repository.',
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.4.0',
+            depName: 'csdp-add-cluster',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
   });
 });

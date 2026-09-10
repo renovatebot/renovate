@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
@@ -21,11 +23,15 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
-import { CommunityActions } from './community.ts';
-import type { DockerReference, RepositoryReference } from './parse.ts';
+import { actionsLockFile, isLockfileManaged } from './common.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
-import type { Steps } from './schema.ts';
-import { Workflow } from './schema.ts';
+import type { UsesStep } from './schema.ts';
+import { ActionsLockfile, CommunityActions, Workflow } from './schema.ts';
+import type {
+  DockerReference,
+  LockfileState,
+  RepositoryReference,
+} from './types.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -63,6 +69,8 @@ function extractDockerAction(
   return dep;
 }
 
+const reusableWorkflowPathRe = regEx(/^\.github\/workflows\/[^/]+\.ya?ml$/);
+
 function extractRepositoryAction(
   actionRef: RepositoryReference,
   parsed: ReturnType<typeof parseUsesLine> & object,
@@ -88,12 +96,13 @@ function extractRepositoryAction(
   const depName = `${registryUrl}${packageName}`;
   const pathSuffix = subPath ? `/${subPath}` : '';
   const commentWs = commentPrecedingWhitespace || ' ';
+  const isReusableWorkflow = !!subPath && reusableWorkflowPathRe.test(subPath);
 
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
     versioning: githubActionsVersioning.id,
-    depType: 'action',
+    depType: isReusableWorkflow ? 'workflow' : 'action',
     replaceString: valueString,
     autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
     ...(isExplicitHostname
@@ -258,7 +267,7 @@ const versionedActions: Record<string, string> = {
   // - java
 };
 
-function extractVersionedAction(step: Steps): PackageDependency | null {
+function extractVersionedAction(step: UsesStep): PackageDependency | null {
   for (const [action, versioning] of Object.entries(versionedActions)) {
     const actionName = `actions/setup-${action}`;
     if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
@@ -284,13 +293,13 @@ function extractVersionedAction(step: Steps): PackageDependency | null {
   return null;
 }
 
-function extractSteps(steps: Steps[]): PackageDependency[] {
+function extractSteps(steps: UsesStep[]): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   for (const step of steps) {
     const res = CommunityActions.safeParse(step);
     if (res.success) {
-      deps.push(res.data);
+      deps.push(...res.data);
       continue;
     }
 
@@ -355,11 +364,61 @@ function extractWithYAMLParser(
   return deps;
 }
 
-export function extractPackageFile(
+async function readLockfile(): Promise<LockfileState> {
+  const content = await readLocalFile(actionsLockFile, 'utf8');
+  if (!content) {
+    return { type: 'missing' };
+  }
+
+  const parsed = ActionsLockfile.safeParse(content);
+  if (!parsed.success) {
+    // `updateActionsLockfile` warns about this once per branch, so stay quiet
+    logger.debug(`Failed to parse ${actionsLockFile}`);
+    return { type: 'unparseable' };
+  }
+
+  return { type: 'parsed', onboardedWorkflows: parsed.data.workflows };
+}
+
+/**
+ * A repository has a single lock file, but can have any number of package files, so read and parse it only once.
+ */
+function getLockfile(): Promise<LockfileState> {
+  const cacheKey = `github-actions:${actionsLockFile}`;
+  const cached = memCache.get<Promise<LockfileState> | undefined>(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const result = readLockfile();
+  memCache.set(cacheKey, result);
+  return result;
+}
+
+/**
+ * Whether `gh actions-lock` owns the digests in this file.
+ *
+ * It rewrites the workflows it manages back to plain refs when regenerating, so an inline digest pin would be stripped straight back out.
+ */
+async function isManagedByLockfile(packageFile: string): Promise<boolean> {
+  const lockfile = await getLockfile();
+
+  switch (lockfile.type) {
+    case 'missing':
+      return false;
+    case 'unparseable':
+      // The tool refuses to regenerate a lock file which it cannot parse, so treat everything as managed: pinning inline here would raise a PR which pins the digests the tool owns and leaves the lock file stale.
+      return true;
+    case 'parsed':
+      return isLockfileManaged(packageFile, lockfile.onboardedWorkflows);
+  }
+}
+
+export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig = {}, // TODO: enforce ExtractConfig
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`github-actions.extractPackageFile(${packageFile})`);
 
   const deps = [
@@ -371,5 +430,17 @@ export function extractPackageFile(
     return null;
   }
 
-  return { deps };
+  const res: PackageFileContent = { deps };
+
+  if (await isManagedByLockfile(packageFile)) {
+    // Deliberately no `lockFiles`: nothing here goes through `updateArtifacts`, and `matchFileNames` also tests `lockFiles`, so declaring it would make a negated rule such as `!.github/workflows/release.yml` match every workflow through the lock file path.
+    for (const dep of deps) {
+      // The lock file only records `OWNER/REPO@REF` pins, so a `docker://` image in a `uses:` is still ours to pin.
+      if (dep.depType === 'action' || dep.depType === 'workflow') {
+        dep.digestManagedExternally = true;
+      }
+    }
+  }
+
+  return res;
 }

@@ -44,10 +44,8 @@ export class DevboxDatasource extends Datasource {
       res.releases = response.body.releases;
       res.homepage = response.body.homepage;
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+        throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }

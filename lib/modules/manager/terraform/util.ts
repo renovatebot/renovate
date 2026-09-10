@@ -14,7 +14,7 @@ export function checkFileContainsDependency(
   return checkList.some((check) => content.includes(check));
 }
 
-const pathStringRegex = regEx(/(.|..)?(\/[^/])+/);
+const pathStringRegex = regEx(/(?:.|..)?(?:\/[^/])+/);
 export function checkIfStringIsPath(path: string): boolean {
   const match = pathStringRegex.exec(path);
   return !!match;

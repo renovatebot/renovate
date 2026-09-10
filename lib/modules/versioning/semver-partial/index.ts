@@ -7,7 +7,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'semver-partial';
 export const displayName = 'Partial Semantic Versioning';
 export const urls = [
-  'https://docs.gitlab.com/ci/components/#partial-semantic-versions',
+  '[GitLab CI components - Partial semantic versions](https://docs.gitlab.com/ci/components/#partial-semantic-versions)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];

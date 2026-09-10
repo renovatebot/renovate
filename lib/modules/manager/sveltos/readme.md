@@ -36,11 +36,16 @@ You must set your own `managerFilePatterns` rules, so Renovate knows which `*.ya
 
 ### Disabling parts of the sveltos manager
 
-You can use these `depTypes` for fine-grained control, for example to disable parts of the Sveltos manager.
+You can use `depTypes` for fine-grained control, for example to disable parts of the Sveltos manager.
 
-| Resource                                                                                             | `depType`          |
-| :--------------------------------------------------------------------------------------------------- | :----------------- |
-| [Cluster Profiles](https://projectsveltos.github.io/sveltos/addons/clusterprofile/)                  | `ClusterProfile`   |
-| [Profiles](https://projectsveltos.github.io/sveltos/addons/profile/)                                 | `Profile`          |
-| [EventTrigger](https://projectsveltos.github.io/sveltos/events/addon_event_deployment/#eventtrigger) | `EventTrigger`     |
-| [ClusterPromotion](https://projectsveltos.github.io/sveltos/addons/clusterpromotion/)                | `ClusterPromotion` |
+```json title="Disable ClusterPromotion resources"
+{
+  "packageRules": [
+    {
+      "matchManagers": ["sveltos"],
+      "matchDepTypes": ["ClusterPromotion"],
+      "enabled": false
+    }
+  ]
+}
+```

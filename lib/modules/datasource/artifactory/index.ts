@@ -91,14 +91,12 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode === 404) {
-          logger.warn(
-            { registryUrl, packageName },
-            'artifactory: `Not Found` error',
-          );
-          return null;
-        }
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        logger.warn(
+          { registryUrl, packageName },
+          'artifactory: `Not Found` error',
+        );
+        return null;
       }
       this.handleGenericErrors(err);
     }

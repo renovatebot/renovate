@@ -1,22 +1,15 @@
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GithubReleaseAttachmentsDatasource } from './index.ts';
 import { GitHubReleaseAttachmentMocker } from './test/index.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-const hostRules = vi.mocked(_hostRules);
-
 const githubApiHost = 'https://api.github.com';
 
 describe('modules/datasource/github-release-attachments/index', () => {
   beforeEach(() => {
-    hostRules.hosts.mockReturnValue([]);
-    hostRules.find.mockReturnValue({
-      token: 'some-token',
-    });
+    hostRules.add({ token: 'some-token' });
   });
 
   describe('getReleases', () => {

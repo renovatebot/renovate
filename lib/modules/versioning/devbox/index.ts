@@ -1,15 +1,14 @@
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'devbox';
 export const displayName = 'devbox';
 export const urls = [];
 export const supportsRanges = false;
 
-const validPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})$/);
-const versionPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){2})$/);
+const validPattern = regEx(/^(?:(?:\d|[1-9]\d*)(?:\.(?:\d|[1-9]\d*)){0,2})$/);
+const versionPattern = regEx(/^(?:(?:\d|[1-9]\d*)(?:\.(?:\d|[1-9]\d*)){2})$/);
 
 class DevboxVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {

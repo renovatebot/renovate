@@ -21,12 +21,12 @@ describe('modules/datasource/elm-package/index', () => {
         .scope(baseUrl)
         .get('/packages/elm/nonexistent/releases.json')
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: ElmPackageDatasource.id,
           packageName: 'elm/nonexistent',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
@@ -34,12 +34,12 @@ describe('modules/datasource/elm-package/index', () => {
         .scope(baseUrl)
         .get('/packages/elm/nonexistent/releases.json')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: ElmPackageDatasource.id,
           packageName: 'elm/nonexistent',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -73,12 +73,12 @@ describe('modules/datasource/elm-package/index', () => {
         .scope(baseUrl)
         .get('/packages/elm/core/releases.json')
         .reply(200, 'not-json');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: ElmPackageDatasource.id,
           packageName: 'elm/core',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error', async () => {
@@ -86,12 +86,12 @@ describe('modules/datasource/elm-package/index', () => {
         .scope(baseUrl)
         .get('/packages/elm/core/releases.json')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: ElmPackageDatasource.id,
           packageName: 'elm/core',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {
@@ -131,12 +131,12 @@ describe('modules/datasource/elm-package/index', () => {
         .scope(baseUrl)
         .get('/packages/elm/core/releases.json')
         .reply(200, { '1.0.0': 'not-a-number' });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: ElmPackageDatasource.id,
           packageName: 'elm/core',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles package without slash in name', async () => {

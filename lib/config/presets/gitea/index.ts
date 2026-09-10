@@ -53,7 +53,7 @@ export function getPreset({
   repo,
   presetName = 'default',
   presetPath,
-  tag = undefined,
+  tag,
 }: PresetConfig): Promise<Nullish<Preset>> {
   return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

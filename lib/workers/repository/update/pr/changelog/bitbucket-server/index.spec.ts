@@ -77,11 +77,11 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         .times(4)
         .reply(200, 'text');
 
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl,
@@ -110,11 +110,11 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         .times(4)
         .reply(200, []);
 
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl,
@@ -143,11 +143,11 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         .times(4)
         .reply(200, []);
 
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl,
@@ -232,7 +232,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
           isLastPage: true,
           values: ['.gitignore', 'README.md'],
         });
-      expect(await getReleaseNotesMdFile(bitbucketProject)).toBeNull();
+      await expect(getReleaseNotesMdFile(bitbucketProject)).resolves.toBeNull();
     });
   });
 

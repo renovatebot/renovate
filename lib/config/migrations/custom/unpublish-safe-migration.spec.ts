@@ -17,7 +17,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       {
         extends: 'test',
         unpublishSafe: true,
-      } as any,
+      },
       {
         extends: ['test', 'security:minimumReleaseAgeNpm'],
       },
@@ -29,7 +29,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       {
         extends: [],
         unpublishSafe: true,
-      } as any,
+      },
       {
         extends: ['security:minimumReleaseAgeNpm'],
       },
@@ -41,7 +41,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       {
         extends: ['foo', ':unpublishSafe', 'bar'],
         unpublishSafe: true,
-      } as any,
+      },
       {
         extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       },
@@ -51,7 +51,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       {
         extends: ['foo', 'default:unpublishSafe', 'bar'],
         unpublishSafe: true,
-      } as any,
+      },
       {
         extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       },
@@ -61,7 +61,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       {
         extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
         unpublishSafe: true,
-      } as any,
+      },
       {
         extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
       },
@@ -73,7 +73,7 @@ describe('config/migrations/custom/unpublish-safe-migration', () => {
       {
         extends: ['foo', 'bar'],
         unpublishSafe: false,
-      } as any,
+      },
       {
         extends: ['foo', 'bar'],
       },

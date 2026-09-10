@@ -22,6 +22,7 @@ function generateBranchUpgradeCache(
     depName,
     depType,
     displayPending,
+    manager,
     packageName,
     fixedVersion,
     currentVersion,
@@ -34,12 +35,14 @@ function generateBranchUpgradeCache(
     sourceUrl,
     remediationNotPossible,
     updateType,
+    isVulnerabilityAlert,
   } = upgrade;
   const result: BranchUpgradeCache = {
     datasource,
     depName,
     depType,
     displayPending,
+    manager,
     fixedVersion,
     currentVersion,
     currentValue,
@@ -51,6 +54,7 @@ function generateBranchUpgradeCache(
     sourceUrl,
     remediationNotPossible,
     updateType,
+    isVulnerabilityAlert,
   };
   if (packageName) {
     result.packageName = packageName;

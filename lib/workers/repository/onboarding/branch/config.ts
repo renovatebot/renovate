@@ -24,6 +24,7 @@ async function getOnboardingConfig(
   if (foundPreset) {
     logger.debug(`Found preset ${foundPreset} - using it in onboarding config`);
     onboardingConfig = {
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- JSON schema reference URL, not a documentation link
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       extends: [foundPreset],
     };

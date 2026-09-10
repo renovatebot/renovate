@@ -1,4 +1,4 @@
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
 import type { Pr, RepoSortMethod, SortMethod } from '../types.ts';
 
@@ -10,18 +10,9 @@ export interface PrReviewersParams {
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
 export type CommitStatusType =
-  | 'pending'
-  | 'success'
-  | 'error'
-  | 'failure'
-  | 'warning'
-  | 'unknown';
+  'pending' | 'success' | 'error' | 'failure' | 'warning' | 'unknown';
 export type PRMergeMethod =
-  | 'fast-forward-only'
-  | 'merge'
-  | 'rebase'
-  | 'rebase-merge'
-  | 'squash';
+  'fast-forward-only' | 'merge' | 'rebase' | 'rebase-merge' | 'squash';
 
 export interface GiteaLabel {
   id: number;

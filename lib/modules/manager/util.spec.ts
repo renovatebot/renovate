@@ -4,7 +4,7 @@ import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
 import { type PackageDependency } from './types.ts';
-import { applyGitSource } from './util.ts';
+import { applyGitSource, artifactErrorMessageFromExecError } from './util.ts';
 
 describe('modules/manager/util', () => {
   beforeEach(() => {
@@ -169,5 +169,58 @@ describe('modules/manager/util', () => {
       currentValue: undefined,
       skipReason: 'unspecified-version',
     });
+  });
+});
+
+describe('modules/manager/util', () => {
+  it('returns stderr when present', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: 'some error', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some error');
+  });
+
+  it('returns stdout when stderr is empty', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns stdout when stderr is only whitespace', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '   ', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns stdout when stderr is undefined', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns fallback message when neither stderr nor stdout are present', () => {
+    const message = artifactErrorMessageFromExecError({}, 'fallback message');
+
+    expect(message).toBe('fallback message');
+  });
+
+  it('returns fallback message when stderr and stdout are only whitespace', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '  ', stdout: '  ' },
+      'fallback message',
+    );
+
+    expect(message).toBe('fallback message');
   });
 });

@@ -1,20 +1,49 @@
-import type { RedisClusterOptions } from '@redis/client';
-import { createClient, createCluster } from '@redis/client';
-import { DateTime } from 'luxon';
+import type {
+  RedisClientType,
+  RedisClusterOptions,
+  RedisClusterType,
+  RedisFunctions,
+  RedisModules,
+  RedisScripts,
+  TypeMapping,
+} from '@redis/client';
+import { RESP_TYPES, createClient, createCluster } from '@redis/client';
 import { logger } from '../../../../logger/index.ts';
-import { compressToBase64, decompressFromBase64 } from '../../../compress.ts';
 import { regEx } from '../../../regex.ts';
 import { parseUrl } from '../../../url.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
 export function normalizeRedisUrl(url: string): string {
-  return url.replace(regEx(/^(rediss?)\+cluster:\/\//), '$1://');
+  return url.replace(
+    regEx(/^(?<scheme>rediss?)\+cluster:\/\//),
+    '$<scheme>://',
+  );
 }
 
+// TODO: switch to RESP 3 (the @redis/client v6 default) in the next major
+// release, as it requires Redis server 6.0 or newer.
+const RESP = 2;
+
 type RedisClient =
-  | ReturnType<typeof createClient>
-  | ReturnType<typeof createCluster>;
+  | RedisClientType<
+      RedisModules,
+      RedisFunctions,
+      RedisScripts,
+      typeof RESP,
+      TypeMapping
+    >
+  | RedisClusterType<
+      RedisModules,
+      RedisFunctions,
+      RedisScripts,
+      typeof RESP,
+      TypeMapping
+    >;
+
+interface RedisBinaryClient {
+  get(key: string): Promise<Buffer | null>;
+}
 
 export class PackageCacheRedis extends PackageCacheBase {
   static async create(
@@ -38,7 +67,12 @@ export class PackageCacheRedis extends PackageCacheBase {
     let client: RedisClient;
 
     if (clusteredMode) {
-      const clusterConfig: RedisClusterOptions = { rootNodes: [config] };
+      const clusterConfig: RedisClusterOptions<
+        RedisModules,
+        RedisFunctions,
+        RedisScripts,
+        typeof RESP
+      > = { rootNodes: [config], RESP };
 
       const parsedUrl = parseUrl(rewrittenUrl);
       if (parsedUrl?.username) {
@@ -54,91 +88,34 @@ export class PackageCacheRedis extends PackageCacheBase {
 
       client = createCluster(clusterConfig);
     } else {
-      client = createClient(config);
+      client = createClient({ ...config, RESP });
     }
 
     await client.connect();
     logger.debug('Redis cache connected');
-    return new PackageCacheRedis(client, rprefix);
+    const binaryClient = client.withTypeMapping({
+      [RESP_TYPES.BLOB_STRING]: Buffer,
+    }) as RedisBinaryClient;
+    return new PackageCacheRedis(client, binaryClient, rprefix);
   }
 
   private readonly client: RedisClient;
+  private readonly binaryClient: RedisBinaryClient;
   private readonly rprefix: string;
 
-  private constructor(client: RedisClient, rprefix: string) {
+  private constructor(
+    client: RedisClient,
+    binaryClient: RedisBinaryClient,
+    rprefix: string,
+  ) {
     super();
     this.client = client;
+    this.binaryClient = binaryClient;
     this.rprefix = rprefix;
   }
 
   private getKey(namespace: PackageCacheNamespace, key: string): string {
     return `${this.rprefix}${namespace}-${key}`;
-  }
-
-  override async get<T = unknown>(
-    namespace: PackageCacheNamespace,
-    key: string,
-  ): Promise<T | undefined> {
-    logger.trace(`cache.get(${namespace}, ${key})`);
-    try {
-      const raw = await this.client.get(this.getKey(namespace, key));
-      if (!raw) {
-        return undefined;
-      }
-
-      const cached = JSON.parse(raw);
-
-      const expiry = DateTime.fromISO(cached.expiry);
-      if (!expiry.isValid || DateTime.local() >= expiry) {
-        await this.rm(namespace, key);
-        return undefined;
-      }
-
-      logger.trace(
-        { rprefix: this.rprefix, namespace, key },
-        'Returning cached value',
-      );
-
-      const json = await decompressFromBase64(cached.value);
-      return JSON.parse(json);
-    } catch {
-      logger.trace({ rprefix: this.rprefix, namespace, key }, 'Cache miss');
-    }
-    return undefined;
-  }
-
-  override async set(
-    namespace: PackageCacheNamespace,
-    key: string,
-    value: unknown,
-    hardTtlMinutes: number,
-  ): Promise<void> {
-    logger.trace(
-      { rprefix: this.rprefix, namespace, key, hardTtlMinutes },
-      'Saving cached value',
-    );
-
-    const ttlSeconds = Math.floor(hardTtlMinutes * 60);
-
-    try {
-      if (ttlSeconds <= 0) {
-        await this.rm(namespace, key);
-        return;
-      }
-
-      const serialized = JSON.stringify(value);
-      const compressedValue = await compressToBase64(serialized);
-      const expiry = DateTime.local().plus({ minutes: hardTtlMinutes });
-      const payload = JSON.stringify({
-        value: compressedValue,
-        expiry,
-      });
-      await this.client.set(this.getKey(namespace, key), payload, {
-        EX: ttlSeconds,
-      });
-    } catch (err) {
-      logger.once.warn({ err }, 'Error while setting Redis cache value');
-    }
   }
 
   override destroy(): Promise<void> {
@@ -151,7 +128,27 @@ export class PackageCacheRedis extends PackageCacheBase {
     return Promise.resolve();
   }
 
-  private async rm(
+  protected override async readRaw(
+    namespace: PackageCacheNamespace,
+    key: string,
+  ): Promise<Buffer | undefined> {
+    const raw = await this.binaryClient.get(this.getKey(namespace, key));
+
+    return raw ?? undefined;
+  }
+
+  protected override async writeRaw(
+    namespace: PackageCacheNamespace,
+    key: string,
+    data: Buffer,
+    ttlSeconds: number,
+  ): Promise<void> {
+    await this.client.set(this.getKey(namespace, key), data, {
+      EX: ttlSeconds,
+    });
+  }
+
+  protected override async rm(
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<void> {

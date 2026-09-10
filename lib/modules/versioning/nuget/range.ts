@@ -1,3 +1,4 @@
+import { regEx } from '../../../util/regex.ts';
 import type { NugetFloatingRange, NugetRange, NugetVersion } from './types.ts';
 import { compare, versionToString } from './version.ts';
 
@@ -20,7 +21,7 @@ export function getFloatingRangeLowerBound(
     if (last === '*') {
       parts[lastIdx] = '0';
     } else {
-      parts[lastIdx] = last.replace(/\*$/, '');
+      parts[lastIdx] = last.replace(regEx(/\*$/), '');
     }
     res.prerelease = parts.join('.');
   }

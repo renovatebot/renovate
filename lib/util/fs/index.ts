@@ -295,7 +295,8 @@ export function listCacheDir(
 
 export async function rmCache(path: string): Promise<void> {
   const fullPath = ensureCachePath(path);
-  await fs.rm(fullPath, { recursive: true });
+  // force: a missing path is a no-op, callers use this for cleanup
+  await fs.rm(fullPath, { recursive: true, force: true });
 }
 
 export async function cachePathExists(pathName: string): Promise<boolean> {

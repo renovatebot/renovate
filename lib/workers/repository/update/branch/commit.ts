@@ -4,12 +4,10 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
-import type {
-  CommitFilesConfig,
-  LongCommitSha,
-} from '../../../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
 
 export function commitFilesToBranch(
@@ -41,11 +39,12 @@ export function commitFilesToBranch(
   // istanbul ignore if
   if (
     config.branchName !== sanitize(config.branchName) ||
-    config.commitMessage !== sanitize(config.commitMessage)
+    config.commitMessage !== sanitize(config.commitMessage) ||
+    config.commitTrailers?.some((trailer) => trailer !== sanitize(trailer))
   ) {
     logger.debug(
       { branchName: config.branchName },
-      'Secrets exposed in branchName or commitMessage',
+      'Secrets exposed in branchName, commitMessage or commitTrailers',
     );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
@@ -55,6 +54,7 @@ export function commitFilesToBranch(
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage!,
+    trailers: config.commitTrailers,
     force: !!config.forceCommit,
     platformCommit: config.platformCommit,
     // Only needed by Gerrit platform

@@ -34,6 +34,7 @@ void (async () => {
   await program.parseAsync();
   const opts = program.opts();
   logger.info(`Preparing v${opts.version?.toString()} ...`);
+  await preparePackageVersion(opts.version?.toString());
   await build();
   await generateDocs(undefined, undefined, opts.version?.toString());
   await buildMkdocs(opts.version?.toString());
@@ -67,7 +68,7 @@ async function build(): Promise<void> {
 async function buildMkdocs(version: string | undefined): Promise<void> {
   logger.info('Building Mkdocs site ...');
 
-  const mkdocsArgs = ['mkdocs', 'build'];
+  const mkdocsArgs = ['mkdocs', 'build', '--no-announcement'];
   if (version) {
     mkdocsArgs.push('--version', version);
   }
@@ -108,5 +109,29 @@ async function buildMkdocs(version: string | undefined): Promise<void> {
     process.exit(tarRes.exitCode);
   } else {
     logger.info('Mkdocs site packaged successfully to tmp/mkdocs-site.tgz');
+  }
+}
+async function preparePackageVersion(
+  version: string | undefined,
+): Promise<void> {
+  if (!version) {
+    return;
+  }
+  const res = await exec(
+    'pnpm',
+    ['version', version, '--no-git-tag-version', '--allow-same-version'],
+    { reject: false },
+  );
+
+  if (res.signal) {
+    logger.error(`Signal received: ${res.signal}`);
+    process.exit(-1);
+  } else if (res.exitCode) {
+    logger.error(
+      `Error occurred updating package version:\n${res.stderr || res.stdout}`,
+    );
+    process.exit(res.exitCode);
+  } else {
+    logger.info('Package version updated');
   }
 }

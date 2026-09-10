@@ -17,12 +17,16 @@ import { regEx } from '../../util/regex.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
-import { extractRepoProblems } from './common.ts';
+import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
 import type { Vulnerability } from './process/types.ts';
 import { Vulnerabilities } from './process/vulnerabilities.ts';
+import type {
+  DependencyDashboardCheck,
+  DependencyDashboardListItemType,
+} from './types.ts';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -197,14 +201,20 @@ export async function readDashboardBody(
     }
   }
 
-  if (config.checkedBranches) {
-    const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-      config.checkedBranches.map((branchName) => [branchName, 'global-config']),
-    );
+  const checkedBranches = GlobalConfig.get('checkedBranches');
+  if (isNonEmptyArray(checkedBranches)) {
+    const checkedBranchesRec: Record<string, DependencyDashboardCheck> =
+      Object.fromEntries(
+        checkedBranches.map((branchName) => [branchName, 'global-config']),
+      );
     dashboardChecks.dependencyDashboardChecks = {
       ...dashboardChecks.dependencyDashboardChecks,
       ...checkedBranchesRec,
     };
+  }
+
+  if (GlobalConfig.get('rebaseAllOpenBranches')) {
+    dashboardChecks.dependencyDashboardRebaseAllOpen = true;
   }
 
   Object.assign(config, dashboardChecks);
@@ -214,7 +224,10 @@ function formatAsMarkdownLink(name: string, url?: string | null): string {
   return url ? `[${name}](${url})` : `\`${name}\``;
 }
 
-function getListItem(branch: BranchConfig, type: string): string {
+function getListItem(
+  branch: BranchConfig,
+  type: DependencyDashboardListItemType,
+): string {
   let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
@@ -255,7 +268,10 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
   return { categories, uncategorized, hasCategorized, hasUncategorized };
 }
 
-function getBranchList(branches: BranchConfig[], listItemType: string): string {
+function getBranchList(
+  branches: BranchConfig[],
+  listItemType: DependencyDashboardListItemType,
+): string {
   return branches
     .map((branch: BranchConfig): string => getListItem(branch, listItemType))
     .join('');
@@ -270,7 +286,7 @@ function getBranchesListMd(
   ) => unknown,
   title: string,
   description: string,
-  listItemType = 'approvePr',
+  listItemType: DependencyDashboardListItemType = 'approvePr',
   bulkComment?: string,
   bulkMessage?: string,
   bulkIcon?: '🔐',
@@ -348,19 +364,17 @@ export async function ensureDependencyDashboard(
       branch.result !== 'automerged' &&
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
-  if (
-    !(
-      config.dependencyDashboard === true ||
-      config.dependencyDashboardApproval === true ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
-        true ||
-      branches.some(
-        (branch) =>
-          !!branch.dependencyDashboardApproval ||
-          !!branch.dependencyDashboardPrApproval,
-      )
+  if (!(
+    config.dependencyDashboard === true ||
+    config.dependencyDashboardApproval === true ||
+    config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+      true ||
+    branches.some(
+      (branch) =>
+        !!branch.dependencyDashboardApproval ||
+        !!branch.dependencyDashboardPrApproval,
     )
-  ) {
+  )) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -383,7 +397,10 @@ export async function ensureDependencyDashboard(
   let hasDeprecationsOrReplacements = false;
   const deprecatedPackages: Record<
     string,
-    Record<string, { hasReplacement: boolean; sourceUrl?: string | null }>
+    Record<
+      string,
+      { hasActionableReplacement: boolean; sourceUrl?: string | null }
+    >
   > = {};
   logger.debug('Checking packageFiles for deprecated or replacement packages');
   if (isNonEmptyObject(packageFiles)) {
@@ -391,14 +408,25 @@ export async function ensureDependencyDashboard(
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
           const name = dep.packageName ?? dep.depName;
-          const hasReplacement = !!dep.updates?.find(
-            (updates) => updates.updateType === 'replacement',
+          const replacementUpdate = dep.updates?.find(
+            (update) => update.updateType === 'replacement',
           );
-          if (name && (dep.deprecationMessage ?? hasReplacement)) {
+          const hasAnyReplacement = !!replacementUpdate;
+          const hasActionableReplacement =
+            hasAnyReplacement &&
+            !(
+              replacementUpdate.newName &&
+              replacementAlreadyExists(
+                fileName.deps,
+                dep,
+                replacementUpdate.newName,
+              )
+            );
+          if (name && (dep.deprecationMessage ?? hasAnyReplacement)) {
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= {
-              hasReplacement,
+              hasActionableReplacement,
               sourceUrl: dep.sourceUrl,
             };
           }
@@ -450,11 +478,11 @@ export async function ensureDependencyDashboard(
     for (const manager of Object.keys(deprecatedPackages).sort()) {
       const deps = deprecatedPackages[manager];
       for (const depName of Object.keys(deps).sort()) {
-        const { hasReplacement, sourceUrl } = deps[depName];
+        const { hasActionableReplacement, sourceUrl } = deps[depName];
         const packageName = formatAsMarkdownLink(depName, sourceUrl);
 
         issueBody += `| ${manager} | ${packageName} | ${
-          hasReplacement
+          hasActionableReplacement
             ? '![Available](https://img.shields.io/badge/available-green?style=flat-square)'
             : '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)'
         } |\n`;
@@ -464,7 +492,7 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardReportAbandonment) {
-    issueBody += getAbandonedPackagesMd(packageFiles);
+    issueBody += getAbandonedPackagesMd(config, packageFiles);
   }
 
   issueBody += getBranchesListMd(
@@ -533,6 +561,7 @@ export async function ensureDependencyDashboard(
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
+    'unpend',
   );
   issueBody += getBranchesListMd(
     branches,
@@ -661,6 +690,7 @@ export async function ensureDependencyDashboard(
 }
 
 export function getAbandonedPackagesMd(
+  config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
 ): string {
   const abandonedPackages: Record<
@@ -699,8 +729,7 @@ export function getAbandonedPackagesMd(
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd +=
-    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
+  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
@@ -771,8 +800,7 @@ export async function getDashboardMarkdownVulnerabilities(
   if (isTruthy(config.osvVulnerabilityAlerts)) {
     result += ' CVEs have Renovate fixes.\n\n';
   } else {
-    result +=
-      ' CVEs have possible Renovate fixes.\n> See [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
+    result += ` CVEs have possible Renovate fixes.\n> See [\`osvVulnerabilityAlerts\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n`;
   }
 
   let renderedVulnerabilities: Vulnerability[];

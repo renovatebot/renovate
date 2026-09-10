@@ -1,4 +1,5 @@
 import { isTruthy } from '@sindresorhus/is';
+import { coerceObject } from '../../../../util/object.ts';
 import { regEx } from '../../../../util/regex.ts';
 import type { PackageDependency } from '../../types.ts';
 import { checkIsValidDependency } from '../utils.ts';
@@ -25,9 +26,7 @@ export function handleAny(
     .map((matchResult) =>
       createDependency(
         {
-          groups:
-            matchResult.groups ??
-            /* istanbul ignore next: can this happen? */ {},
+          groups: coerceObject(matchResult.groups),
           replaceString: matchResult[0],
         },
         config,
@@ -55,7 +54,7 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
+      groups: coerceObject(match.groups),
       replaceString:
         (match?.groups?.currentValue ?? match?.groups?.currentDigest)
           ? match[0]
@@ -118,7 +117,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
       ...parameters,
       content: match[0],
       index: index + 1,
-      combinedGroups: mergeGroups(combinedGroups, match.groups ?? {}),
+      combinedGroups: mergeGroups(combinedGroups, coerceObject(match.groups)),
     });
   });
 }
