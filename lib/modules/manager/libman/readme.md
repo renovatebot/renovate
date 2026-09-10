@@ -4,7 +4,7 @@ LibMan supports several "providers" for resolving libraries.
 
 | LibMan provider | Renovate support                                              |
 | --------------- | ------------------------------------------------------------- |
-| `cdnjs`         | [`cdnjs`](../../datasource/cdnjs) datasource                  |
+| `cdnjs`         | supported via `cdnjs` datasource                              |
 | `jsdelivr`      | Currently unsupported; skipped as an `unsupported-datasource` |
 | `unpkg`         | Currently unsupported; skipped as an `unsupported-datasource` |
 | `filesystem`    | Local files; skipped as a `local-dependency`                  |
