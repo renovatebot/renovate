@@ -5,6 +5,7 @@ import {
   extractHeaderCommand,
   extractPythonVersion,
   getRegistryCredVarsFromPackageFiles,
+  getRegistryUrlsFromPackageFiles,
   matchManager,
 } from './common.ts';
 import { inferCommandExecDir } from './utils.ts';
@@ -225,6 +226,28 @@ describe('modules/manager/pip-compile/common', () => {
 
     it('returns undefined if version cannot be extracted', () => {
       expect(extractPythonVersion('', 'reqs.txt')).toBeUndefined();
+    });
+  });
+
+  describe('getRegistryUrlsFromPackageFiles()', () => {
+    it('collects valid indexes from all files while preserving paths and ports', () => {
+      const urls = getRegistryUrlsFromPackageFiles([
+        { deps: [] },
+        {
+          deps: [],
+          registryUrls: ['https://example.com:8443/private/simple'],
+          additionalRegistryUrls: ['invalid-url'],
+        },
+        {
+          deps: [],
+          additionalRegistryUrls: ['https://other.example.com/simple'],
+        },
+      ]);
+
+      expect(urls.map((url) => url.href)).toEqual([
+        'https://example.com:8443/private/simple',
+        'https://other.example.com/simple',
+      ]);
     });
   });
 

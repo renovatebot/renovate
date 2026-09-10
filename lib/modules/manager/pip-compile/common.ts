@@ -359,19 +359,9 @@ function getRegistryCredEnvVars(
   return ret;
 }
 
-function cleanUrl(url: string): URL | null {
-  // Strip everything but protocol, host, and port
-  const urlObj = parseUrl(url);
-  if (!urlObj) {
-    return null;
-  }
-  // origin of a valid URL is always parseable
-  return parseUrl(urlObj.origin);
-}
-
-export function getRegistryCredVarsFromPackageFiles(
+export function getRegistryUrlsFromPackageFiles(
   packageFiles: PackageFileContent[],
-): ExtraEnv<string> {
+): URL[] {
   const urls: string[] = [];
   for (const packageFile of packageFiles) {
     urls.push(
@@ -381,8 +371,17 @@ export function getRegistryCredVarsFromPackageFiles(
   }
   logger.debug(urls, 'Extracted registry URLs from package files');
 
+  return urls.map((url) => parseUrl(url)).filter(isNotNullOrUndefined);
+}
+
+export function getRegistryCredVarsFromPackageFiles(
+  packageFiles: PackageFileContent[],
+): ExtraEnv<string> {
+  // pip's keyring matches origins, while uv also needs paths for host rules.
   const uniqueHosts = new Set<URL>(
-    urls.map(cleanUrl).filter(isNotNullOrUndefined),
+    getRegistryUrlsFromPackageFiles(packageFiles)
+      .map((url) => parseUrl(url.origin))
+      .filter(isNotNullOrUndefined),
   );
 
   let allCreds: ExtraEnv<string> = {};
