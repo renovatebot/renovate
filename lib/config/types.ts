@@ -195,6 +195,7 @@ export interface GlobalOnlyConfigLegacy {
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
+  exitCodeForErrors?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;

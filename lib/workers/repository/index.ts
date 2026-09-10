@@ -231,6 +231,7 @@ export async function renovateRepository(
       status: repoResult?.status,
       enabled: repoResult?.enabled,
       onboarded: repoResult?.onboarded,
+      exitCode: repoResult?.exitCode,
     },
     'Repository finished',
   );

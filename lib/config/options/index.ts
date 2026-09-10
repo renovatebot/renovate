@@ -1348,6 +1348,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'exitCodeForErrors',
+    description:
+      'Exit with an error-specific exit code when a repository run ends in a known error state.',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    globalOnly: true,
+  },
+  {
     name: 'registryAliases',
     description: 'Aliases for registries.',
     mergeable: true,

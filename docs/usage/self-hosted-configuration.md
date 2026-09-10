@@ -720,6 +720,33 @@ If set to a string value, Renovate will log warnings with the `encryptedWarning`
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
 
+## `exitCodeForErrors`
+
+Set `exitCodeForErrors` to `true` to exit with a code that says _which_ kind of error ended the repository run.
+The groups are the exported error constants in [`lib/constants/error-messages.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/constants/error-messages.ts):
+
+| Exit code | Repository result                                                            |
+| --------- | ---------------------------------------------------------------------------- |
+| `0`       | Success, or a `RepositoryErrors` result                                      |
+| `1`       | Renovate logged an error, but no repository ended in one of the states below |
+| `2`       | Renovate could not parse its own configuration                               |
+| `3`       | `SystemErrors`                                                               |
+| `4`       | `PlatformErrors`                                                             |
+| `5`       | `ConfigErrors`                                                               |
+| `6`       | `TemporaryErrors`                                                            |
+| `7`       | External host error, lockfile error, or missing API credentials              |
+| `8`       | Unknown error                                                                |
+
+Codes `3` to `8` take precedence over `1`, so a repository that ends in one of those states sets the exit code even if errors were logged as well.
+Renovate still exits `1` when no repository ended in an error state but something was logged at error level, such as a failed changelog fetch during an otherwise successful run.
+
+The results in `RepositoryErrors` map to `0`, because they mean the repository is disabled, archived, empty and so on, and not that the run failed.
+
+When Renovate runs against multiple repositories, the exit code comes from the first repository that ended in an error state.
+Renovate still processes the remaining repositories.
+
+The exit code a repository maps to is always logged in the `Repository finished` message, even when this option is disabled.
+
 ## `exposeAllEnv`
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
