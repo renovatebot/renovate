@@ -28,9 +28,8 @@ const PoetryOptionalDependencyMixin = z
   .object({
     optional: z.boolean().optional().catch(false),
   })
-  .transform(
-    ({ optional }): PackageDependency =>
-      optional ? { depType: 'extras' } : {},
+  .transform(({ optional }): PackageDependency =>
+    optional ? { depType: 'extras' } : {},
   );
 
 const PoetryPathDependency = z
@@ -121,21 +120,19 @@ const PoetryPypiDependency = z.union([
       };
     })
     .and(PoetryOptionalDependencyMixin),
-  z.string().transform(
-    (version): PackageDependency => ({
-      datasource: PypiDatasource.id,
-      currentValue: version,
-      managerData: { nestedVersion: false },
-    }),
-  ),
+  z.string().transform((version): PackageDependency => ({
+    datasource: PypiDatasource.id,
+    currentValue: version,
+    managerData: { nestedVersion: false },
+  })),
 ]);
 
-const PoetryArrayDependency = z.array(z.unknown()).transform(
-  (): PackageDependency => ({
+const PoetryArrayDependency = z
+  .array(z.unknown())
+  .transform((): PackageDependency => ({
     datasource: PypiDatasource.id,
     skipReason: 'multiple-constraint-dep',
-  }),
-);
+  }));
 
 const PoetryDependency = z.union([
   PoetryPathDependency,

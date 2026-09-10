@@ -54,39 +54,39 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
     });
 
     it('returns null if @types', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if currentVersion equals newVersion', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: '1.0.0',
           newVersion: '1.0.0',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('skips invalid repos', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://code.forgejo.org/help',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('works without forgejo', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://code.forgejo.org/api/v1/',
@@ -187,11 +187,11 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
             published_at: '2023-07-27T06:19:02Z',
           },
         ]);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://code.forgejo.org/api/v1/',
@@ -232,11 +232,11 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
         .get('/api/v1/repos/meno/dropzone/releases?draft=false')
         .times(4)
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://code.forgejo.org/api/v1/',
@@ -267,11 +267,11 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
         .get('/api/v1/repos/meno/dropzone/releases?draft=false')
         .times(4)
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://code.forgejo.org/api/v1/',
@@ -292,39 +292,39 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
     });
 
     it('handles no sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles invalid sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'http://example.com',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles not enough releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [{ version: '0.9.0' }],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('supports self-hosted forgejo changelog', async () => {
@@ -334,12 +334,12 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
         matchHost: 'https://git.test.com/',
         token: 'abc',
       });
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://git.test.com/api/v1/',
@@ -384,9 +384,9 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
           { name: 'v5.4.0' },
           { name: 'v5.5.0' },
         ]);
-      expect(
-        await changelogSource.getAllTags('https://git.test.com/', 'some/repo'),
-      ).toEqual([]);
+      await expect(
+        changelogSource.getAllTags('https://git.test.com/', 'some/repo'),
+      ).resolves.toEqual([]);
     });
   });
 
@@ -422,13 +422,13 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
           type: 'file',
           content: toBase64('some content'),
         });
-      expect(
-        await getReleaseNotesMd(
+      await expect(
+        getReleaseNotesMd(
           'some/repo',
           'https://git.test.com/api/v1/',
           'charts/some',
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         changelogFile: 'charts/some/CHANGELOG.md',
         changelogMd: 'some content\n#\n##',
       });
@@ -465,13 +465,13 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
           type: 'file',
           content: toBase64('some content'),
         });
-      expect(
-        await getReleaseNotesMd(
+      await expect(
+        getReleaseNotesMd(
           'some/repo',
           'https://git.test.com/api/v1/',
           'charts/some',
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         changelogFile: 'charts/some/CHANGELOG.md',
         changelogMd: 'some content\n#\n##',
       });

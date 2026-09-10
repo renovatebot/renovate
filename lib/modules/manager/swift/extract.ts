@@ -10,7 +10,7 @@ import type { MatchResult } from './types.ts';
 
 const regExps = {
   wildcard: regEx(/^.*?/),
-  space: regEx(/(\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
+  space: regEx(/(?:\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
   depsKeyword: regEx(/dependencies/),
   colon: regEx(/:/),
   beginSection: regEx(/\[/),

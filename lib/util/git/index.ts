@@ -360,7 +360,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>',
+    gitAuthor ?? 'Renovate <renovate@whitesourcesoftware.com>',
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
@@ -605,7 +605,7 @@ export const syncGit = withInstrumenting(
     /* v8 ignore next -- TODO: add test #40625 */
     delete getCache()?.semanticCommits;
 
-    // If upstreamUrl is set then the bot is running in fork mode
+    // If upstreamUrl is set then Renovate is running in fork mode
     // The "upstream" remote is the original repository which was forked from
     if (config.upstreamUrl) {
       const { upstreamUrl } = config;

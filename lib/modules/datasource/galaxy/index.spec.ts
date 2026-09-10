@@ -13,12 +13,12 @@ describe('modules/datasource/galaxy/index', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
         .reply(200);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'non_existent_crate',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing fields', async () => {
@@ -26,12 +26,12 @@ describe('modules/datasource/galaxy/index', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
         .reply(200, undefined);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'non_existent_crate',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty list', async () => {
@@ -39,12 +39,12 @@ describe('modules/datasource/galaxy/index', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
         .reply(200, '\n');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'non_existent_crate',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
@@ -52,12 +52,12 @@ describe('modules/datasource/galaxy/index', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'some_crate',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error', async () => {
@@ -65,12 +65,12 @@ describe('modules/datasource/galaxy/index', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
         .replyWithError('some unknown error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GalaxyDatasource.id,
           packageName: 'some_crate',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {
@@ -82,9 +82,25 @@ describe('modules/datasource/galaxy/index', () => {
         datasource: GalaxyDatasource.id,
         packageName: 'yatesr.timezone',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toEqual({
+        dependencyUrl: 'https://galaxy.ansible.com/yatesr/timezone',
+        registryUrl: 'https://galaxy.ansible.com/',
+        releases: [
+          {
+            releaseTimestamp: '2015-11-17T00:47:51.891Z',
+            version: '1.0.0',
+          },
+          {
+            releaseTimestamp: '2017-09-25T00:31:23.862Z',
+            version: '1.1.0',
+          },
+          {
+            releaseTimestamp: '2019-10-28T01:51:11.502Z',
+            version: '1.2.0',
+          },
+        ],
+        sourceUrl: 'https://github.com/yatesr/ansible-timezone',
+      });
     });
 
     it('handles multiple results when one user matches exactly', async () => {

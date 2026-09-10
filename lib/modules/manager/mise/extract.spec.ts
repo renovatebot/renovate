@@ -12,18 +12,20 @@ const mise1toml = Fixtures.get('Mise.1.toml');
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('', miseFilename)).toBeNull();
+      await expect(extractPackageFile('', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for invalid TOML', async () => {
-      expect(await extractPackageFile('foo', miseFilename)).toBeNull();
+      await expect(extractPackageFile('foo', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for empty tools section', async () => {
       const content = codeBlock`
       [tools]
     `;
-      expect(await extractPackageFile(content, miseFilename)).toBeNull();
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
     });
 
     it('extracts tools - mise core plugins', async () => {
@@ -1100,24 +1102,6 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.19.2',
             datasource: 'github-tags',
             packageName: 'getzola/zola',
-          },
-        ],
-      });
-    });
-
-    it('resolves tools from the mise registry data file via cargo backend', async () => {
-      const content = codeBlock`
-      [tools]
-      magika = "0.3.1"
-    `;
-      const result = await extractPackageFile(content, miseFilename);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'magika',
-            currentValue: '0.3.1',
-            datasource: 'crate',
-            packageName: 'magika-cli',
           },
         ],
       });

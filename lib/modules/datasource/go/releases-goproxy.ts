@@ -159,13 +159,17 @@ export class GoProxyDatasource extends Datasource {
         const statusCode = potentialHttpError?.response?.statusCode;
         const canFallback =
           fallback === '|' ? true : statusCode === 404 || statusCode === 410;
-        const msg = canFallback
-          ? 'Goproxy error: trying next URL provided with GOPROXY'
-          : 'Goproxy error: skipping other URLs provided with GOPROXY';
-        logger.debug({ err }, msg);
         if (!canFallback) {
-          break;
+          logger.debug(
+            { err },
+            'Goproxy error: not falling back to other URLs provided with GOPROXY, rethrowing',
+          );
+          this.handleGenericErrors(err);
         }
+        logger.debug(
+          { err },
+          'Goproxy error: trying next URL provided with GOPROXY',
+        );
       }
     }
 
@@ -267,7 +271,7 @@ export class GoProxyDatasource extends Datasource {
    * @see https://golang.org/ref/mod#goproxy-protocol
    */
   encodeCase(input: string): string {
-    return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
+    return input.replace(regEx(/(?:[A-Z])/g), (x) => `!${x.toLowerCase()}`);
   }
 
   async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {

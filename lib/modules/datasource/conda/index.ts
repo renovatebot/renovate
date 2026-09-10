@@ -26,6 +26,9 @@ export class CondaDatasource extends Datasource {
 
   override readonly caching = true;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `upload_time` field of the files of a version when using the Anaconda.org API, or from the `createdAt` field of the variants of a version when using prefix.dev. All files of a version are assumed to be published at roughly the same time.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `dev_url` field in the results.';

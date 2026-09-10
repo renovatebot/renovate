@@ -369,9 +369,7 @@ const { val, err } = Result.parse(url, z.string().url())
 You can use schema parsing in the middle of the `Result` transform chain:
 
 ```ts
-const UserConfig = z.object({
-  /* ... */
-});
+const UserConfig = z.object({/* ... */});
 
 const config = await Result.wrap(readLocalFile('config.json'))
   .transform((content) => Json.pipe(UserConfig).safeParse(content))

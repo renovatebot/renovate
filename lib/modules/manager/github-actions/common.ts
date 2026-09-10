@@ -10,14 +10,14 @@ export const actionsLockFile = '.github/workflows/actions.lock';
 
 /** Matches GitHub workflow files, not Gitea/Forgejo workflows, `workflow-templates/` or composite action manifests. */
 export const githubWorkflowFileRe = regEx(
-  /(^|\/)\.github\/workflows\/[^/]+\.ya?ml$/,
+  /(?:^|\/)\.github\/workflows\/[^/]+\.ya?ml$/,
 );
 
 /** Matches a composite action manifest, which GitHub requires to be named `action.yml` or `action.yaml`. */
-const compositeActionFileRe = regEx(/(^|\/)action\.ya?ml$/);
+const compositeActionFileRe = regEx(/(?:^|\/)action\.ya?ml$/);
 
 /** Matches anything below a Gitea or Forgejo directory, which `gh actions-lock` never reads. */
-const giteaOrForgejoFileRe = regEx(/(^|\/)\.(?:gitea|forgejo)\//);
+const giteaOrForgejoFileRe = regEx(/(?:^|\/)\.(?:gitea|forgejo)\//);
 
 /**
  * Whether `gh actions-lock` owns the digests in this file, given the workflows which the lock file has onboarded.

@@ -235,25 +235,25 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
   describe('addReleaseNotes()', () => {
     it('returns null if input is null/undefined', async () => {
-      expect(
-        await addReleaseNotes(null, partial<BranchUpgradeConfig>()),
-      ).toBeNull();
-      expect(
-        await addReleaseNotes(undefined, partial<BranchUpgradeConfig>()),
-      ).toBeNull();
+      await expect(
+        addReleaseNotes(null, partial<BranchUpgradeConfig>()),
+      ).resolves.toBeNull();
+      await expect(
+        addReleaseNotes(undefined, partial<BranchUpgradeConfig>()),
+      ).resolves.toBeNull();
     });
 
     it('returns input if invalid', async () => {
       const input = { a: 1 };
-      expect(
-        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
-      ).toEqual(input);
-      expect(
-        await addReleaseNotes(null, partial<BranchUpgradeConfig>()),
-      ).toBeNull();
-      expect(
-        await addReleaseNotes({ versions: [] }, partial<BranchUpgradeConfig>()),
-      ).toStrictEqual({ versions: [] });
+      await expect(
+        addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
+      ).resolves.toEqual(input);
+      await expect(
+        addReleaseNotes(null, partial<BranchUpgradeConfig>()),
+      ).resolves.toBeNull();
+      await expect(
+        addReleaseNotes({ versions: [] }, partial<BranchUpgradeConfig>()),
+      ).resolves.toStrictEqual({ versions: [] });
     });
 
     it('returns ChangeLogResult', async () => {
@@ -264,9 +264,9 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         versions: [{ version: '3.10.0', compare: { url: '' } }],
       };
-      expect(
-        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
-      ).toEqual({
+      await expect(
+        addReleaseNotes(input as never, partial<BranchUpgradeConfig>()),
+      ).resolves.toEqual({
         hasReleaseNotes: false,
         project: {
           repository: 'https://github.com/nodeca/js-yaml',
@@ -499,9 +499,9 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           }),
         ],
       } satisfies ChangeLogResult;
-      expect(
-        await addReleaseNotes(input, partial<BranchUpgradeConfig>()),
-      ).toEqual({
+      await expect(
+        addReleaseNotes(input, partial<BranchUpgradeConfig>()),
+      ).resolves.toEqual({
         hasReleaseNotes: false,
         project: {
           repository: 'gitlab-org/gitter/webapp',
@@ -1556,6 +1556,270 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
+    it('matches a host-qualified name on its trailing name', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'exampleChart-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some old body',
+        },
+        {
+          id: 2,
+          version: 'exampleChart-1.0.1',
+          releaseTimestamp: '2020-01-02' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'some.registry/some/charts/exampleChart',
+          depName: 'some.registry/some/charts/exampleChart',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 2,
+        tag: 'exampleChart-1.0.1',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('matches a host-qualified name on its unqualified name', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'charts/podinfo-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'ghcr.io/charts/podinfo',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 1,
+        tag: 'charts/podinfo-1.0.0',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('matches a host-qualified name with a port', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'exampleChart-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'some.registry:5000/some/charts/exampleChart',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 1,
+        tag: 'exampleChart-1.0.0',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('matches a localhost-qualified name with a port', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'exampleChart-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'correct/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'localhost:5000/charts/exampleChart',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toEqual({
+        url: 'correct/url/tag.com',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        id: 1,
+        tag: 'exampleChart-1.0.0',
+        name: 'some/dep',
+        body: 'some body\n',
+      });
+    });
+
+    it('does not match an unrelated tag for a name with a trailing slash', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: '_1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'some.registry/charts/exampleChart/',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('does not match a scoped npm package on its trailing name', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'node-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: '@types/node',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('does not treat regex characters in the name as wildcards', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'depXjs-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          packageName: 'dep.js',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when neither packageName nor depName is set', async () => {
+      githubReleasesMock.mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'dep-1.0.0',
+          releaseTimestamp: '2020-01-01' as Timestamp,
+          url: 'wrong/url/tag.com',
+          name: 'some/dep',
+          description: 'some body',
+        },
+      ]);
+
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.0.0',
+          gitRef: '1.0.0',
+        }),
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(res).toBeNull();
+    });
+
     it('fallback to extractVersion', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {
@@ -1757,11 +2021,19 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           gitRef: '1.6.9',
         }),
       );
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl:
           'https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md',
         url: 'https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02',
       });
+      expect(res?.body).toStartWith('#### Bug Fixes\n');
+      expect(res?.body).toContain('#### New Features');
+      expect(res?.body).toEndWith(
+        '[#15105](https://github.com/angular/angular.js/issues/15105))\n',
+      );
+      // the neighbouring 1.6.8 section must not leak in
+      expect(res?.body).not.toContain('beneficial-tincture');
+      expect(res?.body).not.toContain('always decode special chars');
     });
 
     it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
@@ -1785,11 +2057,26 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         }),
       );
 
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl:
           'https://gitlab.com/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md',
         url: 'https://gitlab.com/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md#20260---2020-05-18',
       });
+
+      expect(res?.body).toStartWith(
+        '- Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>\n',
+      );
+      expect(res?.body).toContain('- Add GitLab branding to the left-menu,');
+      expect(res?.body).toEndWith(
+        '- Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution\n',
+      );
+      // the neighbouring 20.26.1 and 20.25.0 sections must not leak in
+      expect(res?.body).not.toContain(
+        'Optimizing MongoDB query for chat archive',
+      );
+      expect(res?.body).not.toContain(
+        'Fix collaborators view by listening on room id change',
+      );
     });
 
     it('parses self hosted gitlab', async () => {
@@ -1815,11 +2102,26 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         }),
       );
 
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl:
           'https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md',
         url: 'https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md#20260---2020-05-18',
       });
+
+      expect(res?.body).toStartWith(
+        '- Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>\n',
+      );
+      expect(res?.body).toContain('- Add GitLab branding to the left-menu,');
+      expect(res?.body).toEndWith(
+        '- Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution\n',
+      );
+      // the neighbouring 20.26.1 and 20.25.0 sections must not leak in
+      expect(res?.body).not.toContain(
+        'Optimizing MongoDB query for chat archive',
+      );
+      expect(res?.body).not.toContain(
+        'Fix collaborators view by listening on room id change',
+      );
     });
 
     it('parses jest', async () => {
@@ -1844,11 +2146,23 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         }),
       );
 
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl:
           'https://github.com/facebook/jest/blob/HEAD/CHANGELOG.md',
         url: 'https://github.com/facebook/jest/blob/HEAD/CHANGELOG.md#jest-2200',
       });
+      expect(res?.body).toStartWith('##### Fixes\n');
+      expect(res?.body).toContain('##### Features');
+      expect(res?.body).toContain('##### Chore & Maintenance');
+      expect(res?.body).toContain('Add Global Setup/Teardown options');
+      expect(res?.body).toEndWith(
+        '([#5007](https://github.com/facebook/jest/pull/5007))\n',
+      );
+      // the neighbouring jest 22.0.1 and jest 21.2.1 sections must not leak in
+      expect(res?.body).not.toContain(
+        'fix error for test files providing coverage',
+      );
+      expect(res?.body).not.toContain('Fix watchAll not running tests on save');
     });
 
     it('handles github sourceDirectory', async () => {
@@ -1879,11 +2193,23 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         }),
       );
 
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl:
           'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md',
         url: 'https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md#3100--2017-09-10',
       });
+
+      expect(res?.body).toStartWith(
+        '- Fix `condenseFlow` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).\n',
+      );
+      expect(res?.body).toEndWith(
+        '- Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).\n',
+      );
+      // the neighbouring 3.11.0 and 3.9.1 sections must not leak in
+      expect(res?.body).not.toContain('Fix dump in bin/octal/hex formats');
+      expect(res?.body).not.toContain(
+        'Ensure stack is present for custom errors',
+      );
     });
 
     it('parses js-yaml', async () => {
@@ -1908,11 +2234,23 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         }),
       );
 
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         notesSourceUrl:
           'https://github.com/nodeca/js-yaml/blob/HEAD/CHANGELOG.md',
         url: 'https://github.com/nodeca/js-yaml/blob/HEAD/CHANGELOG.md#3100--2017-09-10',
       });
+
+      expect(res?.body).toStartWith(
+        '- Fix `condenseFlow` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).\n',
+      );
+      expect(res?.body).toEndWith(
+        '- Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).\n',
+      );
+      // the neighbouring 3.11.0 and 3.9.1 sections must not leak in
+      expect(res?.body).not.toContain('Fix dump in bin/octal/hex formats');
+      expect(res?.body).not.toContain(
+        'Ensure stack is present for custom errors',
+      );
     });
 
     it('ignores invalid', async () => {
@@ -1955,11 +2293,22 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         );
         versionOneNotes = res!;
 
-        expect(res).toMatchSnapshot({
+        expect(res).toMatchObject({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
           url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-2020-03-08',
         });
+        expect(res?.body).toStartWith('##### Features\n');
+        expect(res?.body).toContain(
+          '- add usage for single-digit boolean aliases',
+        );
+        expect(res?.body).toContain('##### Bug Fixes');
+        expect(res?.body).toEndWith(
+          '([a5edc32](https://www.github.com/yargs/yargs/commit/a5edc328ecb3f90d1ba09cfe70a0040f68adf50a))\n',
+        );
+        // the neighbouring 15.3.1 and 15.2.0 sections must not leak in
+        expect(res?.body).not.toContain('prototype pollution vulnerability');
+        expect(res?.body).not.toContain('BREAKING CHANGES');
       });
 
       it('parses yargs 15.2.0', async () => {
@@ -1985,11 +2334,21 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         );
         versionTwoNotes = res!;
 
-        expect(res).toMatchSnapshot({
+        expect(res).toMatchObject({
           notesSourceUrl:
             'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md',
           url: 'https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-2020-03-01',
         });
+        expect(res?.body).toStartWith('##### ⚠ BREAKING CHANGES\n');
+        expect(res?.body).toContain('##### Features');
+        expect(res?.body).toContain('- deprecateOption');
+        expect(res?.body).toContain('##### Bug Fixes');
+        expect(res?.body).toEndWith(
+          '([a0b61ac](https://www.github.com/yargs/yargs/commit/a0b61ac21e2b554aa73dbf1a66d4a7af94047c2f))\n',
+        );
+        // the neighbouring 15.3.0 and 15.1.0 sections must not leak in
+        expect(res?.body).not.toContain('address ambiguity between nargs of 1');
+        expect(res?.body).not.toContain('add Finnish localization');
       });
 
       it('parses adapter-utils 4.33.0', async () => {
@@ -2015,11 +2374,25 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         );
         versionTwoNotes = res!;
 
-        expect(res).toMatchSnapshot({
+        expect(res).toMatchObject({
           notesSourceUrl:
             'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md',
           url: 'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md#4330-05-15-2020',
         });
+
+        expect(res?.body).toStartWith(
+          '- add new auth, fix accept header and base path in mock\n',
+        );
+        expect(res?.body).toContain('Closes ADAPT-207');
+        expect(res?.body).toContain(
+          'See merge request itentialopensource/adapter-utils!177',
+        );
+        expect(res?.body).toEndWith('***\n');
+        // the neighbouring 4.32.3 section must not leak in
+        expect(res?.body).not.toContain('ADAPT-198');
+        expect(res?.body).not.toContain(
+          'set username and password in token entitypath',
+        );
       });
 
       it('parses when version contained in the body 0.14.0', async () => {
@@ -2109,11 +2482,25 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         );
         versionTwoNotes = res!;
 
-        expect(res).toMatchSnapshot({
+        expect(res).toMatchObject({
           notesSourceUrl:
             'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/packages/foo/CHANGELOG.md',
           url: 'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/packages/foo/CHANGELOG.md#4330-05-15-2020',
         });
+
+        expect(res?.body).toStartWith(
+          '- add new auth, fix accept header and base path in mock\n',
+        );
+        expect(res?.body).toContain('Closes ADAPT-207');
+        expect(res?.body).toContain(
+          'See merge request itentialopensource/adapter-utils!177',
+        );
+        expect(res?.body).toEndWith('***\n');
+        // the neighbouring 4.32.3 section must not leak in
+        expect(res?.body).not.toContain('ADAPT-198');
+        expect(res?.body).not.toContain(
+          'set username and password in token entitypath',
+        );
       });
 
       it('handles skipped packages', async () => {

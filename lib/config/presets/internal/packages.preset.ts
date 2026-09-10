@@ -169,4 +169,8 @@ export const presets: Record<string, Preset> = {
     matchDatasources: ['npm'],
     matchPackageNames: ['vite', '**vite-plugin**', '@vitejs/**'],
   },
+  vitePlus: {
+    description: 'All Vite+ related packages',
+    extends: ['monorepo:vite-plus', 'monorepo:vitest'],
+  },
 };

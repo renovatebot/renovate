@@ -23,7 +23,9 @@ const di = new DistroInfo('data/ubuntu-distro-info.json');
 
 function isValid(input: string): boolean {
   if (
-    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
+    regEx(/^(?:0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](?:\.[0-9]{1,2})?$/).test(
+      input,
+    )
   ) {
     return true;
   }
