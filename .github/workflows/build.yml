@@ -35,7 +35,6 @@ env:
   DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
   DRY_RUN: true
-  TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
     .github/actions/
     data/
