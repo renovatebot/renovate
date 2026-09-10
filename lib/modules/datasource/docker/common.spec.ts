@@ -277,7 +277,7 @@ describe('modules/datasource/docker/common', () => {
         'https://my.local.registry/prefix',
       );
 
-      expect(headers).toBeNull();
+      expect(headers).toBeUndefined();
     });
 
     it('use resources URL and resolve scope in www-authenticate header', async () => {

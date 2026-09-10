@@ -5,11 +5,7 @@ import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
-import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
-
-export interface ToolingDefinition {
-  config: StaticTooling;
-}
+import type { ToolingDefinition } from './types.ts';
 
 /**
  * Maps proto built-in tool names to Renovate datasource configurations.

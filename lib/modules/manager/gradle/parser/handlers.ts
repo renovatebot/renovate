@@ -470,7 +470,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
     return ctx;
   }
 
-  if (!regEx(/\.gradle(\.kts)?$/).test(scriptFile)) {
+  if (!regEx(/\.gradle(?:\.kts)?$/).test(scriptFile)) {
     logger.debug({ scriptFile }, `Only Gradle files can be included`);
     return ctx;
   }

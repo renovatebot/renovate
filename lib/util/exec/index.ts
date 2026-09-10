@@ -13,6 +13,7 @@ import {
   generateDockerCommand,
   removeDockerContainer,
 } from './docker/index.ts';
+import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
   CommandWithOptions,
@@ -72,15 +73,12 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd:
-    | string
-    | string[]
-    | CommandWithOptions[]
-    | (string | CommandWithOptions)[],
+    string | string[] | CommandWithOptions[] | (string | CommandWithOptions)[],
   opts: ExecOptions,
   sideCarImage: string,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const preCommands = opts.preCommands ?? [];
+  const preCommands = coerceArray(opts.preCommands);
   const customEnvVariables = getCustomEnv();
   const userConfiguredEnv = getUserEnv();
   const { containerbaseDir, binarySource } = GlobalConfig.get();
@@ -98,6 +96,7 @@ async function prepareRawExec(
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
     const extraEnv = {
+      ...hardcodedProcessEnv,
       ...opts.extraEnv,
       ...customEnvVariables,
       ...userConfiguredEnv,
@@ -157,10 +156,7 @@ async function prepareRawExec(
 
 export async function exec(
   cmd:
-    | string
-    | string[]
-    | CommandWithOptions[]
-    | (string | CommandWithOptions)[],
+    string | string[] | CommandWithOptions[] | (string | CommandWithOptions)[],
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;

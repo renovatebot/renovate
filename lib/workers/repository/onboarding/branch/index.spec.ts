@@ -155,6 +155,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       delete expectConfig.env;
       delete expectConfig.extends;
       delete expectConfig.ignorePresets;
+      delete expectConfig.overrideDescription;
       expect(
         configModule.getOnboardingConfigContents,
       ).toHaveBeenCalledExactlyOnceWith(expectConfig, getConfigFileNames()[0]);

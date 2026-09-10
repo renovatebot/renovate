@@ -25,12 +25,20 @@ describe('modules/datasource/golang-version/index', () => {
         datasource,
         packageName: 'golang',
       });
-      expect(res?.releases).toHaveLength(132);
-      expect(res?.releases[0]).toEqual({
-        releaseTimestamp: '2012-03-28T00:00:00.000Z',
-        version: '1.0.0',
+      expect(res).toEqual({
+        homepage: 'https://go.dev/',
+        registryUrl: 'https://raw.githubusercontent.com/golang/website',
+        sourceUrl: 'https://github.com/golang/go',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2012-03-28T00:00:00.000Z' },
+          { version: '1.8.0', releaseTimestamp: '2017-02-16T00:00:00.000Z' },
+          { version: '1.9.0', releaseTimestamp: '2017-08-24T00:00:00.000Z' },
+          { version: '1.9.1', releaseTimestamp: '2017-10-04T00:00:00.000Z' },
+          { version: '1.12.13', releaseTimestamp: '2019-10-31T00:00:00.000Z' },
+          { version: '1.17.8', releaseTimestamp: '2022-03-03T00:00:00.000Z' },
+          { version: '1.18.0', releaseTimestamp: '2022-03-15T00:00:00.000Z' },
+        ],
       });
-      expect(res).toMatchSnapshot();
     });
 
     it('supports custom registry URL', async () => {
@@ -46,7 +54,7 @@ describe('modules/datasource/golang-version/index', () => {
         datasource,
         packageName: 'golang',
       });
-      expect(res?.releases).toHaveLength(132);
+      expect(res?.releases).toHaveLength(7);
       expect(res?.releases[0]).toEqual({
         releaseTimestamp: '2012-03-28T00:00:00.000Z',
         version: '1.0.0',
@@ -114,9 +122,9 @@ describe('modules/datasource/golang-version/index', () => {
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(404);
-      expect(
-        await getPkgReleases({ datasource, packageName: 'golang' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'golang' }),
+      ).resolves.toBeNull();
     });
 
     it('throws ExternalHostError for invalid release format beginning', async () => {

@@ -427,12 +427,9 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
 
@@ -458,12 +455,9 @@ describe('modules/datasource/rpm/index', () => {
         )
         .mockRejectedValueOnce(new Error('extract failed'));
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
       await expect(
@@ -482,12 +476,9 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
 
@@ -506,12 +497,9 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '2.0-1.azl3' }],
       });
       await expect(
@@ -549,12 +537,9 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toBeNull();
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toBeNull();
     });
 
     it('returns null if version is not found in a version element', async () => {

@@ -12,6 +12,7 @@ import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
 import { acquireLock } from '../mutex.ts';
+import { coerceObject } from '../object.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
@@ -22,7 +23,6 @@ import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
 import { fetch, normalize, stream } from './got.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
-
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
 import { getThrottle } from './throttle.ts';
@@ -95,6 +95,7 @@ export abstract class HttpBase<
             this.calculateRetryDelay(retryObject),
           limit: retryLimit,
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+          enforceRetryRules: false,
         },
       },
       { isMergeableObject: isPlainObject },
@@ -112,7 +113,7 @@ export abstract class HttpBase<
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
-  ): Promise<HttpResponse<Buffer>>;
+  ): Promise<HttpResponse<Uint8Array>>;
   private async request<T = unknown>(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'json' },
@@ -242,6 +243,8 @@ export abstract class HttpBase<
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
+      this.handleResponse(resolvedUrl, resCopy);
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
@@ -253,11 +256,9 @@ export abstract class HttpBase<
         throw new ExternalHostError(err);
       }
 
-      const staleResponse = await cacheProvider?.bypassServer<string | Buffer>(
-        method,
-        url,
-        true,
-      );
+      const staleResponse = await cacheProvider?.bypassServer<
+        string | Uint8Array
+      >(method, url, true);
       if (staleResponse) {
         logger.debug(
           { err },
@@ -294,6 +295,10 @@ export abstract class HttpBase<
     throw err;
   }
 
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
+  }
+
   resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     let url = requestUrl;
 
@@ -325,7 +330,7 @@ export abstract class HttpBase<
   get(
     url: string,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<string | Buffer>> {
+  ): Promise<HttpResponse<string | Uint8Array>> {
     return this.request(url, options);
   }
 
@@ -345,7 +350,7 @@ export abstract class HttpBase<
   getBuffer(
     url: string | URL,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<Buffer>> {
+  ): Promise<HttpResponse<Uint8Array>> {
     return this.request(url, { ...options, responseType: 'buffer' });
   }
 
@@ -406,7 +411,7 @@ export abstract class HttpBase<
   }
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
-    const opt = options ?? {};
+    const opt = coerceObject(options);
     return await this.getText(url, {
       headers: {
         Accept: 'text/plain',

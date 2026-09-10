@@ -1,14 +1,9 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
 const jsonnetfile = Fixtures.get('jsonnetfile.json');
 const jsonnetfileWithName = Fixtures.get('jsonnetfile-with-name.json');
-const jsonnetfileNoDependencies = Fixtures.get(
-  'jsonnetfile-no-dependencies.json',
-);
-const jsonnetfileLocalDependencies = Fixtures.get(
-  'jsonnetfile-local-dependencies.json',
-);
 const jsonnetfileEmptyGitSource = JSON.stringify({
   version: 1,
   dependencies: [
@@ -28,12 +23,35 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
     });
 
     it('returns null for jsonnetfile with no dependencies', () => {
+      const jsonnetfileNoDependencies = codeBlock`
+        {
+          "version": 1,
+          "dependencies": [],
+          "legacyImports": true
+        }
+      `;
       expect(
         extractPackageFile(jsonnetfileNoDependencies, 'jsonnetfile.json'),
       ).toBeNull();
     });
 
     it('returns null for local dependencies', () => {
+      const jsonnetfileLocalDependencies = codeBlock`
+        {
+          "version": 1,
+          "dependencies": [
+            {
+              "source": {
+                "local": {
+                  "directory": "jsonnet"
+                }
+              },
+              "version": ""
+            }
+          ],
+          "legacyImports": true
+        }
+      `;
       expect(
         extractPackageFile(jsonnetfileLocalDependencies, 'jsonnetfile.json'),
       ).toBeNull();
@@ -56,21 +74,21 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
 
     it('extracts dependency', () => {
       const res = extractPackageFile(jsonnetfile, 'jsonnetfile.json');
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         deps: [
           {
+            currentValue: 'v0.50.0',
             depName:
               'github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator',
             packageName:
               'https://github.com/prometheus-operator/prometheus-operator.git',
-            currentValue: 'v0.50.0',
           },
           {
+            currentValue: 'v0.9.0',
             depName:
               'github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus',
             packageName:
               'ssh://git@github.com/prometheus-operator/kube-prometheus.git',
-            currentValue: 'v0.9.0',
           },
         ],
       });
@@ -78,14 +96,14 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
 
     it('extracts dependency with custom name', () => {
       const res = extractPackageFile(jsonnetfileWithName, 'jsonnetfile.json');
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         deps: [
           {
+            currentValue: 'v0.50.0',
             depName:
               'github.com/prometheus-operator/prometheus-operator/jsonnet/mixin',
             packageName:
               'https://github.com/prometheus-operator/prometheus-operator',
-            currentValue: 'v0.50.0',
           },
         ],
       });

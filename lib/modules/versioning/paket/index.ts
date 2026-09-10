@@ -2,7 +2,6 @@ import type { RangeStrategy } from '../../../types/versioning.ts';
 import { parseVersion } from '../nuget/parser.ts';
 import type { NugetVersion } from '../nuget/types.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
-import type { PaketConstraint, PaketRange } from './range.ts';
 import {
   adaptToPrecision,
   bumpAtPrecision,
@@ -15,6 +14,7 @@ import {
   releaseParts,
   twiddle,
 } from './range.ts';
+import type { PaketConstraint, PaketRange } from './types.ts';
 import { compare, sameReleaseParts } from './version.ts';
 
 export const id = 'paket';

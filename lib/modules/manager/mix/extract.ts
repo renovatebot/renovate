@@ -11,7 +11,7 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
-  /{:(?<app>\w+)(\s*,\s*"(?<requirement>[^"]+)")?(\s*,\s*(?<opts>[^}]+))?}/gm,
+  /{:(?<app>\w+)(?:\s*,\s*"(?<requirement>[^"]+)")?(?:\s*,\s*(?<opts>[^}]+))?}/gm,
 );
 const gitRegexp = regEx(/git:\s*"(?<value>[^"]+)"/);
 const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
@@ -24,7 +24,7 @@ const lockedVersionRegExp = regEx(
 );
 const hexRegexp = regEx(/hex:\s*(?:"(?<strValue>[^"]+)"|:(?<atomValue>\w+))/);
 const onlyValueRegexp = regEx(/only:\s*(?<only>\[[^\]]*\]|:\w+)/);
-const onlyEnvironmentsRegexp = regEx(/:(\w+)/gm);
+const onlyEnvironmentsRegexp = regEx(/:(?<env>\w+)/gm);
 
 export async function extractPackageFile(
   content: string,
@@ -56,7 +56,7 @@ export async function extractPackageFile(
         const onlyEnvironments = [];
         if (onlyValue) {
           for (const match of onlyValue.matchAll(onlyEnvironmentsRegexp)) {
-            onlyEnvironments.push(match[1]);
+            onlyEnvironments.push(match.groups!.env);
           }
         }
 

@@ -30,9 +30,6 @@ export const RepoInfo = z
     mainbranch: z.object({
       name: z.string(),
     }),
-    has_issues: z.boolean().catch(() => {
-      return false;
-    }),
     uuid: z.string(),
     full_name: z
       .string()
@@ -61,7 +58,6 @@ export const RepoInfo = z
       name,
       mainbranch: repoInfoBody.mainbranch.name,
       mergeMethod: 'merge',
-      has_issues: repoInfoBody.has_issues,
       uuid: repoInfoBody.uuid,
       is_private: repoInfoBody.is_private,
       projectName: repoInfoBody.project?.name,

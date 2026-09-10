@@ -8,8 +8,8 @@ import draft7MetaSchema from 'ajv/lib/refs/json-schema-draft-07.json' with { typ
 import _addFormats from 'ajv-formats';
 import fs from 'fs-extra';
 import { glob } from 'glob';
+import type { Token } from 'markdown-it';
 import MarkdownIt from 'markdown-it';
-import type Token from 'markdown-it/lib/token.mjs';
 import { GlobalConfig } from '../lib/config/global.ts';
 import { massageConfig } from '../lib/config/massage.ts';
 import { migrateConfig } from '../lib/config/migration.ts';
@@ -178,7 +178,7 @@ function checkMigrationStatus(
 
 async function processFile(file: string): Promise<void> {
   const text = await fs.readFile(file, 'utf8');
-  const tokens = markdown.parse(text, undefined);
+  const tokens = markdown.parse(text, {});
 
   for (const [index, token] of tokens.entries()) {
     if (token.type !== 'fence') {

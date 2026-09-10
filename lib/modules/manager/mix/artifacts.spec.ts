@@ -47,36 +47,36 @@ describe('modules/manager/mix/artifacts', () => {
   });
 
   it('returns null if no mix.lock found', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no updatedDeps were provided', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -84,15 +84,20 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'mix deps.update plug',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('returns null when trying to use lockFileMaintenance with no mix.lock file', async () => {
@@ -103,27 +108,27 @@ describe('modules/manager/mix/artifacts', () => {
 
     fs.writeLocalFile.mockClear(); // Clear the mock to ensure we can check if it's called
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, isLockFileMaintenance: true },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(fs.writeLocalFile).not.toHaveBeenCalled();
   });
 
   it('returns null if no updatedDeps and no lockFileMaintenance', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if using lockFileMaintenance in umbrella project', async () => {
@@ -132,14 +137,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'apps/foo/mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, isLockFileMaintenance: true },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
     );
@@ -155,14 +160,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'apps/foo/mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, isLockFileMaintenance: true },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(logger.logger.debug).toHaveBeenCalledWith(
       'Cannot use lockFileMaintenance in an umbrella project, see https://custom.example.com/modules/manager/mix/#lockFileMaintenance',
     );
@@ -198,19 +203,33 @@ describe('modules/manager/mix/artifacts', () => {
       ],
     });
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e CI -e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/renovatebot/base-image ' +
+          "bash -l -c 'install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix deps.update plug'",
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('uses constraints on install mode', async () => {
@@ -220,8 +239,8 @@ describe('modules/manager/mix/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
@@ -230,7 +249,7 @@ describe('modules/manager/mix/artifacts', () => {
           constraints: { erlang: '26.0.0', elixir: '1.14.5' },
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
       },
@@ -292,20 +311,27 @@ describe('modules/manager/mix/artifacts', () => {
       config,
     });
 
-    expect(result).toMatchSnapshot('result');
-    expect(execSnapshots).toMatchSnapshot('execSnapshots');
-
-    // TODO #22198
-    const [updateResult] = result!;
-    expect(updateResult).toEqual({
-      file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
-    });
-
-    const [, packageUpdateCommand] = execSnapshots;
-    expect(packageUpdateCommand.cmd).toInclude(
-      'mix hex.organization auth renovate_test --key valid_test_token && ' +
-        'mix deps.update private_package other_package',
-    );
+    expect(result).toEqual([
+      {
+        file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e CI -e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/renovatebot/base-image ' +
+          "bash -l -c 'install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && " +
+          'mix hex.organization auth renovate_test --key valid_test_token && ' +
+          "mix deps.update private_package other_package'",
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('authenticates to private repositories configured in hostRules', async () => {
@@ -429,14 +455,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'subdir/mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config: { ...config, constraints },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           path: 'subdir/mix.lock',
@@ -465,14 +491,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'apps/foo/mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config: { ...config, constraints },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           path: 'mix.lock',
@@ -487,7 +513,7 @@ describe('modules/manager/mix/artifacts', () => {
       { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix deps.update plug',
-        options: { cwd: '/tmp/github/some/repo/apps/foo' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
@@ -499,8 +525,8 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
 
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -510,7 +536,7 @@ describe('modules/manager/mix/artifacts', () => {
           isLockFileMaintenance: true,
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           path: 'mix.lock',
@@ -536,14 +562,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
 
     mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, isLockFileMaintenance: true },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('catches write errors', async () => {
@@ -552,14 +578,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'mix.lock', stderr: 'not found' } },
     ]);
   });
@@ -568,14 +594,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current mix.lock');
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     mockExecAll(new Error('exec-error'));
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'mix.lock', stderr: 'exec-error' } },
     ]);
   });
@@ -584,14 +610,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.localPathExists.mockResolvedValueOnce(true);
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'mix.lock',
@@ -608,14 +634,14 @@ describe('modules/manager/mix/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.localPathExists.mockResolvedValueOnce(true);
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'apps/foo/mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'mix.lock',
@@ -633,14 +659,14 @@ describe('modules/manager/mix/artifacts', () => {
 
     const execSnapshots = mockExecAll();
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: 'New mix.exs',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(execSnapshots).toHaveLength(0);
     expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(

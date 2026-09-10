@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { extractPackageFile, supportedDatasources } from './index.ts';
-import type { StaticTooling } from './upgradeable-tooling.ts';
+import type { StaticTooling } from './types.ts';
 import { upgradeableTooling } from './upgradeable-tooling.ts';
 
 describe('modules/manager/asdf/index', () => {

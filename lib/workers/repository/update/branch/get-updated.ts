@@ -284,7 +284,7 @@ export async function getUpdatedPackageFiles(
       }
       if (newContent !== packageFileContent) {
         if (reuseExistingBranch) {
-          // This ensure it's always 1 commit from the bot
+          // This ensure it's always 1 commit from Renovate
           logger.debug(
             { packageFile, depName },
             'Need to update package file so will rebase first',

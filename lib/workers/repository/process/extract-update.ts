@@ -295,14 +295,9 @@ export function reportMaliciousSkippedDependencies(
   }
 }
 
-export async function update(
+export function update(
   config: RenovateConfig,
   branches: BranchConfig[],
-): Promise<WriteUpdateResult | undefined> {
-  let res: WriteUpdateResult | undefined;
-  if (config.repoIsOnboarded) {
-    res = await writeUpdates(config, branches);
-  }
-
-  return res;
+): Promise<WriteUpdateResult> {
+  return writeUpdates(config, branches);
 }

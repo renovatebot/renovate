@@ -51,6 +51,20 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getMeta(rec, false)).toBe(' (repository=a/b) [test]');
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'branch' },
+    ])('ignores a non-string value for the $field meta field', ({ field }) => {
+      const rec = partial<BunyanRecord>({
+        [field]: { count: 1 },
+      });
+      expect(prettyStdout.getMeta(rec)).toBeEmptyString();
+    });
   });
 
   describe('getDetails(rec)', () => {
@@ -71,6 +85,26 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getDetails(rec)).toBeEmptyString();
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'branch' },
+    ])(
+      'expands the $field meta field when its value is not a string',
+      ({ field }) => {
+        const rec = partial<BunyanRecord>({
+          v: 0,
+          [field]: { count: 1 },
+        });
+        expect(prettyStdout.getDetails(rec)).toBe(
+          `       "${field}": {"count": 1}\n`,
+        );
+      },
+    );
 
     it('supports a config', () => {
       const rec = partial<BunyanRecord>({
@@ -125,14 +159,6 @@ describe('logger/pretty-stdout', () => {
   });
 
   describe('formatRecord(rec)', () => {
-    beforeEach(() => {
-      process.env.FORCE_COLOR = '1';
-    });
-
-    afterEach(() => {
-      delete process.env.FORCE_COLOR;
-    });
-
     it('formats record', () => {
       const rec: BunyanRecord = {
         level: 10,
@@ -143,9 +169,13 @@ describe('logger/pretty-stdout', () => {
           d: ['e', 'f'],
         },
       };
+      // The colorized level strings are built once, when the module is
+      // imported, so whether they carry ANSI codes depends on the colour
+      // support of the surrounding environment. Derive the expectation the
+      // same way instead of assuming an uncoloured terminal.
       expect(prettyStdout.formatRecord(rec)).toEqual(
         [
-          `TRACE: test message`,
+          `${util.styleText('gray', 'TRACE')}: test message`,
           `       "config": {"a": "b", "d": ["e", "f"]}`,
           ``,
         ].join('\n'),

@@ -3,6 +3,7 @@ import { join, quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../array.ts';
 import { newlineRegex, regEx } from '../../regex.ts';
 import { uniq } from '../../uniq.ts';
 import { rawExec } from '../common.ts';
@@ -149,7 +150,7 @@ export async function generateDockerCommand(
   sideCarImage: string,
 ): Promise<string> {
   const { envVars, cwd } = options;
-  const volumes = options.volumes ?? [];
+  const volumes = coerceArray(options.volumes);
   const {
     localDir,
     cacheDir,

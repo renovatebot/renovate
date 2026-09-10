@@ -4,12 +4,6 @@ import { BazelDatasource } from '../../datasource/bazel/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { parse } from './parser/index.ts';
-import type {
-  BasePackageDep,
-  BazelModulePackageDep,
-  MergePackageDep,
-  OverridePackageDep,
-} from './rules.ts';
 import {
   GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
@@ -17,6 +11,12 @@ import {
   processModulePkgDeps,
   toPackageDependencies,
 } from './rules.ts';
+import type {
+  BasePackageDep,
+  BazelModulePackageDep,
+  MergePackageDep,
+  OverridePackageDep,
+} from './types.ts';
 
 const customRegistryUrl = 'https://example.com/custom_registry';
 

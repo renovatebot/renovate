@@ -1060,6 +1060,8 @@ describe('modules/manager/gradle/parser', () => {
       ${'(["foo", "bar", "1.2.3"])'}                                           | ${null}
       ${'someMethod("foo", "bar", "1.2.3")'}                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'listOf("foo", "bar", "baz")'}                                         | ${null}
+      ${'resValue("string", "google_maps_key", "FakeGoogleMapsApiKey123")'}    | ${null}
+      ${'buildConfigField("int", "MAX_RETRIES", "3")'}                         | ${null}
       ${'java { registerFeature(foo) { capability("foo", "bar", "1.2.3") } }'} | ${null}
     `('$input', ({ input, output }) => {
       const { deps } = parseGradle(input);

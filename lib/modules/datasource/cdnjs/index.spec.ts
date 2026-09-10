@@ -39,12 +39,12 @@ describe('modules/datasource/cdnjs/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -52,12 +52,12 @@ describe('modules/datasource/cdnjs/index', () => {
         .scope(baseUrl)
         .get(pathFor('doesnotexist/doesnotexist'))
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CdnjsDatasource.id,
           packageName: 'doesnotexist/doesnotexist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 401', async () => {
@@ -109,7 +109,49 @@ describe('modules/datasource/cdnjs/index', () => {
         datasource: CdnjsDatasource.id,
         packageName: 'd3-force/d3-force.js',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        homepage: 'https://d3js.org/d3-force/',
+        sourceUrl: 'https://github.com/d3/d3-force',
+        releases: [
+          { version: '0.0.1' },
+          { version: '0.0.2' },
+          { version: '0.0.3' },
+          { version: '0.0.4' },
+          { version: '0.1.0' },
+          { version: '0.2.0' },
+          { version: '0.2.1' },
+          { version: '0.2.2' },
+          { version: '0.3.0' },
+          { version: '0.4.0' },
+          { version: '0.4.1' },
+          { version: '0.5.0' },
+          { version: '0.6.0' },
+          { version: '0.6.1' },
+          { version: '0.6.2' },
+          { version: '0.6.3' },
+          { version: '0.7.0' },
+          { version: '0.7.1' },
+          { version: '1.0.0' },
+          { version: '1.0.1' },
+          { version: '1.0.2' },
+          { version: '1.0.3' },
+          { version: '1.0.4' },
+          { version: '1.0.5' },
+          { version: '1.0.6' },
+          { version: '1.1.0' },
+          { version: '1.1.1' },
+          { version: '1.1.2' },
+          { version: '1.2.0' },
+          { version: '1.2.1' },
+          { version: '2.0.0' },
+          { version: '2.0.1' },
+          { version: '2.1.0' },
+          { version: '2.1.0-rc.1' },
+          { version: '2.1.0-rc.2' },
+          { version: '2.1.1' },
+          { version: '3.0.0' },
+        ],
+      });
     });
   });
 

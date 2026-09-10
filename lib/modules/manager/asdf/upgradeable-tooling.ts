@@ -14,18 +14,7 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
-import type { PackageDependency } from '../types.ts';
-
-export type StaticTooling = Partial<PackageDependency> &
-  Required<Pick<PackageDependency, 'datasource'>>;
-
-export type DynamicTooling = (version: string) => StaticTooling | undefined;
-
-export type ToolingConfig = StaticTooling | DynamicTooling;
-export interface ToolingDefinition {
-  config: ToolingConfig;
-  asdfPluginUrl: string;
-}
+import type { ToolingDefinition } from './types.ts';
 
 const hugoDefinition: ToolingDefinition = {
   // This plugin supports the names `hugo` & `gohugo`
@@ -268,7 +257,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: (version) => ({
       datasource: FlutterVersionDatasource.id,
       // asdf-flutter plugin supports channel on version suffix.
-      currentValue: version.replace(regEx(/-(stable|beta|dev)$/), ''),
+      currentValue: version.replace(regEx(/-(?:stable|beta|dev)$/), ''),
     }),
   },
   flux2: {

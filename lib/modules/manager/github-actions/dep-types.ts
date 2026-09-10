@@ -7,6 +7,11 @@ export const knownDepTypes = [
       'A repository-based action reference in a `uses:` field (e.g. `actions/checkout@v4`)',
   },
   {
+    depType: 'workflow',
+    description:
+      'A reusable workflow referenced in a job-level `uses:` field (e.g. `owner/repo/.github/workflows/release.yml@v1`)',
+  },
+  {
     depType: 'docker',
     description:
       'A Docker image reference in a `uses:` field (e.g. `uses: docker://alpine:3`)',

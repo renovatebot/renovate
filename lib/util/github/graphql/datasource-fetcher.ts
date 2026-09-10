@@ -27,6 +27,18 @@ import type {
 } from './types.ts';
 
 /**
+ * Page sizes to try, from the largest to the smallest.
+ *
+ * Repositories with many tags can exceed the GitHub GraphQL execution
+ * timeout even for small page sizes, hence the low floor.
+ *
+ * @see https://github.com/renovatebot/renovate/discussions/45248
+ */
+const pageSizes = [100, 50, 25, 10, 5] as const;
+
+type PageSize = (typeof pageSizes)[number];
+
+/**
  * We know empirically that certain type of GraphQL errors
  * can be fixed by shrinking page size.
  *
@@ -66,7 +78,7 @@ export class GithubGraphqlDatasourceFetcher<
   private readonly repoOwner: string;
   private readonly repoName: string;
 
-  private itemsPerQuery: 100 | 50 | 25 = 100;
+  private itemsPerQuery: PageSize = pageSizes[0];
 
   private queryCount = 0;
 
@@ -176,17 +188,13 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   private shrinkPageSize(): boolean {
-    if (this.itemsPerQuery === 100) {
-      this.itemsPerQuery = 50;
-      return true;
+    const nextIdx = pageSizes.indexOf(this.itemsPerQuery) + 1;
+    if (nextIdx >= pageSizes.length) {
+      return false;
     }
 
-    if (this.itemsPerQuery === 50) {
-      this.itemsPerQuery = 25;
-      return true;
-    }
-
-    return false;
+    this.itemsPerQuery = pageSizes[nextIdx];
+    return true;
   }
 
   private hasReachedQueryLimit(): boolean {

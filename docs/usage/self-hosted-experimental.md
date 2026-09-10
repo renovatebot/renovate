@@ -7,7 +7,7 @@ The following environment variables are "experimental" because they:
 - can be removed at any time
 - are variables for Renovate's internal use to validate they work as intended
 
-Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate bot developers.
+Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate developers.
 
 Use these experimental variables at your own risk.
 We do not follow Semantic Versioning for any experimental variables.

@@ -1,5 +1,6 @@
 import { diffLines } from 'diff';
 import { markdownTable } from 'markdown-table';
+import type { UpdateArtifactsConfig } from '../types.ts';
 import { parseLine } from './line-parser.ts';
 import type { ExtraDep } from './types.ts';
 
@@ -84,6 +85,7 @@ export function getExtraDepsNotice(
   goModBefore: string | null,
   goModAfter: string | null,
   excludeDeps: string[],
+  { minimumReleaseAge }: Pick<UpdateArtifactsConfig, 'minimumReleaseAge'>,
 ): string | null {
   if (!goModBefore || !goModAfter) {
     return null;
@@ -117,6 +119,13 @@ export function getExtraDepsNotice(
   if (goUpdated) {
     noticeLines.push(
       '- The `go` directive was updated for compatibility reasons',
+    );
+  }
+
+  if (minimumReleaseAge) {
+    noticeLines.push('\n');
+    noticeLines.push(
+      `Due to Go's usage of [Minimal Version Selection (MVS)](https://go.dev/ref/mod#minimal-version-selection), these packages have been updated to the minimum version available, so will still abide by \`minimumReleaseAge=${minimumReleaseAge}\``,
     );
   }
 

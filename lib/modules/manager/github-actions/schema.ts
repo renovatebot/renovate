@@ -5,8 +5,8 @@ import {
   Yaml,
   withDebugMessage,
 } from '../../../util/schema-utils/index.ts';
-import type { ActionSchema } from './community.ts';
 import { actionSchema, communityActions } from './community.ts';
+import type { ActionSchema } from './types.ts';
 
 const UsesStep = z.object({
   uses: z.string(),

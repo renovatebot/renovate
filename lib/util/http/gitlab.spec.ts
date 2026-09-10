@@ -20,7 +20,7 @@ describe('util/http/gitlab', () => {
   beforeEach(() => {
     gitlabApi = new GitlabHttp();
     setBaseUrl(`${gitlabApiHost}/api/v4/`);
-    delete process.env.GITLAB_IGNORE_REPO_URL;
+    vi.stubEnv('GITLAB_IGNORE_REPO_URL', undefined);
 
     hostRules.add({
       hostType: 'gitlab',
@@ -61,7 +61,7 @@ describe('util/http/gitlab', () => {
   });
 
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
-    process.env.GITLAB_IGNORE_REPO_URL = 'true';
+    vi.stubEnv('GITLAB_IGNORE_REPO_URL', 'true');
     setBaseUrl(`${selfHostedUrl}/api/v4/`);
 
     httpMock
@@ -94,10 +94,28 @@ describe('util/http/gitlab', () => {
     expect(res.body).toHaveLength(1);
     expect(logger.logger.once.warn).toHaveBeenCalledWith(
       {
-        requestHost: 'gitlab.com',
-        paginationHost: 'other.host.com',
+        requestOrigin: 'https://gitlab.com',
+        paginationOrigin: 'https://other.host.com',
       },
-      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links.',
+      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
+    );
+  });
+
+  it('does not follow pagination links to a different protocol on the same host', async () => {
+    // Same host, but a different scheme still counts as a different origin
+    httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, ['a'], {
+      link: '<http://gitlab.com/api/v4/some-url&page=2>; rel="next", <http://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+    });
+    const res = await gitlabApi.getJsonUnchecked('some-url', {
+      paginate: true,
+    });
+    expect(res.body).toHaveLength(1);
+    expect(logger.logger.once.warn).toHaveBeenCalledWith(
+      {
+        requestOrigin: 'https://gitlab.com',
+        paginationOrigin: 'http://gitlab.com',
+      },
+      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
     );
   });
 
@@ -182,16 +200,10 @@ describe('util/http/gitlab', () => {
   });
 
   describe('handles 409 errors', () => {
-    let NODE_ENV: string | undefined;
-
-    beforeAll(() => {
+    beforeEach(() => {
       // Unset NODE_ENV so that we can test the retry logic
-      NODE_ENV = process.env.NODE_ENV;
-      delete process.env.NODE_ENV;
-    });
-
-    afterAll(() => {
-      process.env.NODE_ENV = NODE_ENV;
+      vi.stubEnv('NODE_ENV', undefined);
+      gitlabApi = new GitlabHttp();
     });
 
     it('retries the request on resource lock', async () => {
@@ -222,16 +234,10 @@ describe('util/http/gitlab', () => {
   });
 
   describe('handles 400 source_branch errors', () => {
-    let NODE_ENV: string | undefined;
-
-    beforeAll(() => {
+    beforeEach(() => {
       // Unset NODE_ENV so that we can test the retry logic
-      NODE_ENV = process.env.NODE_ENV;
-      delete process.env.NODE_ENV;
-    });
-
-    afterAll(() => {
-      process.env.NODE_ENV = NODE_ENV;
+      vi.stubEnv('NODE_ENV', undefined);
+      gitlabApi = new GitlabHttp();
     });
 
     it('retries the request when source branch does not yet exist', async () => {

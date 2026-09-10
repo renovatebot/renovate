@@ -1,3 +1,4 @@
+import { isBoolean, isUndefined } from '@sindresorhus/is';
 import type { ZodError, output as ZodOutput, ZodType } from 'zod/v4';
 import { NEVER } from 'zod/v4';
 import { logger } from '../logger/index.ts';
@@ -37,17 +38,13 @@ function isZodResult<Output extends Val>(
     input === null ||
     Object.keys(input).length !== 2 ||
     !('success' in input) ||
-    typeof input.success !== 'boolean'
+    !isBoolean(input.success)
   ) {
     return false;
   }
 
   if (input.success) {
-    return (
-      'data' in input &&
-      typeof input.data !== 'undefined' &&
-      input.data !== null
-    );
+    return 'data' in input && !isUndefined(input.data) && input.data !== null;
   }
   return 'error' in input;
 }
@@ -630,8 +627,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
   // oxlint-disable-next-line unicorn/no-thenable -- required to implement PromiseLike
   then<TResult1 = Result<T, E>>(
     onfulfilled?:
-      | ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>)
-      | null,
+      ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>) | null,
   ): PromiseLike<TResult1> {
     return this.asyncResult.then(onfulfilled);
   }

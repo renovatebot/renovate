@@ -17,6 +17,7 @@ import {
 import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
 import * as hostRules from './host-rules.ts';
+import { coerceObject } from './object.ts';
 import { parseUrl } from './url.ts';
 
 /**
@@ -36,7 +37,7 @@ export function detectPlatform(
   | 'github'
   | 'gitlab'
   | null {
-  const { hostname } = parseUrl(url) ?? {};
+  const { hostname } = coerceObject(parseUrl(url));
   if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
     return 'azure';
   }

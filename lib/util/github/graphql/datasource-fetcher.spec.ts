@@ -297,9 +297,11 @@ describe('util/github/graphql/datasource-fetcher', () => {
     });
 
     /**
-     * See: #16343
+     * See: #16343, discussion #45248
      */
     describe('Page shrinking', () => {
+      const pageSizes = [100, 50, 25, 10, 5];
+
       function generateItems(count: number): TestAdapterInput[] {
         const indices = [...range(1, count)].map((x) => `${x}`);
         return indices.map((idx) => ({
@@ -330,16 +332,83 @@ describe('util/github/graphql/datasource-fetcher', () => {
         return pages;
       }
 
-      it('shrinks page from 100 to 50', async () => {
-        const items = generateItems(150);
-        const pages = generatePages(items, 50);
-        const scope = httpMock
+      /**
+       * Requests that failed before the page size became small enough.
+       * Each one re-tries the very first page, hence the `null` cursor.
+       */
+      function shrinkingTrace(attempts: number): unknown[] {
+        return pageSizes.slice(0, attempts).map((size) => ({
+          body: { variables: { count: size, cursor: null } },
+        }));
+      }
+
+      function paginationTrace(pageSize: number, pageCount: number): unknown[] {
+        return [...range(1, pageCount)].map((idx) => ({
+          body: {
+            variables: {
+              count: pageSize,
+              cursor: idx === 1 ? null : `page-${idx}`,
+            },
+          },
+        }));
+      }
+
+      it.each`
+        attempts | pageSize | itemCount
+        ${1}     | ${50}    | ${150}
+        ${2}     | ${25}    | ${100}
+        ${3}     | ${10}    | ${30}
+        ${4}     | ${5}     | ${15}
+      `(
+        'shrinks page size to $pageSize after $attempts failed attempt(s)',
+        async ({
+          attempts,
+          pageSize,
+          itemCount,
+        }: {
+          attempts: number;
+          pageSize: number;
+          itemCount: number;
+        }) => {
+          const items = generateItems(itemCount);
+          const pages = generatePages(items, pageSize);
+          const scope = httpMock
+            .scope('https://api.github.com/')
+            .post('/graphql')
+            .times(attempts)
+            .reply(
+              200,
+              err('Something went wrong while executing your query.'),
+            );
+          pages.forEach((page) => {
+            scope.post('/graphql').reply(200, page);
+          });
+
+          const res = await Datasource.query(
+            { packageName: 'foo/bar' },
+            http,
+            adapter,
+          );
+
+          expect(res).toHaveLength(itemCount);
+          expect(res).toEqual(items.map(adapter.transform));
+          expect(httpMock.getTrace()).toMatchObject([
+            ...shrinkingTrace(attempts),
+            ...paginationTrace(pageSize, pages.length),
+          ]);
+        },
+      );
+
+      it('shrinks page size when a later page fails', async () => {
+        const items = generateItems(30);
+        httpMock
           .scope('https://api.github.com/')
           .post('/graphql')
-          .reply(200, err('Something went wrong while executing your query.'));
-        pages.forEach((page) => {
-          scope.post('/graphql').reply(200, page);
-        });
+          .reply(200, resp(false, items.slice(0, 20), 'page-2'))
+          .post('/graphql')
+          .reply(200, err('Something went wrong while executing your query.'))
+          .post('/graphql')
+          .reply(200, resp(false, items.slice(20)));
 
         const res = await Datasource.query(
           { packageName: 'foo/bar' },
@@ -347,43 +416,11 @@ describe('util/github/graphql/datasource-fetcher', () => {
           adapter,
         );
 
-        expect(res).toHaveLength(150);
         expect(res).toEqual(items.map(adapter.transform));
         expect(httpMock.getTrace()).toMatchObject([
           { body: { variables: { count: 100, cursor: null } } },
-          { body: { variables: { count: 50, cursor: null } } },
+          { body: { variables: { count: 100, cursor: 'page-2' } } },
           { body: { variables: { count: 50, cursor: 'page-2' } } },
-          { body: { variables: { count: 50, cursor: 'page-3' } } },
-        ]);
-      });
-
-      it('shrinks page from 50 to 25', async () => {
-        const items = generateItems(100);
-        const pages = generatePages(items, 25);
-        const scope = httpMock
-          .scope('https://api.github.com/')
-          .post('/graphql')
-          .twice()
-          .reply(200, err('Something went wrong while executing your query.'));
-        pages.forEach((page) => {
-          scope.post('/graphql').reply(200, page);
-        });
-
-        const res = await Datasource.query(
-          { packageName: 'foo/bar' },
-          http,
-          adapter,
-        );
-
-        expect(res).toHaveLength(100);
-        expect(res).toEqual(items.map(adapter.transform));
-        expect(httpMock.getTrace()).toMatchObject([
-          { body: { variables: { count: 100, cursor: null } } },
-          { body: { variables: { count: 50, cursor: null } } },
-          { body: { variables: { count: 25, cursor: null } } },
-          { body: { variables: { count: 25, cursor: 'page-2' } } },
-          { body: { variables: { count: 25, cursor: 'page-3' } } },
-          { body: { variables: { count: 25, cursor: 'page-4' } } },
         ]);
       });
 
@@ -391,18 +428,16 @@ describe('util/github/graphql/datasource-fetcher', () => {
         httpMock
           .scope('https://api.github.com/')
           .post('/graphql')
-          .thrice()
+          .times(pageSizes.length)
           .reply(200, err('Something went wrong while executing your query.'));
 
         await expect(
           Datasource.query({ packageName: 'foo/bar' }, http, adapter),
         ).rejects.toThrow('Something went wrong while executing your query.');
 
-        expect(httpMock.getTrace()).toMatchObject([
-          { body: { variables: { count: 100, cursor: null } } },
-          { body: { variables: { count: 50, cursor: null } } },
-          { body: { variables: { count: 25, cursor: null } } },
-        ]);
+        expect(httpMock.getTrace()).toMatchObject(
+          shrinkingTrace(pageSizes.length),
+        );
       });
     });
 

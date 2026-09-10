@@ -152,7 +152,7 @@ export class DebDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -181,7 +181,7 @@ export class DebDatasource extends Datasource {
         }
       } catch (error) {
         logger.debug(
-          { componentUrl, error },
+          { componentUrl, err: error },
           'Skipping component due to an error',
         );
       }

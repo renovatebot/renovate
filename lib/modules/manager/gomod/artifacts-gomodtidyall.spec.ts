@@ -71,7 +71,7 @@ function baseConfig(
 
 describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   beforeEach(() => {
-    delete process.env.GOPATH;
+    vi.stubEnv('GOPATH', undefined);
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();

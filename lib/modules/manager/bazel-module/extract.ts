@@ -11,10 +11,10 @@ import type {
 } from '../types.ts';
 import * as bazelrc from './bazelrc.ts';
 import { RuleToCratePackageDep } from './parser/crate.ts';
-import type { ResultFragment } from './parser/fragments.ts';
 import { parse } from './parser/index.ts';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven.ts';
 import { RuleToDockerPackageDep } from './parser/oci.ts';
+import type { ResultFragment } from './parser/types.ts';
 import * as rules from './rules.ts';
 import {
   GitRepositoryToPackageDep,
