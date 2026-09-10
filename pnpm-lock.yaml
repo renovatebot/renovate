@@ -175,6 +175,9 @@ importers:
       commander:
         specifier: 15.0.0
         version: 15.0.0
+      common-tags:
+        specifier: 1.8.2
+        version: 1.8.2
       croner:
         specifier: 10.0.1
         version: 10.0.1
@@ -536,9 +539,6 @@ importers:
       callsite:
         specifier: 1.0.0
         version: 1.0.0
-      common-tags:
-        specifier: 1.8.2
-        version: 1.8.2
       conventional-changelog-conventionalcommits:
         specifier: 9.3.1
         version: 9.3.1
