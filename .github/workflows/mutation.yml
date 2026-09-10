@@ -78,7 +78,7 @@ jobs:
         if: steps.changed.outputs.has_files == 'true'
         env:
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
-        run: pnpm stryker run --mutate "$CHANGED_FILES"
+        run: pnpm test:mutation:changed "$CHANGED_FILES"
 
       - name: Post PR comment
         if: always() && steps.changed.outputs.has_files == 'true'

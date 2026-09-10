@@ -40,5 +40,6 @@
   "incremental": true,
   "incrementalFile": "reports/mutation/.stryker-incremental.json",
   "timeoutMS": 60000,
-  "concurrency": 4
+  "concurrency": 4,
+  "dryRunTimeoutMinutes": 45
 }

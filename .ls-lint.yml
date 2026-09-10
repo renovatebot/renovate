@@ -24,6 +24,7 @@ ignore:
   - tools/mkdocs/site
   - tools/mkdocs/.cache
   - .worktrees
+  - .stryker-tmp
   - .agents
   - .claude
   - .opencode
