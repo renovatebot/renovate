@@ -309,9 +309,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     describe('submodules', () => {
-      // TODO: these tests fail under @stryker-mutator/vitest-runner (but pass under plain
-      // `vitest run`, regardless of pool/concurrency) with `fatal: transport 'file' not allowed`
-      // on the `repo.submoduleAdd()` call below. Root cause not yet identified.
       beforeEach(async () => {
         const repo = simpleGit(base.path);
 

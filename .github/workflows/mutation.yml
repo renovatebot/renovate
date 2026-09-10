@@ -7,9 +7,15 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  NODE_VERSION: 24
 
 jobs:
   mutation-full:
@@ -17,15 +23,22 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .node-version
-          cache: pnpm
-      - run: pnpm install
-      - run: pnpm mutation
-      - uses: actions/upload-artifact@v4
+          persist-credentials: false
+          show-progress: false
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - run: pnpm test:mutation
+
+      - name: Upload mutation report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: mutation-report
@@ -36,32 +49,40 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     permissions:
+      contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+          persist-credentials: false
+          show-progress: false
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
         with:
-          node-version-file: .node-version
-          cache: pnpm
-      - run: pnpm install
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
 
       - name: Get changed source files
         id: changed
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'lib/**/*.ts' ':!lib/**/*.spec.ts' ':!lib/**/*.generated.ts' | tr '\n' ',')
+          FILES=$(git diff --name-only "origin/$BASE_REF...HEAD" -- 'lib/**/*.ts' ':!lib/**/*.spec.ts' ':!lib/**/*.generated.ts' | tr '\n' ',')
           echo "files=$FILES" >> "$GITHUB_OUTPUT"
           echo "has_files=$( [ -n "$FILES" ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
 
       - name: Run mutation tests on changed files
         if: steps.changed.outputs.has_files == 'true'
-        run: pnpm stryker run --mutate "${{ steps.changed.outputs.files }}"
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+        run: pnpm stryker run --mutate "$CHANGED_FILES"
 
       - name: Post PR comment
         if: always() && steps.changed.outputs.has_files == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');

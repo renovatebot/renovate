@@ -92,6 +92,15 @@ export default defineConfig(() =>
         reporters,
         mockReset: true,
         unstubEnvs: true,
+        env: {
+          // Needed so `lib/util/git/index.spec.ts`'s local-clone-of-a-submodule
+          // tests work when vitest is invoked directly (e.g. by Stryker's
+          // vitest-runner), bypassing the `pnpm vitest`/`pnpm jest` scripts
+          // that would otherwise set these.
+          GIT_ALLOW_PROTOCOL: 'file',
+          GIT_CONFIG_GLOBAL: '/dev/null',
+          GIT_CONFIG_SYSTEM: '/dev/null',
+        },
         coverage: {
           provider: 'v8',
           skipFull: !ci,
