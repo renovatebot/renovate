@@ -915,7 +915,6 @@ The downside of this is that you may end up with a very old issue getting "recyc
 ## `constraints`
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
-Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
@@ -957,6 +956,13 @@ Additionally, there are several additional constraints that can be specified:
 ## `constraintsFiltering`
 
 This option controls whether Renovate filters new releases based on configured or detected `constraints`.
+Renovate infers recognized runtime constraints from:
+
+- `package.json` `engines` and package-manager declarations
+- repository-root `.tool-versions`
+- repository-root `mise.toml` and `.mise.toml`
+
+For `bun`, `node`, `yarn`, `npm`, `pnpm`, and `vscode`, Renovate uses the primary tool version. Root mise values override `.tool-versions` values. Explicit configuration and constraints in package files take precedence over inferred runtime constraints.
 Renovate supports two options:
 
 - `none`: No release filtering (all releases allowed)

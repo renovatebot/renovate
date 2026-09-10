@@ -6,6 +6,7 @@ describe('modules/manager/asdf/extract', () => {
     it('returns a result', () => {
       const res = extractPackageFile('nodejs 16.16.0\n');
       expect(res).toEqual({
+        extractedConstraints: { node: '16.16.0' },
         deps: [
           {
             currentValue: '16.16.0',
@@ -16,9 +17,31 @@ describe('modules/manager/asdf/extract', () => {
       });
     });
 
+    it('extracts all runtime constraints, including unsupported tooling', () => {
+      const result = extractPackageFile(
+        'bun 1.3.0\nnodejs 22.11.0\nyarn 4.5.0\nnpm 11.0.0\npnpm 10.34.5\nvscode 1.100.0\n',
+      );
+
+      expect(result).toMatchObject({
+        extractedConstraints: {
+          bun: '1.3.0',
+          node: '22.11.0',
+          yarn: '4.5.0',
+          npm: '11.0.0',
+          pnpm: '10.34.5',
+          vscode: '1.100.0',
+        },
+      });
+      expect(result?.deps).toContainEqual({
+        depName: 'vscode',
+        skipReason: 'unsupported-datasource',
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', () => {
       const res = extractPackageFile('unsupported 1.22.5\n');
       expect(res).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             depName: 'unsupported',
@@ -31,6 +54,7 @@ describe('modules/manager/asdf/extract', () => {
     it('only captures the first version', () => {
       const res = extractPackageFile('nodejs 16.16.0 16.15.1');
       expect(res).toEqual({
+        extractedConstraints: { node: '16.16.0' },
         deps: [
           {
             currentValue: '16.16.0',
@@ -155,6 +179,11 @@ dummy 1.2.3
 `,
       );
       expect(res).toEqual({
+        extractedConstraints: {
+          bun: '0.2.2',
+          node: '18.12.0',
+          pnpm: '7.26.2',
+        },
         deps: [
           {
             currentValue: '0.2.54',
@@ -896,6 +925,7 @@ awscli    2.8.6
 `,
       );
       expect(res).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '3.0.0',
@@ -923,6 +953,7 @@ awscli    2.8.6
     it('can handle flutter version channel', () => {
       const withChannel = extractPackageFile('flutter 3.10.0-stable');
       expect(withChannel).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '3.10.0',
@@ -933,6 +964,7 @@ awscli    2.8.6
       });
       const withoutChannel = extractPackageFile('flutter 3.10.0');
       expect(withoutChannel).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '3.10.0',
@@ -946,6 +978,7 @@ awscli    2.8.6
     it('can handle java jre / jdk', () => {
       const adoptOpenJdkRes = extractPackageFile('java adoptopenjdk-16.0.0+36');
       expect(adoptOpenJdkRes).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '16.0.0+36',
@@ -959,6 +992,7 @@ awscli    2.8.6
         'java adoptopenjdk-jre-16.0.0+36',
       );
       expect(adoptOpenJreRes).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '16.0.0+36',
@@ -970,6 +1004,7 @@ awscli    2.8.6
       });
       const temurinJdkRes = extractPackageFile('java temurin-16.0.0+36');
       expect(temurinJdkRes).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '16.0.0+36',
@@ -981,6 +1016,7 @@ awscli    2.8.6
       });
       const temurinJreRes = extractPackageFile('java temurin-jre-16.0.0+36');
       expect(temurinJreRes).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '16.0.0+36',
@@ -992,6 +1028,7 @@ awscli    2.8.6
       });
       const unknownRes = extractPackageFile('java unknown-16.0.0+36');
       expect(unknownRes).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             depName: 'java',
@@ -1004,6 +1041,7 @@ awscli    2.8.6
     it('can handle scala v 2 & 3', () => {
       const v2Res = extractPackageFile('scala 2.0.0');
       expect(v2Res).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '2.0.0',
@@ -1016,6 +1054,7 @@ awscli    2.8.6
       });
       const v3Res = extractPackageFile('scala 3.0.0');
       expect(v3Res).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             currentValue: '3.0.0',
@@ -1027,6 +1066,7 @@ awscli    2.8.6
       });
       const unknownRes = extractPackageFile('scala 0.0.0');
       expect(unknownRes).toEqual({
+        extractedConstraints: {},
         deps: [
           {
             depName: 'scala',
@@ -1054,6 +1094,7 @@ awscli    2.8.6
           it(`entry: '${data.entry}'`, () => {
             const res = extractPackageFile(data.entry);
             expect(res).toEqual({
+              extractedConstraints: { node: data.expect },
               deps: [
                 {
                   currentValue: data.expect,
@@ -1083,6 +1124,7 @@ awscli    2.8.6
           '# this is a full line comment\nnodejs 16.16.0 # this is a comment\n',
         );
         expect(res).toEqual({
+          extractedConstraints: { node: '16.16.0' },
           deps: [
             {
               currentValue: '16.16.0',
@@ -1096,6 +1138,7 @@ awscli    2.8.6
       it('ignores supported tooling with a renovate:ignore comment', () => {
         const res = extractPackageFile('nodejs 16.16.0 # renovate:ignore\n');
         expect(res).toEqual({
+          extractedConstraints: {},
           deps: [
             {
               currentValue: '16.16.0',

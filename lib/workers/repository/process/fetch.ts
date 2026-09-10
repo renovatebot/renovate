@@ -22,6 +22,32 @@ import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
 
 type LookupResult = Result<PackageDependency>;
 
+function getRuntimeConstraints(
+  packageFiles: Record<string, PackageFile[]>,
+): RenovateConfig['constraints'] {
+  const asdfConstraints = packageFiles.asdf
+    ?.filter(({ packageFile }) => packageFile === '.tool-versions')
+    .reduce(
+      (constraints, { extractedConstraints }) => ({
+        ...constraints,
+        ...extractedConstraints,
+      }),
+      {},
+    );
+  const miseConstraints = packageFiles.mise
+    ?.filter(({ packageFile }) =>
+      ['mise.toml', '.mise.toml'].includes(packageFile),
+    )
+    .reduce(
+      (constraints, { extractedConstraints }) => ({
+        ...constraints,
+        ...extractedConstraints,
+      }),
+      {},
+    );
+  return { ...asdfConstraints, ...miseConstraints };
+}
+
 async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
@@ -55,8 +81,8 @@ async function lookup(
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   if (dep.extractedConstraints) {
     depConfig.constraints = {
-      ...dep.extractedConstraints,
       ...depConfig.constraints,
+      ...dep.extractedConstraints,
     };
   }
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
@@ -124,15 +150,16 @@ async function fetchManagerPackagerFileUpdates(
   config: RenovateConfig,
   managerConfig: RenovateConfig,
   pFile: PackageFile,
+  runtimeConstraints: RenovateConfig['constraints'],
 ): Promise<void> {
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  if (pFile.extractedConstraints) {
-    packageFileConfig.constraints = {
-      ...pFile.extractedConstraints,
-      ...config.constraints,
-    };
-  }
+  packageFileConfig.constraints = {
+    ...runtimeConstraints,
+    ...pFile.extractedConstraints,
+    ...packageFileConfig.constraints,
+    ...config.constraints,
+  };
   const mergedConstraintsVersioning = {
     ...pFile.constraintsVersioning,
     ...config.constraintsVersioning,
@@ -163,11 +190,17 @@ async function fetchManagerUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
   manager: string,
+  runtimeConstraints: RenovateConfig['constraints'],
 ): Promise<void> {
   const managerConfig = getManagerConfig(config, manager);
   const queue = packageFiles[manager].map(
     (pFile) => (): Promise<void> =>
-      fetchManagerPackagerFileUpdates(config, managerConfig, pFile),
+      fetchManagerPackagerFileUpdates(
+        config,
+        managerConfig,
+        pFile,
+        runtimeConstraints,
+      ),
   );
   logger.trace(
     { manager, queueLength: queue.length },
@@ -181,10 +214,11 @@ export async function fetchUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
+  const runtimeConstraints = getRuntimeConstraints(packageFiles);
   const managers = Object.keys(packageFiles);
   const allManagerJobs = managers.map((manager) =>
     instrument(manager, () =>
-      fetchManagerUpdates(config, packageFiles, manager),
+      fetchManagerUpdates(config, packageFiles, manager, runtimeConstraints),
     ),
   );
   await Promise.all(allManagerJobs);
