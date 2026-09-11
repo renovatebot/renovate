@@ -268,6 +268,59 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
+  describe('initRepo URL encoding', () => {
+    it('doesn not manually encode whitespace in org/collection when falling back to manualUrl', async () => {
+      await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/my org/',
+        token: 'token',
+      });
+
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRepositories: vi.fn().mockResolvedValue([
+            {
+              name: 'my-repo',
+              defaultBranch: 'main',
+              project: { name: 'my-project' },
+              // simulates no remoteUrl returned by azure -> exercises the manualUrl fallback
+            },
+          ]),
+        }),
+      );
+
+      await azure.initRepo({ repository: 'my-project/my-repo' });
+
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://dev.azure.com/my org/my-project/_git/my-repo',
+        }),
+      );
+    });
+
+    it('encodes whitespace in org/collection when using repo.remoteUrl', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRepositories: vi.fn().mockResolvedValue([
+            {
+              name: 'my-repo',
+              defaultBranch: 'main',
+              project: { name: 'my-project' },
+              remoteUrl: 'https://dev.azure.com/my org/my-project/_git/my-repo',
+            },
+          ]),
+        }),
+      );
+
+      await azure.initRepo({ repository: 'my-project/my-repo' });
+
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://dev.azure.com/my%20org/my-project/_git/my-repo',
+        }),
+      );
+    });
+  });
+
   describe('findPr(branchName, prTitle, state, targetBranch)', () => {
     it('returns pr if found it open', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
