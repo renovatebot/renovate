@@ -5,6 +5,7 @@ import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
@@ -135,6 +136,46 @@ const PnpmSetupWith: ActionSchema = z
     ...parsePnpmRuntime(runtime),
   ]);
 
+// Distributions whose version numbering we can reliably track via the
+// java-version datasource (which sources releases from Adoptium/Eclipse
+// Temurin). Other distributions may not follow the same release cadence
+// or versioning, so we don't attempt to track them.
+const supportedJavaDistributions = new Set(['temurin', 'adopt']);
+
+const SetupJavaWith: ActionSchema = z
+  .object({
+    distribution: z.string().optional(),
+    'java-version': z.string().optional(),
+    'java-package': z.string().optional(),
+  })
+  .transform(
+    ({
+      distribution,
+      'java-version': version,
+      'java-package': javaPackage,
+    }) => {
+      const packageName = javaPackage?.startsWith('jre')
+        ? 'java-jre'
+        : 'java-jdk';
+
+      if (
+        !distribution ||
+        !supportedJavaDistributions.has(distribution.toLowerCase())
+      ) {
+        return [
+          {
+            packageName,
+            depType: 'uses-with',
+            skipStage: 'extract',
+            skipReason: 'unsupported',
+          },
+        ];
+      }
+
+      return [{ packageName, ...parseValue(version) }];
+    },
+  );
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -163,6 +204,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     datasource: DotnetVersionDatasource.id,
     packageName: 'dotnet-sdk',
     withSchema: valSchema('dotnet-version', (val) => val.includes('\n')),
+  },
+  // https://github.com/actions/setup-java
+  'actions/setup-java': {
+    datasource: JavaVersionDatasource.id,
+    packageName: '', // determined from `distribution`/`java-package` inputs
+    withSchema: SetupJavaWith,
   },
   // https://github.com/aquasecurity/setup-trivy
   'aquasecurity/setup-trivy': {

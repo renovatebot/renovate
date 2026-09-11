@@ -1541,6 +1541,105 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'adopt', 'java-version': '11' },
+      },
+      expected: [
+        {
+          currentValue: '11',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: {
+          distribution: 'temurin',
+          'java-version': '21',
+          'java-package': 'jre',
+        },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jre',
+          depType: 'uses-with',
+          packageName: 'java-jre',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // we can't reliably track version updates for distributions other
+      // than Temurin/Adopt
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'zulu', 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'aquasecurity/setup-trivy@v0.2.6',
         with: {},
       },
