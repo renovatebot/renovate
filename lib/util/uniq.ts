@@ -1,3 +1,4 @@
+/** Returns a new array with duplicate elements removed. */
 export function uniq<T = unknown>(
   array: T[],
   eql = (x: T, y: T): boolean => x === y,
