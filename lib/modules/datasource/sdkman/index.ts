@@ -1,12 +1,12 @@
+import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { id } from '../../versioning/docker/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { logger } from '../../../logger/index.ts';
-import { id } from '../../versioning/docker/index.ts';
-import { joinUrlParts, parseUrl } from '../../../util/url.ts';
-import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
-import { HttpError } from '../../../util/http/index.ts';
-import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 
 export class SdkmanDatasource extends Datasource {
   static readonly id = 'sdkman';
