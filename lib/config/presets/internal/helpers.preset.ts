@@ -55,7 +55,7 @@ export const presets: Record<string, Preset> = {
   },
   githubDigestChangelogs: {
     description:
-      'Ensure that every dependency pinned by digest and sourced from GitHub.com and Github enterprise contains a link to the commit-to-commit diff',
+      'Ensure that every dependency pinned by digest and sourced from GitHub.com, GitHub Enterprise Cloud, or GitHub Enterprise Server contains a link to the commit-to-commit diff',
     packageRules: [
       {
         changelogUrl: '{{sourceUrl}}/compare/{{currentDigest}}..{{newDigest}}',
