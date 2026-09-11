@@ -1830,6 +1830,94 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: 'amazon/amazon-ecs-sample:latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:v1.2.3',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.2.3',
+          datasource: 'docker',
+          depName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+          depType: 'uses-with',
+          packageName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image:
+            'amazon/amazon-ecs-sample@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      // the image is templated, so we can't reliably determine what to update
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '${{ steps.build-image.outputs.image }}',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'contains-variable',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'pnpm/action-setup@v4',
         with: {
           version: 'latest',
