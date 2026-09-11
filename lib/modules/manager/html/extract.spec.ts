@@ -93,6 +93,43 @@ describe('modules/manager/html/extract', () => {
     });
   });
 
+  it('extracts unpkg dependencies', () => {
+    const content = `
+      <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+      <script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+      <link href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" />
+    `;
+
+    expect(extractPackageFile(content)).toEqual({
+      deps: [
+        {
+          datasource: 'unpkg',
+          depName: 'babel-standalone',
+          packageName: 'babel-standalone',
+          currentValue: '6.26.0',
+          replaceString:
+            '<script src="https://unpkg.com/babel-standalone@6.26.0/babel.js">',
+        },
+        {
+          datasource: 'unpkg',
+          depName: '@popperjs/core',
+          packageName: '@popperjs/core',
+          currentValue: '2.11.8',
+          replaceString:
+            '<script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js">',
+        },
+        {
+          datasource: 'unpkg',
+          depName: 'react',
+          packageName: 'react',
+          currentValue: '18.3.1',
+          replaceString:
+            '<link href="https://unpkg.com/react@18.3.1/umd/react.production.min.js" />',
+        },
+      ],
+    });
+  });
+
   it('returns null', () => {
     expect(extractPackageFile(nothing)).toBeNull();
   });
