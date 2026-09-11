@@ -4,3 +4,8 @@ export interface MatchResult {
   label: string;
   substr: string;
 }
+
+export interface ParsedRegistries {
+  defaultUrl?: string;
+  named: Record<string, string>;
+}
