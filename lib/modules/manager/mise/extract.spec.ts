@@ -805,14 +805,14 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '1.0.0',
             packageName: 'some/repo',
             datasource: 'gitlab-releases',
-            extractVersion: '^release\\-(?<version>.+)',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
           },
           {
             depName: 'gitlab:other/repo',
             currentValue: '2.0.0',
             packageName: 'other/repo',
             datasource: 'gitlab-releases',
-            extractVersion: '^v(?<version>.+)',
+            extractVersion: '^\\x76(?<version>.+)',
           },
         ],
       });

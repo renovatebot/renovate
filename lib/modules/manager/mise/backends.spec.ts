@@ -229,7 +229,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'gitlab-releases',
         currentValue: '1.0.0',
-        extractVersion: '^release\\-(?<version>.+)',
+        extractVersion: '^\\x72elease\\x2d(?<version>.+)',
       });
     });
 
@@ -242,7 +242,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'gitlab-releases',
         currentValue: '1.0.0',
-        extractVersion: '^v1\\.0\\+(?<version>.+)',
+        extractVersion: '^\\x761\\.0\\+(?<version>.+)',
       });
     });
   });

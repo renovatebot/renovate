@@ -151,7 +151,7 @@ export function createGitlabToolConfig(
   const prefix = toolOptions.version_prefix;
 
   if (isNonEmptyString(prefix)) {
-    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+    extractVersion = `^${RegExp.escape(prefix)}(?<version>.+)`;
   }
 
   return {
