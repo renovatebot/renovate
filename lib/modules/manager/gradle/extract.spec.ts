@@ -407,6 +407,65 @@ describe('modules/manager/gradle/extract', () => {
     ]);
   });
 
+  it('extracts rich version constraints', async () => {
+    const fsMock = {
+      'build.gradle': codeBlock`
+        dependencies {
+          implementation('org.slf4j:slf4j-api') {
+            version {
+              strictly '[1.7, 1.8['
+            }
+          }
+          implementation('com.google.guava:guava') {
+            version {
+              require '30.1-jre'
+              prefer '31.0-jre'
+            }
+          }
+          implementation('com.google.gson:gson') {
+            version {
+              strictly '2.8.9'
+              reject '2.8.8'
+            }
+          }
+        }
+      `,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
+    );
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'build.gradle',
+        deps: [
+          {
+            depName: 'org.slf4j:slf4j-api',
+            currentValue: '[1.7, 1.8[',
+            depType: 'dependencies',
+            enabled: false,
+            managerData: { versionConstraint: 'strictly' },
+          },
+          {
+            depName: 'com.google.guava:guava',
+            currentValue: '30.1-jre',
+            depType: 'dependencies',
+            managerData: { versionConstraint: 'require' },
+          },
+          {
+            depName: 'com.google.gson:gson',
+            depType: 'dependencies',
+            skipReason: 'unsupported-version',
+          },
+        ],
+      },
+    ]);
+    expect(res![0].deps[1].enabled).toBeUndefined();
+  });
+
   describe('registry URLs', () => {
     it('deduplicates registry urls', async () => {
       const fsMock = {

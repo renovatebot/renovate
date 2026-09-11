@@ -28,3 +28,56 @@ Renovate will check the file for existing hash types (like `sha256`) and use the
   Gradle allows verification metadata to use the `md5` and `sha1` algorithms.
   Because those algorithms are prone to collision attacks, Renovate ignores them.
   If Renovate encounters hashes that are generated with `md5` or `sha1` algorithms, Renovate uses `sha256` instead.
+
+### Rich version constraints
+
+Renovate extracts dependencies whose version comes from a Gradle [rich version constraint](https://docs.gradle.org/current/userguide/dependency_versions.html#sec:rich-version-constraints) declared in a `version { ... }` block, in both the Groovy and the Kotlin DSL:
+
+```groovy
+dependencies {
+    implementation('org.slf4j:slf4j-api') {
+        version {
+            strictly '[1.7, 1.8['
+        }
+    }
+}
+```
+
+Renovate can only rewrite one version literal per dependency, so it picks a single constraint to update and records which one in `managerData.versionConstraint`:
+
+| Declared constraints               | What Renovate updates                         |
+| ---------------------------------- | --------------------------------------------- |
+| `strictly`                         | `strictly`                                    |
+| `strictly` + `prefer`              | `strictly`, if `strictly` is a single version |
+| `require`                          | `require`                                     |
+| `require` + `prefer`               | `require`, because `prefer` is only a hint    |
+| `prefer`                           | `prefer`                                      |
+| `require` + `strictly`             | nothing, skipped as `multiple-constraint-dep` |
+| `strictly` range + `prefer`        | nothing, skipped as `multiple-constraint-dep` |
+| anything + `reject` or `rejectAll` | nothing, skipped as `unsupported-version`     |
+
+`strictly` and `prefer` pin a version on purpose, so Renovate disables those dependencies by default and only updates them for [vulnerability alerts](../../../configuration-options.md#vulnerabilityalerts).
+A `require` constraint means the same thing as a plain version declaration, so it is updated like any other dependency.
+
+To also receive regular updates for `strictly` and `prefer` constraints, opt in with a package rule:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["gradle"],
+      "matchJsonata": [
+        "managerData.versionConstraint in ['strictly', 'prefer']"
+      ],
+      "enabled": true
+    }
+  ]
+}
+```
+
+!!! note
+  Rich versions in [version catalogs](https://docs.gradle.org/current/userguide/platforms.html) are extracted by the TOML parser instead, which updates a single `require`, `prefer` or `strictly` constraint without disabling it.
+
+!!! note
+  A `version { ... }` block on a dependency that already spells out its version, such as `implementation('org.slf4j:slf4j-api:1.7.25') { version { strictly '1.7.30' } }`, is not valid Gradle.
+  Renovate updates the version in the dependency string and ignores the block.
