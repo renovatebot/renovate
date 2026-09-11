@@ -445,6 +445,18 @@ describe('modules/versioning/rez/index', () => {
     },
   );
 
+  it('getNewValue() replaces a plain version with a four-component version', () => {
+    // rez versions may have more than three components, which npm rejects,
+    // so the new value is determined via pep440 instead of version precision
+    const res = versioning.getNewValue({
+      currentValue: '1.2.3',
+      rangeStrategy: 'replace',
+      currentVersion: '1.2.3',
+      newVersion: '1.2.3.4',
+    });
+    expect(res).toBe('1.2.3.4');
+  });
+
   it.each`
     version    | expected
     ${'1.2.0'} | ${true}
