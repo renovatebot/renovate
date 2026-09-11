@@ -7,6 +7,7 @@ import {
   isString,
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -56,9 +57,28 @@ export async function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [];
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
+  const constraintNames: ConstraintName[] = [
+    'bun',
+    'node',
+    'yarn',
+    'npm',
+    'pnpm',
+    'vscode',
+  ];
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {
     deps.push(extractToolEntry(name, toolData, 'tools'));
+    const depName = optionInToolNameRegex.exec(name.trim())!.groups!.name;
+    const toolName = depName.substring(depName.indexOf(':') + 1);
+    const constraintName =
+      toolName === 'nodejs'
+        ? 'node'
+        : constraintNames.find((name) => name === toolName);
+    const version = parseVersion(toolData);
+    if (constraintName && version) {
+      extractedConstraints[constraintName] = version;
+    }
   }
 
   for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
@@ -73,7 +93,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const result: PackageFileContent = { deps };
+  const result: PackageFileContent = { deps, extractedConstraints };
 
   const lockFileName = getLockFileName(packageFile);
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');

@@ -53,6 +53,55 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts all runtime constraints from tools, including unsupported tooling', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          [tools]
+          bun = '1.3.0'
+          node = '22.11.0'
+          "core:node" = '24.0.0'
+          yarn = '4.5.0'
+          npm = '11.0.0'
+          pnpm = '10.34.5'
+          vscode = '1.100.0'
+
+          [tasks.test]
+          tools = { node = '25.0.0' }
+        `,
+        miseFilename,
+      );
+
+      expect(result).toMatchObject({
+        extractedConstraints: {
+          bun: '1.3.0',
+          node: '24.0.0',
+          yarn: '4.5.0',
+          npm: '11.0.0',
+          pnpm: '10.34.5',
+          vscode: '1.100.0',
+        },
+      });
+      expect(result?.deps).toContainEqual({
+        depName: 'vscode',
+        depType: 'tools',
+        skipReason: 'unsupported-datasource',
+      });
+    });
+
+    it('normalizes the asdf nodejs tool name to node', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          [tools]
+          "asdf:nodejs" = '22.11.0'
+        `,
+        miseFilename,
+      );
+
+      expect(result).toMatchObject({
+        extractedConstraints: { node: '22.11.0' },
+      });
+    });
+
     it('extracts tools - mise registry tools', async () => {
       const content = codeBlock`
       [tools]
@@ -432,6 +481,7 @@ describe('modules/manager/mise/extract', () => {
           },
         ],
       });
+      expect(result?.extractedConstraints).toEqual({ node: '16' });
     });
 
     it('extracts tools with plugin options', async () => {
@@ -842,6 +892,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       java = '21.0.2'
       erlang = []
+      node = []
     `;
       const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -854,8 +905,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'erlang',
             skipReason: 'unspecified-version',
           },
+          {
+            depName: 'node',
+            skipReason: 'unspecified-version',
+          },
         ],
       });
+      expect(result?.extractedConstraints).not.toHaveProperty('node');
     });
 
     it('complete mise.toml example', async () => {
