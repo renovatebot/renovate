@@ -534,6 +534,66 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(res.updatedArtifacts[0].type).toBe('addition');
     });
 
+    it('updates every duplicate artifact entry for the same path', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'gomod',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['echo test'],
+            fileFilters: ['**/go.sum'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'gomod',
+        updatedPackageFiles: [],
+        updatedArtifacts: [
+          { type: 'addition', path: 'app/go.sum', contents: 'stale contents' },
+          { type: 'addition', path: 'app/go.sum', contents: 'stale contents' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['app/go.sum'],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      git.isFileModeEnabled.mockResolvedValue(false);
+
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({ localDir, allowedCommands: ['echo test'] });
+
+      exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
+      fs.localPathIsFile.mockResolvedValue(true);
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValue('post-upgrade contents');
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'app/go.sum',
+          contents: 'post-upgrade contents',
+        },
+        {
+          type: 'addition',
+          path: 'app/go.sum',
+          contents: 'post-upgrade contents',
+        },
+      ]);
+    });
+
     describe('executable file modes', () => {
       const postUpgradeTask = partial<BranchUpgradeConfig>([
         {
