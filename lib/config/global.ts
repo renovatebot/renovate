@@ -18,6 +18,8 @@ export class GlobalConfig {
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
+    'azureBypassPolicy',
+    'azureBypassPolicyReason',
     'bbUseDevelopmentBranch',
     'binarySource',
     'cacheDir',
