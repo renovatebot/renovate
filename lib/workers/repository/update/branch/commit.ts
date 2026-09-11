@@ -39,11 +39,12 @@ export function commitFilesToBranch(
   // istanbul ignore if
   if (
     config.branchName !== sanitize(config.branchName) ||
-    config.commitMessage !== sanitize(config.commitMessage)
+    config.commitMessage !== sanitize(config.commitMessage) ||
+    config.commitTrailers?.some((trailer) => trailer !== sanitize(trailer))
   ) {
     logger.debug(
       { branchName: config.branchName },
-      'Secrets exposed in branchName or commitMessage',
+      'Secrets exposed in branchName, commitMessage or commitTrailers',
     );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
@@ -53,6 +54,7 @@ export function commitFilesToBranch(
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage!,
+    trailers: config.commitTrailers,
     force: !!config.forceCommit,
     platformCommit: config.platformCommit,
     // Only needed by Gerrit platform

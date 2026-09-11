@@ -4,7 +4,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
   it('migrates', async () => {
     await expect(FetchReleaseNotesMigration).toMigrate(
       {
-        fetchReleaseNotes: false as never,
+        fetchReleaseNotes: false,
       },
       {
         fetchChangeLogs: 'off',
@@ -12,7 +12,7 @@ describe('config/migrations/custom/fetch-release-notes-migration', () => {
     );
     await expect(FetchReleaseNotesMigration).toMigrate(
       {
-        fetchReleaseNotes: true as never,
+        fetchReleaseNotes: true,
       },
       {
         fetchChangeLogs: 'pr',

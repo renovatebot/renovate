@@ -35,14 +35,9 @@ describe('config/presets/local/common', () => {
   describe('getPresetFromEndpoint', () => {
     it('works', async () => {
       platform.getRawFile.mockResolvedValueOnce('{}');
-      expect(
-        await getPresetFromEndpoint(
-          'some/repo',
-          'default.json',
-          undefined,
-          'dummy',
-        ),
-      ).toEqual({});
+      await expect(
+        getPresetFromEndpoint('some/repo', 'default.json', undefined, 'dummy'),
+      ).resolves.toEqual({});
     });
   });
 });

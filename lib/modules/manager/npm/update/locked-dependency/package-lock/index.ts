@@ -248,7 +248,7 @@ export async function updateLockedDependency(
       }
       newPackageJsonContent =
         parentUpdateResult.files[packageFile] || newPackageJsonContent;
-      /* v8 ignore next 2 -- hard to test */
+      /* v8 ignore next -- hard to test */
       newLockFileContent =
         parentUpdateResult.files[lockFile] || newLockFileContent;
     }

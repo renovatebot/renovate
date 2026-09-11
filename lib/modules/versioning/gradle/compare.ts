@@ -1,4 +1,5 @@
 import { isString } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 
 export const TokenType = {
@@ -167,7 +168,7 @@ function tokenCmp(left: Token | null, right: Token | null): number {
     if (left.val > right.val) {
       return 1;
     }
-  } else if (typeof left.val === 'string' && typeof right.val === 'string') {
+  } else if (isString(left.val) && isString(right.val)) {
     return stringTokenCmp(left.val, right.val);
   } else if (right.type === TokenType.Number) {
     return -1;
@@ -179,8 +180,8 @@ function tokenCmp(left: Token | null, right: Token | null): number {
 }
 
 export function compare(left: string, right: string): number {
-  const leftTokens = tokenize(left) ?? [];
-  const rightTokens = tokenize(right) ?? [];
+  const leftTokens = coerceArray(tokenize(left));
+  const rightTokens = coerceArray(tokenize(right));
   const length = Math.max(leftTokens.length, rightTokens.length);
   for (let idx = 0; idx < length; idx += 1) {
     const leftToken = leftTokens[idx] || null;
@@ -222,7 +223,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
-export type RangeBound = 'inclusive' | 'exclusive';
+type RangeBound = 'inclusive' | 'exclusive';
 
 interface MavenBasedRange {
   leftBound: RangeBound;

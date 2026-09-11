@@ -23,8 +23,6 @@ const http = new Http('npm');
 
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
-    packageCache.get.mockReset();
-    packageCache.setWithRawTtl.mockReset();
     hostRules.clear();
     setNpmrc();
   });
@@ -53,7 +51,9 @@ describe('modules/datasource/npm/get', () => {
 
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
-      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+      await expect(
+        getDependency(http, registryUrl, '@myco/test'),
+      ).resolves.toBeNull();
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBe('Bearer XXX');
@@ -85,7 +85,9 @@ describe('modules/datasource/npm/get', () => {
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
-      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+      await expect(
+        getDependency(http, registryUrl, '@myco/test'),
+      ).resolves.toBeNull();
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBe('Basic dGVzdDp0ZXN0');
@@ -108,7 +110,9 @@ describe('modules/datasource/npm/get', () => {
         .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
-      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+      await expect(
+        getDependency(http, registryUrl, '@myco/test'),
+      ).resolves.toBeNull();
 
       const trace = httpMock.getTrace();
       expect(trace[0].headers.authorization).toBeUndefined();
@@ -134,7 +138,9 @@ describe('modules/datasource/npm/get', () => {
       .reply(200, { name: '@myco/test' });
     setNpmrc(npmrc);
     const registryUrl = resolveRegistryUrl('@myco/test');
-    expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, '@myco/test'),
+    ).resolves.toBeNull();
   });
 
   it('uses hostRules token auth', async () => {
@@ -155,7 +161,9 @@ describe('modules/datasource/npm/get', () => {
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
     const registryUrl = resolveRegistryUrl('renovate');
-    expect(await getDependency(http, registryUrl, 'renovate')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'renovate'),
+    ).resolves.toBeNull();
   });
 
   it('uses hostRules basic token auth', async () => {
@@ -177,7 +185,9 @@ describe('modules/datasource/npm/get', () => {
       .reply(200, { name: 'renovate' });
     setNpmrc(npmrc);
     const registryUrl = resolveRegistryUrl('renovate');
-    expect(await getDependency(http, registryUrl, 'renovate')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'renovate'),
+    ).resolves.toBeNull();
   });
 
   it('cover all paths', async () => {
@@ -190,7 +200,7 @@ describe('modules/datasource/npm/get', () => {
       .get('/none')
       .reply(200, { name: '@myco/test' });
     let registryUrl = resolveRegistryUrl('none');
-    expect(await getDependency(http, registryUrl, 'none')).toBeNull();
+    await expect(getDependency(http, registryUrl, 'none')).resolves.toBeNull();
 
     httpMock
       .scope('https://test.org')
@@ -202,7 +212,9 @@ describe('modules/datasource/npm/get', () => {
         'dist-tags': { latest: '1.0.0' },
       });
     registryUrl = resolveRegistryUrl('@myco/test');
-    expect(await getDependency(http, registryUrl, '@myco/test')).toBeDefined();
+    await expect(
+      getDependency(http, registryUrl, '@myco/test'),
+    ).resolves.toBeDefined();
 
     httpMock
       .scope('https://test.org')
@@ -213,24 +225,34 @@ describe('modules/datasource/npm/get', () => {
         'dist-tags': { latest: '1.0.0' },
       });
     registryUrl = resolveRegistryUrl('@myco/test2');
-    expect(await getDependency(http, registryUrl, '@myco/test2')).toBeDefined();
+    await expect(
+      getDependency(http, registryUrl, '@myco/test2'),
+    ).resolves.toBeDefined();
 
     httpMock.scope('https://test.org').get('/error-401').reply(401);
     registryUrl = resolveRegistryUrl('error-401');
-    expect(await getDependency(http, registryUrl, 'error-401')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'error-401'),
+    ).resolves.toBeNull();
 
     httpMock.scope('https://test.org').get('/error-402').reply(402);
     registryUrl = resolveRegistryUrl('error-402');
-    expect(await getDependency(http, registryUrl, 'error-402')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'error-402'),
+    ).resolves.toBeNull();
 
     httpMock.scope('https://test.org').get('/error-404').reply(404);
     registryUrl = resolveRegistryUrl('error-404');
-    expect(await getDependency(http, registryUrl, 'error-404')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'error-404'),
+    ).resolves.toBeNull();
 
     // return invalid json to get coverage
     httpMock.scope('https://test.org').get('/error4').reply(200, '{');
     registryUrl = resolveRegistryUrl('error4');
-    expect(await getDependency(http, registryUrl, 'error4')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'error4'),
+    ).resolves.toBeNull();
 
     setNpmrc();
     httpMock
@@ -243,7 +265,9 @@ describe('modules/datasource/npm/get', () => {
     ).rejects.toThrow(ExternalHostError);
 
     httpMock.scope(defaultRegistryUrl).get('/npm-error-402').reply(402);
-    expect(await getDependency(http, registryUrl, 'npm-error-402')).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'npm-error-402'),
+    ).resolves.toBeNull();
   });
 
   it('throw ExternalHostError when error happens on registry.npmjs.org', async () => {
@@ -280,9 +304,9 @@ describe('modules/datasource/npm/get', () => {
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     const registryUrl = resolveRegistryUrl('npm-parse-error');
-    expect(
-      await getDependency(http, registryUrl, 'npm-parse-error'),
-    ).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).resolves.toBeNull();
   });
 
   it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules disables abortOnError', async () => {
@@ -295,9 +319,9 @@ describe('modules/datasource/npm/get', () => {
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     const registryUrl = resolveRegistryUrl('npm-parse-error');
-    expect(
-      await getDependency(http, registryUrl, 'npm-parse-error'),
-    ).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).resolves.toBeNull();
   });
 
   it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules without protocol disables abortOnError', async () => {
@@ -311,9 +335,9 @@ describe('modules/datasource/npm/get', () => {
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     const registryUrl = resolveRegistryUrl('npm-parse-error');
-    expect(
-      await getDependency(http, registryUrl, 'npm-parse-error'),
-    ).toBeNull();
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).resolves.toBeNull();
   });
 
   it('throw ExternalHostError when error happens on custom host when hostRules enables abortOnError', async () => {
@@ -610,44 +634,48 @@ describe('modules/datasource/npm/get', () => {
       httpMock
         .scope('https://example.com')
         .get('/some-package')
-        .reply(200, {
-          _id: 'some-package',
-          name: 'some-package',
-          repository: {
-            type: 'git',
-            url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
-            directory: 'packages/foo',
-          },
-          homepage: 'https://example.com/package',
-          time: {
-            created: '2024-06-01T00:00:00.000Z',
-            '1.0.0': '2024-06-02T00:00:00.000Z',
-          },
-          'dist-tags': { latest: '1.0.0' },
-          versions: {
-            '1.0.0': {
-              repository: {
-                type: 'git',
-                url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
-              },
-              homepage: 'https://example.com/package/v1',
-              deprecated: 'use 2.0.0',
-              gitHead: 'abc123',
-              dependencies: { foo: '^1.0.0' },
-              devDependencies: { bar: '^2.0.0' },
-              engines: { node: '>=18', bun: '>=1.0.0' },
-              dist: {
-                attestations: {
-                  url: 'https://example.com/attestations',
-                  issuer: 'ignore me',
-                },
-                tarball: 'https://example.com/some-package.tgz',
-              },
-              scripts: { test: 'vitest' },
+        .reply(
+          200,
+          {
+            _id: 'some-package',
+            name: 'some-package',
+            repository: {
+              type: 'git',
+              url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+              directory: 'packages/foo',
             },
+            homepage: 'https://example.com/package',
+            time: {
+              created: '2024-06-01T00:00:00.000Z',
+              '1.0.0': '2024-06-02T00:00:00.000Z',
+            },
+            'dist-tags': { latest: '1.0.0' },
+            versions: {
+              '1.0.0': {
+                repository: {
+                  type: 'git',
+                  url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+                },
+                homepage: 'https://example.com/package/v1',
+                deprecated: 'use 2.0.0',
+                gitHead: 'abc123',
+                dependencies: { foo: '^1.0.0' },
+                devDependencies: { bar: '^2.0.0' },
+                engines: { node: '>=18', bun: '>=1.0.0' },
+                dist: {
+                  attestations: {
+                    url: 'https://example.com/attestations',
+                    issuer: 'ignore me',
+                  },
+                  tarball: 'https://example.com/some-package.tgz',
+                },
+                scripts: { test: 'vitest' },
+              },
+            },
+            readme: 'huge',
           },
-          readme: 'huge',
-        });
+          { 'cache-control': 'max-age=180, public' },
+        );
 
       const dep = await getDependency(
         http,
@@ -701,6 +729,26 @@ describe('modules/datasource/npm/get', () => {
         }),
         expect.any(Number),
       );
+    });
+
+    it('skips cache write when registry omits cache-control', async () => {
+      httpMock
+        .scope('https://npm.pkg.github.com')
+        .get('/@org%2Fpackage')
+        .reply(200, {
+          name: '@org/package',
+          'dist-tags': { latest: '1.0.0' },
+          versions: { '1.0.0': {} },
+        });
+
+      const dep = await getDependency(
+        http,
+        'https://npm.pkg.github.com',
+        '@org/package',
+      );
+
+      expect(dep).toMatchObject({ tags: { latest: '1.0.0' } });
+      expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
     });
 
     it('returns releases when `time` contains non-string entries', async () => {

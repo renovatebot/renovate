@@ -1,8 +1,5 @@
-import { mockDeep } from 'vitest-mock-extended';
-import { hostRules } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url.ts';
-
-vi.mock('../host-rules.ts', () => mockDeep());
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {
@@ -91,7 +88,10 @@ describe('util/git/url', () => {
       expect(getHttpUrl('http://git.mycompany.com/scm/proj/repo.git')).toBe(
         'http://git.mycompany.com/scm/proj/repo.git',
       );
-      hostRules.hostType.mockReturnValueOnce('bitbucket-server');
+      hostRules.add({
+        matchHost: 'git.mycompany.com',
+        hostType: 'bitbucket-server',
+      });
       expect(getHttpUrl('ssh://git@git.mycompany.com:7999/proj/repo.git')).toBe(
         'https://git.mycompany.com/scm/proj/repo.git',
       );
@@ -121,53 +121,50 @@ describe('util/git/url', () => {
     });
 
     it('transforms an ssh git url to https for the purpose of finding hostRules', () => {
-      getRemoteUrlWithToken('git@foo.bar:some/repo');
-      expect(hostRules.find).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          url: 'https://foo.bar/some/repo',
-        }),
+      // this rule can only match after the ssh url is transformed to https
+      hostRules.add({
+        matchHost: 'https://foo.bar/some/repo',
+        token: 'token',
+      });
+      expect(getRemoteUrlWithToken('git@foo.bar:some/repo')).toBe(
+        'https://token@foo.bar/some/repo',
       );
     });
 
     it('does not transform urls that are not parseable as git urls', () => {
-      getRemoteUrlWithToken('abcdefg');
-      expect(hostRules.find).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          url: 'abcdefg',
-        }),
-      );
+      expect(getRemoteUrlWithToken('abcdefg')).toBe('abcdefg');
     });
 
     it('returns http url with token', () => {
-      hostRules.find.mockReturnValueOnce({ token: 'token' });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('http://foo.bar/')).toBe(
         'http://token@foo.bar/',
       );
     });
 
     it('returns https url with token', () => {
-      hostRules.find.mockReturnValueOnce({ token: 'token' });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
         'https://token@foo.bar/',
       );
     });
 
     it('returns https url with token for non-http protocols', () => {
-      hostRules.find.mockReturnValueOnce({ token: 'token' });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://foo.bar/')).toBe(
         'https://token@foo.bar/',
       );
     });
 
     it('returns https url with encoded token', () => {
-      hostRules.find.mockReturnValueOnce({ token: 't#ken' });
+      hostRules.add({ token: 't#ken' });
       expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
         'https://t%23ken@foo.bar/',
       );
     });
 
     it('returns http url with username and password', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'user',
         password: 'pass',
       });
@@ -177,7 +174,7 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with username and password', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'user',
         password: 'pass',
       });
@@ -187,7 +184,7 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with username and password for non-http protocols', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'user',
         password: 'pass',
       });
@@ -197,7 +194,7 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with encoded username and password', () => {
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         username: 'u$er',
         password: 'p@ss',
       });
@@ -207,18 +204,14 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with encoded gitlab token', () => {
-      hostRules.find.mockReturnValueOnce({
-        token: 'token',
-      });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://gitlab.com/some/repo.git')).toBe(
         'https://gitlab-ci-token:token@gitlab.com/some/repo.git',
       );
     });
 
     it('returns https url for ssh url with encoded github token', () => {
-      hostRules.find.mockReturnValueOnce({
-        token: 'token',
-      });
+      hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://github.com/some/repo.git')).toBe(
         'https://x-access-token:token@github.com/some/repo.git',
       );

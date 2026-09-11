@@ -1,8 +1,10 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../../lib/config/options/index.ts';
+import type { UpdateType } from '../../lib/config/types.ts';
 import { regEx } from '../../lib/util/regex.ts';
 import { templateHelperNames } from '../../lib/util/template/index.ts';
+import { isMinimumReleaseAgeApplicable } from '../../lib/workers/repository/process/lookup/filter-checks.ts';
 
 const options = getOptions();
 const markdownGlob = '{docs,lib}/**/*.md';
@@ -44,7 +46,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/configuration-options.md', () => {
       async function getConfigHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches
           .map((match) =>
             match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
@@ -74,15 +76,17 @@ describe('docs/documentation', () => {
       }
 
       it('has doc headers sorted alphabetically', async () => {
-        expect(await getConfigHeaders('configuration-options.md')).toEqual(
+        await expect(
+          getConfigHeaders('configuration-options.md'),
+        ).resolves.toEqual(
           (await getConfigHeaders('configuration-options.md')).sort(),
         );
       });
 
       it('has headers for every required option', async () => {
-        expect(await getConfigHeaders('configuration-options.md')).toEqual(
-          getRequiredConfigOptions(),
-        );
+        await expect(
+          getConfigHeaders('configuration-options.md'),
+        ).resolves.toEqual(getRequiredConfigOptions());
       });
 
       function getPostUpdateOptionsValues(): Set<string> {
@@ -93,7 +97,7 @@ describe('docs/documentation', () => {
       async function getConfigSubHeaders(file: string): Promise<string[]> {
         const postUpdateValues = getPostUpdateOptionsValues();
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        const matches = content.match(/\n### (?:.*?)\n/g) ?? [];
         return matches
           .map((match) =>
             match.substring(5, match.length - 1).replace(/^`|`$/g, ''),
@@ -142,20 +146,17 @@ describe('docs/documentation', () => {
       }
 
       it('has headers for every required sub-option', async () => {
-        expect(await getConfigSubHeaders('configuration-options.md')).toEqual(
-          getRequiredConfigSubOptions(),
-        );
+        await expect(
+          getConfigSubHeaders('configuration-options.md'),
+        ).resolves.toEqual(getRequiredConfigSubOptions());
       });
 
       it.each([...getParentNames()])(
         '%s has sub-headers sorted alphabetically',
         async (parentName: string) => {
-          expect(
-            await getConfigOptionSubHeaders(
-              'configuration-options.md',
-              parentName,
-            ),
-          ).toEqual(
+          await expect(
+            getConfigOptionSubHeaders('configuration-options.md', parentName),
+          ).resolves.toEqual(
             (
               await getConfigOptionSubHeaders(
                 'configuration-options.md',
@@ -184,32 +185,120 @@ describe('docs/documentation', () => {
     describe('docs/usage/self-hosted-configuration.md', () => {
       async function getSelfHostedHeaders(file: string): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches.map((match) =>
           match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
         );
       }
 
-      function getRequiredSelfHostedOptions(): string[] {
-        return options
+      // Sub-options (e.g. `hostRules.allowInternal`) are only valid in self-hosted
+      // config, so their parent (e.g. `hostRules`) needs its own top-level header
+      // here even though the parent option itself isn't `globalOnly`.
+      function getSelfHostedParentNames(): Set<string> {
+        const childrens = options
           .filter((option) => option.globalOnly)
-          .map((option) => option.name)
+          .filter(
+            (option) =>
+              option.parents &&
+              option.parents.length > 0 &&
+              !option.parents.includes('.'),
+          );
+
+        const parentNames = new Set<string>();
+        for (const children of childrens) {
+          for (const parent of children.parents ?? []) {
+            parentNames.add(parent);
+          }
+        }
+
+        return parentNames;
+      }
+
+      function getRequiredSelfHostedOptions(): string[] {
+        const topLevelOptions = options
+          .filter((option) => option.globalOnly)
+          // Only include top-level options, which have no parents (implicit root) or explicitly define the
+          // root ('.') as their parent.
+          .filter(
+            (option) =>
+              !option.parents ||
+              option.parents.length === 0 ||
+              option.parents.includes('.'),
+          )
+          .map((option) => option.name);
+
+        return [
+          ...new Set([...topLevelOptions, ...getSelfHostedParentNames()]),
+        ].sort();
+      }
+
+      async function getSelfHostedSubHeaders(file: string): Promise<string[]> {
+        const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
+        const matches = content.matchAll(/\n###\s`?(?<child>[\w.]+)`?\n/g);
+        return [...matches]
+          .map((match) => match.groups?.child)
+          .filter((child): child is string => !!child)
           .sort();
       }
 
+      function getRequiredSelfHostedSubOptions(): string[] {
+        return (
+          options
+            .filter((option) => option.globalOnly)
+            // Only include true sub-options: options which have parents but none of those are explicitly the root ('.').
+            .filter(
+              (option) =>
+                option.parents &&
+                option.parents.length > 0 &&
+                !option.parents.includes('.'),
+            )
+            .flatMap((option) =>
+              (option.parents ?? [])
+                .filter((parent) => parent !== '.')
+                .map((parent) => `${parent}.${option.name}`),
+            )
+            .sort()
+        );
+      }
+
       it('has headers sorted alphabetically', async () => {
-        expect(
-          await getSelfHostedHeaders('self-hosted-configuration.md'),
-        ).toEqual(
+        await expect(
+          getSelfHostedHeaders('self-hosted-configuration.md'),
+        ).resolves.toEqual(
           (await getSelfHostedHeaders('self-hosted-configuration.md')).sort(),
         );
       });
 
       it('has headers for every required option', async () => {
-        expect(
-          await getSelfHostedHeaders('self-hosted-configuration.md'),
-        ).toEqual(getRequiredSelfHostedOptions());
+        await expect(
+          getSelfHostedHeaders('self-hosted-configuration.md'),
+        ).resolves.toEqual(getRequiredSelfHostedOptions());
       });
+
+      it('has headers for every required sub-option', async () => {
+        await expect(
+          getSelfHostedSubHeaders('self-hosted-configuration.md'),
+        ).resolves.toEqual(getRequiredSelfHostedSubOptions());
+      });
+
+      it.each([...getSelfHostedParentNames()])(
+        '%s has sub-headers sorted alphabetically',
+        async (parentName: string) => {
+          await expect(
+            getConfigOptionSubHeaders(
+              'self-hosted-configuration.md',
+              parentName,
+            ),
+          ).resolves.toEqual(
+            (
+              await getConfigOptionSubHeaders(
+                'self-hosted-configuration.md',
+                parentName,
+              )
+            ).sort(),
+          );
+        },
+      );
     });
 
     describe('docs/usage/self-hosted-experimental.md', () => {
@@ -217,16 +306,14 @@ describe('docs/documentation', () => {
         file: string,
       ): Promise<string[]> {
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(/\n## (?:.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(4, match.length - 1));
       }
 
       it('has headers sorted alphabetically', async () => {
-        expect(
-          await getSelfHostedExperimentalConfigHeaders(
-            'self-hosted-experimental.md',
-          ),
-        ).toEqual(
+        await expect(
+          getSelfHostedExperimentalConfigHeaders('self-hosted-experimental.md'),
+        ).resolves.toEqual(
           (
             await getSelfHostedExperimentalConfigHeaders(
               'self-hosted-experimental.md',
@@ -241,7 +328,7 @@ describe('docs/documentation', () => {
         string[]
       > {
         const content = await fs.readFile(`docs/usage/templates.md`, 'utf8');
-        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        const matches = content.match(/\n### (?:.*?)\n/g) ?? [];
         return matches.map((match) => match.substring(5, match.length - 1));
       }
 
@@ -258,6 +345,50 @@ describe('docs/documentation', () => {
         expect(additionalHandlebarsHelpers).toEqual(
           templateHelperNames.toSorted(),
         );
+      });
+    });
+
+    describe('docs/usage/key-concepts/minimum-release-age.md', () => {
+      const supportEmoji: Record<string, boolean> = {
+        '✅': true,
+        '🟡': true,
+        '❌': false,
+      };
+
+      async function getUpdateTypeSupportTable(): Promise<
+        Record<string, boolean>
+      > {
+        const content = await fs.readFile(
+          'docs/usage/key-concepts/minimum-release-age.md',
+          'utf8',
+        );
+        // RE2 (renovate's regex engine) doesn't support lookahead, so bound
+        // the section with plain index lookups instead of `(?=\n### )`.
+        const start = regEx(/### Which update types take/).exec(content)?.index;
+        let section: string | undefined;
+        if (start !== undefined) {
+          const end = content.indexOf('\n### ', start + 1);
+          section = content.slice(start, end === -1 ? undefined : end);
+        }
+        const rows =
+          section?.matchAll(
+            /^\|\s*`(?<updateType>\w+)`\s*\|\s*(?<emoji>[^\s|]+)\s*\|/gm,
+          ) ?? [];
+        const table: Record<string, boolean> = {};
+        for (const row of rows) {
+          const { updateType, emoji } = row.groups!;
+          table[updateType] = supportEmoji[emoji];
+        }
+        return table;
+      }
+
+      it('matches isMinimumReleaseAgeApplicable() for every documented update type', async () => {
+        const table = await getUpdateTypeSupportTable();
+        for (const [updateType, docsSupport] of Object.entries(table)) {
+          expect(isMinimumReleaseAgeApplicable(updateType as UpdateType)).toBe(
+            docsSupport,
+          );
+        }
       });
     });
   });

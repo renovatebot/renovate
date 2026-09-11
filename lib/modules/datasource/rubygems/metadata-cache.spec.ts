@@ -12,14 +12,13 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
   beforeEach(() => {
     packageCacheMock.clear();
 
-    packageCache.get.mockImplementation(
-      (ns, key) =>
-        Promise.resolve(packageCacheMock.get(`${ns}::${key}`)) as never,
+    packageCache.get.mockImplementation((ns, key) =>
+      Promise.resolve(packageCacheMock.get(`${ns}::${key}`)),
     );
 
     packageCache.set.mockImplementation((ns, key, value) => {
       packageCacheMock.set(`${ns}::${key}`, value);
-      return Promise.resolve() as never;
+      return Promise.resolve();
     });
   });
 

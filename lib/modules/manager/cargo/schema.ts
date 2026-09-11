@@ -70,7 +70,7 @@ const CargoDep = z.union([
         if (skipReason) {
           dep.skipReason = skipReason;
         }
-        if (pkg) {
+        if (pkg && !git) {
           dep.packageName = pkg;
         }
         if (registry) {
@@ -80,13 +80,11 @@ const CargoDep = z.union([
         return dep;
       },
     ),
-  z.string().transform(
-    (version): PackageDependency<CargoManagerData> => ({
-      currentValue: version,
-      managerData: { nestedVersion: false },
-      datasource: CrateDatasource.id,
-    }),
-  ),
+  z.string().transform((version): PackageDependency<CargoManagerData> => ({
+    currentValue: version,
+    managerData: { nestedVersion: false },
+    datasource: CrateDatasource.id,
+  })),
 ]);
 
 const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {

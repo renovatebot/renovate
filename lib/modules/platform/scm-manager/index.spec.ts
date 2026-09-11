@@ -68,7 +68,6 @@ const renovatePr = mapPrFromScmToRenovate(pullRequest);
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    vi.resetAllMocks();
     hostRules.add({ token, username: user.name });
     scmPlatform.invalidatePrCache();
   });
@@ -96,7 +95,9 @@ describe('modules/platform/scm-manager/index', () => {
 
     it('should init platform', async () => {
       httpMock.scope(baseUrl).get('/me').reply(200, user);
-      expect(await scmPlatform.initPlatform({ endpoint, token })).toEqual({
+      await expect(
+        scmPlatform.initPlatform({ endpoint, token }),
+      ).resolves.toEqual({
         endpoint: baseUrl,
         gitAuthor: 'Test User <test@user.de>',
       });
@@ -121,11 +122,11 @@ describe('modules/platform/scm-manager/index', () => {
 
       vi.mocked(util.repoFingerprint).mockReturnValueOnce(expectedFingerprint);
 
-      expect(
-        await scmPlatform.initRepo({
+      await expect(
+        scmPlatform.initRepo({
           repository: `${repo.namespace}/${repo.name}`,
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         defaultBranch: expectedDefaultBranch,
         isFork: false,
         repoFingerprint: expectedFingerprint,
@@ -158,7 +159,7 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(await scmPlatform.getRepos()).toEqual([
+      await expect(scmPlatform.getRepos()).resolves.toEqual([
         'default/repo',
         'other/repository',
       ]);
@@ -180,7 +181,7 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(await scmPlatform.getPrList()).toBeEmptyArray();
+      await expect(scmPlatform.getPrList()).resolves.toBeEmptyArray();
     });
 
     it('should return empty array, because API request failed', async () => {
@@ -191,7 +192,7 @@ describe('modules/platform/scm-manager/index', () => {
         )
         .reply(400);
 
-      expect(await scmPlatform.getPrList()).toBeEmptyArray();
+      await expect(scmPlatform.getPrList()).resolves.toBeEmptyArray();
     });
 
     it('should return all PRs of a repo', async () => {
@@ -224,9 +225,13 @@ describe('modules/platform/scm-manager/index', () => {
         });
 
       //Fetching from client
-      expect(await scmPlatform.getPrList()).toIncludeAllMembers(expectedResult);
+      await expect(scmPlatform.getPrList()).resolves.toIncludeAllMembers(
+        expectedResult,
+      );
       //Fetching from cache
-      expect(await scmPlatform.getPrList()).toIncludeAllMembers(expectedResult);
+      await expect(scmPlatform.getPrList()).resolves.toIncludeAllMembers(
+        expectedResult,
+      );
     });
   });
 
@@ -245,12 +250,12 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(
-        await scmPlatform.findPr({
+      await expect(
+        scmPlatform.findPr({
           branchName: pullRequest.source,
           prTitle: pullRequest.title,
         }),
-      ).toEqual(renovatePr);
+      ).resolves.toEqual(renovatePr);
     });
 
     it.each`
@@ -292,13 +297,13 @@ describe('modules/platform/scm-manager/index', () => {
             },
           });
 
-        expect(
-          await scmPlatform.findPr({
+        await expect(
+          scmPlatform.findPr({
             branchName,
             prTitle,
             state: state as PrFilterByState,
           }),
-        ).toEqual(result);
+        ).resolves.toEqual(result);
       },
     );
   });
@@ -333,7 +338,9 @@ describe('modules/platform/scm-manager/index', () => {
             },
           });
 
-        expect(await scmPlatform.getBranchPr(branchName)).toEqual(result);
+        await expect(scmPlatform.getBranchPr(branchName)).resolves.toEqual(
+          result,
+        );
       },
     );
   });
@@ -358,7 +365,7 @@ describe('modules/platform/scm-manager/index', () => {
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(404);
 
-      expect(await scmPlatform.getPr(1)).toBeNull();
+      await expect(scmPlatform.getPr(1)).resolves.toBeNull();
     });
 
     it('should return PR from cache', async () => {
@@ -375,9 +382,9 @@ describe('modules/platform/scm-manager/index', () => {
           },
         });
 
-      expect(await scmPlatform.getPr(parseInt(pullRequest.id, 10))).toEqual(
-        renovatePr,
-      );
+      await expect(
+        scmPlatform.getPr(parseInt(pullRequest.id, 10)),
+      ).resolves.toEqual(renovatePr);
     });
 
     it('should return fetched pr', async () => {
@@ -399,9 +406,9 @@ describe('modules/platform/scm-manager/index', () => {
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(200, pullRequest);
 
-      expect(await scmPlatform.getPr(parseInt(pullRequest.id, 10))).toEqual(
-        renovatePr,
-      );
+      await expect(
+        scmPlatform.getPr(parseInt(pullRequest.id, 10)),
+      ).resolves.toEqual(renovatePr);
     });
   });
 
@@ -450,15 +457,15 @@ describe('modules/platform/scm-manager/index', () => {
             },
           });
 
-        expect(
-          await scmPlatform.createPr({
+        await expect(
+          scmPlatform.createPr({
             sourceBranch: 'feature/test',
             targetBranch: 'develop',
             prTitle: 'PR Title',
             prBody: 'PR Body',
             draftPR: draftPr,
           }),
-        ).toEqual({
+        ).resolves.toEqual({
           sourceBranch: 'feature/test',
           targetBranch: 'develop',
           title: 'PR Title',
@@ -620,13 +627,13 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe('ensureComment', () => {
     it('should Not implemented', async () => {
-      expect(
-        await scmPlatform.ensureComment({
+      await expect(
+        scmPlatform.ensureComment({
           number: 1,
           topic: 'comment',
           content: 'content',
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
   });
 

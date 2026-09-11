@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import type { GithubGraphqlRelease } from './releases-query-adapter.ts';
 import { adapter } from './releases-query-adapter.ts';
@@ -30,7 +31,7 @@ describe('util/github/graphql/query-adapters/releases-query-adapter', () => {
   });
 
   it('handles invalid items', () => {
-    expect(adapter.transform({} as never)).toBeNull();
+    expect(adapter.transform(partial<GithubGraphqlRelease>())).toBeNull();
   });
 
   it('marks prereleases as unstable', () => {

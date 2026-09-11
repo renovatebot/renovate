@@ -95,7 +95,9 @@ describe('config/presets/gitea/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        'dep not found',
+      );
     });
 
     it('throws if invalid content', async () => {
@@ -218,9 +220,9 @@ describe('config/presets/gitea/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea.getPresetFromEndpoint('some/repo', 'default', undefined),
-      ).toEqual({ from: 'api' });
+      await expect(
+        gitea.getPresetFromEndpoint('some/repo', 'default', undefined),
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint', async () => {
@@ -230,8 +232,8 @@ describe('config/presets/gitea/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea
+      await expect(
+        gitea
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -239,7 +241,7 @@ describe('config/presets/gitea/index', () => {
             'https://api.gitea.example.org',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses default endpoint with a tag', async () => {
@@ -249,15 +251,15 @@ describe('config/presets/gitea/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea.getPresetFromEndpoint(
+      await expect(
+        gitea.getPresetFromEndpoint(
           'some/repo',
           'default',
           undefined,
           giteaApiHost,
           'someTag',
         ),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint with a tag', async () => {
@@ -267,8 +269,8 @@ describe('config/presets/gitea/index', () => {
         .reply(200, {
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea
+      await expect(
+        gitea
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -277,7 +279,7 @@ describe('config/presets/gitea/index', () => {
             'someTag',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
   });
 });

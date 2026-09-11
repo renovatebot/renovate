@@ -9,6 +9,7 @@ import {
   hashMap,
 } from '../../../modules/manager/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { ExtractResult, WorkerExtractConfig } from '../../types.ts';
 import { getMatchingFiles } from './file-match.ts';
 import { getManagerPackageFiles } from './manager-files.ts';
@@ -21,21 +22,21 @@ export async function extractAllDependencies(
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
 
-  const tryConfig = (managerConfig: ManagerConfig): void => {
+  function tryConfig(managerConfig: ManagerConfig): void {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
       extractList.push({ ...managerConfig, fileList: matchingFileList });
     }
-  };
+  }
 
   instrument('filter packageFiles for managers', () => {
     for (const manager of managerList) {
       const managerConfig = getManagerConfig(config, manager);
       managerConfig.manager = manager;
       if (isCustomManager(manager)) {
-        const filteredCustomManagers = (config.customManagers ?? []).filter(
-          (mgr) => mgr.customType === manager,
-        );
+        const filteredCustomManagers = coerceArray(
+          config.customManagers,
+        ).filter((mgr) => mgr.customType === manager);
         for (const customManager of filteredCustomManagers) {
           tryConfig(mergeChildConfig(managerConfig, customManager));
         }

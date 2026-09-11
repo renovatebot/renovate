@@ -1,6 +1,12 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import {
+  isNonEmptyStringAndNotWhitespace,
+  isNumericString,
+  isString,
+} from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import * as debianVersioning from '../../versioning/debian/index.ts';
 import * as ubuntuVersioning from '../../versioning/ubuntu/index.ts';
@@ -76,8 +82,7 @@ function processDepForAutoReplace(
   });
 
   const minLine = lineNumberRangesToReplace[0]?.[0];
-  const maxLine =
-    lineNumberRangesToReplace[lineNumberRangesToReplace.length - 1]?.[1];
+  const maxLine = lineNumberRangesToReplace.at(-1)?.[1];
   if (
     lineNumberRanges.length === 1 ||
     minLine === undefined ||
@@ -129,10 +134,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   const depTagSplit = currentDepTag.split(':');
   let depName: string;
   let currentValue: string | undefined;
-  if (
-    depTagSplit.length === 1 ||
-    depTagSplit[depTagSplit.length - 1].includes('/')
-  ) {
+  if (depTagSplit.length === 1 || depTagSplit.at(-1)!.includes('/')) {
     depName = currentDepTag;
   } else {
     currentValue = depTagSplit.pop();
@@ -178,21 +180,37 @@ export function getDep(
   }
 
   // Resolve registry aliases first so that we don't need special casing later on:
-  for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    if (currentFrom.startsWith(`${name}/`)) {
-      const depName = currentFrom.substring(name.length + 1);
-      const dep = getDep(`${value}/${depName}`, false);
-      // retain depName, not sure if condition is necessary
-      if (dep.depName?.startsWith(value)) {
-        dep.packageName = dep.depName;
-        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
-      }
-      if (specifyReplaceString) {
-        dep.replaceString = currentFrom;
-        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
-      }
-      return dep;
+  for (const [name, value] of Object.entries(coerceObject(registryAliases))) {
+    // Allow `${VAR}`/`${VAR:-...}` keys to match without a trailing slash
+    // (`}` is an unambiguous boundary). Bare identifier keys like
+    // `$CI_REGISTRY` still require `/` so they can't eat `$CI_REGISTRY_IMAGE/`.
+    const matchedWithSlash = currentFrom.startsWith(`${name}/`);
+    const matchedAtBoundary =
+      name.endsWith('}') && currentFrom.startsWith(name);
+    if (!matchedWithSlash && !matchedAtBoundary) {
+      continue;
     }
+    const depName = currentFrom.slice(
+      matchedWithSlash ? name.length + 1 : name.length,
+    );
+    // An empty alias value means "no registry prefix", i.e. Docker Hub.
+    const valueWithSlash = value ? ensureTrailingSlash(value) : '';
+    const dep = getDep(`${valueWithSlash}${depName}`, false);
+    // TODO: when the inner getDep strips a `library/` prefix (or similar)
+    // the depName no longer starts with `valueWithSlash` and the alias-rooted
+    // depName is not restored.
+    if (dep.depName?.startsWith(valueWithSlash)) {
+      dep.packageName = dep.depName;
+      const [imageAndTag] = currentFrom.split('@');
+      dep.depName = dep.currentValue
+        ? imageAndTag.substring(0, imageAndTag.lastIndexOf(':'))
+        : imageAndTag;
+    }
+    if (specifyReplaceString) {
+      dep.replaceString = currentFrom;
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+    }
+    return dep;
   }
 
   const dep = splitImageParts(currentFrom);
@@ -258,7 +276,7 @@ export function extractPackageFile(
 
   const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
-  for (let lineNumber = 0; lineNumber < lines.length; ) {
+  for (let lineNumber = 0; lineNumber < lines.length;) {
     const lineNumberInstrStart = lineNumber;
     let instruction = lines[lineNumber];
 
@@ -323,17 +341,20 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) {
+      if (
+        (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) ||
+        (argMatchValue.startsWith("'") && argMatchValue.endsWith("'"))
+      ) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 
       args[argMatch.groups.name] = argMatchValue || '';
     }
 
-    const fromRegex = new RegExp(
+    const fromRegex = regEx(
       `^[ \\t]*FROM(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const fromMatch = instruction.match(fromRegex);
     if (fromMatch?.groups?.image) {
       let fromImage = fromMatch.groups.image;
@@ -375,10 +396,10 @@ export function extractPackageFile(
       }
     }
 
-    const copyFromRegex = new RegExp(
+    const copyFromRegex = regEx(
       `^[ \\t]*COPY(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const copyFromMatch = instruction.match(copyFromRegex);
     if (copyFromMatch?.groups?.image) {
       if (stageNames.includes(copyFromMatch.groups.image)) {
@@ -386,7 +407,12 @@ export function extractPackageFile(
           { image: copyFromMatch.groups.image },
           'Skipping alias COPY --from',
         );
-      } else if (Number.isNaN(Number(copyFromMatch.groups.image))) {
+      } else if (isNumericString(copyFromMatch.groups.image)) {
+        logger.debug(
+          { image: copyFromMatch.groups.image },
+          'Skipping index reference COPY --from',
+        );
+      } else {
         const dep = getDep(
           copyFromMatch.groups.image,
           true,
@@ -405,11 +431,6 @@ export function extractPackageFile(
           'Dockerfile COPY --from',
         );
         deps.push(dep);
-      } else {
-        logger.debug(
-          { image: copyFromMatch.groups.image },
-          'Skipping index reference COPY --from',
-        );
       }
     }
 
@@ -455,6 +476,10 @@ export function extractPackageFile(
   for (const d of deps) {
     d.depType ??= 'stage';
   }
-  deps[deps.length - 1].depType = 'final';
+  // find the last `stage`, and treat it as the `final` stage
+  const lastStage = deps.filter((d) => d.depType === 'stage').at(-1);
+  if (lastStage) {
+    lastStage.depType = 'final';
+  }
   return { deps };
 }

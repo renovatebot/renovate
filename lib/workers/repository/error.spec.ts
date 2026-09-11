@@ -121,7 +121,7 @@ describe('workers/repository/error', () => {
       const error = new Error(CONFIG_VALIDATION);
       await handleError(config, error);
       expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
-        { error },
+        { err: error },
         'Repository has invalid config',
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe('workers/repository/error', () => {
       const error = new Error(CONFIG_VALIDATION);
       await handleError({ ...config, configValidationError: false }, error);
       expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
-        { error },
+        { err: error },
         'Repository has invalid config',
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
@@ -141,7 +141,7 @@ describe('workers/repository/error', () => {
       const error = new Error(CONFIG_VALIDATION);
       await handleError({ ...config, configValidationError: true }, error);
       expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith(
-        { error },
+        { err: error },
         'Repository has invalid config',
       );
       expect(logger.logger.warn).not.toHaveBeenCalled();

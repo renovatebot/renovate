@@ -250,8 +250,11 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toBeNull();
 
       expect(logger.once.warn).toHaveBeenCalledWith(
-        { errorMessage: 'The symbol "." cannot be used as a unary operator' },
-        'Invalid JSONata expression: $[.name = "Alice" and',
+        {
+          errorMessage: 'The symbol "." cannot be used as a unary operator',
+          transformTemplate: '$[.name = "Alice" and',
+        },
+        'Invalid JSONata expression',
       );
     });
 
@@ -276,8 +279,8 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toBeNull();
 
       expect(logger.once.warn).toHaveBeenCalledWith(
-        { err: expect.any(Object) },
-        'Error while evaluating JSONata expression: $notafunction()',
+        { err: expect.any(Object), transformTemplate: '$notafunction()' },
+        'Error while evaluating JSONata expression',
       );
     });
 

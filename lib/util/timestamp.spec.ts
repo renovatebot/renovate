@@ -2,7 +2,7 @@ import { MaybeTimestamp, asTimestamp } from './timestamp.ts';
 
 describe('util/timestamp', () => {
   describe('asTimestamp', () => {
-    test.each`
+    it.each`
       input                                        | expected
       ${new Date('2021-01-01T00:00:00.000Z')}      | ${'2021-01-01T00:00:00.000Z'}
       ${new Date('2021-01-01T00:00:00.000-03:00')} | ${'2021-01-01T03:00:00.000Z'}

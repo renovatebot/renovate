@@ -96,7 +96,7 @@ export function parseYaml<ResT = unknown>(
     // handle schema validation errors
     if (options?.failureBehaviour === 'filter') {
       logger.trace(
-        { error: result.error, document },
+        { err: result.error, document },
         'Failed to parse schema for YAML',
       );
       continue;

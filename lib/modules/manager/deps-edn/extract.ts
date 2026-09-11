@@ -120,7 +120,7 @@ function resolveGitPackageFromEdnVal(
   dep.datasource = GitRefsDatasource.id;
   dep.packageName = gitUrl;
   if (isHttpUrl(gitUrl)) {
-    dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+    dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
   }
 }
 

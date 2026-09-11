@@ -70,23 +70,20 @@ function infoMock(
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
     };
-  } else {
-    // This mimics the behavior of bb-server which does not include the clone property at all
-    // if ssh and https are both turned off
-    return {
-      id: 1,
-      slug: repositorySlug,
-      project: { key: projectKey },
-      origin: { name: repositorySlug, slug: repositorySlug },
-      links: { clone: undefined },
-    };
   }
+  // This mimics the behavior of bb-server which does not include the clone property at all
+  // if ssh and https are both turned off
+  return {
+    id: 1,
+    slug: repositorySlug,
+    project: { key: projectKey },
+    origin: { name: repositorySlug, slug: repositorySlug },
+    links: { clone: undefined },
+  };
 }
 
 describe('modules/platform/bitbucket-server/utils', () => {
-  function createError(
-    body: Partial<BitbucketErrorResponse> | undefined = undefined,
-  ) {
+  function createError(body?: Partial<BitbucketErrorResponse>) {
     return partial<BitbucketError>({
       response: partial<Response<BitbucketErrorResponse>>({ body }),
     });

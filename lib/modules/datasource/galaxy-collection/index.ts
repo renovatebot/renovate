@@ -125,20 +125,19 @@ export class GalaxyCollectionDatasource extends Datasource {
       return ensureTrailingSlash(
         joinUrlParts(registryUrl, 'api/v3/collections', namespace, projectName),
       );
-    } else {
-      const repository =
-        repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
-      return ensureTrailingSlash(
-        joinUrlParts(
-          registryUrl,
-          'v3/plugin/ansible/content',
-          repository,
-          'collections/index',
-          namespace,
-          projectName,
-        ),
-      );
     }
+    const repository =
+      repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
+    return ensureTrailingSlash(
+      joinUrlParts(
+        registryUrl,
+        'v3/plugin/ansible/content',
+        repository,
+        'collections/index',
+        namespace,
+        projectName,
+      ),
+    );
   }
 
   private async _getVersionDetails(

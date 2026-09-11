@@ -1,18 +1,20 @@
 import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, OptionsInit, RetryObject } from 'got';
-import type { Merge, SetRequired } from 'type-fest';
+import type { SetRequired } from 'type-fest';
 import type { z } from 'zod/v4';
 import { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
-import { pkg } from '../../expose.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import type { CombinedHostRule } from '../../types/index.ts';
+import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
 import { acquireLock } from '../mutex.ts';
+import { coerceObject } from '../object.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
@@ -22,14 +24,13 @@ import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization } from './auth.ts';
 import type { HttpCacheProvider } from './cache/types.ts';
 import { fetch, normalize, stream } from './got.ts';
+import { applyHostGuard } from './host-guard.ts';
 import { applyHostRule, findMatchingRule } from './host-rules.ts';
-
 import { getQueue } from './queue.ts';
 import { getRetryAfter, wrapWithRetry } from './retry-after.ts';
 import { getThrottle } from './throttle.ts';
 import type {
   GotOptions,
-  GotStreamOptions,
   GotTask,
   HttpMethod,
   HttpOptions,
@@ -67,9 +68,7 @@ export function applyDefaultHeaders(options: OptionsInit): void {
   const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
     ...options.headers,
-    'user-agent': compile(userAgentTemplate, {
-      renovateVersion: pkg.version,
-    }),
+    'user-agent': compile(userAgentTemplate, {}),
   };
 }
 
@@ -98,24 +97,92 @@ export abstract class HttpBase<
             this.calculateRetryDelay(retryObject),
           limit: retryLimit,
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+          enforceRetryRules: false,
         },
       },
       { isMergeableObject: isPlainObject },
     );
   }
 
+  /**
+   * Builds the final got options for a request to a given `url`
+   *
+   * This merges instance options, applies default headers, host rules and authorization, and rejects requests to disabled hosts.
+   *
+   * Both the `request()` and `stream()` paths must use this single entry point so that policy applied here covers every outbound request.
+   */
+  private prepareOptions(
+    resolvedUrl: URL,
+    httpOptions: InternalHttpOptions,
+  ): {
+    options: InternalGotOptions & InternalHttpOptions;
+    hostRule: CombinedHostRule;
+  } {
+    const url = resolvedUrl.toString();
+
+    let options = merge<InternalGotOptions, InternalHttpOptions>(
+      {
+        ...this.options,
+        hostType: this.hostType,
+      },
+      httpOptions,
+      { isMergeableObject: isPlainObject },
+    );
+
+    applyDefaultHeaders(options);
+
+    if (
+      isUndefined(options.readOnly) &&
+      ['head', 'get'].includes(options.method.toLowerCase())
+    ) {
+      options.readOnly = true;
+    }
+
+    const hostRule = findMatchingRule(url, options);
+    options = applyHostRule(url, options, hostRule);
+    if (options.enabled === false) {
+      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
+      throw new Error(HOST_DISABLED);
+    }
+    options = applyAuthorization(options);
+
+    // enforced here so it runs before anything else - including cache lookups - can act on the URL, and for the stream path too
+    const guard = applyHostGuard(
+      resolvedUrl,
+      options.hostType,
+      hostRule.internalHostGrant,
+      options.responseBecomesConfig,
+    );
+    options.dnsLookup = guard.dnsLookup;
+    options.hooks = {
+      ...options.hooks,
+      beforeRedirect: [
+        ...coerceArray(options.hooks?.beforeRedirect),
+        guard.beforeRedirect,
+      ],
+    };
+    if (guard.beforeRequest) {
+      options.hooks.beforeRequest = [
+        ...coerceArray(options.hooks.beforeRequest),
+        guard.beforeRequest,
+      ];
+    }
+
+    return { options, hostRule };
+  }
+
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'text' },
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
-  ): Promise<HttpResponse<Buffer>>;
+  ): Promise<HttpResponse<Uint8Array>>;
   private async request<T = unknown>(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'json' },
@@ -130,33 +197,13 @@ export abstract class HttpBase<
 
     this.processOptions(resolvedUrl, httpOptions);
 
-    let options = merge<InternalGotOptions, InternalHttpOptions>(
-      {
-        ...this.options,
-        hostType: this.hostType,
-      },
-      httpOptions,
-      { isMergeableObject: isPlainObject },
-    );
+    const { options, hostRule } = this.prepareOptions(resolvedUrl, httpOptions);
 
     const method = options.method.toLowerCase();
     const isReadMethod = ['head', 'get'].includes(method);
 
     logger.trace(`HTTP request: ${method.toUpperCase()} ${url}`);
 
-    applyDefaultHeaders(options);
-
-    if (isUndefined(options.readOnly) && isReadMethod) {
-      options.readOnly = true;
-    }
-
-    const hostRule = findMatchingRule(url, options);
-    options = applyHostRule(url, options, hostRule);
-    if (options.enabled === false) {
-      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
-      throw new Error(HOST_DISABLED);
-    }
-    options = applyAuthorization(options);
     const timeout = options.timeout ?? 60000;
     options.timeout = timeout;
 
@@ -245,6 +292,8 @@ export abstract class HttpBase<
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
+      this.handleResponse(resolvedUrl, resCopy);
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(method, url, resCopy);
       }
@@ -256,11 +305,9 @@ export abstract class HttpBase<
         throw new ExternalHostError(err);
       }
 
-      const staleResponse = await cacheProvider?.bypassServer<string | Buffer>(
-        method,
-        url,
-        true,
-      );
+      const staleResponse = await cacheProvider?.bypassServer<
+        string | Uint8Array
+      >(method, url, true);
       if (staleResponse) {
         logger.debug(
           { err },
@@ -282,7 +329,12 @@ export abstract class HttpBase<
    * @returns extra Renovate options.
    */
   protected extraOptions(): readonly string[] {
-    return ['baseUrl', 'cacheProvider', 'readOnly'] as (keyof HttpOptions)[];
+    return [
+      'baseUrl',
+      'cacheProvider',
+      'readOnly',
+      'responseBecomesConfig',
+    ] as (keyof HttpOptions)[];
   }
 
   protected processOptions(_url: URL, _options: InternalHttpOptions): void {
@@ -297,10 +349,11 @@ export abstract class HttpBase<
     throw err;
   }
 
-  resolveUrl(
-    requestUrl: string | URL,
-    options: HttpOptions | undefined = undefined,
-  ): URL {
+  protected handleResponse(_url: URL, _res: HttpResponse<unknown>): void {
+    // noop
+  }
+
+  resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     let url = requestUrl;
 
     if (url instanceof URL) {
@@ -331,7 +384,7 @@ export abstract class HttpBase<
   get(
     url: string,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<string | Buffer>> {
+  ): Promise<HttpResponse<string | Uint8Array>> {
     return this.request(url, options);
   }
 
@@ -344,17 +397,14 @@ export abstract class HttpBase<
     }) as Promise<HttpResponse<never>>;
   }
 
-  getText(
-    url: string | URL,
-    options: HttpOptions = {},
-  ): Promise<HttpResponse<string>> {
+  getText(url: string | URL, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request(url, { ...options, responseType: 'text' });
   }
 
   getBuffer(
     url: string | URL,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<Buffer>> {
+  ): Promise<HttpResponse<Uint8Array>> {
     return this.request(url, { ...options, responseType: 'buffer' });
   }
 
@@ -415,7 +465,7 @@ export abstract class HttpBase<
   }
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
-    const opt = options ?? {};
+    const opt = coerceObject(options);
     return await this.getText(url, {
       headers: {
         Accept: 'text/plain',
@@ -663,36 +713,17 @@ export abstract class HttpBase<
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    let combinedOptions: Merge<
-      GotStreamOptions,
-      SetRequired<InternalHttpOptions, 'method'>
-    > = {
-      ...this.options,
-      hostType: this.hostType,
+    const resolvedUrl = this.resolveUrl(url, options);
+
+    const { options: combinedOptions } = this.prepareOptions(resolvedUrl, {
       ...options,
       method: 'get',
-    };
+    });
 
-    const resolvedUrl = this.resolveUrl(url, options).toString();
-
-    applyDefaultHeaders(combinedOptions);
-
-    // v8 ignore else -- TODO: add test #40625
-    if (
-      isUndefined(combinedOptions.readOnly) &&
-      ['head', 'get'].includes(combinedOptions.method)
-    ) {
-      combinedOptions.readOnly = true;
-    }
-
-    const hostRule = findMatchingRule(url, combinedOptions);
-    combinedOptions = applyHostRule(resolvedUrl, combinedOptions, hostRule);
-    if (combinedOptions.enabled === false) {
-      throw new Error(HOST_DISABLED);
-    }
-    combinedOptions = applyAuthorization(combinedOptions);
-
-    return stream(resolvedUrl, this._normalizeOptions(combinedOptions));
+    return stream(
+      resolvedUrl.toString(),
+      this._normalizeOptions(combinedOptions),
+    );
   }
 
   async getToml<Schema extends ZodType<any, any, any>>(

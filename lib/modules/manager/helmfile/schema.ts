@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 import {
   LooseArray,
   LooseRecord,
+  Nullish,
   Yaml,
 } from '../../../util/schema-utils/index.ts';
 
@@ -15,12 +16,9 @@ export type HelmRepository = z.infer<typeof HelmRepository>;
 export const HelmRelease = z.object({
   name: z.string(),
   chart: z.string(),
-  version: z
-    .string()
-    .or(z.number())
-    .optional()
-    .nullable()
-    .transform((version) => (version ? version.toString() : null)),
+  version: Nullish(z.string().or(z.number())).transform((version) =>
+    version ? version.toString() : null,
+  ),
   strategicMergePatches: z.unknown().optional(),
   jsonPatches: z.unknown().optional(),
   transformers: z.unknown().optional(),

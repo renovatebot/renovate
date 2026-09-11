@@ -16,10 +16,6 @@ vi.mock('simple-git', () => ({
 }));
 
 beforeEach(() => {
-  mockGit.raw.mockReset();
-  mockGit.revparse.mockReset();
-  mockGit.diff.mockReset();
-  mockGit.env.mockReset();
   mockGit.env.mockReturnValue(mockGit);
 });
 

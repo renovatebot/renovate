@@ -1,7 +1,38 @@
 import { codeBlock } from 'common-tags';
-import { extractLocks } from './util.ts';
+import { extractLocks, sortConstraints } from './util.ts';
 
 describe('modules/manager/terraform/lockfile/util', () => {
+  describe('sortConstraints()', () => {
+    it.each`
+      input                               | expected
+      ${undefined}                        | ${undefined}
+      ${'5.9.0'}                          | ${'5.9.0'}
+      ${'~> 5.0'}                         | ${'~> 5.0'}
+      ${'~> 5.0, 5.9.0'}                  | ${'~> 5.0, 5.9.0'}
+      ${'5.9.0, ~> 5.0'}                  | ${'~> 5.0, 5.9.0'}
+      ${'0.0.186, ~> 0.0.176'}            | ${'~> 0.0.176, 0.0.186'}
+      ${'~> 6.0, >= 5.81.0'}              | ${'>= 5.81.0, ~> 6.0'}
+      ${'0.0.176, ~> 0.0.176'}            | ${'0.0.176, ~> 0.0.176'}
+      ${'>= 2.41.0, <= 2.46.0, >= 2.0.0'} | ${'>= 2.0.0, >= 2.41.0, <= 2.46.0'}
+      ${'< 2.0.0, > 1.0.0'}               | ${'> 1.0.0, < 2.0.0'}
+      ${'!= 1.5.0, >= 1.0.0'}             | ${'>= 1.0.0, != 1.5.0'}
+      ${'= 2.0.0, ~> 1.0'}                | ${'~> 1.0, = 2.0.0'}
+      ${'~> 2.0, ~> 2.0.0'}               | ${'~> 2.0.0, ~> 2.0'}
+      ${'>= 1.0.0, > 1.0.0'}              | ${'> 1.0.0, >= 1.0.0'}
+      ${'< 1.0.0, <= 1.0.0'}              | ${'<= 1.0.0, < 1.0.0'}
+      ${'!= 1.0.0, 1.0.0'}                | ${'1.0.0, != 1.0.0'}
+      ${'1.0.0-rc1, ~> 1.0'}              | ${'1.0.0-rc1, ~> 1.0'}
+    `('normalizes "$input" to "$expected"', ({ input, expected }) => {
+      expect(sortConstraints(input)).toBe(expected);
+    });
+
+    it('leaves unparseable constraints untouched', () => {
+      expect(sortConstraints('not-a-version, also-bad')).toBe(
+        'not-a-version, also-bad',
+      );
+    });
+  });
+
   describe('extractLocks()', () => {
     it('returns null for empty', () => {
       const result = extractLocks('nothing here');

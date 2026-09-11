@@ -35,7 +35,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
         packageName: 'cloudnative-pg',
         registryUrls: [customRegistryUrl],
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should handle empty response on versions request', async () => {
@@ -66,7 +66,7 @@ describe('modules/datasource/glasskube-packages/index', () => {
         packageName: 'cloudnative-pg',
         registryUrls: [customRegistryUrl],
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should handle empty response on manifest request', async () => {

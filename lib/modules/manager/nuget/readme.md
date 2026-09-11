@@ -4,11 +4,19 @@ The NuGet package manager supports these SDK-style files and formats:
 
 - `.csproj`
 - `.fsproj`
+- `.sqlproj` (SSDT SQL projects)
 - `.vbproj`
 - `.props`
 - `.targets`
 - `global.json`
 - `dotnet-tools.json`
+
+MSBuild SDK dependencies are also extracted from:
+
+- `<Sdk Name="..." Version="..." />` elements
+- `<Import ... Sdk="..." Version="..." />` elements
+- `<Project Sdk="name/version">` attributes
+- `global.json` → `msbuild-sdks`
 
 .NET Core projects are supported by default.
 

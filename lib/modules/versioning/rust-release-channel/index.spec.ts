@@ -1,7 +1,7 @@
 import rustReleaseChannel from './index.ts';
 
 describe('modules/versioning/rust-release-channel/index', () => {
-  test.each`
+  it.each`
     input                              | expected
     ${'stable'}                        | ${true}
     ${'beta'}                          | ${true}
@@ -20,7 +20,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.isValid(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                   | expected
     ${'1.82.0'}             | ${true}
     ${'1.83.0-beta.5'}      | ${true}
@@ -37,7 +37,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.isVersion(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input                   | expected
     ${'1.82.0'}             | ${true}
     ${'1.83.0-beta.5'}      | ${true}
@@ -51,7 +51,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.isSingleVersion(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                 | expected
     ${'1.82.0'}             | ${true}
     ${'1.0.0'}              | ${true}
@@ -66,7 +66,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.isStable(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                       | b                       | expected
     ${'1.82'}               | ${'1.82'}               | ${true}
     ${'1.82.0'}             | ${'1.82.0'}             | ${true}
@@ -82,7 +82,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                       | b                       | expected
     ${'nightly-2025-11-24'} | ${'1.82.0'}             | ${true}
     ${'nightly-2025-11-24'} | ${'nightly-2025-11-23'} | ${true}
@@ -110,7 +110,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                       | b                       | expected
     ${'1.82.0'}             | ${'1.82.0'}             | ${0}
     ${'1.83.0-beta.5'}      | ${'1.83.0-beta.5'}      | ${0}
@@ -134,7 +134,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.sortVersions(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                 | expected
     ${'1.82.0'}             | ${1}
     ${'1.0.0'}              | ${1}
@@ -148,7 +148,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.getMajor(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                 | expected
     ${'1.82.0'}             | ${82}
     ${'1.0.0'}              | ${0}
@@ -160,7 +160,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.getMinor(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                 | expected
     ${'1.82.0'}             | ${0}
     ${'1.0.0'}              | ${0}
@@ -173,7 +173,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     expect(rustReleaseChannel.getPatch(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                 | range                   | expected
     ${'1.82.0'}             | ${'stable'}             | ${true}
     ${'1.82.0'}             | ${'1.82'}               | ${true}
@@ -201,7 +201,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     },
   );
 
-  test.each`
+  it.each`
     version                                          | current                                          | expected
     ${'nightly-2025-11-24'}                          | ${'nightly-2025-11-23'}                          | ${true}
     ${'nightly-2025-11-25'}                          | ${'nightly-2025-11-24'}                          | ${true}
@@ -226,7 +226,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     },
   );
 
-  test.each`
+  it.each`
     versions                                                  | range            | expected
     ${['1.82.0', '1.83.0', '1.84.0']}                         | ${'stable'}      | ${'1.84.0'}
     ${['1.82.0', '1.83.0-beta.1', '1.83.0-beta.5']}           | ${'beta'}        | ${'1.83.0-beta.5'}
@@ -245,7 +245,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     },
   );
 
-  test.each`
+  it.each`
     versions                                                  | range            | expected
     ${['1.82.0', '1.83.0', '1.84.0']}                         | ${'stable'}      | ${'1.82.0'}
     ${['1.82.0', '1.83.0-beta.1', '1.83.0-beta.5']}           | ${'beta'}        | ${'1.83.0-beta.1'}
@@ -264,7 +264,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     },
   );
 
-  test.each`
+  it.each`
     currentValue            | rangeStrategy | newVersion              | expected
     ${'stable'}             | ${'replace'}  | ${'1.83.0'}             | ${'stable'}
     ${'beta'}               | ${'replace'}  | ${'1.83.0-beta.5'}      | ${'beta'}

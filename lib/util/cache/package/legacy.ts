@@ -1,7 +1,9 @@
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { decompressFromBase64, decompressFromBuffer } from '../../compress.ts';
 
-// Decode-only support for pre-binary cache formats. Delete this file (and its single call site in impl/base.ts) once entries written before <release> have expired.
+// TODO: Delete this decode-only support, legacy.spec.ts, and the single call
+// site in impl/base.ts once pre-envelope entries have expired.
 
 export interface LegacyEntry {
   value: unknown;
@@ -24,7 +26,7 @@ export async function decodeLegacyEntry(data: Buffer): Promise<LegacyEntry> {
 async function decodeLegacyJsonEntry(data: Buffer): Promise<LegacyEntry> {
   const cached = JSON.parse(data.toString('utf8')) as LegacyJsonEntry;
 
-  if (typeof cached.value !== 'string' || typeof cached.expiry !== 'string') {
+  if (!isString(cached.value) || !isString(cached.expiry)) {
     throw new Error('Invalid legacy JSON package cache entry');
   }
 

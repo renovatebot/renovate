@@ -17,7 +17,7 @@ export default defineConfig({
     'lib/logger/types.ts',
     'lib/modules/datasource/common.ts',
     'lib/modules/datasource/index.ts',
-    'lib/modules/datasource/npm/types.ts',
+    'lib/modules/datasource/npm/schema.ts',
     'lib/modules/datasource/types.ts',
     'lib/modules/manager/index.ts',
     'lib/modules/manager/types.ts',

@@ -32,7 +32,7 @@ describe('modules/datasource/bitbucket-server-tags/schema', () => {
         displayId: 'v17.7.2-deno',
         hash: '430f18aa2968b244fc91ecd9f374f62301af4b63',
       },
-      { displayId: 'v17.7.2', hash: null },
+      { displayId: 'v17.7.2', hash: undefined },
       { displayId: 'v17.7.1' },
     ]);
   });

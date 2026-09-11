@@ -1,15 +1,10 @@
 import { regEx } from '../../../util/regex.ts';
 import { isSingleVersion, parseRange, rangeToStr } from '../maven/compare.ts';
+import type { Revision } from './types.ts';
 
 const REV_TYPE_LATEST = 'REV_TYPE_LATEST';
 const REV_TYPE_SUBREV = 'REV_TYPE_SUBREVISION';
 const REV_TYPE_RANGE = 'REV_TYPE_RANGE';
-
-export interface Revision {
-  type: typeof REV_TYPE_LATEST | typeof REV_TYPE_RANGE | typeof REV_TYPE_SUBREV;
-
-  value: string;
-}
 
 export const LATEST_REGEX = regEx(/^latest\.|^latest$/i);
 

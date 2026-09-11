@@ -15,7 +15,7 @@ export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
 export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 const packageGitRegex = regEx(
-  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/,
+  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(?:\.git)?(?:@(?<version>.*))))/,
 );
 
 const rangePattern: string = RANGE_PATTERN;
@@ -87,7 +87,7 @@ export function extractPackageFile(
         datasource: PypiDatasource.id,
       };
       if (currentValue?.startsWith('==')) {
-        dep.currentVersion = currentValue.replace(/^==\s*/, '');
+        dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
       }
       return dep;
     })

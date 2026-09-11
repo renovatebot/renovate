@@ -59,10 +59,11 @@ export abstract class Datasource implements DatasourceApi {
       this.handleHttpErrors(err);
 
       const statusCode = err.response?.statusCode;
-      if (statusCode) {
-        if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
-          throw new ExternalHostError(err);
-        }
+      if (
+        statusCode &&
+        (statusCode === 429 || (statusCode >= 500 && statusCode < 600))
+      ) {
+        throw new ExternalHostError(err);
       }
     }
 
