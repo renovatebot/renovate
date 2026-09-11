@@ -12,6 +12,12 @@ function generateToolingTable(): string {
   table += '\n';
 
   for (const [name, cfg] of Object.entries(communityActions)) {
+    // `actions/*` are GitHub's own first-party Actions, documented separately
+    // as "built-in" rather than here as community-maintained.
+    if (name.startsWith('actions/')) {
+      continue;
+    }
+
     const withFields = getWithSchemaFields(cfg.withSchema);
 
     table += `| [\`${name}\`](https://github.com/${name}) | \`${withFields.join('`, `')}\` | ${determineDependencyToUpdate(cfg)} |\n`;
