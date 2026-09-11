@@ -14,6 +14,7 @@ import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
+import { splitImageParts } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
 import type { ActionSchema, KnownActionConfig } from './types.ts';
 
@@ -88,6 +89,29 @@ const actionsVersionsExtractVersion =
 const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => [{ packageName: repo, ...parseValue(tag) }]);
+
+const EcsRenderTaskDefinitionWith: ActionSchema = z
+  .object({ image: z.string().optional() })
+  .transform(({ image }) => {
+    if (!image) {
+      return [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ];
+    }
+
+    const dep = splitImageParts(image);
+    return [
+      {
+        depType: 'uses-with',
+        ...dep,
+        ...(dep.skipReason ? { skipStage: 'extract' } : {}),
+      },
+    ];
+  });
 
 const sha256Regex = regEx(/^[a-f0-9]{64}$/);
 const MiseWith: ActionSchema = z
@@ -261,6 +285,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     versioning: npmVersioning.id,
     packageName: 'astral-sh/uv',
+  },
+  // https://github.com/aws-actions/amazon-ecs-render-task-definition
+  'aws-actions/amazon-ecs-render-task-definition': {
+    datasource: DockerDatasource.id,
+    packageName: '', // determined from `image` input
+    withSchema: EcsRenderTaskDefinitionWith,
   },
   'azure/setup-helm': {
     datasource: GithubReleasesDatasource.id,
