@@ -1,8 +1,12 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -199,7 +203,7 @@ export class RepologyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -228,16 +232,16 @@ export class RepologyDatasource extends Datasource {
       }));
       return { releases };
     } catch (err) {
-      if (err.message === HOST_DISABLED) {
-        logger.trace({ packageName, err }, 'Host disabled');
+      if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+        logger.trace({ packageName, err }, refusedHostMessage(err));
       } else {
-        logger.warn(
+        logger.once.warn(
           { packageName, err },
           'Repology lookup failed with unexpected error',
         );
       }
 
-      throw new ExternalHostError(err);
+      this.handleGenericErrors(err);
     }
   }
 }

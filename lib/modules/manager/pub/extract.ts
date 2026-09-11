@@ -1,4 +1,4 @@
-import { isEmptyObject, isObject, isString } from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import type { SkipReason } from '../../../types/index.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { DartDatasource } from '../../datasource/dart/index.ts';
@@ -142,8 +142,6 @@ export function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints = extractConstraints(pubspec);
-
   return {
     deps: [
       ...extractFromSection(pubspec, 'dependencies'),
@@ -151,6 +149,6 @@ export function extractPackageFile(
       ...extractDart(pubspec),
       ...extractFlutter(pubspec),
     ],
-    ...(!isEmptyObject(extractedConstraints) && { extractedConstraints }),
+    extractedConstraints: extractConstraints(pubspec),
   };
 }

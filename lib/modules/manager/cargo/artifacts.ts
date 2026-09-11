@@ -2,14 +2,13 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import type {
@@ -18,6 +17,8 @@ import type {
   Upgrade,
 } from '../types.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
+
+const gitExec = withGitEnvironment(['cargo']);
 
 async function cargoUpdate(
   manifestPath: string,
@@ -34,11 +35,10 @@ async function cargoUpdate(
   }
 
   const execOptions: ExecOptions = {
-    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
-  await exec(cmd, execOptions);
+  await gitExec(cmd, execOptions);
 }
 
 async function cargoUpdatePrecise(
@@ -72,12 +72,11 @@ async function cargoUpdatePrecise(
   );
 
   const execOptions: ExecOptions = {
-    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
 
-  await exec(cmds, execOptions);
+  await gitExec(cmds, execOptions);
 }
 
 export async function updateArtifacts(

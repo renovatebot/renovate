@@ -84,7 +84,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     const dependencies: PackageDependency[] = [];
     // if there are no path elements left, we have reached the end of the path
     if (leftPath.length === 0) {
-      /* v8 ignore next 8 -- needs test */
+      /* v8 ignore next -- needs test */
       if (!isNonEmptyString(parentElement)) {
         return [
           {

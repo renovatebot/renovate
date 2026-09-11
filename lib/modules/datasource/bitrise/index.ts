@@ -40,7 +40,7 @@ export class BitriseDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -48,7 +48,8 @@ export class BitriseDatasource extends Datasource {
     const parsedUrl = parseGitUrl(registryUrl);
     if (detectPlatform(registryUrl) !== 'github') {
       logger.once.warn(
-        `${parsedUrl.source} is not a supported Git hoster for this datasource`,
+        { source: parsedUrl.source },
+        'Unsupported Git hoster for this datasource',
       );
       return null;
     }

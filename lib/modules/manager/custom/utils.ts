@@ -15,8 +15,6 @@ export const validMatchFields = [
   'indentation',
 ] as const;
 
-export type ValidMatchFields = (typeof validMatchFields)[number];
-
 export function isValidDependency({
   depName,
   currentValue,

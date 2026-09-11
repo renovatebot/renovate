@@ -5,6 +5,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { safeStringify } from '../../../util/stringify.ts';
@@ -26,14 +27,17 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
-      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, '')),
+      branchUpgrades.map(({ depName }) =>
+        depName?.replace(regEx(/^@types\//), ''),
+      ),
     ).size === 1
   );
 }
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
-  const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
-    !!depName?.startsWith('@types/');
+  function isTypesUpgrade({ depName }: BranchUpgradeConfig): boolean {
+    return !!depName?.startsWith('@types/');
+  }
   const regularUpgrades = upgrades.filter(
     (upgrade) => !isTypesUpgrade(upgrade),
   );
@@ -99,8 +103,8 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
   upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
   upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
   upgrade.commitMessage = upgrade.commitMessage.replace(
-    regEx(/to vv(\d)/),
-    'to v$1',
+    regEx(/to vv(?<digit>\d)/),
+    'to v$<digit>',
   );
   if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
     // We only need to lowercase the first line
@@ -301,9 +305,7 @@ export function generateBranchConfig(
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
-      upgrade.displayPending = `\`${upgrade
-        .pendingVersions!.slice(-1)
-        .pop()!}\``;
+      upgrade.displayPending = `\`${upgrade.pendingVersions!.at(-1)!}\``;
       if (pendingVersionsLength > 1) {
         upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
       }
@@ -467,14 +469,14 @@ export function generateBranchConfig(
   config.labels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.labels ?? [])
+        .map((upgrade) => coerceArray(upgrade.labels))
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
   config.addLabels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.addLabels ?? [])
+        .map((upgrade) => coerceArray(upgrade.addLabels))
         .reduce((a, b) => a.concat(b), []),
     ),
   ];

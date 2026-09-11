@@ -6,6 +6,7 @@ export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['Pipfile.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://pipenv.pypa.io/en/latest';
 export const categories: Category[] = ['python'];

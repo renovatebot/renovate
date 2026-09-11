@@ -10,7 +10,7 @@ import {
 } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import { hasProxy } from '../../proxy.ts';
-import type { HostRule } from '../../types/index.ts';
+import type { CombinedHostRule, HostRule } from '../../types/index.ts';
 import * as hostRules from '../host-rules.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { parseUrl } from '../url.ts';
@@ -21,7 +21,6 @@ import type { GotOptions } from './types.ts';
 export type HostRulesGotOptions = Pick<
   GotOptions & InternalHttpOptions,
   | 'hostType'
-  | 'url'
   | 'noAuth'
   | 'headers'
   | 'token'
@@ -41,7 +40,7 @@ export type HostRulesGotOptions = Pick<
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-): HostRule {
+): CombinedHostRule {
   const { hostType, readOnly } = options;
   let res = hostRules.find({ hostType, url, readOnly });
 

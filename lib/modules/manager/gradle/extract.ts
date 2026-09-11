@@ -130,10 +130,12 @@ export function matchesContentDescriptor(
   if (hasIncludes && hasExcludes) {
     // if both includes and excludes exist, dep must match include and not match exclude
     return matchesInclude && !matchesExclude;
-  } else if (hasIncludes) {
+  }
+  if (hasIncludes) {
     // if only includes exist, dep must match at least one include
     return matchesInclude;
-  } else if (hasExcludes) {
+  }
+  if (hasExcludes) {
     // if only excludes exist, dep must not match any exclude
     return !matchesExclude;
   }

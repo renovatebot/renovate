@@ -2,10 +2,12 @@ import { ensureTrailingSlash } from '../url.ts';
 import { HttpBase } from './http.ts';
 
 let baseUrl: string;
-export const setBaseUrl = (newBaseUrl: string): void => {
+export function setBaseUrl(newBaseUrl: string): void {
   baseUrl = ensureTrailingSlash(newBaseUrl);
-};
-export const getBaseUrl = (): string => baseUrl;
+}
+export function getBaseUrl(): string {
+  return baseUrl;
+}
 
 export class ScmManagerHttp extends HttpBase {
   constructor() {

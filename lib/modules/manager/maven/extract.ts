@@ -3,6 +3,7 @@ import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { MAVEN_REPO } from '../../datasource/maven/common.ts';
@@ -127,9 +128,9 @@ function getAllCNBDependencies(
   node: XmlDocument,
   config: ExtractConfig,
 ): PackageDependency[] | null {
-  const pluginNodes =
-    node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin') ??
-    [];
+  const pluginNodes = coerceArray(
+    node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin'),
+  );
 
   const pluginNode = pluginNodes.find((pluginNode) => {
     return (
@@ -157,7 +158,7 @@ function getAllCNBDependencies(
     config,
   );
   const buildpacks = getCNBDependencies(
-    imageNode.childNamed('buildpacks')?.childrenNamed('buildpack') ?? [],
+    coerceArray(imageNode.childNamed('buildpacks')?.childrenNamed('buildpack')),
     config,
   );
   deps.push(...builder, ...runImage, ...buildpacks);
@@ -248,10 +249,10 @@ function deepExtract(
 }
 
 function applyProps(
-  dep: PackageDependency<Record<string, any>>,
+  dep: PackageDependency,
   depPackageFile: string,
   props: MavenProp,
-): PackageDependency<Record<string, any>> {
+): PackageDependency {
   let result = dep;
   let anyChange = false;
   const alreadySeenProps = new Set<string>();
@@ -281,18 +282,18 @@ function applyProps(
 }
 
 function applyPropsInternal(
-  dep: PackageDependency<Record<string, any>>,
+  dep: PackageDependency,
   depPackageFile: string,
   props: MavenProp,
   previouslySeenProps: Set<string>,
-): [PackageDependency<Record<string, any>>, boolean, boolean] {
+): [PackageDependency, boolean, boolean] {
   let anyChange = false;
   let fatal = false;
 
   const seenProps = new Set<string>();
 
-  const replaceAll = (str: string): string =>
-    str.replace(regEx(/\${[^}]*?}/g), (substr) => {
+  function replaceAll(str: string): string {
+    return str.replace(regEx(/\${[^}]*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
@@ -307,6 +308,7 @@ function applyPropsInternal(
       }
       return substr;
     });
+  }
 
   let depName = dep.depName;
   if (dep.depName) {
@@ -559,7 +561,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const urlsSet = new Set([
-        ...(rawDep.registryUrls ?? []),
+        ...coerceArray(rawDep.registryUrls),
         ...registryUrls[name],
       ]);
       rawDep.registryUrls = [...urlsSet];

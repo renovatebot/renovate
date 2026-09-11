@@ -11,6 +11,7 @@ describe('util/git/config', () => {
       completion: { onClose: true, onExit: false },
       config: ['core.quotePath=false'],
       unsafe: {
+        allowUnsafeAskPass: true,
         allowUnsafeSshCommand: true,
         allowUnsafeConfigEnvCount: true,
       },
@@ -26,6 +27,7 @@ describe('util/git/config', () => {
       },
       config: ['core.quotePath=false'],
       unsafe: {
+        allowUnsafeAskPass: true,
         allowUnsafeSshCommand: true,
         allowUnsafeConfigEnvCount: true,
       },
@@ -34,7 +36,7 @@ describe('util/git/config', () => {
 
   it('throws', () => {
     // @ts-expect-error -- testing invalid input
-    expect(() => setNoVerify(1)).toThrowError(
+    expect(() => setNoVerify(1)).toThrow(
       'config error: gitNoVerify should be an array of strings',
     );
   });

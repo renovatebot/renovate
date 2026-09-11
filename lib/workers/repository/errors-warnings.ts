@@ -4,6 +4,7 @@ import { logger } from '../../logger/index.ts';
 import type { PackageFile } from '../../modules/manager/types.ts';
 import { coerceArray } from '../../util/array.ts';
 import { emojify } from '../../util/emoji.ts';
+import { coerceObject } from '../../util/object.ts';
 import { regEx } from '../../util/regex.ts';
 import type { DepWarnings } from '../types.ts';
 
@@ -38,8 +39,8 @@ function getDepWarnings(
 ): DepWarnings {
   const warnings: string[] = [];
   const warningFiles: string[] = [];
-  for (const files of Object.values(packageFiles ?? {})) {
-    for (const file of files ?? []) {
+  for (const files of Object.values(coerceObject(packageFiles))) {
+    for (const file of coerceArray(files)) {
       // TODO: remove condition when type is fixed (#22198)
       if (file.packageFile) {
         for (const dep of coerceArray(file.deps)) {

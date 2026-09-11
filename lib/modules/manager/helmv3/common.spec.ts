@@ -12,7 +12,7 @@ describe('modules/manager/helmv3/common', () => {
         password: 'testpass',
       },
     };
-    expect(await generateLoginCmd(repositoryRule)).toEqual(
+    await expect(generateLoginCmd(repositoryRule)).resolves.toEqual(
       'helm registry login --username testuser --password testpass example.com',
     );
   });

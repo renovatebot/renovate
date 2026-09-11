@@ -9,7 +9,7 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
-import type { GitlabCommit, GitlabTag } from './types.ts';
+import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util.ts';
 
 export class GitlabTagsDatasource extends Datasource {
@@ -48,9 +48,7 @@ export class GitlabTagsDatasource extends Datasource {
     );
 
     const gitlabTags = (
-      await this.http.getJsonUnchecked<GitlabTag[]>(url, {
-        paginate: true,
-      })
+      await this.http.getJson(url, { paginate: true }, GitlabTags)
     ).body;
 
     const dependency: ReleaseResult = {
@@ -60,7 +58,7 @@ export class GitlabTagsDatasource extends Datasource {
     dependency.releases = gitlabTags.map(({ name, commit }) => ({
       version: name,
       gitRef: name,
-      releaseTimestamp: asTimestamp(commit?.created_at),
+      releaseTimestamp: asTimestamp(commit.created_at),
     }));
 
     return dependency;
@@ -100,9 +98,8 @@ export class GitlabTagsDatasource extends Datasource {
           `repository/commits/`,
           newValue,
         );
-        const gitlabCommits =
-          await this.http.getJsonUnchecked<GitlabCommit>(url);
-        digest = gitlabCommits.body.id;
+        const gitlabCommit = await this.http.getJson(url, GitlabCommit);
+        digest = gitlabCommit.body.id;
       } else {
         const url = joinUrlParts(
           depHost,
@@ -110,8 +107,7 @@ export class GitlabTagsDatasource extends Datasource {
           urlEncodedRepo,
           `repository/commits?per_page=1`,
         );
-        const gitlabCommits =
-          await this.http.getJsonUnchecked<GitlabCommit[]>(url);
+        const gitlabCommits = await this.http.getJson(url, GitlabCommits);
         digest = gitlabCommits.body[0].id;
       }
     } catch (err) {

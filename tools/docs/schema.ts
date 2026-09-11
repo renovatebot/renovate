@@ -13,13 +13,7 @@ import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
 
 type JsonSchemaBasicType =
-  | 'string'
-  | 'number'
-  | 'integer'
-  | 'boolean'
-  | 'object'
-  | 'array'
-  | 'null';
+  'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
 /* These are sorted in priority order, but editors may not suggest in that order */
@@ -141,6 +135,30 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     temp.$ref = '#';
   }
 
+  if (option.name === 'repositories') {
+    temp.items = {
+      oneOf: [
+        { type: 'string' },
+        {
+          allOf: [
+            {
+              type: 'object',
+              required: ['repository'],
+              properties: {
+                repository: {
+                  type: 'string',
+                  minLength: 1,
+                  description: 'Repository name (e.g. `owner/repo`).',
+                },
+              },
+            },
+            { $ref: '#' },
+          ],
+        },
+      ],
+    };
+  }
+
   if (option.name === 'constraints') {
     temp.additionalProperties = false;
     temp.properties = {};
@@ -243,6 +261,23 @@ function addChildrenArrayInParents(
                       type: 'string',
                       description:
                         'A custom description for this configuration object',
+                    },
+                  ],
+                },
+                overrideDescription: {
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        description:
+                          'Description which replaces the descriptions of any presets which this config extends',
+                      },
+                    },
+                    {
+                      type: 'string',
+                      description:
+                        'Description which replaces the descriptions of any presets which this config extends',
                     },
                   ],
                 },

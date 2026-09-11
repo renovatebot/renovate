@@ -51,8 +51,8 @@ function convertStabilityModifier(input: string): string {
 
   // 1.0@beta2 to 1.0-beta.2
   const stability = versionParts[1].replace(
-    regEx(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi),
-    '$1.$2',
+    regEx(/(?:^|\s)(?<label>beta|alpha|rc)(?<num>[1-9][0-9]*)(?: |$)/gi),
+    '$<label>.$<num>',
   );
 
   // If there is a stability part, npm semver expects the version
@@ -64,7 +64,7 @@ function normalizeVersion(input: string): string {
   let output = input;
   // Strip leading + prefix (not a valid composer constraint operator)
   output = output.replace(regEx(/^\+/), '');
-  output = output.replace(regEx(/(^|>|>=|\^|~)v/i), '$1');
+  output = output.replace(regEx(/(?<prefix>^|>|>=|\^|~)v/i), '$<prefix>');
   return convertStabilityModifier(output);
 }
 
@@ -111,7 +111,9 @@ function calculateSatisfyingVersionIntenal(
  */
 function removeComposerSpecificPatchPart(input: string): [string, boolean] {
   // the regex is based on the original from composer implementation https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L137
-  const pattern = /^v?\d+(\.\d+(\.\d+(\.\d+)?)?)?(?<suffix>-p[1-9]\d*)$/gi;
+  const pattern = regEx(
+    /^v?\d+(?:\.\d+(?:\.\d+(?:\.\d+)?)?)?(?<suffix>-p[1-9]\d*)$/gi,
+  );
   const match = pattern.exec(input);
 
   return match
@@ -135,23 +137,28 @@ function composer2npm(input: string): string {
 
       // ~4 to ^4 and ~4.1 to ^4.1
       output = output.replace(
-        regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
-        '^$1',
+        regEx(/(?:^|\s)~(?<minVersion>[1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
+        '^$<minVersion>',
       );
       // ~0.4 to >=0.4 <1
       output = output.replace(
-        regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
-        '>=$1 <1',
+        regEx(/(?:^|\s)~(?<minVersion>0\.[1-9][0-9]*)(?: |$)/g),
+        '>=$<minVersion> <1',
       );
 
       // add extra digits to <8-DEV and <8.0-DEV
       output = output
-        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0')
-        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0');
+        .replace(regEx(/^(?<version><\d+(?:\.\d+)?)$/g), '$<version>.0')
+        .replace(regEx(/^(?<version><\d+(?:\.\d+)?)$/g), '$<version>.0');
 
       return output + stability;
     })
-    .map((part) => part.replace(/([a-z])([0-9])/gi, '$1.$2'))
+    .map((part) =>
+      part.replace(
+        regEx(/(?<letter>[a-z])(?<digit>[0-9])/gi),
+        '$<letter>.$<digit>',
+      ),
+    )
     .join(' || ');
 }
 
@@ -267,7 +274,7 @@ function getNewValue({
   let newValue: string | null = null;
   if (isVersion(currentValue)) {
     newValue = newVersion;
-  } else if (regEx(/^[~^](0\.[1-9][0-9]*)$/).test(currentValue)) {
+  } else if (regEx(/^[~^](?:0\.[1-9][0-9]*)$/).test(currentValue)) {
     const operator = currentValue.substring(0, 1);
     // handle ~0.4 case first
     if (toMajor === 0) {
@@ -277,14 +284,14 @@ function getNewValue({
       // TODO: types (#22198)
       newValue = `${operator}${toMajor!}.0`;
     }
-  } else if (regEx(/^[~^]([0-9]*)$/).test(currentValue)) {
+  } else if (regEx(/^[~^](?:[0-9]*)$/).test(currentValue)) {
     // handle ~4 case
     const operator = currentValue.substring(0, 1);
     // TODO: types (#22198)
     newValue = `${operator}${toMajor!}`;
   } else if (
     toMajor &&
-    regEx(/^[~^]([0-9]*(?:\.[0-9]*)?)$/).test(currentValue)
+    regEx(/^[~^](?:[0-9]*(?:\.[0-9]*)?)$/).test(currentValue)
   ) {
     const operator = currentValue.substring(0, 1);
     if (rangeStrategy === 'bump') {
@@ -315,7 +322,7 @@ function getNewValue({
     const hasOr = currentValue.includes(' || ');
     if (hasOr || rangeStrategy === 'widen') {
       const splitValues = currentValue.split('||');
-      const lastValue = splitValues[splitValues.length - 1];
+      const lastValue = splitValues.at(-1)!;
       const replacementValue = getNewValue({
         currentValue: lastValue.trim(),
         rangeStrategy: 'replace',
@@ -326,7 +333,7 @@ function getNewValue({
         newValue = replacementValue;
       } else if (replacementValue) {
         const parsedRange = parseRange(replacementValue);
-        const element = parsedRange[parsedRange.length - 1];
+        const element = parsedRange.at(-1)!;
         if (element.operator?.startsWith('<')) {
           const splitCurrent = currentValue.split(element.operator);
           splitCurrent.pop();
@@ -346,7 +353,7 @@ function getNewValue({
     newValue = newVersion;
   }
   if (currentValue.split('.')[0].includes('v')) {
-    newValue = newValue.replace(regEx(/([0-9])/), 'v$1');
+    newValue = newValue.replace(regEx(/(?<digit>[0-9])/), 'v$<digit>');
   }
 
   // Preserve original min-stability specifier
@@ -364,15 +371,13 @@ function sortVersions(a: string, b: string): number {
   if (aContainsPatch === bContainsPatch) {
     // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
     return npm.sortVersions(composer2npm(a), composer2npm(b));
-  } else if (
-    npm.equals(composer2npm(aWithoutPatch), composer2npm(bWithoutPatch))
-  ) {
+  }
+  if (npm.equals(composer2npm(aWithoutPatch), composer2npm(bWithoutPatch))) {
     // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
     return aContainsPatch ? 1 : -1;
-  } else {
-    // All other cases can be compared correctly by npm
-    return npm.sortVersions(composer2npm(a), composer2npm(b));
   }
+  // All other cases can be compared correctly by npm
+  return npm.sortVersions(composer2npm(a), composer2npm(b));
 }
 
 function isCompatible(version: string): boolean {

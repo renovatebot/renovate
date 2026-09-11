@@ -99,6 +99,18 @@ export function handleCommitError(
     );
     return null;
   }
+  if (err.message.includes('GH013')) {
+    logger.debug({ err }, 'GitHub repository ruleset blocked push');
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = branchName;
+    error.validationError = 'GitHub repository ruleset violation';
+    error.validationMessage =
+      `Renovate cannot push to \`${branchName}\` because a GitHub ` +
+      `repository ruleset rejected the push (GH013). Update the ` +
+      `ruleset - or grant Renovate a bypass actor - so Renovate can ` +
+      `proceed. Original error: \`${err.message.replaceAll('`', "'")}\``;
+    throw error;
+  }
   if (
     (err.message.includes('remote rejected') || err.message.includes('403')) &&
     files?.some((file) => file.path?.startsWith('.github/workflows/'))

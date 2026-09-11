@@ -1,15 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import type { NewValueConfig, VersioningApi } from './types.ts';
-
-export interface GenericVersion {
-  release: number[];
-  /** prereleases are treated in the standard semver manner, if present */
-  prerelease?: string;
-  suffix?: string;
-}
-export type VersionParser = (version: string) => GenericVersion;
-
-export type VersionComparator = (version: string, other: string) => number;
+import { regEx } from '../../util/regex.ts';
+import type { GenericVersion, NewValueConfig, VersioningApi } from './types.ts';
 
 export abstract class GenericVersioningApi<
   T extends GenericVersion = GenericVersion,
@@ -132,7 +123,7 @@ export abstract class GenericVersioningApi<
     newVersion,
   }: NewValueConfig): string | null {
     if (currentVersion === `v${currentValue}`) {
-      return newVersion.replace(/^v/, '');
+      return newVersion.replace(regEx(/^v/), '');
     }
     return newVersion ?? null;
   }

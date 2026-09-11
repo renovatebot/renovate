@@ -24,12 +24,7 @@ export interface ChangeLogRelease {
 }
 
 export type ChangeLogPlatform =
-  | 'bitbucket'
-  | 'bitbucket-server'
-  | 'forgejo'
-  | 'gitea'
-  | 'github'
-  | 'gitlab';
+  'bitbucket' | 'bitbucket-server' | 'forgejo' | 'gitea' | 'github' | 'gitlab';
 
 export interface ChangeLogProject {
   packageName?: string;
@@ -43,9 +38,7 @@ export interface ChangeLogProject {
 }
 
 export type ChangeLogError =
-  | 'MissingBitbucketToken'
-  | 'MissingGithubToken'
-  | 'MissingGitlabToken';
+  'MissingBitbucketToken' | 'MissingGithubToken' | 'MissingGitlabToken';
 
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;

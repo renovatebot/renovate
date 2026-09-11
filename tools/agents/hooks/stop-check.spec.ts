@@ -1,4 +1,5 @@
 // https://code.claude.com/docs/en/hooks#stop
+import { Json } from '../../../lib/util/schema-utils/index.ts';
 import { BlockOutput } from './utils/schemas.ts';
 
 const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
@@ -13,9 +14,6 @@ const consoleSpy = vi.spyOn(console, 'log');
 
 beforeEach(() => {
   vi.resetModules();
-  exec.mockReset();
-  getChangedFiles.mockReset();
-  consoleSpy.mockReset();
 });
 
 it('runs pnpm check --all with changed files', async () => {
@@ -33,13 +31,13 @@ it('runs pnpm check --all with changed files', async () => {
   expect(consoleSpy).not.toHaveBeenCalled();
 });
 
-it('runs pnpm check --all without targets when no files changed', async () => {
+it('does not run pnpm check --all when no files changed', async () => {
   getChangedFiles.mockResolvedValue([]);
   exec.mockResolvedValue(undefined);
 
   await import('./stop-check.ts');
 
-  expect(exec).toHaveBeenCalledWith('pnpm', ['check', '--all']);
+  expect(exec).not.toHaveBeenCalled();
   expect(consoleSpy).not.toHaveBeenCalled();
 });
 
@@ -50,7 +48,7 @@ it('outputs block JSON when pnpm check --all fails', async () => {
   await import('./stop-check.ts');
 
   expect(consoleSpy).toHaveBeenCalledOnce();
-  const output = BlockOutput.parse(JSON.parse(consoleSpy.mock.calls[0][0]));
+  const output = Json.pipe(BlockOutput).parse(consoleSpy.mock.calls[0][0]);
   expect(output).toEqual({
     decision: 'block',
     reason:

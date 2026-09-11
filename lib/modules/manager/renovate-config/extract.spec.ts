@@ -85,6 +85,85 @@ describe('modules/manager/renovate-config/extract', () => {
         });
       });
 
+      it('provides skipReason for relative presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": ["./system/registries", "../shared", "/security/base"]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              depName: './system/registries',
+              skipReason: 'unsupported-datasource',
+            },
+            {
+              depName: '../shared',
+              skipReason: 'unsupported-datasource',
+            },
+            {
+              depName: '/security/base',
+              skipReason: 'unsupported-datasource',
+            },
+          ],
+        });
+      });
+
+      it('provides skipReason for malformed presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": ["./foo#1.2.3", "github>abc/foo#1.2.3"]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              depName: './foo#1.2.3',
+              skipReason: 'invalid-value',
+            },
+            {
+              datasource: 'github-tags',
+              depName: 'abc/foo',
+              currentValue: '1.2.3',
+            },
+          ],
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { preset: './foo#1.2.3', err: expect.any(Error) },
+          'Failed to parse preset',
+        );
+      });
+
+      it('ignores templated presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": ["local>{{ env.PRESET_REPO }}:python-312", "github>abc/foo#1.2.3"]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              datasource: 'github-tags',
+              depName: 'abc/foo',
+              currentValue: '1.2.3',
+            },
+          ],
+        });
+      });
+
       it('provides skipReason for presets without versions', () => {
         expect(
           extractPackageFile(

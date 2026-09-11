@@ -40,7 +40,14 @@ export async function postprocessRelease(
     return release;
   }
 
-  const registryUrl = config.registryUrl ?? config.registryUrls?.at(0) ?? null;
+  // Prefer the registry that actually reported this release (set by `mergeRegistries`
+  // for the `merge` registryStrategy) over the configured/default registry, otherwise
+  // we may probe a registry that never had this artifact and wrongly reject it.
+  const registryUrl =
+    release.registryUrl ??
+    config.registryUrl ??
+    config.registryUrls?.at(0) ??
+    null;
 
   try {
     const result = await ds.postprocessRelease(
@@ -64,7 +71,7 @@ export async function postprocessRelease(
 
     return result;
   } catch (err) {
-    logger.once.warn({ err }, `Release interceptor failed for "${datasource}"`);
+    logger.once.warn({ err, datasource }, 'Release interceptor failed');
     return release;
   }
 }

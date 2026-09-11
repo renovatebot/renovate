@@ -8,7 +8,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -23,11 +23,11 @@ const gitUrl = regEx(
 );
 // regex to match URLs with ".git" delimiter
 const dotGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(?:\.git))))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
 );
 // regex to match URLs with "_git" delimiter
 const underscoreGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(?:_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
 );
 // regex to match URLs having an extra "//"
 const gitUrlWithPath = regEx(
@@ -62,7 +62,7 @@ export function extractResource(base: string): PackageDependency | null {
     return null;
   }
 
-  if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
+  if (regEx(/(?:github\.com)(?::|\/)/).test(path)) {
     return {
       currentValue,
       datasource: GithubTagsDatasource.id,
@@ -159,18 +159,10 @@ export function extractHelmChart(
   }
 
   if (isOCIRegistry(helmChart.repo)) {
-    const dep = getDep(
-      `${removeOCIPrefix(helmChart.repo)}/${helmChart.name}:${helmChart.version}`,
-      false,
-      aliases,
-    );
-    delete dep.replaceString;
     return {
-      ...dep,
+      ...getOciChartDep(helmChart.repo, helmChart.name, aliases),
       depName: helmChart.name,
-      // https://github.com/helm/helm/issues/10312
-      // https://github.com/helm/helm/issues/10678
-      pinDigests: false,
+      currentValue: helmChart.version,
     };
   }
 

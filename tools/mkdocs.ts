@@ -58,14 +58,15 @@ program
     if (opts.strict) {
       mkdocsArgs.push('--strict');
     }
-    const spawnServe = (): ExecaChildProcess<string> =>
-      execa('uv', mkdocsArgs, {
+    function spawnServe(): ExecaChildProcess {
+      return execa('uv', mkdocsArgs, {
         cwd: 'tools/mkdocs',
         stdio: 'inherit',
         reject: false,
         maxBuffer: 20 * 1024 * 1024,
         encoding: 'utf8',
       });
+    }
 
     if (!opts.build) {
       await prepareDocs(opts);
@@ -73,7 +74,7 @@ program
       return;
     }
 
-    let activeChild: ExecaChildProcess<string> | null = null;
+    let activeChild: ExecaChildProcess | null = null;
     let shouldRestart = false;
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -110,7 +111,7 @@ async function prepareDocs(opts: any): Promise<void> {
   }
 }
 
-function checkResult(res: ExecaReturnValue<string>): void {
+function checkResult(res: ExecaReturnValue): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);

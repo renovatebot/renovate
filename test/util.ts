@@ -95,3 +95,26 @@ export function fakeSha(
 ): LongCommitSha {
   return toLongCommitSha(hash(seed, algorithm));
 }
+
+/**
+ * Variables that `vi.stubEnv()` treats as booleans: it maps them onto '1' / ''
+ * rather than deleting them, so they cannot be cleared through a stub.
+ * Vitest sets them itself, and nothing under test reads them.
+ */
+const unstubbableEnvVars = new Set(['PROD', 'DEV', 'SSR']);
+
+/**
+ * Clear every environment variable for the duration of the current test.
+ *
+ * Replacing `process.env` wholesale would break `vi.stubEnv()`, which captures
+ * the original object when the worker starts and would keep deleting from it.
+ * Stubbing each key instead keeps that intact, and `unstubEnvs` restores them
+ * all before the next test.
+ */
+export function clearEnv(): void {
+  for (const key of Object.keys(process.env)) {
+    if (!unstubbableEnvVars.has(key)) {
+      vi.stubEnv(key, undefined);
+    }
+  }
+}

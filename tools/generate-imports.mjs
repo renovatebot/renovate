@@ -6,11 +6,11 @@ import { hashFile, hashFromArray } from './utils/hash.mjs';
 
 const newFiles = new Set();
 
-if (!fs.existsSync('lib')) {
+if (!(await fs.pathExists('lib'))) {
   process.exit(0);
 }
 
-if (!fs.existsSync('data')) {
+if (!(await fs.pathExists('data'))) {
   process.exit(0);
 }
 
@@ -20,7 +20,9 @@ if (!fs.existsSync('data')) {
  * @param {string} code
  */
 async function updateFile(file, code) {
-  const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
+  const oldCode = (await fs.pathExists(file))
+    ? await fs.readFile(file, 'utf8')
+    : null;
   if (code !== oldCode) {
     await fs.writeFile(file, code);
   }
@@ -35,20 +37,20 @@ const dataPaths = [
 /**
  *
  * @param {string[]} paths
- * @returns {string[]}
+ * @returns {Promise<string[]>}
  */
-function expandPaths(paths) {
-  return paths
-    .map((pathName) => {
-      const stat = fs.statSync(pathName);
+async function expandPaths(paths) {
+  const expanded = await Promise.all(
+    paths.map(async (pathName) => {
+      const stat = await fs.stat(pathName);
 
       if (stat.isFile()) {
         return [pathName];
       }
 
       if (stat.isDirectory()) {
-        const dirPaths = fs
-          .readdirSync(pathName, { withFileTypes: true })
+        const dirents = await fs.readdir(pathName, { withFileTypes: true });
+        const dirPaths = dirents
           .filter(
             (dirent) =>
               !(dirent.isFile() && ['.DS_Store'].includes(dirent.name)),
@@ -58,8 +60,9 @@ function expandPaths(paths) {
       }
 
       return [];
-    })
-    .reduce((x, y) => x.concat(y));
+    }),
+  );
+  return expanded.reduce((x, y) => x.concat(y));
 }
 
 /**
@@ -109,7 +112,7 @@ export async function getManagerHash(managerName, isCustomManager) {
 }
 
 async function generateData() {
-  const files = expandPaths(dataPaths).sort();
+  const files = (await expandPaths(dataPaths)).sort();
 
   const importDataFileType = files.map((x) => `  | '${x}'`).join('\n');
 
@@ -247,6 +250,46 @@ export const globalConfigOptionDefaults: Record<string, unknown> = ${JSON.string
   await updateFile('lib/global-config-option-defaults.generated.ts', content);
 }
 
+/**
+ * The field names a repository can influence and reference from a template,
+ * collected from the lists Renovate already maintains:
+ *
+ * - `validMatchFields` -- what a custom manager extracts straight out of a file in
+ *   the repository, so entirely attacker-chosen.
+ * - `exposedConfigOptions` -- config options a repository can set in its own
+ *   `renovate.json` and reference from a template.
+ * - `allowedFields` -- the runtime values exposed to templates, which is where
+ *   most dependency metadata (`depName`, `newVersion`, ...) comes from.
+ *
+ * Written out because the `renovate/no-unquoted-exec-interpolation` lint rule
+ * needs them, and runs inside oxlint where importing `lib/` isn't an option.
+ * `test/other/validate-templatable-fields.spec.ts` fails if this drifts.
+ */
+async function generateTemplatableFields() {
+  const { validMatchFields } =
+    await import('../lib/modules/manager/custom/utils.ts');
+  const { allowedFields, exposedConfigOptions } =
+    await import('../lib/util/template/index.ts');
+
+  const fields = [
+    ...new Set([
+      ...validMatchFields,
+      ...exposedConfigOptions,
+      ...Object.keys(allowedFields),
+    ]),
+  ].sort();
+
+  const content = [
+    '/** Field names a repository can influence and reference from a template. */',
+    'export const templatableFields = [',
+    ...fields.map((field) => `  '${field}',`),
+    '];',
+    '',
+  ].join('\n');
+
+  await updateFile('tools/lint/rules/templatable-fields.generated.ts', content);
+}
+
 async function generateHash() {
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
@@ -296,7 +339,7 @@ await (async () => {
   try {
     // prevent import cycles when trying to generate config options
     const stubFile = 'lib/global-config-option-defaults.generated.ts';
-    if (!fs.existsSync(stubFile)) {
+    if (!(await fs.pathExists(stubFile))) {
       await fs.writeFile(
         stubFile,
         '\nexport const globalConfigOptionDefaults: Record<string, unknown> = {};\n',
@@ -310,6 +353,7 @@ await (async () => {
     await generateVersioningList();
     await generateDatasourceList();
     await generateGlobalConfigOptionDefaults();
+    await generateTemplatableFields();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))

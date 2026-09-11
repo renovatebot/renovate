@@ -1,0 +1,29 @@
+name: 'Label PRs dequeued from the merge queue'
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  # Or when manually requested
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  label-dequeued-prs:
+    runs-on: ubuntu-slim
+    if: github.repository == 'renovatebot/renovate'
+
+    permissions:
+      pull-requests: write
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Find and label PRs dequeued from the merge queue
+        run: bash ./tools/find-dequeued-merge-queue-prs.sh

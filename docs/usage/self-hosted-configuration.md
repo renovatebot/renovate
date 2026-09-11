@@ -9,7 +9,7 @@ Only use these configuration options when you _self-host_ Renovate.
 
 Do _not_ put the self-hosted config options listed on this page in your "repository config" file (`renovate.json` for example), because Renovate will ignore those config options, and may also create a config error issue.
 
-The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
+The config options below _must_ be configured in the admin config, so in either an environment variable, CLI option, or a special file like `config.js`.
 
 !!! note
   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
@@ -82,7 +82,7 @@ This configuration option was formerly known as `allowedPostUpgradeCommands`.
 
 ## `allowedEnv`
 
-Bot administrators can allow users to configure custom environment variables within repo config.
+Administrators can allow users to configure custom environment variables within repo config.
 Only environment variables matching the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
 
 Examples:
@@ -107,6 +107,16 @@ module.exports = {
 `allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
 For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
 
+!!! note
+  `allowedEnv` constrains what a repository, and the presets it extends, may set - it does not constrain you, the self-hosted administrator.
+  <br>
+  The `env` you set in your own config is always applied, as is any `env` set by a preset you chose to `extends`, whether in your global config or in a `repositories[]` entry.
+  <br>
+  A repository can override one of your environment variables only where its name is in the `allowedEnv` allowlist.
+  <br>
+  A repository could override an allowlisted environment variable's value to the empty string, which may or may not disable it, depending on how the tool(s) that consume that environment variable respond.
+  Where the name is not permitted by `allowedEnv`, the self-hosted administrator's value is always used.
+
 ## `allowedHeaders`
 
 `allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
@@ -115,6 +125,11 @@ If needed, you can allow additional headers with the `allowedHeaders` option.
 Any set `allowedHeaders` overrides the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
 The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
+!!! note
+  Where more than one of your own rules matches a request, the `headers` of the most specific rule are used, and replace those of the broader rules it matched alongside.
+  So to keep a header away from a host that a broader rule of yours also matches, give that host a rule of its own which sets `headers`.
+  Whichever of your `headers` that leaves for a request are then applied over any a repository set, and always with the value you set: a repository's `hostRules` - or those of a preset it extends - can neither stop one of them being sent, nor replace its value.
 
 Examples:
 
@@ -163,15 +178,16 @@ Allowed options:
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
 | `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
+| `pixi`          | Allows running `pixi lock` when updating `pixi.lock` files (`pixi` and `pep621` managers).    |
 
 ## `autodiscover`
 
-When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
+When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the Renovate account can access.
 You can limit which repositories Renovate can access by using the `autodiscoverFilter` config option.
 
 ## `autodiscoverFilter`
 
-You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+You can use this option to filter the list of repositories that the Renovate account can access through `autodiscover`.
 The pattern matches against the organization/repo path.
 
 This option supports an array of minimatch-compatible globs or RE2-compatible regex strings.
@@ -427,10 +443,17 @@ Other valid cache namespaces are as follows:
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
 
+!!! warning
+  When using `checkedBranches`, Renovate treats this as you, the self-hosted administrator, consenting to any updates the given branch introduces.
+  This can lead to branches that have not yet passed their `internalChecksFilter` / `minimumReleaseAge` to be created.
+  <br>
+  There is [not currently](https://github.com/renovatebot/renovate/issues/45668) a way to control this.
+  <!-- TODO: #45668 -->
+
 It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
-Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.
 
 ## `configFileNames`
 
@@ -452,6 +475,12 @@ Example:
 ## `configValidationError`
 
 If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
+
+This applies to the repo configuration and any resolved `extends` presets - any validation issues in that resolved configuration will also abort the repository run.
+Leave this disabled if your repositories extend presets you do not control, as a problem introduced by a preset would then stop Renovate from running against your repository.
+
+!!! note
+  Violations of sensitive configuration options, like those governed by [`allowedEnv`](#allowedenv) and [`allowedHeaders`](#allowedheaders), will **always** abort the repository, regardless of the `configValidationError` setting.
 
 ## `containerbaseDir`
 
@@ -507,7 +536,7 @@ The process that runs Renovate must have the correct permissions to delete the c
 
 ## `detectGlobalManagerConfig`
 
-The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
+The purpose of this config option is to allow you (as an administrator) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
 
 This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
 
@@ -691,6 +720,33 @@ If set to a string value, Renovate will log warnings with the `encryptedWarning`
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
 
+## `exitCodeForErrors`
+
+Set `exitCodeForErrors` to `true` to exit with a code that says _which_ kind of error ended the repository run.
+The groups are the exported error constants in [`lib/constants/error-messages.ts`](https://github.com/renovatebot/renovate/blob/HEAD/lib/constants/error-messages.ts):
+
+| Exit code | Repository result                                                            |
+| --------- | ---------------------------------------------------------------------------- |
+| `0`       | Success, or a `RepositoryErrors` result                                      |
+| `1`       | Renovate logged an error, but no repository ended in one of the states below |
+| `2`       | Renovate could not parse its own configuration                               |
+| `3`       | `SystemErrors`                                                               |
+| `4`       | `PlatformErrors`                                                             |
+| `5`       | `ConfigErrors`                                                               |
+| `6`       | `TemporaryErrors`                                                            |
+| `7`       | External host error, lockfile error, or missing API credentials              |
+| `8`       | Unknown error                                                                |
+
+Codes `3` to `8` take precedence over `1`, so a repository that ends in one of those states sets the exit code even if errors were logged as well.
+Renovate still exits `1` when no repository ended in an error state but something was logged at error level, such as a failed changelog fetch during an otherwise successful run.
+
+The results in `RepositoryErrors` map to `0`, because they mean the repository is disabled, archived, empty and so on, and not that the run failed.
+
+When Renovate runs against multiple repositories, the exit code comes from the first repository that ended in an error state.
+Renovate still processes the remaining repositories.
+
+The exit code a repository maps to is always logged in the `Repository finished` message, even when this option is disabled.
+
 ## `exposeAllEnv`
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
@@ -700,7 +756,7 @@ If you must expose all environment variables to package managers, you can set th
   Always consider the security implications of using `exposeAllEnv`!
   Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
-Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
+Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate runs against.
 Alternatively, you can use the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
@@ -760,7 +816,7 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 This is a private PGP or SSH key for signing Git commits.
 
 For PGP, it should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
-Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
+Replace the newlines with `\n` before adding the resulting single-line value to your self-hosted config.
 
 !!! note
   The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
@@ -824,6 +880,115 @@ Use the `extends` field instead of this if, for example, you need the ability fo
   When Renovate resolves `globalExtends` it does not fully process the configuration.
   This means that Renovate does not have the authentication it needs to fetch private things.
 
+## `hostRules`
+
+These `hostRules` fields are only allowed in self-hosted config, and are ignored (or rejected with a config error) if set in repository config or a preset.
+See [`hostRules`](./configuration-options.md#hostrules) for the rest of the available fields.
+
+When Renovate prepares outgoing HTTP traffic, it considers:
+
+> could this outbound HTTP call lead to configuration being included? (i.e. it's part of an `extends`, but _not_ part of i.e. `customDatasources`)
+
+If it is, Renovate treats it more cautiously, alongside the current configuration for [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess).
+
+| Could request become config | `internalHostAccess` setting | Host being requested                                                    | Result                   | How to allow traffic                                                                                                       |
+| --------------------------- | ---------------------------- | ----------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Yes                         | `internalHostAccess=block`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| Yes                         | `internalHostAccess=block`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| Yes                         | `internalHostAccess=block`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Blocked                  | Create a host rule setting `allowInternal=true`, scoped with a `hostType` or a URL-prefix `matchHost`                      |
+| No                          | `internalHostAccess=block`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| No                          | `internalHostAccess=block`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| No                          | `internalHostAccess=block`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Blocked                  | Create a host rule naming the host with `matchHost` (trusted<sup>1</sup>), or one setting `allowInternal=true`             |
+| Yes                         | `internalHostAccess=warn`    | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| Yes                         | `internalHostAccess=warn`    | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| Yes                         | `internalHostAccess=warn`    | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, with a WARN log | Create a host rule setting `allowInternal=true`, scoped with a `hostType` or a URL-prefix `matchHost`<sup>2</sup>          |
+| No                          | `internalHostAccess=warn`    | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| No                          | `internalHostAccess=warn`    | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| No                          | `internalHostAccess=warn`    | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, with a WARN log | Create a host rule naming the host with `matchHost` (trusted<sup>1</sup>), or one setting `allowInternal=true`<sup>2</sup> |
+| Yes                         | `internalHostAccess=allow`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| Yes                         | `internalHostAccess=allow`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| Yes                         | `internalHostAccess=allow`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, no warning      | Already allowed - no host rule needed                                                                                      |
+| No                          | `internalHostAccess=allow`   | `https://docs.renovatebot.com`                                          | Allowed                  |                                                                                                                            |
+| No                          | `internalHostAccess=allow`   | `169.254.169.254`                                                       | Blocked                  | Not possible                                                                                                               |
+| No                          | `internalHostAccess=allow`   | `http://172.16.1.5:8081/artifactory/repo/internal-presets/default.json` | Allowed, no warning      | Already allowed - no host rule needed                                                                                      |
+
+<sup>1</sup>: a "trusted" host rule is one that's configured by the self-hosted administrator
+
+<sup>2</sup>: under `internalHostAccess=warn`, the request is allowed either way - the host rule only silences the WARN log, it isn't required for the request to go through
+
+### `hostRules.allowInternal`
+
+As seen above, specifying `allowInternal` is required when Renovate interacts with private addresses, and is dependent on how [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess) is configured.
+
+If a host is being used i.e. in a `customDatasources` or a `registryUrl` configuration, then an _implicit_ grant is sufficient.
+For instance, if the self-hosted configuration authenticates to a private Artifactory deployment:
+
+```json {configType=global}
+{
+  "hostRules": [
+    {
+      "matchHost": "http://172.16.1.5:8081/artifactory",
+      "username": "renovate-user",
+      "password": "{{ secrets.ARTIFACTORY_PASSWORD }}"
+    }
+  ]
+}
+```
+
+!!! warning
+  An implicit grant does not depend on the rule carrying credentials.
+  _Any_ host rule in your own configuration whose `matchHost` matches the host grants internal access to it, even a rule that only sets something like `timeout` or `concurrentRequestLimit`.
+  This means that when you upgrade, the `hostRules` you already have silently become internal-access grants for the hosts they name.
+
+If there are hosts that you do not want Renovate to access, it is worth explicitly blocking them with:
+
+```json {configType=global}
+{
+  "hostRules": [
+    {
+      "matchHost": "http://localhost:8500/v1/flags/",
+      "allowInternal": false
+    }
+  ]
+}
+```
+
+Setting `allowInternal=false` is also how you keep a rule you need for another reason - credentials, for instance - without it granting internal access to the host it names.
+
+It is recommended to use a URL-prefix `matchHost` (as above) over a bare hostname when permitting loopback addresses, so that only the intended service - and not everything else running on the same host - becomes reachable.
+Include the port in that prefix for the same reason.
+A bare hostname `matchHost` also matches every subdomain of that host, so prefer a URL prefix whenever you want the grant to stay narrow.
+
+If a host is being used i.e. in an `extends`, an _explicit_ grant is required to permit fetching that configuration.
+This covers HTTP presets, and `npm:` presets - whose registry a repository can point at any host with its own `npmrc`.
+The grant must be deliberately scoped, by setting `allowInternal` on a rule with a `hostType`, or on one with a URL-prefix `matchHost`:
+
+```json {configType=global}
+{
+  "hostRules": [
+    {
+      "hostType": "preset",
+      "matchHost": "https://config-server.corp/renovate-presets/",
+      "allowInternal": true
+    },
+    {
+      "hostType": "npm",
+      "matchHost": "https://registry.corp/",
+      "allowInternal": true
+    }
+  ]
+}
+```
+
+The first rule permits HTTP presets from that server, the second `npm:` presets from that registry.
+
+!!! note
+  A URL-form `matchHost` is scoped enough on its own, so a `hostType` is not required.
+  A rule such as `{ "matchHost": "http://10.1.2.3", "allowInternal": true }` therefore permits config-fetching requests - such as HTTP presets - to that URL prefix, and not only lookups.
+  A bare hostname such as `{ "matchHost": "10.1.2.3", "allowInternal": true }` is not scoped, and permits lookups only.
+
+Cloud instance-metadata endpoints are always blocked, and cannot be permitted with this field.
+
 ## `httpCacheTtlDays`
 
 This option sets the number of days that Renovate will cache HTTP responses.
@@ -835,13 +1000,13 @@ Value of `0` means no caching.
 
 ## `ignorePrAuthor`
 
-This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+This is usually needed if someone needs to migrate the account Renovate runs as, including from the Mend Renovate App to self-hosted.
 An additional use case is for GitLab users of project or group access tokens who need to rotate them.
 
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
-You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
+You should only want to enable this if you are changing the account Renovate runs as (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
 
-Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
+Setting this field to `true` in Github or GitLab will also mean that all Issues will be fetched instead of only those by Renovate itself.
 
 ## `includeMirrors`
 
@@ -877,6 +1042,9 @@ The inherited config may include all valid repository config and these config op
 
 This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 
+Configured `hostRules` in inherited config are treated as if they are repository configuration, when applying precedence and whether [`internalHostAccess`](#internalhostaccess) can be configured.
+If you trust each organisation onboarded to this Renovate deployment to be able to specify at an organisation level whether they should be able to access internal hosts, you can set [`inheritConfigTrusted=true`](#inheritconfigtrusted).
+
 We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
 This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
 We will add a smart/dynamic approach in future, so that we can selectively enable `inheritConfig` per organization.
@@ -899,6 +1067,89 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 !!! warning
   Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
 
+## `inheritConfigTrusted`
+
+!!! warning
+  Only set this to `true` if everyone who can push to the `inheritConfigRepoName` repositories are trusted to control these additional settings.
+  This trust is transitive: `hostRules` defined in any preset the inherited config `extends` are trusted at the same level, so everyone who can change those preset sources must be trusted too.
+  If you're running a multi-tenant platform, it is recommended you leave this disabled.
+
+### Host Rules
+
+By default, `hostRules` in inherited config are treated like a repository's own: they may carry credentials or headers, but they cannot grant access to internal hosts.
+
+This is because the `inheritConfigRepoName` repository is controlled by each organization's administrators, rather than the self-hosted administrators themselves.
+As this repository is outside of the self-hosted administrator's control, there may be looser access control than may be wanted on the repository and its ability to provide settings, and so an additional level of opt-in trust is required.
+
+If you opt in by setting `inheritConfigTrusted=true`, this will permit the inherited config to set `hostRules`:
+
+- set [`allowInternal`](#hostrulesallowinternal), which is otherwise a fatal config error there
+- implicitly permit an internal host by naming it in a rule's `matchHost` - whether or not the rule carries credentials - the same way the self-hosted config's `hostRules` do
+
+A self-hosted administrator's configuration still takes precedence for:
+
+- specifying `allowInternal`, allowing you to "veto" access to any hosts
+- `headers`, which are applied last
+- `enabled`, which cannot be overridden by inherited config
+- inherited config still cannot change [`internalHostAccess`](#internalhostaccess), or any other option that is not marked `inheritConfigSupport`
+
+Inherited config cannot permit the hosts of its own `extends` presets, whatever this option is set to: those presets are resolved before its `hostRules` are registered.
+A preset that inherited config extends from an internal host still needs a grant in global config.
+
+Trust does however extend to the `hostRules` defined _in_ those presets: once the inherited config's `extends` are resolved, the `hostRules` they contribute are registered at the same inherited trust level, as if the inherited config had defined them itself.
+
+## `internalHostAccess`
+
+Controls whether Renovate may make HTTP requests to internal hosts: loopback, RFC1918 private ranges, link-local, carrier-grade NAT, IPv6 unique-local, and similar special-use addresses.
+This applies whether the URL names an IP address directly, or a hostname which resolves to one, and covers redirects too.
+
+- `warn` (default): requests to internal hosts are permitted, but each request that `block` would refuse is logged as a warning
+- `block`: requests to internal hosts are refused, unless the host is your configured platform `endpoint`, or is permitted by a `hostRule` in your own (self-hosted administrator) configuration
+- `allow`: requests to internal hosts are permitted, and not logged
+
+The default will become `block` in a future major release, so treat the warnings as the work to do before then.
+Hosted platforms, such as the Mend Renovate App, may run with `block` regardless of this setting.
+
+!!! warning
+  `allow` is a migration escape hatch, and we plan to remove it in a future major release.
+  After that, every internal host Renovate should reach needs a `hostRules` entry permitting it, and there is no way to silence the warnings in bulk.
+  Use the time before then to add those grants, rather than to keep `allow` set.
+
+The policy applies no matter where the URL came from - repository configuration such as `extends` presets or `registryUrls`, package file contents, or your own configuration - if Renovate should be able to reach an internal host, you need to permit it with a `hostRule` rather than setting `allow`.
+
+For most deployments there is nothing to do: internal registries nearly always already have a `hostRules` entry carrying their credentials, which permits them implicitly, and so are never warned about.
+Hosts without one only need naming:
+
+```json {configType=global}
+{
+  "hostRules": [
+    { "matchHost": "artifactory.corp" },
+    {
+      "hostType": "preset",
+      "matchHost": "https://config-server.corp/renovate-presets/",
+      "allowInternal": true
+    }
+  ]
+}
+```
+
+The first rule permits an internal registry the same way a credentialed rule would, and the second deliberately permits fetching HTTP presets from an internal host.
+Anything whose response becomes configuration - HTTP presets, and `npm:` presets - always requires such an explicit, scoped [`allowInternal`](#hostrulesallowinternal) grant, even for a host your other rules already permit.
+
+Once your grants are in place and the warnings have stopped, set `internalHostAccess=block` to enforce the policy today, rather than waiting for the default to change.
+Set `internalHostAccess=allow` only as a temporary escape hatch while you work out which hosts to permit.
+
+If you manage `hostRules` centrally through [`inheritConfig`](#inheritconfig), those rules do not grant anything by default, because that repository is the organization's rather than yours.
+Either opt into trusting them with [`inheritConfigTrusted=true`](#inheritconfigtrusted), or move the rules for internal hosts into your own global config or a `repositories[]` entry.
+
+Cloud instance-metadata endpoints (such as `169.254.169.254`, `169.254.170.2` and `metadata.google.internal`) are **always** blocked, regardless of `internalHostAccess`' setting, as Renovate's HTTP layer never has a legitimate reason to request them.
+This does not affect Renovate's cloud environment detection or cloud SDK authentication, which do not use Renovate's HTTP layer - see [`useCloudMetadataServices`](#usecloudmetadataservices).
+
+If you run Renovate behind a proxy (`HTTP_PROXY` or `HTTPS_PROXY`), the proxy resolves the target hostname, so Renovate cannot check the address it actually connects to.
+Renovate still checks the URL itself and every redirect target, and resolves the hostname up front as a best-effort check, but as the proxy resolves the name again the two answers can differ - such as with DNS rebinding, or split-horizon DNS.
+Renovate lets the request through when it cannot resolve the hostname itself, which is common in locked-down proxy environments.
+Restrict what your proxy may reach with egress controls on the proxy, for defense in depth.
+
 ## `logContext`
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -914,7 +1165,7 @@ Otherwise, it queries all the supported datasources (check default value).
 Example:
 
 ```js
-modules.exports = {
+module.exports = {
   mergeConfidenceDatasources: ['npm'],
 };
 ```
@@ -946,7 +1197,7 @@ Use an empty string to indicate that the preset should be ignored rather than re
 Example:
 
 ```js
-modules.exports = {
+module.exports = {
   migratePresets: {
     '@company': 'local>org/renovate-config',
   },
@@ -962,8 +1213,8 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 Only set this to `false` if all three statements are true:
 
-- You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
-- You want to run Renovate on every repository the bot has access to
+- You've configured Renovate entirely on the admin side (e.g. empty `renovate.json` in repositories)
+- You want to run Renovate on every repository Renovate has access to
 - You want to skip all onboarding PRs
 
 ## `onboardingAutoCloseAge`
@@ -1025,7 +1276,7 @@ Otherwise, it will continue as normal.
 
 `optimizeForDisabled` can make initialization quicker in cases where most repositories are disabled, but it uses an extra API call for enabled repositories.
 
-A second, advanced, use also exists when the bot global config has `extends: [":disableRenovate"]`.
+A second, advanced, use also exists when the global config has `extends: [":disableRenovate"]`.
 In that case, Renovate searches the repository config file for any of these configurations:
 
 - `extends: [":enableRenovate"]`
@@ -1107,11 +1358,11 @@ Is this correct? (y/N) y
 
 GnuPG needs to construct a user ID to identify your key.
 
-Real name: Renovate Bot
+Real name: Renovate
 Email address: renovate@whitesourcesoftware.com
 Comment:
 You selected this USER-ID:
-    "Renovate Bot <renovate@whitesourcesoftware.com>"
+    "Renovate <renovate@whitesourcesoftware.com>"
 
 Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
 
@@ -1121,7 +1372,7 @@ public and secret key created and signed.
 
 pub   rsa4096 2021-09-10 [SC]
       794B820F34B34A8DF32AADB20649CEXAMPLEONLY
-uid                      Renovate Bot <renovate@whitesourcesoftware.com>
+uid                      Renovate <renovate@whitesourcesoftware.com>
 sub   rsa4096 2021-09-10 [E]
 ```
 
@@ -1136,7 +1387,7 @@ sub   rsa4096 2021-09-10 [E]
 ```bash
 ❯ gpg --edit-key renovate@whitesourcesoftware.com
 gpg> showpref
-[ultimate] (1). Renovate Bot <renovate@whitesourcesoftware.com>
+[ultimate] (1). Renovate <renovate@whitesourcesoftware.com>
      Cipher: AES256, AES192, AES, 3DES
      AEAD: OCB, EAX
      Digest: SHA512, SHA384, SHA256, SHA224, SHA1
@@ -1160,7 +1411,7 @@ gpg> save
 - Run `gpg --armor --export-secret-keys YOUR_NEW_KEY_ID > renovate-private-key.asc` to generate an armored (text-based) private key file
 - Run `gpg --armor --export YOUR_NEW_KEY_ID > renovate-public-key.asc` to generate an armored (text-based) public key file
 
-The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
+The private key should then be added to your Renovate global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
 
 !!! note "Base64 Encoding Support"
@@ -1223,6 +1474,13 @@ Example:
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## `rebaseAllOpenBranches`
+
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of all open PRs.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
+Example: `renovate --rebase-all-open-branches=true renovate-reproductions/checked` will rebase all open PRs in the `renovate-reproductions/checked` repository.
+
 ## `redisPrefix`
 
 If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
@@ -1270,13 +1528,22 @@ Defines how the report is exposed:
 
 ## `repositories`
 
-Elements in the `repositories` array can be an object if you wish to define more settings.
-Example:
+The `repositories` array can contain a mix of repository names, and objects which can override Global and Repo configuration for a specified repository.
+
+For instance:
 
 ```js
-{
-  repositories: [{ repository: 'g/r1', bumpVersion: 'patch' }, 'g/r2'];
-}
+module.exports = {
+  repositories: [
+    // we trust this repository's authors to run `make generate` in some cases
+    {
+      repository: 'g/r1',
+      allowedCommands: ['^make generate$'],
+    },
+    // this repository doesn't get any specific configuration
+    'g/r2',
+  ],
+};
 ```
 
 ## `repositoryCache`
@@ -1348,7 +1615,7 @@ Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.ama
 
 ## `secrets`
 
-Secrets may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+Secrets may be configured by an administrator in `config.js`, which will then make them available for templating within repository configs.
 For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
 
 ```js
@@ -1417,7 +1684,7 @@ Renovate will use the token to discover its username on the platform, including 
 
 ## `variables`
 
-Variables may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+Variables may be configured by an administrator in `config.js`, which will then make them available for templating within repository configs.
 This config option behaves exactly like [secrets](#secrets), except that it won't be masked in the logs.
 For example, to configure a `SOME_VARIABLE` to be accessible by all repositories:
 
@@ -1463,7 +1730,7 @@ By default, Renovate processes each repository that it finds.
 You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
 
 Known use cases consist, among other things, of horizontal scaling setups.
-See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
+See [Scaling Renovate on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

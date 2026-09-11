@@ -21,10 +21,12 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
   const unsafe: SimpleGitOptions['unsafe'] = {
     allowUnsafeSshCommand: true, // For custom `GIT_SSH_COMMAND`.
     allowUnsafeConfigEnvCount: true, // For custom `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_*` and `GIT_CONFIG_VALUE_*`.
+    allowUnsafeAskPass: true, // For custom `GIT_ASKPASS`
   };
   if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
     unsafe.allowUnsafeHooksPath = true;
   }
+
   const config: Partial<SimpleGitOptions> = {
     completion: {
       onClose: true,

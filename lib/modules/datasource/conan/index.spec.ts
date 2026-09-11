@@ -37,7 +37,7 @@ describe('modules/datasource/conan/index', () => {
   describe('getDigest', () => {
     it('handles package without digest', async () => {
       digestConfig.packageName = 'fakepackage/1.2@_/_';
-      expect(await getDigest(digestConfig)).toBeNull();
+      await expect(getDigest(digestConfig)).resolves.toBeNull();
     });
 
     it('handles digest', async () => {
@@ -48,7 +48,7 @@ describe('modules/datasource/conan/index', () => {
         .reply(200, pocoRevisions[version]);
       digestConfig.packageName = `poco/${version}@_/_`;
       digestConfig.currentDigest = '4fc13d60fd91ba44fefe808ad719a5af';
-      expect(await getDigest(digestConfig, version)).toBe(
+      await expect(getDigest(digestConfig, version)).resolves.toBe(
         '3a9b47caee2e2c1d3fb7d97788339aa8',
       );
     });
@@ -61,7 +61,7 @@ describe('modules/datasource/conan/index', () => {
         .reply(200, []);
       digestConfig.packageName = `poco/${version}@_/_`;
       digestConfig.currentDigest = '4fc13d60fd91ba44fefe808ad719a5af';
-      expect(await getDigest(digestConfig, version)).toBeNull();
+      await expect(getDigest(digestConfig, version)).resolves.toBeNull();
     });
   });
 
@@ -71,12 +71,12 @@ describe('modules/datasource/conan/index', () => {
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'fakepackage/1.2@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles empty return', async () => {
@@ -84,12 +84,12 @@ describe('modules/datasource/conan/index', () => {
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'fakepackage/1.2@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles bad registries', async () => {
@@ -98,12 +98,12 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=poco')
         .reply(404);
       config.registryUrls = ['https://fake.bintray.com/'];
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'poco/1.2@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles missing packages', async () => {
@@ -111,12 +111,12 @@ describe('modules/datasource/conan/index', () => {
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, fakeJson);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'fakepackage/1.2@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real versioned data', async () => {
@@ -124,12 +124,12 @@ describe('modules/datasource/conan/index', () => {
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'poco/1.2@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: 'https://not.conan.io',
         releases: [
           {
@@ -156,12 +156,12 @@ describe('modules/datasource/conan/index', () => {
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=FooBar')
         .reply(200, mixedCaseJson);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'FooBar/1.0.0@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: 'https://not.conan.io',
         releases: [
           {
@@ -184,13 +184,13 @@ describe('modules/datasource/conan/index', () => {
           '/repos/conan-io/conan-center-index/contents/recipes/poco/config.yml',
         )
         .reply(200, pocoYamlGitHubContent);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           registryUrls: [defaultRegistryUrl],
           packageName: 'poco/1.2@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: 'https://center2.conan.io',
         releases: [
           {
@@ -225,23 +225,23 @@ describe('modules/datasource/conan/index', () => {
           '/repos/conan-io/conan-center-index/contents/recipes/poco/config.yml',
         )
         .reply(200, '');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           registryUrls: [defaultRegistryUrl],
           packageName: 'poco/1.2@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('rejects userAndChannel for Conan Center', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           registryUrls: [defaultRegistryUrl],
           packageName: 'poco/1.2@foo/bar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles mismatched userAndChannel versioned data', async () => {
@@ -250,12 +250,12 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
       config.packageName = 'poco';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'poco/1.2@un/matched',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles malformed packages', async () => {
@@ -264,12 +264,12 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=bad')
         .reply(200, malformedJson);
       config.packageName = 'bad';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'bad/1.2@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: 'https://not.conan.io',
         releases: [
           {
@@ -286,12 +286,12 @@ describe('modules/datasource/conan/index', () => {
         .replyWithError('error');
       config.registryUrls = ['https://fake.bintray.com/'];
       config.packageName = 'poco';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'poco/1.2@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles missing slash on registries', async () => {
@@ -301,12 +301,12 @@ describe('modules/datasource/conan/index', () => {
         .reply(200, fakeJson);
       config.registryUrls = ['https://fake.bintray.com'];
       config.packageName = 'poco';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'poco/1.2@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('artifactory sourceurl', async () => {
@@ -344,12 +344,12 @@ describe('modules/datasource/conan/index', () => {
         'https://fake.artifactory.com/artifactory/api/conan/test-repo',
       ];
       config.packageName = 'arti';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'arti/1.1@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
         releases: [
@@ -377,12 +377,12 @@ describe('modules/datasource/conan/index', () => {
         );
       config.registryUrls = ['https://fake.artifactory.com'];
       config.packageName = 'arti';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'arti/1.1@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: 'https://fake.artifactory.com',
         releases: [
           {
@@ -410,12 +410,12 @@ describe('modules/datasource/conan/index', () => {
         'https://fake.artifactory.com/artifactory/api/conan/test-repo',
       ];
       config.packageName = 'arti';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'arti/1.1@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
         releases: [],
@@ -431,12 +431,12 @@ describe('modules/datasource/conan/index', () => {
         'https://fake.artifactory.com/artifactory/api/conan/test-repo',
       ];
       config.packageName = 'arti';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'arti/1.1@_/_',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('artifactory no package url', async () => {
@@ -470,12 +470,12 @@ describe('modules/datasource/conan/index', () => {
         'https://fake.artifactory.com/artifactory/api/conan/test-repo',
       ];
       config.packageName = 'arti';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'arti/1.1@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
         releases: [
@@ -509,12 +509,12 @@ describe('modules/datasource/conan/index', () => {
         'https://fake.artifactory.com/artifactory/api/conan/test-repo',
       ];
       config.packageName = 'arti';
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           packageName: 'arti/1.1@_/_',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
         releases: [
