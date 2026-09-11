@@ -74,11 +74,17 @@ describe('modules/manager/buf/extract', () => {
           - remote: bsr.example.com/owner/name:v0.1.0
       `;
       const res = extractPackageFile(content, 'buf.gen.yaml', {});
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'owner/name',
-        registryUrls: ['https://bsr.example.com'],
-        currentValue: 'v0.1.0',
-      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'owner/name',
+          datasource: BufPluginDatasource.id,
+          registryUrls: ['https://bsr.example.com'],
+          currentValue: 'v0.1.0',
+          replaceString: 'bsr.example.com/owner/name:v0.1.0',
+          autoReplaceStringTemplate:
+            'bsr.example.com/owner/name:{{#if newValue}}{{newValue}}{{/if}}',
+        },
+      ]);
     });
 
     it('skips a v1 local plugin', () => {
@@ -106,6 +112,24 @@ describe('modules/manager/buf/extract', () => {
       const content = `
         plugins:
           - remote: buf.build/bufbuild/connect-go
+            out: gen/go
+      `;
+      const res = extractPackageFile(content, 'buf.gen.yaml', {});
+      expect(res?.deps).toEqual([
+        {
+          depName: 'bufbuild/connect-go',
+          datasource: BufPluginDatasource.id,
+          registryUrls: ['https://buf.build'],
+          skipReason: 'unspecified-version',
+        },
+      ]);
+    });
+
+    it('flags a remote plugin pinned only by revision', () => {
+      const content = `
+        plugins:
+          - remote: buf.build/bufbuild/connect-go
+            revision: 2
             out: gen/go
       `;
       const res = extractPackageFile(content, 'buf.gen.yaml', {});
