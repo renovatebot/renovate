@@ -369,6 +369,30 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ]);
     });
 
+    it('prefers the derived Java version over the extracted constraint', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        }),
+      );
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+
+      await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config: { ...config, extractedConstraints: { java: '8.0.1' } },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool java 11.0.1' },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+        },
+      ]);
+    });
+
     it('distributionSha256Sum 404', async () => {
       const execSnapshots = mockExecAll();
       httpMock

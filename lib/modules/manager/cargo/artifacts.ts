@@ -16,6 +16,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
 
 const gitExec = withGitEnvironment(['cargo']);
@@ -125,12 +126,14 @@ async function updateArtifactsImpl(
     ];
   }
 
+  const rustConstraint = await resolveToolConstraint(config, 'rust');
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug(`Updating ${lockFileName}`);
 
     if (isLockFileMaintenance) {
-      await cargoUpdate(packageFileName, true, config.constraints?.rust);
+      await cargoUpdate(packageFileName, true, rustConstraint);
     } else {
       const hasNonCrateDep = updatedDeps.some(
         (dep) => dep.datasource !== CrateDatasource.id,
@@ -149,14 +152,10 @@ async function updateArtifactsImpl(
             'Missing locked version for dependency',
           );
         }
-        await cargoUpdate(packageFileName, false, config.constraints?.rust);
+        await cargoUpdate(packageFileName, false, rustConstraint);
       } else {
         // If all dependencies have locked versions then update them precisely.
-        await cargoUpdatePrecise(
-          packageFileName,
-          updatedDeps,
-          config.constraints?.rust,
-        );
+        await cargoUpdatePrecise(packageFileName, updatedDeps, rustConstraint);
       }
     }
 

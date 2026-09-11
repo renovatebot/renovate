@@ -402,6 +402,39 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config: {
+        extractedConstraints: {
+          mise: '2026.6.12',
+          node: '24.16.0',
+          npm: '11.4.2',
+          go: '1.24.4',
+          ruby: '3.4.3',
+        },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool mise 2026.6.12' },
+      { cmd: 'install-tool node 24.16.0' },
+      { cmd: 'install-tool npm 11.4.2' },
+      { cmd: 'install-tool golang 1.24.4' },
+      { cmd: 'install-tool ruby 3.4.3' },
+      { cmd: trustCmd },
+      { cmd: updateToolCmd },
+    ]);
+  });
+
   it.each`
     depName                              | oldVersion    | newVersion    | newPackageFileContent
     ${'npm:renovate'}                    | ${'43.220.0'} | ${'43.233.3'} | ${`[tools]\n"npm:renovate" = "43.233.3"\n`}

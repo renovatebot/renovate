@@ -2,9 +2,8 @@ import semver from 'semver';
 import upath from 'upath';
 import type { ExtraEnv } from '../../../util/exec/types.ts';
 import { privateCacheDir } from '../../../util/fs/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 
-export function generateHelmEnvs(config: UpdateArtifactsConfig): ExtraEnv {
+export function generateHelmEnvs(helmConstraint: string | undefined): ExtraEnv {
   const cacheDir = privateCacheDir();
 
   const envs: ExtraEnv = {
@@ -14,10 +13,7 @@ export function generateHelmEnvs(config: UpdateArtifactsConfig): ExtraEnv {
     HELM_REPOSITORY_CACHE: upath.join(cacheDir, 'repositories'),
   };
 
-  if (
-    config.constraints?.helm &&
-    !semver.intersects(config.constraints.helm, '>=3.8.0')
-  ) {
+  if (helmConstraint && !semver.intersects(helmConstraint, '>=3.8.0')) {
     envs.HELM_EXPERIMENTAL_OCI = '1';
   }
 

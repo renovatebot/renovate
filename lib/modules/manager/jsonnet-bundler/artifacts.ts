@@ -12,6 +12,7 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 function dependencyUrl(dep: PackageDependency): string {
   const url = dep.packageName!;
@@ -37,7 +38,7 @@ export async function updateArtifacts(
 
   const jsonnetBundlerToolConstraint: ToolConstraint = {
     toolName: 'jb',
-    constraint: config.constraints?.jb,
+    constraint: await resolveToolConstraint(config, 'jb'),
   };
 
   const execOptions: ExecOptions = {

@@ -24,6 +24,7 @@ import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { extractPackageFile } from './extract.ts';
 
 export function getMatchingHostRule(url: string): HostRule | null {
@@ -145,12 +146,12 @@ export async function updateArtifacts({
     }
     const cmd = 'pipenv lock';
     const pipfileDir = getParentDir(ensureLocalPath(pipfileName));
-    const tagConstraint =
-      config.constraints?.python ??
-      (await pipenvDetect.getPythonConstraint(pipfileDir));
-    const pipenvConstraint =
-      config.constraints?.pipenv ??
-      (await pipenvDetect.getPipenvConstraint(pipfileDir));
+    const tagConstraint = await resolveToolConstraint(config, 'python', () =>
+      pipenvDetect.getPythonConstraint(pipfileDir),
+    );
+    const pipenvConstraint = await resolveToolConstraint(config, 'pipenv', () =>
+      pipenvDetect.getPipenvConstraint(pipfileDir),
+    );
     const extraEnv: Opt<ExtraEnv> = {
       PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),

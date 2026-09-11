@@ -16,6 +16,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants.ts';
 import { getNodeToolConstraint } from './post-update/node-version.ts';
 import { processHostRules } from './post-update/rules.ts';
@@ -110,7 +111,7 @@ async function handlePackageManagerUpdates(
       nodeConstraints,
       {
         toolName: 'corepack',
-        constraint: config.constraints?.corepack,
+        constraint: await resolveToolConstraint(config, 'corepack'),
       },
     ],
     docker: {},

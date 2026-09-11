@@ -541,6 +541,34 @@ describe('modules/manager/vendir/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    await expect(
+      vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: vendirFile,
+        config: {
+          ...config,
+          extractedConstraints: { vendir: '0.35.0', helm: '3.17.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool vendir 0.35.0' },
+      { cmd: 'install-tool helm 3.17.0' },
+      { cmd: 'vendir sync' },
+    ]);
+  });
+
   describe('Docker', () => {
     beforeEach(() => {
       GlobalConfig.set({

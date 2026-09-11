@@ -312,6 +312,24 @@ describe('modules/manager/bun/artifacts', () => {
         ]);
       });
     });
+
+    it('falls back to the extracted bun constraint', async () => {
+      updateArtifact.config = { extractedConstraints: { bun: '1.1.0' } };
+      updateArtifact.updatedDeps = [
+        { manager: 'bun', lockFiles: ['bun.lock'] },
+      ];
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+
+      await updateArtifacts(updateArtifact);
+
+      expect(exec).toHaveBeenCalledWith(
+        'bun install --ignore-scripts',
+        expect.objectContaining({
+          toolConstraints: [{ toolName: 'bun', constraint: '1.1.0' }],
+        }),
+      );
+    });
   });
 
   describe('bun command execution', () => {

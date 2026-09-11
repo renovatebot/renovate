@@ -887,6 +887,57 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe('package-lock-contents');
   });
 
+  it('falls back to the extracted corepack constraint', async () => {
+    vi.stubEnv('CONTAINERBASE', 'true');
+
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+
+    Fixtures.mock(
+      {
+        'package.json': '{ "packageManager": "yarn@3.0.0" }',
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir',
+    );
+
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
+      releases: [
+        { version: '0.17.0' },
+        { version: '0.17.1' },
+        { version: '0.18.0' },
+      ],
+    });
+
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+      // the yarn version from `package.json` wins over the extracted one, which
+      // would otherwise select yarn 1
+      extractedConstraints: {
+        yarn: '1.22.0',
+        corepack: '^0.17.0',
+      },
+    });
+
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool corepack 0.17.1', options: { cwd: 'some-dir' } },
+      { cmd: 'yarn install --mode=update-lockfile' },
+    ]);
+
+    expect(res.lockFile).toBe('package-lock-contents');
+  });
+
   it('uses slim yarn instead of corepack', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();

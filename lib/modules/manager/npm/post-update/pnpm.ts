@@ -20,6 +20,7 @@ import {
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
 import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -55,9 +56,13 @@ export async function generateLockFile(
       toolName: 'pnpm',
       constraint:
         getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
-        config.constraints?.pnpm ?? // from user config or extraction
-        getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in package.json > packageManager or engines
-        (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
+        (await resolveToolConstraint(
+          config,
+          'pnpm',
+          async () =>
+            getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in package.json > packageManager or engines
+            (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
+        )),
     };
 
     const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);

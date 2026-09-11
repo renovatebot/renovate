@@ -29,6 +29,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { PackageLock } from '../schema.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -121,10 +122,13 @@ export async function generateLockFile(
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
       constraint:
-        config.constraints?.npm ??
-        getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
-        (await getNpmConstraintFromPackageLock(lockFileDir, filename)) ??
-        null,
+        (await resolveToolConstraint(
+          config,
+          'npm',
+          async () =>
+            getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
+            (await getNpmConstraintFromPackageLock(lockFileDir, filename)),
+        )) ?? null,
     };
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||

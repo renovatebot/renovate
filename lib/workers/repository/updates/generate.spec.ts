@@ -352,6 +352,39 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe(false);
     });
 
+    it('merges extractedConstraints of all upgrades', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { python: '==3.11' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { poetry: '1.8.0' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.extractedConstraints).toEqual({
+        python: '==3.11',
+        poetry: '1.8.0',
+      });
+    });
+
     it('groups major updates with different versions but same newValue, no recreateWhen', () => {
       const branch = [
         {

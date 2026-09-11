@@ -261,6 +261,35 @@ describe('modules/manager/mix/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted erlang and elixir constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '24.3.4.1' }, { version: '26.2.5.4' }],
+    });
+
+    await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [{ depName: 'plug' }],
+      newPackageFileContent: '{}',
+      config: {
+        ...config,
+        extractedConstraints: { erlang: '24.3.4.1', elixir: '1.14.5' },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 24.3.4.1' },
+      { cmd: 'install-tool elixir 1.14.5' },
+      { cmd: 'mix deps.update plug' },
+    ]);
+  });
+
   it('authenticates to private repositories in updated dependencies', async () => {
     GlobalConfig.set({
       ...adminConfig,

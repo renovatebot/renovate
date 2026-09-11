@@ -20,10 +20,7 @@ describe('modules/manager/kustomize/common', () => {
 
   describe('generateHelmEnvs', () => {
     it('generates envs for specific helm version not requiring HELM_EXPERIMENTAL_OCI', () => {
-      const config = {
-        constraints: { helm: '3.8.0' },
-      };
-      const envs = generateHelmEnvs(config);
+      const envs = generateHelmEnvs('3.8.0');
       expect(envs).toEqual({
         HELM_REGISTRY_CONFIG:
           '/tmp/cache/__renovate-private-cache/registry.json',
@@ -35,10 +32,7 @@ describe('modules/manager/kustomize/common', () => {
     });
 
     it('generates envs for helm version range not requiring HELM_EXPERIMENTAL_OCI', () => {
-      const config = {
-        constraints: { helm: '>=3.7.0' },
-      };
-      const envs = generateHelmEnvs(config);
+      const envs = generateHelmEnvs('>=3.7.0');
       expect(envs).toEqual({
         HELM_REGISTRY_CONFIG:
           '/tmp/cache/__renovate-private-cache/registry.json',
@@ -50,11 +44,7 @@ describe('modules/manager/kustomize/common', () => {
     });
 
     it('generates envs for specific helm version requiring HELM_EXPERIMENTAL_OCI', () => {
-      const config = {
-        constraints: { helm: '3.7.0' },
-        postUpdateOptions: ['kustomizeInflateHelmCharts'],
-      };
-      const envs = generateHelmEnvs(config);
+      const envs = generateHelmEnvs('3.7.0');
       expect(envs).toEqual({
         HELM_REGISTRY_CONFIG:
           '/tmp/cache/__renovate-private-cache/registry.json',
@@ -67,11 +57,7 @@ describe('modules/manager/kustomize/common', () => {
     });
 
     it('generates envs for helm range version requiring HELM_EXPERIMENTAL_OCI', () => {
-      const config = {
-        constraints: { helm: '<3.8.0' },
-        postUpdateOptions: ['kustomizeInflateHelmCharts'],
-      };
-      const envs = generateHelmEnvs(config);
+      const envs = generateHelmEnvs('<3.8.0');
       expect(envs).toEqual({
         HELM_REGISTRY_CONFIG:
           '/tmp/cache/__renovate-private-cache/registry.json',

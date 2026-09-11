@@ -151,6 +151,38 @@ describe('modules/manager/devbox/artifacts', () => {
       ]);
     });
 
+    it('falls back to the extracted devbox constraint', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(`{}`);
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce(
+        Buffer.from('Old devbox.lock') as never,
+      );
+      fs.readLocalFile.mockResolvedValueOnce(
+        Buffer.from('New devbox.lock') as never,
+      );
+
+      await updateArtifacts({
+        packageFileName: 'devbox.json',
+        newPackageFileContent: devboxJson,
+        updatedDeps: [
+          {
+            manager: 'devbox',
+            lockFiles: ['devbox.lock'],
+            depName: 'nodejs',
+          },
+        ],
+        config: {
+          extractedConstraints: {
+            devbox: '0.13.0',
+          },
+        },
+      });
+
+      // the extracted constraint decides that `--no-install` is unsupported
+      expect(execSnapshots).toMatchObject([{ cmd: 'devbox install' }]);
+    });
+
     it('returns installed devbox.lock with multiple updated deps', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(`{}`);

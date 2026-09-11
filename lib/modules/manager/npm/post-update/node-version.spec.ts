@@ -26,6 +26,27 @@ describe('modules/manager/npm/post-update/node-version', () => {
       expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
+    it('falls back to the extracted constraints', async () => {
+      const res = await getNodeConstraint(
+        { extractedConstraints: { node: '^18.0.0' } },
+        [],
+        '',
+        new Lazy(() => Promise.resolve({})),
+      );
+      expect(res).toBe('^18.0.0');
+    });
+
+    it('prefers a derived constraint over the extracted constraints', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('12.16.2\n');
+      const res = await getNodeConstraint(
+        { extractedConstraints: { node: '^18.0.0' } },
+        [],
+        '',
+        new Lazy(() => Promise.resolve({})),
+      );
+      expect(res).toBe('12.16.2');
+    });
+
     it('returns .node-version value', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       fs.readLocalFile.mockResolvedValueOnce('12.16.1\n');

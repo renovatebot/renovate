@@ -6,9 +6,10 @@ import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export async function updateArtifacts({
-  config: { constraints, isLockFileMaintenance },
+  config,
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -19,8 +20,11 @@ export async function updateArtifacts({
     return null;
   }
 
-  const supportsNoInstall = constraints?.devbox
-    ? semver.intersects(constraints.devbox, '>=0.14.0')
+  const nixConstraint = await resolveToolConstraint(config, 'nix');
+  const devboxConstraint = await resolveToolConstraint(config, 'devbox');
+
+  const supportsNoInstall = devboxConstraint
+    ? semver.intersects(devboxConstraint, '>=0.14.0')
     : true;
 
   const execOptions: ExecOptions = {
@@ -31,18 +35,18 @@ export async function updateArtifacts({
       // https://github.com/jetify-com/devbox/issues/2585
       {
         toolName: 'nix',
-        constraint: constraints?.nix,
+        constraint: nixConstraint,
       },
       {
         toolName: 'devbox',
-        constraint: constraints?.devbox,
+        constraint: devboxConstraint,
       },
     ],
     docker: {},
   };
 
   const cmd = [];
-  if (isLockFileMaintenance) {
+  if (config.isLockFileMaintenance) {
     cmd.push(
       supportsNoInstall ? 'devbox update --no-install' : 'devbox update',
     );

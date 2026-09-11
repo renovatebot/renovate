@@ -25,7 +25,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
-import { applyGitSource } from '../../util.ts';
+import { applyGitSource, resolveToolConstraint } from '../../util.ts';
 import { type PyProject, UvLockfile, type UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
@@ -208,13 +208,19 @@ export class UvProcessor extends BasePyProjectProcessor {
 
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
-        constraint:
-          config.constraints?.python ?? project.project?.['requires-python'],
+        constraint: await resolveToolConstraint(
+          config,
+          'python',
+          () => project.project?.['requires-python'],
+        ),
       };
       const uvConstraint: ToolConstraint = {
         toolName: 'uv',
-        constraint:
-          config.constraints?.uv ?? project.tool?.uv?.['required-version'],
+        constraint: await resolveToolConstraint(
+          config,
+          'uv',
+          () => project.tool?.uv?.['required-version'],
+        ),
       };
 
       const extraEnv = {

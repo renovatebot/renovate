@@ -294,6 +294,30 @@ describe('modules/manager/copier/artifacts', () => {
       },
     );
 
+    it('falls back to the extracted constraints', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgrades,
+        newPackageFileContent: '',
+        config: {
+          ...config,
+          constraints: {},
+          extractedConstraints: { python: '3.11.3', copier: '9.1.0' },
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool python 3.11.3' },
+        { cmd: 'install-tool copier 9.1.0' },
+        {
+          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
+        },
+      ]);
+    });
+
     it('includes --trust when allowScripts is true and ignoreScripts is false', async () => {
       GlobalConfig.set({ ...adminConfig, allowScripts: true });
       const execSnapshots = mockExecAll();

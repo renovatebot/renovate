@@ -941,6 +941,35 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted rust constraint', async () => {
+    fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    await expect(
+      cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: { ...config, extractedConstraints: { rust: '1.65.0' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool rust 1.65.0' },
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
+  });
+
   it('catches errors', async () => {
     fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');

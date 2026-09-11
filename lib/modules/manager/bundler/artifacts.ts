@@ -147,7 +147,7 @@ export async function updateArtifacts(
       {} as Record<string, string>,
     );
 
-    const bundler = getBundlerConstraint(
+    const bundler = await getBundlerConstraint(
       updateArtifact,
       existingLockFileContent,
     );

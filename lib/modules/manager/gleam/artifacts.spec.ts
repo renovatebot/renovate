@@ -168,6 +168,24 @@ describe('modules/manager/gleam/artifacts', () => {
       ]);
     });
 
+    it('falls back to the extracted gleam constraint', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+      updateArtifact.updatedDeps = [{ manager: 'gleam' }];
+      updateArtifact.config.extractedConstraints = { gleam: '1.4.1' };
+      fs.readLocalFile.mockResolvedValueOnce('old');
+      fs.readLocalFile.mockResolvedValueOnce('new');
+      fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts(updateArtifact);
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool gleam 1.4.1' },
+        { cmd: 'gleam deps update' },
+      ]);
+    });
+
     it('prevents injections', async () => {
       updateArtifact.updatedDeps = [{ depName: '|| date' }];
       fs.readLocalFile.mockResolvedValueOnce('old');

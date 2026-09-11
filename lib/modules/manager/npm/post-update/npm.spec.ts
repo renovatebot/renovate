@@ -555,6 +555,62 @@ describe('modules/manager/npm/post-update/npm', () => {
     ]);
   });
 
+  it('falls back to the extracted npm constraint', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { extractedConstraints: { npm: '6.0.0' } },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool npm 6.0.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
+  it('prefers the derived npm constraint over the extracted one', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{"packageManager":"npm@8.0.0"}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { extractedConstraints: { npm: '6.0.0' } },
+      [{ isLockFileMaintenance: true }],
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool npm 8.0.0' },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+      },
+    ]);
+  });
+
   describe('passes NODE_OPTIONS', () => {
     it('if nodeMaxMemory set on global config', async () => {
       GlobalConfig.set({
