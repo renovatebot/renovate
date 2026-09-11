@@ -278,19 +278,19 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
-        deps.push(dep.depName!);
+        deps.push(`${dep.depName!}==${dep.newVersion!}`);
         break;
       }
       case depTypes.uvDevDependencies:
       case depTypes.uvSources: {
-        deps.push(dep.depName!);
+        deps.push(`${dep.depName!}==${dep.newVersion!}`);
         break;
       }
       case depTypes.buildSystemRequires:
         // build requirements are not locked in the lock files, no need to update.
         break;
       default: {
-        deps.push(dep.packageName!);
+        deps.push(`${dep.packageName!}==${dep.newVersion!}`);
       }
     }
   }
