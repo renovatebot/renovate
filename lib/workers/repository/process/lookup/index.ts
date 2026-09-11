@@ -182,6 +182,18 @@ async function applyMinimumReleaseAgeToDigestUpdate(
   }
 }
 
+/**
+ * Resolve `v` back to its pre-`extractVersion` tag via `Release.versionOrig`,
+ * since `getDigest()` needs the real tag. Returns `v` unchanged if there's no
+ * matching release (e.g. extractVersion wasn't configured).
+ */
+function resolveOrigTag(
+  dependency: ReleaseResult | null,
+  v: string | undefined,
+): string | undefined {
+  return dependency?.releases.find((r) => r.version === v)?.versionOrig ?? v;
+}
+
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
 ): Promise<Result<UpdateResult>> {
@@ -860,6 +872,7 @@ export async function lookupUpdates(
         ) {
           const getDigestConfig: GetDigestInputConfig = {
             ...config,
+            currentValue: resolveOrigTag(dependency, config.currentValue),
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
           };
@@ -893,7 +906,7 @@ export async function lookupUpdates(
 
           update.newDigest ??= await getDigest(
             getDigestConfig,
-            update.newValue,
+            resolveOrigTag(dependency, update.newValue),
           );
 
           // If the digest could not be determined, report this as otherwise the
