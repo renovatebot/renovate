@@ -175,6 +175,40 @@ describe('modules/manager/helm-values/extract', () => {
       ]);
     });
 
+    it('uses name as an alias for repository', () => {
+      const result = extractPackageFile(
+        codeBlock`image:
+  name: traefik
+  tag: 2.2.8`,
+        packageFile,
+        config,
+      );
+
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '2.2.8',
+            depName: 'traefik',
+            datasource: 'docker',
+            versioning: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('prefers repository when name is also present', () => {
+      const result = extractPackageFile(
+        codeBlock`image:
+  name: ignored
+  repository: traefik
+  tag: 2.2.8`,
+        packageFile,
+        config,
+      );
+
+      expect(result?.deps[0].depName).toBe('traefik');
+    });
+
     it('extract data from file with multiple documents', () => {
       const multiDocumentFile = Fixtures.get(
         'single_file_with_multiple_documents.yaml',
