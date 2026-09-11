@@ -1,5 +1,6 @@
 import { BitbucketServerTagsDatasource } from '../modules/datasource/bitbucket-server-tags/index.ts';
 import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags/index.ts';
+import { GerritTagsDatasource } from '../modules/datasource/gerrit-tags/index.ts';
 import { GiteaTagsDatasource } from '../modules/datasource/gitea-tags/index.ts';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
@@ -14,6 +15,7 @@ import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
   FORGEJO_API_USING_HOST_TYPES,
+  GERRIT_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -96,5 +98,12 @@ describe('constants/platform', () => {
     expect(
       BITBUCKET_SERVER_API_USING_HOST_TYPES.includes('bitbucket-server'),
     ).toBeTrue();
+  });
+
+  it('should be part of the GERRIT_API_USING_HOST_TYPES', () => {
+    expect(
+      GERRIT_API_USING_HOST_TYPES.includes(GerritTagsDatasource.id),
+    ).toBeTrue();
+    expect(GERRIT_API_USING_HOST_TYPES.includes('gerrit')).toBeTrue();
   });
 });

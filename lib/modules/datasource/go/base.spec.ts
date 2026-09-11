@@ -2,6 +2,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import { GerritTagsDatasource } from '../gerrit-tags/index.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
@@ -416,6 +417,47 @@ describe('modules/datasource/go/base', () => {
           datasource: GitlabTagsDatasource.id,
           registryUrl: 'https://gitlab.com',
           packageName: 'golang/myrepo',
+        });
+      });
+
+      it('supports Gerrit deps via go-import', async () => {
+        httpMock
+          .scope('https://gerrit.example.com')
+          .get('/my/module?go-get=1')
+          .reply(200, Fixtures.get('go-get-gerrit.html'));
+
+        const res = await BaseGoDatasource.getDatasource(
+          'gerrit.example.com/my/module',
+        );
+
+        expect(res).toEqual({
+          datasource: GerritTagsDatasource.id,
+          registryUrl: 'https://gerrit.example.com',
+          // strips optional /a/ auth prefix from the go-import git URL
+          packageName: 'my/module',
+        });
+      });
+
+      it('supports Gerrit deps via hostRules hostType', async () => {
+        hostRules.add({
+          matchHost: 'review.example.com',
+          hostType: 'gerrit',
+        });
+        const meta =
+          '<meta name="go-import" content="review.example.com/team/lib git https://review.example.com/a/team/lib">';
+        httpMock
+          .scope('https://review.example.com')
+          .get('/team/lib?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'review.example.com/team/lib',
+        );
+
+        expect(res).toEqual({
+          datasource: GerritTagsDatasource.id,
+          registryUrl: 'https://review.example.com',
+          packageName: 'team/lib',
         });
       });
 
