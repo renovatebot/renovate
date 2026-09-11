@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
@@ -126,21 +127,6 @@ Initial release
 [1.30.2]: https://github.com/taiki-e/upload-rust-binary-action/compare/v1.30.1...v1.30.2
 [1.30.1]: https://github.com/taiki-e/upload-rust-binary-action/compare/v1.30.0...v1.30.1
 [1.0.0]: https://github.com/taiki-e/upload-rust-binary-action/releases/tag/v1.0.0
-`;
-
-const fullChangelogStubMd = `# Release Notes
-
-## [v5.48.1](https://github.com/laravel/horizon/compare/v5.48.0...v5.48.1) - 2026-07-20
-
-**Full Changelog**: https://github.com/laravel/horizon/compare/v5.48.0...v5.48.1
-
-## [v5.48.0](https://github.com/laravel/horizon/compare/v5.47.2...v5.48.0) - 2026-07-17
-
-- Add option to set a CSP nonce for use with style and script tags
-
-## [v5.47.2](https://github.com/laravel/horizon/compare/v5.47.1...v5.47.2) - 2026-06-03
-
-- Fix metric clearing with PhpRedis scan prefix
 `;
 
 const bitbucketTreeResponse = {
@@ -2477,7 +2463,21 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           .reply(200, githubTreeResponse)
           .get('/repos/laravel/horizon/git/blobs/abcd')
           .reply(200, {
-            content: toBase64(fullChangelogStubMd),
+            content: toBase64(codeBlock`
+              # Release Notes
+
+              ## [v5.48.1](https://github.com/laravel/horizon/compare/v5.48.0...v5.48.1) - 2026-07-20
+
+              **Full Changelog**: https://github.com/laravel/horizon/compare/v5.48.0...v5.48.1
+
+              ## [v5.48.0](https://github.com/laravel/horizon/compare/v5.47.2...v5.48.0) - 2026-07-17
+
+              - Add option to set a CSP nonce for use with style and script tags
+
+              ## [v5.47.2](https://github.com/laravel/horizon/compare/v5.47.1...v5.47.2) - 2026-06-03
+
+              - Fix metric clearing with PhpRedis scan prefix
+            `),
           });
         const res = await getReleaseNotesMd(
           {
