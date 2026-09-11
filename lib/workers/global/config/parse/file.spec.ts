@@ -88,6 +88,16 @@ describe('workers/global/config/parse/file', () => {
       await fs.promises.unlink(configFile);
     });
 
+    it('does not warn about migrations if the file is empty', async () => {
+      const configFile = upath.resolve(tmp.path, 'config.js');
+      fs.writeFileSync(configFile, '', { encoding: 'utf8' });
+
+      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+
+      expect(logger.warn).not.toHaveBeenCalled();
+      fs.unlinkSync(configFile);
+    });
+
     it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
       await expect(file.getConfig({})).resolves.toBeDefined();
     });
