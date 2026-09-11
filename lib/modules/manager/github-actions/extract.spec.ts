@@ -2564,6 +2564,45 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-version': '43.100.0',
+          'renovate-image': 'ghcr.io/my-org/renovate',
+        },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/my-org/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/my-org/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'UpCloudLtd/upcloud-cli-action@main',
         with: { version: 'v3.35.0' },
       },
