@@ -1,4 +1,5 @@
 import { isArray, isObject, isString } from '@sindresorhus/is';
+import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
@@ -11,6 +12,7 @@ import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
+import { applyBunfigRegistries, loadBunfigToml } from './bunfig.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
@@ -65,12 +67,25 @@ export async function extractAllPackageFiles(
   const allPackageJson = matchedFiles.filter((file) =>
     matchesFileName(file, 'package.json'),
   );
+  const allBunfigToml = matchedFiles.filter((file) =>
+    matchesFileName(file, 'bunfig.toml'),
+  );
   for (const lockFile of allLockFiles) {
     const packageFile = getSiblingFileName(lockFile, 'package.json');
+    // Bun reads `bunfig.toml` from the directory it runs in only, so a single
+    // file next to the lock file applies to the whole workspace
+    const lockFileDir = upath.dirname(lockFile);
+    const bunfigFile = allBunfigToml.find(
+      (file) => upath.dirname(file) === lockFileDir,
+    );
+    const bunfig = bunfigFile ? await loadBunfigToml(bunfigFile) : null;
+
     const res = await processPackageFile(packageFile, config);
     if (res) {
+      applyBunfigRegistries(res.deps, bunfig, res.npmrc);
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
+
     // Check if package.json contains workspaces
     let workspaces = res?.managerData?.workspaces;
 
@@ -95,6 +110,7 @@ export async function extractAllPackageFiles(
       for (const workspaceFile of workspacePackageFiles) {
         const res = await processPackageFile(workspaceFile, config);
         if (res) {
+          applyBunfigRegistries(res.deps, bunfig, res.npmrc);
           packageFiles.push({ ...res, lockFiles: [lockFile] });
         }
       }

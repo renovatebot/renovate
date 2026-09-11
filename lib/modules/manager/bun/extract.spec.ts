@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
 import { extractAllPackageFiles } from './extract.ts';
 
@@ -309,5 +310,154 @@ describe('modules/manager/bun/extract', () => {
     expect(packageFiles[0].npmrc).toBe(
       'registry=https://custom.registry.com\n',
     );
+  });
+
+  describe('bunfig.toml registry support', () => {
+    const packageJson = JSON.stringify({
+      name: 'test',
+      version: '0.0.1',
+      dependencies: { lodash: '1.0.0', '@myorg/utils': '2.0.0' },
+    });
+
+    it('applies the default registry', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [install]
+        registry = "https://registry.example.com"
+      `);
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'bunfig.toml',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          deps: [
+            {
+              depName: 'lodash',
+              registryUrls: ['https://registry.example.com'],
+            },
+            {
+              depName: '@myorg/utils',
+              registryUrls: ['https://registry.example.com'],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('applies scoped registries', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [install]
+        registry = "https://registry.example.com"
+
+        [install.scopes]
+        myorg = "https://registry.myorg.com"
+      `);
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'bunfig.toml',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          deps: [
+            {
+              depName: 'lodash',
+              registryUrls: ['https://registry.example.com'],
+            },
+            {
+              depName: '@myorg/utils',
+              registryUrls: ['https://registry.myorg.com'],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('ignores an invalid bunfig.toml file', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [install]
+        registry = 123
+      `);
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'bunfig.toml',
+      ]);
+
+      expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('ignores a bunfig.toml file which is not next to the lock file', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(packageJson);
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'packages/pkg1/bunfig.toml',
+      ]);
+
+      expect(packageFiles[0].deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('applies the workspace root registries to workspace packages', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [install]
+        registry = "https://registry.example.com"
+      `);
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'root',
+          version: '1.0.0',
+          workspaces: ['packages/*'],
+          dependencies: { lodash: '1.0.0' },
+        }),
+      );
+      fs.getParentDir.mockReturnValueOnce('');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'pkg1',
+          version: '1.0.0',
+          dependencies: { axios: '2.0.0' },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'bunfig.toml',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          deps: [
+            {
+              depName: 'lodash',
+              registryUrls: ['https://registry.example.com'],
+            },
+          ],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          deps: [
+            {
+              depName: 'axios',
+              registryUrls: ['https://registry.example.com'],
+            },
+          ],
+        },
+      ]);
+    });
   });
 });
