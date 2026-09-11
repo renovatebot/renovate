@@ -390,17 +390,17 @@ describe('util/git/auth', () => {
       expect(getGitEnvironmentVariables({})).toStrictEqual({});
     });
 
-    it('returns environment variables with token if hostRule for api.github.com exists', () => {
+    it('falls back to a write GitHub token for git authentication', () => {
       add({
         hostType: 'github',
         matchHost: 'api.github.com',
-        token: 'token123',
+        token: 'write-token',
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:write-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:write-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://write-token@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -429,6 +429,30 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
+      });
+    });
+
+    it('prefers a readonly GitHub token for git authentication', () => {
+      add({
+        matchHost: 'api.github.com',
+        token: 'readonly-token',
+        readOnly: true,
+      });
+      add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'write-token',
+      });
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0:
+          'url.https://ssh:readonly-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://git:readonly-token@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://readonly-token@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
     });
 

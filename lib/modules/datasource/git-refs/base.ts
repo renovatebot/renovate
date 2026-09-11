@@ -30,7 +30,7 @@ export abstract class GitDatasource extends Datasource {
 
     // fetch remote tags
     const lsRemote = await git.listRemote([
-      getRemoteUrlWithToken(packageName, this.id),
+      getRemoteUrlWithToken(packageName, this.id, true),
     ]);
     if (!lsRemote) {
       return null;

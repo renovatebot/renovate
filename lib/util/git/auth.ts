@@ -175,6 +175,7 @@ export function getGitEnvironmentVariables(
   // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
   const gitHubHostRule = find({
     hostType: 'github',
+    readOnly: true,
     url: 'https://api.github.com/',
   });
 

@@ -449,7 +449,7 @@ describe('modules/manager/mise/artifacts', () => {
     },
   );
 
-  it('injects GITHUB_TOKEN when host rule found', async () => {
+  it('falls back to a write GITHUB_TOKEN', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
       .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
@@ -457,7 +457,44 @@ describe('modules/manager/mise/artifacts', () => {
     hostRules.add({
       hostType: 'github',
       matchHost: 'https://api.github.com/',
-      token: 'github-token',
+      token: 'write-token',
+    });
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      {
+        cmd: updateToolCmd,
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: expect.objectContaining({
+            GITHUB_TOKEN: 'write-token',
+          }),
+        },
+      },
+    ]);
+  });
+
+  it('prefers a readonly GITHUB_TOKEN', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
+    const execSnapshots = mockExecAll();
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'https://api.github.com/',
+      token: 'write-token',
+    });
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'https://api.github.com/',
+      readOnly: true,
+      token: 'readonly-token',
     });
 
     await updateArtifacts({
@@ -474,7 +511,7 @@ describe('modules/manager/mise/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: expect.objectContaining({
-            GITHUB_TOKEN: 'github-token',
+            GITHUB_TOKEN: 'readonly-token',
           }),
         },
       },
