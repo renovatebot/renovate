@@ -8,7 +8,7 @@ import * as template from '../../../../../util/template/index.ts';
 import { joinUrlParts } from '../../../../../util/url.ts';
 import type { BranchConfig } from '../../../../types.ts';
 import { getDepWarningsPR, getWarnings } from '../../../errors-warnings.ts';
-import { getChangelogs } from './changelogs.ts';
+import { getChangelogs, getChangelogsCommentNotice } from './changelogs.ts';
 import { getPrConfigDescription } from './config-description.ts';
 import { getControls } from './controls.ts';
 import { getPrFooter } from './footer.ts';
@@ -119,7 +119,10 @@ export function getPrBody(
     table: getPrUpdatesTable(branchConfig),
     warnings,
     notes: getPrNotes(branchConfig) + getPrExtraNotes(branchConfig),
-    changelogs: getChangelogs(branchConfig),
+    changelogs:
+      branchConfig.changelogsLocation === 'comment'
+        ? getChangelogsCommentNotice(branchConfig)
+        : getChangelogs(branchConfig),
     configDescription: getPrConfigDescription(branchConfig),
     controls: getControls(),
     footer: getPrFooter(branchConfig),
