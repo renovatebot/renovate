@@ -4,7 +4,6 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
-  deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -35,9 +34,6 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -46,7 +42,18 @@ export async function updateArtifacts({
         { toolName: 'apm', constraint: config.constraints?.apm },
       ],
     };
-    await exec('apm install', execOptions);
+    // `apm install` only resolves the refs `apm.yml` already pins, so it is a
+    // no-op on an up-to-date project. `apm update` re-resolves each dependency to
+    // the latest matching ref and leaves `apm.yml` untouched, which is what lock
+    // file maintenance means; `--yes` skips its confirmation prompt.
+    //
+    // The lockfile is no longer removed first. Deleting it did not perform
+    // maintenance - it forced `apm install` to rebuild the file from `apm.yml`
+    // alone, discarding every entry the manifest does not declare.
+    await exec(
+      isLockFileMaintenance ? 'apm update --yes' : 'apm install',
+      execOptions,
+    );
 
     // `apm install` regenerates the lockfile and re-deploys the harness
     // directories (`.github/`, `.claude/`, ...) that APM consumers commit, so
