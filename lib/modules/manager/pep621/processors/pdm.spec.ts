@@ -137,7 +137,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       expect(execSnapshots).toEqual([]);
     });
 
-    it('return update dep update', async () => {
+    it('keeps dependency updates eager when update-all is configured', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
@@ -199,7 +199,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: {
+            pdmUpdateStrategy: 'all',
+          },
           updatedDeps,
         },
         parsePyProject('')!,
@@ -313,6 +315,52 @@ describe('modules/manager/pep621/processors/pdm', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'pdm update --no-sync --update-eager',
+          options: {
+            cwd: '/tmp/github/some/repo/folder',
+          },
+        },
+      ]);
+    });
+
+    it('uses update-all when configured for lockfileMaintenance', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // pdm
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'folder/pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            isLockFileMaintenance: true,
+            pdmUpdateStrategy: 'all',
+          },
+          updatedDeps: [],
+        },
+        parsePyProject('')!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'pdm.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'pdm update --no-sync --update-all',
           options: {
             cwd: '/tmp/github/some/repo/folder',
           },
