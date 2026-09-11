@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 
 import { regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -157,6 +158,12 @@ const RenovateGithubActionWith: ActionSchema = z
  * Community contributed actions with known version input schemas.
  */
 export const communityActions: Record<string, CommunityActionConfig> = {
+  // https://github.com/actions/setup-dotnet
+  'actions/setup-dotnet': {
+    datasource: DotnetVersionDatasource.id,
+    packageName: 'dotnet-sdk',
+    withSchema: valSchema('dotnet-version', (val) => val.includes('\n')),
+  },
   // https://github.com/aquasecurity/setup-trivy
   'aquasecurity/setup-trivy': {
     datasource: GithubReleasesDatasource.id,
