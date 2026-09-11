@@ -35,7 +35,7 @@
       "@solid-design-system/styles",
       "@solid-design-system/components"
     ],
-    "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
+    "spfx": ["/^@microsoft/sp-/", "/^@microsoft/spfx-(?!cli$)/", "/^@microsoft/eslint-.+-spfx$/"],
     "spock": "/^org\\.spockframework:spock-/",
     "syncfusion-dotnet": "/^Syncfusion\\./",
     "testing-library": "/^@testing-library//",
