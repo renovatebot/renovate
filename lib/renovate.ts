@@ -13,7 +13,7 @@ void (async (): Promise<void> => {
   /* v8 ignore next -- not easily testable */
   process.on('unhandledRejection', (err) => {
     logger.logger.error({ err }, 'unhandledRejection');
-    process.exitCode ||= 1;
+    process.exitCode ??= 1;
   });
   await logger.init();
 
