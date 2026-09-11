@@ -1,0 +1,85 @@
+diff --git a/dist/src/sandbox/ts-config-preprocessor.js b/dist/src/sandbox/ts-config-preprocessor.js
+index d17257e928054c73b1e8a041564a6515430fb418..cda6627daea5d1259a75864f45af7c9161a49be5 100644
+--- a/dist/src/sandbox/ts-config-preprocessor.js
++++ b/dist/src/sandbox/ts-config-preprocessor.js
+@@ -1,5 +1,52 @@
+ import path from 'path';
+ import { tokens, commonTokens } from '@stryker-mutator/api/plugin';
++/**
++ * TypeScript 7's native compiler doesn't ship a public compiler API (`ts.parseConfigFileTextToJson`,
++ * `ts.resolveProjectReferencePath`, etc. are unavailable). This is a minimal JSONC-tolerant fallback
++ * used only when those APIs are missing, so tsconfig rewriting keeps working.
++ * See https://github.com/stryker-mutator/stryker-js/issues/6110.
++ */
++function parseTSConfigJsonc(text) {
++    let result = '';
++    let inString = false;
++    let stringChar = '';
++    for (let i = 0; i < text.length; i++) {
++        const char = text[i];
++        const next = text[i + 1];
++        if (inString) {
++            result += char;
++            if (char === '\\') {
++                result += next;
++                i++;
++            }
++            else if (char === stringChar) {
++                inString = false;
++            }
++            continue;
++        }
++        if (char === '"' || char === "'") {
++            inString = true;
++            stringChar = char;
++            result += char;
++        }
++        else if (char === '/' && next === '/') {
++            while (i < text.length && text[i] !== '\n') {
++                i++;
++            }
++        }
++        else if (char === '/' && next === '*') {
++            i += 2;
++            while (i < text.length && !(text[i] === '*' && text[i + 1] === '/')) {
++                i++;
++            }
++            i++;
++        }
++        else {
++            result += char;
++        }
++    }
++    return JSON.parse(result.replace(/,(\s*[}\]])/g, '$1'));
++}
+ /**
+  * A helper class that rewrites `references` and `extends` file paths if they end up falling outside of the sandbox.
+  * @example
+@@ -43,7 +90,10 @@ export class TSConfigPreprocessor {
+             if (tsconfigFile) {
+                 this.log.debug('Rewriting file %s', tsconfigFile);
+                 const { default: ts } = await import('typescript');
+-                const { config } = ts.parseConfigFileTextToJson(tsconfigFileName, await tsconfigFile.readContent());
++                const content = await tsconfigFile.readContent();
++                const config = typeof ts.parseConfigFileTextToJson === 'function'
++                    ? ts.parseConfigFileTextToJson(tsconfigFileName, content).config
++                    : parseTSConfigJsonc(content);
+                 if (config) {
+                     await this.rewriteExtends(project, config, tsconfigFileName);
+                     await this.rewriteProjectReferences(project, config, tsconfigFileName);
+@@ -85,7 +135,14 @@ export class TSConfigPreprocessor {
+         const { default: ts } = await import('typescript');
+         if (Array.isArray(config.references)) {
+             for (const reference of config.references) {
+-                const referencePath = ts.resolveProjectReferencePath(reference);
++                let referencePath;
++                if (typeof ts.resolveProjectReferencePath === 'function') {
++                    referencePath = ts.resolveProjectReferencePath(reference);
++                }
++                else {
++                    const rawPath = typeof reference === 'string' ? reference : reference.path;
++                    referencePath = rawPath.endsWith('.json') ? rawPath : path.join(rawPath, 'tsconfig.json');
++                }
+                 const rewritten = this.tryRewriteReference(referencePath, originTSConfigFileName);
+                 if (rewritten) {
+                     reference.path = rewritten;

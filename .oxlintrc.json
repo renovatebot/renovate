@@ -414,6 +414,7 @@
     "tools/mkdocs/docs",
     "tools/mkdocs/site",
     ".worktrees/**/*",
+    ".stryker-tmp/**/*",
     ".markdownlint-cli2.mjs",
     "tools/mkdocs/.cache",
     "**/.agents/**",

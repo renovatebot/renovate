@@ -92,6 +92,20 @@ export default defineConfig(() =>
         reporters,
         mockReset: true,
         unstubEnvs: true,
+        // A few specs (WASM-based PGP crypto, version-manager subprocess
+        // calls, ...) are close enough to the 5s default that they can time
+        // out under CPU contention alone, e.g. Stryker's dry run, which
+        // starts several test-runner processes up front.
+        testTimeout: 15000,
+        env: {
+          // Needed so `lib/util/git/index.spec.ts`'s local-clone-of-a-submodule
+          // tests work when vitest is invoked directly (e.g. by Stryker's
+          // vitest-runner), bypassing the `pnpm vitest`/`pnpm jest` scripts
+          // that would otherwise set these.
+          GIT_ALLOW_PROTOCOL: 'file',
+          GIT_CONFIG_GLOBAL: '/dev/null',
+          GIT_CONFIG_SYSTEM: '/dev/null',
+        },
         coverage: {
           provider: 'v8',
           skipFull: !ci,
@@ -127,6 +141,10 @@ export default defineConfig(() =>
         exclude: [
           ...defaultExclude,
           'dist/**/*',
+          // Stryker's sandbox, left behind if a mutation run is interrupted
+          // before it cleans up; otherwise a stray copy of the whole repo
+          // gets picked up as extra test files.
+          '.stryker-tmp/**/*',
           'tools/docs/test/**/*.test.mjs',
           '.worktrees/**/*',
           '.claude/worktrees/**/*',
