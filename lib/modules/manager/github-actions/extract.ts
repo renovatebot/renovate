@@ -257,7 +257,7 @@ function extractRunner(runner: string): PackageDependency | null {
 }
 
 // For official https://github.com/actions
-const versionedActions: Record<string, string> = {
+const builtinVersionedActions: Record<string, string> = {
   go: npmVersioning.id,
   node: nodeVersioning.id,
   python: npmVersioning.id,
@@ -268,7 +268,7 @@ const versionedActions: Record<string, string> = {
 };
 
 function extractVersionedAction(step: UsesStep): PackageDependency | null {
-  for (const [action, versioning] of Object.entries(versionedActions)) {
+  for (const [action, versioning] of Object.entries(builtinVersionedActions)) {
     const actionName = `actions/setup-${action}`;
     if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
       continue;
