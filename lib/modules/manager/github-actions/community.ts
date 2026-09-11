@@ -251,6 +251,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     // Strip hatch- prefix from release tags
     extractVersion: '^hatch-(?<version>.+)$',
   },
+  // https://github.com/renovatebot/github-action
+  'renovatebot/github-action': {
+    datasource: DockerDatasource.id,
+    packageName: 'ghcr.io/renovatebot/renovate',
+    withSchema: valSchema('renovate-version'),
+  },
   'ruby/setup-ruby': {
     datasource: RubyVersionDatasource.id,
     packageName: 'ruby',
