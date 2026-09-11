@@ -289,6 +289,26 @@ describe('util/exec/common', () => {
       );
     });
 
+    it('does not retain stdin input in command errors', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      const error = await exec(
+        cmd,
+        partial<RawExecOptions>({ input: 'private manifest', timeout: 5 }),
+      ).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ExecError);
+      expect((error as ExecError).options).toEqual({ timeout: 5 });
+    });
+
     it('does not throw if an error occurs, but we specify ignoreFailure=true', async () => {
       const cmd = 'ls -l';
       const stub = getSpawnStub({
@@ -314,6 +334,44 @@ describe('util/exec/common', () => {
       expect(logger.logger.once.debug).toHaveBeenCalledWith(
         { command: 'ls -l', stdout, stderr, exitCode: 1 },
         'Ignoring failure to execute comamnd `ls -l`, as ignoreFailure=true is set',
+      );
+    });
+
+    it('redacts ignored failure output from logs without discarding it', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          { command: ['ls', '-l'], ignoreFailure: true },
+          partial<RawExecOptions>({ redactOutput: true, timeout: 5 }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+        exitCode: 1,
+      });
+
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
+        {
+          command: 'ls -l',
+          stdoutBytes: 11,
+          stderrBytes: 11,
+          exitCode: 1,
+        },
+        'Ignoring failure to execute comamnd `ls -l`, as ignoreFailure=true is set',
+      );
+      expect(execa).toHaveBeenCalledWith(
+        'ls',
+        ['-l'],
+        expect.objectContaining({ reject: false }),
       );
     });
 

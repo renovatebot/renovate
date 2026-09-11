@@ -135,8 +135,9 @@ export function exec(
       }
     }
 
+    const { redactOutput, ...execaOptions } = opts;
     const cp = execa(cmd, args, {
-      ...opts,
+      ...execaOptions,
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
       detached: process.platform !== 'win32',
@@ -193,19 +194,26 @@ export function exec(
           return;
         }
 
+        const ignoredStdout = stringify(stdout, opts.outputWriters?.stdout);
+        const ignoredStderr = stringify(stderr, opts.outputWriters?.stderr);
+        const outputFields = redactOutput
+          ? {
+              stdoutBytes: Buffer.byteLength(ignoredStdout),
+              stderrBytes: Buffer.byteLength(ignoredStderr),
+            }
+          : { stdout: ignoredStdout, stderr: ignoredStderr };
         logger.once.debug(
           {
             command: cp.spawnargs.join(' '),
-            stdout: stringify(stdout, opts.outputWriters?.stdout),
-            stderr: stringify(stderr, opts.outputWriters?.stderr),
+            ...outputFields,
             exitCode: code,
           },
           `Ignoring failure to execute comamnd \`${cp.spawnargs.join(' ')}\`, as ignoreFailure=true is set`,
         );
 
         resolve({
-          stderr: stringify(stderr, opts.outputWriters?.stderr),
-          stdout: stringify(stdout, opts.outputWriters?.stdout),
+          stderr: ignoredStderr,
+          stdout: ignoredStdout,
           exitCode: code,
         });
         return;
@@ -217,9 +225,14 @@ export function exec(
     });
 
     function rejectInfo(): ExecErrorData {
+      const {
+        input: _input,
+        redactOutput: _redactOutput,
+        ...safeOptions
+      } = opts;
       return {
         cmd: cp.spawnargs.join(' '),
-        options: opts,
+        options: safeOptions,
         stdout: stringify(stdout, opts.outputWriters?.stdout),
         stderr: stringify(stderr, opts.outputWriters?.stderr),
       };
