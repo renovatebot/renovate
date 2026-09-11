@@ -135,9 +135,16 @@ export async function generateLockFile(
     };
 
     // check first upgrade, see #17786
-    const hasPackageManager =
+    let hasPackageManager =
       !!config.managerData?.hasPackageManager ||
       !!upgrades[0]?.managerData?.hasPackageManager;
+    // the flag can be clobbered by dep-level managerData, e.g. for nested
+    // resolutions, so fall back to package.json itself, see #25853
+    if (!isYarn1 && !hasPackageManager) {
+      const pkgJson = await lazyPgkJson.getValue();
+      hasPackageManager =
+        !!pkgJson.packageManager || !!pkgJson.devEngines?.packageManager;
+    }
 
     if (!isYarn1 && hasPackageManager) {
       toolConstraints.push({
