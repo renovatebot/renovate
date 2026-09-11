@@ -127,5 +127,41 @@ describe('modules/platform/gitlab/code-owners', () => {
         },
       ]);
     });
+
+    it('should treat a ! exclusion line as an empty rule (no usernames)', () => {
+      const rules = extractRulesFromCodeOwnersLines(['!excluded/path/']);
+
+      expect(rules).toEqual([
+        {
+          pattern: '!excluded/path/',
+          usernames: [],
+          score: 15,
+          match: expect.any(Function),
+        },
+      ]);
+    });
+
+    it('should not inherit section default usernames for ! exclusion lines', () => {
+      const lines = ['[Docs] @docs-team', 'docs/', '!docs/internal/'];
+      const rules = extractRulesFromCodeOwnersLines(lines);
+
+      expect(rules[0]).toMatchObject({
+        pattern: 'docs/',
+        usernames: ['@docs-team'],
+      });
+      expect(rules[1]).toMatchObject({
+        pattern: '!docs/internal/',
+        usernames: [],
+      });
+    });
+
+    it('should match excluded paths via the ! exclusion rule', () => {
+      const lines = ['[Docs] @docs-team', 'docs/', '!docs/internal/'];
+      const rules = extractRulesFromCodeOwnersLines(lines);
+      const exclusionRule = rules[1];
+
+      expect(exclusionRule.match('docs/internal/README.md')).toBe(true);
+      expect(exclusionRule.match('docs/public/README.md')).toBe(false);
+    });
   });
 });
