@@ -5,7 +5,7 @@ import {
   Yaml,
   withDebugMessage,
 } from '../../../util/schema-utils/index.ts';
-import { actionSchema, communityActions } from './community.ts';
+import { actionSchema, knownActions } from './known-actions.ts';
 import type { ActionSchema } from './types.ts';
 
 const UsesStep = z.object({
@@ -83,7 +83,7 @@ export const ActionsLockfile = Yaml.pipe(
 export type ActionsLockfile = z.infer<typeof ActionsLockfile>;
 
 export const CommunityActions = z.union(
-  Object.entries(communityActions).map(([name, cfg]) =>
+  Object.entries(knownActions).map(([name, cfg]) =>
     actionSchema(name, cfg),
   ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
 );
