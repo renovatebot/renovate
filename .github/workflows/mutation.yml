@@ -74,11 +74,26 @@ jobs:
           echo "files=$FILES" >> "$GITHUB_OUTPUT"
           echo "has_files=$( [ -n "$FILES" ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
 
+      - name: Restore mutation incremental cache
+        if: steps.changed.outputs.has_files == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/.stryker-incremental.json
+          key: mutation-incremental-${{ github.event.pull_request.number }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: mutation-incremental-${{ github.event.pull_request.number }}-
+
       - name: Run mutation tests on changed files
         if: steps.changed.outputs.has_files == 'true'
         env:
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
         run: pnpm test:mutation:changed "$CHANGED_FILES"
+
+      - name: Save mutation incremental cache
+        if: always() && steps.changed.outputs.has_files == 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/mutation/.stryker-incremental.json
+          key: mutation-incremental-${{ github.event.pull_request.number }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Post PR comment
         if: always() && steps.changed.outputs.has_files == 'true'
@@ -89,12 +104,27 @@ jobs:
             let body = '## 🧬 Mutation Testing Results\n\n';
             try {
               const report = JSON.parse(fs.readFileSync('reports/mutation/mutation.json', 'utf8'));
-              const score = report.schemaVersion ?
-                (report.files ? Object.values(report.files).reduce((acc, f) => acc + f.mutationScore, 0) / Object.keys(report.files).length : 0) : 0;
-              body += `**Mutation Score:** ${score.toFixed(1)}%\n\n`;
+              const files = Object.entries(report.files || {});
+              if (files.length === 0) {
+                throw new Error('report has no files');
+              }
+              let totalKilled = 0;
+              let totalDetectable = 0;
+              const rows = files.map(([file, data]) => {
+                const mutants = data.mutants || [];
+                const killed = mutants.filter((m) => m.status === 'Killed' || m.status === 'Timeout').length;
+                const survived = mutants.filter((m) => m.status === 'Survived' || m.status === 'NoCoverage').length;
+                const detectable = killed + survived;
+                totalKilled += killed;
+                totalDetectable += detectable;
+                const score = detectable > 0 ? (killed / detectable) * 100 : 0;
+                return { file, score, survived, killed, total: mutants.length };
+              });
+              const overallScore = totalDetectable > 0 ? (totalKilled / totalDetectable) * 100 : 0;
+              body += `**Mutation Score:** ${overallScore.toFixed(1)}%\n\n`;
               body += '| File | Score | Survived | Killed | Total |\n|------|-------|----------|--------|-------|\n';
-              for (const [file, data] of Object.entries(report.files || {})) {
-                body += `| ${file} | ${data.mutationScore.toFixed(1)}% | ${data.survived || 0} | ${data.killed || 0} | ${data.totalMutants || 0} |\n`;
+              for (const r of rows) {
+                body += `| ${r.file} | ${r.score.toFixed(1)}% | ${r.survived} | ${r.killed} | ${r.total} |\n`;
               }
             } catch (e) {
               body += '_No mutation report generated (possibly no mutants in changed files)._\n';
