@@ -125,6 +125,7 @@ export interface RenovateSharedConfig {
   platformAutomerge?: boolean;
   platformCommit?: PlatformCommitOptions;
   postUpgradeTasks?: PostUpgradeTasks;
+  customUpdateCommands?: CustomUpdateCommands;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prBodyHeadingDefinitions?: Record<string, string>;
@@ -323,6 +324,13 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
+  installTools?: Partial<Record<ToolName, Record<never, never>>>;
+}
+
+export interface CustomUpdateCommands {
+  commands: string[];
+  fileFilters?: string[];
+  workingDirTemplate?: string;
   installTools?: Partial<Record<ToolName, Record<never, never>>>;
 }
 
@@ -631,6 +639,7 @@ export type AllowedParents =
   | 'logLevelRemap'
   | 'packageRules'
   | 'postUpgradeTasks'
+  | 'customUpdateCommands'
   | 'vulnerabilityAlerts'
   | 'toolSettings'
   | ManagerName
