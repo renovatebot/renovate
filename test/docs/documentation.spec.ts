@@ -21,32 +21,6 @@ describe('docs/documentation', () => {
     );
   });
 
-  it('has no indented content inside figure blocks', async () => {
-    // MkDocs runs with `tab_length: 2`, so an indented line inside a
-    // `<figure markdown>` block renders as a code block instead of an image.
-    const markdownFiles = await glob(markdownGlob);
-    const indentedLines: string[] = [];
-
-    await Promise.all(
-      markdownFiles.map(async (markdownFile) => {
-        const markdownText = await fs.readFile(markdownFile, 'utf8');
-        let insideFigure = false;
-
-        markdownText.split('\n').forEach((line, index) => {
-          if (line.startsWith('<figure markdown')) {
-            insideFigure = true;
-          } else if (line.trim() === '</figure>') {
-            insideFigure = false;
-          } else if (insideFigure && line.startsWith(' ')) {
-            indentedLines.push(`${markdownFile}:${index + 1}`);
-          }
-        });
-      }),
-    );
-
-    expect(indentedLines).toEqual([]);
-  });
-
   describe('website-documentation', () => {
     async function getConfigOptionSubHeaders(
       file: string,

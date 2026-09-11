@@ -1,6 +1,11 @@
+import figureBlockIndent from './tools/markdownlint/rules/figure-block-indent.ts';
+
 const ci = !!process.env.CI;
 
 export default {
+  // Project-specific rules
+  customRules: [figureBlockIndent],
+
   // Disable some built-in rules
   config: {
     'no-emphasis-as-heading': false,
