@@ -257,7 +257,7 @@ function extractRunner(runner: string): PackageDependency | null {
 }
 
 // For official https://github.com/actions
-const builtinVersionedActions: Record<string, string> = {
+export const builtinVersionedActions: Record<string, string> = {
   go: npmVersioning.id,
   node: nodeVersioning.id,
   python: npmVersioning.id,

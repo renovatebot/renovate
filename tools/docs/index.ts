@@ -7,6 +7,7 @@ import { generateDatasources } from './datasources.ts';
 import { generateEnvOptions } from './env-options.ts';
 import { generateEnvVars } from './env-vars.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
+import { generateManagerGithubActionsBuiltin } from './manager/github-actions/builtin.ts';
 import { generateManagerGithubActionsCommunity } from './manager/github-actions/community.ts';
 import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
@@ -57,6 +58,10 @@ export async function generateDocs(
     // managers/asdf supported plugins
     logger.info('* managers/asdf/supported-plugins');
     await generateManagerAsdfSupportedPlugins(dist);
+
+    // managers/github-actions built-in actions
+    logger.info('* managers/github-actions/builtin');
+    await generateManagerGithubActionsBuiltin(dist);
 
     // managers/github-actions community actions
     logger.info('* managers/github-actions/community');

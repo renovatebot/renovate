@@ -214,14 +214,15 @@ This means that Renovate will:
 
 ### with:version support for built-in Actions
 
-Renovate supports updating the "with" version for `actions/setup-go`, `actions/setup-node`, and `actions/setup-python`, although not all syntaxes are supported out of the box.
+Renovate supports updating the "with" version for the following GitHub Actions:
 
-By default, Renovate will use `npm`-style semver versioning for `go` and `python`, and Renovate's built-in `node` versioning for updating `node`.
-The goal of these defaults is to match as closely as possible to what these GitHub Actions support.
+<!-- Autogenerate list of built-in actions in https://github.com/renovatebot/renovate -->
+
+These defaults aim to match as closely as possible to what these GitHub Actions support.
 For example, normally the `^` syntax is not used in `go` or `python`, but it's supported in their respective actions.
 
 Depending on your use case, you may need to change `versioning` manually.
-If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise a Discussion to suggest it.
+If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
 
 ### Updating `with:` values in commonly used Community-maintained GitHub Actions
 
