@@ -41,6 +41,49 @@ describe('util/template/index', () => {
     expect(output).toBe('github token = ""');
   });
 
+  describe('unknown variables', () => {
+    it('preserves unknown variables as literal text', () => {
+      const output = template.compile(
+        'TicketID {{project_template}}: Update dependency',
+        {},
+      );
+      expect(output).toBe('TicketID {{project_template}}: Update dependency');
+    });
+
+    it('is idempotent for values containing literal curly braces', () => {
+      const input = { depName: '{{some_dir}}' };
+      const once = template.compile('Update {{depName}}', input);
+      expect(once).toBe('Update {{some_dir}}');
+      const twice = template.compile(once, input);
+      expect(twice).toBe('Update {{some_dir}}');
+    });
+
+    it('renders allowed but unset fields as empty string', () => {
+      const output = template.compile('version "{{newVersion}}"', {});
+      expect(output).toBe('version ""');
+    });
+
+    it('renders unknown fields present in unfiltered input as empty string', () => {
+      const output = template.compile(
+        'a{{foobar}}b',
+        { foobar: undefined },
+        false,
+      );
+      expect(output).toBe('ab');
+    });
+
+    it('renders nothing for unknown block variables', () => {
+      const output = template.compile('a{{#foobar}}x{{/foobar}}b', {});
+      expect(output).toBe('ab');
+    });
+
+    it('throws for unknown helpers called with arguments', () => {
+      expect(() => template.compile("{{foobar 'baz'}}", {})).toThrow(
+        'Missing helper: "foobar"',
+      );
+    });
+  });
+
   it('exposes renovateVersion to every template, without needing to pass it explicitly', () => {
     const output = template.compile('{{renovateVersion}}', {});
     expect(output).toBe(pkg.version);
