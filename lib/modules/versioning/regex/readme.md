@@ -83,3 +83,22 @@ Here is another example, this time for handling `ghcr.io/linuxserver/openssh-ser
   ]
 }
 ```
+
+The `regex` scheme also accepts a comparator range wherever a version is matched against a constraint, such as `allowedVersions` and `matchCurrentVersion`, evaluated through the same capture-group ordering.
+The supported operators are `<`, `<=`, `>`, `>=`, `=` and `==`, and several comparators separated by whitespace or a comma are combined with logical AND.
+Because the comparison uses the scheme's own ordering rather than npm `semver`, a numeric suffix captured as `build` is ordered correctly, where `semver` would treat it as a prerelease and reject the range.
+
+For example, to hold a GitLab EE image at or below a required upgrade stop, capture the `-ee` suffix as a numeric `build` group and cap it with `allowedVersions`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["gitlab/gitlab-ee"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-ee\\.(?<build>\\d+)$",
+      "allowedVersions": "<=19.1.2-ee.0"
+    }
+  ]
+}
+```
