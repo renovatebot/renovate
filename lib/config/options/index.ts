@@ -3483,7 +3483,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default: 'auto',
     allowedValues: ['auto', 'disabled', 'enabled'],
-    supportedPlatforms: ['github'],
+    supportedPlatforms: ['github', 'gitlab'],
   },
   {
     name: 'branchNameStrict',
