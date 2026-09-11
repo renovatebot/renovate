@@ -156,24 +156,24 @@ describe('modules/datasource/artifactory/index', () => {
         .scope(testRegistryUrl)
         .get(getPath(testLookupName))
         .reply(200, '<html>\n<h1>Header wo. nodes</h1>\n<hmtl/>');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...testConfig,
           datasource,
           packageName: testLookupName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('404 returns null', async () => {
       httpMock.scope(testRegistryUrl).get(getPath(testLookupName)).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...testConfig,
           datasource,
           packageName: testLookupName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(logger.warn).toHaveBeenCalledTimes(1);
 
       expect(logger.warn).toHaveBeenCalledWith(

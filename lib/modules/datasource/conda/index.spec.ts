@@ -23,12 +23,12 @@ describe('modules/datasource/conda/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(defaultRegistryUrl).get(depUrl).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
@@ -36,12 +36,12 @@ describe('modules/datasource/conda/index', () => {
         .scope(defaultRegistryUrl)
         .get(depUrl)
         .reply(200, { versions: [] });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

@@ -21,5 +21,4 @@ export type DependencyDashboardListItemType =
  *`checkedBranches` is never rendered as a checkbox.
  */
 export type DependencyDashboardCheck =
-  | DependencyDashboardListItemType
-  | 'global-config';
+  DependencyDashboardListItemType | 'global-config';

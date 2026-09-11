@@ -123,7 +123,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
-      headers: structuredClone(err.options.headers),
+      headers: structuredClone({ ...err.options.headers }),
       url: err.options.url?.toString(),
       hostType: err.options.context.hostType,
     };

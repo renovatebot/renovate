@@ -79,12 +79,12 @@ describe('modules/datasource/gitlab-releases/index', () => {
         .scope('https://gitlab.com')
         .get('/api/v4/projects/some%2Fdep2/releases')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: GitlabReleasesDatasource.id,
           packageName: 'some/dep2',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
   });
 });

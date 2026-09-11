@@ -53,7 +53,48 @@ describe('modules/manager/deno/compat', () => {
           },
         }),
       );
-      expect(await collectPackageJson('deno.lock')).toEqual([
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
+        {
+          deps: [
+            {
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depName: 'dep1',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+          ],
+          extractedConstraints: {},
+          lockFiles: ['deno.lock'],
+          managerData: {
+            workspaces: undefined,
+          },
+          packageFile: 'package.json',
+        },
+      ]);
+    });
+
+    it('skips nested package.json when no workspaces are declared', async () => {
+      vi.mocked(findPackages).mockResolvedValue([
+        { dir: 'sub', manifest: {}, writeProjectManifest: Promise.resolve },
+      ]);
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            dependencies: {
+              dep1: '1.0.0',
+            },
+          }),
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            dependencies: {
+              dep2: '2.0.0',
+            },
+          }),
+        );
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
         {
           deps: [
             {
@@ -99,7 +140,7 @@ describe('modules/manager/deno/compat', () => {
             },
           }),
         );
-      expect(await collectPackageJson('deno.lock')).toEqual([
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
         {
           deps: [
             {
@@ -157,6 +198,7 @@ describe('modules/manager/deno/compat', () => {
       fs.readLocalFile
         .mockResolvedValueOnce(
           JSON.stringify({
+            workspaces: ['workspace'],
             dependencies: {
               dep1: '1.0.0',
             },
@@ -178,7 +220,7 @@ describe('modules/manager/deno/compat', () => {
           extractedConstraints: {},
           lockFiles: ['deno.lock'],
           managerData: {
-            workspaces: undefined,
+            workspaces: ['workspace'],
           },
           packageFile: 'package.json',
         },

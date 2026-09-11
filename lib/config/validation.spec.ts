@@ -1160,7 +1160,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue',
+            'Regex Managers must contain currentValue or currentDigest, their template variants (currentValueTemplate or currentDigestTemplate) or regex groups named after configuration fields',
         },
         {
           message:
@@ -1253,9 +1253,59 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue',
+            'Regex Managers must contain currentValue or currentDigest, their template variants (currentValueTemplate or currentDigestTemplate) or regex groups named after configuration fields',
         },
       ]);
+    });
+
+    // via https://github.com/renovatebot/renovate/discussions/45665
+    it('does not error if a customManager only uses `currentDigest`', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: [
+              '/\\.gitlab-ci\\.yml$/',
+              '/\\.gitlab\\/pipelines\\/.*\\.yaml$/',
+            ],
+            matchStrings: [
+              '.*@(?<currentDigest>sha256:[^ ]+) *# renovate: image=(?<depName>[^ \\n]+)\\n',
+            ],
+            datasourceTemplate: 'docker',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('does not error if a customManager only uses `currentValue`', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: [
+              '/\\.gitlab-ci\\.yml$/',
+              '/\\.gitlab\\/pipelines\\/.*\\.yaml$/',
+            ],
+            matchStrings: ['ENV YARN_VERSION=(?<currentValue>.*?)\\n'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'docker',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors if customManager fields are missing: JSONataManager', async () => {
@@ -1278,7 +1328,8 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `JSONata Managers must contain currentValueTemplate configuration or currentValue in the query `,
+          message:
+            'JSONata Managers must contain currentValue or currentDigest in the query or their templates',
         },
         {
           topic: 'Configuration Error',
@@ -2299,6 +2350,134 @@ describe('config/validation', () => {
         },
       ]);
       expect(warnings).toBeEmptyArray();
+    });
+
+    it('reports `allowInternal` in repo config as a security error', async () => {
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'http://10.1.2.3',
+            allowInternal: true,
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toMatchObject([
+        {
+          message: `The "allowInternal" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "hostRules `allowInternal` is only allowed in the self-hosted administrator's own configuration.",
+          topic: 'Config security error',
+        },
+      ]);
+    });
+
+    it('allows `allowInternal` in global config', async () => {
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'http://10.1.2.3',
+            allowInternal: false,
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('reports `allowInternal` in inherited config as a security error, saying how to permit it', async () => {
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'http://10.1.2.3',
+            allowInternal: true,
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'inherit',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'hostRules `allowInternal` is not allowed in inherited config, as this Renovate instance has not set `inheritConfigTrusted=true`. The administrator can either set it, or move the rule to their global config or a `repositories[]` entry.',
+          topic: 'Config security error',
+        },
+      ]);
+    });
+
+    it('allows `allowInternal` in inherited config with `inheritConfigTrusted`', async () => {
+      GlobalConfig.set({ inheritConfigTrusted: true });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'http://10.1.2.3',
+            allowInternal: true,
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'inherit',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('still reports `allowInternal` in repo config with `inheritConfigTrusted`', async () => {
+      // `inheritConfigTrusted` says nothing about a repository's own config, or the presets it extends
+      GlobalConfig.set({ inheritConfigTrusted: true });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'http://10.1.2.3',
+            allowInternal: true,
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toMatchObject([
+        {
+          message: `The "allowInternal" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "hostRules `allowInternal` is only allowed in the self-hosted administrator's own configuration.",
+          topic: 'Config security error',
+        },
+      ]);
     });
 
     it('errors if forbidden header in hostRules', async () => {

@@ -158,6 +158,7 @@ export async function start(): Promise<number> {
   }
 
   let config: AllConfig;
+  let repoExitCode = 0;
   const env = getEnv();
   try {
     if (isNonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
@@ -269,7 +270,11 @@ export async function start(): Promise<number> {
           queue.clear();
           throttle.clear();
 
-          await repositoryWorker.renovateRepository(repoConfig);
+          const repoResult =
+            await repositoryWorker.renovateRepository(repoConfig);
+          if (config.exitCodeForErrors && !repoExitCode) {
+            repoExitCode = repoResult?.exitCode ?? 0;
+          }
           setMeta({});
         },
         {
@@ -309,6 +314,13 @@ export async function start(): Promise<number> {
         `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
       );
     }
+  }
+  if (repoExitCode) {
+    logger.info(
+      { exitCode: repoExitCode },
+      'Renovate is exiting with an error-specific code due to a repository error',
+    );
+    return repoExitCode;
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   if (loggerErrors.length) {

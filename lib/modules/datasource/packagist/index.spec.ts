@@ -622,14 +622,14 @@ describe('modules/datasource/packagist/index', () => {
         .get('/p2/drewm/mailchimp-api~dev.json')
         .reply(200, mailchimpDevJson);
       config.registryUrls = ['https://repo.packagist.org'];
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           datasource,
           versioning,
           packageName: 'drewm/mailchimp-api',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: 'https://repo.packagist.org',
         releases: [
           {
@@ -742,14 +742,14 @@ describe('modules/datasource/packagist/index', () => {
         .get('/p2/drewm/mailchimp-api~dev.json')
         .reply(200, mailchimpDevJson);
       config.registryUrls = [];
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           datasource,
           versioning,
           packageName: 'drewm/mailchimp-api',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         registryUrl: 'https://repo.packagist.org',
         releases: [
           { version: '1.0' },

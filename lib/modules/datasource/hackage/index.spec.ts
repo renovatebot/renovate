@@ -15,22 +15,22 @@ describe('modules/datasource/hackage/index', () => {
 
   describe('getReleases', () => {
     it('return null with empty registryUrl', async () => {
-      expect(
-        await new HackageDatasource().getReleases({
+      await expect(
+        new HackageDatasource().getReleases({
           packageName: 'base',
           registryUrl: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/package/base.json').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HackageDatasource.id,
           packageName: 'base',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns releases for 200', async () => {
@@ -38,12 +38,12 @@ describe('modules/datasource/hackage/index', () => {
         .scope(baseUrl)
         .get('/package/base.json')
         .reply(200, { '4.19.0.1': 'deprecated', '4.20.0.1': 'normal' });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: HackageDatasource.id,
           packageName: 'base',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: baseUrl,
         releases: [
           {

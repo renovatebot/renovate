@@ -1,11 +1,14 @@
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../config/global.ts';
+import { logger } from '../../../../../logger/index.ts';
 import * as semverVersioning from '../../../../../modules/versioning/semver/index.ts';
+import { ExternalHostError } from '../../../../../types/errors/external-host-error.ts';
 import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
 import * as hostRules from '../../../../../util/host-rules.ts';
 import type { Timestamp } from '../../../../../util/timestamp.ts';
 import type { BranchConfig } from '../../../../types.ts';
+import api from './api.ts';
 import { getChangeLogJSON } from './index.ts';
 import * as releases from './releases.ts';
 
@@ -42,6 +45,31 @@ const upgrade = partial<BranchConfig>({
   ],
 });
 
+function expectedChangeLog({
+  baseUrl = 'https://github.com/',
+  apiBaseUrl = 'https://api.github.com/',
+  sourceUrl = 'https://github.com/chalk/chalk',
+  packageName = 'renovate',
+} = {}) {
+  return {
+    hasReleaseNotes: true,
+    project: {
+      apiBaseUrl,
+      baseUrl,
+      packageName,
+      repository: 'chalk/chalk',
+      sourceUrl,
+      type: 'github',
+    },
+    versions: [
+      { version: '2.5.2' },
+      { version: '2.4.2' },
+      { version: '2.3.0' },
+      { version: '2.2.2' },
+    ],
+  };
+}
+
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
@@ -53,50 +81,79 @@ describe('workers/repository/update/pr/changelog/index', () => {
       });
     });
 
+    it('logs a warning when changelog fetching fails with an external host error', async () => {
+      const changeLogSource = api.get('github')!;
+      vi.spyOn(changeLogSource, 'getChangeLogJSON').mockRejectedValueOnce(
+        new ExternalHostError(new Error('some error')),
+      );
+
+      await expect(getChangeLogJSON({ ...upgrade })).resolves.toBeNull();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'getChangeLogJSON error',
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs an error when changelog fetching fails unexpectedly', async () => {
+      const changeLogSource = api.get('github')!;
+      vi.spyOn(changeLogSource, 'getChangeLogJSON').mockRejectedValueOnce(
+        new Error('some error'),
+      );
+
+      await expect(getChangeLogJSON({ ...upgrade })).resolves.toBeNull();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        'getChangeLogJSON error',
+      );
+    });
+
     it('returns null if @types', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles unsupported changelog source', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://dev.azure.com/unknown-repo',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if no currentVersion', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null if currentVersion equals newVersion', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           currentVersion: '1.0.0',
           newVersion: '1.0.0',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('skips invalid repos', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/about',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('works without Github', async () => {
@@ -112,29 +169,11 @@ describe('workers/repository/update/pr/changelog/index', () => {
         .get('/repos/chalk/chalk')
         .times(4)
         .reply(500);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('uses GitHub tags', async () => {
@@ -148,29 +187,11 @@ describe('workers/repository/update/pr/changelog/index', () => {
         { version: 'v2.4.2' },
       ] as never);
       githubReleasesMock.mockResolvedValue([]);
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('filters unnecessary warns', async () => {
@@ -183,100 +204,67 @@ describe('workers/repository/update/pr/changelog/index', () => {
         ...upgrade,
         packageName: '@renovate/no',
       });
-      expect(res).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          packageName: '@renovate/no',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      expect(res).toMatchObject(
+        expectedChangeLog({ packageName: '@renovate/no' }),
+      );
     });
 
     it('supports node engines', async () => {
       githubTagsMock.mockResolvedValueOnce([]);
       githubReleasesMock.mockResolvedValueOnce([]);
       httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           depType: 'engines',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('handles no sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: undefined,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles invalid sourceUrl', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'http://example.com',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles missing Github token', async () => {
       GlobalConfig.set({ githubTokenWarn: true });
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com',
         }),
-      ).toEqual({ error: 'MissingGithubToken' });
+      ).resolves.toEqual({ error: 'MissingGithubToken' });
     });
 
     it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('handles not enough releases', async () => {
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           releases: [{ version: '0.9.0' }],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('will call getInRangeReleases when releases is undefined', async () => {
@@ -297,29 +285,11 @@ describe('workers/repository/update/pr/changelog/index', () => {
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      ).resolves.toMatchObject(expectedChangeLog());
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
@@ -336,29 +306,18 @@ describe('workers/repository/update/pr/changelog/index', () => {
         token: 'abc',
       });
       vi.stubEnv('GITHUB_ENDPOINT', '');
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
+      ).resolves.toMatchObject(
+        expectedChangeLog({
           baseUrl: 'https://github-enterprise.example.com/',
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
+          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+        }),
+      );
     });
 
     it('supports github.com and github enterprise changelog', async () => {
@@ -374,29 +333,18 @@ describe('workers/repository/update/pr/changelog/index', () => {
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
+      ).resolves.toMatchObject(
+        expectedChangeLog({
           baseUrl: 'https://github-enterprise.example.com/',
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
+          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+        }),
+      );
     });
   });
 });

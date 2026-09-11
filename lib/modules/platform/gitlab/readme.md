@@ -1,5 +1,22 @@
 # GitLab
 
+## Easiest way to run Renovate
+
+For users on GitLab.com, the easiest way to get started is to install the Mend-hosted Renovate app [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
+When you use the app, Mend will:
+
+- authenticate Renovate to GitLab.com
+- keep the tokens safe
+- maintain and update the Renovate version used
+
+If you self-host Renovate you must do the things listed above yourself.
+Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
+We recommend most users install the Mend-hosted app.
+
+Read the [GitLab security](../../../gitlab-bot-security.md) page to learn about the security model for both the Mend-hosted app and self-hosted deployments.
+
+After you installed the hosted app, please read the [reading list](../../../reading-list.md) to learn how to use and configure Renovate.
+
 ## Authentication
 
 You can authenticate Renovate to GitLab, with _one_ of these methods:
@@ -97,6 +114,7 @@ By setting the server version yourself, you save a API call that fetches the ser
 - Do not truncate Markdown body to 25K chars since `v13.4.0`
 - Allow configure reviewers since `v13.9.0`
 - Add automerged MRs to merge trains since `v17.11.0` (when [merge trains](https://docs.gitlab.com/ci/pipelines/merge_trains/) are enabled on the project)
+- With `platformAutomerge=false`, Renovate adds MRs to the merge train itself once all checks have passed, see [GitLab Merge Trains](../../../key-concepts/automerge.md#gitlab-merge-trains)
 
 ## Multiple merge request assignees
 

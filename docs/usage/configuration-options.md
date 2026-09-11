@@ -338,6 +338,9 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
 - As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 25 hours, see [`prNotPendingHours`](#prnotpendinghours))
 
+Note that `"automergeType": "branch"` only works with GitHub merge queues or GitLab merge trains if Renovate is on the merge queue's bypass list, because the merge queue does not allow pushing directly to the base branch otherwise.
+If the push is rejected, Renovate falls back to creating a PR.
+
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
@@ -1873,7 +1876,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs-and-tools) to allow Renovate to fetch changelogs notes from `github.com`.
 
-You may use [package rules](#packagerules) to override the value of `fetchChangeLogs` for matching depeendencies, with later rules overriding earlier ones.
+You may use [package rules](#packagerules) to override the value of `fetchChangeLogs` for matching dependencies, with later rules overriding earlier ones.
 
 The following re-enables fetching of changelogs when creating pull-requests for lodash updates.
 
@@ -2178,6 +2181,10 @@ To match specific ports you have to add a protocol to `matchHost`:
 !!! note
   Disabling a host is only 100% effective if added to self-hosted config.
   Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same Renovate deployment has successfully queried for the same dependency recently.
+
+!!! note
+  `enabled` is not resolved by specificity alone: host rules from the self-hosted administrator's own config are resolved at a higher trust level than those from repository config or a preset.
+  So if the administrator's own rules set `enabled` for a host, repository config or a preset cannot re-enable - or disable - that host, no matter how specific its `matchHost` is.
 
 ### `hostRules.abortIgnoreStatusCodes`
 
@@ -4603,7 +4610,7 @@ By default this label is `"rebase"` but you can configure it to anything you wan
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
+- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead. On GitHub, if the base branch has a merge queue, `conflicted` is used because the merge queue already tests PRs against the head of the base branch. The same applies on GitLab if merge trains are enabled on the project
 - `automerging`: Renovate will use `behind-base-branch` if configured to automerge, Otherwise, `never` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
@@ -4649,6 +4656,7 @@ The aliases support variables with default values (using the `:-` syntax) which 
 This feature works with the following managers:
 
 - [`ansible`](modules/manager/ansible/index.md)
+- [`argocd`](modules/manager/argocd/index.md)
 - [`bazel-module`](modules/manager/bazel-module/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
@@ -4663,6 +4671,7 @@ This feature works with the following managers:
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
 - [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
+- [`helmsman`](modules/manager/helmsman/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
 - [`terraform`](modules/manager/terraform/index.md)

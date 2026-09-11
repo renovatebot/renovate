@@ -92,3 +92,36 @@ export interface NpmrcResult {
   npmrc: string | undefined;
   npmrcFileName: string | null;
 }
+
+export type NpmrcLineEnding = '\n' | '\r\n' | '\r' | '';
+export type DetectedNpmrcLineEnding = Exclude<NpmrcLineEnding, ''>;
+
+interface NpmrcBaseLine {
+  raw: string;
+  lineEnding: NpmrcLineEnding;
+}
+
+export interface NpmrcSettingLine extends NpmrcBaseLine {
+  type: 'setting';
+  section: string | null;
+  key: string;
+  isArray: boolean;
+  value: unknown;
+}
+
+export interface NpmrcSectionLine extends NpmrcBaseLine {
+  type: 'section';
+  name: string;
+}
+
+export interface NpmrcOtherLine extends NpmrcBaseLine {
+  type: 'other';
+}
+
+export type NpmrcLine = NpmrcSettingLine | NpmrcSectionLine | NpmrcOtherLine;
+
+export interface NpmrcDocument {
+  lines: NpmrcLine[];
+  detectedLineEnding: DetectedNpmrcLineEnding | null;
+  trailingLineEnding: NpmrcLineEnding;
+}

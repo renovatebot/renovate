@@ -16,6 +16,27 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('keeps the syntax dep type when there is no FROM', () => {
+      const res = extractPackageFile(
+        '# syntax=docker/dockerfile:1.9.0\n',
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.9.0',
+          datasource: 'docker',
+          depName: 'docker/dockerfile',
+          depType: 'syntax',
+          packageName: 'docker/dockerfile',
+          replaceString: 'docker/dockerfile:1.9.0',
+        },
+      ]);
+    });
+
     it('handles naked dep', () => {
       const res = extractPackageFile('FROM node\n', '', {})?.deps;
       expect(res).toEqual([

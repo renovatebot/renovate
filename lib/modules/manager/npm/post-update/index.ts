@@ -132,6 +132,7 @@ export function determineLockFileDirs(
 export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles,
+  originalNpmrcFiles = new Map<string, string>(),
 ): Promise<void> {
   if (!packageFiles.npm) {
     return;
@@ -158,6 +159,12 @@ export async function writeExistingFiles(
         !packageFile.managerData.npmrcFileName)
     ) {
       try {
+        if (!originalNpmrcFiles.has(npmrcFilename)) {
+          const originalNpmrc = await readLocalFile(npmrcFilename, 'utf8');
+          if (isString(originalNpmrc)) {
+            originalNpmrcFiles.set(npmrcFilename, originalNpmrc);
+          }
+        }
         await writeLocalFile(npmrcFilename, npmrc.replace(regEx(/\n?$/), '\n'));
       } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
@@ -210,7 +217,14 @@ export async function writeExistingFiles(
                 delete npmLockParsed.packages[packageName];
                 continue;
               }
-              if (!depName || !oldVersion) {
+              if (
+                !depName ||
+                !oldVersion ||
+                // Workspace entries (e.g. `packages/app`) and the root entry
+                // are link targets: `node_modules/<name>` points at them with
+                // `link: true`, so deleting one breaks npm with EMISSINGTARGET.
+                !packageName.startsWith('node_modules/')
+              ) {
                 continue;
               }
               // Lockstep monorepo siblings (e.g. vue -> @vue/server-renderer)
@@ -264,6 +278,18 @@ export async function writeExistingFiles(
   }
 }
 
+async function restoreNpmrcFiles(
+  originalNpmrcFiles: Map<string, string>,
+): Promise<void> {
+  for (const [npmrcFilename, originalNpmrc] of originalNpmrcFiles) {
+    try {
+      await writeLocalFile(npmrcFilename, originalNpmrc);
+    } catch (err) {
+      logger.warn({ npmrcFilename, err }, 'Error restoring .npmrc');
+    }
+  }
+}
+
 export async function writeUpdatedPackageFiles(
   config: PostUpdateConfig,
 ): Promise<void> {
@@ -296,13 +322,11 @@ export async function writeUpdatedPackageFiles(
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
-    if (
-      !(
-        packageFile.path.endsWith('package.json') ||
-        packageFile.path.endsWith('pnpm-workspace.yaml') ||
-        packageFile.path.endsWith('.yarnrc.yml')
-      )
-    ) {
+    if (!(
+      packageFile.path.endsWith('package.json') ||
+      packageFile.path.endsWith('pnpm-workspace.yaml') ||
+      packageFile.path.endsWith('.yarnrc.yml')
+    )) {
       continue;
     }
     const contents =
@@ -418,9 +442,10 @@ export async function updateYarnBinary(
   return existingYarnrcYmlContent && yarnrcYml;
 }
 
-export async function getAdditionalFiles(
+async function getAdditionalFilesInner(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
+  originalNpmrcFiles: Map<string, string>,
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
@@ -444,7 +469,7 @@ export async function getAdditionalFiles(
   }
   const dirs = determineLockFileDirs(config, packageFiles);
   logger.trace({ dirs }, 'lock file dirs');
-  await writeExistingFiles(config, packageFiles);
+  await writeExistingFiles(config, packageFiles, originalNpmrcFiles);
   await writeUpdatedPackageFiles(config);
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
@@ -698,4 +723,20 @@ export async function getAdditionalFiles(
   }
 
   return { artifactErrors, artifactNotices, updatedArtifacts };
+}
+
+export async function getAdditionalFiles(
+  config: PostUpdateConfig<NpmManagerData>,
+  packageFiles: AdditionalPackageFiles,
+): Promise<WriteExistingFilesResult> {
+  const originalNpmrcFiles = new Map<string, string>();
+  try {
+    return await getAdditionalFilesInner(
+      config,
+      packageFiles,
+      originalNpmrcFiles,
+    );
+  } finally {
+    await restoreNpmrcFiles(originalNpmrcFiles);
+  }
 }

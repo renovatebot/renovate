@@ -939,18 +939,18 @@ describe('modules/datasource/maven/index', () => {
 
     it('returns original value for invalid configs', async () => {
       const releaseOrig: Release = { version: '1.2.3' };
-      expect(
-        await postprocessRelease(
+      await expect(
+        postprocessRelease(
           { datasource, registryUrl: MAVEN_REPO }, // packageName is missing
           releaseOrig,
         ),
-      ).toBe(releaseOrig);
-      expect(
-        await postprocessRelease(
+      ).resolves.toBe(releaseOrig);
+      await expect(
+        postprocessRelease(
           { datasource, packageName: 'foo:bar' }, // registryUrl is missing
           releaseOrig,
         ),
-      ).toBe(releaseOrig);
+      ).resolves.toBe(releaseOrig);
     });
 
     it('adds releaseTimestamp', async () => {

@@ -76,13 +76,13 @@ describe('modules/datasource/repology/index', () => {
         body: '[]',
       });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing repository or package', async () => {
@@ -93,13 +93,13 @@ describe('modules/datasource/repology/index', () => {
         status: 404,
       });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'this_should/never-exist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws error on unexpected API response', async () => {
@@ -210,13 +210,13 @@ describe('modules/datasource/repology/index', () => {
         body: '[]',
       });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'ubuntu_20_04/git',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws without repository and package name', async () => {
@@ -231,13 +231,13 @@ describe('modules/datasource/repology/index', () => {
 
     it('throws on disabled host', async () => {
       hostRules.add({ matchHost: repologyHost, enabled: false });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns correct version for binary package', async () => {

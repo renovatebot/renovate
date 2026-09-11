@@ -10,12 +10,10 @@ const OrbVersion = z
       created_at: MaybeTimestamp,
     }),
   })
-  .transform(
-    ({ attributes }): Release => ({
-      version: attributes.version,
-      releaseTimestamp: attributes.created_at,
-    }),
-  );
+  .transform(({ attributes }): Release => ({
+    version: attributes.version,
+    releaseTimestamp: attributes.created_at,
+  }));
 
 const OrbPackage = z
   .object({

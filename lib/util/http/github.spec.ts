@@ -204,10 +204,34 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd']);
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         {
-          requestHost: 'api.github.com',
-          paginationHost: 'attacker.example.com',
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'https://attacker.example.com',
         },
-        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
+    });
+
+    it('does not follow cursor pagination links to a different protocol on the same host', async () => {
+      // Same host, but a different scheme still counts as a different origin
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: '<http://api.github.com/some-url?after=cursor-2>; rel="next"',
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'http://api.github.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
       );
     });
 
@@ -418,10 +442,27 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b']);
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         {
-          requestHost: 'api.github.com',
-          paginationHost: 'attacker.example.com',
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'https://attacker.example.com',
         },
-        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
+    });
+
+    it('does not follow pagination links to a different protocol on the same host', async () => {
+      // Same host, but a different scheme still counts as a different origin
+      const url = '/some-url?per_page=2';
+      httpMock.scope(githubApiHost).get(url).reply(200, ['a', 'b'], {
+        link: `<http://api.github.com/some-url?per_page=2&page=2>; rel="next", <http://api.github.com/some-url?per_page=2&page=3>; rel="last"`,
+      });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'http://api.github.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
       );
     });
 
@@ -842,11 +883,11 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
         }),
-      ).toEqual([]);
+      ).resolves.toEqual([]);
     });
 
     it('returns empty array for undefined data.', async () => {
@@ -856,11 +897,11 @@ describe('util/http/github', () => {
         .reply(200, {
           data: { repository: { otherField: 'someval' } },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem', {
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
         }),
-      ).toEqual([]);
+      ).resolves.toEqual([]);
     });
 
     it('throws errors for invalid responses', async () => {
@@ -884,9 +925,9 @@ describe('util/http/github', () => {
             someprop: 'someval',
           },
         });
-      expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem'),
-      ).toMatchInlineSnapshot(`[]`);
+      await expect(
+        githubApi.queryRepoField(graphqlQuery, 'testItem'),
+      ).resolves.toMatchInlineSnapshot(`[]`);
     });
 
     it('throws when an app installation exhausts its GraphQL budget', async () => {

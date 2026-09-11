@@ -28,22 +28,22 @@ describe('modules/datasource/java-version/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
       httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -51,12 +51,12 @@ describe('modules/datasource/java-version/index', () => {
         .scope(defaultRegistryUrl)
         .get(getPath(0))
         .reply(200, { versions: [] });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

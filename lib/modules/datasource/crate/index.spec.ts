@@ -154,23 +154,23 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(404, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid registry url', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: ['3'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
@@ -180,13 +180,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing fields', async () => {
@@ -196,13 +196,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, undefined);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty list', async () => {
@@ -212,13 +212,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, '\n');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
@@ -226,13 +226,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/so/me/some_crate')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -254,13 +254,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/so/me/some_crate')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data: libc', async () => {

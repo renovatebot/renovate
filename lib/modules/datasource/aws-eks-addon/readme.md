@@ -7,6 +7,25 @@ This `datasource` returns the addon versions available for use on [AWS EKS](http
 
 See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
+You can also provide credentials specifically for this datasource with a `hostRules` entry.
+Set `hostType` to `aws-eks-addon`, `username` to the access key ID, `password` to the secret access key, and optionally `token` to the session token:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "aws-eks-addon",
+      "username": "access-key-id",
+      "password": "secret-access-key",
+      "token": "session-token"
+    }
+  ]
+}
+```
+
+These credentials only apply to AWS EKS Addon lookups.
+When this host rule is absent or incomplete, Renovate uses the default AWS credential provider chain.
+
 You can also specify different `region` and `profile` for each addon.
 
 The minimal IAM privileges required for this datasource are:

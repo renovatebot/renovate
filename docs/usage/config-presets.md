@@ -370,6 +370,11 @@ Parameters are supported similar to other methods:
 }
 ```
 
+!!! note
+  Renovate warns about HTTP requests to internal hosts (loopback, private ranges, and similar) by default, and can be set to block them - see [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess).
+  Because a preset's response becomes configuration, fetching presets from an internal host needs a deliberate grant from the self-hosted administrator: a `hostRules` entry in their own configuration setting [`allowInternal=true`](./self-hosted-configuration.md#hostrulesallowinternal), scoped with a `hostType` or a URL-prefix `matchHost`.
+  This applies to `npm:` presets too, where the scoped grant names the registry, for example `{ "matchHost": "https://registry.corp/", "hostType": "npm", "allowInternal": true }`.
+
 ## Templating presets
 
 You can use [Handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.

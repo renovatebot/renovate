@@ -10,6 +10,7 @@ import type {
   PackageRuleInputConfig,
 } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
 import { getApiToken } from '../merge-confidence/index.ts';
 import { Matcher } from './base.ts';
 
@@ -19,6 +20,14 @@ export class MergeConfidenceMatcher extends Matcher {
     { matchConfidence }: PackageRule,
   ): boolean | null {
     if (isNullOrUndefined(matchConfidence)) {
+      return null;
+    }
+
+    // if we're on `local` platform - for instance to test against a repo - don't error, but don't allow the packageRule either
+    if (GlobalConfig.get('platform') === 'local') {
+      logger.once.debug(
+        "Skipping packageRule(s) with `matchConfidence`, as we're running in platform=local",
+      );
       return null;
     }
 

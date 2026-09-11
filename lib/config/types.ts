@@ -26,23 +26,15 @@ import type { Timestamp } from '../util/timestamp.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
-  | 'global'
-  | 'inherit'
-  | 'repository'
-  | 'package'
-  | 'branch'
-  | 'pr';
+  'global' | 'inherit' | 'repository' | 'package' | 'branch' | 'pr';
 
 export type RenovateSplit =
-  | 'init'
-  | 'onboarding'
-  | 'extract'
-  | 'lookup'
-  | 'update';
+  'init' | 'onboarding' | 'extract' | 'lookup' | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
+export type InternalHostAccess = 'allow' | 'warn' | 'block';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
@@ -204,6 +196,7 @@ export interface GlobalOnlyConfigLegacy {
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
+  exitCodeForErrors?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -260,6 +253,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
+  inheritConfigTrusted?: boolean;
+  internalHostAccess?: InternalHostAccess;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
@@ -344,8 +339,7 @@ export type RenovateRepository = string | RenovateRepositoryEntry;
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
-  | 'timestamp-required'
-  | 'timestamp-optional';
+  'timestamp-required' | 'timestamp-optional';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -585,11 +579,7 @@ export type MergeStrategy =
 
 // This list should be added to as any new unsafe execution commands should be permitted
 export type AllowedUnsafeExecution =
-  | 'bazelModDeps'
-  | 'goGenerate'
-  | 'gradleWrapper'
-  | 'mise'
-  | 'pixi';
+  'bazelModDeps' | 'goGenerate' | 'gradleWrapper' | 'mise' | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule

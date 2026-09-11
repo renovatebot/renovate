@@ -1,10 +1,14 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import { dir as tmpDir } from 'tmp-promise';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { extractPackageFile } from '../../manager/pip_requirements/extract.ts';
 import { getPkgReleases } from '../index.ts';
 import { PypiDatasource } from './index.ts';
 
@@ -79,6 +83,65 @@ const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
 
 describe('modules/datasource/pypi/index', () => {
+  describe('registry caching', () => {
+    let cacheDir: Awaited<ReturnType<typeof tmpDir>>;
+
+    beforeEach(async () => {
+      memCache.init();
+      cacheDir = await tmpDir({ unsafeCleanup: true });
+      await packageCache.init({ cacheDir: cacheDir.path });
+    });
+
+    afterEach(async () => {
+      await packageCache.cleanup({});
+      memCache.reset();
+      await cacheDir.cleanup();
+    });
+
+    it('keeps merged PyPI releases within each requirements file registry set', async () => {
+      httpMock
+        .scope(PypiDatasource.defaultURL)
+        .get('/foo/json')
+        .reply(200, { releases: { '1.0.0': [{}] } });
+      httpMock
+        .scope('https://index-a.example/pypi')
+        .get('/foo/json')
+        .reply(200, { releases: { '2.0.0': [{}] } });
+      httpMock
+        .scope('https://index-b.example/pypi')
+        .get('/foo/json')
+        .reply(200, { releases: { '3.0.0': [{}] } });
+
+      const fileA = extractPackageFile(
+        '--extra-index-url https://index-a.example/pypi\nfoo==1.0.0\n',
+      )!;
+      const fileB = extractPackageFile(
+        '--extra-index-url https://index-b.example/pypi\nfoo==1.0.0\n',
+      )!;
+      const firstConfig = {
+        ...fileA,
+        datasource: 'pypi',
+        packageName: fileA.deps[0].packageName!,
+      };
+      const first = await getPkgReleases(firstConfig);
+      const second = await getPkgReleases({
+        ...fileB,
+        datasource: 'pypi',
+        packageName: fileB.deps[0].packageName!,
+      });
+
+      expect(first?.releases.map(({ version }) => version)).toEqual([
+        '1.0.0',
+        '2.0.0',
+      ]);
+      expect(second?.releases.map(({ version }) => version)).toEqual([
+        '1.0.0',
+        '3.0.0',
+      ]);
+      await expect(getPkgReleases(firstConfig)).resolves.toEqual(first);
+    });
+  });
+
   describe('getReleases', () => {
     beforeEach(() => {
       vi.stubEnv('PIP_INDEX_URL', undefined);
@@ -87,22 +150,22 @@ describe('modules/datasource/pypi/index', () => {
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/something/json').reply(404);
       httpMock.scope(baseUrl).get('/something/').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'something',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {
       httpMock.scope(baseUrl).get('/azure-cli-monitor/json').reply(200, res1);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'azure-cli-monitor',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         releases: [
           {
             releaseTimestamp: '2017-04-03T16:55:08.000Z',
@@ -253,13 +316,13 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://custom.pypi.net/foo'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           datasource,
           packageName: 'azure-cli-monitor',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         registryUrl: 'https://custom.pypi.net/foo',
         releases: expect.toBeArrayOfSize(22),
         sourceUrl: 'https://github.com/Azure/azure-cli',
@@ -556,14 +619,14 @@ describe('modules/datasource/pypi/index', () => {
             '0.4.1': [],
           },
         });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           constraints: { python: '2.7' },
           packageName: 'doit',
           constraintsFiltering: 'strict',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         releases: [
           { version: '0.4.0' },
           { version: '0.4.1' },
@@ -604,14 +667,14 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         releases: [
           { version: '0.1.2' },
           { version: '0.1.3' },
@@ -636,14 +699,14 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://some.registry.org/+simple/'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         registryUrl: 'https://some.registry.org/+simple',
         releases: [
           { version: '0.1.2' },
@@ -729,14 +792,14 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           ...config,
           constraints: { python: '2.7' },
           packageName: 'image-collector',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         releases: [{ version: '0.0.5' }],
       });
     });
@@ -916,14 +979,14 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404 response from simple endpoint', async () => {
@@ -934,14 +997,14 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for response with no versions', async () => {
@@ -952,14 +1015,14 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it.each([404, 403])(
@@ -993,15 +1056,15 @@ describe('modules/datasource/pypi/index', () => {
       const config = {
         registryUrls: ['https://some.registry.org/simple/'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           constraints: { python: '2.7' },
           ...config,
           packageName: 'dj-database-url',
           constraintsFiltering: 'strict',
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         releases: [
           { version: '0.1.2' },
           { version: '0.1.3' },
@@ -1563,14 +1626,14 @@ describe('modules/datasource/pypi/index', () => {
         getAccessToken: vi.fn().mockResolvedValue('some-token'),
       });
     });
-    expect(
-      await getPkgReleases({
+    await expect(
+      getPkgReleases({
         datasource,
         ...config,
         constraints: { python: '2.7' },
         packageName: 'dj-database-url',
       }),
-    ).toMatchObject({
+    ).resolves.toMatchObject({
       isPrivate: true,
       registryUrl:
         'https://someregion-python.pkg.dev/some-project/some-repo/simple',
@@ -1596,14 +1659,14 @@ describe('modules/datasource/pypi/index', () => {
         getAccessToken: vi.fn().mockResolvedValue('some-token'),
       });
     });
-    expect(
-      await getPkgReleases({
+    await expect(
+      getPkgReleases({
         datasource,
         ...config,
         constraints: { python: '2.7' },
         packageName: 'dj-database-url',
       }),
-    ).toMatchObject({
+    ).resolves.toMatchObject({
       isPrivate: true,
       registryUrl:
         'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple',
@@ -1629,14 +1692,14 @@ describe('modules/datasource/pypi/index', () => {
     const config = {
       registryUrls: ['https://pypi.org/simple/'],
     };
-    expect(
-      await getPkgReleases({
+    await expect(
+      getPkgReleases({
         datasource,
         ...config,
         constraints: { python: '2.7' },
         packageName: 'azure-cli-monitor',
       }),
-    ).toMatchObject({
+    ).resolves.toMatchObject({
       registryUrl: 'https://pypi.org/simple',
       releases: [
         { version: '0.0.1' },

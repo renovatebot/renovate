@@ -53,6 +53,7 @@
       "replacements:rollup-node-resolve-to-scoped",
       "replacements:rollup-terser-to-scoped",
       "replacements:rome-to-biome",
+      "replacements:scorecard-registry-move",
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
@@ -1164,6 +1165,16 @@
         "matchPackageNames": ["rome"],
         "replacementName": "@biomejs/biome",
         "replacementVersion": "1.0.0"
+      }
+    ]
+  },
+  "scorecard-registry-move": {
+    "description": "The OpenSSF Scorecard container images moved from `gcr.io/openssf/scorecard` to `ghcr.io/ossf/scorecard`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/openssf/scorecard"],
+        "replacementName": "ghcr.io/ossf/scorecard"
       }
     ]
   },

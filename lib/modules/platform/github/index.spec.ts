@@ -120,12 +120,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, { login: 'renovate-bot' })
         .get('/user/emails')
         .reply(200, [{ email: 'user@domain.com' }]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: 'github_pat_XXXXXX',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor: 'undefined <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -168,7 +168,11 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(400);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support default endpoint no email result', async () => {
@@ -180,17 +184,26 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(200, [{}]);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support gitAuthor and username', async () => {
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           token: '123test',
           username: 'renovate-bot',
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'renovate@whitesourcesoftware.com',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);
@@ -404,7 +417,12 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should use public email from user profile when available', async () => {
@@ -413,7 +431,7 @@ describe('modules/platform/github/index', () => {
         name: 'Example User',
         email: 'user@domain.com',
       });
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'Example User <user@domain.com>',
         renovateUsername: 'renovate-bot',
@@ -435,7 +453,7 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(200, [{ email: 'user@differentdomain.com' }]);
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'Example User <user@differentdomain.com>',
         renovateUsername: 'renovate-bot',
@@ -454,7 +472,7 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(403);
-      expect(await github.initPlatform({ token: '123test' })).toEqual({
+      await expect(github.initPlatform({ token: '123test' })).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: undefined,
         renovateUsername: 'renovate-bot',
@@ -474,9 +492,9 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({ token: 'x-access-token:ghs_123test' }),
-      ).toEqual({
+      await expect(
+        github.initPlatform({ token: 'x-access-token:ghs_123test' }),
+      ).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
@@ -516,7 +534,9 @@ describe('modules/platform/github/index', () => {
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);
-      expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
+      await expect(
+        github.initPlatform({ token: 'ghs_123test' }),
+      ).resolves.toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
         hostRules: [
@@ -585,12 +605,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: 'x-access-token:ghs_123test',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor:
           'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
@@ -613,12 +633,12 @@ describe('modules/platform/github/index', () => {
         .reply(200, {
           data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
         });
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://api.octocorp.ghe.com',
           token: 'x-access-token:ghs_123test',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://api.octocorp.ghe.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
         renovateUsername: 'my-app[bot]',
@@ -648,12 +668,17 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support custom endpoint without version', async () => {
@@ -672,12 +697,17 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(
-        await github.initPlatform({
+      await expect(
+        github.initPlatform({
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
   });
 
@@ -702,7 +732,7 @@ describe('modules/platform/github/index', () => {
           null,
         ]);
       const repos = await github.getRepos();
-      expect(repos).toMatchSnapshot();
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
 
     it('should filters repositories by topics', async () => {
@@ -823,6 +853,22 @@ describe('modules/platform/github/index', () => {
     });
   }
 
+  function prListMock(scope: httpMock.Scope, prNo: number): void {
+    scope
+      .get(
+        '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+      )
+      .reply(200, [
+        {
+          number: prNo,
+          base: { ref: 'master' },
+          head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+          state: 'open',
+          title: 'Some PR',
+        },
+      ]);
+  }
+
   function forkInitRepoMock(
     scope: httpMock.Scope,
     repository: string,
@@ -876,7 +922,12 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('queries all version-gated fields if the GHES version is unknown', async () => {
@@ -944,7 +995,12 @@ describe('modules/platform/github/index', () => {
         forkToken: 'token',
         forkCreation: true,
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should throw if fork needed but forkCreation=false', async () => {
@@ -1094,7 +1150,12 @@ describe('modules/platform/github/index', () => {
         forkCreation: true,
         forkOrg: 'forked',
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('detects fork default branch mismatch', async () => {
@@ -1110,7 +1171,12 @@ describe('modules/platform/github/index', () => {
         forkToken: 'true',
         forkCreation: true,
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should merge', async () => {
@@ -1139,7 +1205,12 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should rebase', async () => {
@@ -1166,7 +1237,12 @@ describe('modules/platform/github/index', () => {
           },
         });
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should not guess at merge', async () => {
@@ -1186,7 +1262,12 @@ describe('modules/platform/github/index', () => {
           },
         });
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should throw error if archived', async () => {
@@ -1383,9 +1464,9 @@ describe('modules/platform/github/index', () => {
         .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(401);
-      await expect(
-        github.getBranchForceRebase('main'),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      await expect(github.getBranchForceRebase('main')).rejects.toThrow(
+        'Request failed with status code 401 (Unauthorized): GET https://api.github.com/repos/undefined/branches/main/protection',
+      );
     });
 
     it('should return empty object when parentRepo is set', async () => {
@@ -1566,6 +1647,113 @@ describe('modules/platform/github/index', () => {
       const secondResult = await github.getBranchForceRebase('dev');
       expect(secondResult).toBeFalse();
     });
+  });
+
+  describe('isBranchMergeQueueEnabled', () => {
+    it('should return true if the branch has a merge queue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').reply(200, {
+        data: { repository: { mergeQueue: { id: 'MQ_kwDOBJLedM0dmQ' } } },
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.isBranchMergeQueueEnabled('main');
+
+      expect(res).toBeTrue();
+    });
+
+    it('should return false if the branch has no merge queue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').reply(200, {
+        data: { repository: { mergeQueue: null } },
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.isBranchMergeQueueEnabled('main');
+
+      expect(res).toBeFalse();
+    });
+
+    it('should return cached result on subsequent calls', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').reply(200, {
+        data: { repository: { mergeQueue: { id: 'MQ_kwDOBJLedM0dmQ' } } },
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      // First call should make the HTTP request and cache the result
+      const firstResult = await github.isBranchMergeQueueEnabled('main');
+      // Second call should return cached result without making HTTP request
+      const secondResult = await github.isBranchMergeQueueEnabled('main');
+
+      expect(firstResult).toBeTrue();
+      expect(secondResult).toBeTrue();
+    });
+
+    it('should reuse the default branch result from initRepo', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', {
+        mergeQueue: { id: 'MQ_kwDOBJLedM0dmQ' },
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.isBranchMergeQueueEnabled('master');
+
+      expect(res).toBeTrue();
+    });
+
+    it('should assume a merge queue if the query returns errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').reply(200, {
+        errors: [
+          {
+            message: "Field 'mergeQueue' doesn't exist on type 'Repository'",
+          },
+        ],
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.isBranchMergeQueueEnabled('main');
+
+      expect(res).toBeTrue();
+    });
+
+    it('should assume a merge queue on request error', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').replyWithError('unknown error');
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.isBranchMergeQueueEnabled('main');
+
+      expect(res).toBeTrue();
+    });
+  });
+
+  describe('isPrInMergeQueue', () => {
+    it.each`
+      isInMergeQueue
+      ${true}
+      ${false}
+    `(
+      'returns $isInMergeQueue from the pull request merge queue status',
+      async ({ isInMergeQueue }) => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({ repository: 'some/repo' });
+        scope.post('/graphql').reply(200, {
+          data: { repository: { pullRequest: { isInMergeQueue } } },
+        });
+
+        const res = await github.isPrInMergeQueue(1234);
+
+        expect(res).toBe(isInMergeQueue);
+      },
+    );
   });
 
   describe('getPrList()', () => {
@@ -3927,13 +4115,13 @@ describe('modules/platform/github/index', () => {
           },
         ]);
       await github.initRepo({ repository: 'some/repo' });
-      expect(
-        await github.findPr({
+      await expect(
+        github.findPr({
           branchName: 'branch',
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 1,
         sourceBranch: 'branch-a',
         sourceRepo: 'some/repo',
@@ -5388,6 +5576,7 @@ describe('modules/platform/github/index', () => {
     it('should handle merge error', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .replyWithError('merge error');
@@ -5398,17 +5587,18 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should handle merge block', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .reply(405, { message: 'Required status check "build" is expected.' });
@@ -5419,13 +5609,13 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
           strategy: 'merge-commit', // for coverage - has no effect on this test
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it.each([
@@ -5435,6 +5625,7 @@ describe('modules/platform/github/index', () => {
     ])('should handle approvers required: %j', async (message) => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
         message,
       });
@@ -5445,18 +5636,19 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
           strategy: 'auto', // for coverage -- has not effect on this test
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should warn if automergeStrategy is not supported', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
       await github.initRepo({ repository: 'some/repo' });
 
@@ -5476,6 +5668,7 @@ describe('modules/platform/github/index', () => {
     it('should use configured automergeStrategy', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1234);
       scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
       await github.initRepo({ repository: 'some/repo' });
 
@@ -5499,11 +5692,200 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('mergePr(prNo) - merge queue', () => {
+    const pullsListItem = {
+      number: 1234,
+      node_id: 'abcd',
+      head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+      base: { ref: 'main' },
+      state: 'open',
+      title: 'Some PR',
+      updated_at: '01-09-2022',
+    };
+
+    function mergeQueueMock(
+      scope: httpMock.Scope,
+      mergeQueue: { id: string } | null,
+    ): void {
+      initRepoMock(scope, 'some/repo');
+      scope.post('/graphql').reply(200, {
+        data: { repository: { mergeQueue } },
+      });
+    }
+
+    it('should add PR to the merge queue instead of merging', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            enqueuePullRequest: {
+              mergeQueueEntry: { id: 'MQE_1', position: 1 },
+            },
+          },
+        });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeTrue();
+      expect(httpMock.getTrace()).toMatchObject([
+        { url: 'https://api.github.com/graphql' },
+        {
+          url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        },
+        { url: 'https://api.github.com/graphql' },
+        {
+          url: 'https://api.github.com/graphql',
+          graphql: {
+            mutation: { enqueuePullRequest: {} },
+            variables: { pullRequestId: 'abcd' },
+          },
+        },
+      ]);
+      // The PR is not merged yet, so it must not be cached as merged
+      await expect(github.getPr(1234)).resolves.toMatchObject({
+        number: 1234,
+        state: 'open',
+      });
+    });
+
+    it('should return true if the PR is already in the merge queue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .post('/graphql')
+        .reply(200, {
+          errors: [
+            {
+              type: 'UNPROCESSABLE',
+              message: 'The pull request is already enqueued',
+            },
+          ],
+        });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeTrue();
+    });
+
+    it('should return false if adding to the merge queue fails', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .post('/graphql')
+        .reply(200, {
+          errors: [
+            {
+              type: 'UNPROCESSABLE',
+              message: 'Pull request is in unstable status',
+            },
+          ],
+        });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeFalse();
+    });
+
+    it('should return false on merge queue request error', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .post('/graphql')
+        .replyWithError('unknown error');
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeFalse();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { prNumber: 1234, err: expect.any(Error) },
+        'Failed to add PR to the merge queue',
+      );
+    });
+
+    it('should merge directly if the PR cannot be found', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [])
+        .get('/repos/some/repo/pulls/1234')
+        .reply(404)
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeTrue();
+    });
+
+    it('should merge directly if the branch has no merge queue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, null);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeTrue();
+    });
+  });
+
   describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
       const input =
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(github.massageMarkdown(input)).toMatchSnapshot();
+      expect(github.massageMarkdown(input)).toBe(
+        '[https://github.com/foo/bar/issues/5](https://redirect.github.com/foo/bar/issues/5) plus also [a link](https://redirect.github.com/foo/bar/issues/5)',
+      );
     });
 
     it('returns not-updated pr body for GHE', async () => {
@@ -5553,6 +5935,7 @@ describe('modules/platform/github/index', () => {
     it('should try squash first', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1235);
       scope.put('/repos/some/repo/pulls/1235/merge').reply(200);
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
@@ -5561,17 +5944,18 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('should try merge after squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1236);
       scope
         .put('/repos/some/repo/pulls/1236/merge')
         .reply(400, 'no squashing allowed');
@@ -5582,17 +5966,18 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
 
     it('should try rebase after merge', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1237);
       scope
         .put('/repos/some/repo/pulls/1237/merge')
         .reply(405, 'no squashing allowed')
@@ -5607,17 +5992,18 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('should give up', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      prListMock(scope, 1237);
       scope
         .put('/repos/some/repo/pulls/1237/merge')
         .reply(405, 'no squashing allowed')
@@ -5634,12 +6020,12 @@ describe('modules/platform/github/index', () => {
           ref: 'someref',
         },
       };
-      expect(
-        await github.mergePr({
+      await expect(
+        github.mergePr({
           branchName: '',
           id: pr.number,
         }),
-      ).toBeFalse();
+      ).resolves.toBeFalse();
     });
   });
 

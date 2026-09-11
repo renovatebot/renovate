@@ -231,7 +231,7 @@ GitHub Actions maintained by the wider community have `with:` blocks such as:
 
 ```yaml
 steps:
-- uses: astral-sh/setup-uv@v9.0.0
+- uses: astral-sh/setup-uv@v10.0.1
   with:
     version: '0.4.x'
 

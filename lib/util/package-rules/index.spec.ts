@@ -15,6 +15,10 @@ type TestConfig = PackageRuleInputConfig & {
 };
 
 describe('util/package-rules/index', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   const config1: TestConfig = {
     foo: 'bar',
 
@@ -63,7 +67,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    expect(await applyPackageRules(config)).toEqual({
+    await expect(applyPackageRules(config)).resolves.toEqual({
       ...config,
       labels: ['bump'],
     });
@@ -951,6 +955,45 @@ describe('util/package-rules/index', () => {
       );
     });
 
+    it('does not throw when unauthenticated on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+          },
+        ],
+      };
+      hostRules.clear();
+
+      await expect(applyPackageRules(config)).resolves.not.toThrow();
+    });
+
+    it('does not apply the packageRule on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+            // @ts-expect-error -- testing
+            x: 1,
+          },
+        ],
+      };
+      hostRules.clear();
+
+      const res = await applyPackageRules(config);
+      expect(res.x).toBeUndefined();
+    });
+
     it('uses productLinks.documentation in error message URL', async () => {
       GlobalConfig.set({
         productLinks: { documentation: 'https://custom.example.com/' },
@@ -1236,9 +1279,9 @@ describe('util/package-rules/index', () => {
   });
 
   it('empty rules', async () => {
-    expect(
-      await applyPackageRules({ ...config1, packageRules: null as never }),
-    ).toEqual({
+    await expect(
+      applyPackageRules({ ...config1, packageRules: null as never }),
+    ).resolves.toEqual({
       foo: 'bar',
       packageRules: null,
     });

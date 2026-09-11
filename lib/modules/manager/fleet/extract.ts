@@ -3,8 +3,11 @@ import { regEx } from '../../../util/regex.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import { getDep } from '../dockerfile/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import {
+  getOciChartDep,
+  isOCIRegistry,
+  removeOCIPrefix,
+} from '../helmv3/oci.ts';
 import { checkIfStringIsPath } from '../terraform/util.ts';
 import type {
   ExtractConfig,
@@ -60,18 +63,20 @@ function extractFleetHelmBlock(
   }
 
   if (isOCIRegistry(doc.chart)) {
-    const dockerDep = getDep(
-      `${removeOCIPrefix(doc.chart)}:${doc.version}`,
-      false,
-      config.registryAliases,
-    );
-
+    const ociDep: PackageDependency = {
+      ...dep,
+      ...getOciChartDep(doc.chart, undefined, config.registryAliases),
+      depName: removeOCIPrefix(doc.chart),
+    };
+    if (!doc.version) {
+      return {
+        ...ociDep,
+        skipReason: 'unspecified-version',
+      };
+    }
     return {
-      ...dockerDep,
-      depType: 'fleet',
-      // https://github.com/helm/helm/issues/10312
-      // https://github.com/helm/helm/issues/10678
-      pinDigests: false,
+      ...ociDep,
+      currentValue: doc.version,
     };
   }
 

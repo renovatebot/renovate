@@ -1,6 +1,7 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import type { MockInstance } from 'vitest';
+import * as httpMock from '~test/http-mock.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { fs, logger, partial, platform, scm } from '~test/util.ts';
 import * as decrypt from '../../../config/decrypt.ts';
@@ -10,6 +11,7 @@ import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
 import * as _migrate from '../../../config/migration.ts';
 import type { AllConfig } from '../../../config/types.ts';
 import * as configValidation from '../../../config/validation.ts';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
@@ -83,7 +85,7 @@ describe('workers/repository/init/merge', () => {
     it('returns config if not found', async () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(await detectRepoFileConfig()).toEqual({});
+      await expect(detectRepoFileConfig()).resolves.toEqual({});
     });
 
     it('returns config if not found - uses cache', async () => {
@@ -93,7 +95,7 @@ describe('workers/repository/init/merge', () => {
       platform.getRawFile.mockRejectedValueOnce(new Error());
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(await detectRepoFileConfig()).toEqual({});
+      await expect(detectRepoFileConfig()).resolves.toEqual({});
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists',
@@ -109,7 +111,7 @@ describe('workers/repository/init/merge', () => {
         'package.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(pJson);
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'package.json',
         configFileParsed: { schema: 'https://docs.renovate.com' },
       });
@@ -132,7 +134,7 @@ describe('workers/repository/init/merge', () => {
       });
       fs.readLocalFile.mockResolvedValueOnce(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'package.json',
         configFileParsed: { prHourlyLimit: 10 },
       });
@@ -149,7 +151,7 @@ describe('workers/repository/init/merge', () => {
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
         configParsed,
       );
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'renovate.json',
         configFileParsed: {
           schema: 'https://docs.renovate.com',
@@ -167,12 +169,12 @@ describe('workers/repository/init/merge', () => {
       });
       fs.readLocalFile.mockResolvedValue(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'package.json',
         configFileParsed: { prHourlyLimit: 10 },
       });
       // get from repoCache
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'package.json',
         configFileParsed: { prHourlyLimit: 10 },
       });
@@ -186,7 +188,7 @@ describe('workers/repository/init/merge', () => {
       });
       fs.readLocalFile.mockResolvedValue(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'package.json',
         configFileParsed: { extends: ['github>renovatebot/renovate'] },
       });
@@ -195,7 +197,7 @@ describe('workers/repository/init/merge', () => {
     it('returns error if cannot parse', async () => {
       scm.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
       fs.readLocalFile.mockResolvedValue('cannot parse');
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'renovate.json',
         configFileParseError: {
           validationError: 'Invalid JSON (parsing failed)',
@@ -209,7 +211,7 @@ describe('workers/repository/init/merge', () => {
       fs.readLocalFile.mockResolvedValue(
         '{ "enabled": true, "enabled": false }',
       );
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: '.renovaterc',
         configFileParseError: {
           validationError: 'Duplicate keys in JSON',
@@ -227,7 +229,7 @@ describe('workers/repository/init/merge', () => {
       `;
       scm.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
       fs.readLocalFile.mockResolvedValue(configFileRaw);
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: 'renovate.json5',
         configFileParsed: {},
       });
@@ -239,7 +241,7 @@ describe('workers/repository/init/merge', () => {
         '.github/renovate.json',
       ]);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: '.github/renovate.json',
         configFileParsed: {},
       });
@@ -251,7 +253,7 @@ describe('workers/repository/init/merge', () => {
         '.gitlab/renovate.json',
       ]);
       fs.readLocalFile.mockResolvedValue('{}');
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: '.gitlab/renovate.json',
         configFileParsed: {},
       });
@@ -261,11 +263,11 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       platform.getRawFile.mockResolvedValueOnce('{"something":"new"}');
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: '.renovaterc.json',
         configFileParsed: {},
       });
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: '.renovaterc.json',
         configFileParsed: {
           something: 'new',
@@ -277,11 +279,11 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json5']);
       fs.readLocalFile.mockResolvedValue('{}');
       platform.getRawFile.mockResolvedValueOnce('{"something":"new"}');
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: '.renovaterc.json5',
         configFileParsed: {},
       });
-      expect(await detectRepoFileConfig()).toEqual({
+      await expect(detectRepoFileConfig()).resolves.toEqual({
         configFileName: '.renovaterc.json5',
         configFileParsed: {
           something: 'new',
@@ -400,7 +402,7 @@ describe('workers/repository/init/merge', () => {
         errors: [],
       });
       config.extends = [':automergeDisabled'];
-      expect(await mergeRenovateConfig(config)).toBeDefined();
+      await expect(mergeRenovateConfig(config)).resolves.toBeDefined();
     });
 
     it('continues if no errors-2', async () => {
@@ -411,8 +413,8 @@ describe('workers/repository/init/merge', () => {
         errors: [],
       });
       GlobalConfig.set({ requireConfig: 'ignored' });
-      expect(
-        await mergeRenovateConfig({
+      await expect(
+        mergeRenovateConfig({
           ...config,
           requireConfig: 'ignored',
           // @ts-expect-error -- TODO: do we still need this?
@@ -420,7 +422,7 @@ describe('workers/repository/init/merge', () => {
           warnings: undefined,
           secrets: undefined,
         }),
-      ).toBeDefined();
+      ).resolves.toBeDefined();
     });
 
     it('sets npmToken to npmrc when it is not inside encrypted', async () => {
@@ -804,8 +806,91 @@ describe('workers/repository/init/merge', () => {
               'custom-header': 'Bearer admin-secret',
               'X-Allowed': 'yes',
             },
+            internalHostGrant: { implicit: true },
           },
         );
+      });
+
+      it("applies a `repositories[]` entry's `allowInternal` without a validation error", async () => {
+        fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+        await expect(
+          mergeRenovateConfig({
+            ...config,
+            repositoryEntryConfig: {
+              hostRules: [
+                {
+                  matchHost: 'http://10.1.2.3',
+                  allowInternal: true,
+                },
+              ],
+            },
+          }),
+        ).toResolve();
+
+        expect(
+          hostRules.find({ url: 'http://10.1.2.3' }).internalHostGrant,
+        ).toEqual({ explicit: true, scoped: true, implicit: true });
+      });
+
+      it('permits an internal HTTP preset granted by the repositories[] entry', async () => {
+        // proves the entry's trusted rules are registered before the repository config's presets resolve
+        httpMock
+          .scope('http://10.1.2.3')
+          .get('/granted-preset.json')
+          .reply(200, {});
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['http://10.1.2.3/granted-preset.json'] }),
+        );
+
+        await expect(
+          mergeRenovateConfig({
+            ...config,
+            repositoryEntryConfig: {
+              hostRules: [
+                {
+                  hostType: 'preset',
+                  matchHost: 'http://10.1.2.3/',
+                  allowInternal: true,
+                },
+              ],
+            },
+          }),
+        ).toResolve();
+      });
+
+      it('rejects an internal HTTP preset without a deliberate grant', async () => {
+        GlobalConfig.set({ internalHostAccess: 'block' });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({
+            extends: ['http://10.1.2.3/ungranted-preset.json'],
+          }),
+        );
+
+        await expect(mergeRenovateConfig(config)).rejects.toMatchObject({
+          message: CONFIG_VALIDATION,
+          validationError: expect.stringContaining(
+            'Preset host is blocked by this Renovate instance',
+          ),
+        });
+      });
+
+      it('rejects `allowInternal` injected by a preset as a security error', async () => {
+        memCache.set('preset:local>internalPreset', {
+          hostRules: [{ matchHost: 'http://10.1.2.3', allowInternal: true }],
+        });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['local>internalPreset'] }),
+        );
+
+        await expect(mergeRenovateConfig(config)).rejects.toMatchObject({
+          message: CONFIG_VALIDATION,
+          validationMessage:
+            "hostRules `allowInternal` is only allowed in the self-hosted administrator's own configuration.",
+        });
+        expect(
+          hostRules.find({ url: 'http://10.1.2.3' }).internalHostGrant,
+        ).toBeUndefined();
       });
 
       it('drops `repositories[]` entry headers, if it is not in `allowedHeaders`', async () => {
@@ -827,7 +912,7 @@ describe('workers/repository/init/merge', () => {
         });
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          {},
+          { internalHostGrant: { implicit: true } },
         );
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { denied: ['Authorization'] },
@@ -954,6 +1039,28 @@ describe('workers/repository/init/merge', () => {
         expect.anything(),
         "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
       );
+    });
+
+    it('exempts `allowInternal` a repositories[] entry preset contributes', async () => {
+      // the entry, and everything the presets it extends contribute, is the self-hosted admin's own config, so its `allowInternal` is not a violation
+      memCache.set('preset:local>entryGrantsInternal', {
+        hostRules: [
+          { matchHost: 'http://10.1.2.3', allowInternal: true },
+          // host-less rules are the admin's own too
+          { allowInternal: false },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: { extends: ['local>entryGrantsInternal'] },
+      });
+
+      expect(res).toBeDefined();
+      expect(
+        hostRules.find({ url: 'http://10.1.2.3' }).internalHostGrant,
+      ).toEqual({ explicit: true, scoped: true, implicit: true });
     });
 
     it("reports a repository preset replaying the admin's header to a host of its own choosing", async () => {
@@ -1680,6 +1787,7 @@ describe('workers/repository/init/merge', () => {
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        internalHostGrant: { implicit: true },
       });
     });
 
@@ -1708,6 +1816,7 @@ describe('workers/repository/init/merge', () => {
         }),
       ).toEqual({
         headers: { 'X-Api-Key': 'from-admin' },
+        internalHostGrant: { implicit: true },
       });
     });
 

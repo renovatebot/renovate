@@ -161,11 +161,11 @@ describe('modules/datasource/nuget/index', () => {
         registryUrls: ['#$#api.nuget.org/v3/index.xml'],
       };
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('extracts feed version from registry URL hash', async () => {
@@ -176,11 +176,11 @@ describe('modules/datasource/nuget/index', () => {
         packageName: 'nunit',
         registryUrls: ['https://my-registry#protocolVersion=3'],
       };
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it(`can't get packages list (v3)`, async () => {
@@ -245,11 +245,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3V2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result (v2)', async () => {
@@ -259,11 +259,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result (v3)', async () => {
@@ -591,20 +591,20 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3V2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for non 200 (v3)', async () => {
       httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for non 200 (v2)', async () => {
@@ -614,11 +614,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error (v3v2)', async () => {
@@ -632,11 +632,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3V2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns deduplicated results', async () => {
@@ -668,24 +668,9 @@ describe('modules/datasource/nuget/index', () => {
             releaseTimestamp: '2011-01-07T07:57:55.387Z',
           },
           {
-            version: '2.5.9.10348',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2011-02-09T07:26:34.347Z',
-          },
-          {
-            version: '2.5.10.11092',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2011-04-25T20:20:34.397Z',
-          },
-          {
             version: '2.6.0.12051',
             isDeprecated: true,
             registryUrl: 'https://api.nuget.org/v3/index.json',
-          },
-          {
-            version: '2.6.0.12054',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2012-02-24T04:03:05.290Z',
           },
           {
             version: '2.6.1',
@@ -698,189 +683,9 @@ describe('modules/datasource/nuget/index', () => {
             releaseTimestamp: '2012-10-23T15:37:48.000Z',
           },
           {
-            version: '2.6.3',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2013-10-11T01:52:53.417Z',
-          },
-          {
-            version: '2.6.4',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2014-12-17T17:30:47.607Z',
-          },
-          {
-            version: '2.6.5',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2018-04-20T04:23:59.217Z',
-          },
-          {
-            version: '2.6.6',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2018-06-07T15:24:16.807Z',
-          },
-          {
-            version: '2.6.7',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2018-07-07T15:41:32.657Z',
-          },
-          {
-            version: '2.7.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2018-08-10T20:45:24.080Z',
-          },
-          {
-            version: '2.7.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2019-08-21T07:08:49.360Z',
-          },
-          {
             version: '3.0.0-alpha',
             registryUrl: 'https://api.nuget.org/v3/index.json',
             releaseTimestamp: '2014-09-23T03:11:33.430Z',
-          },
-          {
-            version: '3.0.0-alpha-2',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2014-11-03T06:24:59.217Z',
-          },
-          {
-            version: '3.0.0-alpha-3',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2014-11-29T22:38:18.493Z',
-          },
-          {
-            version: '3.0.0-alpha-4',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2014-12-31T04:47:39.507Z',
-          },
-          {
-            version: '3.0.0-alpha-5',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-01-31T22:13:01.997Z',
-          },
-          {
-            version: '3.0.0-beta-1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-03-26T11:33:22.173Z',
-          },
-          {
-            version: '3.0.0-beta-2',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-05-13T00:51:22.430Z',
-          },
-          {
-            version: '3.0.0-beta-3',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-07-15T23:44:47.403Z',
-          },
-          {
-            version: '3.0.0-beta-4',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-08-25T23:24:11.473Z',
-          },
-          {
-            version: '3.0.0-beta-5',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-10-17T03:39:18.100Z',
-          },
-          {
-            version: '3.0.0-rc',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-11-01T21:56:49.637Z',
-          },
-          {
-            version: '3.0.0-rc-2',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-11-08T16:27:15.110Z',
-          },
-          {
-            version: '3.0.0-rc-3',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-11-14T05:30:57.323Z',
-          },
-          {
-            version: '3.0.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-11-16T00:02:51.807Z',
-          },
-          {
-            version: '3.0.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2015-12-02T03:52:57.997Z',
-          },
-          {
-            version: '3.2.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2016-03-05T21:12:58.990Z',
-          },
-          {
-            version: '3.2.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2016-04-19T15:31:13.390Z',
-          },
-          {
-            version: '3.4.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2016-06-25T17:44:56.253Z',
-          },
-          {
-            version: '3.4.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2016-06-30T21:20:49.497Z',
-          },
-          {
-            version: '3.5.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2016-10-04T01:19:19.447Z',
-          },
-          {
-            version: '3.6.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2017-01-10T02:17:19.187Z',
-          },
-          {
-            version: '3.6.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2017-02-26T14:56:04.407Z',
-          },
-          {
-            version: '3.7.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2017-05-30T00:07:36.707Z',
-          },
-          {
-            version: '3.7.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2017-06-06T01:59:11.787Z',
-          },
-          {
-            version: '3.8.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2017-08-28T00:08:29.500Z',
-          },
-          {
-            version: '3.8.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2017-08-29T01:11:58.860Z',
-          },
-          {
-            version: '3.9.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2017-11-10T23:35:19.670Z',
-          },
-          {
-            version: '3.10.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2018-03-13T00:29:56.400Z',
-          },
-          {
-            version: '3.10.1',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2018-03-13T03:13:09.930Z',
-          },
-          {
-            version: '3.11.0',
-            registryUrl: 'https://api.nuget.org/v3/index.json',
-            releaseTimestamp: '2018-10-07T01:17:31.310Z',
           },
           {
             version: '3.12.0',
@@ -900,11 +705,11 @@ describe('modules/datasource/nuget/index', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error in getQueryUrlForV3Feed  (v3)', async () => {
@@ -914,11 +719,11 @@ describe('modules/datasource/nuget/index', () => {
         .reply(200, nugetIndexV3)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV3,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error (v2)', async () => {
@@ -928,11 +733,11 @@ describe('modules/datasource/nuget/index', () => {
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...configV2,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data (v3) feed is a nuget.org', async () => {
@@ -955,20 +760,8 @@ describe('modules/datasource/nuget/index', () => {
             releaseTimestamp: '2011-01-07T07:57:55.387Z',
           },
           {
-            version: '2.5.9.10348',
-            releaseTimestamp: '2011-02-09T07:26:34.347Z',
-          },
-          {
-            version: '2.5.10.11092',
-            releaseTimestamp: '2011-04-25T20:20:34.397Z',
-          },
-          {
             version: '2.6.0.12051',
             isDeprecated: true,
-          },
-          {
-            version: '2.6.0.12054',
-            releaseTimestamp: '2012-02-24T04:03:05.290Z',
           },
           {
             version: '2.6.1',
@@ -979,152 +772,8 @@ describe('modules/datasource/nuget/index', () => {
             releaseTimestamp: '2012-10-23T15:37:48.000Z',
           },
           {
-            version: '2.6.3',
-            releaseTimestamp: '2013-10-11T01:52:53.417Z',
-          },
-          {
-            version: '2.6.4',
-            releaseTimestamp: '2014-12-17T17:30:47.607Z',
-          },
-          {
-            version: '2.6.5',
-            releaseTimestamp: '2018-04-20T04:23:59.217Z',
-          },
-          {
-            version: '2.6.6',
-            releaseTimestamp: '2018-06-07T15:24:16.807Z',
-          },
-          {
-            version: '2.6.7',
-            releaseTimestamp: '2018-07-07T15:41:32.657Z',
-          },
-          {
-            version: '2.7.0',
-            releaseTimestamp: '2018-08-10T20:45:24.080Z',
-          },
-          {
-            version: '2.7.1',
-            releaseTimestamp: '2019-08-21T07:08:49.360Z',
-          },
-          {
             version: '3.0.0-alpha',
             releaseTimestamp: '2014-09-23T03:11:33.430Z',
-          },
-          {
-            version: '3.0.0-alpha-2',
-            releaseTimestamp: '2014-11-03T06:24:59.217Z',
-          },
-          {
-            version: '3.0.0-alpha-3',
-            releaseTimestamp: '2014-11-29T22:38:18.493Z',
-          },
-          {
-            version: '3.0.0-alpha-4',
-            releaseTimestamp: '2014-12-31T04:47:39.507Z',
-          },
-          {
-            version: '3.0.0-alpha-5',
-            releaseTimestamp: '2015-01-31T22:13:01.997Z',
-          },
-          {
-            version: '3.0.0-beta-1',
-            releaseTimestamp: '2015-03-26T11:33:22.173Z',
-          },
-          {
-            version: '3.0.0-beta-2',
-            releaseTimestamp: '2015-05-13T00:51:22.430Z',
-          },
-          {
-            version: '3.0.0-beta-3',
-            releaseTimestamp: '2015-07-15T23:44:47.403Z',
-          },
-          {
-            version: '3.0.0-beta-4',
-            releaseTimestamp: '2015-08-25T23:24:11.473Z',
-          },
-          {
-            version: '3.0.0-beta-5',
-            releaseTimestamp: '2015-10-17T03:39:18.100Z',
-          },
-          {
-            version: '3.0.0-rc',
-            releaseTimestamp: '2015-11-01T21:56:49.637Z',
-          },
-          {
-            version: '3.0.0-rc-2',
-            releaseTimestamp: '2015-11-08T16:27:15.110Z',
-          },
-          {
-            version: '3.0.0-rc-3',
-            releaseTimestamp: '2015-11-14T05:30:57.323Z',
-          },
-          {
-            version: '3.0.0',
-            releaseTimestamp: '2015-11-16T00:02:51.807Z',
-          },
-          {
-            version: '3.0.1',
-            releaseTimestamp: '2015-12-02T03:52:57.997Z',
-          },
-          {
-            version: '3.2.0',
-            releaseTimestamp: '2016-03-05T21:12:58.990Z',
-          },
-          {
-            version: '3.2.1',
-            releaseTimestamp: '2016-04-19T15:31:13.390Z',
-          },
-          {
-            version: '3.4.0',
-            releaseTimestamp: '2016-06-25T17:44:56.253Z',
-          },
-          {
-            version: '3.4.1',
-            releaseTimestamp: '2016-06-30T21:20:49.497Z',
-          },
-          {
-            version: '3.5.0',
-            releaseTimestamp: '2016-10-04T01:19:19.447Z',
-          },
-          {
-            version: '3.6.0',
-            releaseTimestamp: '2017-01-10T02:17:19.187Z',
-          },
-          {
-            version: '3.6.1',
-            releaseTimestamp: '2017-02-26T14:56:04.407Z',
-          },
-          {
-            version: '3.7.0',
-            releaseTimestamp: '2017-05-30T00:07:36.707Z',
-          },
-          {
-            version: '3.7.1',
-            releaseTimestamp: '2017-06-06T01:59:11.787Z',
-          },
-          {
-            version: '3.8.0',
-            releaseTimestamp: '2017-08-28T00:08:29.500Z',
-          },
-          {
-            version: '3.8.1',
-            releaseTimestamp: '2017-08-29T01:11:58.860Z',
-          },
-          {
-            version: '3.9.0',
-            releaseTimestamp: '2017-11-10T23:35:19.670Z',
-          },
-          {
-            version: '3.10.0',
-            releaseTimestamp: '2018-03-13T00:29:56.400Z',
-          },
-          {
-            version: '3.10.1',
-            releaseTimestamp: '2018-03-13T03:13:09.930Z',
-          },
-          {
-            version: '3.11.0',
-            releaseTimestamp: '2018-10-07T01:17:31.310Z',
           },
           {
             version: '3.12.0',
@@ -1224,252 +873,12 @@ describe('modules/datasource/nuget/index', () => {
             releaseTimestamp: '2011-01-07T07:57:35.043Z',
           },
           {
-            version: '2.0.0.2000',
-            releaseTimestamp: '2011-07-18T14:20:06.540Z',
-          },
-          {
             version: '2.0.1',
             isDeprecated: true,
           },
           {
-            version: '2.0.1.1',
-            isDeprecated: true,
-          },
-          {
-            version: '2.0.1.2',
-            releaseTimestamp: '2013-04-08T10:18:27.300Z',
-          },
-          {
-            version: '2.1.0',
-            releaseTimestamp: '2013-10-10T22:26:20.613Z',
-          },
-          {
             version: '3.0.0',
             releaseTimestamp: '2014-06-02T14:47:27.650Z',
-          },
-          {
-            version: '3.1.0',
-            releaseTimestamp: '2014-06-24T18:42:54.117Z',
-          },
-          {
-            version: '3.2.0',
-            releaseTimestamp: '2015-01-02T10:14:28.843Z',
-          },
-          {
-            version: '3.2.1',
-            releaseTimestamp: '2015-04-24T21:15:30.340Z',
-          },
-          {
-            version: '4.0.0-rc',
-            isDeprecated: true,
-          },
-          {
-            version: '4.0.0',
-            releaseTimestamp: '2015-06-09T19:41:48.923Z',
-          },
-          {
-            version: '4.0.1',
-            releaseTimestamp: '2015-06-18T20:46:30.997Z',
-          },
-          {
-            version: '4.1.0-alpha1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.1.0-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.1.0',
-            releaseTimestamp: '2015-08-31T17:29:28.263Z',
-          },
-          {
-            version: '4.1.1-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.1.1',
-            releaseTimestamp: '2015-09-12T14:10:41.850Z',
-          },
-          {
-            version: '4.1.2',
-            releaseTimestamp: '2015-09-20T19:49:25.110Z',
-          },
-          {
-            version: '4.2.0-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.2.0',
-            releaseTimestamp: '2015-10-24T20:48:16.067Z',
-          },
-          {
-            version: '4.2.1-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.2.1',
-            releaseTimestamp: '2015-11-21T14:35:27.680Z',
-          },
-          {
-            version: '4.2.2',
-            releaseTimestamp: '2015-12-02T22:45:07.057Z',
-          },
-          {
-            version: '4.2.3',
-            releaseTimestamp: '2015-12-20T22:21:32.393Z',
-          },
-          {
-            version: '4.3.0-alpha1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-alpha2',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-alpha3',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-alpha4',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-beta1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-beta2',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-beta3',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-rc2',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0-rc3',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.0',
-            releaseTimestamp: '2016-04-16T12:06:14.047Z',
-          },
-          {
-            version: '4.3.1-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.1',
-            releaseTimestamp: '2016-04-20T08:38:41.000Z',
-          },
-          {
-            version: '4.3.2',
-            releaseTimestamp: '2016-04-26T20:20:30.510Z',
-          },
-          {
-            version: '4.3.3',
-            releaseTimestamp: '2016-04-28T20:41:45.630Z',
-          },
-          {
-            version: '4.3.4',
-            releaseTimestamp: '2016-05-16T21:30:35.150Z',
-          },
-          {
-            version: '4.3.5-alpha1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.5',
-            releaseTimestamp: '2016-06-12T22:24:27.787Z',
-          },
-          {
-            version: '4.3.6',
-            releaseTimestamp: '2016-07-23T22:39:36.957Z',
-          },
-          {
-            version: '4.3.7',
-            releaseTimestamp: '2016-08-06T13:22:54.357Z',
-          },
-          {
-            version: '4.3.8',
-            releaseTimestamp: '2016-09-05T19:24:50.107Z',
-          },
-          {
-            version: '4.3.9-test-retry-archive',
-            isDeprecated: true,
-          },
-          {
-            version: '4.3.9',
-            releaseTimestamp: '2016-09-18T15:32:44.897Z',
-          },
-          {
-            version: '4.3.10',
-            releaseTimestamp: '2016-10-11T20:03:23.587Z',
-          },
-          {
-            version: '4.3.11',
-            releaseTimestamp: '2016-11-07T21:13:11.687Z',
-          },
-          {
-            version: '4.4.0-alpha1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-alpha2',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-alpha3',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-alpha4',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta-14',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta10',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta11',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta12',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta13',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta2',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta3',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta4',
-            isDeprecated: true,
           },
           {
             version: '4.4.0-beta5',
@@ -1480,252 +889,8 @@ describe('modules/datasource/nuget/index', () => {
             isDeprecated: true,
           },
           {
-            version: '4.4.0-beta7',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta8',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-beta9',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-betaV14',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-betaV15',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.0-rc2',
-            isDeprecated: true,
-          },
-          {
             version: '4.4.0',
             releaseTimestamp: '2016-12-14T10:47:25.290Z',
-          },
-          {
-            version: '4.4.1-dev-b4084',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.1-dev-b4085',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.1',
-            releaseTimestamp: '2016-12-24T00:50:07.050Z',
-          },
-          {
-            version: '4.4.2-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.2-rc2',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.2',
-            releaseTimestamp: '2017-02-06T21:38:25.163Z',
-          },
-          {
-            version: '4.4.3',
-            releaseTimestamp: '2017-02-17T20:49:31.620Z',
-          },
-          {
-            version: '4.4.4',
-            releaseTimestamp: '2017-03-10T22:09:53.593Z',
-          },
-          {
-            version: '4.4.5-beta1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.5',
-            releaseTimestamp: '2017-03-28T20:33:59.553Z',
-          },
-          {
-            version: '4.4.6-beta1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.6-beta2',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.6-beta3',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.6-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.4.6',
-            releaseTimestamp: '2017-04-15T13:21:00.143Z',
-          },
-          {
-            version: '4.4.7',
-            releaseTimestamp: '2017-04-25T21:25:50.540Z',
-          },
-          {
-            version: '4.4.8',
-            releaseTimestamp: '2017-04-28T21:58:14.857Z',
-          },
-          {
-            version: '4.4.9',
-            releaseTimestamp: '2017-05-05T21:27:55.517Z',
-          },
-          {
-            version: '4.4.10',
-            releaseTimestamp: '2017-05-31T19:11:43.000Z',
-          },
-          {
-            version: '4.4.11',
-            releaseTimestamp: '2017-06-17T11:53:19.870Z',
-          },
-          {
-            version: '4.4.12',
-            releaseTimestamp: '2017-08-08T19:31:51.007Z',
-          },
-          {
-            version: '4.4.13',
-            releaseTimestamp: '2018-02-27T23:49:22.210Z',
-          },
-          {
-            version: '4.5.0-alpha01',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-alpha02',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-alpha03',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-alpha04',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta01',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta02',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta03',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta04',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta05',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta06',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta07',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-beta08',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-rc01',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-rc02',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-rc03',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-rc04',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-rc05',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-rc06',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0-rc07',
-            isDeprecated: true,
-          },
-          {
-            version: '4.5.0',
-            releaseTimestamp: '2018-03-25T21:56:07.213Z',
-          },
-          {
-            version: '4.5.1',
-            releaseTimestamp: '2018-04-03T21:50:26.203Z',
-          },
-          {
-            version: '4.5.2',
-            releaseTimestamp: '2018-04-06T22:56:43.503Z',
-          },
-          {
-            version: '4.5.3',
-            releaseTimestamp: '2018-04-16T18:22:17.257Z',
-          },
-          {
-            version: '4.5.4',
-            releaseTimestamp: '2018-05-05T22:53:27.540Z',
-          },
-          {
-            version: '4.5.5',
-            releaseTimestamp: '2018-05-25T16:30:46.667Z',
-          },
-          {
-            version: '4.5.6',
-            releaseTimestamp: '2018-05-29T21:25:14.857Z',
-          },
-          {
-            version: '4.5.7',
-            releaseTimestamp: '2018-07-19T09:39:06.830Z',
-          },
-          {
-            version: '4.5.8',
-            releaseTimestamp: '2018-08-05T11:38:58.573Z',
-          },
-          {
-            version: '4.5.9',
-            releaseTimestamp: '2018-08-24T21:40:39.070Z',
-          },
-          {
-            version: '4.5.10',
-            releaseTimestamp: '2018-09-17T21:58:18.610Z',
-          },
-          {
-            version: '4.5.11',
-            releaseTimestamp: '2018-11-06T17:31:25.310Z',
-          },
-          {
-            version: '4.6.0-rc1',
-            isDeprecated: true,
           },
           {
             version: '4.6.0-rc2',
@@ -1736,108 +901,8 @@ describe('modules/datasource/nuget/index', () => {
             isDeprecated: true,
           },
           {
-            version: '4.6.0',
-            releaseTimestamp: '2019-03-21T00:27:35.483Z',
-          },
-          {
-            version: '4.6.1',
-            releaseTimestamp: '2019-03-29T23:23:40.613Z',
-          },
-          {
-            version: '4.6.2',
-            releaseTimestamp: '2019-04-02T22:53:01.020Z',
-          },
-          {
-            version: '4.6.3',
-            releaseTimestamp: '2019-04-30T20:12:12.640Z',
-          },
-          {
-            version: '4.6.4',
-            releaseTimestamp: '2019-05-28T21:04:44.207Z',
-          },
-          {
-            version: '4.6.5',
-            releaseTimestamp: '2019-06-14T00:20:11.710Z',
-          },
-          {
-            version: '4.6.6',
-            releaseTimestamp: '2019-07-14T21:33:26.327Z',
-          },
-          {
-            version: '4.6.7',
-            releaseTimestamp: '2019-08-25T19:22:57.470Z',
-          },
-          {
-            version: '4.6.8',
-            releaseTimestamp: '2019-11-04T21:35:02.220Z',
-          },
-          {
-            version: '4.7.0-rc1',
-            isDeprecated: true,
-          },
-          {
-            version: '4.7.0',
-            releaseTimestamp: '2020-03-20T17:10:34.303Z',
-          },
-          {
-            version: '4.7.1',
-            releaseTimestamp: '2020-05-15T14:48:03.620Z',
-          },
-          {
-            version: '4.7.2',
-            releaseTimestamp: '2020-05-18T20:46:15.073Z',
-          },
-          {
             version: '4.7.3',
             releaseTimestamp: '2020-07-31T22:20:36.847Z',
-          },
-          {
-            version: '5.0.0-beta01',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta02',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta03',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta03-tryoutMutex',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta04',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta05',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta05-test',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta06',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta07',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta08',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta09',
-            isDeprecated: true,
-          },
-          {
-            version: '5.0.0-beta10',
-            isDeprecated: true,
           },
           {
             version: '5.0.0-beta11',
@@ -1883,20 +948,8 @@ describe('modules/datasource/nuget/index', () => {
             releaseTimestamp: '2011-01-07T07:57:55.387Z',
           },
           {
-            version: '2.5.9.10348',
-            releaseTimestamp: '2011-02-09T07:26:34.347Z',
-          },
-          {
-            version: '2.5.10.11092',
-            releaseTimestamp: '2011-04-25T20:20:34.397Z',
-          },
-          {
             version: '2.6.0.12051',
             isDeprecated: true,
-          },
-          {
-            version: '2.6.0.12054',
-            releaseTimestamp: '2012-02-24T04:03:05.290Z',
           },
           {
             version: '2.6.1',
@@ -1906,152 +959,8 @@ describe('modules/datasource/nuget/index', () => {
             version: '2.6.2',
           },
           {
-            version: '2.6.3',
-            releaseTimestamp: '2013-10-11T01:52:53.417Z',
-          },
-          {
-            version: '2.6.4',
-            releaseTimestamp: '2014-12-17T17:30:47.607Z',
-          },
-          {
-            version: '2.6.5',
-            releaseTimestamp: '2018-04-20T04:23:59.217Z',
-          },
-          {
-            version: '2.6.6',
-            releaseTimestamp: '2018-06-07T15:24:16.807Z',
-          },
-          {
-            version: '2.6.7',
-            releaseTimestamp: '2018-07-07T15:41:32.657Z',
-          },
-          {
-            version: '2.7.0',
-            releaseTimestamp: '2018-08-10T20:45:24.080Z',
-          },
-          {
-            version: '2.7.1',
-            releaseTimestamp: '2019-08-21T07:08:49.360Z',
-          },
-          {
             version: '3.0.0-alpha',
             releaseTimestamp: '2014-09-23T03:11:33.430Z',
-          },
-          {
-            version: '3.0.0-alpha-2',
-            releaseTimestamp: '2014-11-03T06:24:59.217Z',
-          },
-          {
-            version: '3.0.0-alpha-3',
-            releaseTimestamp: '2014-11-29T22:38:18.493Z',
-          },
-          {
-            version: '3.0.0-alpha-4',
-            releaseTimestamp: '2014-12-31T04:47:39.507Z',
-          },
-          {
-            version: '3.0.0-alpha-5',
-            releaseTimestamp: '2015-01-31T22:13:01.997Z',
-          },
-          {
-            version: '3.0.0-beta-1',
-            releaseTimestamp: '2015-03-26T11:33:22.173Z',
-          },
-          {
-            version: '3.0.0-beta-2',
-            releaseTimestamp: '2015-05-13T00:51:22.430Z',
-          },
-          {
-            version: '3.0.0-beta-3',
-            releaseTimestamp: '2015-07-15T23:44:47.403Z',
-          },
-          {
-            version: '3.0.0-beta-4',
-            releaseTimestamp: '2015-08-25T23:24:11.473Z',
-          },
-          {
-            version: '3.0.0-beta-5',
-            releaseTimestamp: '2015-10-17T03:39:18.100Z',
-          },
-          {
-            version: '3.0.0-rc',
-            releaseTimestamp: '2015-11-01T21:56:49.637Z',
-          },
-          {
-            version: '3.0.0-rc-2',
-            releaseTimestamp: '2015-11-08T16:27:15.110Z',
-          },
-          {
-            version: '3.0.0-rc-3',
-            releaseTimestamp: '2015-11-14T05:30:57.323Z',
-          },
-          {
-            version: '3.0.0',
-            releaseTimestamp: '2015-11-16T00:02:51.807Z',
-          },
-          {
-            version: '3.0.1',
-            releaseTimestamp: '2015-12-02T03:52:57.997Z',
-          },
-          {
-            version: '3.2.0',
-            releaseTimestamp: '2016-03-05T21:12:58.990Z',
-          },
-          {
-            version: '3.2.1',
-            releaseTimestamp: '2016-04-19T15:31:13.390Z',
-          },
-          {
-            version: '3.4.0',
-            releaseTimestamp: '2016-06-25T17:44:56.253Z',
-          },
-          {
-            version: '3.4.1',
-            releaseTimestamp: '2016-06-30T21:20:49.497Z',
-          },
-          {
-            version: '3.5.0',
-            releaseTimestamp: '2016-10-04T01:19:19.447Z',
-          },
-          {
-            version: '3.6.0',
-            releaseTimestamp: '2017-01-10T02:17:19.187Z',
-          },
-          {
-            version: '3.6.1',
-            releaseTimestamp: '2017-02-26T14:56:04.407Z',
-          },
-          {
-            version: '3.7.0',
-            releaseTimestamp: '2017-05-30T00:07:36.707Z',
-          },
-          {
-            version: '3.7.1',
-            releaseTimestamp: '2017-06-06T01:59:11.787Z',
-          },
-          {
-            version: '3.8.0',
-            releaseTimestamp: '2017-08-28T00:08:29.500Z',
-          },
-          {
-            version: '3.8.1',
-            releaseTimestamp: '2017-08-29T01:11:58.860Z',
-          },
-          {
-            version: '3.9.0',
-            releaseTimestamp: '2017-11-10T23:35:19.670Z',
-          },
-          {
-            version: '3.10.0',
-            releaseTimestamp: '2018-03-13T00:29:56.400Z',
-          },
-          {
-            version: '3.10.1',
-            releaseTimestamp: '2018-03-13T03:13:09.930Z',
-          },
-          {
-            version: '3.11.0',
-            releaseTimestamp: '2018-10-07T01:17:31.310Z',
           },
           {
             version: '3.12.0',
@@ -2078,55 +987,35 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         releases: [
-          { version: '2.5.7.10213' },
-          { version: '2.5.9.10348' },
-          { version: '2.5.10.11092' },
-          { version: '2.6.0.12051' },
-          { version: '2.6.0.12054' },
-          { version: '2.6.1' },
-          { version: '2.6.2' },
-          { version: '2.6.3' },
-          { version: '2.6.4' },
-          { version: '2.6.5' },
-          { version: '2.6.6' },
-          { version: '2.6.7' },
-          { version: '2.7.0' },
-          { version: '2.7.1' },
-          { version: '3.0.0-alpha' },
-          { version: '3.0.0-alpha-2' },
-          { version: '3.0.0-alpha-3' },
-          { version: '3.0.0-alpha-4' },
-          { version: '3.0.0-alpha-5' },
-          { version: '3.0.0-beta-1' },
-          { version: '3.0.0-beta-2' },
-          { version: '3.0.0-beta-3' },
-          { version: '3.0.0-beta-4' },
-          { version: '3.0.0-beta-5' },
-          { version: '3.0.0-rc' },
-          { version: '3.0.0-rc-2' },
-          { version: '3.0.0-rc-3' },
-          { version: '3.0.0' },
-          { version: '3.0.1' },
-          { version: '3.2.0' },
-          { version: '3.2.1' },
-          { version: '3.4.0' },
-          { version: '3.4.1' },
-          { version: '3.5.0' },
-          { version: '3.6.0' },
-          { version: '3.6.1' },
-          { version: '3.7.0' },
-          { version: '3.7.1' },
-          { version: '3.8.0' },
-          { version: '3.8.1' },
-          { version: '3.9.0' },
-          { version: '3.10.0' },
-          { version: '3.10.1' },
-          { version: '3.11.0' },
-          { version: '3.12.0' },
+          {
+            version: '2.5.7.10213',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+            isDeprecated: true,
+          },
+          {
+            version: '2.6.1',
+            releaseTimestamp: '2012-08-05T03:08:28.403Z',
+          },
+          {
+            version: '2.6.2',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
+          },
+          {
+            version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
         ],
         sourceUrl: 'https://nunit.org/',
+        registryUrl: 'https://api.nuget.org/v3/index.json',
       });
     });
 
@@ -2143,55 +1032,35 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         releases: [
-          { version: '2.5.7.10213' },
-          { version: '2.5.9.10348' },
-          { version: '2.5.10.11092' },
-          { version: '2.6.0.12051' },
-          { version: '2.6.0.12054' },
-          { version: '2.6.1' },
-          { version: '2.6.2' },
-          { version: '2.6.3' },
-          { version: '2.6.4' },
-          { version: '2.6.5' },
-          { version: '2.6.6' },
-          { version: '2.6.7' },
-          { version: '2.7.0' },
-          { version: '2.7.1' },
-          { version: '3.0.0-alpha' },
-          { version: '3.0.0-alpha-2' },
-          { version: '3.0.0-alpha-3' },
-          { version: '3.0.0-alpha-4' },
-          { version: '3.0.0-alpha-5' },
-          { version: '3.0.0-beta-1' },
-          { version: '3.0.0-beta-2' },
-          { version: '3.0.0-beta-3' },
-          { version: '3.0.0-beta-4' },
-          { version: '3.0.0-beta-5' },
-          { version: '3.0.0-rc' },
-          { version: '3.0.0-rc-2' },
-          { version: '3.0.0-rc-3' },
-          { version: '3.0.0' },
-          { version: '3.0.1' },
-          { version: '3.2.0' },
-          { version: '3.2.1' },
-          { version: '3.4.0' },
-          { version: '3.4.1' },
-          { version: '3.5.0' },
-          { version: '3.6.0' },
-          { version: '3.6.1' },
-          { version: '3.7.0' },
-          { version: '3.7.1' },
-          { version: '3.8.0' },
-          { version: '3.8.1' },
-          { version: '3.9.0' },
-          { version: '3.10.0' },
-          { version: '3.10.1' },
-          { version: '3.11.0' },
-          { version: '3.12.0' },
+          {
+            version: '2.5.7.10213',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
+          },
+          {
+            version: '2.6.0.12051',
+            isDeprecated: true,
+          },
+          {
+            version: '2.6.1',
+            releaseTimestamp: '2012-08-05T03:08:28.403Z',
+          },
+          {
+            version: '2.6.2',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
+          },
+          {
+            version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
+          },
+          {
+            version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
+          },
         ],
         sourceUrl: 'https://nunit.org/',
+        registryUrl: 'https://api.nuget.org/v3/index.json',
       });
     });
 
@@ -2205,192 +1074,37 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         releases: [
           {
-            releaseTimestamp: '2011-01-07T07:57:55.387Z',
             version: '2.5.7.10213',
-          },
-          {
-            releaseTimestamp: '2011-02-09T07:26:34.347Z',
-            version: '2.5.9.10348',
-          },
-          {
-            releaseTimestamp: '2011-04-25T20:20:34.397Z',
-            version: '2.5.10.11092',
+            releaseTimestamp: '2011-01-07T07:57:55.387Z',
           },
           {
             version: '2.6.0.12051',
           },
           {
-            releaseTimestamp: '2012-02-24T04:03:05.290Z',
-            version: '2.6.0.12054',
-          },
-          {
-            releaseTimestamp: '2012-08-05T03:08:28.403Z',
-            version: '2.6.1',
-          },
-          {
-            releaseTimestamp: '2012-10-23T15:37:48.000Z',
             version: '2.6.2',
+            releaseTimestamp: '2012-10-23T15:37:48.000Z',
           },
           {
-            releaseTimestamp: '2013-10-11T01:52:53.417Z',
-            version: '2.6.3',
-          },
-          {
-            releaseTimestamp: '2014-12-17T17:30:47.607Z',
-            version: '2.6.4',
-          },
-          {
-            releaseTimestamp: '2018-04-20T04:23:59.217Z',
-            version: '2.6.5',
-          },
-          {
-            releaseTimestamp: '2018-06-07T15:24:16.807Z',
-            version: '2.6.6',
-          },
-          {
-            releaseTimestamp: '2018-07-07T15:41:32.657Z',
-            version: '2.6.7',
-          },
-          {
-            releaseTimestamp: '2018-08-10T20:45:24.080Z',
-            version: '2.7.0',
-          },
-          {
-            releaseTimestamp: '2019-08-21T07:08:49.360Z',
             version: '2.7.1',
+            releaseTimestamp: '2019-08-21T07:08:49.360Z',
           },
           {
-            releaseTimestamp: '2014-09-23T03:11:33.430Z',
             version: '3.0.0-alpha',
+            releaseTimestamp: '2014-09-23T03:11:33.430Z',
           },
           {
-            releaseTimestamp: '2014-11-03T06:24:59.217Z',
-            version: '3.0.0-alpha-2',
-          },
-          {
-            releaseTimestamp: '2014-11-29T22:38:18.493Z',
-            version: '3.0.0-alpha-3',
-          },
-          {
-            releaseTimestamp: '2014-12-31T04:47:39.507Z',
-            version: '3.0.0-alpha-4',
-          },
-          {
-            releaseTimestamp: '2015-01-31T22:13:01.997Z',
-            version: '3.0.0-alpha-5',
-          },
-          {
-            releaseTimestamp: '2015-03-26T11:33:22.173Z',
-            version: '3.0.0-beta-1',
-          },
-          {
-            releaseTimestamp: '2015-05-13T00:51:22.430Z',
-            version: '3.0.0-beta-2',
-          },
-          {
-            releaseTimestamp: '2015-07-15T23:44:47.403Z',
-            version: '3.0.0-beta-3',
-          },
-          {
-            releaseTimestamp: '2015-08-25T23:24:11.473Z',
-            version: '3.0.0-beta-4',
-          },
-          {
-            releaseTimestamp: '2015-10-17T03:39:18.100Z',
-            version: '3.0.0-beta-5',
-          },
-          {
-            releaseTimestamp: '2015-11-01T21:56:49.637Z',
-            version: '3.0.0-rc',
-          },
-          {
-            releaseTimestamp: '2015-11-08T16:27:15.110Z',
-            version: '3.0.0-rc-2',
-          },
-          {
-            releaseTimestamp: '2015-11-14T05:30:57.323Z',
-            version: '3.0.0-rc-3',
-          },
-          {
-            releaseTimestamp: '2015-11-16T00:02:51.807Z',
-            version: '3.0.0',
-          },
-          {
-            releaseTimestamp: '2015-12-02T03:52:57.997Z',
-            version: '3.0.1',
-          },
-          {
-            releaseTimestamp: '2016-03-05T21:12:58.990Z',
-            version: '3.2.0',
-          },
-          {
-            releaseTimestamp: '2016-04-19T15:31:13.390Z',
-            version: '3.2.1',
-          },
-          {
-            releaseTimestamp: '2016-06-25T17:44:56.253Z',
-            version: '3.4.0',
-          },
-          {
-            releaseTimestamp: '2016-06-30T21:20:49.497Z',
-            version: '3.4.1',
-          },
-          {
-            releaseTimestamp: '2016-10-04T01:19:19.447Z',
-            version: '3.5.0',
-          },
-          {
-            releaseTimestamp: '2017-01-10T02:17:19.187Z',
-            version: '3.6.0',
-          },
-          {
-            releaseTimestamp: '2017-02-26T14:56:04.407Z',
-            version: '3.6.1',
-          },
-          {
-            releaseTimestamp: '2017-05-30T00:07:36.707Z',
-            version: '3.7.0',
-          },
-          {
-            releaseTimestamp: '2017-06-06T01:59:11.787Z',
-            version: '3.7.1',
-          },
-          {
-            releaseTimestamp: '2017-08-28T00:08:29.500Z',
-            version: '3.8.0',
-          },
-          {
-            releaseTimestamp: '2017-08-29T01:11:58.860Z',
-            version: '3.8.1',
-          },
-          {
-            releaseTimestamp: '2017-11-10T23:35:19.670Z',
-            version: '3.9.0',
-          },
-          {
-            releaseTimestamp: '2018-03-13T00:29:56.400Z',
-            version: '3.10.0',
-          },
-          {
-            releaseTimestamp: '2018-03-13T03:13:09.930Z',
-            version: '3.10.1',
-          },
-          {
-            releaseTimestamp: '2018-10-07T01:17:31.310Z',
-            version: '3.11.0',
-          },
-          {
-            releaseTimestamp: '2019-05-15T00:24:28.390Z',
             version: '3.12.0',
+            releaseTimestamp: '2019-05-15T00:24:28.390Z',
           },
         ],
-        sourceUrl: 'https://nunit.org/',
         tags: {
           latest: '3.12.0',
         },
+        sourceUrl: 'https://nunit.org/',
+        registryUrl: 'https://www.nuget.org/api/v2',
       });
     });
 
@@ -2448,278 +1162,6 @@ describe('modules/datasource/nuget/index', () => {
             </m:properties>
           </entry>
           <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.7')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.7')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.7')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.7"/>
-            <m:properties>
-              <d:Version>2.6.7</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.6')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.6')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.6')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.6"/>
-            <m:properties>
-              <d:Version>2.6.6</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.5')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.5')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.5')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.5"/>
-            <m:properties>
-              <d:Version>2.6.5</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.10.1"/>
-            <m:properties>
-              <d:Version>3.10.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.10.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.10.0"/>
-            <m:properties>
-              <d:Version>3.10.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.9.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.9.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.9.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.9.0"/>
-            <m:properties>
-              <d:Version>3.9.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.8.1"/>
-            <m:properties>
-              <d:Version>3.8.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.8.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.8.0"/>
-            <m:properties>
-              <d:Version>3.8.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.7.1"/>
-            <m:properties>
-              <d:Version>3.7.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.7.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.7.0"/>
-            <m:properties>
-              <d:Version>3.7.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.6.1"/>
-            <m:properties>
-              <d:Version>3.6.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.6.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.6.0"/>
-            <m:properties>
-              <d:Version>3.6.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.5.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.5.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.5.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.5.0"/>
-            <m:properties>
-              <d:Version>3.5.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.4.1"/>
-            <m:properties>
-              <d:Version>3.4.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.4.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.4.0"/>
-            <m:properties>
-              <d:Version>3.4.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.2.1"/>
-            <m:properties>
-              <d:Version>3.2.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
             <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.0')</id>
             <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
             <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.2.0')"/>
@@ -2732,74 +1174,6 @@ describe('modules/datasource/nuget/index', () => {
             <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.2.0"/>
             <m:properties>
               <d:Version>3.2.0</d:Version>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.1"/>
-            <m:properties>
-              <d:Version>3.0.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0"/>
-            <m:properties>
-              <d:Version>3.0.0</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.4')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.4')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.4')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.4"/>
-            <m:properties>
-              <d:Version>2.6.4</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc-3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc-3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc-3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-rc-3"/>
-            <m:properties>
-              <d:Version>3.0.0-rc-3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
             </m:properties>
           </entry>
           <entry>
@@ -2819,329 +1193,6 @@ describe('modules/datasource/nuget/index', () => {
               <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
             </m:properties>
           </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-rc')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-rc"/>
-            <m:properties>
-              <d:Version>3.0.0-rc</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-5')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-5')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-5')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-5"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-5</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-4')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-4')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-4')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-4"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-4</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.3"/>
-            <m:properties>
-              <d:Version>2.6.3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.2')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.2')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.2')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.2"/>
-            <m:properties>
-              <d:Version>2.6.2</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12054')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12054')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12054')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.0.12054"/>
-            <m:properties>
-              <d:Version>2.6.0.12054</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.1"/>
-            <m:properties>
-              <d:Version>2.6.1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-2')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-2')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-2')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-2"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-2</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-3"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.10.11092')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.10.11092')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.10.11092')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.5.10.11092"/>
-            <m:properties>
-              <d:Version>2.5.10.11092</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.7.10213')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.7.10213')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.7.10213')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.5.7.10213"/>
-            <m:properties>
-              <d:Version>2.5.7.10213</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12051')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12051')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.6.0.12051')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.6.0.12051"/>
-            <m:properties>
-              <d:Version>2.6.0.12051</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-3')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-3')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-3')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-3"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-3</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-1')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-1')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-beta-1')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-beta-1"/>
-            <m:properties>
-              <d:Version>3.0.0-beta-1</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-4')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-4')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-4')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-4"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-4</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.9.10348')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.9.10348')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='2.5.9.10348')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/2.5.9.10348"/>
-            <m:properties>
-              <d:Version>2.5.9.10348</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-2')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-2')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-2')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-2"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-2</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
-          <entry>
-            <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-5')</id>
-            <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
-            <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-5')"/>
-            <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.0.0-alpha-5')"/>
-            <title type="text">NUnit</title>
-            <updated>2019-02-04T12:51:36Z</updated>
-            <author>
-              <name/>
-            </author>
-            <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.0.0-alpha-5"/>
-            <m:properties>
-              <d:Version>3.0.0-alpha-5</d:Version>
-              <d:IsLatestVersion>false</d:IsLatestVersion>
-              <d:ProjectUrl>https://github.com/nunit/nunit-old</d:ProjectUrl>
-            </m:properties>
-          </entry>
         </feed>
       `;
       httpMock
@@ -3153,140 +1204,26 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV2,
       });
-      expect(res).toMatchObject({
+      expect(res).toEqual({
         releases: [
           {
-            version: '2.5.7.10213',
-          },
-          {
-            version: '2.5.9.10348',
-          },
-          {
-            version: '2.5.10.11092',
-          },
-          {
-            version: '2.6.0.12051',
-          },
-          {
-            version: '2.6.0.12054',
-          },
-          {
-            version: '2.6.1',
-          },
-          {
-            version: '2.6.2',
-          },
-          {
-            version: '2.6.3',
-          },
-          {
-            version: '2.6.4',
-          },
-          {
-            version: '2.6.5',
-          },
-          {
-            version: '2.6.6',
-          },
-          {
-            version: '2.6.7',
-          },
-          {
             version: '2.7.0',
-          },
-          {
-            version: '3.0.0-alpha',
-          },
-          {
-            version: '3.0.0-alpha-2',
-          },
-          {
-            version: '3.0.0-alpha-3',
-          },
-          {
-            version: '3.0.0-alpha-4',
-          },
-          {
-            version: '3.0.0-alpha-5',
-          },
-          {
-            version: '3.0.0-beta-1',
-          },
-          {
-            version: '3.0.0-beta-2',
-          },
-          {
-            version: '3.0.0-beta-3',
-          },
-          {
-            version: '3.0.0-beta-4',
-          },
-          {
-            version: '3.0.0-beta-5',
-          },
-          {
-            version: '3.0.0-rc',
           },
           {
             version: '3.0.0-rc-2',
           },
           {
-            version: '3.0.0-rc-3',
-          },
-          {
-            version: '3.0.0',
-          },
-          {
-            version: '3.0.1',
-          },
-          {
             version: '3.2.0',
-          },
-          {
-            version: '3.2.1',
-          },
-          {
-            version: '3.4.0',
-          },
-          {
-            version: '3.4.1',
-          },
-          {
-            version: '3.5.0',
-          },
-          {
-            version: '3.6.0',
-          },
-          {
-            version: '3.6.1',
-          },
-          {
-            version: '3.7.0',
-          },
-          {
-            version: '3.7.1',
-          },
-          {
-            version: '3.8.0',
-          },
-          {
-            version: '3.8.1',
-          },
-          {
-            version: '3.9.0',
-          },
-          {
-            version: '3.10.0',
-          },
-          {
-            version: '3.10.1',
           },
           {
             version: '3.11.0',
           },
         ],
+        tags: {
+          latest: '3.11.0',
+        },
+        registryUrl: 'https://www.nuget.org/api/v2',
       });
-      expect(res?.sourceUrl).toBeUndefined();
     });
 
     it('processes real data with no github project url (v2)', async () => {
@@ -3411,12 +1348,22 @@ describe('modules/datasource/nuget/index', () => {
       const res = await getPkgReleases({
         ...configV3Deprecated,
       });
-      expect(res).toMatchObject({
-        deprecationMessage: 'The package `ProxyKit` is deprecated.',
+      expect(res).toEqual({
         releases: [
-          { isDeprecated: true, version: '1.0.0' },
-          { isDeprecated: true, version: '2.3.4' },
+          {
+            version: '1.0.0',
+            isDeprecated: true,
+          },
+          {
+            version: '2.3.4',
+            isDeprecated: true,
+          },
         ],
+        deprecationMessage: 'The package `ProxyKit` is deprecated.',
+        changelogContent:
+          'See https://github.com/ProxyKit/ProxyKit/releases for release notes.',
+        sourceUrl: 'https://github.com/ProxyKit/ProxyKit',
+        registryUrl: 'https://api.nuget.org/v3/index.json',
       });
     });
   });

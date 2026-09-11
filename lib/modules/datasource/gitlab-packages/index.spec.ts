@@ -106,13 +106,13 @@ describe('modules/datasource/gitlab-packages/index', () => {
           per_page: '100',
         })
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           registryUrls: ['https://gitlab.com'],
           packageName: 'user/project1:mypkg',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -124,13 +124,13 @@ describe('modules/datasource/gitlab-packages/index', () => {
           per_page: '100',
         })
         .reply(200, []);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           registryUrls: ['https://gitlab.com'],
           packageName: 'user/project1:mypkg',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

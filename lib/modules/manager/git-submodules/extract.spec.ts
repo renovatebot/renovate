@@ -44,7 +44,9 @@ describe('modules/manager/git-submodules/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('empty submodule returns null', async () => {
-      expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
+      await expect(
+        extractPackageFile('', '.gitmodules.1', {}),
+      ).resolves.toBeNull();
     });
 
     it('currentValue is unset when no branch is specified', async () => {
