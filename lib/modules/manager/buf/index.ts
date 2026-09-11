@@ -1,8 +1,11 @@
+import type { Category } from '../../../constants/index.ts';
 import { BufPluginDatasource } from '../../datasource/buf-plugin/index.ts';
 
 export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://buf.build/docs/generate/overview';
+
+export const categories: Category[] = ['buf'];
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)buf\\.gen\\.ya?ml$/'],
