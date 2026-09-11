@@ -1,4 +1,4 @@
-import { Graph, depthFirstSearch, topologicalSort } from 'graph-data-structure';
+import { Graph, depthFirstSearch } from 'graph-data-structure';
 import upath from 'upath';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import {
@@ -61,8 +61,9 @@ async function buildDependencyGraph(): Promise<Graph> {
 
 /**
  * Get all `go.mod` files which transitively depend on `packageFileName`, ordered
- * so that a module always comes before the modules which depend on it.
- * The given `packageFileName` is not included.
+ * so that a module comes before the modules which depend on it whenever the
+ * relationship is acyclic. Cycles are tolerated and each dependent module is
+ * included once. The given `packageFileName` is not included.
  */
 export async function getGoModulesInTidyOrder(
   packageFileName: string,
@@ -72,12 +73,8 @@ export async function getGoModulesInTidyOrder(
     return [];
   }
 
-  const dependents = new Set(
-    depthFirstSearch(graph, {
-      sourceNodes: [packageFileName],
-      includeSourceNodes: false,
-    }),
-  );
-
-  return topologicalSort(graph).filter((f) => dependents.has(f));
+  return depthFirstSearch(graph, {
+    sourceNodes: [packageFileName],
+    includeSourceNodes: false,
+  }).reverse();
 }

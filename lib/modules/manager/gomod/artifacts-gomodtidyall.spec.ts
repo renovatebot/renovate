@@ -69,6 +69,12 @@ function baseConfig(
   };
 }
 
+function mockTidyAllFileContents(...passes: (string | null)[][]): void {
+  for (const content of passes.flat()) {
+    fs.readLocalFile.mockResolvedValueOnce(content);
+  }
+}
+
 describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   beforeEach(() => {
     vi.stubEnv('GOPATH', undefined);
@@ -90,6 +96,15 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       'api/go.mod',
       'cmd/go.mod',
     ]);
+    const stableContents = [
+      'shared.mod',
+      'shared.sum',
+      'api.mod',
+      'api.sum',
+      'cmd.mod',
+      'cmd.sum',
+    ];
+    mockTidyAllFileContents(stableContents, stableContents);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['shared/go.sum', 'api/go.sum', 'cmd/go.sum'],
@@ -135,6 +150,8 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   it('implies primary tidy when only gomodTidyAll is set', async () => {
     const execSnapshots = mockExecAll();
     packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
+    const stableContents = ['root.mod', 'root.sum', 'api.mod', 'api.sum'];
+    mockTidyAllFileContents(stableContents, stableContents);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({ modified: ['go.sum', 'api/go.sum'] }),
     );
@@ -160,6 +177,8 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
   it('collects updated dependent go.mod when only that file changed', async () => {
     mockExecAll();
     packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
+    const stableContents = ['root.mod', 'root.sum', 'api.mod', 'api.sum'];
+    mockTidyAllFileContents(stableContents, stableContents);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({ modified: ['api/go.mod'] }),
     );
@@ -240,5 +259,147 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     });
 
     expect(packageTree.getGoModulesInTidyOrder).not.toHaveBeenCalled();
+  });
+
+  it('compares module contents and repeats tidy commands until stable', async () => {
+    const execSnapshots = mockExecAll();
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
+    const initialContents = ['root-0', 'sum-0', 'api-0', 'api-sum-0'];
+    const changedContents = ['root-1', 'sum-1', 'api-1', 'api-sum-1'];
+    mockTidyAllFileContents(initialContents, changedContents, changedContents);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({ modified: ['go.sum', 'api/go.sum'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New api/go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+
+    await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: baseConfig(),
+    });
+
+    expect(
+      execSnapshots.filter(({ cmd }) => cmd === 'go -C api mod tidy'),
+    ).toHaveLength(2);
+    expect(
+      execSnapshots.filter(({ cmd }) => cmd === 'go mod tidy'),
+    ).toHaveLength(3);
+  });
+
+  it('runs vendoring and generation after tidy commands stabilize', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      allowedUnsafeExecutions: ['goGenerate'],
+    });
+    fs.readLocalFile.mockReset();
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('modules.txt content');
+    const execSnapshots = mockExecAll();
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
+    const initialContents = ['root-0', 'sum-0', 'api-0', 'api-sum-0'];
+    const changedContents = ['root-1', 'sum-1', 'api-1', 'api-sum-1'];
+    mockTidyAllFileContents(initialContents, changedContents, changedContents);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({ modified: ['go.sum'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+
+    await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: baseConfig({
+        postUpdateOptions: ['gomodTidyAll', 'goGenerate'],
+      }),
+    });
+
+    const commands = execSnapshots.map(({ cmd }) => cmd);
+    expect(commands.indexOf('go mod vendor')).toBeGreaterThan(
+      commands.lastIndexOf('go -C api mod tidy'),
+    );
+    expect(commands.indexOf('go generate ./...')).toBeGreaterThan(
+      commands.indexOf('go mod vendor'),
+    );
+  });
+
+  it('returns source artifacts and an error when dependent tidies do not stabilize', async () => {
+    const execSnapshots = mockExecAll();
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
+    mockTidyAllFileContents(
+      ['root-0', 'sum-0', 'api-0', null],
+      ['root-1', 'sum-1', 'api-1', 'api-sum-1'],
+      ['root-2', 'sum-2', 'api-2', 'api-sum-2'],
+      ['root-3', 'sum-3', 'api-3', 'api-sum-3'],
+    );
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({ modified: ['go.sum'] }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('sum-1');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+
+    const result = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: baseConfig(),
+    });
+
+    expect(
+      execSnapshots.filter(({ cmd }) => cmd === 'go -C api mod tidy'),
+    ).toHaveLength(3);
+    expect(result).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'go.sum',
+          contents: 'sum-1',
+        },
+      },
+      {
+        artifactError: {
+          fileName: 'go.sum',
+          stderr: 'go mod tidy did not stabilize after 3 passes',
+        },
+      },
+    ]);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('go.mod', 'root-1');
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('go.sum', 'sum-1');
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('api/go.mod', 'api-0');
+    expect(fs.deleteLocalFile).toHaveBeenCalledWith('api/go.sum');
+  });
+
+  it('returns an error when rollback leaves no modified module files', async () => {
+    mockExecAll();
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
+    mockTidyAllFileContents(
+      ['root-0', 'sum-0', 'api-0', 'api-sum-0'],
+      ['root-1', 'sum-1', 'api-1', 'api-sum-1'],
+      ['root-2', 'sum-2', 'api-2', 'api-sum-2'],
+      ['root-3', 'sum-3', 'api-3', 'api-sum-3'],
+    );
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({ modified: [] }),
+    );
+
+    const result = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: baseConfig(),
+    });
+
+    expect(result).toEqual([
+      {
+        artifactError: {
+          fileName: 'go.sum',
+          stderr: 'go mod tidy did not stabilize after 3 passes',
+        },
+      },
+    ]);
   });
 });

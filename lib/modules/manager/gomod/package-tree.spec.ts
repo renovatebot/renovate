@@ -78,6 +78,35 @@ describe('modules/manager/gomod/package-tree', () => {
       ]);
     });
 
+    it('returns dependents when local replacements contain a cycle', async () => {
+      const cyclicMonorepo: Record<string, string> = {
+        'tooling/go.mod': codeBlock`
+          module example.com/tooling
+
+          replace example.com/service => ../service
+        `,
+        'service/go.mod': codeBlock`
+          module example.com/service
+
+          replace example.com/tooling => ../tooling
+        `,
+        'app/go.mod': codeBlock`
+          module example.com/app
+
+          replace example.com/service => ../service
+        `,
+      };
+      scm.getFileList.mockResolvedValue(Object.keys(cyclicMonorepo));
+      fs.readLocalFile.mockImplementation((f: string) =>
+        Promise.resolve(cyclicMonorepo[f]),
+      );
+
+      expect(await getGoModulesInTidyOrder('tooling/go.mod')).toEqual([
+        'service/go.mod',
+        'app/go.mod',
+      ]);
+    });
+
     it('returns empty array when the module has no dependents or is unknown', async () => {
       scm.getFileList.mockResolvedValue(['a/go.mod']);
       fs.readLocalFile.mockResolvedValue('module example.com/a\n');
