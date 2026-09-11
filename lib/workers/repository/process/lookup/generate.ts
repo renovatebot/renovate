@@ -39,12 +39,10 @@ export async function generateUpdate(
   if (release.newDigest !== undefined) {
     update.newDigest = release.newDigest;
   }
-  // istanbul ignore if
   if (release.releaseTimestamp) {
     update.releaseTimestamp = release.releaseTimestamp;
     update.newVersionAgeInDays = getElapsedDays(release.releaseTimestamp);
   }
-  // istanbul ignore if
   if (release.registryUrl !== undefined) {
     /**
      * This means:
