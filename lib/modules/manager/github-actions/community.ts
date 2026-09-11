@@ -15,6 +15,7 @@ import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
 import type { ActionSchema, CommunityActionConfig } from './types.ts';
+import { actionUsesRegex } from './utils.ts';
 
 export function actionSchema(
   name: string,
@@ -35,9 +36,7 @@ export function actionSchema(
 }
 
 function matchAction(action: string): z.ZodString {
-  return z
-    .string()
-    .regex(regEx(`(?:https?://[^/]+/)?${RegExp.escape(action)}(?:@.+)?$`));
+  return z.string().regex(actionUsesRegex(action));
 }
 
 function parseValue(

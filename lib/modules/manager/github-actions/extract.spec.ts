@@ -1209,6 +1209,34 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
+    it('extracts x-version from actions/setup-x referenced by an https:// URL', async () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: https://github.com/actions/setup-node@v4.4.0
+                with:
+                  node-version: '23.7.0'
+        `;
+
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'https://github.com/actions/setup-node',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '23.7.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+      ]);
+    });
+
     it('handles actions/setup-x without x-version field', async () => {
       const yamlContent = codeBlock`
         jobs:

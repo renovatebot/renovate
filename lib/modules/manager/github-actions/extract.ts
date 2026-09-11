@@ -32,6 +32,7 @@ import type {
   LockfileState,
   RepositoryReference,
 } from './types.ts';
+import { matchesAction } from './utils.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -262,15 +263,14 @@ export const builtinVersionedActions: Record<string, string> = {
   node: nodeVersioning.id,
   python: npmVersioning.id,
 
-  // Not covered yet because they use different datasources/packageNames:
-  // - dotnet
-  // - java
+  // dotnet and java are covered by `communityActions` instead, as they use
+  // different datasources/packageNames.
 };
 
 function extractVersionedAction(step: UsesStep): PackageDependency | null {
   for (const [action, versioning] of Object.entries(builtinVersionedActions)) {
     const actionName = `actions/setup-${action}`;
-    if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
+    if (!matchesAction(step.uses, actionName)) {
       continue;
     }
 
