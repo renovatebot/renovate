@@ -31,6 +31,7 @@ describe('modules/datasource/npm/schema', () => {
                 url: 'https://example.com/attestations',
                 issuer: 'ignore me',
               },
+              integrity: 'sha512-abc',
               tarball: 'https://example.com/vue.tgz',
             },
             scripts: { test: 'vitest' },
@@ -62,6 +63,8 @@ describe('modules/datasource/npm/schema', () => {
             attestations: {
               url: 'https://example.com/attestations',
             },
+            integrity: 'sha512-abc',
+            tarball: 'https://example.com/vue.tgz',
           },
         },
       },
