@@ -154,7 +154,11 @@ async function buildUpdateVerificationMetadataCmd(
     return null;
   }
 
-  return `${baseCmd} --write-verification-metadata ${hashTypes.join(',')} dependencies`;
+  // --refresh-dependencies: with a warm dependency metadata cache, Gradle
+  // skips the parent POM / platform BOM walk and omits their entries from the
+  // written file (https://github.com/gradle/gradle/issues/19228), breaking
+  // consumers that verify metadata. The flag forces the full walk.
+  return `${baseCmd} --write-verification-metadata ${hashTypes.join(',')} dependencies --refresh-dependencies`;
 }
 
 export async function updateArtifacts({
