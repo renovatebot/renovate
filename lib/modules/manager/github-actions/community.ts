@@ -134,6 +134,25 @@ const PnpmSetupWith: ActionSchema = z
     ...parsePnpmRuntime(runtime),
   ]);
 
+const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
+const RenovateGithubActionWith: ActionSchema = z
+  .object({
+    'renovate-version': z.string().optional(),
+    'renovate-image': z.string().optional(),
+  })
+  .transform(({ 'renovate-version': version, 'renovate-image': image }) => {
+    const [packageName, currentDigest] = (
+      image ?? renovateGithubActionDefaultImage
+    ).split('@');
+    return [
+      {
+        packageName,
+        ...(currentDigest ? { currentDigest } : {}),
+        ...parseValue(version),
+      },
+    ];
+  });
+
 /**
  * Community contributed actions with known version input schemas.
  */
@@ -254,8 +273,8 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   // https://github.com/renovatebot/github-action
   'renovatebot/github-action': {
     datasource: DockerDatasource.id,
-    packageName: 'ghcr.io/renovatebot/renovate',
-    withSchema: valSchema('renovate-version'),
+    packageName: '', // determined from `renovate-image` input, if set
+    withSchema: RenovateGithubActionWith,
   },
   'ruby/setup-ruby': {
     datasource: RubyVersionDatasource.id,
