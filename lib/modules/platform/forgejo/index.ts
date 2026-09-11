@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -16,6 +17,7 @@ import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import { setBaseUrl } from '../../../util/http/forgejo.ts';
+import { parseInteger } from '../../../util/number.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -32,8 +34,10 @@ import type {
   MergePRConfig,
   Platform,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   RepoSortMethod,
@@ -196,6 +200,105 @@ async function fetchRepositories({
     }),
   });
   return repos.filter(usableRepo).map((r) => r.full_name);
+}
+
+/**
+ * Attempt Forgejo-native automerge on a PR.
+ *
+ * Forgejo computes the `mergeable` field asynchronously after a branch is
+ * pushed. Calling POST /pulls/{idx}/merge with `merge_when_checks_succeed=true`
+ * while the field is still being computed fails, and the earlier implementation
+ * issued a single merge call from `createPr` and gave up on any error, so
+ * automerge was effectively skipped for newly created PRs.
+ *
+ * This helper polls the PR a small number of times until `mergeable` is true,
+ * then issues the merge call. Mirrors GitLab's `tryPrAutomerge` pattern.
+ * Tunable via the experimental env vars
+ *   RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_ATTEMPTS (default 5)
+ *   RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_DELAY    (default 250 ms, exponential)
+ */
+async function tryPrAutomerge(
+  prNumber: number,
+  platformPrOptions: PlatformPrOptions | undefined,
+): Promise<void> {
+  if (!platformPrOptions?.usePlatformAutomerge) {
+    return;
+  }
+
+  // Only Forgejo v10.0.0+ support delete_branch_after_merge.
+  // This is required to not have undesired behavior when renovate finds existing branches on next run.
+  // Codeberg usees git versioning like `11.0.1-99-c504062+gitea-1.22.0` so allow any version >= 10.0.0-0.
+  if (!semver.gte(defaults.version, '10.0.0-0')) {
+    logger.debug(
+      { prNumber },
+      `Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.`,
+    );
+    return;
+  }
+
+  const env = getEnv();
+  const retryTimes = parseInteger(
+    env.RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_ATTEMPTS,
+    5,
+  );
+  const baseDelay = parseInteger(
+    env.RENOVATE_X_FORGEJO_AUTO_MERGEABLE_CHECK_DELAY,
+    250,
+  );
+
+  // Wait for Forgejo to finish computing mergeable before calling merge.
+  // Just after PR creation the field is false as a placeholder while the async
+  // check runs; a follow-up getPR returns the current value.
+  for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
+    const pr = await helper.getPR(config.repository, prNumber, {
+      memCache: false,
+    });
+    if (pr.mergeable) {
+      break;
+    }
+    if (attempt === retryTimes) {
+      logger.debug(
+        `PR not mergeable after ${retryTimes} attempts, merging anyway...prNo: ${prNumber}`,
+      );
+      break;
+    }
+    logger.debug(
+      `PR not yet in mergeable state. Retrying ${attempt}...prNo: ${prNumber}`,
+    );
+    await setTimeout(baseDelay * attempt ** 2); // exponential backoff
+  }
+
+  try {
+    await helper.mergePR(config.repository, prNumber, {
+      Do:
+        getMergeMethod(platformPrOptions?.automergeStrategy) ??
+        config.mergeMethod,
+      merge_when_checks_succeed: true,
+      delete_branch_after_merge: true,
+    });
+    logger.debug({ prNumber }, 'Forgejo-native automerge: success');
+  } catch (err) {
+    logger.warn({ err, prNumber }, 'Forgejo-native automerge: fail');
+  }
+}
+
+/**
+ * Re-attempt Forgejo-native automerge on an existing PR. Called by the worker
+ * after a branch update so that PRs which could not be auto-merged at creation
+ * time get another chance, and so that PRs created before a packageRules change
+ * enabled automerge get retroactively flagged.
+ */
+export async function reattemptPlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  try {
+    await tryPrAutomerge(number, platformPrOptions);
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
+  }
 }
 
 const platform: Platform = {
@@ -599,37 +702,7 @@ const platform: Platform = {
         labels: labels.filter(isNumber),
       });
 
-      if (platformPrOptions?.usePlatformAutomerge) {
-        // Only Forgejo v10.0.0+ support delete_branch_after_merge.
-        // This is required to not have undesired behavior when renovate finds existing branches on next run.
-        // Codeberg usees git versioning like `11.0.1-99-c504062+gitea-1.22.0` so allow any version >= 10.0.0-0.
-        if (semver.gte(defaults.version, '10.0.0-0')) {
-          try {
-            await helper.mergePR(config.repository, gpr.number, {
-              Do:
-                getMergeMethod(platformPrOptions?.automergeStrategy) ??
-                config.mergeMethod,
-              merge_when_checks_succeed: true,
-              delete_branch_after_merge: true,
-            });
-
-            logger.debug(
-              { prNumber: gpr.number },
-              'Forgejo-native automerge: success',
-            );
-          } catch (err) {
-            logger.warn(
-              { err, prNumber: gpr.number },
-              'Forgejo-native automerge: fail',
-            );
-          }
-        } else {
-          logger.debug(
-            { prNumber: gpr.number },
-            `Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.`,
-          );
-        }
-      }
+      await tryPrAutomerge(gpr.number, platformPrOptions);
 
       const pr = toRenovatePR(gpr, botUserName);
       if (!pr) {
