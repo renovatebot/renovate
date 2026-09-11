@@ -1527,6 +1527,55 @@ describe('modules/manager/github-actions/extract', () => {
   it.each([
     {
       step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0.404' },
+      },
+      expected: [
+        {
+          currentValue: '8.0.404',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      // multiple SDKs, one per line, aren't a single version we can update
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '3.1.x\n5.0.x' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          currentValue: '3.1.x\n5.0.x',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'aquasecurity/setup-trivy@v0.2.6',
         with: {},
       },
