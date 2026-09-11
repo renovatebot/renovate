@@ -23,10 +23,33 @@ import type {
 import { mergeChildConfig } from './utils.ts';
 
 const options = getOptions();
+const migratedTemplates = {
+  fromVersion: 'currentVersion',
+  newValueMajor: 'newMajor',
+  newValueMinor: 'newMinor',
+  newVersionMajor: 'newMajor',
+  newVersionMinor: 'newMinor',
+  toVersion: 'newVersion',
+} as const;
+const regExpWithEscape = RegExp as RegExpConstructor & {
+  escape(input: string): string;
+};
+
 export function fixShortHours(input: string): string {
   return input.replace(
     regEx(/(?<hours> \d?\d)(?<meridiem>(?:a|p)m)/g),
     '$<hours>:00$<meridiem>',
+  );
+}
+
+function replaceStandaloneTemplateIdentifier(
+  input: string,
+  from: string,
+  to: string,
+): string {
+  return input.replace(
+    regEx(`\\b${regExpWithEscape.escape(from)}\\b`, 'g'),
+    to,
   );
 }
 
@@ -45,6 +68,10 @@ export function migrateConfig(
     }
     const newConfig = MigrationsService.run(config, parentKey);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
+    const migratedConfigRecord = migratedConfig as unknown as Record<
+      string,
+      unknown
+    >;
 
     for (const [key, val] of Object.entries(newConfig)) {
       if (isString(val) && val.includes('{{baseDir}}')) {
@@ -90,8 +117,8 @@ export function migrateConfig(
         // @ts-expect-error -- TODO: fix me
         migratedConfig[key] = String(val[0]);
       } else if (isArray(val)) {
-        // @ts-expect-error -- TODO: fix me
         // v8 ignore else -- TODO: add test #40625
+        // @ts-expect-error -- TODO: fix me
         if (isArray(migratedConfig?.[key])) {
           const newArray = [];
           // @ts-expect-error -- TODO: fix me
@@ -118,23 +145,17 @@ export function migrateConfig(
         }
       }
 
-      const migratedTemplates = {
-        fromVersion: 'currentVersion',
-        newValueMajor: 'newMajor',
-        newValueMinor: 'newMinor',
-        newVersionMajor: 'newMajor',
-        newVersionMinor: 'newMinor',
-        toVersion: 'newVersion',
-      };
-      // @ts-expect-error -- TODO: fix me
-      if (isString(migratedConfig[key])) {
+      const migratedValue = migratedConfigRecord[key];
+      if (isString(migratedValue)) {
+        let migratedStringValue = migratedValue;
         for (const [from, to] of Object.entries(migratedTemplates)) {
-          // @ts-expect-error -- TODO: fix me
-          migratedConfig[key] = (migratedConfig[key] as string).replace(
-            regEx(from, 'g'),
+          migratedStringValue = replaceStandaloneTemplateIdentifier(
+            migratedStringValue,
+            from,
             to,
           );
         }
+        migratedConfigRecord[key] = migratedStringValue;
       }
     }
     const languages = [
