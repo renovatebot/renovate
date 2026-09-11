@@ -1209,6 +1209,34 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
+    it('extracts x-version from actions/setup-x referenced by an https:// URL', async () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: https://github.com/actions/setup-node@v4.4.0
+                with:
+                  node-version: '23.7.0'
+        `;
+
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'https://github.com/actions/setup-node',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '23.7.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+      ]);
+    });
+
     it('handles actions/setup-x without x-version field', async () => {
       const yamlContent = codeBlock`
         jobs:
@@ -1220,11 +1248,18 @@ describe('modules/manager/github-actions/extract', () => {
                   registry-url: 'https://npm.pkg.github.com'
         `;
       const res = await extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'actions/setup-node',
-        depType: 'action',
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/setup-node',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ]);
     });
 
     it('extracts x-version from actions/setup-x in composite action', async () => {

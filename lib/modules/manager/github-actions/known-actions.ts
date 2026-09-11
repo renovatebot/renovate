@@ -10,13 +10,14 @@ import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
+import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
-import type { ActionSchema, CommunityActionConfig } from './types.ts';
+import type { ActionSchema, KnownActionConfig } from './types.ts';
 
 export function actionSchema(
   name: string,
-  { withSchema, ...cfg }: CommunityActionConfig,
+  { withSchema, ...cfg }: KnownActionConfig,
 ): ActionSchema {
   return z
     .object({
@@ -75,6 +76,12 @@ function valSchema(
 }
 
 const VersionVal = valSchema('version');
+
+// Shared by the `actions/setup-{go,node,python}` entries below, whose
+// releases are published as `actions/{go,node,python}-versions` GitHub
+// releases, tagged like `20.11.0` or `20.11.0-1` (a build number suffix).
+const actionsVersionsExtractVersion =
+  '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$';
 
 const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
@@ -154,9 +161,37 @@ const RenovateGithubActionWith: ActionSchema = z
   });
 
 /**
- * Community contributed actions with known version input schemas.
+ * Community-maintained and first-party (GitHub's own `actions/*`) Actions
+ * with known version input schemas.
  */
-export const communityActions: Record<string, CommunityActionConfig> = {
+export const knownActions: Record<string, KnownActionConfig> = {
+  // https://github.com/actions/setup-go
+  'actions/setup-go': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'go',
+    packageName: 'actions/go-versions',
+    versioning: npmVersioning.id,
+    extractVersion: actionsVersionsExtractVersion,
+    withSchema: valSchema('go-version'),
+  },
+  // https://github.com/actions/setup-node
+  'actions/setup-node': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'node',
+    packageName: 'actions/node-versions',
+    versioning: nodeVersioning.id,
+    extractVersion: actionsVersionsExtractVersion,
+    withSchema: valSchema('node-version'),
+  },
+  // https://github.com/actions/setup-python
+  'actions/setup-python': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'python',
+    packageName: 'actions/python-versions',
+    versioning: npmVersioning.id,
+    extractVersion: actionsVersionsExtractVersion,
+    withSchema: valSchema('python-version'),
+  },
   // https://github.com/aquasecurity/setup-trivy
   'aquasecurity/setup-trivy': {
     datasource: GithubReleasesDatasource.id,
