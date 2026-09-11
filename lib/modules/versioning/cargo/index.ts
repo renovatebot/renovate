@@ -1,4 +1,9 @@
-import { major as getMajor, minor as getMinor } from 'semver';
+import {
+  Range,
+  major as getMajor,
+  minor as getMinor,
+  minVersion,
+} from 'semver';
 import semver from 'semver-stable';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
@@ -12,7 +17,11 @@ export const urls = [
   '[Cargo - Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html)',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'replace',
+  'widen',
+];
 
 function isVersion(input: string): boolean {
   return npm.isVersion(input);
@@ -56,6 +65,34 @@ function npm2cargo(input: string): string {
     }
   }
   return res.join(', ');
+}
+
+/**
+ * Cargo has no OR operator: comma-separated requirements are ANDed.
+ * `widen` asks npm for a union such as `^1.0.0 || ^2.0.0`, which cannot be
+ * written in Cargo, so collapse it into the single span it describes.
+ */
+function npmUnionToCargoRange(npmRange: string): string | null {
+  let range: Range;
+  try {
+    range = new Range(npmRange);
+  } catch {
+    /* istanbul ignore next: npm only ever hands us ranges it built itself */
+    return null;
+  }
+  const lowerBound = minVersion(range);
+  const lastComparators = range.set.at(-1);
+  const upperBound = lastComparators?.find(
+    (comparator) => comparator.operator === '<' || comparator.operator === '<=',
+  );
+  if (!lowerBound || !upperBound) {
+    return null;
+  }
+  // semver marks a caret/tilde upper bound with a `-0` prerelease so that
+  // prereleases sort below it. Cargo has no such convention, and the bound is
+  // exclusive there anyway, so drop it.
+  const upperVersion = upperBound.semver.version.replace(regEx(/-0$/), '');
+  return `>=${lowerBound.version}, ${upperBound.operator}${upperVersion}`;
 }
 
 function isLessThanRange(version: string, range: string): boolean {
@@ -125,6 +162,16 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
+
+  // A union has no Cargo equivalent, so express the same span as one ANDed range
+  // instead of letting `||` reach Cargo.toml.
+  if (newSemver?.includes('||')) {
+    const cargoRange = npmUnionToCargoRange(newSemver);
+    if (cargoRange) {
+      return cargoRange;
+    }
+    return currentValue;
+  }
   let newCargo = newSemver
     ? npm2cargo(newSemver)
     : /* istanbul ignore next: should never happen */ null;
