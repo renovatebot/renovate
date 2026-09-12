@@ -628,6 +628,41 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('updates the monorepo root lock file for a subproject', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mise.lock');
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'packages/a/mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expect.stringContaining('version = "24.16.0"'),
+          path: 'mise.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledWith('mise.lock', 'utf8');
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustSubdirCmd },
+      {
+        cmd: updateToolCmd,
+        options: {
+          cwd: '/tmp/github/some/repo/packages/a',
+        },
+      },
+    ]);
+  });
+
   it('handles subdirectory package files', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
