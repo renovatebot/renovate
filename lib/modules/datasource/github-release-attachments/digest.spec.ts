@@ -1,7 +1,14 @@
 import * as httpMock from '~test/http-mock.ts';
-import type { GithubDigestFile } from '../../../util/github/types.ts';
+import { partial } from '~test/util.ts';
+import type {
+  GithubDigestFile,
+  GithubRestAsset,
+} from '../../../util/github/types.ts';
 import { toSha256 } from '../../../util/hash.ts';
-import { GithubReleaseAttachmentsDatasource } from './index.ts';
+import {
+  GithubReleaseAttachmentsDatasource,
+  isChecksumManifestCandidate,
+} from './index.ts';
 import { GitHubReleaseAttachmentMocker } from './test/index.ts';
 
 describe('modules/datasource/github-release-attachments/digest', () => {
@@ -12,7 +19,50 @@ describe('modules/datasource/github-release-attachments/digest', () => {
   );
   const githubReleaseAttachments = new GithubReleaseAttachmentsDatasource();
 
+  describe('isChecksumManifestCandidate', () => {
+    it.each`
+      name                                           | size         | expected
+      ${'anything.zip'}                              | ${4 * 1024}  | ${true}
+      ${'anything.zip'}                              | ${6 * 1024}  | ${false}
+      ${'SHASUMS.txt'}                               | ${6 * 1024}  | ${true}
+      ${'SHA512-SUMS.txt'}                           | ${6 * 1024}  | ${true}
+      ${'SHASUMS256.txt'}                            | ${6 * 1024}  | ${true}
+      ${'SHA256SUMS'}                                | ${6 * 1024}  | ${true}
+      ${'actionlint_1.7.12_checksums.txt'}           | ${6 * 1024}  | ${true}
+      ${'sha256.sum'}                                | ${6 * 1024}  | ${true}
+      ${'uv-x86_64-unknown-linux-gnu.tar.gz.sha256'} | ${6 * 1024}  | ${true}
+      ${'release.tar.gz.sha512'}                     | ${6 * 1024}  | ${true}
+      ${'checksums.txt.asc'}                         | ${6 * 1024}  | ${false}
+      ${'SHASUMS.txt'}                               | ${65 * 1024} | ${false}
+    `('$name at $size bytes is $expected', ({ name, size, expected }) => {
+      expect(
+        isChecksumManifestCandidate(partial<GithubRestAsset>({ name, size })),
+      ).toBe(expected);
+    });
+  });
+
   describe('findDigestAsset', () => {
+    it('reads a checksum manifest larger than a small asset by its name', async () => {
+      const padding = `${'0'.repeat(64)} `;
+      const lines = Array.from(
+        { length: 80 },
+        (_, i) => `${padding}other-asset-${i}.tar.gz`,
+      );
+      lines.push('test-digest    linux-amd64.tar.gz');
+      const manifest = lines.join('\n');
+      expect(manifest.length).toBeGreaterThan(5 * 1024);
+      const release = releaseMock.withAssets('v1.0.0', {
+        'SHA512-SUMS.txt': manifest,
+      });
+
+      const digestAsset = await githubReleaseAttachments.findDigestAsset(
+        release,
+        'test-digest',
+      );
+      expect(digestAsset?.assetName).toBe('SHA512-SUMS.txt');
+      expect(digestAsset?.digestedFileName).toBe('linux-amd64.tar.gz');
+    });
+
     it('finds SHASUMS.txt file containing digest', async () => {
       const release = releaseMock.withDigestFileAsset(
         'v1.0.0',
