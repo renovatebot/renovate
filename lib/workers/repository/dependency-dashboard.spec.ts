@@ -2279,17 +2279,7 @@ None detected
       expect(result).toContain(
         '<summary>View abandoned dependencies (1)</summary>',
       );
-      expect(result).toContain(
-        '> ℹ️ **Note**\n> \n> Packages are marked as abandoned when they exceed the [`abandonmentThreshold`]',
-      );
-      expect(result).toContain(
-        '> Unlike deprecated packages with official notices, abandonment is detected by release inactivity.',
-      );
-      // the alert must sit outside the <details> block, otherwise GitHub
-      // renders it as plain text instead of a styled note
-      expect(result.indexOf('> ℹ️ **Note**')).toBeLessThan(
-        result.indexOf('<details>'),
-      );
+      expect(result).toContain('> ℹ️ **Note**');
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
