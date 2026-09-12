@@ -51,6 +51,10 @@ export async function updateArtifacts(
   const pkgFileDir = upath.dirname(packageFileName);
   const npmrcContent = await getNpmrcContent(pkgFileDir);
   const { additionalNpmrcContent } = processHostRules();
+  // processHostRules() only adds auth; scope/registry mappings live in npmrc.
+  if (config.npmrc) {
+    additionalNpmrcContent.unshift(config.npmrc);
+  }
   await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
 
   try {
