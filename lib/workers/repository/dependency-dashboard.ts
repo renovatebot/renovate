@@ -725,13 +725,15 @@ export function getAbandonedPackagesMd(
   abandonedMd +=
     'The following dependencies have not received updates for an extended period and may be unmaintained.\n\n';
 
+  // The note must stay outside the `<details>` block: GitHub renders alerts
+  // only at the top level of the body, not inside collapsible sections.
+  abandonedMd += emojify('> :information_source: **Note**\n> \n');
+  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release.\n`;
+  abandonedMd +=
+    '> Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n';
+
   abandonedMd += '<details>\n';
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
-
-  abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
-  abandonedMd +=
-    'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
   abandonedMd += '| Datasource | Package | Last Updated |\n';
   abandonedMd += '|------------|------|-------------|\n';
