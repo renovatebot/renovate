@@ -1245,6 +1245,35 @@ describe('modules/manager/mise/extract', () => {
       expect(result?.lockFiles).toBeUndefined();
     });
 
+    it('reads the monorepo root lock file for a subproject', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('mise.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        lockfile_version = 1
+
+        [[tools.node]]
+        version = "24.21.0"
+        backend = "core:node"
+        specifiers = ["24.21.0"]
+
+        [[tools.node]]
+        version = "22.19.0"
+        backend = "core:node"
+        specifiers = ["22"]
+      `);
+      const content = codeBlock`
+        [tools]
+        node = "22"
+        pnpm = "11"
+      `;
+      const result = await extractPackageFile(content, 'packages/a/mise.toml');
+      expect(result?.lockFiles).toEqual(['mise.lock']);
+      expect(result?.deps).toMatchObject([
+        { depName: 'node', currentValue: '22', lockedVersion: '22.19.0' },
+        { depName: 'pnpm', currentValue: '11' },
+      ]);
+      expect(result?.deps[1]).not.toHaveProperty('lockedVersion');
+    });
+
     it('works with environment-specific lock files', async () => {
       const testLockFileContent = codeBlock`
         [[tools.node]]

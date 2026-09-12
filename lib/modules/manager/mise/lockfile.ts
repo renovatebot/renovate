@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { findLocalSiblingOrParent } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { MiseLockFile } from './schema.ts';
 import type { MiseConfigType } from './types.ts';
@@ -22,8 +23,13 @@ export function getConfigType(configPath: string): MiseConfigType {
 /**
  * Derives the lock file path from a mise config file path.
  * Matches mise's lockfile_path_for_config() logic from src/lockfile.rs
+ *
+ * In monorepo mode (`monorepo_root = true` with `[monorepo] lockfile = true`)
+ * mise writes a single lock file at the monorepo root and removes the
+ * subproject ones, so a colocated lock file wins and otherwise the nearest
+ * ancestor lock file is used.
  */
-export function getLockFileName(configPath: string): string {
+export async function getLockFileName(configPath: string): Promise<string> {
   const dirname = upath.dirname(configPath);
   const parentDirname = upath.basename(dirname);
 
@@ -43,7 +49,9 @@ export function getLockFileName(configPath: string): string {
     lockFileName = 'mise.lock';
   }
 
-  return upath.join(lockDir, lockFileName);
+  const colocated = upath.join(lockDir, lockFileName);
+  const found = await findLocalSiblingOrParent(colocated, lockFileName);
+  return found ?? colocated;
 }
 
 /**
@@ -78,6 +86,7 @@ export function getLockFileName(configPath: string): string {
 export function getLockedVersion(
   lockFileData: MiseLockFile,
   depName: string,
+  currentValue?: string | null,
 ): string | undefined {
   // Try full name first (for non-registry tools like ubi:, aqua:)
   let lockedTools = lockFileData.tools[depName];
@@ -89,6 +98,14 @@ export function getLockedVersion(
       const shortName = depName.substring(delimiterIndex + 1);
       lockedTools = lockFileData.tools[shortName];
     }
+  }
+
+  // Version 1 lock files record the original request in `specifiers`. A
+  // monorepo root lock file can hold several entries for one tool, so match
+  // on the specifier when the lock file has them.
+  if (currentValue && lockedTools?.some((tool) => tool.specifiers)) {
+    return lockedTools.find((tool) => tool.specifiers?.includes(currentValue))
+      ?.version;
   }
 
   return lockedTools?.[0]?.version;
