@@ -100,7 +100,7 @@ export interface ParsedUsesLine {
  */
 export type ActionSchema = z.ZodType<PackageDependency[]>;
 
-export interface CommunityActionConfig {
+export interface KnownActionConfig {
   datasource: string;
   depName?: string;
   packageName: string;

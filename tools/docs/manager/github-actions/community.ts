@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod/v4';
-import { communityActions } from '../../../../lib/modules/manager/github-actions/community.ts';
-import type { CommunityActionConfig } from '../../../../lib/modules/manager/github-actions/types.ts';
+import { knownActions } from '../../../../lib/modules/manager/github-actions/known-actions.ts';
+import type { KnownActionConfig } from '../../../../lib/modules/manager/github-actions/types.ts';
 import { readFile, updateFile } from '../../../utils/index.ts';
 import { replaceContent } from '../../utils.ts';
 
 function getWithSchemaFields(
-  schema: CommunityActionConfig['withSchema'],
+  schema: KnownActionConfig['withSchema'],
 ): string[] {
   if (!schema) {
     return ['version'];
@@ -26,7 +26,7 @@ function getWithSchemaFields(
 function determineDependencyToUpdate({
   depName,
   packageName,
-}: CommunityActionConfig): string {
+}: KnownActionConfig): string {
   if (!depName && !packageName) {
     // some actions determine the depName and packageName dynamically
     return '(determined from `with` input(s))';
@@ -42,7 +42,7 @@ function generateToolingTable(): string {
     `;
   table += '\n';
 
-  for (const [name, cfg] of Object.entries(communityActions)) {
+  for (const [name, cfg] of Object.entries(knownActions)) {
     const withFields = getWithSchemaFields(cfg.withSchema);
 
     table += `| [\`${name}\`](https://github.com/${name}) | \`${withFields.join('`, `')}\` | ${determineDependencyToUpdate(cfg)} |\n`;
