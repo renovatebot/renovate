@@ -212,32 +212,19 @@ This means that Renovate will:
 - not delete Ratchet comments after parsing them
 - keep `# ratchet:exclude` comments
 
-### with:version support for built-in Actions
+### Updating `with:` values in GitHub Actions
 
-Renovate supports updating the "with" version for `actions/setup-go`, `actions/setup-node`, and `actions/setup-python`, although not all syntaxes are supported out of the box.
-
-By default, Renovate will use `npm`-style semver versioning for `go` and `python`, and Renovate's built-in `node` versioning for updating `node`.
-The goal of these defaults is to match as closely as possible to what these GitHub Actions support.
-For example, normally the `^` syntax is not used in `go` or `python`, but it's supported in their respective actions.
-
-Depending on your use case, you may need to change `versioning` manually.
-If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise a Discussion to suggest it.
-
-### Updating `with:` values in commonly used Community-maintained GitHub Actions
-
-Third-party GitHub Actions will commonly specify a version of a given tool using a `with:` block, such as:
-
-GitHub Actions maintained by the wider community have `with:` blocks such as:
+Both GitHub's own first-party Actions and Actions maintained by the wider community will commonly specify a version of a given tool using a `with:` block, such as:
 
 ```yaml
 steps:
-- uses: astral-sh/setup-uv@v10.0.1
-  with:
-    version: '0.4.x'
+  - uses: actions/setup-node@v5
+    with:
+      node-version: '22.0.0'
 
-- uses: 'denoland/setup-deno@v2',
-  with:
-    deno-version: '2.4.0'
+  - uses: astral-sh/setup-uv@v10.0.1
+    with:
+      version: '0.4.x'
 ```
 
 Renovate supports extracting some of these input(s) from the following Actions, and performing automagic dependency updates accordingly.
@@ -253,6 +240,11 @@ steps:
       runtime: 'node@24.1.0'
 ```
 
-The following third-party Actions have support for their `with:` blocks:
+The following Actions have support for their `with:` blocks:
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
+
+<sup>1</sup> Default for the datasource used.
+
+Depending on your use case, you may need to change `versioning` manually.
+If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
