@@ -2162,7 +2162,7 @@ A preset alternative to the above is:
 }
 ```
 
-To match specific ports you have to add a protocol to `matchHost`:
+To match a specific port, add the port to `matchHost`:
 
 ```json
 {
@@ -2175,8 +2175,9 @@ To match specific ports you have to add a protocol to `matchHost`:
 }
 ```
 
-!!! warning
-  Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
+!!! note
+  A `matchHost` with a port or a path but no scheme, like `domain.com:9118` or `domain.com/path`, is treated as `https://domain.com:9118` or `https://domain.com/path`.
+  To match a port over plain `http`, include the scheme.
 
 !!! note
   Disabling a host is only 100% effective if added to self-hosted config.
@@ -2453,7 +2454,7 @@ registry=https://gitlab.myorg.com/api/v4/packages/npm/
 ```
 
 !!! note
-  Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` → `https://domain.com/path`)
+  Values containing a URL path or a port but missing a scheme will be prepended with `https://` (e.g. `domain.com/path` → `https://domain.com/path`, `domain.com:9118` → `https://domain.com:9118`).
 
 ### `hostRules.maxRequestsPerSecond`
 
