@@ -1,0 +1,61 @@
+{
+  "type": "npm",
+  "name": "jquery",
+  "tags": {
+    "latest": "4.0.0",
+    "beta": "4.0.0-rc.2"
+  },
+  "versions": [
+    {
+      "version": "4.0.0",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery@4.0.0"
+      }
+    },
+    {
+      "version": "4.0.0-rc.2",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-rc.2",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-rc.2/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery@4.0.0-rc.2"
+      }
+    },
+    {
+      "version": "4.0.0-rc.1",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-rc.1",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-rc.1/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery@4.0.0-rc.1"
+      }
+    },
+    {
+      "version": "4.0.0-beta.2",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-beta.2",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-beta.2/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery@4.0.0-beta.2"
+      }
+    },
+    {
+      "version": "4.0.0-beta",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-beta",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0-beta/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery@4.0.0-beta"
+      }
+    },
+    {
+      "version": "3.7.1",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/npm/jquery@3.7.1",
+        "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/jquery@3.7.1/entrypoints",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery@3.7.1"
+      }
+    }
+  ],
+  "links": {
+    "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery"
+  }
+}
