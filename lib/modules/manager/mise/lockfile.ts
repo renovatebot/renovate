@@ -86,7 +86,7 @@ export async function getLockFileName(configPath: string): Promise<string> {
 export function getLockedVersion(
   lockFileData: MiseLockFile,
   depName: string,
-  currentValue?: string,
+  currentValue?: string | null,
 ): string | undefined {
   // Try full name first (for non-registry tools like ubi:, aqua:)
   let lockedTools = lockFileData.tools[depName];
