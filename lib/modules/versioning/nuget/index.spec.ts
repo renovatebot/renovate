@@ -427,6 +427,7 @@ describe('modules/versioning/nuget/index', () => {
       ${['1', '2', '3']}                              | ${'foobar'} | ${null}
       ${['0.1', '1-beta', '1', '1.1', '2-beta', '2']} | ${'[1,2)'}  | ${'1'}
       ${['foobar', '0.9.0', '1.0.0', '1.0.1']}        | ${'1.0.0'}  | ${'1.0.0'}
+      ${['foobar', '0.9.0', '1.0.1-beta.1', '1.0.1']} | ${'1.0.0'}  | ${'1.0.1'}
     `(
       'minSatisfyingVersion($versions, $range) === $expected',
       ({ versions, range, expected }) => {
