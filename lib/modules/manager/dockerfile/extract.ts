@@ -64,15 +64,20 @@ function processDepForAutoReplace(
   linefeed: string,
 ): void {
   const lineNumberRangesToReplace: number[][] = [];
+  let currentValueFound = false;
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
-      if (
-        (isString(dep.currentValue) &&
-          lines[lineNumber].includes(dep.currentValue)) ||
-        (isString(dep.currentDigest) &&
-          lines[lineNumber].includes(dep.currentDigest))
-      ) {
+      const valueOnLine =
+        isString(dep.currentValue) &&
+        lines[lineNumber].includes(dep.currentValue);
+      const digestOnLine =
+        isString(dep.currentDigest) &&
+        lines[lineNumber].includes(dep.currentDigest);
+      if (valueOnLine || digestOnLine) {
         lineNumberRangesToReplace.push(lineNumberRange);
+      }
+      if (valueOnLine) {
+        currentValueFound = true;
       }
     }
   }
@@ -105,6 +110,14 @@ function processDepForAutoReplace(
   }
 
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+
+  // A FROM tag composed from more than one `${ARG}` resolves to a value that is not
+  // present verbatim in the file, so its version cannot be rewritten in place and a
+  // version update would fail. Skip it; when it also pins a digest, updateArtifacts
+  // re-pins that digest for the composed tag using the replaceString kept above.
+  if (isString(dep.currentValue) && !currentValueFound) {
+    dep.skipReason = 'contains-variable';
+  }
 }
 
 export function splitImageParts(currentFrom: string): PackageDependency {
