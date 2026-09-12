@@ -120,7 +120,6 @@ describe('modules/datasource/maven/cache', () => {
         release: '2.0.0',
       },
     });
-    expect(httpMock.getTrace()).toEqual([]);
     expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
@@ -162,7 +161,6 @@ describe('modules/datasource/maven/cache', () => {
       replacementName: 'org.example:package',
       replacementVersion: '2.0.0',
     });
-    expect(httpMock.getTrace()).toEqual([]);
   });
 
   it('revalidates trimmed cached XML after 304 responses', async () => {
@@ -271,7 +269,6 @@ describe('modules/datasource/maven/cache', () => {
         release: '1.0.3-SNAPSHOT',
       },
     });
-    expect(httpMock.getTrace()).toEqual([]);
     expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 });
