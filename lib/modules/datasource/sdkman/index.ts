@@ -98,19 +98,13 @@ function constructPackageUrl(
     );
   }
 
-  try {
-    url.searchParams.delete('binaryArch');
+  url.searchParams.delete('binaryArch');
 
-    return joinUrlParts(
-      url.toString(),
-      packageName,
-      binaryArch,
-      'versions',
-      'all',
-    );
-  } catch (error) {
-    throw new Error(
-      `Invalid sdkman repo URL: ${registryUrl} - see documentation: ${error.message}`,
-    );
-  }
+  return joinUrlParts(
+    url.toString(),
+    packageName,
+    binaryArch,
+    'versions',
+    'all',
+  );
 }

@@ -7,7 +7,7 @@ import { SdkmanDatasource } from './index.ts';
 const packageName = 'java';
 const datasource = SdkmanDatasource.id;
 
-const defaultRegistryUrl = 'https://api.sdkman.io/2/candidates';
+const registryUrlBase = 'https://api.sdkman.io/2/candidates';
 
 function getPath() {
   return '/java/linuxx64/versions/all';
@@ -16,7 +16,7 @@ function getPath() {
 describe('modules/datasource/sdkman/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath()).replyWithError('error');
+      httpMock.scope(registryUrlBase).get(getPath()).replyWithError('error');
       await expect(
         getPkgReleases({
           datasource,
@@ -26,7 +26,7 @@ describe('modules/datasource/sdkman/index', () => {
     });
 
     it('returns null for 404', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath()).reply(404);
+      httpMock.scope(registryUrlBase).get(getPath()).reply(404);
       await expect(
         getPkgReleases({
           datasource,
@@ -36,7 +36,7 @@ describe('modules/datasource/sdkman/index', () => {
     });
 
     it('returns null for empty result', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath()).reply(200, '');
+      httpMock.scope(registryUrlBase).get(getPath()).reply(200, '');
       await expect(
         getPkgReleases({
           datasource,
@@ -46,7 +46,7 @@ describe('modules/datasource/sdkman/index', () => {
     });
 
     it('throws for 5xx', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath()).reply(502);
+      httpMock.scope(registryUrlBase).get(getPath()).reply(502);
       await expect(
         getPkgReleases({
           datasource,
@@ -84,6 +84,28 @@ describe('modules/datasource/sdkman/index', () => {
             version: '11.0.32-amzn',
           },
         ],
+      });
+    });
+
+    describe('parsing of registry url', () => {
+      const invalidUrl = 'https://api.sdkman.io/2/candidates';
+
+      it('returns null when registry url is not a url', async () => {
+        const res = await getPkgReleases({
+          datasource: SdkmanDatasource.id,
+          registryUrls: ['foobar'],
+          packageName,
+        });
+        expect(res).toBeNull();
+      });
+
+      it('returns null when registry url misses binaryArch', async () => {
+        const res = await getPkgReleases({
+          datasource: SdkmanDatasource.id,
+          registryUrls: [invalidUrl],
+          packageName,
+        });
+        expect(res).toBeNull();
       });
     });
   });
