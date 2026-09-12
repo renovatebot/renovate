@@ -199,10 +199,14 @@ function getNewValue({
     }
   }
 
-  // Explicitly check whether this is a fully-qualified version
+  // Only allow partial prereleases when updating an existing prerelease.
+  const newVersionGroups = VERSION_PATTERN.exec(newVersion)?.groups;
+  const currentVersionGroups = currentVersion
+    ? VERSION_PATTERN.exec(currentVersion)?.groups
+    : undefined;
   if (
-    (VERSION_PATTERN.exec(newVersion)?.groups?.release ?? '').split('.')
-      .length !== 3
+    (newVersionGroups?.release ?? '').split('.').length !== 3 &&
+    !(newVersionGroups?.pre && currentVersionGroups?.pre)
   ) {
     logger.debug(
       'Cannot massage python version to npm - returning currentValue',
