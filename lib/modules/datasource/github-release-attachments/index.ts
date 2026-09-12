@@ -21,6 +21,33 @@ import type {
 
 export const cacheNamespace = 'datasource-github-releases';
 
+/**
+ * Any asset this small is worth reading as a possible checksum manifest,
+ * whatever it is called.
+ */
+const smallAssetLimit = 5 * 1024;
+
+/**
+ * An asset whose name says it is a checksum manifest is read up to this size.
+ * A release with many assets, such as a Godot release with 34, has a
+ * `SHA512-SUMS.txt` that is larger than `smallAssetLimit`, and without this
+ * every asset would be downloaded and hashed instead.
+ */
+const checksumManifestLimit = 64 * 1024;
+
+const checksumManifestName = regEx(
+  /(?:^|[^a-z0-9])(?:sha(?:1|256|512)?[-_]?sums?(?:256|512)?|sha(?:1|256|512)|checksums?|sums?)(?:\.txt)?$/i,
+);
+
+export function isChecksumManifestCandidate(asset: GithubRestAsset): boolean {
+  if (asset.size < smallAssetLimit) {
+    return true;
+  }
+  return (
+    asset.size < checksumManifestLimit && checksumManifestName.test(asset.name)
+  );
+}
+
 function inferHashAlg(digest: string): string {
   switch (digest.length) {
     case 64:
@@ -55,10 +82,8 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     release: GithubRestRelease,
     digest: string,
   ): Promise<GithubDigestFile | null> {
-    const smallAssets = release.assets.filter(
-      (a: GithubRestAsset) => a.size < 5 * 1024,
-    );
-    for (const asset of smallAssets) {
+    const candidates = release.assets.filter(isChecksumManifestCandidate);
+    for (const asset of candidates) {
       const res = await this.http.getText(asset.browser_download_url);
       for (const line of res.body.split(newlineRegex)) {
         const [lineDigest, lineFilename] = line.split(regEx(/\s+/), 2);
@@ -211,7 +236,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
    *
    * There may be many assets attached to the release. This function will:
    *  - Identify the asset pinned by `currentDigest` in the `currentValue` release
-   *     - Download small release assets, parse as checksum manifests (e.g. `SHASUMS.txt`).
+   *     - Download small release assets, and larger ones named like a checksum manifest (e.g. `SHASUMS.txt`), and parse them as such.
    *     - Download individual assets until `currentDigest` is encountered. This is limited to sha256 and sha512.
    *  - Map the hashed asset to `newValue` and return the updated digest as a string
    */
