@@ -4,23 +4,50 @@ import { logger } from '../../../logger/index.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import {
+  ensureCacheDir,
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts({
   packageFileName,
   config,
   updatedDeps,
+  newPackageFileContent,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const lockFileName = packageFileName.replace(regEx(/\.nix$/), '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const lockFileName = getSiblingFileName(packageFileName, 'flake.lock');
+  const existingLockFileContent = await readLocalFile(lockFileName);
+
+  logger.trace({ packageFileName, updatedDeps }, 'nix.updateArtifacts');
+
   if (!existingLockFileContent) {
     logger.debug('No flake.lock found');
     return null;
   }
+
+  let updateCommand = 'flake update';
+  if (!config.isLockFileMaintenance) {
+    const inputs = updatedDeps
+      .map(({ depName }) => depName)
+      .filter(isNonEmptyStringAndNotWhitespace)
+      .map((depName) => quote(depName))
+      .join(' ');
+    if (!inputs) {
+      logger.debug('No flake inputs to update');
+      return null;
+    }
+    updateCommand += ` ${inputs}`;
+  }
+
+  // Nix reads flake.nix from the working tree, while Renovate keeps package
+  // file updates in memory until artifact generation has finished.
+  await writeLocalFile(packageFileName, newPackageFileContent);
 
   let cmd = `nix --extra-experimental-features 'nix-command flakes' `;
 
@@ -35,18 +62,13 @@ export async function updateArtifacts({
     cmd += `--extra-access-tokens github.com=${quote(token)} `;
   }
 
-  if (config.isLockFileMaintenance) {
-    cmd += 'flake update';
-  } else {
-    const inputs = updatedDeps
-      .map(({ depName }) => depName)
-      .filter(isNonEmptyStringAndNotWhitespace)
-      .map((depName) => quote(depName))
-      .join(' ');
-    cmd += `flake update ${inputs}`;
-  }
+  cmd += updateCommand;
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
+    extraEnv: {
+      ...getGitEnvironmentVariables({}),
+      NIX_CACHE_HOME: await ensureCacheDir('nix'),
+    },
     toolConstraints: [
       {
         toolName: 'nix',
