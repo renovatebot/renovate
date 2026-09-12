@@ -2280,6 +2280,11 @@ None detected
         '<summary>View abandoned dependencies (1)</summary>',
       );
       expect(result).toContain('> ℹ️ **Note**');
+      // the note must stay outside the <details> block, otherwise GitHub
+      // renders it as plain text rather than a note alert
+      expect(result.indexOf('> ℹ️ **Note**')).toBeLessThan(
+        result.indexOf('<details>'),
+      );
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
