@@ -1209,6 +1209,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 If `extractVersion` cannot be captured with a named capture group in `matchString`, then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
+See [`extractVersion`](#extractversion) for how the value is used.
 
 ### `customManagers.fileFormat`
 
@@ -1812,6 +1813,9 @@ Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/p
 
 Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
 You must define a "named capture group" called `version` like in the examples below.
+
+`extractVersion` is only applied to the versions returned by the datasource.
+It is not applied to the `currentValue` from your package file, so `currentValue` must already be in the extracted format.
 
 For example, to extract only the major.minor precision from a GitHub release, the following would work:
 
