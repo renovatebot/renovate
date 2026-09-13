@@ -28,11 +28,13 @@ describe('modules/datasource/github-release-attachments/digest', () => {
       ${'SHA512-SUMS.txt'}                           | ${6 * 1024}  | ${true}
       ${'SHASUMS256.txt'}                            | ${6 * 1024}  | ${true}
       ${'SHA256SUMS'}                                | ${6 * 1024}  | ${true}
+      ${'SHA384SUMS'}                                | ${6 * 1024}  | ${true}
       ${'actionlint_1.7.12_checksums.txt'}           | ${6 * 1024}  | ${true}
       ${'sha256.sum'}                                | ${6 * 1024}  | ${true}
       ${'uv-x86_64-unknown-linux-gnu.tar.gz.sha256'} | ${6 * 1024}  | ${true}
       ${'release.tar.gz.sha512'}                     | ${6 * 1024}  | ${true}
       ${'checksums.txt.asc'}                         | ${6 * 1024}  | ${false}
+      ${'SHA1SUMS.txt'}                              | ${6 * 1024}  | ${false}
       ${'SHASUMS.txt'}                               | ${65 * 1024} | ${false}
     `('$name at $size bytes is $expected', ({ name, size, expected }) => {
       expect(
