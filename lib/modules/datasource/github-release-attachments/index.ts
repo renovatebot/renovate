@@ -35,8 +35,13 @@ const smallAssetLimit = 5 * 1024;
  */
 const checksumManifestLimit = 64 * 1024;
 
+/**
+ * The names a checksum manifest goes by: `SHASUMS`, `SHA256SUMS`,
+ * `SHA512-SUMS`, `SHASUMS512`, `checksums`, `sums`, and per-asset forms such
+ * as `<asset>.sha384`, each optionally suffixed with `.txt`.
+ */
 const checksumManifestName = regEx(
-  /(?:^|[^a-z0-9])(?:sha(?:1|256|512)?[-_]?sums?(?:256|512)?|sha(?:1|256|512)|checksums?|sums?)(?:\.txt)?$/i,
+  /(?:^|[^a-z0-9])(?:sha(?:256|384|512)?[-_]?sums?(?:256|384|512)?|sha(?:256|384|512)|checksums?|sums?)(?:\.txt)?$/i,
 );
 
 export function isChecksumManifestCandidate(asset: GithubRestAsset): boolean {
@@ -236,7 +241,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
    *
    * There may be many assets attached to the release. This function will:
    *  - Identify the asset pinned by `currentDigest` in the `currentValue` release
-   *     - Download small release assets, and larger ones named like a checksum manifest (e.g. `SHASUMS.txt`), and parse them as such.
+   *     - Download small release assets and checksum manifests (e.g. SHASUMS.txt) up to 64 KiB, and parse them.
    *     - Download individual assets until `currentDigest` is encountered. This is limited to sha256 and sha512.
    *  - Map the hashed asset to `newValue` and return the updated digest as a string
    */
