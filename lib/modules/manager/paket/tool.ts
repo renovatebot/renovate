@@ -11,14 +11,14 @@ function buildUpdateCommand(command: UpdatePackage): string {
   const version = command.version
     ? ` --version ${quote(command.version)} `
     : '';
-  return `paket update${groupFilter}${version}${packageFilter}`;
+  return `paket update --no-install${groupFilter}${version}${packageFilter}`;
 }
 
 /**
  * Call the paket cli to update dependencies by refreshing the lock file.
  * All commands run in a single exec call to avoid spinning up the tool environment once per dependency.
- * The packages will be downloaded (normally not committed on git), and the lock file will be updated.
- * Other versioned files are not affected.
+ * `--no-install` skips the install step (package download and project files patching),
+ * as only the lock file is committed. Other versioned files are not affected.
  * https://fsprojects.github.io/Paket/paket-update.html
  *
  * @param filePath - path of the lock file, used as working directory

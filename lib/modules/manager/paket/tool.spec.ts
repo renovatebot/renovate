@@ -19,23 +19,28 @@ describe('modules/manager/paket/tool', () => {
 
       await runPaketUpdate(packageFilePath, [{}]);
 
-      expect(execSnapshots.map((s) => s.cmd)).toEqual(['paket update']);
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        'paket update --no-install',
+      ]);
     });
 
     it.each([
-      [{ packageName: 'FSharp.Core' }, 'paket update FSharp.Core '],
-      [{ group: 'GroupA' }, 'paket update --group GroupA '],
+      [
+        { packageName: 'FSharp.Core' },
+        'paket update --no-install FSharp.Core ',
+      ],
+      [{ group: 'GroupA' }, 'paket update --no-install --group GroupA '],
       [
         { group: 'GroupA', packageName: 'FSharp.Core' },
-        'paket update --group GroupA  FSharp.Core ',
+        'paket update --no-install --group GroupA  FSharp.Core ',
       ],
       [
         { packageName: 'FSharp.Core', version: '1.2.3' },
-        'paket update --version 1.2.3  FSharp.Core ',
+        'paket update --no-install --version 1.2.3  FSharp.Core ',
       ],
       [
         { group: 'GroupA', packageName: 'FSharp.Core', version: '1.2.3' },
-        'paket update --group GroupA  --version 1.2.3  FSharp.Core ',
+        'paket update --no-install --group GroupA  --version 1.2.3  FSharp.Core ',
       ],
     ])(
       'can specify parameters (%o)',
@@ -57,8 +62,8 @@ describe('modules/manager/paket/tool', () => {
       ]);
 
       expect(execSnapshots.map((s) => s.cmd)).toEqual([
-        'paket update --group Main  --version 2.9.3  xunit ',
-        'paket update --group GroupA  --version 5.16  FAKE ',
+        'paket update --no-install --group Main  --version 2.9.3  xunit ',
+        'paket update --no-install --group GroupA  --version 5.16  FAKE ',
       ]);
     });
 
@@ -70,7 +75,7 @@ describe('modules/manager/paket/tool', () => {
       ]);
 
       expect(execSnapshots.map((s) => s.cmd)).toEqual([
-        `paket update --group 'Group A'  --version '1 2 3'  'FSharp Core' `,
+        `paket update --no-install --group 'Group A'  --version '1 2 3'  'FSharp Core' `,
       ]);
     });
   });
