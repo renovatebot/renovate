@@ -205,21 +205,19 @@ describe('modules/manager/copier/artifacts', () => {
             cwd: '/tmp/github/some/repo',
             env: {
               GIT_CONFIG_COUNT: '6',
-              GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_3:
-                'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-              GIT_CONFIG_KEY_4:
-                'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-              GIT_CONFIG_KEY_5:
-                'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
+              GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
+              GIT_CONFIG_KEY_3: 'url.https://gittags.com/.insteadOf',
+              GIT_CONFIG_KEY_4: 'url.https://gittags.com/.insteadOf',
+              GIT_CONFIG_KEY_5: 'http.https://gittags.com/.extraHeader',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
-              GIT_CONFIG_VALUE_2: 'https://github.com/',
+              GIT_CONFIG_VALUE_2: 'Authorization: Basic YWJjMTIzOg==',
               GIT_CONFIG_VALUE_3: 'ssh://git@gittags.com/',
               GIT_CONFIG_VALUE_4: 'git@gittags.com:',
-              GIT_CONFIG_VALUE_5: 'https://gittags.com/',
+              GIT_CONFIG_VALUE_5:
+                'Authorization: Basic Z2l0LXRhZ3MtdXNlcjpnaXQtdGFncy1wYXNzd29yZA==',
             },
           },
         },
