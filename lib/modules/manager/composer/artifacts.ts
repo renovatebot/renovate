@@ -28,6 +28,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { Lazy } from '../../../util/lazy.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
@@ -142,15 +143,16 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
 
     // `extractConstraints()` re-reads the updated package file, so its values win
-    // over what extraction saw on the base branch.
-    const fileConstraints = extractConstraints(file, lockfile);
+    // over what extraction saw on the base branch. It only runs when a user
+    // constraint is missing for at least one of the tools.
+    const fileConstraints = new Lazy(() => extractConstraints(file, lockfile));
 
     const composerToolConstraint: ToolConstraint = {
       toolName: 'composer',
       constraint: await resolveToolConstraint(
         config,
         'composer',
-        () => fileConstraints.composer,
+        () => fileConstraints.getValue().composer,
       ),
     };
 
@@ -159,7 +161,7 @@ export async function updateArtifacts({
       constraint: await resolveToolConstraint(
         config,
         'php',
-        () => fileConstraints.php,
+        () => fileConstraints.getValue().php,
       ),
     };
 

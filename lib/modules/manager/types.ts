@@ -62,8 +62,6 @@ export interface ToolConstraintsConfig {
 
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
-  constraints?: Partial<Record<ConstraintName, string>>;
-  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
