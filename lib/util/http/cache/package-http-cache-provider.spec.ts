@@ -2,6 +2,7 @@ import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
 import { z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../cache/package/index.ts';
 import { Http, type HttpResponse } from '../index.ts';
@@ -40,7 +41,6 @@ describe('util/http/cache/package-http-cache-provider', () => {
   let cache: Record<string, HttpCache> = {};
 
   beforeEach(() => {
-    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((_ns, k) => {
@@ -56,20 +56,21 @@ describe('util/http/cache/package-http-cache-provider', () => {
     GlobalConfig.reset();
   });
 
-  const mockTime = (time: string) => {
+  function mockTime(time: string) {
     const value = DateTime.fromISO(time).valueOf();
     Settings.now = () => value;
-  };
+  }
 
-  const createCacheProvider = (
+  function createCacheProvider(
     options: Partial<PackageHttpCacheProviderOptions> = {},
-  ) =>
-    new PackageHttpCacheProvider({
+  ) {
+    return new PackageHttpCacheProvider({
       namespace,
       checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
       ...options,
     });
+  }
 
   it('skips persisting null cache values', async () => {
     const cacheProvider = createCacheProvider();
@@ -457,7 +458,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     // 3. cache-control header (public, private, null, undefined, malformed)
     // 4. checkAuthorizationHeader (true, false)
     // 5. authorization header (true, false, undefined)
-    test.each`
+    it.each`
       cachePrivatePackages | checkCacheControlHeader | cacheControl              | checkAuthorizationHeader | authorization | expected
       ${true}              | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${true}
       ${true}              | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${true}       | ${true}
@@ -517,7 +518,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
           checkAuthorizationHeader,
         });
 
-        const response = { headers: {} } as HttpResponse;
+        const response = partial<HttpResponse>({ headers: {} });
 
         if (cacheControl !== undefined) {
           response.headers['cache-control'] = cacheControl;
@@ -531,16 +532,16 @@ describe('util/http/cache/package-http-cache-provider', () => {
       },
     );
 
-    test('handles case-insensitive cache-control values', () => {
+    it('handles case-insensitive cache-control values', () => {
       GlobalConfig.set({ cachePrivatePackages: false });
 
       const cacheProvider = createCacheProvider({
         checkCacheControlHeader: true,
       });
 
-      const response = {
+      const response = partial<HttpResponse>({
         headers: { 'cache-control': 'PUBLIC, max-age=300' },
-      } as HttpResponse;
+      });
 
       expect(cacheProvider.cacheAllowed(response)).toBe(true);
     });

@@ -1,15 +1,16 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+
+const gitExec = withGitEnvironment(['conan']);
 
 async function conanLockUpdate(
   conanFilePath: string,
@@ -20,7 +21,6 @@ async function conanLockUpdate(
   const command = `conan lock create ${quote(conanFilePath)}${isLockFileMaintenance ? ' --lockfile=""' : ''}`;
 
   const execOptions: ExecOptions = {
-    extraEnv: { ...getGitEnvironmentVariables(['conan']) },
     toolConstraints: [
       {
         toolName: 'python',
@@ -34,7 +34,7 @@ async function conanLockUpdate(
     docker: {},
   };
 
-  await exec(command, execOptions);
+  await gitExec(command, execOptions);
 }
 
 export async function updateArtifacts(

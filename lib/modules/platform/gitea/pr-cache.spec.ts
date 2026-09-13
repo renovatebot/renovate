@@ -1,4 +1,4 @@
-import { partial } from '~test/util.ts';
+import { fakeSha, partial } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
@@ -6,7 +6,6 @@ import {
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { GiteaPrCache } from './pr-cache.ts';
 import type { PR, Repo } from './types.ts';
 import { toRenovatePR } from './utils.ts';
@@ -30,7 +29,7 @@ const pr1: PR = {
   base: { ref: 'some-base-branch' },
   head: {
     label: 'some-head-branch',
-    sha: 'some-head-sha' as LongCommitSha,
+    sha: fakeSha('some-head-sha'),
     repo: partial<Repo>({ full_name: 'some/repo' }),
   },
 };
@@ -48,7 +47,7 @@ const pr2: PR = {
   base: { ref: 'other-base-branch' },
   head: {
     label: 'other-head-branch',
-    sha: 'other-head-sha' as LongCommitSha,
+    sha: fakeSha('other-head-sha'),
     repo: partial<Repo>({ full_name: 'some/repo' }),
   },
   labels: [

@@ -11,6 +11,7 @@ import { generateManagerGithubActionsCommunity } from './manager/github-actions/
 import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
 import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins.ts';
+import { generateDatasourceReleaseTimestampSupportForMinimumReleaseAge } from './minimum-release-age.ts';
 import { generatePlatforms } from './platforms.ts';
 import { generatePresets } from './presets.ts';
 import { generateSchema } from './schema.ts';
@@ -44,6 +45,10 @@ export async function generateDocs(
     // datasources
     logger.info('* datasources');
     await generateDatasources(dist, openItems.datasources);
+
+    // minimum release age: datasource release timestamp support
+    logger.info('* key-concepts/minimum-release-age');
+    await generateDatasourceReleaseTimestampSupportForMinimumReleaseAge(dist);
 
     // managers
     logger.info('* managers');

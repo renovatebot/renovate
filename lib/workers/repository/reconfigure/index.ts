@@ -56,11 +56,12 @@ export async function checkReconfigureBranch(
   const reconfigureCache = cache.reconfigureBranchCache;
 
   // only use valid cached information
-  if (reconfigureCache?.reconfigureBranchSha === branchSha) {
-    if (!existingPr || reconfigureCache.extractResult) {
-      logger.debug('Skipping validation check as branch sha is unchanged');
-      return;
-    }
+  if (
+    reconfigureCache?.reconfigureBranchSha === branchSha &&
+    (!existingPr || reconfigureCache.extractResult)
+  ) {
+    logger.debug('Skipping validation check as branch sha is unchanged');
+    return;
   }
 
   const result = await getReconfigureConfig(reconfigureBranch);

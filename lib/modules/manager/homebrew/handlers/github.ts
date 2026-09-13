@@ -4,27 +4,12 @@ import { parseUrl } from '../../../../util/url.ts';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type {
+  GitHubManagerData,
+  GitHubUrlParsedResult,
+  GitHubUrlType,
+} from '../types.ts';
 import { HomebrewUrlHandler } from './base.ts';
-
-export type GitHubUrlType = 'archive' | 'releases';
-
-// URL parsing result with urlType for datasource selection
-export interface GitHubUrlParsedResult {
-  type: 'github';
-  currentValue: string;
-  ownerName: string;
-  repoName: string;
-  urlType: GitHubUrlType;
-}
-
-// Manager data with type discriminator
-export interface GitHubManagerData {
-  type: 'github';
-  ownerName: string;
-  repoName: string;
-  sha256: string | null;
-  url: string | null;
-}
 
 export class GitHubUrlHandler extends HomebrewUrlHandler {
   readonly type = 'github';

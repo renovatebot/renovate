@@ -39,9 +39,8 @@ const RuleSet = z.object({
 });
 
 const All = z.object({
-  description: z.string(),
   extends: z.array(z.string()),
-  ignoreDeps: z.array(z.string()).optional(),
+  overrideDescription: z.string(),
 });
 
 export const Replacements = z

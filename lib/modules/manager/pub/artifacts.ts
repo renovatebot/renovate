@@ -108,24 +108,22 @@ function getExecCommand(
 ): string {
   if (isLockFileMaintenance) {
     return `${toolName} pub upgrade`;
-  } else {
-    const depNames = updatedDeps.map((dep) => dep.depName).filter(isString);
-    if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
-      return `${toolName} ${PUB_GET_COMMAND}`;
-    }
-    // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
-    // we use Flutter over Dart to run `pub get` as it is a Flutter project.
-    else if (
-      depNames.length === 2 &&
-      depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
-    ) {
-      return `flutter ${PUB_GET_COMMAND}`;
-    } else {
-      const depNamesCmd = depNames
-        .filter((depName) => !SDK_NAMES.includes(depName))
-        .map(quote)
-        .join(' ');
-      return `${toolName} pub upgrade ${depNamesCmd}`;
-    }
   }
+  const depNames = updatedDeps.map((dep) => dep.depName).filter(isString);
+  if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
+    return `${toolName} ${PUB_GET_COMMAND}`;
+  }
+  // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
+  // we use Flutter over Dart to run `pub get` as it is a Flutter project.
+  if (
+    depNames.length === 2 &&
+    depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
+  ) {
+    return `flutter ${PUB_GET_COMMAND}`;
+  }
+  const depNamesCmd = depNames
+    .filter((depName) => !SDK_NAMES.includes(depName))
+    .map(quote)
+    .join(' ');
+  return `${toolName} pub upgrade ${depNamesCmd}`;
 }

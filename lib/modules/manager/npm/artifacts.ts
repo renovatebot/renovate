@@ -1,4 +1,5 @@
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
@@ -11,6 +12,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
@@ -35,8 +37,10 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
   let res: UpdateArtifactsResult[] = [];
-  res.push((await handlePackageManagerUpdates(updateArtifactsConfig)) ?? {});
-  res.push((await updatePnpmWorkspace(updateArtifactsConfig)) ?? {});
+  res.push(
+    coerceObject(await handlePackageManagerUpdates(updateArtifactsConfig)),
+  );
+  res.push(coerceObject(await updatePnpmWorkspace(updateArtifactsConfig)));
 
   res = res.filter(isNonEmptyObject);
   if (res.length === 0) {
@@ -80,7 +84,7 @@ async function handlePackageManagerUpdates(
   const { additionalNpmrcContent } = processHostRules();
   const npmrcContent = await getNpmrcContent(pkgFileDir);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${depName}@${newVersion}`;
+  const cmd = `corepack use ${quote(`${depName}@${newVersion}`)}`;
 
   const nodeConstraints = await getNodeToolConstraint(
     config,
@@ -157,14 +161,14 @@ async function updatePnpmWorkspace(
     return null;
   }
 
-  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap;
-  if (!isString(pnpmShrinkwrap)) {
+  const pnpmLockFile = upgrades[0].managerData?.pnpmLockFile;
+  if (!isString(pnpmLockFile)) {
     logger.debug(
       'No pnpm shrinkwrap found, not attempting to update pnpm-workspace.yaml',
     );
     return null;
   }
-  const lockFileDir = upath.dirname(pnpmShrinkwrap);
+  const lockFileDir = upath.dirname(pnpmLockFile);
   const pnpmWorkspaceFilePath = upath.join(lockFileDir, 'pnpm-workspace.yaml');
 
   if (!(await localPathExists(pnpmWorkspaceFilePath))) {
@@ -200,7 +204,7 @@ async function updatePnpmWorkspace(
 
     if (!excludeNode) {
       logger.debug('Adding new exclude block');
-      excludeNode = doc.createNode([]) as YAMLSeq;
+      excludeNode = doc.createNode([]);
       const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
       newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
       excludeNode.items.push(newItem);

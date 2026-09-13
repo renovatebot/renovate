@@ -2,9 +2,6 @@ import type { Preset } from '../types.ts';
 
 export const presets: Record<string, Preset> = {
   all: {
-    description: [
-      'Apply crowd-sourced workarounds for known problems with packages.',
-    ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
       'workarounds:ignoreSpringCloudNumeric',
@@ -26,8 +23,11 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
+      'workarounds:groupings',
     ],
-    ignoreDeps: [], // Hack to improve onboarding PR description
+    overrideDescription: [
+      'Apply crowd-sourced workarounds for known problems with packages.',
+    ],
   },
   bitnamiDockerImageVersioning: {
     description: 'Use custom regex versioning for bitnami images',
@@ -136,6 +136,19 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  groupings: {
+    description: 'Groupings for specific package updates.',
+    packageRules: [
+      {
+        description:
+          'Group commander major updates, they depend on each other.',
+        groupName: 'commander',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@commander-js/extra-typings', 'commander'],
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore `http4s` digest-based `1.x` milestones.',
     packageRules: [
@@ -208,6 +221,50 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jdk',
+          'java-jre',
+          'sapmachine',
+          '/^azul/zulu-openjdk/',
+          '/^bellsoft/liberica-openj(dk|re)-/',
+          '/^cimg/openjdk/',
+        ],
+        versioning: 'docker',
+      },
+      {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchDepNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning: 'docker',
+      },
+      {
+        description:
+          'Use partial semver versioning for partial mise Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
+        matchCurrentValue: '/^\\d+(?:\\.\\d+)?$/',
+        matchDatasources: ['java-version'],
+        matchManagers: ['mise'],
+        versioning: 'semver-partial',
       },
       {
         allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',

@@ -161,13 +161,13 @@ export class SbtPluginDatasource extends Datasource {
     scalaVersion: string,
   ): Promise<string[] | null> {
     const searchRoot = `${rootUrl}/${artifact}`;
-    const hrefFilterMap = (href: string): string | null => {
+    function hrefFilterMap(href: string): string | null {
       if (href.startsWith('.')) {
         return null;
       }
 
       return href;
-    };
+    }
     const searchRootContent = await downloadHttpContent(
       this.http,
       ensureTrailingSlash(searchRoot),
@@ -222,7 +222,7 @@ export class SbtPluginDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

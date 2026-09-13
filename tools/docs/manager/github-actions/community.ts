@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod/v4';
-import type { CommunityActionConfig } from '../../../../lib/modules/manager/github-actions/community.ts';
 import { communityActions } from '../../../../lib/modules/manager/github-actions/community.ts';
+import type { CommunityActionConfig } from '../../../../lib/modules/manager/github-actions/types.ts';
 import { readFile, updateFile } from '../../../utils/index.ts';
 import { replaceContent } from '../../utils.ts';
 

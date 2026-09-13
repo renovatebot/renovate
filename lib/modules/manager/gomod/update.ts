@@ -25,13 +25,13 @@ export function updateDependency({
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!currentName || !upgrade.managerData) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
-    /* v8 ignore next 4 -- hard to test */
+    /* v8 ignore next -- hard to test */
     if (lines.length <= upgrade.managerData.lineNumber) {
       logger.warn('go.mod current line no longer exists after update');
       return null;
@@ -52,7 +52,7 @@ export function updateDependency({
 
     if (depType === 'golang' || depType === 'toolchain') {
       updateLineExp = regEx(
-        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)([^\s]+|[\w]+)/,
+        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)(?:[^\s]+|[\w]+)/,
       );
     }
     if (depType === 'replace') {
@@ -83,7 +83,13 @@ export function updateDependency({
       // Since the 2024 goproxy datasource changes, newValue and newDigest are
       // both extracted from the same proxy version string and always reference
       // the same commit, so newValue can be written directly for pseudo-versions.
-      if (upgrade.newValue?.startsWith('v0.0.0-')) {
+      // However, for private modules (GONOPROXY / direct datasource), the proxy
+      // has no data and newValue may equal currentValue. In that case, fall
+      // through to the bare hash path so that gomodTidy can resolve it.
+      if (
+        upgrade.newValue?.startsWith('v0.0.0-') &&
+        upgrade.newValue !== upgrade.currentValue
+      ) {
         logger.debug(
           { depName: currentName, lineToChange, newValue: upgrade.newValue },
           'gomod: updating pseudo-version digest',
@@ -94,10 +100,10 @@ export function updateDependency({
           `$<depPart>$<divider>${upgrade.newValue}`,
         );
       } else {
-        // Defensive fallback for non-pseudo-version digest updates.
-        // Unreachable for gomod in practice: currentDigest is only extracted
-        // for pseudo-versions, and the gomod override in lookup/index.ts that
-        // sets updateType='digest' requires newValue to start with 'v0.0.0-'.
+        // Fallback for private modules where the proxy could not resolve a new
+        // pseudo-version, or non-pseudo-version digest updates.
+        // Writes the bare hash so that postUpdateOptions like gomodTidy can
+        // normalize it into a valid pseudo-version via `go get`.
         const newDigestRightSized = upgrade.newDigest!.substring(
           0,
           upgrade.currentDigest!.length,

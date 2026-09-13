@@ -63,7 +63,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('catches errors', async () => {
@@ -80,7 +85,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('finds pnpm globally', async () => {
@@ -94,7 +104,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs lock file updates', async () => {
@@ -279,7 +294,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
       },
       {
         cmd: 'pnpm update --no-save some-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
@@ -296,7 +311,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs dedupe', async () => {
@@ -313,10 +333,37 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
       },
       {
-        cmd: 'pnpm dedupe --ignore-scripts',
+        cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs dedupe without --recursive for workspaces', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(
+      codeBlock`
+        packages:
+          - pkg-a
+      `,
+    );
+    const postUpdateOptions = ['pnpmDedupe'];
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, postUpdateOptions },
+      upgrades,
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+      },
+      {
+        cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
@@ -334,7 +381,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
     // TODO: check docker preCommands
   });
 
@@ -360,7 +412,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: {
           cwd: 'some-folder',
           env: {
@@ -404,7 +456,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: {
           cwd: 'some-folder',
           env: {
@@ -461,7 +513,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: {
           cwd: 'some-folder',
           env: {
@@ -524,14 +576,15 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +
-          '&& pnpm install --lockfile-only' +
-          '"',
+          '&& pnpm install --lockfile-only --no-frozen-lockfile' +
+          "'",
       },
     ]);
   });
@@ -556,7 +609,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool pnpm 6.0.0' },
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
       },
     ]);
   });
@@ -582,7 +635,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool pnpm 6.0.0' },
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --no-frozen-lockfile',
       },
     ]);
   });
@@ -610,7 +663,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res.lockFile).toBe('package-lock-contents');
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         },
       ]);
 
@@ -637,7 +690,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res.lockFile).toBe('package-lock-contents');
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         },
       ]);
 

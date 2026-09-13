@@ -10,18 +10,9 @@ export interface PrReviewersParams {
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
 export type CommitStatusType =
-  | 'pending'
-  | 'success'
-  | 'error'
-  | 'failure'
-  | 'warning'
-  | 'unknown';
+  'pending' | 'success' | 'error' | 'failure' | 'warning' | 'unknown';
 export type PRMergeMethod =
-  | 'fast-forward-only'
-  | 'merge'
-  | 'rebase'
-  | 'rebase-merge'
-  | 'squash';
+  'fast-forward-only' | 'merge' | 'rebase' | 'rebase-merge' | 'squash';
 
 export interface GiteaLabel {
   id: number;

@@ -46,3 +46,4 @@ pdm.lock
 
 # Git worktrees
 /.worktrees
+/.claude/worktrees

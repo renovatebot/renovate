@@ -38,7 +38,9 @@ import { API_PATH } from './utils.ts';
 
 export const forgejoHttp = new ForgejoHttp();
 
-const urlEscape = (raw: string): string => encodeURIComponent(raw);
+function urlEscape(raw: string): string {
+  return encodeURIComponent(raw);
+}
 const commitStatusStates: CommitStatusType[] = [
   'unknown',
   'success',

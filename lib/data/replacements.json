@@ -1,7 +1,6 @@
 {
   "$schema": "../../tools/schemas/replacements-schema.json",
   "all": {
-    "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
@@ -12,6 +11,8 @@
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
+      "replacements:dev-oidc-provider-to-unscoped",
+      "replacements:dev-process-manager-to-unscoped",
       "replacements:docker-compose",
       "replacements:edb-jdbc-to-enterprisedb",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
@@ -39,6 +40,7 @@
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
+      "replacements:pwpush-to-universal-container",
       "replacements:react-query-devtools-to-scoped",
       "replacements:react-query-to-scoped",
       "replacements:react-scripts-ts-to-react-scripts",
@@ -51,6 +53,7 @@
       "replacements:rollup-node-resolve-to-scoped",
       "replacements:rollup-terser-to-scoped",
       "replacements:rome-to-biome",
+      "replacements:scorecard-registry-move",
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
@@ -64,7 +67,7 @@
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
-    "ignoreDeps": []
+    "overrideDescription": "Apply crowd-sourced package replacement rules."
   },
   "actions-attest-build-provenance-to-actions-attest": {
     "description": "`actions/attest-build-provenance` was renamed to `actions/attest`.",
@@ -283,6 +286,30 @@
         "matchPackageNames": ["cucumber"],
         "replacementName": "@cucumber/cucumber",
         "replacementVersion": "7.0.0"
+      }
+    ]
+  },
+  "dev-oidc-provider-to-unscoped": {
+    "description": "`dev-oidc-provider` became unscoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@comet/dev-oidc-provider"],
+        "replacementName": "dev-oidc-provider",
+        "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "dev-process-manager-to-unscoped": {
+    "description": "`dev-process-manager` became unscoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@comet/dev-process-manager"],
+        "replacementName": "dev-process-manager",
+        "replacementVersion": "4.0.0"
       }
     ]
   },
@@ -990,6 +1017,22 @@
       }
     ]
   },
+  "pwpush-to-universal-container": {
+    "description": "Replace deprecated Password Pusher database-specific images with its universal image.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "1.35.0",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?pglombardo/pwpush-(?:ephemeral|mysql|postgres)$/"
+        ],
+        "prBodyNotes": [
+          "⚠️ Follow Password Pusher's [universal-container migration guide](https://docs.pwpush.com/docs/how-to-universal/) before merging. Back up the database and validate existing data after migration."
+        ],
+        "replacementName": "pglombardo/pwpush"
+      }
+    ]
+  },
   "react-query-devtools-to-scoped": {
     "description": "`react-query/devtools` became scoped under the `tanstack` organization.",
     "packageRules": [
@@ -1122,6 +1165,16 @@
         "matchPackageNames": ["rome"],
         "replacementName": "@biomejs/biome",
         "replacementVersion": "1.0.0"
+      }
+    ]
+  },
+  "scorecard-registry-move": {
+    "description": "The OpenSSF Scorecard container images moved from `gcr.io/openssf/scorecard` to `ghcr.io/ossf/scorecard`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/openssf/scorecard"],
+        "replacementName": "ghcr.io/ossf/scorecard"
       }
     ]
   },

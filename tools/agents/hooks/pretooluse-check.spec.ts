@@ -23,8 +23,6 @@ function makeInput(
 
 beforeEach(() => {
   vi.resetModules();
-  deny.mockReset();
-  readStdin.mockReset();
 });
 
 it('blocks npm install', async () => {

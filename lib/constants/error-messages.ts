@@ -105,10 +105,14 @@ export const FILE_ACCESS_VIOLATION_ERROR = 'file-access-violation-error';
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
 export const IGNORABLE_HOST_ERROR = 'ignorable-host-error';
+export const HOST_BLOCKED = 'host-blocked';
 export const HOST_DISABLED = 'host-disabled';
 
 // Worker Error
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';
+
+// PR Error
+export const PR_ALREADY_IN_MERGE_QUEUE = 'pr-already-in-merge-queue';
 
 // Bundler Error
 export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';

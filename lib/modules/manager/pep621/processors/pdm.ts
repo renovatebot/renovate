@@ -1,7 +1,6 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import { exec } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ToolConstraint,
@@ -10,7 +9,7 @@ import {
   getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { Result } from '../../../../util/result.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type {
@@ -25,6 +24,7 @@ import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
+const gitExec = withGitEnvironment(['pep621']);
 
 export class PdmProcessor extends BasePyProjectProcessor {
   override lockfileName = 'pdm.lock';
@@ -108,12 +108,8 @@ export class PdmProcessor extends BasePyProjectProcessor {
         constraint: config.constraints?.pdm,
       };
 
-      const extraEnv = {
-        ...getGitEnvironmentVariables(['pep621']),
-      };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
-        extraEnv,
         docker: {},
         toolConstraints: [pythonConstraint, pdmConstraint],
       };
@@ -126,7 +122,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
       } else {
         cmds.push(...generateCMDs(updatedDeps));
       }
-      await exec(cmds, execOptions);
+      await gitExec(cmds, execOptions);
 
       // check for changes
       const fileChanges: UpdateArtifactsResult[] = [];
