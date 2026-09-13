@@ -9,6 +9,7 @@ export { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['paket.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://fsprojects.github.io/Paket/';
 export const categories: Category[] = ['dotnet'];

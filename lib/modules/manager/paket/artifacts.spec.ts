@@ -53,9 +53,8 @@ describe('modules/manager/paket/artifacts', () => {
 
           if (toolSpy.mock.calls.length === 0) {
             return Promise.resolve('Old fake lock file content');
-          } else {
-            return Promise.resolve(newContentLockFile);
           }
+          return Promise.resolve(newContentLockFile);
         },
       );
     }
