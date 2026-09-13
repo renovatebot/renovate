@@ -107,7 +107,7 @@ describe('util/git/config', () => {
     });
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { GIT_CONFIG_COUNT: 'invalid' },
-      `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
+      `Found GIT_CONFIG_COUNT env variable, but could not parse the value to an integer. Ignoring it.`,
     );
   });
 });
