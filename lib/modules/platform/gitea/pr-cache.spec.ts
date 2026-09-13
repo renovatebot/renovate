@@ -1,6 +1,6 @@
 import { fakeSha, partial } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
-import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import {
   getCache,
   resetCache as repoCacheReset,
@@ -56,11 +56,52 @@ const pr2: PR = {
 
 describe('modules/platform/gitea/pr-cache', () => {
   let cache = getCache();
+  let prCache: GiteaPrCache;
 
   beforeEach(() => {
-    memCacheReset();
+    memCache.reset();
     repoCacheReset();
     cache = getCache();
+    prCache = new GiteaPrCache(http, 'gitea');
+    prCache.initRepo('SOME/repo', ignorePrAuthor, 'some-author');
+  });
+
+  it('throws when used before initRepo', async () => {
+    prCache.reset();
+
+    await expect(prCache.getPrs()).rejects.toThrow(
+      'PR cache used before initRepo()',
+    );
+  });
+
+  it('reuses the repository cache until the next initRepo', async () => {
+    memCache.init();
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/repos/SOME/repo/pulls?state=all&sort=recentupdate&limit=100&poster=some-author',
+      )
+      .reply(200, [pr1])
+      .get(
+        '/repos/SOME/repo/pulls?state=all&sort=recentupdate&limit=20&poster=some-author',
+      )
+      .reply(200, [pr1]);
+
+    const res1 = await prCache.getPrs();
+    await prCache.setPr(toRenovatePR(pr2, 'some-author')!);
+    const res2 = await prCache.getPrs();
+
+    expect(res1).toMatchObject([{ number: 1 }]);
+    expect(res2).toMatchObject([{ number: 2 }, { number: 1 }]);
+
+    memCache.set('gitea-pr-cache-synced', false);
+    prCache.initRepo('SOME/repo', ignorePrAuthor, 'some-author');
+    const res3 = await prCache.getPrs();
+
+    expect(res3).toMatchObject([{ number: 2 }, { number: 1 }]);
+    expect(cache.platform?.gitea?.pullRequestsCache).toMatchObject({
+      items: { '1': { number: 1 }, '2': { number: 2 } },
+    });
   });
 
   it('fetches cache - author defined', async () => {
@@ -77,13 +118,7 @@ describe('modules/platform/gitea/pr-cache', () => {
       )
       .reply(200, [pr2]);
 
-    const res = await GiteaPrCache.getPrs(
-      http,
-      'gitea',
-      'SOME/repo',
-      ignorePrAuthor,
-      'some-author',
-    );
+    const res = await prCache.getPrs();
 
     expect(res).toMatchObject([
       {
@@ -131,13 +166,7 @@ describe('modules/platform/gitea/pr-cache', () => {
       )
       .reply(200, [pr1]);
 
-    const res = await GiteaPrCache.getPrs(
-      http,
-      'gitea',
-      'SOME/repo',
-      ignorePrAuthor,
-      'some-author',
-    );
+    const res = await prCache.getPrs();
 
     expect(res).toMatchObject([
       {
@@ -180,13 +209,7 @@ describe('modules/platform/gitea/pr-cache', () => {
       )
       .reply(200, [pr2, pr1]);
 
-    const res = await GiteaPrCache.getPrs(
-      http,
-      'gitea',
-      'SOME/repo',
-      ignorePrAuthor,
-      'some-author',
-    );
+    const res = await prCache.getPrs();
 
     expect(res).toMatchObject([
       {

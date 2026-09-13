@@ -147,9 +147,11 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
   let config: GiteaRepoConfig = {} as any;
   let botUserID: number;
   let botUserName: string;
+  const prCache = new GiteaPrCache(http, id);
 
   function resetPlatform(): void {
     config = {} as any;
+    prCache.reset();
     botUserID = undefined as never;
     botUserName = undefined as never;
     defaults.endpoint = options.defaultEndpoint;
@@ -361,6 +363,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       // Reset cached resources
       config.issueList = null;
       config.labelList = null;
+      prCache.initRepo(config.repository, config.ignorePrAuthor, botUserName);
       config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
       config.orgName = repo.owner.login;
 
@@ -510,13 +513,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     },
 
     getPrList(): Promise<Pr[]> {
-      return GiteaPrCache.getPrs(
-        http,
-        id,
-        config.repository,
-        config.ignorePrAuthor,
-        botUserName,
-      );
+      return prCache.getPrs();
     },
 
     async getPr(number: number): Promise<Pr | null> {
@@ -532,14 +529,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
 
         // Add pull request to cache for further lookups / queries
         if (pr) {
-          await GiteaPrCache.setPr(
-            http,
-            id,
-            config.repository,
-            config.ignorePrAuthor,
-            botUserName,
-            pr,
-          );
+          await prCache.setPr(pr);
         }
       }
 
@@ -654,14 +644,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           throw new Error('Can not parse newly created Pull Request');
         }
 
-        await GiteaPrCache.setPr(
-          http,
-          id,
-          config.repository,
-          config.ignorePrAuthor,
-          botUserName,
-          pr,
-        );
+        await prCache.setPr(pr);
         return pr;
       } catch (err) {
         // When the user manually deletes a branch from Renovate, the PR remains but is no longer linked to any branch. In
@@ -675,7 +658,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           );
 
           // Refresh cached PR list and search for pull request with matching information
-          GiteaPrCache.forceSync(id);
+          prCache.forceSync();
           const pr = await platform.findPr({
             branchName: sourceBranch,
             state: 'open',
@@ -759,14 +742,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       );
       const pr = toRenovatePR(gpr, botUserName);
       if (pr) {
-        await GiteaPrCache.setPr(
-          http,
-          id,
-          config.repository,
-          config.ignorePrAuthor,
-          botUserName,
-          pr,
-        );
+        await prCache.setPr(pr);
       }
     },
 
