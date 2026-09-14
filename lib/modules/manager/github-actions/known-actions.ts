@@ -412,6 +412,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'jdx/mise',
     withSchema: MiseWith,
   },
+  // https://github.com/jfrog/setup-jfrog-cli
+  'jfrog/setup-jfrog-cli': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'jfrog-cli',
+    packageName: 'jfrog/jfrog-cli',
+  },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
     packageName: 'bun',
