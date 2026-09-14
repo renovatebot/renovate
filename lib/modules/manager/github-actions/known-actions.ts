@@ -383,6 +383,12 @@ const RenovateGithubActionWith: ActionSchema = z
  * with known version input schemas.
  */
 export const knownActions: Record<string, KnownActionConfig> = {
+  // https://github.com/abatilo/actions-poetry
+  'abatilo/actions-poetry': {
+    datasource: PypiDatasource.id,
+    packageName: 'poetry',
+    withSchema: valSchema('poetry-version'),
+  },
   // https://github.com/actions/setup-dotnet
   'actions/setup-dotnet': {
     datasource: DotnetVersionDatasource.id,
