@@ -286,6 +286,79 @@ const KindActionWith: ActionSchema = z
     return deps;
   });
 
+// `erlef/setup-beam` can yield up to 4 dependencies from a single step: OTP,
+// Elixir, Gleam, and rebar3. All inputs are optional, so only emit a
+// dependency for the ones a workflow actually sets.
+const ErlefSetupBeamWith: ActionSchema = z
+  .object({
+    'otp-version': z.string().optional(),
+    'elixir-version': z.string().optional(),
+    'gleam-version': z.string().optional(),
+    'rebar3-version': z.string().optional(),
+  })
+  .transform(
+    ({
+      'otp-version': otpVersion,
+      'elixir-version': elixirVersion,
+      'gleam-version': gleamVersion,
+      'rebar3-version': rebar3Version,
+    }) => {
+      const deps: PackageDependency[] = [];
+
+      if (otpVersion) {
+        // `false` is a valid, documented value (used to skip installing OTP
+        // for Gleam-only workflows), but not one we can pin/bump
+        deps.push(
+          otpVersion === 'false'
+            ? {
+                packageName: 'erlang/otp',
+                currentValue: otpVersion,
+                depType: 'uses-with',
+                skipStage: 'extract',
+                skipReason: 'unsupported-version',
+              }
+            : {
+                packageName: 'erlang/otp',
+                // erlang/otp tags releases like `OTP-27.1.2`
+                extractVersion: '^OTP-(?<version>.+)$',
+                ...parseValue(otpVersion),
+              },
+        );
+      }
+
+      if (elixirVersion) {
+        deps.push({
+          packageName: 'elixir-lang/elixir',
+          ...parseValue(elixirVersion),
+        });
+      }
+
+      if (gleamVersion) {
+        deps.push({
+          packageName: 'gleam-lang/gleam',
+          ...parseValue(gleamVersion),
+        });
+      }
+
+      if (rebar3Version) {
+        // `nightly` is a valid, documented value, but not one we can pin/bump
+        deps.push(
+          rebar3Version === 'nightly'
+            ? {
+                packageName: 'erlang/rebar3',
+                currentValue: rebar3Version,
+                depType: 'uses-with',
+                skipStage: 'extract',
+                skipReason: 'unsupported-version',
+              }
+            : { packageName: 'erlang/rebar3', ...parseValue(rebar3Version) },
+        );
+      }
+
+      return deps;
+    },
+  );
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -434,6 +507,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: RustVersionDatasource.id,
     packageName: 'rust',
     withSchema: valSchema('toolchain'),
+  },
+  // https://github.com/erlef/setup-beam
+  'erlef/setup-beam': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined per dependency: OTP, Elixir, Gleam, rebar3
+    withSchema: ErlefSetupBeamWith,
   },
   // https://github.com/expo/expo-github-action
   'expo/expo-github-action': {
