@@ -240,6 +240,75 @@ describe('workers/repository/process/lookup/filter', () => {
       ]);
     });
 
+    it('returns no versions if there is no current version', () => {
+      const releases = [{ version: '1.0.1' }, { version: '1.2.0' }];
+
+      expect(
+        filterVersions(
+          partial<FilterConfig>({}),
+          '',
+          '1.2.0',
+          releases,
+          versioning,
+        ),
+      ).toBeEmpty();
+    });
+
+    it('keeps every release if the current major cannot be determined', () => {
+      const releases = [
+        { version: '20.0.0' },
+        { version: '2023.3.3' },
+      ] satisfies Release[];
+
+      // without a current major there is nothing to measure the increment against
+      const versioningWithoutMajor = {
+        ...versioning,
+        getMajor: () => null,
+      };
+
+      const filteredVersions = filterVersions(
+        partial<FilterConfig>({ maxMajorIncrement: 1 }),
+        '19.2.0',
+        '2023.3.3',
+        releases,
+        versioningWithoutMajor,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '20.0.0' },
+        { version: '2023.3.3' },
+      ]);
+    });
+
+    it('keeps a release whose major cannot be determined', () => {
+      const releases = [
+        { version: '20.0.0' },
+        { version: '25.0.0' },
+        { version: '2023.3.3' },
+      ] satisfies Release[];
+
+      const versioningWithoutReleaseMajor = {
+        ...versioning,
+        getMajor: (version: string) =>
+          version === '2023.3.3' ? null : versioning.getMajor(version),
+      };
+
+      const filteredVersions = filterVersions(
+        partial<FilterConfig>({ maxMajorIncrement: 1 }),
+        '19.2.0',
+        '2023.3.3',
+        releases,
+        versioningWithoutReleaseMajor,
+      );
+
+      // 25.0.0 exceeds the increment and is dropped, proving the filter ran,
+      // while the release without a major is kept rather than discarded
+      expect(filteredVersions).toEqual([
+        { version: '20.0.0' },
+        { version: '2023.3.3' },
+      ]);
+    });
+
     it('filters with maxMajorIncrement set to 1', () => {
       const releases = [
         { version: '1.0.1' },

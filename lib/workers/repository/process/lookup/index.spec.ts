@@ -173,6 +173,27 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('warns if there is nothing to roll back to', async () => {
+      // below every published version, so nothing satisfies it and nothing is older
+      config.currentValue = '0.0.0-alpha';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toBeEmpty();
+      expect(res.warnings).toEqual([
+        {
+          topic: 'q',
+          message: "Can't find version matching 0.0.0-alpha for npm package q",
+        },
+      ]);
+    });
+
     it('returns rollback for ranged version', async () => {
       config.currentValue = '^0.9.99';
       config.packageName = 'q';
