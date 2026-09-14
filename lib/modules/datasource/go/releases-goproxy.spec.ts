@@ -1640,9 +1640,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .reply(404);
       }
 
-      // As a version's publication time should never change (as the Go proxy treats this as immutable data), we SHOULD be only calling the `.info` API once
-      //
-      // Currently, this does not work, as we do not cache it sufficiently, so re-query the API each time
+      // As a version's publication time should never change (as the Go proxy treats this as immutable data), we should be only calling the `.info` API once
       //
       // This test simulates i.e.
       //
@@ -1652,7 +1650,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       // - 2026-01-02T00:00Z: Renovate runs
       //
       // But without needing to actually wait that long
-      it.fails('reuses timestamps fetched by an earlier run', async () => {
+      it('reuses timestamps fetched by an earlier run', async () => {
         GlobalConfig.set({
           cacheTtlOverride: {
             'datasource-go-proxy':
@@ -1680,6 +1678,68 @@ describe('modules/datasource/go/releases-goproxy', () => {
         expect(
           httpMock.getTrace().filter(({ url }) => url.endsWith('.info')),
         ).toHaveLength(1);
+      });
+
+      it('does not store a version which has no publication time', async () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-go-proxy':
+              // 0 means "expired as soon as it's written to cache", and allows us to show what happens if the cache has expired between the runs, as if the default `cacheTtl` has passed on `datasource-go-proxy`
+              0,
+          },
+        });
+        vi.stubEnv('GOPROXY', baseUrl);
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\n')
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(res?.releases).toEqual([{ version: 'v1.0.0' }]);
+        await expect(
+          packageCache.get(
+            'datasource-go-proxy-timestamps',
+            `${baseUrl}@@github.com/google/btree`,
+          ),
+        ).resolves.toBeUndefined();
+      });
+
+      it('stores the timestamps it fetched when another version fails', async () => {
+        vi.stubEnv('GOPROXY', baseUrl);
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\nv1.1.0\n')
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' })
+          .get('/@v/v1.1.0.info')
+          .reply(410)
+          .get('/@latest')
+          .reply(200, { Version: 'v1.1.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        await expect(
+          packageCache.get(
+            'datasource-go-proxy-timestamps',
+            `${baseUrl}@@github.com/google/btree`,
+          ),
+        ).resolves.toEqual({ 'v1.0.0': '2018-01-01T00:00:00.000Z' });
       });
     });
   });
