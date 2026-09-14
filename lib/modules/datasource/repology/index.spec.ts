@@ -310,7 +310,7 @@ describe('modules/datasource/repology/index', () => {
       mockResolverCall('debian_stable', 'unknown-package', 'binname', {
         status: 403,
       });
-      mockApiCall('unknown-package', { status: 200, body: [] });
+      mockApiCall('unknown-package', { status: 200, body: '[]' });
 
       const res = await getPkgReleases({
         datasource,
