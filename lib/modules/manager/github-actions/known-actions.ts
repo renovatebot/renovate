@@ -670,6 +670,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: '', // determined from `renovate-image` input, if set
     withSchema: RenovateGithubActionWith,
   },
+  // https://github.com/reviewdog/action-setup
+  'reviewdog/action-setup': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'reviewdog',
+    packageName: 'reviewdog/reviewdog',
+    withSchema: valSchema('reviewdog_version'),
+  },
   'ruby/setup-ruby': {
     datasource: RubyVersionDatasource.id,
     packageName: 'ruby',

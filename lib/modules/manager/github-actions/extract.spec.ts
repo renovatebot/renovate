@@ -3714,6 +3714,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'reviewdog/action-setup@v1',
+        with: { reviewdog_version: 'v0.21.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.21.1',
+          datasource: 'github-releases',
+          depName: 'reviewdog',
+          depType: 'uses-with',
+          packageName: 'reviewdog/reviewdog',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'reviewdog/action-setup@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'reviewdog',
+          depType: 'uses-with',
+          packageName: 'reviewdog/reviewdog',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
