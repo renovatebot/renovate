@@ -470,6 +470,11 @@ export const knownActions: Record<string, KnownActionConfig> = {
     withSchema: SetupKubectlWith,
   },
   // https://github.com/cloudflare/wrangler-action
+  // https://github.com/biomejs/setup-biome
+  'biomejs/setup-biome': {
+    datasource: NpmDatasource.id,
+    packageName: '@biomejs/biome',
+  },
   'cloudflare/wrangler-action': {
     datasource: NpmDatasource.id,
     packageName: 'wrangler',

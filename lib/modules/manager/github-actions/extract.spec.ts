@@ -3652,6 +3652,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'biomejs/setup-biome@v2',
+        with: { version: '1.9.4' },
+      },
+      expected: [
+        {
+          currentValue: '1.9.4',
+          datasource: 'npm',
+          depName: '@biomejs/biome',
+          depType: 'uses-with',
+          packageName: '@biomejs/biome',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'biomejs/setup-biome@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: '@biomejs/biome',
+          depType: 'uses-with',
+          packageName: '@biomejs/biome',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
