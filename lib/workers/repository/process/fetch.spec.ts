@@ -120,6 +120,274 @@ describe('workers/repository/process/fetch', () => {
       });
     });
 
+    it('applies root .tool-versions constraints to other package files', async () => {
+      config.constraints = {};
+      const packageFiles: any = {
+        asdf: [
+          {
+            packageFile: '.tool-versions',
+            extractedConstraints: { node: '19.9.0' },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [{ datasource: 'npm', depName: '@changesets/cli' }],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({ constraints: { node: '19.9.0' } }),
+      );
+    });
+
+    it('prefers root mise constraints over root .tool-versions constraints', async () => {
+      config.constraints = {};
+      const packageFiles: any = {
+        asdf: [
+          {
+            packageFile: '.tool-versions',
+            extractedConstraints: { node: '19.9.0' },
+            deps: [],
+          },
+        ],
+        mise: [
+          {
+            packageFile: 'mise.toml',
+            extractedConstraints: { node: '22.11.0' },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [{ datasource: 'npm', depName: '@changesets/cli' }],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({ constraints: { node: '22.11.0' } }),
+      );
+    });
+
+    it('applies all root .mise.toml constraints to other package files', async () => {
+      config.constraints = {};
+      const packageFiles: any = {
+        mise: [
+          {
+            packageFile: '.mise.toml',
+            extractedConstraints: {
+              bun: '1.3.0',
+              node: '22.11.0',
+              yarn: '4.5.0',
+              npm: '11.0.0',
+              pnpm: '10.34.5',
+              vscode: '1.100.0',
+            },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [{ datasource: 'npm', depName: '@changesets/cli' }],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          constraints: {
+            bun: '1.3.0',
+            node: '22.11.0',
+            yarn: '4.5.0',
+            npm: '11.0.0',
+            pnpm: '10.34.5',
+            vscode: '1.100.0',
+          },
+        }),
+      );
+    });
+
+    it('prefers configured constraints over inferred runtime constraints', async () => {
+      config.constraints = { node: '20.0.0' };
+      const packageFiles: any = {
+        asdf: [
+          {
+            packageFile: '.tool-versions',
+            extractedConstraints: { node: '19.9.0' },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [{ datasource: 'npm', depName: '@changesets/cli' }],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({ constraints: { node: '20.0.0' } }),
+      );
+    });
+
+    it('prefers package-file constraints over inferred runtime constraints', async () => {
+      config.constraints = {};
+      const packageFiles: any = {
+        asdf: [
+          {
+            packageFile: '.tool-versions',
+            extractedConstraints: { node: '19.9.0' },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            extractedConstraints: { node: '18.0.0' },
+            deps: [{ datasource: 'npm', depName: '@changesets/cli' }],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({ constraints: { node: '18.0.0' } }),
+      );
+    });
+
+    it('prefers dependency constraints over inferred runtime constraints', async () => {
+      config.constraints = {};
+      const packageFiles: any = {
+        asdf: [
+          {
+            packageFile: '.tool-versions',
+            extractedConstraints: { node: '19.9.0' },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                datasource: 'npm',
+                depName: '@changesets/cli',
+                extractedConstraints: { node: '18.0.0' },
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({ constraints: { node: '18.0.0' } }),
+      );
+    });
+
+    it('prefers manager-scoped constraints over inferred runtime constraints', async () => {
+      config.constraints = {};
+      // @ts-expect-error -- manager configurations are dynamically addressed
+      config.npm = { constraints: { node: '20.0.0' } };
+      const packageFiles: any = {
+        asdf: [
+          {
+            packageFile: '.tool-versions',
+            extractedConstraints: { node: '19.9.0' },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [{ datasource: 'npm', depName: '@changesets/cli' }],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({ constraints: { node: '20.0.0' } }),
+      );
+    });
+
+    it('does not apply nested runtime constraints to other package files', async () => {
+      config.constraints = {};
+      const packageFiles: any = {
+        asdf: [
+          {
+            packageFile: 'subdir/.tool-versions',
+            extractedConstraints: { node: '19.9.0' },
+            deps: [],
+          },
+        ],
+        mise: [
+          {
+            packageFile: 'subdir/mise.toml',
+            extractedConstraints: { node: '22.11.0' },
+            deps: [],
+          },
+          {
+            packageFile: 'subdir/.mise.toml',
+            extractedConstraints: { pnpm: '10.34.5' },
+            deps: [],
+          },
+        ],
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [{ datasource: 'npm', depName: '@changesets/cli' }],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({ constraints: {} }),
+      );
+    });
+
     describe('constraintsVersioning', () => {
       it('is merged from packageFile with config', async () => {
         config.constraintsVersioning = { gomodMod: 'config-version' };
@@ -221,7 +489,7 @@ describe('workers/repository/process/fetch', () => {
       });
     });
 
-    it('prefers configured constraints over extracted constraints', async () => {
+    it('prefers dependency extracted constraints over configured constraints', async () => {
       config.rangeStrategy = 'auto';
       config.constraints = { python: '>=3.9' };
       const packageFiles: any = {
@@ -247,7 +515,7 @@ describe('workers/repository/process/fetch', () => {
 
       expect(lookupUpdates).toHaveBeenCalledWith(
         expect.objectContaining({
-          constraints: { python: '>=3.9' },
+          constraints: { python: '<3.12' },
           datasource: 'maven',
           depName: 'bbb',
         }),

@@ -1,5 +1,6 @@
 import { isFunction, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { isSkipComment } from '../../../util/ignore.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -14,12 +15,29 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   );
 
   const deps: PackageDependency[] = [];
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
+  const constraintNames: ConstraintName[] = [
+    'bun',
+    'node',
+    'yarn',
+    'npm',
+    'pnpm',
+    'vscode',
+  ];
 
   for (const groups of [...content.matchAll(regex)]
     .map((m) => m.groups)
     .filter(isTruthy)) {
     const depName = groups.toolName.trim();
     const version = groups.version.trim();
+    const isIgnored = isSkipComment((groups.comment ?? '').trim());
+    const constraintName =
+      depName === 'nodejs'
+        ? 'node'
+        : constraintNames.find((name) => name === depName);
+    if (!isIgnored && constraintName) {
+      extractedConstraints[constraintName] = version;
+    }
 
     const toolConfig = upgradeableTooling[depName];
     let toolDefinition: StaticTooling | undefined;
@@ -35,7 +53,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         depName,
         ...toolDefinition,
       };
-      if (isSkipComment((groups.comment ?? '').trim())) {
+      if (isIgnored) {
         dep.skipReason = 'ignored';
       }
 
@@ -50,5 +68,5 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     }
   }
 
-  return deps.length ? { deps } : null;
+  return deps.length ? { deps, extractedConstraints } : null;
 }
