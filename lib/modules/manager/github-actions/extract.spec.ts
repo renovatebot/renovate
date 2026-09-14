@@ -4524,6 +4524,55 @@ describe('modules/manager/github-actions/extract', () => {
       },
       expected: [],
     },
+    {
+      step: {
+        uses: 'baptiste0928/cargo-install@v3',
+        with: { crate: 'cargo-hack', version: '0.6.14' },
+      },
+      expected: [
+        {
+          currentValue: '0.6.14',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'baptiste0928/cargo-install@v3',
+        with: { crate: 'cargo-hack', version: '' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+        },
+      ],
+    },
+    {
+      // `version` has a default (`'latest'`), so real workflows commonly
+      // omit it from `with:` entirely rather than passing an empty string
+      step: {
+        uses: 'baptiste0928/cargo-install@v3',
+        with: { crate: 'cargo-hack' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
