@@ -1,8 +1,11 @@
 import type { RangeStrategy } from '../../../types/index.ts';
 import { DistroInfo } from '../distro.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { NewValueConfig, VersioningApi } from '../types.ts';
+import type {
+  GenericVersion,
+  NewValueConfig,
+  VersioningApi,
+} from '../types.ts';
 import {
   RollingReleasesData,
   getDatedContainerImageCodename,

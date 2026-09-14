@@ -1,4 +1,5 @@
 import { type Hash, createHash } from 'node:crypto';
+import { isFunction, isSymbol } from '@sindresorhus/is';
 
 // Returns true when `value` would appear in the canonical JSON produced by
 // `safe-stable-stringify`. We pre-check before emitting because objects must
@@ -8,11 +9,7 @@ import { type Hash, createHash } from 'node:crypto';
 // `cache` memoizes the result per object reference so callers that invoke
 // isEmittable just before recursing don't re-walk the toJSON chain twice.
 function isEmittable(value: unknown, cache: WeakMap<object, boolean>): boolean {
-  if (
-    value === undefined ||
-    typeof value === 'function' ||
-    typeof value === 'symbol'
-  ) {
+  if (value === undefined || isFunction(value) || isSymbol(value)) {
     return false;
   }
   // oxlint-disable-next-line renovate/prefer-is-object -- byte-exact JSON canonicalization: functions are handled explicitly above and must not take the object path
@@ -24,8 +21,9 @@ function isEmittable(value: unknown, cache: WeakMap<object, boolean>): boolean {
     return cached;
   }
   const obj = value as { toJSON?: () => unknown };
-  const result =
-    typeof obj.toJSON === 'function' ? isEmittable(obj.toJSON(), cache) : true;
+  const result = isFunction(obj.toJSON)
+    ? isEmittable(obj.toJSON(), cache)
+    : true;
   cache.set(value, result);
   return result;
 }
@@ -48,7 +46,7 @@ function fingerprintInto(
   }
 
   const obj = value as { toJSON?: () => unknown };
-  if (typeof obj.toJSON === 'function') {
+  if (isFunction(obj.toJSON)) {
     fingerprintInto(h, obj.toJSON(), seen, emittableCache);
     return;
   }

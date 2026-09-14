@@ -128,6 +128,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -180,6 +181,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         options: {
           cwd: '/tmp/github',
           env: {
+            CI: 'true',
             HOME: '/home/user',
             HTTPS_PROXY: 'https://example.com',
             HTTP_PROXY: 'http://example.com',
@@ -232,6 +234,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "./":"./" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
           'ghcr.io/renovatebot/base-image' +
@@ -344,6 +347,31 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ]);
     expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('prefers the derived Java version over the extracted constraint', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'install',
+    });
+
+    await updateArtifacts({
+      packageFileName: 'maven',
+      newPackageFileContent: '',
+      updatedDeps: [{ depName: 'maven-wrapper' }],
+      config: {
+        currentValue: '3.0.0',
+        newValue: '3.3.1',
+        extractedConstraints: { java: '8.0.1' },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 17.0.0' },
+      { cmd: './mvnw wrapper:wrapper -Dtype=script' },
+    ]);
   });
 
   it('updates with binarySource install after detecting wrapper version from mvnw script', async () => {

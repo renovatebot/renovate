@@ -14,7 +14,9 @@ describe('util/cache/package/index', () => {
   });
 
   it('returns undefined on get without backend', async () => {
-    expect(await index.get('_test-namespace', 'missing-key')).toBeUndefined();
+    await expect(
+      index.get('_test-namespace', 'missing-key'),
+    ).resolves.toBeUndefined();
   });
 
   it('stores and retrieves via L1 without backend', async () => {

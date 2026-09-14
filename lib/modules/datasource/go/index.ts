@@ -129,7 +129,7 @@ export class GoDatasource extends Datasource {
       case GitlabTagsDatasource.id: {
         return this.direct.gitlab.getDigest(source, tag);
       }
-      /* v8 ignore next 3: can never happen, makes lint happy */
+      /* v8 ignore next: can never happen, makes lint happy */
       default: {
         return null;
       }

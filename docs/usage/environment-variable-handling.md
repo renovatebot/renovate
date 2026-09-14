@@ -27,6 +27,10 @@ By default, Renovate will **always** pass the following environment variables to
 
 <!-- Autogenerate basicEnvVars -->
 
+Additionally, Renovate will **always** set the following environment variables to these exact values:
+
+<!-- Autogenerate hardcodedProcessEnv -->
+
 !!! note
   Some managers pass additional environment variables where necessary.
   <br>

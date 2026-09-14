@@ -58,7 +58,7 @@ export async function generateDocs(
     logger.info('* managers/asdf/supported-plugins');
     await generateManagerAsdfSupportedPlugins(dist);
 
-    // managers/github-actions community actions
+    // managers/github-actions first-party and community actions
     logger.info('* managers/github-actions/community');
     await generateManagerGithubActionsCommunity(dist);
 

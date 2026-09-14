@@ -12,18 +12,20 @@ const mise1toml = Fixtures.get('Mise.1.toml');
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('', miseFilename)).toBeNull();
+      await expect(extractPackageFile('', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for invalid TOML', async () => {
-      expect(await extractPackageFile('foo', miseFilename)).toBeNull();
+      await expect(extractPackageFile('foo', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for empty tools section', async () => {
       const content = codeBlock`
       [tools]
     `;
-      expect(await extractPackageFile(content, miseFilename)).toBeNull();
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
     });
 
     it('extracts tools - mise core plugins', async () => {
@@ -782,6 +784,40 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts gitlab backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "gitlab:gitlab-org/cli" = "v1.54.0"
+      "gitlab:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "gitlab:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'gitlab:gitlab-org/cli',
+            currentValue: 'v1.54.0',
+            packageName: 'gitlab-org/cli',
+            datasource: 'gitlab-releases',
+          },
+          {
+            depName: 'gitlab:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+          },
+          {
+            depName: 'gitlab:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x76(?<version>.+)',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', async () => {
       const content = codeBlock`
       [tools]
@@ -1100,24 +1136,6 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.19.2',
             datasource: 'github-tags',
             packageName: 'getzola/zola',
-          },
-        ],
-      });
-    });
-
-    it('resolves tools from the mise registry data file via cargo backend', async () => {
-      const content = codeBlock`
-      [tools]
-      magika = "0.3.1"
-    `;
-      const result = await extractPackageFile(content, miseFilename);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'magika',
-            currentValue: '0.3.1',
-            datasource: 'crate',
-            packageName: 'magika-cli',
           },
         ],
       });

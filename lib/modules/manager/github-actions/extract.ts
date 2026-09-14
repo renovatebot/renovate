@@ -9,14 +9,11 @@ import { parseUrl } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
-import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import * as dockerVersioning from '../../versioning/docker/index.ts';
 import * as exactVersioning from '../../versioning/exact/index.ts';
 import * as githubActionsVersioning from '../../versioning/github-actions/index.ts';
-import * as nodeVersioning from '../../versioning/node/index.ts';
-import * as npmVersioning from '../../versioning/npm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
@@ -24,11 +21,14 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
-import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { UsesStep } from './schema.ts';
 import { ActionsLockfile, CommunityActions, Workflow } from './schema.ts';
-import type { LockfileState } from './types.ts';
+import type {
+  DockerReference,
+  LockfileState,
+  RepositoryReference,
+} from './types.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -66,6 +66,8 @@ function extractDockerAction(
   return dep;
 }
 
+const reusableWorkflowPathRe = regEx(/^\.github\/workflows\/[^/]+\.ya?ml$/);
+
 function extractRepositoryAction(
   actionRef: RepositoryReference,
   parsed: ReturnType<typeof parseUsesLine> & object,
@@ -91,12 +93,13 @@ function extractRepositoryAction(
   const depName = `${registryUrl}${packageName}`;
   const pathSuffix = subPath ? `/${subPath}` : '';
   const commentWs = commentPrecedingWhitespace || ' ';
+  const isReusableWorkflow = !!subPath && reusableWorkflowPathRe.test(subPath);
 
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
     versioning: githubActionsVersioning.id,
-    depType: 'action',
+    depType: isReusableWorkflow ? 'workflow' : 'action',
     replaceString: valueString,
     autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
     ...(isExplicitHostname
@@ -250,43 +253,6 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
-// For official https://github.com/actions
-const versionedActions: Record<string, string> = {
-  go: npmVersioning.id,
-  node: nodeVersioning.id,
-  python: npmVersioning.id,
-
-  // Not covered yet because they use different datasources/packageNames:
-  // - dotnet
-  // - java
-};
-
-function extractVersionedAction(step: UsesStep): PackageDependency | null {
-  for (const [action, versioning] of Object.entries(versionedActions)) {
-    const actionName = `actions/setup-${action}`;
-    if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
-      continue;
-    }
-
-    const fieldName = `${action}-version`;
-    const currentValue = step.with?.[fieldName];
-    if (!currentValue) {
-      return null;
-    }
-
-    return {
-      datasource: GithubReleasesDatasource.id,
-      depName: action,
-      packageName: `actions/${action}-versions`,
-      versioning,
-      extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-      currentValue,
-      depType: 'uses-with',
-    };
-  }
-  return null;
-}
-
 function extractSteps(steps: UsesStep[]): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
@@ -294,12 +260,6 @@ function extractSteps(steps: UsesStep[]): PackageDependency[] {
     const res = CommunityActions.safeParse(step);
     if (res.success) {
       deps.push(...res.data);
-      continue;
-    }
-
-    const versionedDep = extractVersionedAction(step);
-    if (versionedDep) {
-      deps.push(versionedDep);
     }
   }
 
@@ -430,7 +390,7 @@ export async function extractPackageFile(
     // Deliberately no `lockFiles`: nothing here goes through `updateArtifacts`, and `matchFileNames` also tests `lockFiles`, so declaring it would make a negated rule such as `!.github/workflows/release.yml` match every workflow through the lock file path.
     for (const dep of deps) {
       // The lock file only records `OWNER/REPO@REF` pins, so a `docker://` image in a `uses:` is still ours to pin.
-      if (dep.depType === 'action') {
+      if (dep.depType === 'action' || dep.depType === 'workflow') {
         dep.digestManagedExternally = true;
       }
     }

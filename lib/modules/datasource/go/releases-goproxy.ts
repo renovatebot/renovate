@@ -159,13 +159,17 @@ export class GoProxyDatasource extends Datasource {
         const statusCode = potentialHttpError?.response?.statusCode;
         const canFallback =
           fallback === '|' ? true : statusCode === 404 || statusCode === 410;
-        const msg = canFallback
-          ? 'Goproxy error: trying next URL provided with GOPROXY'
-          : 'Goproxy error: skipping other URLs provided with GOPROXY';
-        logger.debug({ err }, msg);
         if (!canFallback) {
-          break;
+          logger.debug(
+            { err },
+            'Goproxy error: not falling back to other URLs provided with GOPROXY, rethrowing',
+          );
+          this.handleGenericErrors(err);
         }
+        logger.debug(
+          { err },
+          'Goproxy error: trying next URL provided with GOPROXY',
+        );
       }
     }
 
@@ -207,7 +211,7 @@ export class GoProxyDatasource extends Datasource {
     }
 
     const parsedUrl = parseUrl(sourceUrl);
-    /* v8 ignore next 3 -- detectPlatform only returns a platform for parseable URLs */
+    /* v8 ignore next -- detectPlatform only returns a platform for parseable URLs */
     if (!parsedUrl) {
       return;
     }
@@ -267,7 +271,7 @@ export class GoProxyDatasource extends Datasource {
    * @see https://golang.org/ref/mod#goproxy-protocol
    */
   encodeCase(input: string): string {
-    return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
+    return input.replace(regEx(/(?:[A-Z])/g), (x) => `!${x.toLowerCase()}`);
   }
 
   async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {
@@ -412,9 +416,9 @@ export class GoProxyDatasource extends Datasource {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
-    const baseMod =
-      modParts?.baseMod ??
-      /* v8 ignore next -- defensive: modRegex matches any non-empty package name, so baseMod is always set */ packageName;
+    /* v8 ignore start: defensive - modRegex matches any non-empty package name, so baseMod is always set */
+    const baseMod = modParts?.baseMod ?? packageName;
+    /* v8 ignore stop */
     const packageMajor = parseInt(modParts?.majorVersion ?? '0', 10);
 
     const result: ReleaseResult = { releases: [] };
@@ -510,6 +514,7 @@ export class GoProxyDatasource extends Datasource {
         }
         if (!result.releases.length) {
           const releaseFromLatest = pseudoVersionToRelease(latestVersion);
+          // v8 ignore else -- needs an empty version list plus a non-pseudo latest
           if (releaseFromLatest) {
             result.releases.push(releaseFromLatest);
           }
