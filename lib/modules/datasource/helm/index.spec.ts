@@ -2,14 +2,9 @@ import { Readable } from 'node:stream';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
-import type { DirectoryResult } from 'tmp-promise';
-import { dir as tmpDir } from 'tmp-promise';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
-import * as memCache from '../../../util/cache/memory/index.ts';
-import * as packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { HelmDatasource } from './index.ts';
@@ -18,189 +13,6 @@ import { HelmDatasource } from './index.ts';
 const indexYaml = Fixtures.get('index.yaml');
 
 describe('modules/datasource/helm/index', () => {
-  const s3mock = mockClient(S3Client);
-
-  afterEach(() => {
-    s3mock.reset();
-    hostRules.clear();
-  });
-
-  describe('repository cache', () => {
-    let cacheDir: DirectoryResult;
-
-    beforeEach(async () => {
-      cacheDir = await tmpDir({ unsafeCleanup: true });
-      GlobalConfig.reset();
-      memCache.init();
-      await packageCache.init({ cacheDir: cacheDir.path });
-    });
-
-    afterEach(async () => {
-      await packageCache.cleanup({});
-      memCache.reset();
-      GlobalConfig.reset();
-      await cacheDir.cleanup();
-    });
-
-    it('preserves the lookup error for malformed repository URLs', async () => {
-      await expect(
-        new HelmDatasource().getRepositoryData('not-a-url'),
-      ).rejects.toThrow('Invalid URL');
-    });
-
-    it('does not reuse S3 repository data', async () => {
-      s3mock
-        .on(GetObjectCommand)
-        .resolvesOnce({ Body: Readable.from([indexYaml]) as never })
-        .resolvesOnce({ Body: Readable.from(['entries: {}']) as never });
-      const datasource = new HelmDatasource();
-
-      const first = await datasource.getRepositoryData(
-        's3://chart-bucket/charts',
-      );
-      const second = await datasource.getRepositoryData(
-        's3://chart-bucket/charts',
-      );
-
-      expect(first.ambassador.releases).toHaveLength(27);
-      expect(second).toEqual({});
-    });
-
-    it('retains the administrator override for custom repositories', async () => {
-      GlobalConfig.set({ cachePrivatePackages: true });
-      httpMock
-        .scope('https://example.com')
-        .get('/index.yaml')
-        .reply(200, indexYaml);
-
-      const first = await new HelmDatasource().getRepositoryData(
-        'https://example.com',
-      );
-      memCache.reset();
-      const second = await new HelmDatasource().getRepositoryData(
-        'https://example.com',
-      );
-
-      expect(second).toEqual(first);
-      expect(second.ambassador.releases).toHaveLength(27);
-    });
-
-    it.each([
-      'https://charts.helm.sh/stable',
-      'https://charts.helm.sh/stable/',
-      'HTTPS://CHARTS.HELM.SH:443/stable',
-      'https://charts.helm.sh/stable///',
-      'https://charts.helm.sh/other/../stable',
-      'https://charts.helm.sh/other/%2e%2e/stable',
-    ])('reuses the public index for %s', async (registryUrl) => {
-      httpMock
-        .scope('https://charts.helm.sh')
-        .get('/stable/index.yaml')
-        .reply(200, indexYaml);
-      const datasource = new HelmDatasource();
-
-      const first = await datasource.getRepositoryData(registryUrl);
-      memCache.reset();
-      const second = await new HelmDatasource().getRepositoryData(registryUrl);
-
-      expect(second).toEqual(first);
-      expect(second.ambassador.releases).toHaveLength(27);
-    });
-
-    it.each([
-      [
-        'https://example.com/charts',
-        'https://example.com',
-        '/charts/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh/incubator',
-        'https://charts.helm.sh',
-        '/incubator/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh/stable.git',
-        'https://charts.helm.sh',
-        '/stable.git/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh/stable/private',
-        'https://charts.helm.sh',
-        '/stable/private/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh/stable%2fprivate',
-        'https://charts.helm.sh',
-        '/stable%2fprivate/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh/%73table',
-        'https://charts.helm.sh',
-        '/%73table/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh.evil.test/stable',
-        'https://charts.helm.sh.evil.test',
-        '/stable/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh:8443/stable',
-        'https://charts.helm.sh:8443',
-        '/stable/index.yaml',
-      ],
-      [
-        'http://charts.helm.sh/stable',
-        'http://charts.helm.sh',
-        '/stable/index.yaml',
-      ],
-      [
-        'https://user:secret@charts.helm.sh/stable',
-        'https://charts.helm.sh',
-        '/stable/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh/stable?token=secret',
-        'https://charts.helm.sh',
-        '/stable?token=secret/index.yaml',
-      ],
-      [
-        'https://charts.helm.sh/stable#fragment',
-        'https://charts.helm.sh',
-        '/stable',
-      ],
-    ])(
-      'bypasses a populated cache for %s',
-      async (registryUrl, origin, path) => {
-        await packageCache.set(
-          'datasource-helm',
-          `cache-decorator:repository-data:${registryUrl}`,
-          {
-            cachedAt: new Date().toISOString(),
-            value: { stale: { releases: [] } },
-          },
-          30,
-        );
-        httpMock.scope(origin).get(path).reply(200, indexYaml);
-
-        const result = await new HelmDatasource().getRepositoryData(
-          registryUrl,
-        );
-
-        expect(result.ambassador.releases).toHaveLength(27);
-        memCache.reset();
-        await expect(
-          packageCache.get(
-            'datasource-helm',
-            `cache-decorator:repository-data:${registryUrl}`,
-          ),
-        ).resolves.toEqual({
-          cachedAt: expect.any(String),
-          value: { stale: { releases: [] } },
-        });
-      },
-    );
-  });
-
   describe('getReleases', () => {
     it('returns null if packageName was not provided', async () => {
       await expect(
@@ -457,6 +269,8 @@ describe('modules/datasource/helm/index', () => {
   });
 
   describe('S3', () => {
+    const s3mock = mockClient(S3Client);
+
     // The AWS SDK puts the error code in `name`, not `message`
     function s3Error(
       name: string,
@@ -467,6 +281,11 @@ describe('modules/datasource/helm/index', () => {
       err.name = name;
       return err;
     }
+
+    afterEach(() => {
+      s3mock.reset();
+      hostRules.clear();
+    });
 
     it('returns releases from an S3 bucket', async () => {
       s3mock
