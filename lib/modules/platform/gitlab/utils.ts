@@ -2,6 +2,7 @@ import url from 'node:url';
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import type { PrState } from '../../../types/index.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
@@ -24,7 +25,9 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
   const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
     targetBranch: mr.target_branch,
-    state: mr.state === 'opened' ? 'open' : mr.state,
+    // GitLab reports `opened`, `closed`, `merged` or `locked`. Only `opened`
+    // needs renaming; `locked` is passed through as it always has been.
+    state: mr.state === 'opened' ? 'open' : (mr.state as PrState),
     number: mr.iid,
     title: mr.title,
     createdAt: mr.created_at,

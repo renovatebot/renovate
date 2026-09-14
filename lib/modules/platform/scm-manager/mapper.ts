@@ -1,8 +1,9 @@
+import type { PrState } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { Pr } from '../types.ts';
-import type { PrState, PullRequest } from './schema.ts';
+import type { PullRequest, PrState as ScmPrState } from './schema.ts';
 
-const PR_STATE_MAP: Record<PrState, string> = {
+const PR_STATE_MAP: Record<ScmPrState, PrState> = {
   DRAFT: 'open',
   OPEN: 'open',
   REJECTED: 'closed',

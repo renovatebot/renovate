@@ -2,6 +2,7 @@ import { isNonEmptyArray } from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import type { PrState } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -130,7 +131,8 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
   return {
     labels,
     number: data.number,
-    state: data.merged ? 'merged' : data.state,
+    // `all` only exists as a search filter, the API never reports it as a state
+    state: data.merged ? 'merged' : (data.state as PrState),
     title,
     isDraft,
     bodyStruct: getPrBodyStruct(data.body),

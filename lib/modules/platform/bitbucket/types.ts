@@ -44,10 +44,15 @@ export interface BitbucketStatus {
   state: BitbucketBranchState;
 }
 
+/**
+ * https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/
+ */
+export type BitbucketPrState = 'OPEN' | 'MERGED' | 'DECLINED' | 'SUPERSEDED';
+
 export interface PrResponse {
   id: number;
   title: string;
-  state: string;
+  state: BitbucketPrState;
   links: {
     commits: {
       href: string;

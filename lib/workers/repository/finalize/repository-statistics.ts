@@ -46,8 +46,6 @@ export function runRenovateRepoStats(
       case 'open':
         prStats.open += 1;
         break;
-      default:
-        break;
     }
   }
   logger.debug({ stats: prStats }, `Renovate repository PR statistics`);

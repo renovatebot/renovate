@@ -2,6 +2,7 @@ import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackin
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { logger as _logger, partial } from '~test/util.ts';
+import type { Issue } from '../types.ts';
 import * as _azureApi from './azure-got-wrapper.ts';
 import { IssueService } from './issue.ts';
 import type { Config } from './types.ts';
@@ -199,7 +200,7 @@ describe('modules/platform/azure/issue', () => {
 
   describe('findIssue()', () => {
     it('should return first matching issue', async () => {
-      const mockIssue = {
+      const mockIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'open',
@@ -235,7 +236,7 @@ describe('modules/platform/azure/issue', () => {
 
   describe('ensureIssueClosing()', () => {
     it('should close open issue when found', async () => {
-      const mockIssue = {
+      const mockIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'open',
@@ -262,7 +263,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should not close already closed issue', async () => {
-      const mockIssue = {
+      const mockIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'closed',
@@ -284,12 +285,12 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should not close issue without number', async () => {
-      const mockIssue = {
+      const mockIssue = partial<Issue>({
         number: undefined,
         title: '[Renovate] Test Issue',
         state: 'open',
         body: 'Test description',
-      };
+      });
 
       vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
 
@@ -392,7 +393,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should reopen closed issue when shouldReOpen is true', async () => {
-      const mockClosedIssue = {
+      const mockClosedIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'closed',
@@ -514,7 +515,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should not reopen closed issue when once is true', async () => {
-      const mockClosedIssue = {
+      const mockClosedIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'closed',
@@ -535,7 +536,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should update existing open issue', async () => {
-      const mockOpenIssue = {
+      const mockOpenIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'open',
@@ -577,7 +578,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should close duplicate open issues', async () => {
-      const mockOpenIssues = [
+      const mockOpenIssues: Issue[] = [
         {
           number: 1,
           title: '[Renovate] Test Issue',
@@ -628,7 +629,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should skip duplicate issues without number', async () => {
-      const mockOpenIssues = [
+      const mockOpenIssues = partial<Issue>([
         {
           number: 1,
           title: '[Renovate] Test Issue',
@@ -641,7 +642,7 @@ describe('modules/platform/azure/issue', () => {
           body: 'Description 2',
           // number is undefined
         },
-      ];
+      ]);
 
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue(mockOpenIssues);
 
@@ -683,7 +684,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should not update issue if content is same', async () => {
-      const mockOpenIssue = {
+      const mockOpenIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'open',
@@ -712,12 +713,12 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should return null when trying to reopen issue without number', async () => {
-      const mockClosedIssueWithoutNumber = {
+      const mockClosedIssueWithoutNumber = partial<Issue>({
         title: '[repo] Test Issue',
         state: 'closed',
         body: 'Old content',
         // number is undefined
-      };
+      });
 
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
         mockClosedIssueWithoutNumber,
@@ -736,12 +737,12 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should return null when trying to update issue without number', async () => {
-      const mockOpenIssueWithoutNumber = {
+      const mockOpenIssueWithoutNumber = partial<Issue>({
         title: '[repo] Old Title',
         state: 'open',
         body: 'Old content',
         // number is undefined
-      };
+      });
 
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
         mockOpenIssueWithoutNumber,
@@ -759,7 +760,7 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should not reopen closed issue when shouldReOpen is false', async () => {
-      const mockClosedIssue = {
+      const mockClosedIssue: Issue = {
         number: 1,
         title: '[Renovate] Test Issue',
         state: 'closed',

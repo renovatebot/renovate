@@ -428,14 +428,11 @@ export async function updatePr({
     state === 'closed'
       ? PullRequestStatusEnum.CLOSED
       : PullRequestStatusEnum.OPEN;
-  // v8 ignore else -- TODO: add test #40625
-  if (cachedPr?.state !== prStatusInput) {
-    try {
-      await client.updatePrStatus(`${prNo}`, prStatusInput);
-    } catch {
-      // safety check
-      // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
-    }
+  try {
+    await client.updatePrStatus(`${prNo}`, prStatusInput);
+  } catch {
+    // safety check
+    // do nothing, it's ok to fail sometimes when trying to update from open to open or from closed to closed.
   }
 }
 

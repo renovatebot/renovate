@@ -160,7 +160,9 @@ export type GithubBranchRulesets = z.infer<typeof GithubBranchRulesets>;
 
 const GithubIssueBase = z.object({
   number: z.number(),
-  state: z.string().transform((val) => val.toLowerCase()),
+  // GitHub only reports `OPEN`/`CLOSED` (GraphQL) or `open`/`closed` (REST), but
+  // we keep accepting any string so unexpected payloads are not rejected.
+  state: z.string().transform((val) => val.toLowerCase() as 'open' | 'closed'),
   title: z.string(),
   body: z.string(),
 });

@@ -23,7 +23,7 @@ export type {
   HostRule,
   InternalHostGrant,
 } from './host-rules.ts';
-export type { PrState } from './pr-state.ts';
+export type { PrFilterState, PrState } from './pr-state.ts';
 export type { SkipReason, StageName } from './skip-reason.ts';
 export type { RangeStrategy } from './versioning.ts';
 

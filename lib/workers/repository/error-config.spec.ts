@@ -133,7 +133,7 @@ Message: some-message
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),
         number: 1,
-        state: '!open',
+        state: 'closed',
       });
 
       const res = await raiseConfigWarningIssue(config, error);

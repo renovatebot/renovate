@@ -1,6 +1,10 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import type { BranchStatus, PrState } from '../../../types/index.ts';
+import type {
+  BranchStatus,
+  PrFilterState,
+  PrState,
+} from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -74,7 +78,7 @@ function createHttpUrl(url: URL, endpoint: string, repository: string): string {
   return url.toString();
 }
 
-export function mapPrStateToGerritFilter(state?: PrState): string | null {
+export function mapPrStateToGerritFilter(state?: PrFilterState): string | null {
   switch (state) {
     case 'merged':
       return 'status:merged';
@@ -122,7 +126,7 @@ export function mapGerritChangeToPr(
 
 export function mapGerritChangeStateToPrState(
   state: GerritChangeStatus,
-): 'merged' | 'open' | 'closed' {
+): PrState {
   switch (state) {
     case 'NEW':
       return 'open';
