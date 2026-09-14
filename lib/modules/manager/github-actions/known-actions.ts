@@ -333,6 +333,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'eas-cli',
     withSchema: valSchema('eas-version'),
   },
+  // https://github.com/extractions/setup-just
+  'extractions/setup-just': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'just',
+    packageName: 'casey/just',
+    withSchema: valSchema('just-version'),
+  },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',

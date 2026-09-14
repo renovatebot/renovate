@@ -2893,6 +2893,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'extractions/setup-just@v3',
+        with: { 'just-version': '1.58.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.58.0',
+          datasource: 'github-releases',
+          depName: 'just',
+          depType: 'uses-with',
+          packageName: 'casey/just',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'extractions/setup-just@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'just',
+          depType: 'uses-with',
+          packageName: 'casey/just',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'gradle/actions/setup-gradle@v4',
         with: { 'gradle-version': '8.10' },
       },
