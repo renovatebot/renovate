@@ -8,6 +8,7 @@ import {
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import {
+  findGithubComHostRule,
   findGithubToken,
   takePersonalAccessTokenIfPossible,
 } from '../../../util/check-token.ts';
@@ -50,10 +51,7 @@ import {
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubHostRule = hostRules.find({
-    hostType: 'github',
-    url: 'https://api.github.com/',
-  });
+  const githubHostRule = findGithubComHostRule();
 
   const gitTagsHostRule = hostRules.find({
     hostType: GitTagsDatasource.id,

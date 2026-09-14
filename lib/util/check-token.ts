@@ -8,6 +8,9 @@ import type { CombinedHostRule } from '../types/index.ts';
 import * as memCache from '../util/cache/memory/index.ts';
 import * as hostRules from './host-rules.ts';
 
+/** The GitHub.com API base URL, used to look up the `github` host rule for github.com. */
+export const GITHUB_API_URL = 'https://api.github.com/';
+
 export function checkGithubToken(
   packageFiles: Record<string, PackageFileContent[]> = {},
 ): void {
@@ -78,6 +81,22 @@ export function findGithubToken(
   searchResult: CombinedHostRule,
 ): string | undefined {
   return searchResult?.token?.replace('x-access-token:', '');
+}
+
+/**
+ * Look up the `github` host rule for the github.com API, the way every
+ * artifact updater that authenticates against github.com resolves it.
+ */
+export function findGithubComHostRule(hostType = 'github'): CombinedHostRule {
+  return hostRules.find({ hostType, url: GITHUB_API_URL });
+}
+
+/**
+ * Look up and normalize (see {@link findGithubToken}) the token configured
+ * for the github.com API.
+ */
+export function findGithubComToken(hostType = 'github'): string | undefined {
+  return findGithubToken(findGithubComHostRule(hostType));
 }
 
 export function takePersonalAccessTokenIfPossible(

@@ -4,6 +4,7 @@ import deepmerge from 'deepmerge';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { findGithubComHostRule } from '../../../../util/check-token.ts';
 import { getEnv } from '../../../../util/env.ts';
 import {
   ensureCacheDir,
@@ -13,7 +14,6 @@ import {
 } from '../../../../util/fs/index.ts';
 import { getFile, getRepoStatus } from '../../../../util/git/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
-import * as hostRules from '../../../../util/host-rules.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../../util/url.ts';
 import { dump, parseSingleYaml } from '../../../../util/yaml.ts';
@@ -487,10 +487,7 @@ async function getAdditionalFilesInner(
 
   let token: string | undefined;
   try {
-    ({ token } = hostRules.find({
-      hostType: 'github',
-      url: 'https://api.github.com/',
-    }));
+    ({ token } = findGithubComHostRule());
     // v8 ignore next -- TODO: add test #40625
     token = token ? `${token}@` : token;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
