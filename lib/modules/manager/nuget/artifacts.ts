@@ -199,6 +199,9 @@ export async function updateArtifacts({
         newLockFileContentMap[lockFileName]
       ) {
         logger.trace(`Lock file ${lockFileName} is unchanged`);
+        // NOTE: a lock file that changed always has new content, so the
+        // implicit else never runs. A coverage-ignore hint cannot suppress it
+        // on an `else if`.
       } else if (newLockFileContentMap[lockFileName]) {
         retArray.push({
           file: {
