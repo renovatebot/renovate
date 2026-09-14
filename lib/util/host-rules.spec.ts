@@ -5,6 +5,8 @@ import type { HostRule } from '../types/index.ts';
 import {
   type LegacyHostRule,
   add,
+  basicAuthHeaderValue,
+  basicUserinfo,
   clear,
   confidentialFields,
   filterAllowedHeaders,
@@ -14,6 +16,7 @@ import {
   getAll,
   hostType,
   hosts,
+  resolveAuth,
 } from './host-rules.ts';
 import { redactedFields, sanitize } from './sanitize.ts';
 
@@ -1298,6 +1301,109 @@ describe('util/host-rules', () => {
       expect(findAllForHostType('npm')).toMatchObject([
         { hostType: 'npm', matchHost: 'registry.example.com', token: 'npm' },
       ]);
+    });
+  });
+
+  describe('resolveAuth()', () => {
+    it('returns null when the rule carries no credentials', () => {
+      expect(resolveAuth({})).toBeNull();
+    });
+
+    it('resolves a username and password to Basic', () => {
+      expect(resolveAuth({ username: 'user', password: 'pass' })).toEqual({
+        type: 'basic',
+        username: 'user',
+        password: 'pass',
+      });
+    });
+
+    it('resolves a password without a username to Basic', () => {
+      expect(resolveAuth({ password: 'pass' })).toEqual({
+        type: 'basic',
+        username: undefined,
+        password: 'pass',
+      });
+    });
+
+    it('resolves a token to a token credential', () => {
+      expect(resolveAuth({ token: 'abc' })).toEqual({
+        type: 'token',
+        token: 'abc',
+        authType: undefined,
+      });
+    });
+
+    it('carries the authType of a token', () => {
+      expect(resolveAuth({ token: 'abc', authType: 'Token-Only' })).toEqual({
+        type: 'token',
+        token: 'abc',
+        authType: 'Token-Only',
+      });
+    });
+
+    it('prefers a password over a token', () => {
+      expect(
+        resolveAuth({
+          username: 'user',
+          password: 'pass',
+          token: 'abc',
+          authType: 'Basic',
+        }),
+      ).toEqual({ type: 'basic', username: 'user', password: 'pass' });
+    });
+
+    it('prefers a password over a token even without a username', () => {
+      expect(resolveAuth({ password: 'pass', token: 'abc' })).toEqual({
+        type: 'basic',
+        username: undefined,
+        password: 'pass',
+      });
+    });
+
+    it('treats an empty password as a Basic credential', () => {
+      expect(
+        resolveAuth({ username: 'user', password: '', token: 'abc' }),
+      ).toEqual({ type: 'basic', username: 'user', password: '' });
+    });
+
+    it('ignores an empty token', () => {
+      expect(resolveAuth({ token: '' })).toBeNull();
+    });
+
+    it('ignores a username without a password', () => {
+      expect(resolveAuth({ username: 'user' })).toBeNull();
+    });
+
+    it('falls back to the token when only a username is set', () => {
+      expect(resolveAuth({ username: 'user', token: 'abc' })).toEqual({
+        type: 'token',
+        token: 'abc',
+        authType: undefined,
+      });
+    });
+  });
+
+  describe('basicUserinfo()', () => {
+    it('joins the username and password', () => {
+      expect(basicUserinfo({ username: 'user', password: 'pass' })).toBe(
+        'user:pass',
+      );
+    });
+
+    it('substitutes an empty username', () => {
+      expect(basicUserinfo({ password: 'pass' })).toBe(':pass');
+    });
+  });
+
+  describe('basicAuthHeaderValue()', () => {
+    it('base64-encodes the userinfo', () => {
+      expect(basicAuthHeaderValue({ username: 'user', password: 'pass' })).toBe(
+        'Basic dXNlcjpwYXNz',
+      );
+    });
+
+    it('encodes a credential without a username', () => {
+      expect(basicAuthHeaderValue({ password: 'pass' })).toBe('Basic OnBhc3M=');
     });
   });
 

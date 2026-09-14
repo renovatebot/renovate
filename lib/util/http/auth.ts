@@ -5,6 +5,7 @@ import {
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../../constants/index.ts';
+import { basicAuthHeaderValue } from '../host-rules.ts';
 import type { GotOptions } from './types.ts';
 
 export type AuthGotOptions = Pick<
@@ -74,10 +75,10 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
     delete options.token;
   } else if (options.password !== undefined) {
     // Otherwise got will add username and password to url and header
-    const auth = Buffer.from(
-      `${options.username ?? ''}:${options.password}`,
-    ).toString('base64');
-    options.headers.authorization = `Basic ${auth}`;
+    options.headers.authorization = basicAuthHeaderValue({
+      username: options.username,
+      password: options.password,
+    });
     delete options.username;
     delete options.password;
   }

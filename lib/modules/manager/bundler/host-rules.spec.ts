@@ -29,6 +29,24 @@ describe('modules/manager/bundler/host-rules', () => {
       ).toBe('token');
     });
 
+    it('returns the authentication header for a password without a username', () => {
+      expect(
+        getAuthenticationHeaderValue({
+          password: 'password',
+        }),
+      ).toBe(':password');
+    });
+
+    it('prefers the password over the token', () => {
+      expect(
+        getAuthenticationHeaderValue({
+          username: 'test',
+          password: 'password',
+          token: 'token',
+        }),
+      ).toBe('test:password');
+    });
+
     it('escapes special characters in the username but not the password', () => {
       expect(
         getAuthenticationHeaderValue({
