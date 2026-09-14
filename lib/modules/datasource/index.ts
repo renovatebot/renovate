@@ -320,11 +320,21 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 
 function resolveRegistryUrls(
   datasource: DatasourceApi,
+  packageName: string,
   defaultRegistryUrls: string[] | undefined,
   registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined,
 ): string[] {
-  if (!datasource.customRegistrySupport) {
+  const customRegistrySupport =
+    datasource.supportsCustomRegistry?.(packageName) ??
+    datasource.customRegistrySupport;
+  const datasourceDefaultRegistryUrls =
+    datasource.getDefaultRegistryUrls?.(packageName) ??
+    (isFunction(datasource.defaultRegistryUrls)
+      ? datasource.defaultRegistryUrls()
+      : datasource.defaultRegistryUrls);
+
+  if (!customRegistrySupport) {
     if (
       isNonEmptyArray(registryUrls) ||
       isNonEmptyArray(defaultRegistryUrls) ||
@@ -340,9 +350,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return isFunction(datasource.defaultRegistryUrls)
-      ? datasource.defaultRegistryUrls()
-      : coerceArray(datasource.defaultRegistryUrls);
+    return coerceArray(datasourceDefaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
   let resolvedUrls: string[] = [];
@@ -351,11 +359,8 @@ function resolveRegistryUrls(
   } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isFunction(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls];
+  } else if (isNonEmptyArray(datasourceDefaultRegistryUrls)) {
+    resolvedUrls = [...datasourceDefaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   }
   return massageRegistryUrls(resolvedUrls);
@@ -400,6 +405,7 @@ async function fetchReleases(
   }
   registryUrls = resolveRegistryUrls(
     datasource,
+    config.packageName,
     config.defaultRegistryUrls,
     registryUrls,
     config.additionalRegistryUrls,
@@ -546,6 +552,7 @@ function getDigestConfig(
     config.registryUrl ??
     resolveRegistryUrls(
       datasource,
+      packageName,
       config.defaultRegistryUrls,
       config.registryUrls,
       config.additionalRegistryUrls,
