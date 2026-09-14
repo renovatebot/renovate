@@ -20,10 +20,12 @@ function findLockedDependency(
   group: DependenciesFileGroup,
   pkg: DependenciesFilePackage,
 ): LockFileDependency | undefined {
+  const groupName = group.groupName.toUpperCase();
+  const packageName = pkg.name.toUpperCase();
   return dependencies.find(
     (d) =>
-      d.groupName.toUpperCase() === group.groupName.toUpperCase() &&
-      d.packageName.toUpperCase() === pkg.name.toUpperCase(),
+      d.groupName.toUpperCase() === groupName &&
+      d.packageName.toUpperCase() === packageName,
   );
 }
 

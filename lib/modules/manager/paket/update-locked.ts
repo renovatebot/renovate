@@ -23,11 +23,12 @@ export function updateLockedDependency({
     return { status: 'update-failed' };
   }
 
-  const group = managerData?.group;
+  const packageName = depName.toUpperCase();
+  const groupName = managerData?.group?.toUpperCase();
   const lockedEntries = parseLockFile(lockFileContent).filter(
     (dep) =>
-      dep.packageName.toUpperCase() === depName.toUpperCase() &&
-      (!group || dep.groupName.toUpperCase() === group.toUpperCase()),
+      dep.packageName.toUpperCase() === packageName &&
+      (!groupName || dep.groupName.toUpperCase() === groupName),
   );
   if (
     lockedEntries.length &&
