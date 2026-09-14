@@ -720,6 +720,11 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'flutter/flutter',
     withSchema: valSchema('flutter-version'),
   },
+  // https://github.com/supabase/setup-cli
+  'supabase/setup-cli': {
+    datasource: NpmDatasource.id,
+    packageName: 'supabase',
+  },
   // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {
     datasource: GithubReleasesDatasource.id,
