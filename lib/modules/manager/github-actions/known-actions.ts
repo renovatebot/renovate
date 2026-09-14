@@ -328,6 +328,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'wrangler',
     withSchema: valSchema('wranglerVersion'),
   },
+  // https://github.com/cycjimmy/semantic-release-action
+  'cycjimmy/semantic-release-action': {
+    datasource: NpmDatasource.id,
+    packageName: 'semantic-release',
+    // the action's docs describe `semantic_version` as a version range, not
+    // a pinned exact version
+    versioning: npmVersioning.id,
+    withSchema: valSchema('semantic_version'),
+  },
   // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
     datasource: NpmDatasource.id,

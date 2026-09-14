@@ -2878,6 +2878,39 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'cycjimmy/semantic-release-action@v4',
+        with: { semantic_version: '^24.0.0' },
+      },
+      expected: [
+        {
+          currentValue: '^24.0.0',
+          datasource: 'npm',
+          depName: 'semantic-release',
+          depType: 'uses-with',
+          packageName: 'semantic-release',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cycjimmy/semantic-release-action@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'semantic-release',
+          depType: 'uses-with',
+          packageName: 'semantic-release',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'cloudflare/wrangler-action@v3',
         with: { wranglerVersion: '3.78.0' },
       },
