@@ -655,13 +655,6 @@ describe('modules/platform/scm-manager/index', () => {
     });
   });
 
-  describe('getJsonFile', () => {
-    it('should Not implemented and return undefined', async () => {
-      const result = await scmPlatform.getJsonFile('package.json');
-      expect(result).toBeNull();
-    });
-  });
-
   describe('maxBodyLength', () => {
     it('should return the max body length allowed for an SCM-Manager request body', () => {
       expect(scmPlatform.maxBodyLength()).toBe(200000);

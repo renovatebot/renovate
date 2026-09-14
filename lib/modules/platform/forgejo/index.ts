@@ -53,7 +53,6 @@ export const {
   getBranchStatusCheck,
   getIssue,
   getRawFile,
-  getJsonFile,
   getIssueList,
   getPr,
   massageMarkdown,

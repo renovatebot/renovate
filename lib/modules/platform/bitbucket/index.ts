@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
-import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
+import { getInheritedOrGlobal } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { BitbucketHttpOptions } from '../../../util/http/bitbucket.ts';
@@ -220,16 +220,6 @@ export async function getRawFile(
     cacheProvider: repoCacheProvider,
   });
   return res.body;
-}
-
-export async function getJsonFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
-): Promise<any> {
-  // TODO #22198
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return parseJson(raw, fileName);
 }
 
 // Initialize bitbucket by getting base branch and SHA

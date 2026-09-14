@@ -4,10 +4,16 @@ import { PLATFORM_HOST_TYPES, type PlatformId } from '../../constants/index.ts';
 import { loadModules } from '../../util/modules.ts';
 import api from './api.ts';
 import * as platform from './index.ts';
+import * as local from './local/index.ts';
 import type { PlatformModule } from './types.ts';
 
 vi.unmock('./index.ts');
 vi.unmock('./scm.ts');
+
+vi.mock('./local/index.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./local/index.ts')>()),
+  getRawFile: vi.fn(),
+}));
 
 describe('modules/platform/index', () => {
   beforeEach(() => {
@@ -335,6 +341,41 @@ describe('modules/platform/index', () => {
       platform.setPlatformApi('gitlab');
 
       expect(platform.platformSupports('expandGroupMembers')).toBeTrue();
+    });
+  });
+
+  describe('getJsonFile', () => {
+    const getRawFile = vi.mocked(local.getRawFile);
+
+    beforeEach(() => {
+      platform.setPlatformApi('local');
+    });
+
+    it('returns null when the file does not exist', async () => {
+      getRawFile.mockResolvedValueOnce(null);
+
+      await expect(platform.getJsonFile('renovate.json')).resolves.toBeNull();
+    });
+
+    it('parses the raw file contents', async () => {
+      getRawFile.mockResolvedValueOnce('{"foo":"bar"}');
+
+      await expect(platform.getJsonFile('renovate.json')).resolves.toEqual({
+        foo: 'bar',
+      });
+    });
+
+    it('passes repo and branch through and parses JSON5', async () => {
+      getRawFile.mockResolvedValueOnce("{ foo: 'bar' } // comment");
+
+      await expect(
+        platform.getJsonFile('renovate.json5', 'some/repo', 'dev'),
+      ).resolves.toEqual({ foo: 'bar' });
+      expect(getRawFile).toHaveBeenCalledExactlyOnceWith(
+        'renovate.json5',
+        'some/repo',
+        'dev',
+      );
     });
   });
 });

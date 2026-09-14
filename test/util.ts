@@ -3,7 +3,10 @@ import type { DeepMockProxy } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../lib/config/types.ts';
 import * as _logger from '../lib/logger/index.ts';
 import type { Platform } from '../lib/modules/platform/index.ts';
-import { platform as _platform } from '../lib/modules/platform/index.ts';
+import {
+  getJsonFile as _getJsonFile,
+  platform as _platform,
+} from '../lib/modules/platform/index.ts';
 import { scm as _scm } from '../lib/modules/platform/scm.ts';
 import * as _env from '../lib/util/exec/env.ts';
 import * as _fs from '../lib/util/fs/index.ts';
@@ -38,6 +41,7 @@ export const fs = vi.mocked(_fs);
 export const git = vi.mocked(_git);
 
 export const platform = vi.mocked(partial<Required<Platform>>(_platform));
+export const getJsonFile = vi.mocked(_getJsonFile);
 export const scm = vi.mocked(_scm);
 export const env = vi.mocked(_env);
 export const hostRules = vi.mocked(_hostRules);

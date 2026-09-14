@@ -1129,16 +1129,6 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
-  describe('getJsonFile()', () => {
-    //TODO: the wanted semantic is not clear
-    it('getJsonFile()', async () => {
-      clientMock.getFile.mockResolvedValueOnce('{}');
-      await expect(
-        gerrit.getJsonFile('renovate.json', 'test/repo', 'main'),
-      ).resolves.toEqual({});
-    });
-  });
-
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
       expect(

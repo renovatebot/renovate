@@ -13,6 +13,7 @@ vi.mock('../lib/modules/platform/index.ts', () => ({
   initPlatform: vi.fn(),
   getPlatformList: vi.fn(),
   platformSupports: vi.fn(),
+  getJsonFile: vi.fn(),
 }));
 
 vi.mock('../lib/modules/platform/scm.ts', () => ({

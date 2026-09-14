@@ -49,10 +49,6 @@ export function getRawFile(): Promise<string | null> {
   return Promise.resolve(null);
 }
 
-export function getJsonFile(): Promise<Record<string, unknown> | null> {
-  return Promise.resolve(null);
-}
-
 export function getPrList(): Promise<Pr[]> {
   return Promise.resolve([]);
 }

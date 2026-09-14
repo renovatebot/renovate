@@ -8,7 +8,7 @@ import {
 import { logger } from '../../../../logger/index.ts';
 import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
-import { platform } from '../../../../modules/platform/index.ts';
+import { getJsonFile, platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
@@ -112,9 +112,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (cache.configFileName && !config.forkToken) {
     logger.debug('Checking cached config file name');
     try {
-      const configFileContent = await platform.getJsonFile(
-        cache.configFileName,
-      );
+      const configFileContent = await getJsonFile(cache.configFileName);
       if (
         configFileContent &&
         (cache.configFileName !== 'package.json' || configFileContent.renovate)

@@ -4323,97 +4323,48 @@ These updates have all been created already. To force a retry/rebase of any, cli
     });
   });
 
-  describe('getJsonFile()', () => {
-    it('returns null', async () => {
-      const scope = await initRepo();
-      scope
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
-        )
-        .reply(200, {
-          content: '',
-        });
-      const res = await gitlab.getJsonFile('dir/file.json');
-      expect(res).toBeNull();
-    });
-
+  describe('getRawFile()', () => {
     it('returns file content', async () => {
-      const data = { foo: 'bar' };
       const scope = await initRepo();
       scope
         .get(
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .reply(200, {
-          content: toBase64(JSON.stringify(data)),
+          content: toBase64('{"foo":"bar"}'),
         });
-      const res = await gitlab.getJsonFile('dir/file.json');
-      expect(res).toEqual(data);
-    });
-
-    it('returns file content in json5 format', async () => {
-      const json5Data = `
-        {
-          // json5 comment
-          foo: 'bar'
-        }
-        `;
-      const scope = await initRepo();
-      scope
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json5?ref=HEAD',
-        )
-        .reply(200, {
-          content: toBase64(json5Data),
-        });
-      const res = await gitlab.getJsonFile('dir/file.json5');
-      expect(res).toEqual({ foo: 'bar' });
+      const res = await gitlab.getRawFile('dir/file.json');
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('returns file content from given repo', async () => {
-      const data = { foo: 'bar' };
       const scope = await initRepo();
       scope
         .get(
           '/api/v4/projects/different%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .reply(200, {
-          content: toBase64(JSON.stringify(data)),
+          content: toBase64('{"foo":"bar"}'),
         });
-      const res = await gitlab.getJsonFile('dir/file.json', 'different%2Frepo');
-      expect(res).toEqual(data);
+      const res = await gitlab.getRawFile('dir/file.json', 'different%2Frepo');
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('returns file content from branch or tag', async () => {
-      const data = { foo: 'bar' };
       const scope = await initRepo();
       scope
         .get(
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=dev',
         )
         .reply(200, {
-          content: toBase64(JSON.stringify(data)),
+          content: toBase64('{"foo":"bar"}'),
         });
-      const res = await gitlab.getJsonFile(
+      const res = await gitlab.getRawFile(
         'dir/file.json',
         'some%2Frepo',
         'dev',
       );
-      expect(res).toEqual(data);
-    });
-
-    it('throws on malformed JSON', async () => {
-      const scope = await initRepo();
-      scope
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
-        )
-        .reply(200, {
-          content: toBase64('!@#'),
-        });
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
-        "JSON5: invalid character '!' at 1:1",
-      );
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('throws on errors', async () => {
@@ -4423,7 +4374,7 @@ These updates have all been created already. To force a retry/rebase of any, cli
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .replyWithError('some error');
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
+      await expect(gitlab.getRawFile('dir/file.json')).rejects.toThrow(
         'some error',
       );
     });

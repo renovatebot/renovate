@@ -6418,81 +6418,38 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('getJsonFile()', () => {
-    it('returns null', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      scope.get('/repos/some/repo/contents/file.json').reply(200, {
-        content: '',
-      });
-      const res = await github.getJsonFile('file.json');
-      expect(res).toBeNull();
-    });
-
+  describe('getRawFile()', () => {
     it('returns file content', async () => {
-      const data = { foo: 'bar' };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
-        content: toBase64(JSON.stringify(data)),
+        content: toBase64('{"foo":"bar"}'),
       });
-      const res = await github.getJsonFile('file.json');
-      expect(res).toEqual(data);
-    });
-
-    it('returns file content in json5 format', async () => {
-      const json5Data = `
-        {
-          // json5 comment
-          foo: 'bar'
-        }
-      `;
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      scope.get('/repos/some/repo/contents/file.json5').reply(200, {
-        content: toBase64(json5Data),
-      });
-      const res = await github.getJsonFile('file.json5');
-      expect(res).toEqual({ foo: 'bar' });
+      const res = await github.getRawFile('file.json');
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('returns file content from given repo', async () => {
-      const data = { foo: 'bar' };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'different/repo');
       await github.initRepo({ repository: 'different/repo' });
       scope.get('/repos/different/repo/contents/file.json').reply(200, {
-        content: toBase64(JSON.stringify(data)),
+        content: toBase64('{"foo":"bar"}'),
       });
-      const res = await github.getJsonFile('file.json', 'different/repo');
-      expect(res).toEqual(data);
+      const res = await github.getRawFile('file.json', 'different/repo');
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('returns file content from branch or tag', async () => {
-      const data = { foo: 'bar' };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope.get('/repos/some/repo/contents/file.json?ref=dev').reply(200, {
-        content: toBase64(JSON.stringify(data)),
+        content: toBase64('{"foo":"bar"}'),
       });
-      const res = await github.getJsonFile('file.json', 'some/repo', 'dev');
-      expect(res).toEqual(data);
-    });
-
-    it('throws on malformed JSON', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      scope.get('/repos/some/repo/contents/file.json').reply(200, {
-        content: toBase64('!@#'),
-      });
-      await expect(github.getJsonFile('file.json')).rejects.toThrow(
-        "JSON5: invalid character '!' at 1:1",
-      );
+      const res = await github.getRawFile('file.json', 'some/repo', 'dev');
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('throws on errors', async () => {
@@ -6503,7 +6460,7 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/contents/file.json')
         .replyWithError('some error');
 
-      await expect(github.getJsonFile('file.json')).rejects.toThrow(
+      await expect(github.getRawFile('file.json')).rejects.toThrow(
         'some error',
       );
     });

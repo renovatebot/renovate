@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '~test/util.ts';
-import { git, logger, partial, platform, scm } from '~test/util.ts';
+import { getJsonFile, git, logger, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
@@ -62,7 +62,7 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from default branch if useBaseBranchConfig not specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile.mockResolvedValueOnce({});
+      getJsonFile.mockResolvedValueOnce({});
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
       getCache().configFileName = 'renovate.json';
@@ -72,7 +72,7 @@ describe('workers/repository/process/index', () => {
         branches: [undefined, undefined],
         packageFiles: undefined,
       });
-      expect(platform.getJsonFile).not.toHaveBeenCalledExactlyOnceWith(
+      expect(getJsonFile).not.toHaveBeenCalledExactlyOnceWith(
         'renovate.json',
         undefined,
         'dev',
@@ -81,9 +81,7 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from branches in baseBranchPatterns if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = vi
-        .fn()
-        .mockResolvedValue({ extends: [':approveMajorUpdates'] });
+      getJsonFile.mockResolvedValue({ extends: [':approveMajorUpdates'] });
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       getCache().configFileName = 'renovate.json';
@@ -94,7 +92,7 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      expect(platform.getJsonFile).toHaveBeenCalledWith(
+      expect(getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
         'dev',
@@ -105,7 +103,7 @@ describe('workers/repository/process/index', () => {
 
     it('throws if base branch config is invalid', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = vi.fn().mockResolvedValue({
+      getJsonFile.mockResolvedValue({
         extends: [':approveMajorUpdates'],
         labels: '123',
         invalidKey: 'invalidValue',
@@ -120,14 +118,12 @@ describe('workers/repository/process/index', () => {
 
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = vi
-        .fn()
-        .mockImplementation((fileName, repoName, branchName) => {
-          if (branchName === 'dev') {
-            throw new Error();
-          }
-          return {};
-        });
+      getJsonFile.mockImplementation((fileName, repoName, branchName) => {
+        if (branchName === 'dev') {
+          throw new Error();
+        }
+        return Promise.resolve({});
+      });
       getCache().configFileName = 'renovate.json';
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';

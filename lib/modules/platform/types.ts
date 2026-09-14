@@ -292,11 +292,6 @@ export interface PlatformModule {
     repoName?: string,
     branchOrTag?: string,
   ): Promise<string | null>;
-  getJsonFile(
-    fileName: string,
-    repoName?: string,
-    branchOrTag?: string,
-  ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;

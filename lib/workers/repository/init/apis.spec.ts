@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '~test/util.ts';
-import { platform } from '~test/util.ts';
+import { getJsonFile, platform } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -37,7 +37,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({ enabled: false });
+      getJsonFile.mockResolvedValueOnce({ enabled: false });
       await expect(
         initApis({
           ...config,
@@ -52,7 +52,7 @@ describe('workers/repository/init/apis', () => {
         isFork: true,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
+      getJsonFile.mockResolvedValueOnce({
         forkProcessing: 'disabled',
       });
       await expect(
@@ -69,7 +69,7 @@ describe('workers/repository/init/apis', () => {
         isFork: true,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
+      getJsonFile.mockResolvedValueOnce({
         includeForks: true,
       });
       const workerPlatformConfig = await initApis(config);
@@ -82,20 +82,20 @@ describe('workers/repository/init/apis', () => {
         isFork: true,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
+      getJsonFile.mockResolvedValueOnce({
         forkProcessing: 'enabled',
       });
       const workerPlatformConfig = await initApis(config);
       expect(workerPlatformConfig).toBeTruthy();
     });
 
-    it('ignores platform.getJsonFile() failures', async () => {
+    it('ignores getJsonFile() failures', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockRejectedValue(new Error());
+      getJsonFile.mockRejectedValue(new Error());
       await expect(
         initApis({
           ...config,
@@ -106,13 +106,13 @@ describe('workers/repository/init/apis', () => {
       ).resolves.not.toThrow();
     });
 
-    it('throws for fork with platform.getJsonFile() failures', async () => {
+    it('throws for fork with getJsonFile() failures', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: true,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockRejectedValue(new Error());
+      getJsonFile.mockRejectedValue(new Error());
       await expect(
         initApis({
           ...config,
@@ -128,7 +128,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
+      getJsonFile.mockResolvedValueOnce({
         forkProcessing: 'disabled',
       });
       const workerPlatformConfig = await initApis({
@@ -140,12 +140,10 @@ describe('workers/repository/init/apis', () => {
       expect(workerPlatformConfig.onboardingConfigFileName).toBe(
         '.github/renovate.json',
       );
-      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
+      expect(getJsonFile).toHaveBeenCalledExactlyOnceWith(
         '.github/renovate.json',
       );
-      expect(platform.getJsonFile).not.toHaveBeenCalledExactlyOnceWith(
-        'renovate.json',
-      );
+      expect(getJsonFile).not.toHaveBeenCalledExactlyOnceWith('renovate.json');
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
@@ -154,7 +152,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
+      getJsonFile.mockResolvedValueOnce({
         forkProcessing: 'disabled',
       });
       const workerPlatformConfig = await initApis({
@@ -164,9 +162,7 @@ describe('workers/repository/init/apis', () => {
       });
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
-      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
-        'renovate.json',
-      );
+      expect(getJsonFile).toHaveBeenCalledExactlyOnceWith('renovate.json');
     });
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not valid', async () => {
@@ -175,7 +171,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({ forkProcessing: false });
+      getJsonFile.mockResolvedValueOnce({ forkProcessing: false });
       const workerPlatformConfig = await initApis({
         ...config,
         optimizeForDisabled: true,
@@ -183,9 +179,7 @@ describe('workers/repository/init/apis', () => {
       });
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBe('foo.bar');
-      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
-        'renovate.json',
-      );
+      expect(getJsonFile).toHaveBeenCalledExactlyOnceWith('renovate.json');
     });
 
     it('checks for re-enablement and continues', async () => {
@@ -194,7 +188,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
+      getJsonFile.mockResolvedValueOnce({
         enabled: true,
       });
       const workerPlatformConfig = await initApis({
@@ -203,9 +197,7 @@ describe('workers/repository/init/apis', () => {
         extends: [':disableRenovate'],
       });
       expect(workerPlatformConfig).toBeTruthy();
-      expect(platform.getJsonFile).toHaveBeenCalledExactlyOnceWith(
-        'renovate.json',
-      );
+      expect(getJsonFile).toHaveBeenCalledExactlyOnceWith('renovate.json');
     });
 
     it('checks for re-enablement and skips', async () => {
@@ -214,7 +206,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce(null);
+      getJsonFile.mockResolvedValueOnce(null);
       await expect(
         initApis({
           ...config,

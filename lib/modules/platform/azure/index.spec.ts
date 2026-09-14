@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream';
 import { isString } from '@sindresorhus/is';
 import type { ICoreApi } from 'azure-devops-node-api/CoreApi.js';
 import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
@@ -2379,22 +2378,19 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
-  describe('getJsonFile()', () => {
+  describe('getRawFile()', () => {
     beforeEach(async () => {
       await initRepo();
     });
 
     it('returns file content', async () => {
-      const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
         vi.fn().mockImplementationOnce(() => ({
-          getItem: vi.fn(() =>
-            Promise.resolve({ content: JSON.stringify(data) }),
-          ),
+          getItem: vi.fn(() => Promise.resolve({ content: '{"foo":"bar"}' })),
         })),
       );
-      const res = await azure.getJsonFile('file.json');
-      expect(res).toEqual(data);
+      const res = await azure.getRawFile('file.json');
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('returns null when file not found', async () => {
@@ -2403,48 +2399,18 @@ describe('modules/platform/azure/index', () => {
           getItem: vi.fn(() => Promise.resolve(null)),
         })),
       );
-      const res = await azure.getJsonFile('file.json');
+      const res = await azure.getRawFile('file.json');
       expect(res).toBeNull();
     });
 
-    it('returns file content in json5 format', async () => {
-      const json5Data = `
-        {
-          // json5 comment
-          foo: 'bar'
-        }
-      `;
-      azureApi.gitApi.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getItem: vi.fn(() => Promise.resolve({ content: json5Data })),
-        })),
-      );
-      const res = await azure.getJsonFile('file.json5');
-      expect(res).toEqual({ foo: 'bar' });
-    });
-
     it('returns file content from branch or tag', async () => {
-      const data = { foo: 'bar' };
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getItem: vi.fn(() =>
-            Promise.resolve({ content: JSON.stringify(data) }),
-          ),
+          getItem: vi.fn(() => Promise.resolve({ content: '{"foo":"bar"}' })),
         }),
       );
-      const res = await azure.getJsonFile('file.json', undefined, 'dev');
-      expect(res).toEqual(data);
-    });
-
-    it('throws on malformed JSON', async () => {
-      azureApi.gitApi.mockResolvedValueOnce(
-        partial<IGitApi>({
-          getItemContent: vi.fn(() => Promise.resolve(Readable.from('!@#'))),
-        }),
-      );
-      await expect(azure.getJsonFile('file.json')).rejects.toThrow(
-        'azureApiGit.getItem is not a function',
-      );
+      const res = await azure.getRawFile('file.json', undefined, 'dev');
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('throws on errors', async () => {
@@ -2455,16 +2421,15 @@ describe('modules/platform/azure/index', () => {
           }),
         }),
       );
-      await expect(azure.getJsonFile('file.json')).rejects.toThrow(
+      await expect(azure.getRawFile('file.json')).rejects.toThrow(
         'azureApiGit.getItem is not a function',
       );
     });
 
     it('supports fetch from another repo', async () => {
-      const data = { foo: 'bar' };
       const getItemFn = vi
         .fn()
-        .mockResolvedValueOnce({ content: JSON.stringify(data) });
+        .mockResolvedValueOnce({ content: '{"foo":"bar"}' });
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
           getItem: getItemFn,
@@ -2475,8 +2440,8 @@ describe('modules/platform/azure/index', () => {
             ]),
         }),
       );
-      const res = await azure.getJsonFile('file.json', 'foo/bar');
-      expect(res).toEqual(data);
+      const res = await azure.getRawFile('file.json', 'foo/bar');
+      expect(res).toBe('{"foo":"bar"}');
       expect(getItemFn.mock.calls).toEqual([
         [
           '123456',
@@ -2499,7 +2464,7 @@ describe('modules/platform/azure/index', () => {
           getRepositories: vi.fn(() => Promise.resolve([])),
         }),
       );
-      const res = await azure.getJsonFile('file.json', 'foo/bar');
+      const res = await azure.getRawFile('file.json', 'foo/bar');
       expect(res).toBeNull();
     });
   });
@@ -2544,12 +2509,12 @@ describe('modules/platform/azure/index', () => {
           ]),
       }),
     );
-    const result = await azure.getJsonFile(
+    const result = await azure.getRawFile(
       'file.json',
       'some/repo',
       'some-branch',
     );
-    expect(result).toEqual({ test: 'branch content' });
+    expect(result).toBe('{ "test": "branch content" }');
     expect(callArgs[0]).toBe(GitVersionType.Tag);
     expect(callArgs[1]).toBe(GitVersionType.Branch);
   });

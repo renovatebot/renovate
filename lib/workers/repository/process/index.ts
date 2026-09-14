@@ -10,7 +10,7 @@ import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types.ts';
 import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { supportsGit } from '../../../modules/platform/capabilities.ts';
-import { platform } from '../../../modules/platform/index.ts';
+import { getJsonFile } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
@@ -46,7 +46,7 @@ export async function getBaseBranchConfig(
     const configFileName = cache.configFileName!;
 
     try {
-      baseBranchConfig = await platform.getJsonFile(
+      baseBranchConfig = await getJsonFile(
         configFileName,
         config.repository,
         baseBranch,

@@ -8,7 +8,10 @@ import type {
   RepoParams,
   RepoResult,
 } from '../../../modules/platform/index.ts';
-import { platform } from '../../../modules/platform/index.ts';
+import {
+  getJsonFile as getPlatformJsonFile,
+  platform,
+} from '../../../modules/platform/index.ts';
 import { getDefaultConfigFileName } from '../onboarding/common.ts';
 
 // TODO: fix types (#22198)
@@ -18,7 +21,7 @@ export type WorkerPlatformConfig = RepoResult &
 
 async function getJsonFile(file: string): Promise<RenovateConfig | null> {
   try {
-    return await platform.getJsonFile(file);
+    return await getPlatformJsonFile(file);
   } catch {
     return null;
   }

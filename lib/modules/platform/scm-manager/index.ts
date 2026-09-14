@@ -314,15 +314,6 @@ export function getRawFile(
   return Promise.resolve(null);
 }
 
-export function getJsonFile(
-  _fileName: string,
-  _repoName?: string,
-  _branchOrTag?: string,
-): Promise<any> {
-  logger.debug('Not implemented getJsonFile');
-  return Promise.resolve(null);
-}
-
 export function maxBodyLength(): number {
   return 200000;
 }
