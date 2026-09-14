@@ -1,4 +1,3 @@
-import { isString } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import * as hostRules from '../../../../util/host-rules.ts';
 import { regEx } from '../../../../util/regex.ts';
@@ -34,14 +33,20 @@ export function processHostRules(): HostRulesResult {
       cleanedUri = matchedHost.replace(regEx(/^https?:/), '');
     }
 
-    if (hostRule.token) {
-      const key = hostRule.authType === 'Basic' ? '_auth' : '_authToken';
-      logger.debug(`Adding npmrc entry for ${cleanedUri} with key ${key}`);
-      additionalNpmrcContent.push(`${cleanedUri}:${key}=${hostRule.token}`);
+    const auth = hostRules.resolveAuth(hostRule);
+    // v8 ignore if -- TODO: add test #40625
+    if (!auth) {
+      continue;
+    }
 
-      if (hostRule.authType === 'Basic') {
+    if (auth.type === 'token') {
+      const key = auth.authType === 'Basic' ? '_auth' : '_authToken';
+      logger.debug(`Adding npmrc entry for ${cleanedUri} with key ${key}`);
+      additionalNpmrcContent.push(`${cleanedUri}:${key}=${auth.token}`);
+
+      if (auth.authType === 'Basic') {
         const registry = {
-          npmAuthIdent: hostRule.token,
+          npmAuthIdent: auth.token,
         };
         additionalYarnRcYml.npmRegistries[cleanedUri] = registry;
         additionalYarnRcYml.npmRegistries[uri] = registry;
@@ -50,7 +55,7 @@ export function processHostRules(): HostRulesResult {
       }
 
       const registry = {
-        npmAuthToken: hostRule.token,
+        npmAuthToken: auth.token,
       };
       additionalYarnRcYml.npmRegistries[cleanedUri] = registry;
       additionalYarnRcYml.npmRegistries[uri] = registry;
@@ -58,23 +63,17 @@ export function processHostRules(): HostRulesResult {
       continue;
     }
 
-    // v8 ignore else -- TODO: add test #40625
-    if (isString(hostRule.username) && isString(hostRule.password)) {
-      logger.debug(
-        `Adding npmrc entry for ${cleanedUri} with username/password`,
-      );
-      const password = toBase64(hostRule.password);
-      additionalNpmrcContent.push(
-        `${cleanedUri}:username=${hostRule.username}`,
-      );
-      additionalNpmrcContent.push(`${cleanedUri}:_password=${password}`);
+    logger.debug(`Adding npmrc entry for ${cleanedUri} with username/password`);
+    const username = auth.username ?? '';
+    const password = toBase64(auth.password);
+    additionalNpmrcContent.push(`${cleanedUri}:username=${username}`);
+    additionalNpmrcContent.push(`${cleanedUri}:_password=${password}`);
 
-      const registries = {
-        npmAuthIdent: `${hostRule.username}:${hostRule.password}`,
-      };
-      additionalYarnRcYml.npmRegistries[cleanedUri] = registries;
-      additionalYarnRcYml.npmRegistries[uri] = registries;
-    }
+    const registries = {
+      npmAuthIdent: hostRules.basicUserinfo(auth),
+    };
+    additionalYarnRcYml.npmRegistries[cleanedUri] = registries;
+    additionalYarnRcYml.npmRegistries[uri] = registries;
   }
 
   const hasYarnRcNpmRegistries =

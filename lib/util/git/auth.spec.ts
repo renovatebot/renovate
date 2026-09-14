@@ -46,7 +46,7 @@ describe('util/git/auth', () => {
       });
     });
 
-    it('prefers token over username and password', () => {
+    it('prefers username and password over token', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
           username: 'username',
@@ -57,12 +57,30 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://username:password@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://username:password@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://username:password@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+    });
+
+    it('returns url with a password and no username', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables({}, 'https://example.com/', {
+          password: 'password',
+          hostType: 'github',
+          matchHost: 'example.com',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://:password@example.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://:password@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+        GIT_CONFIG_VALUE_1: 'git@example.com:',
+        GIT_CONFIG_VALUE_2: 'https://example.com/',
       });
     });
 
