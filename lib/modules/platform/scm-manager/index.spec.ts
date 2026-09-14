@@ -553,7 +553,7 @@ describe('modules/platform/scm-manager/index', () => {
     it('should Not implemented and return null', async () => {
       const result = await scmPlatform.getBranchStatusCheck(
         'test/branch',
-        null,
+        'test-context',
       );
       expect(result).toBeNull();
     });
