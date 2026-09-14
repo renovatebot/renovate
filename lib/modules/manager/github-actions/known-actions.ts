@@ -524,6 +524,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: PypiDatasource.id,
     packageName: 'poetry',
   },
+  // https://github.com/subosito/flutter-action
+  'subosito/flutter-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'flutter',
+    packageName: 'flutter/flutter',
+    withSchema: valSchema('flutter-version'),
+  },
   // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {
     datasource: GithubReleasesDatasource.id,
