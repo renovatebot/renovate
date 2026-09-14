@@ -3904,6 +3904,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'pulumi/actions@v6',
+        with: { 'pulumi-version': '3.262.0' },
+      },
+      expected: [
+        {
+          currentValue: '3.262.0',
+          datasource: 'github-releases',
+          depName: 'pulumi',
+          depType: 'uses-with',
+          packageName: 'pulumi/pulumi',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pulumi/actions@v6',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'pulumi',
+          depType: 'uses-with',
+          packageName: 'pulumi/pulumi',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

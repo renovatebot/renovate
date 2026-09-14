@@ -688,6 +688,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'prefix-dev/pixi',
     withSchema: valSchema('pixi-version'),
   },
+  // https://github.com/pulumi/actions
+  'pulumi/actions': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'pulumi',
+    packageName: 'pulumi/pulumi',
+    withSchema: valSchema('pulumi-version'),
+  },
   // https://github.com/pypa/hatch/tree/install
   'pypa/hatch': {
     datasource: GithubReleasesDatasource.id,
