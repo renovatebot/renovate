@@ -53,6 +53,7 @@ export function getExtraDeps(
     }
 
     const newValue = addDeps[depName];
+    // v8 ignore else -- needs a removed dep that is not added back
     if (newValue) {
       result.push({
         depName,
@@ -110,6 +111,8 @@ export function getExtraDepsNotice(
 
   if (otherDepsCount === 1) {
     noticeLines.push(`- ${otherDepsCount} additional dependency was updated`);
+    // NOTE: a zero count adds no line. A coverage-ignore hint cannot suppress
+    // the implicit else on an `else if`.
   } else if (otherDepsCount > 1) {
     noticeLines.push(
       `- ${otherDepsCount} additional dependencies were updated`,
