@@ -19,7 +19,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import { isPublicGoPackage } from './common.ts';
+import { isPseudoVersion, isPublicGoPackage } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { GoProxyDatasource } from './releases-goproxy.ts';
@@ -53,6 +53,10 @@ export class GoDatasource extends Datasource {
   static readonly pversionRegexp = regEx(
     /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
   );
+
+  override isPseudoVersion(version: string): boolean {
+    return isPseudoVersion(version);
+  }
 
   private _getReleases(
     config: GetReleasesConfig,

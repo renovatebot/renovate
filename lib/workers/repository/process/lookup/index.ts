@@ -8,6 +8,7 @@ import {
   getDefaultVersioning,
 } from '../../../../modules/datasource/common.ts';
 import type {
+  DatasourceApi,
   Release,
   ReleaseResult,
 } from '../../../../modules/datasource/index.ts';
@@ -54,6 +55,10 @@ import {
   restoreVersionCompatibility,
 } from './version-compatibility.ts';
 import { applyVulnerabilityFixFilter } from './vulnerability.ts';
+
+function isPseudoVersion(datasource: DatasourceApi, version: string): boolean {
+  return datasource.isPseudoVersion?.(version) ?? false;
+}
 
 async function getTimestamp(
   config: LookupUpdateConfig,
@@ -114,10 +119,8 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
-    if (
-      !isGetPkgReleasesConfig(config) ||
-      !getDatasourceFor(config.datasource)
-    ) {
+    const datasourceApi = getDatasourceFor(config.datasource);
+    if (!isGetPkgReleasesConfig(config) || !datasourceApi) {
       res.skipReason = 'invalid-config';
       return Result.ok(res);
     }
@@ -451,11 +454,12 @@ export async function lookupUpdates(
           allReleaseVersions,
         );
 
-        // #29034
+        // An update between two pseudo-versions of the same package changes the commit and nothing else, so it is a digest update - see #29034
         if (
-          config.manager === 'gomod' &&
-          compareValue?.startsWith('v0.0.0-') &&
-          update.newValue?.startsWith('v0.0.0-') &&
+          compareValue &&
+          isPseudoVersion(datasourceApi, compareValue) &&
+          update.newValue &&
+          isPseudoVersion(datasourceApi, update.newValue) &&
           config.currentDigest !== update.newDigest
         ) {
           update.updateType = 'digest';
