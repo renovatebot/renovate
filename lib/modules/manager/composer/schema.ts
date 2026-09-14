@@ -148,6 +148,8 @@ export const Repos = z
         gitRepos[repo.name] = repo;
       } else if (repo.type === 'path') {
         pathRepos[repo.name] = repo;
+        // NOTE: the union above has no other member, so the implicit else never
+        // runs. A coverage-ignore hint cannot suppress it on an `else if`.
       } else if (repo.type === 'disable-packagist') {
         packagist = false;
       }
