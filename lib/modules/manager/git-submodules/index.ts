@@ -14,3 +14,8 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [GitRefsDatasource.id];
+
+// `updateDependency()` checks out the new revision in the submodule instead of
+// changing `.gitmodules`, so the unchanged `.gitmodules` must still count as
+// updated for `updateArtifacts()` to pick up the checked out revision.
+export const updatesFilesOutOfBand = true;
