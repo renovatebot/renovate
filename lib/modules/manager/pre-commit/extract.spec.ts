@@ -12,11 +12,6 @@ const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml',
 );
 describe('modules/manager/pre-commit/extract', () => {
-  beforeEach(() => {
-    hostRules.find.mockReset();
-    hostRules.hostType.mockReset();
-  });
-
   describe('extractPackageFile()', () => {
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [', filename);
@@ -209,7 +204,10 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('preserves registryUrls for custom github hosts detected via hostRules', () => {
-      hostRules.hostType.mockReturnValueOnce('github');
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'enterprise.com',
+      });
 
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
@@ -330,7 +328,6 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('strips credentials from registryUrls for custom hosts', () => {
-      hostRules.find.mockReturnValue({});
       const config = codeBlock`
         repos:
           - repo: https://user:pass@enterprise.com/pre-commit/pre-commit-hooks

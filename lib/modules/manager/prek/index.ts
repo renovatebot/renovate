@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
@@ -18,6 +19,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
+  ForgejoTagsDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   NpmDatasource.id,

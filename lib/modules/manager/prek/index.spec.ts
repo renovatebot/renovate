@@ -1,3 +1,4 @@
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
@@ -22,6 +23,7 @@ describe('modules/manager/prek/index', () => {
   it('lists all datasources used by extraction', () => {
     expect(supportedDatasources).toEqual(
       expect.arrayContaining([
+        ForgejoTagsDatasource.id,
         GithubTagsDatasource.id,
         GitlabTagsDatasource.id,
         NpmDatasource.id,

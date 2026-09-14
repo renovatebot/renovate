@@ -1,43 +1,14 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
-import { hostRules } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { extractPackageFile } from './index.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-
 const filename = 'prek.toml';
 
 const validPrekConfig = Fixtures.get('valid.prek.toml');
-const additionalDependenciesPrekConfig = Fixtures.get(
-  'additional_dependencies.prek.toml',
-);
-
-const noReposPrekConfig = codeBlock`
-  minimum_prek_version = "0.1.0"
-`;
-
-const missingRevPrekConfig = codeBlock`
-  [[repos]]
-  repo = "https://github.com/pre-commit/pre-commit-hooks"
-
-  [[repos]]
-  repo = "https://github.com/rhysd/actionlint"
-  rev = "v1.7.7"
-`;
-
-const invalidUrlPrekConfig = codeBlock`
-  [[repos]]
-  repo = "not_a_valid_url"
-  rev = "v1.0.0"
-
-  [[repos]]
-  repo = "https://github.com/pre-commit/pre-commit-hooks"
-  rev = "v1.0.0"
-`;
 
 const enterprisePrekConfig = codeBlock`
   [[repos]]
@@ -45,28 +16,7 @@ const enterprisePrekConfig = codeBlock`
   rev = "v1.0.0"
 `;
 
-const malformedTypedRepoPrekConfig = codeBlock`
-  [[repos]]
-  repo = "https://github.com/pre-commit/pre-commit-hooks"
-  rev = 1
-
-  [[repos]]
-  repo = "https://github.com/rhysd/actionlint"
-  rev = "v1.7.7"
-`;
-
-const customGitlabHostPrekConfig = codeBlock`
-  [[repos]]
-  repo = "https://gitlab.enterprise.com/pre-commit/pre-commit-hooks"
-  rev = "v1.0.0"
-`;
-
 describe('modules/manager/prek/extract', () => {
-  beforeEach(() => {
-    hostRules.find.mockReset();
-    hostRules.hostType.mockReset();
-  });
-
   describe('extractPackageFile()', () => {
     it('returns null for invalid TOML file content', () => {
       const result = extractPackageFile('not valid toml = [', filename);
@@ -84,6 +34,9 @@ describe('modules/manager/prek/extract', () => {
     });
 
     it('returns null when no repos are present', () => {
+      const noReposPrekConfig = codeBlock`
+        minimum_prek_version = "0.1.0"
+      `;
       const result = extractPackageFile(noReposPrekConfig, filename);
       expect(result).toBeNull();
     });
@@ -94,7 +47,7 @@ describe('modules/manager/prek/extract', () => {
     });
 
     it('returns null when all repos are invalid', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks"
 revv = "v3.3.0"`;
       const result = extractPackageFile(config, filename);
@@ -145,7 +98,7 @@ revv = "v3.3.0"`;
     });
 
     it('strips .git suffix from repository dependency depName', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks.git"
 rev = "v1.0.0"`;
 
@@ -164,7 +117,7 @@ rev = "v1.0.0"`;
     });
 
     it('normalizes depName when repository URL contains query and fragment', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks.git?ref=main#frag"
 rev = "v1.0.0"`;
 
@@ -183,7 +136,7 @@ rev = "v1.0.0"`;
     });
 
     it('normalizes depName for trailing slash repository URLs', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks/"
 rev = "v1.0.0"`;
 
@@ -202,7 +155,7 @@ rev = "v1.0.0"`;
     });
 
     it('extracts frozen SHA revs with double quotes', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/crate-ci/typos"
 rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0
 hooks = [{ id = "typos" }]`;
@@ -227,7 +180,7 @@ hooks = [{ id = "typos" }]`;
     });
 
     it('extracts frozen SHA revs with single quotes', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/executablebooks/mdformat"
 rev = '82912cdaea4fb830f751504486a7879c70526547' # frozen: 1.0.0
 
@@ -254,7 +207,7 @@ id = "mdformat"`;
     });
 
     it('extracts frozen SHA revs when rev appears before repo in a repo block', () => {
-      const config = `[[ repos ]]
+      const config = codeBlock`[[ repos ]]
 rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0
 repo = "https://github.com/crate-ci/typos"
 
@@ -289,7 +242,7 @@ rev = "v5.0.0"`;
     });
 
     it('extracts frozen SHA revs when repo line has a trailing comment', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/crate-ci/typos" # comment
 rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0
 hooks = [{ id = "typos" }]`;
@@ -314,7 +267,7 @@ hooks = [{ id = "typos" }]`;
     });
 
     it('extracts frozen SHA revs when repo section line has a trailing comment', () => {
-      const config = `[[repos]] # comment
+      const config = codeBlock`[[repos]] # comment
 rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0
 repo = "https://github.com/crate-ci/typos"
 hooks = [{ id = "typos" }]`;
@@ -339,7 +292,7 @@ hooks = [{ id = "typos" }]`;
     });
 
     it('marks bare SHA revs as unspecified-version', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f"
 hooks = [{ id = "check-metaschema" }]`;
@@ -360,7 +313,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('extracts frozen SHA revs with trailing notes without consuming the note', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/crate-ci/typos"
 rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0 # note
 hooks = [{ id = "typos" }]`;
@@ -385,7 +338,7 @@ hooks = [{ id = "typos" }]`;
     });
 
     it('extracts SHA revs with version comments as digest pins with currentValue', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # v1.2.3
 hooks = [{ id = "check-metaschema" }]`;
@@ -410,7 +363,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('extracts SHA revs with plain numeric version comments as digest pins with currentValue', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # 1.2.3
 hooks = [{ id = "check-metaschema" }]`;
@@ -434,7 +387,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('extracts SHA revs with pin-style version comments as digest pins with currentValue', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # pin @v1.2.3
 hooks = [{ id = "check-metaschema" }]`;
@@ -459,7 +412,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('extracts SHA revs with tag-style version comments as digest pins with currentValue', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.3
 hooks = [{ id = "check-metaschema" }]`;
@@ -484,7 +437,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('extracts SHA revs with renovate pin comments as digest pins with currentValue', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # renovate: pin @v1.2.3
 hooks = [{ id = "check-metaschema" }]`;
@@ -509,7 +462,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('extracts SHA revs with version comments and trailing notes without consuming the note', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # @v1.2.3 # note
 hooks = [{ id = "check-metaschema" }]`;
@@ -534,7 +487,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('marks SHA revs with unrecognized comments as unspecified-version', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v3.0.0-alpha.9-for-vscode
 hooks = [{ id = "check-metaschema" }]`;
@@ -555,7 +508,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('marks SHA revs with non-version trailing comments as unspecified-version', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # pin this
 hooks = [{ id = "check-metaschema" }]`;
@@ -576,7 +529,7 @@ hooks = [{ id = "check-metaschema" }]`;
     });
 
     it('keeps duplicate repo and SHA entries correlated to the correct replace strings', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/python-jsonschema/check-jsonschema"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # v1.2.3
 
@@ -616,6 +569,9 @@ rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.4`;
     });
 
     it('extracts additional_dependencies for node/python/golang and ignores invalid node specs', () => {
+      const additionalDependenciesPrekConfig = Fixtures.get(
+        'additional_dependencies.prek.toml',
+      );
       const result = extractPackageFile(
         additionalDependenciesPrekConfig,
         filename,
@@ -676,7 +632,7 @@ rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f" # tag=v1.2.4`;
     });
 
     it('extracts local hook additional_dependencies and ignores meta/builtin hook additional_dependencies from valid logical repos', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "local"
 
 [[repos.hooks]]
@@ -721,6 +677,15 @@ additional_dependencies = [
     });
 
     it('drops malformed typed repos and continues extracting valid dependencies', () => {
+      const malformedTypedRepoPrekConfig = codeBlock`
+        [[repos]]
+        repo = "https://github.com/pre-commit/pre-commit-hooks"
+        rev = 1
+
+        [[repos]]
+        repo = "https://github.com/rhysd/actionlint"
+        rev = "v1.7.7"
+      `;
       const result = extractPackageFile(malformedTypedRepoPrekConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -736,6 +701,14 @@ additional_dependencies = [
     });
 
     it('ignores repos without rev', () => {
+      const missingRevPrekConfig = codeBlock`
+        [[repos]]
+        repo = "https://github.com/pre-commit/pre-commit-hooks"
+
+        [[repos]]
+        repo = "https://github.com/rhysd/actionlint"
+        rev = "v1.7.7"
+      `;
       const result = extractPackageFile(missingRevPrekConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -751,6 +724,15 @@ additional_dependencies = [
     });
 
     it('keeps invalid URLs with invalid-url skip reason and continues extraction', () => {
+      const invalidUrlPrekConfig = codeBlock`
+        [[repos]]
+        repo = "not_a_valid_url"
+        rev = "v1.0.0"
+
+        [[repos]]
+        repo = "https://github.com/pre-commit/pre-commit-hooks"
+        rev = "v1.0.0"
+      `;
       const result = extractPackageFile(invalidUrlPrekConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -774,7 +756,7 @@ additional_dependencies = [
     });
 
     it('preserves invalid-url skip reason for bare SHA revs with malformed repository URLs', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/"
 rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f"`;
 
@@ -794,7 +776,7 @@ rev = "9f48a48aa91a6040d749ad68ec70907d907a5a7f"`;
     });
 
     it('marks host-only repository URLs as invalid', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/"
 rev = "v1.0.0"`;
 
@@ -814,6 +796,11 @@ rev = "v1.0.0"`;
     });
 
     it('detects gitlab datasource via platform detection for custom gitlab hosts', () => {
+      const customGitlabHostPrekConfig = codeBlock`
+        [[repos]]
+        repo = "https://gitlab.enterprise.com/pre-commit/pre-commit-hooks"
+        rev = "v1.0.0"
+      `;
       const result = extractPackageFile(customGitlabHostPrekConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -830,7 +817,7 @@ rev = "v1.0.0"`;
     });
 
     it('detects gitlab datasource for custom gitlab hosts with explicit ports', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://gitlab.enterprise.com:8443/pre-commit/pre-commit-hooks"
 rev = "v1.0.0"`;
 
@@ -850,7 +837,7 @@ rev = "v1.0.0"`;
     });
 
     it('extracts frozen SHA revs for custom gitlab hosts', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://gitlab.enterprise.com/pre-commit/pre-commit-hooks"
 rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0`;
 
@@ -875,12 +862,11 @@ rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0`;
     });
 
     it('can handle private git repos using hostRules', () => {
-      // url only
-      hostRules.find.mockReturnValueOnce({ token: 'value1' });
-      // hostType=github
-      hostRules.find.mockReturnValueOnce({});
-      // hostType=gitlab
-      hostRules.find.mockReturnValueOnce({ token: 'value' });
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'enterprise.com',
+        token: 'value',
+      });
 
       const result = extractPackageFile(enterprisePrekConfig, filename);
       expect(result).toEqual({
@@ -898,7 +884,10 @@ rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0`;
     });
 
     it('preserves registryUrls for custom github hosts detected via hostRules', () => {
-      hostRules.hostType.mockReturnValueOnce('github');
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'enterprise.com',
+      });
 
       const result = extractPackageFile(enterprisePrekConfig, filename);
       expect(result).toEqual({
@@ -916,7 +905,6 @@ rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0`;
     });
 
     it('can handle invalid private git repos', () => {
-      hostRules.find.mockReturnValue({});
       const result = extractPackageFile(enterprisePrekConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -933,8 +921,11 @@ rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0`;
     });
 
     it('can handle unknown private git repos when hostRules url exists but hostType does not match', () => {
-      hostRules.find.mockReturnValueOnce({ token: 'value1' });
-      hostRules.find.mockReturnValue({});
+      // A real host rule cannot match the URL-only query while missing every
+      // hostType-scoped query, so spy to reach the unknown-registry branch.
+      const find = vi.spyOn(hostRules, 'find');
+      find.mockReturnValueOnce({ token: 'value1' });
+      find.mockReturnValue({});
       const result = extractPackageFile(enterprisePrekConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -951,8 +942,7 @@ rev = "631208b7aac2daa8b707f55e7331f9112b0e062d" # frozen: v1.44.0`;
     });
 
     it('strips credentials from registryUrls for custom hosts', () => {
-      hostRules.find.mockReturnValue({});
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://user:pass@enterprise.com/pre-commit/pre-commit-hooks"
 rev = "v1.0.0"`;
 
@@ -972,7 +962,7 @@ rev = "v1.0.0"`;
     });
 
     it('ignores hook-level minimum_prek_version', () => {
-      const config = `[[repos]]
+      const config = codeBlock`[[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks"
 rev = "v5.0.0"
 

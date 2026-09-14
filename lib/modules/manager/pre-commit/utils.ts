@@ -12,6 +12,7 @@ import { parseLine } from '../gomod/line-parser.ts';
 import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency.ts';
 import { pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency } from '../types.ts';
+import type { HookAdditionalDependencies } from './types.ts';
 
 const nodeDependencyRegex = regEx('^(?<name>.+)@(?<range>.+)$');
 
@@ -24,11 +25,6 @@ type GitDependencyMetadata = Pick<
   | 'registryUrls'
   | 'skipReason'
 >;
-
-export interface HookAdditionalDependencies {
-  additional_dependencies?: string[];
-  language?: string;
-}
 
 /**
  * Determines the datasource(id) to be used for this dependency

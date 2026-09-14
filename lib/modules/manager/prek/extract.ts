@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseComment } from '../github-actions/parse.ts';
 import {
@@ -48,7 +49,7 @@ function setRegexDep(
   dep: RegexDep,
 ): void {
   const key = getShaPinnedDepKey(repo, dep.currentDigest);
-  const deps = regexDeps.get(key) ?? [];
+  const deps = coerceArray(regexDeps.get(key));
   deps.push(dep);
   regexDeps.set(key, deps);
 }
@@ -183,7 +184,7 @@ function findDependencies(
   for (const item of config.repos) {
     const repo = item.repo?.trim();
     if (shouldExtractAdditionalDependencies(repo)) {
-      for (const hook of item.hooks ?? []) {
+      for (const hook of coerceArray(item.hooks)) {
         deps.push(...extractPreCommitAdditionalDependencies(hook));
       }
     }

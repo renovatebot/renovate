@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { PrekToml } from './schema.ts';
 
 describe('modules/manager/prek/schema', () => {
@@ -7,16 +8,18 @@ describe('modules/manager/prek/schema', () => {
 
   it('strips unknown repo-level and hook-level fields', () => {
     expect(
-      PrekToml.parse(`[[repos]]
-repo = "https://github.com/crate-ci/typos"
-rev = "v1.44.0"
-managed = true
+      PrekToml.parse(codeBlock`
+        [[repos]]
+        repo = "https://github.com/crate-ci/typos"
+        rev = "v1.44.0"
+        managed = true
 
-[[repos.hooks]]
-id = "typos"
-language = "python"
-additional_dependencies = ["requests==1.1.1"]
-extra = "value"`),
+        [[repos.hooks]]
+        id = "typos"
+        language = "python"
+        additional_dependencies = ["requests==1.1.1"]
+        extra = "value"
+      `),
     ).toEqual({
       repos: [
         {

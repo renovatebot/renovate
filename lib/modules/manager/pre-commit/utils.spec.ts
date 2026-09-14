@@ -1,4 +1,4 @@
-import * as hostRules from '../../../util/host-rules.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
@@ -11,10 +11,6 @@ import {
 } from './utils.ts';
 
 describe('modules/manager/pre-commit/utils', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   it('extracts git dependency metadata for self-hosted gitlab SCP URLs', () => {
     hostRules.add({
       hostType: 'gitlab',
