@@ -4446,6 +4446,37 @@ describe('modules/manager/github-actions/extract', () => {
       },
       expected: [],
     },
+    {
+      step: {
+        uses: 'moonrepo/setup-rust@v1',
+        with: { channel: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'moonrepo/setup-rust@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

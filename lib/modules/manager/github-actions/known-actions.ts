@@ -809,6 +809,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     // pin/bump
     withSchema: valSchemaSkippingLiterals('version', new Set(['lts', 'pre'])),
   },
+  // https://github.com/moonrepo/setup-rust
+  'moonrepo/setup-rust': {
+    datasource: RustVersionDatasource.id,
+    packageName: 'rust',
+    withSchema: valSchema('channel'),
+  },
   // https://github.com/moonrepo/setup-toolchain
   'moonrepo/setup-toolchain': {
     datasource: GithubReleasesDatasource.id,
