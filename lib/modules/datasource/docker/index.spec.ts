@@ -328,6 +328,28 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe('some-digest');
     });
 
+    it('supports basic authentication for a password without a username', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+
+        .head('/library/some-dep/manifests/some-tag')
+        .matchHeader('authorization', 'Basic OnNvbWUtcGFzc3dvcmQ=')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+      hostRules.clear();
+      hostRules.add({ password: 'some-password', token: 'some-token' });
+
+      const res = await getDigest(
+        { datasource: 'docker', packageName: 'some-dep' },
+        'some-tag',
+      );
+
+      expect(res).toBe('some-digest');
+    });
+
     it('returns null for 403 with basic authentication', async () => {
       httpMock
         .scope(baseUrl)
