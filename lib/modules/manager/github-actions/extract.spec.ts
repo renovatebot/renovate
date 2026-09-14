@@ -4668,6 +4668,56 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'conda-incubator/setup-miniconda@v3',
+        with: { 'miniforge-version': '26.7.2-0', 'python-version': '3.12' },
+      },
+      expected: [
+        {
+          currentValue: '26.7.2-0',
+          datasource: 'github-releases',
+          depName: 'miniforge',
+          depType: 'uses-with',
+          packageName: 'conda-forge/miniforge',
+        },
+        {
+          currentValue: '3.12',
+          datasource: 'github-releases',
+          depName: 'python',
+          depType: 'uses-with',
+          packageName: 'actions/python-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 supported inputs (of the 6
+      // this action exposes overall)
+      step: {
+        uses: 'conda-incubator/setup-miniconda@v3',
+        with: { 'python-version': '3.12' },
+      },
+      expected: [
+        {
+          currentValue: '3.12',
+          datasource: 'github-releases',
+          depName: 'python',
+          depType: 'uses-with',
+          packageName: 'actions/python-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // neither supported input is set, so no deps should be extracted at
+      // all (rather than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'conda-incubator/setup-miniconda@v3',
+        with: {},
+      },
+      expected: [],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

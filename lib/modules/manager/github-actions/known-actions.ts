@@ -501,6 +501,52 @@ const InstallCrystalWith: ActionSchema = z
     return deps;
   });
 
+// `conda-incubator/setup-miniconda` exposes 6 separate version inputs
+// (`miniconda-version`, `miniforge-version`, `conda-version`,
+// `conda-build-version`, `python-version`, `mamba-version`), but only 2 map
+// onto a datasource we can reliably use: `miniforge-version` (GitHub
+// releases of `conda-forge/miniforge`) and `python-version` (the same
+// `actions/python-versions` releases already used for `actions/setup-python`).
+// The other 4 are versioned via anaconda.org channels or an installer
+// archive with no clean Renovate datasource, so they're intentionally not
+// tracked. Both supported inputs are optional, so only emit a dependency
+// for the ones a workflow actually sets.
+const SetupMinicondaWith: ActionSchema = z
+  .object({
+    'miniforge-version': z.string().optional(),
+    'python-version': z.string().optional(),
+  })
+  .transform(
+    ({
+      'miniforge-version': miniforgeVersion,
+      'python-version': pythonVersion,
+    }) => {
+      const deps: PackageDependency[] = [];
+
+      if (miniforgeVersion) {
+        deps.push({
+          datasource: GithubReleasesDatasource.id,
+          depName: 'miniforge',
+          packageName: 'conda-forge/miniforge',
+          ...parseValue(miniforgeVersion),
+        });
+      }
+
+      if (pythonVersion) {
+        deps.push({
+          datasource: GithubReleasesDatasource.id,
+          depName: 'python',
+          packageName: 'actions/python-versions',
+          versioning: npmVersioning.id,
+          extractVersion: actionsVersionsExtractVersion,
+          ...parseValue(pythonVersion),
+        });
+      }
+
+      return deps;
+    },
+  );
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -656,6 +702,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     withSchema: valSchema('wranglerVersion'),
   },
   // https://github.com/cycjimmy/semantic-release-action
+  // https://github.com/conda-incubator/setup-miniconda
+  'conda-incubator/setup-miniconda': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined per dependency: miniforge-version, python-version
+    withSchema: SetupMinicondaWith,
+  },
   // https://github.com/crystal-lang/install-crystal
   'crystal-lang/install-crystal': {
     datasource: GithubReleasesDatasource.id,
