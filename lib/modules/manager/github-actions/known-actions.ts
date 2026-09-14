@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 
 import { regEx } from '../../../util/regex.ts';
+import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
@@ -101,6 +102,15 @@ const SetupRustToolchainWith: ActionSchema = z
 const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => [{ packageName: repo, ...parseValue(tag) }]);
+
+// Same shape as `InstallBinaryWith` above, but the package name comes from
+// a crates.io crate name rather than a GitHub repo. `version` has a default
+// (`'latest'`), so real workflows commonly omit it from `with:` entirely.
+const CargoInstallWith: ActionSchema = z
+  .object({ crate: z.string(), version: z.string().optional() })
+  .transform(({ crate, version }) => [
+    { packageName: crate, ...parseValue(version) },
+  ]);
 
 function parseImageValue(image: string | undefined): PackageDependency {
   if (!image) {
@@ -547,6 +557,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'kubectl',
     packageName: 'kubernetes/kubernetes',
+  },
+  // https://github.com/baptiste0928/cargo-install
+  'baptiste0928/cargo-install': {
+    datasource: CrateDatasource.id,
+    packageName: '', // determined from the `crate` input
+    withSchema: CargoInstallWith,
   },
   // https://github.com/biomejs/setup-biome
   'biomejs/setup-biome': {
