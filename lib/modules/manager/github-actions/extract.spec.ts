@@ -2878,6 +2878,56 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'azure/setup-kubectl@v4',
+        with: { version: 'v1.31.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.31.0',
+          datasource: 'github-releases',
+          depName: 'kubectl',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-kubectl@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'kubectl',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      // `'latest'` is a valid, documented value (and the action's own
+      // default), but not one we can pin/bump — the value is passed
+      // through as-is, and the versioning layer skips proposing an update
+      // since it isn't a real version
+      step: {
+        uses: 'azure/setup-kubectl@v4',
+        with: { version: 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'kubectl',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'snok/install-poetry@v1',
         with: { version: '1.8.3' },
       },
