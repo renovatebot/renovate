@@ -237,11 +237,15 @@ describe('modules/manager/mise/artifacts', () => {
   });
 
   it('refreshes metadata from the updated in-memory lockfile', async () => {
+    const originalLockFile =
+      '[[tools.node]]\nversion = "20.0.0"\nplatforms = { linux = { checksum = "old" } }\n';
     const updatedLockFile =
       '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "new" } }\n';
     const refreshedLockFile =
       '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "refreshed" } }\n';
-    fs.readLocalFile.mockResolvedValueOnce(refreshedLockFile);
+    fs.readLocalFile
+      .mockResolvedValueOnce(originalLockFile)
+      .mockResolvedValueOnce(refreshedLockFile);
     const execSnapshots = mockExecAll();
 
     const res = await updateArtifacts({
@@ -268,6 +272,33 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: trustCmd },
       { cmd: updateToolCmd },
+    ]);
+  });
+
+  it('returns regenerated content that matches the in-memory update', async () => {
+    const originalLockFile = '[[tools.node]]\nversion = "20.0.0"\n';
+    const updatedLockFile = '[[tools.node]]\nversion = "22.0.0"\n';
+    fs.readLocalFile
+      .mockResolvedValueOnce(originalLockFile)
+      .mockResolvedValueOnce(updatedLockFile);
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '[tools]\nnode = "22"\n',
+      newLockFileContent: updatedLockFile,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: updatedLockFile,
+        },
+      },
     ]);
   });
 
