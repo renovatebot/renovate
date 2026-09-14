@@ -2988,7 +2988,7 @@ The package manager then refuses to update the lock file, and the update fails w
 Renovate defers the update until `minimumReleaseAge` _plus_ the buffer duration has passed, while the package manager keeps using the plain `minimumReleaseAge` cutoff.
 This way, packages published up to the buffer time after the suggested release have also passed the package manager's cooldown.
 
-By default, Renovate uses a buffer of 10 minutes.
+By default, Renovate uses a buffer of 30 minutes.
 Set `minimumReleaseAgeBuffer` to `null` to disable the buffer.
 
 For example, with the following configuration Renovate waits 3 days plus 1 hour before suggesting an update, while the package manager's cooldown stays at 3 days:

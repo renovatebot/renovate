@@ -2169,7 +2169,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Extra time added to `minimumReleaseAge` before an update is considered stable.',
     type: 'string',
-    default: '10 minutes',
+    default: '30 minutes',
   },
   {
     name: 'abandonmentThreshold',
