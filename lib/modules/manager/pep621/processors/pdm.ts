@@ -24,7 +24,8 @@ import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
-const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
+const pdmUpdateEagerCMD = 'pdm update --no-sync --update-eager';
+const pdmUpdateAllCMD = 'pdm update --no-sync --update-all';
 const gitExec = withGitEnvironment(['pep621']);
 
 export class PdmProcessor extends BasePyProjectProcessor {
@@ -122,7 +123,11 @@ export class PdmProcessor extends BasePyProjectProcessor {
       // else only update specific packages
       const cmds: string[] = [];
       if (isLockFileMaintenance) {
-        cmds.push(pdmUpdateCMD);
+        cmds.push(
+          config.pdmUpdateStrategy === 'all'
+            ? pdmUpdateAllCMD
+            : pdmUpdateEagerCMD,
+        );
       } else {
         cmds.push(...generateCMDs(updatedDeps));
       }
@@ -177,7 +182,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
         }
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -G ${quote(dep.managerData.depGroup)}`,
+          `${pdmUpdateEagerCMD} -G ${quote(dep.managerData.depGroup)}`,
           dep.packageName!,
         );
         break;
@@ -193,7 +198,7 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
         }
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -dG ${quote(dep.managerData.depGroup)}`,
+          `${pdmUpdateEagerCMD} -dG ${quote(dep.managerData.depGroup)}`,
           dep.packageName!,
         );
         break;
@@ -203,7 +208,11 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
         // Reference: https://github.com/pdm-project/pdm/discussions/2869
         break;
       default: {
-        addPackageToCMDRecord(packagesByCMD, pdmUpdateCMD, dep.packageName!);
+        addPackageToCMDRecord(
+          packagesByCMD,
+          pdmUpdateEagerCMD,
+          dep.packageName!,
+        );
       }
     }
   }
