@@ -25,13 +25,13 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages.ts';
-import type { Platform } from '../types.ts';
+import type { PlatformModule } from '../types.ts';
 import { getCodeCommitUrl } from './codecommit-client.ts';
 import * as codeCommit from './index.ts';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
-async function reInitRepo(codeCommit: Platform): Promise<void> {
+async function reInitRepo(codeCommit: PlatformModule): Promise<void> {
   codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
     repositoryMetadata: {
       defaultBranch: 'main',

@@ -831,10 +831,7 @@ export async function processBranch(
           });
         }
       }
-      // v8 ignore else -- TODO: add test #40625
-      if (platform.refreshPr) {
-        await platform.refreshPr(branchPr.number);
-      }
+      await platform.refreshPr(branchPr.number);
     }
     if (!commitSha && !branchExists) {
       return {
