@@ -35,29 +35,24 @@ export class GradleVersionDatasource extends Datasource {
   private async _getReleases({
     registryUrl,
   }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
-    let releases: Release[];
-    try {
-      const response = await this.http.getJson(registryUrl, GradleReleases);
-      releases = response.body
-        .filter((release) => !release.snapshot && !release.nightly)
-        .map((release) => {
-          const { version, buildTime } = release;
+    const body = await this.fetchJson(registryUrl, GradleReleases);
+    const releases = body
+      .filter((release) => !release.snapshot && !release.nightly)
+      .map((release) => {
+        const { version, buildTime } = release;
 
-          const gitRef = GradleVersionDatasource.getGitRef(release.version);
+        const gitRef = GradleVersionDatasource.getGitRef(release.version);
 
-          const releaseTimestamp = asTimestamp(buildTime);
+        const releaseTimestamp = asTimestamp(buildTime);
 
-          const result: Release = { version, gitRef, releaseTimestamp };
+        const result: Release = { version, gitRef, releaseTimestamp };
 
-          if (release.broken) {
-            result.isDeprecated = true;
-          }
+        if (release.broken) {
+          result.isDeprecated = true;
+        }
 
-          return result;
-        });
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+        return result;
+      });
 
     const res: ReleaseResult = {
       releases,

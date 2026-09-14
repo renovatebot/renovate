@@ -1,8 +1,14 @@
+import type { ZodType, z } from 'zod/v4';
+import { ZodError } from 'zod/v4';
+import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import type { CachedOptions } from '../../util/cache/package/with-cache.ts';
 import { withCache } from '../../util/cache/package/with-cache.ts';
+import type { HttpBase } from '../../util/http/http.ts';
 import { Http, HttpError } from '../../util/http/index.ts';
+import type { HttpOptions } from '../../util/http/types.ts';
+import { coerceObject } from '../../util/object.ts';
 import type {
   DatasourceApi,
   DigestConfig,
@@ -14,6 +20,14 @@ import type {
   ReleaseResult,
   SourceUrlSupport,
 } from './types.ts';
+
+/**
+ * The options accepted by the JSON methods of the http client `H`:
+ * `HttpOptions` for the plain client, and the client's own options type for a
+ * specialised one such as `GithubHttp`.
+ */
+type JsonOptions<H extends Http> =
+  H extends HttpBase<infer Opts, any> ? Opts : HttpOptions;
 
 export abstract class Datasource<
   H extends Http = Http,
@@ -101,6 +115,57 @@ export abstract class Datasource<
       { ...options, namespace: options.namespace ?? this.cacheNamespace },
       fn,
     );
+  }
+
+  /**
+   * Requests `url` and returns the response body validated by `schema`.
+   *
+   * Every error, a response that fails validation included, goes through
+   * {@link Datasource.handleGenericErrors} and therefore fails the lookup.
+   * Use it when a malformed response must be treated as an error; use
+   * {@link Datasource.fetchJsonOrNull} when it should count as "no data from
+   * this registry" instead.
+   */
+  protected async fetchJson<Schema extends ZodType<any, any, any>>(
+    url: string,
+    schema: Schema,
+    options?: JsonOptions<H>,
+  ): Promise<z.infer<Schema>> {
+    const httpOptions = coerceObject(options) as HttpOptions;
+    try {
+      const { body } = await this.http.getJson(url, httpOptions, schema);
+      return body;
+    } catch (err) {
+      this.handleGenericErrors(err);
+    }
+  }
+
+  /**
+   * Same as {@link Datasource.fetchJson}, except that a response which fails
+   * schema validation is logged and reported as `null`.
+   *
+   * Use it when a malformed response means "no data from this registry"
+   * rather than a failed lookup. Every other error still goes through
+   * {@link Datasource.handleGenericErrors}.
+   */
+  protected async fetchJsonOrNull<Schema extends ZodType<any, any, any>>(
+    url: string,
+    schema: Schema,
+    options?: JsonOptions<H>,
+  ): Promise<z.infer<Schema> | null> {
+    try {
+      return await this.fetchJson(url, schema, options);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        logger.debug(
+          { err, datasource: this.id, url },
+          'Ignoring response that failed schema validation',
+        );
+        return null;
+      }
+
+      throw err;
+    }
   }
 
   protected handleGenericErrors(err: Error): never {

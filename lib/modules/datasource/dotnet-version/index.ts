@@ -82,12 +82,7 @@ export class DotnetVersionDatasource extends Datasource {
   ): Promise<Release[]> {
     const schema =
       packageName === 'dotnet-sdk' ? DotnetSdkReleases : DotnetRuntimeReleases;
-    try {
-      const { body } = await this.http.getJson(releaseUrl, schema);
-      return body;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    return this.fetchJson(releaseUrl, schema);
   }
 
   getChannelReleases(

@@ -49,16 +49,8 @@ export class JsrDatasource extends Datasource {
       releases: [],
     };
 
-    try {
-      const { body } = await this.http.getJson(
-        packageInfoUrl,
-        JsrPackageMetadata,
-      );
-      result.releases.push(...body);
-    } catch (err) {
-      logger.warn({ err }, 'JSR: failed to get package details');
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(packageInfoUrl, JsrPackageMetadata);
+    result.releases.push(...body);
 
     return result.releases.length ? result : null;
   }
