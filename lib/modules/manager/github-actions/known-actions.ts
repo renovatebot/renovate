@@ -335,6 +335,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
   },
+  // https://github.com/hashicorp/setup-terraform
+  'hashicorp/setup-terraform': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'terraform',
+    packageName: 'hashicorp/terraform',
+    withSchema: valSchema('terraform_version'),
+  },
   // https://github.com/helm/chart-testing-action
   'helm/chart-testing-action': {
     datasource: GithubReleasesDatasource.id,
