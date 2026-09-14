@@ -88,6 +88,15 @@ const VersionVal = valSchema('version');
 const actionsVersionsExtractVersion =
   '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$';
 
+// `actions-rust-lang/setup-rust-toolchain`'s `toolchain` input is a
+// comma-separated list of toolchains; only the LAST one becomes the active
+// default toolchain, so that's the only one worth tracking.
+const SetupRustToolchainWith: ActionSchema = z
+  .object({ toolchain: z.string().optional() })
+  .transform(({ toolchain }) => [
+    parseValue(toolchain?.split(',').pop()?.trim()),
+  ]);
+
 const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => [{ packageName: repo, ...parseValue(tag) }]);
@@ -388,6 +397,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: PypiDatasource.id,
     packageName: 'poetry',
     withSchema: valSchema('poetry-version'),
+  },
+  // https://github.com/actions-rust-lang/setup-rust-toolchain
+  'actions-rust-lang/setup-rust-toolchain': {
+    datasource: RustVersionDatasource.id,
+    packageName: 'rust',
+    withSchema: SetupRustToolchainWith,
   },
   // https://github.com/actions/setup-dotnet
   'actions/setup-dotnet': {
