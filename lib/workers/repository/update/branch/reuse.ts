@@ -82,11 +82,10 @@ export function decideBranchReuse({
     return { action: 'unchanged', userRebaseRequested };
   }
 
-  const keepUpdatedLabel = config.keepUpdatedLabel;
   if (
     branchExists &&
     config.rebaseWhen === 'never' &&
-    !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
+    !hasKeepUpdatedLabel(config, branchPr) &&
     !dependencyDashboardCheck
   ) {
     logger.debug('rebaseWhen=never so skipping branch update check');
@@ -112,35 +111,26 @@ export function decideBranchReuse({
   return { action: 'check-reuse', userRebaseRequested };
 }
 
-async function shouldKeepUpdated(
+/**
+ * Whether the branch's PR carries the label which asks Renovate to keep the
+ * branch up to date with its base branch.
+ */
+export function hasKeepUpdatedLabel(
   config: BranchConfig,
-  _baseBranch: string,
-  _branchName: string,
-): Promise<boolean> {
+  branchPr: Pr | null,
+): boolean {
   const keepUpdatedLabel = config.keepUpdatedLabel;
-  if (!keepUpdatedLabel) {
-    return false;
-  }
-
-  const branchPr = await platform.getBranchPr(
-    config.branchName,
-    config.baseBranch,
-  );
-
-  if (branchPr?.labels?.includes(keepUpdatedLabel)) {
-    return true;
-  }
-
-  return false;
+  return !!keepUpdatedLabel && !!branchPr?.labels?.includes(keepUpdatedLabel);
 }
 
 export async function shouldReuseExistingBranch(
   config: BranchConfig,
+  branchPr: Pr | null,
 ): Promise<BranchConfig> {
   const { baseBranch, branchName } = config;
   const result: BranchConfig = { ...config, reuseExistingBranch: false };
 
-  const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
+  const keepUpdated = hasKeepUpdatedLabel(result, branchPr);
   await determineRebaseWhenValue(result, keepUpdated);
 
   // Check if branch exists
@@ -154,10 +144,10 @@ export async function shouldReuseExistingBranch(
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
-      if (await scm.isBranchModified(branchName, baseBranch)) {
+      result.isModified ??= await scm.isBranchModified(branchName, baseBranch);
+      if (result.isModified) {
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
-        result.isModified = true;
         return result;
       }
       logger.debug('Branch is unmodified, so can be rebased');
@@ -175,12 +165,12 @@ export async function shouldReuseExistingBranch(
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 
-    if ((await scm.isBranchModified(branchName, baseBranch)) === false) {
+    result.isModified ??= await scm.isBranchModified(branchName, baseBranch);
+    if (!result.isModified) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (result.rebaseWhen === 'never' && !keepUpdated) {
         logger.debug('Rebasing disabled by config');
         result.reuseExistingBranch = true;
-        result.isModified = false;
       }
       // Setting reuseExistingBranch back to undefined means that we'll use the default branch
       return result;
