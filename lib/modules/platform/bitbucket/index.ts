@@ -38,7 +38,14 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { findPrInList, repoFingerprint } from '../util.ts';
-import { smartTruncate } from '../utils/pr-body.ts';
+import {
+  renamePrRebaseHints,
+  replaceRebaseCheckboxHints,
+  replaceRenovateHiddenComments,
+  rewriteRelativeLinks,
+  smartTruncate,
+  stripRebaseCheckSection,
+} from '../utils/pr-body.ts';
 import * as comments from './comments.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import {
@@ -578,26 +585,26 @@ export async function setBranchStatus({
  * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
  */
 export function massageMarkdown(input: string): string {
-  let massaged = smartTruncate(input, maxBodyLength())
-    .replace(
-      'you tick the rebase/retry checkbox',
-      'by renaming this PR to start with "rebase!"',
-    )
-    .replace(
-      'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"',
-    )
-    .replace(
-      regEx(
-        /<details>\n(?:<summary>View abandoned dependencies.*<\/summary>\n\n)(?<body>[\s\S]*?)<\/details>/,
-      ),
-      '$<body>',
-    )
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/\]\(\.\.\/issues\//g), '](../../issues/')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+  let massaged = replaceRebaseCheckboxHints(
+    smartTruncate(input, maxBodyLength()),
+    {
+      ...renamePrRebaseHints,
+      tick: 'by renaming this PR to start with "rebase!"',
+    },
+  );
 
+  massaged = massaged.replace(
+    regEx(
+      /<details>\n(?:<summary>View abandoned dependencies.*<\/summary>\n\n)(?<body>[\s\S]*?)<\/details>/,
+    ),
+    '$<body>',
+  );
+  massaged = stripRebaseCheckSection(massaged);
+  massaged = rewriteRelativeLinks(massaged, {
+    issues: '../../issues/',
+    pulls: '../../pull-requests/',
+  });
+  massaged = replaceRenovateHiddenComments(massaged);
   massaged = massageDetailSummaryHtmlToNestedLists(massaged);
 
   return massageCodeblockMarkdown(massaged);

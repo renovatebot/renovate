@@ -8,13 +8,12 @@ import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
+import { rewriteRelativeLinks } from '../utils/pr-body.ts';
 import type { PR, PRMergeMethod, Repo } from './schema.ts';
 import type { GiteaPlatformKey } from './types.ts';
 
 export function smartLinks(body: string): string {
-  return body
-    ?.replace(regEx(/\]\(\.\.\/issues\//g), '](issues/')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
+  return rewriteRelativeLinks(body, { issues: 'issues/', pulls: 'pulls/' });
 }
 
 export function trimTrailingApiPath(url: string): string {

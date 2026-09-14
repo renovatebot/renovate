@@ -52,7 +52,13 @@ import {
   ensureCommentRemovalWith,
   ensureCommentWith,
 } from '../utils/comments.ts';
-import { smartTruncate } from '../utils/pr-body.ts';
+import {
+  replaceRebaseCheckboxHints,
+  replaceRenovateHiddenComments,
+  rewriteRelativeLinks,
+  smartTruncate,
+  stripRebaseCheckSection,
+} from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import * as azureHelper from './azure-helper.ts';
@@ -911,25 +917,16 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return (
-    smartTruncate(readOnlyIssueBody(input), maxBodyLength())
-      .replace(
-        'you tick the rebase/retry checkbox',
-        'PR is renamed to start with "rebase!"',
-      )
-      .replace(
-        'checking the rebase/retry box above',
-        'renaming the PR to start with "rebase!"',
-      )
-      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
-      // Replace GitHub-style PR links with Azure DevOps format
-      .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
-      // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR.
-      // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
-      // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
-      .replace(regEx(/(?<lead>^|[\s(])#(?<num>\d+)/g), '$<lead>!$<num>')
-  );
+  let body = smartTruncate(readOnlyIssueBody(input), maxBodyLength());
+  body = replaceRebaseCheckboxHints(body);
+  body = stripRebaseCheckSection(body);
+  body = replaceRenovateHiddenComments(body);
+  // Replace GitHub-style PR links with Azure DevOps format
+  body = rewriteRelativeLinks(body, { pulls: '!' });
+  // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR.
+  // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
+  // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
+  return body.replace(regEx(/(?<lead>^|[\s(])#(?<num>\d+)/g), '$<lead>!$<num>');
 }
 
 export function maxBodyLength(): number {

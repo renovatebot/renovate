@@ -8,6 +8,7 @@ import {
   ensureCommentRemovalWith,
   ensureCommentWith,
 } from '../utils/comments.ts';
+import { replaceRebaseCheckboxHints } from '../utils/pr-body.ts';
 import type { Account, CommentsConfig, PagedResult } from './types.ts';
 
 export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
@@ -134,13 +135,10 @@ export async function ensureCommentRemoval(
 }
 
 function sanitizeCommentBody(body: string): string {
-  return body
-    .replace(
-      'checking the rebase/retry box above',
-      'renaming this PR to start with "rebase!"',
-    )
-    .replace(
-      'rename this PR to get a fresh replacement',
-      'add a comment starting with "reopen!" to get a fresh replacement',
-    );
+  return replaceRebaseCheckboxHints(body, {
+    checking: 'renaming this PR to start with "rebase!"',
+  }).replace(
+    'rename this PR to get a fresh replacement',
+    'add a comment starting with "reopen!" to get a fresh replacement',
+  );
 }
