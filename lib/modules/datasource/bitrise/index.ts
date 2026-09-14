@@ -4,55 +4,14 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
-import { regEx } from '../../../util/regex.ts';
 import { fromBase64 } from '../../../util/string.ts';
-import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { GithubContentResponse } from '../../platform/github/schema.ts';
 import semver from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { BitriseStepFile } from './schema.ts';
-
-function isPublicRegistry(registryUrl: string | undefined): boolean {
-  if (!registryUrl || detectPlatform(registryUrl) !== 'github') {
-    return false;
-  }
-
-  const url = parseUrl(registryUrl);
-  if (
-    !url ||
-    !['http:', 'https:', 'ssh:'].includes(url.protocol) ||
-    url.password ||
-    (url.username && !(url.protocol === 'ssh:' && url.username === 'git')) ||
-    url.search ||
-    url.hash
-  ) {
-    return false;
-  }
-
-  // The raw URL is part of the cache key, so ignored selectors can leak secrets.
-  const rawPath = regEx(/^[a-z][a-z\d+.-]*:\/\/[^/]+(?<path>\/.*)$/i).exec(
-    registryUrl,
-  )?.groups?.path;
-  try {
-    if (
-      !rawPath ||
-      !regEx(/^\/bitrise-io\/bitrise-steplib(?:\.git)?\/?$/i).test(
-        decodeURIComponent(rawPath),
-      )
-    ) {
-      return false;
-    }
-  } catch {
-    return false;
-  }
-
-  const parsedUrl = parseGitUrl(registryUrl);
-  return (
-    parsedUrl.resource === 'github.com' &&
-    parsedUrl.full_name.toLowerCase() === 'bitrise-io/bitrise-steplib'
-  );
-}
+import { isPublicRegistry } from './url.ts';
 
 export class BitriseDatasource extends Datasource {
   static readonly id = 'bitrise';
