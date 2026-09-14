@@ -158,6 +158,19 @@ describe('modules/datasource/pypi/index', () => {
       ).resolves.toBeNull();
     });
 
+    it('returns null if the response carries no releases', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/no-releases/json')
+        .reply(200, { info: { name: 'no-releases' } });
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'no-releases',
+        }),
+      ).resolves.toBeNull();
+    });
+
     it('processes real data', async () => {
       httpMock.scope(baseUrl).get('/azure-cli-monitor/json').reply(200, res1);
       await expect(
