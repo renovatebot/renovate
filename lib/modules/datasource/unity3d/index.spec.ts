@@ -1,5 +1,11 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPkgReleases } from '../index.ts';
 import { Unity3dDatasource } from './index.ts';
@@ -328,5 +334,170 @@ describe('modules/datasource/unity3d/index', () => {
     });
 
     expect(responses?.releases).toBeArrayOfSize(total);
+  });
+
+  describe('package cache', () => {
+    let cacheDir: string;
+    const datasource = new Unity3dDatasource();
+    const packageName = 'm_EditorVersion';
+    const namespace = 'datasource-unity3d';
+
+    beforeEach(async () => {
+      GlobalConfig.set({ cachePrivatePackages: false });
+      memCache.init();
+      cacheDir = await mkdtemp(join(tmpdir(), 'unity3d-cache-'));
+      await packageCache.init({ cacheDir });
+    });
+
+    afterEach(async () => {
+      await packageCache.cleanup({});
+      await rm(cacheDir, { recursive: true, force: true });
+      memCache.init();
+    });
+
+    function mockRequest(registryUrl: string, offset: number) {
+      const url = parseUrl(
+        `${datasource.translateStream(registryUrl)}&limit=25&offset=0`,
+      )!;
+      httpMock
+        .scope(url.origin)
+        .get(`${url.pathname}${url.search}`)
+        .reply(200, createUnityReleases(1, offset, 1));
+    }
+
+    it.each`
+      registryUrl                                                                              | isStable
+      ${Unity3dDatasource.streams.lts}                                                         | ${true}
+      ${Unity3dDatasource.streams.tech}                                                        | ${false}
+      ${Unity3dDatasource.streams.alpha}                                                       | ${false}
+      ${Unity3dDatasource.streams.beta}                                                        | ${false}
+      ${Unity3dDatasource.legacyStreams.lts}                                                   | ${true}
+      ${Unity3dDatasource.legacyStreams.stable}                                                | ${true}
+      ${Unity3dDatasource.legacyStreams.beta}                                                  | ${false}
+      ${'HTTPS://SERVICES.API.UNITY.COM:443/unity/editor/release/v1/releases?stream=LTS'}      | ${false}
+      ${`${Unity3dDatasource.baseUrl}?platform=WINDOWS&architecture=X86_64&stream=LTS`}        | ${false}
+      ${`${Unity3dDatasource.baseUrl}?version=6000.0.1f1&order=RELEASE_DATE_ASC`}              | ${false}
+      ${`${Unity3dDatasource.baseUrl}?limit=1&offset=0&stream=LTS`}                            | ${false}
+      ${`${Unity3dDatasource.baseUrl}?%73tream=LTS&stream=BETA`}                               | ${false}
+      ${'https://services.api.unity.com/unity/editor/release/v1/other/../releases?stream=LTS'} | ${false}
+      ${'https://services.api.unity.com/unity/editor/release/v1/%2e/releases?stream=LTS'}      | ${false}
+    `(
+      'reuses public releases for $registryUrl',
+      async ({ registryUrl, isStable }) => {
+        mockRequest(registryUrl, 0);
+
+        const first = await datasource.getReleases({
+          packageName,
+          registryUrl,
+        });
+        memCache.init();
+        const second = await datasource.getReleases({
+          packageName,
+          registryUrl,
+        });
+
+        expect(first?.releases).toEqual([
+          {
+            version: '6000.0.1f1',
+            releaseTimestamp: '2024-12-18T08:40:10.134Z',
+            changelogUrl: 'testUrl',
+            isStable,
+          },
+        ]);
+        expect(second).toEqual(first);
+      },
+    );
+
+    it.each([
+      'https://private.example/releases?stream=LTS',
+      `${Unity3dDatasource.baseUrl}?stream=LTS#private-token`,
+      'http://services.api.unity.com/unity/editor/release/v1/releases?stream=LTS',
+      'https://services.api.unity.com:444/unity/editor/release/v1/releases?stream=LTS',
+      'https://services.api.unity.com.evil.example/unity/editor/release/v1/releases?stream=LTS',
+      'https://services.api.unity.com./unity/editor/release/v1/releases?stream=LTS',
+      `${Unity3dDatasource.baseUrl}/?stream=LTS`,
+      `${Unity3dDatasource.baseUrl}.git?stream=LTS`,
+      `${Unity3dDatasource.baseUrl}/private?stream=LTS`,
+      'https://services.api.unity.com/unity/editor/release/v1/%72eleases?stream=LTS',
+      'https://services.api.unity.com/unity/editor/release/v1/releases%2fprivate?stream=LTS',
+      `${Unity3dDatasource.baseUrl}?project=private`,
+      `${Unity3dDatasource.baseUrl}?Stream=LTS`,
+      Unity3dDatasource.baseUrl,
+      `${Unity3dDatasource.legacyStreams.lts}?stream=LTS`,
+      'https://user:password@services.api.unity.com/unity/editor/release/v1/releases?stream=LTS',
+    ])('bypasses existing entries and writes for %s', async (registryUrl) => {
+      const key = `cache-decorator:${registryUrl}:${packageName}`;
+      const cached = {
+        cachedAt: new Date().toISOString(),
+        value: { releases: [{ version: 'private' }] },
+      };
+      await packageCache.set(namespace, key, cached, 60);
+      mockRequest(registryUrl, 0);
+
+      const first = await datasource.getReleases({ packageName, registryUrl });
+      memCache.init();
+      mockRequest(registryUrl, 1);
+      const second = await datasource.getReleases({ packageName, registryUrl });
+
+      expect(first?.releases.map(({ version }) => version)).toEqual([
+        '6000.0.1f1',
+      ]);
+      expect(second?.releases.map(({ version }) => version)).toEqual([
+        '6000.0.2f1',
+      ]);
+      memCache.init();
+      await expect(packageCache.get(namespace, key)).resolves.toEqual(cached);
+    });
+
+    it('does not fall back to stale custom-feed releases on failure', async () => {
+      const registryUrl = 'https://private.example/releases?stream=LTS';
+      const key = `cache-decorator:${registryUrl}:${packageName}`;
+      const cached = {
+        cachedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        value: { releases: [{ version: 'private' }] },
+      };
+      await packageCache.set(namespace, key, cached, 60);
+      httpMock
+        .scope('https://private.example')
+        .get('/releases?stream=LTS&limit=25&offset=0')
+        .reply(404);
+
+      await expect(
+        datasource.getReleases({ packageName, registryUrl }),
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
+
+      await expect(packageCache.get(namespace, key)).resolves.toEqual(cached);
+    });
+
+    it('does not return cached releases for an invalid URL', async () => {
+      const registryUrl = 'not-a-url';
+      const key = `cache-decorator:${registryUrl}:${packageName}`;
+      const cached = {
+        cachedAt: new Date().toISOString(),
+        value: { releases: [{ version: 'private' }] },
+      };
+      await packageCache.set(namespace, key, cached, 60);
+
+      await expect(
+        datasource.getReleases({ packageName, registryUrl }),
+      ).rejects.toThrow('Invalid URL');
+
+      await expect(packageCache.get(namespace, key)).resolves.toEqual(cached);
+    });
+
+    it('honors the explicit private-package cache override', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+      const registryUrl = 'https://private.example/releases?stream=LTS';
+      mockRequest(registryUrl, 0);
+
+      const first = await datasource.getReleases({ packageName, registryUrl });
+      memCache.init();
+      const second = await datasource.getReleases({ packageName, registryUrl });
+
+      expect(first?.releases.map(({ version }) => version)).toEqual([
+        '6000.0.1f1',
+      ]);
+      expect(second).toEqual(first);
+    });
   });
 });
