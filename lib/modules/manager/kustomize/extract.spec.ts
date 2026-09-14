@@ -600,6 +600,20 @@ describe('modules/manager/kustomize/extract', () => {
       expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
     });
 
+    it('skips components, images and helm charts that yield nothing', () => {
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      components:
+      - ./local-component
+      images:
+      - name: ""
+      helmCharts:
+      - name: ""
+      `;
+      expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
+    });
+
     it('should extract bases resources and components from their respective blocks', () => {
       const content = codeBlock`
       apiVersion: kustomize.config.k8s.io/v1beta1

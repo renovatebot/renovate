@@ -41,6 +41,14 @@ describe('modules/manager/jenkins/extract', () => {
       ]);
     });
 
+    it('skips a yaml plugin entry with no artifactId', () => {
+      const res = extractPackageFile(
+        'plugins:\n  - version: 1.0\n',
+        'path/file.yml',
+      );
+      expect(res).toBeNull();
+    });
+
     it('extracts multiple image lines in yaml format', () => {
       const res = extractPackageFile(pluginsYamlFile, 'path/file.yml');
       expect(res?.deps).toMatchObject([
