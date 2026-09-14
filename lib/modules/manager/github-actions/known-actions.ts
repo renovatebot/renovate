@@ -90,28 +90,26 @@ const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => [{ packageName: repo, ...parseValue(tag) }]);
 
+function parseImageValue(image: string | undefined): PackageDependency {
+  if (!image) {
+    return {
+      depType: 'uses-with',
+      skipStage: 'extract',
+      skipReason: 'unspecified-version',
+    };
+  }
+
+  const dep = splitImageParts(image);
+  return {
+    depType: 'uses-with',
+    ...dep,
+    ...(dep.skipReason ? { skipStage: 'extract' } : {}),
+  };
+}
+
 const EcsRenderTaskDefinitionWith: ActionSchema = z
   .object({ image: z.string().optional() })
-  .transform(({ image }) => {
-    if (!image) {
-      return [
-        {
-          depType: 'uses-with',
-          skipStage: 'extract',
-          skipReason: 'unspecified-version',
-        },
-      ];
-    }
-
-    const dep = splitImageParts(image);
-    return [
-      {
-        depType: 'uses-with',
-        ...dep,
-        ...(dep.skipReason ? { skipStage: 'extract' } : {}),
-      },
-    ];
-  });
+  .transform(({ image }) => [parseImageValue(image)]);
 
 const sha256Regex = regEx(/^[a-f0-9]{64}$/);
 const MiseWith: ActionSchema = z
