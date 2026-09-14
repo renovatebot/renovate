@@ -192,16 +192,7 @@ class NugetVersioningApi implements VersioningApi {
       let vMax: NugetVersion | undefined;
       for (const version of versions) {
         const v = parseVersion(version);
-        if (!v) {
-          continue;
-        }
-
-        // Stable pin must not match a pre-release version.
-        if (v.prerelease && !u.prerelease) {
-          continue;
-        }
-
-        if (compare(v, u) < 0) {
+        if (!v || !this.isSatisfiedBy(v, u)) {
           continue;
         }
 
@@ -247,16 +238,7 @@ class NugetVersioningApi implements VersioningApi {
       let vMin: NugetVersion | undefined;
       for (const version of versions) {
         const v = parseVersion(version);
-        if (!v) {
-          continue;
-        }
-
-        // Stable pin must not match a pre-release version.
-        if (v.prerelease && !u.prerelease) {
-          continue;
-        }
-
-        if (compare(v, u) < 0) {
+        if (!v || !this.isSatisfiedBy(v, u)) {
           continue;
         }
 
@@ -374,11 +356,7 @@ class NugetVersioningApi implements VersioningApi {
 
     const u = parseVersion(range);
     if (u) {
-      // Stable pin must not match a pre-release version.
-      if (v.prerelease && !u.prerelease) {
-        return false;
-      }
-      return compare(v, u) >= 0;
+      return this.isSatisfiedBy(v, u);
     }
 
     const r = parseRange(range);
@@ -387,6 +365,16 @@ class NugetVersioningApi implements VersioningApi {
     }
 
     return matches(v, r);
+  }
+
+  private isSatisfiedBy(v: NugetVersion, u: NugetVersion): boolean {
+    // A bare version acts as a min-version range, but it should
+    // still respect stability: a stable pin must not match a
+    // pre-release version.
+    if (v.prerelease && !u.prerelease) {
+      return false;
+    }
+    return compare(v, u) >= 0;
   }
 }
 
