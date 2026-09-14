@@ -40,7 +40,9 @@ describe('modules/manager/terraform/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', '1.tf', {}),
+      ).resolves.toBeNull();
     });
 
     it('returns null for no deps', async () => {
@@ -51,7 +53,7 @@ describe('modules/manager/terraform/extract', () => {
         }
         `;
 
-      expect(await extractPackageFile(src, '1.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '1.tf', {})).resolves.toBeNull();
     });
 
     it('extracts  modules', async () => {
@@ -762,7 +764,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
         deps: [{ skipReason: 'local' }],
       });
     });
@@ -773,7 +775,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toBeNull();
     });
 
     it('extract helm releases', async () => {
@@ -808,6 +810,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'docker',
           depName: 'public.ecr.aws/karpenter/karpenter',
           depType: 'helm_release',
+          pinDigests: false,
         },
         {
           currentValue: 'v0.22.1',
@@ -815,6 +818,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'karpenter',
           depType: 'helm_release',
           packageName: 'public.ecr.aws/karpenter/karpenter',
+          pinDigests: false,
         },
         {
           datasource: 'helm',
@@ -828,6 +832,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'kube-prometheus',
           depType: 'helm_release',
           packageName: 'index.docker.io/bitnamicharts/kube-prometheus',
+          pinDigests: false,
         },
         {
           currentValue: '1.0.1',
@@ -841,6 +846,28 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'redis',
           depType: 'helm_release',
           registryUrls: ['https://charts.helm.sh/stable'],
+        },
+      ]);
+    });
+
+    it('extracts helm releases from OCI registries with a port', async () => {
+      const src = codeBlock`
+        resource "helm_release" "redis" {
+          name       = "redis"
+          repository = "oci://registry.example.com:5000/charts"
+          chart      = "redis"
+          version    = "1.0.1"
+        }
+      `;
+      const res = await extractPackageFile(src, 'helm.tf', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.1',
+          datasource: 'docker',
+          depName: 'redis',
+          depType: 'helm_release',
+          packageName: 'registry.example.com:5000/charts/redis',
+          pinDigests: false,
         },
       ]);
     });

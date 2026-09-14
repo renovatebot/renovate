@@ -21,22 +21,22 @@ describe('modules/datasource/node-version/index', () => {
         .scope(defaultRegistryUrl)
         .get('/index.json')
         .replyWithError('error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'node',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(defaultRegistryUrl).get('/index.json').reply(200, []);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'node',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {
@@ -48,8 +48,39 @@ describe('modules/datasource/node-version/index', () => {
         datasource,
         packageName: 'node',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(64);
+      expect(res).toEqual({
+        homepage: 'https://nodejs.org',
+        sourceUrl: 'https://github.com/nodejs/node',
+        registryUrl: 'https://nodejs.org/dist',
+        releases: [
+          {
+            version: 'v14.0.0',
+            isStable: false,
+            releaseTimestamp: '2020-04-21T00:00:00.000Z',
+          },
+          {
+            version: 'v14.14.0',
+            isStable: false,
+            releaseTimestamp: '2020-10-15T00:00:00.000Z',
+          },
+          {
+            version: 'v14.15.0',
+            isStable: true,
+            releaseTimestamp: '2020-10-27T00:00:00.000Z',
+          },
+          {
+            version: 'v14.17.6',
+            isStable: true,
+            releaseTimestamp: '2021-08-30T00:00:00.000Z',
+          },
+          { version: 'v16.0.0', isStable: false },
+          {
+            version: 'v16.9.0',
+            isStable: false,
+            releaseTimestamp: '2021-09-07T00:00:00.000Z',
+          },
+        ],
+      });
     });
   });
 });

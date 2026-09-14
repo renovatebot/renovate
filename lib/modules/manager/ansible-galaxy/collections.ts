@@ -16,8 +16,8 @@ function interpretLine(
   dependency: AnsibleGalaxyPackageDependency,
 ): void {
   const localDependency = dependency;
-  const key = lineMatch[2];
-  const value = lineMatch[3].replace(regEx(/["']/g), '');
+  const key = lineMatch.groups!.key;
+  const value = lineMatch.groups!.value.replace(regEx(/["']/g), '');
   switch (key) {
     case 'name': {
       localDependency.managerData.name = value;

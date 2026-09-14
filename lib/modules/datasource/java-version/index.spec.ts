@@ -5,7 +5,7 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { range } from '../../../util/range.ts';
 import { getPkgReleases } from '../index.ts';
-import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
+import { adoptiumRegistryUrl } from './adoptium.ts';
 import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
 import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
 import { JavaVersionDatasource } from './index.ts';
@@ -96,171 +96,144 @@ const oracleGraalvmJreReleases = [
   },
 ];
 
+const packageName = 'java';
+
 describe('modules/datasource/java-version/index', () => {
   describe('getReleases', () => {
-    describe('Adoptium (Temurin)', () => {
-      it('throws for error', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0))
-          .replyWithError('error');
-        await expect(
-          getPkgReleases({
-            datasource,
-            packageName: 'adoptium-jdk',
-          }),
-        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      });
-
-      it('returns null for 404', async () => {
-        httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(404);
-        expect(
-          await getPkgReleases({
-            datasource,
-            packageName: 'adoptium-jdk',
-          }),
-        ).toBeNull();
-      });
-
-      it('returns null for empty result', async () => {
-        httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
-        expect(
-          await getPkgReleases({
-            datasource,
-            packageName: 'adoptium-jdk',
-          }),
-        ).toBeNull();
-      });
-
-      it('returns null for empty 200 OK', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0))
-          .reply(200, { versions: [] });
-        expect(
-          await getPkgReleases({
-            datasource,
-            packageName: 'adoptium-jdk',
-          }),
-        ).toBeNull();
-      });
-
-      it('throws for 5xx', async () => {
-        httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(502);
-        await expect(
-          getPkgReleases({
-            datasource,
-            packageName: 'adoptium-jdk',
-          }),
-        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      });
-
-      it('processes real data', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0))
-          .reply(200, Fixtures.get('page.json'));
-        const res = await getPkgReleases({
+    it('throws for error', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0))
+        .replyWithError('error');
+      await expect(
+        getPkgReleases({
           datasource,
-          packageName: 'adoptium-jdk',
-        });
-        expect(res).toMatchSnapshot();
-        expect(res?.releases).toHaveLength(3);
-      });
+          packageName,
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
 
-      it('processes real data (jre)', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0, 'jre'))
-          .reply(200, Fixtures.get('jre.json'));
-        const res = await getPkgReleases({
+    it('returns null for 404', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(404);
+      await expect(
+        getPkgReleases({
           datasource,
-          packageName: 'adoptium-jre',
-        });
-        expect(res).toMatchSnapshot();
-        expect(res?.releases).toHaveLength(2);
-      });
+          packageName,
+        }),
+      ).resolves.toBeNull();
+    });
 
-      it('processes real data (jre,windows,x64)', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0, 'jre', '&os=windows&architecture=x64'))
-          .reply(200, Fixtures.get('jre.json'));
-        const res = await getPkgReleases({
+    it('returns null for empty result', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
+      await expect(
+        getPkgReleases({
           datasource,
-          packageName: 'adoptium-jre?os=windows&architecture=x64',
-        });
-        expect(res?.releases).toHaveLength(2);
-      });
+          packageName,
+        }),
+      ).resolves.toBeNull();
+    });
 
-      it('pages', async () => {
-        const versions = [...range(1, 50)].map((v: number) => ({
-          semver: `1.${v}.0`,
-        }));
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0))
-          .reply(200, { versions })
-          .get(getPath(1))
-          .reply(404);
-        const res = await getPkgReleases({
+    it('returns null for empty 200 OK', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0))
+        .reply(200, { versions: [] });
+      await expect(
+        getPkgReleases({
           datasource,
-          packageName: 'adoptium-jdk',
-        });
-        expect(res).toMatchSnapshot();
-        expect(res?.releases).toHaveLength(50);
-      });
+          packageName,
+        }),
+      ).resolves.toBeNull();
+    });
 
-      it('processes real data (jre,system)', async () => {
-        vi.spyOn(process, 'arch', 'get').mockReturnValueOnce('ia32');
-        vi.spyOn(process, 'platform', 'get').mockReturnValueOnce('win32');
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0, 'jre', '&os=windows&architecture=x86'))
-          .reply(200, Fixtures.get('jre.json'));
-        const res = await getPkgReleases({
+    it('throws for 5xx', async () => {
+      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(502);
+      await expect(
+        getPkgReleases({
           datasource,
-          packageName: 'adoptium-jre?system=true',
-        });
-        expect(res?.releases).toHaveLength(2);
-      });
+          packageName,
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
 
-      // Backwards compatibility tests
-      it('handles legacy name: java', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0))
-          .reply(200, Fixtures.get('page.json'));
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'java',
-        });
-        expect(res?.releases).toHaveLength(3);
+    it('processes real data', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0))
+        .reply(200, Fixtures.get('page.json'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
       });
+      expect(res).toMatchObject({
+        releases: [
+          { version: '8.0.302+8' },
+          { version: '11.0.12+7' },
+          { version: '16.0.2+7' },
+        ],
+      });
+    });
 
-      it('handles legacy name: java-jdk', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0))
-          .reply(200, Fixtures.get('page.json'));
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'java-jdk',
-        });
-        expect(res?.releases).toHaveLength(3);
+    it('processes real data (jre)', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0, 'jre'))
+        .reply(200, Fixtures.get('jre.json'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'java-jre',
       });
+      expect(res).toMatchObject({
+        releases: [{ version: '8.0.302+8' }, { version: '11.0.12+7' }],
+      });
+    });
 
-      it('handles legacy name: java-jre', async () => {
-        httpMock
-          .scope(defaultRegistryUrl)
-          .get(getPath(0, 'jre'))
-          .reply(200, Fixtures.get('jre.json'));
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'java-jre',
-        });
-        expect(res?.releases).toHaveLength(2);
+    it('processes real data (jre,windows,x64)', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0, 'jre', '&os=windows&architecture=x64'))
+        .reply(200, Fixtures.get('jre.json'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'java-jre?os=windows&architecture=x64',
       });
+      expect(res?.releases).toHaveLength(2);
+    });
+
+    it('pages', async () => {
+      const versions = [...range(1, 50)].map((v: number) => ({
+        semver: `1.${v}.0`,
+      }));
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0))
+        .reply(200, { versions })
+        .get(getPath(1))
+        .reply(404);
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+      });
+      expect(res).toMatchObject({
+        releases: Array.from({ length: 50 }, (_, idx) => ({
+          version: `1.${idx + 1}.0`,
+        })),
+      });
+      expect(res?.releases).toHaveLength(50);
+    });
+
+    it('processes real data (jre,system)', async () => {
+      vi.spyOn(process, 'arch', 'get').mockReturnValueOnce('ia32');
+      vi.spyOn(process, 'platform', 'get').mockReturnValueOnce('win32');
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0, 'jre', '&os=windows&architecture=x86'))
+        .reply(200, Fixtures.get('jre.json'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'java-jre?system=true',
+      });
+      expect(res?.releases).toHaveLength(2);
     });
 
     describe('Oracle GraalVM', () => {
@@ -282,24 +255,24 @@ describe('modules/datasource/java-version/index', () => {
 
       it('returns null for 404', async () => {
         httpMock.scope(graalvmRegistryUrl).get(graalvmBasePath).reply(404);
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource,
             packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
             registryUrls: [graalvmRegistryUrl],
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('returns null for empty result', async () => {
         httpMock.scope(graalvmRegistryUrl).get(graalvmBasePath).reply(200, []);
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource,
             packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
             registryUrls: [graalvmRegistryUrl],
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       });
 
       it('throws for 5xx', async () => {
@@ -462,11 +435,11 @@ describe('modules/datasource/java-version/index', () => {
       it('uses the default OS when it is omitted', async () => {
         httpMock
           .scope(graalvmRegistryUrl)
-          .get(graalvmBasePath)
+          .get('/jvm/ga/linux/aarch64.json')
           .reply(200, oracleGraalvmJdkReleases);
         const res = await getPkgReleases({
           datasource,
-          packageName: 'oracle-graalvm-jdk?architecture=x86_64',
+          packageName: 'oracle-graalvm-jdk?architecture=aarch64',
         });
         expect(res?.releases).toHaveLength(3);
       });
@@ -474,11 +447,11 @@ describe('modules/datasource/java-version/index', () => {
       it('uses the default architecture when it is omitted', async () => {
         httpMock
           .scope(graalvmRegistryUrl)
-          .get(graalvmBasePath)
+          .get('/jvm/ga/windows/x86_64.json')
           .reply(200, oracleGraalvmJdkReleases);
         const res = await getPkgReleases({
           datasource,
-          packageName: 'oracle-graalvm-jdk?os=linux',
+          packageName: 'oracle-graalvm-jdk?os=windows',
         });
         expect(res?.releases).toHaveLength(3);
       });
@@ -604,23 +577,6 @@ describe('modules/datasource/java-version/index', () => {
         });
         expect(graalvmRes?.releases).toHaveLength(3);
       });
-    });
-  });
-
-  describe('getAdoptiumReleases', () => {
-    it('re-throws non-HttpError', async () => {
-      const mockHttp = {
-        getJson: vi.fn().mockRejectedValue(new Error('unexpected')),
-      };
-
-      await expect(
-        getAdoptiumReleases(partial<Http>(mockHttp), {
-          vendor: 'adoptium',
-          imageType: 'jdk',
-          architecture: null,
-          os: null,
-        }),
-      ).rejects.toThrow('unexpected');
     });
   });
 

@@ -22,7 +22,7 @@ import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
 const extensionName = 'github/gh-actions-lock';
 
 /** The `uses:` dep types the lockfile graph is built from. */
-const lockedDepTypes = ['action', 'docker'];
+const lockedDepTypes = ['action', 'workflow', 'docker'];
 
 function findToken(url: string): string | undefined {
   return findGithubToken(hostRules.find({ hostType: 'github', url }));

@@ -1,7 +1,6 @@
 {
   "$schema": "../../tools/schemas/replacements-schema.json",
   "all": {
-    "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
@@ -54,6 +53,7 @@
       "replacements:rollup-node-resolve-to-scoped",
       "replacements:rollup-terser-to-scoped",
       "replacements:rome-to-biome",
+      "replacements:scorecard-registry-move",
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
@@ -67,7 +67,7 @@
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
-    "ignoreDeps": []
+    "overrideDescription": "Apply crowd-sourced package replacement rules."
   },
   "actions-attest-build-provenance-to-actions-attest": {
     "description": "`actions/attest-build-provenance` was renamed to `actions/attest`.",
@@ -1165,6 +1165,16 @@
         "matchPackageNames": ["rome"],
         "replacementName": "@biomejs/biome",
         "replacementVersion": "1.0.0"
+      }
+    ]
+  },
+  "scorecard-registry-move": {
+    "description": "The OpenSSF Scorecard container images moved from `gcr.io/openssf/scorecard` to `ghcr.io/ossf/scorecard`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/openssf/scorecard"],
+        "replacementName": "ghcr.io/ossf/scorecard"
       }
     ]
   },

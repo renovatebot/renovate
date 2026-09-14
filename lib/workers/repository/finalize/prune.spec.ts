@@ -40,6 +40,14 @@ describe('workers/repository/finalize/prune', () => {
       expect(git.getBranchList).toHaveBeenCalledTimes(0);
     });
 
+    it('returns if branchPrefix is empty', async () => {
+      config.branchPrefix = '';
+      config.branchList = ['main/quality/renovate-a'];
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(0);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+
     it('returns if no renovate branches', async () => {
       config.branchList = [];
       git.getBranchList.mockReturnValueOnce([]);

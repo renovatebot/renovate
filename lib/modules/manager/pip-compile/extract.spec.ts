@@ -99,7 +99,9 @@ describe('modules/manager/pip-compile/extract', () => {
       // TODO(not7cd)
       'setup.cfg',
     ])('returns null on not supported package files', async (file: string) => {
-      expect(await extractPackageFile('some content', file, {})).toBeNull();
+      await expect(
+        extractPackageFile('some content', file, {}),
+      ).resolves.toBeNull();
     });
   });
 

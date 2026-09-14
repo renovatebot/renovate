@@ -33,13 +33,13 @@ function filterByMaxMajorIncrement(
   depName: string,
 ): Release[] {
   const currentMajor = versioningApi.getMajor(currentVersion);
-  /* v8 ignore next 3 -- shouldn't happen */
+  /* v8 ignore next -- shouldn't happen */
   if (currentMajor === null) {
     return releases;
   }
   return releases.filter((r) => {
     const releaseMajor = versioningApi.getMajor(r.version);
-    /* v8 ignore next 3 -- shouldn't happen */
+    /* v8 ignore next -- shouldn't happen */
     if (releaseMajor === null) {
       return true;
     }
@@ -64,7 +64,7 @@ export function filterVersions(
   const { ignoreUnstable, ignoreDeprecated, respectLatest, maxMajorIncrement } =
     config;
 
-  /* v8 ignore next 3 -- shouldn't happen */
+  /* v8 ignore next -- shouldn't happen */
   if (!currentVersion) {
     return [];
   }

@@ -22,6 +22,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
@@ -55,7 +56,10 @@ export async function checkYarnrc(
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+        yarnPath = pathLine.replace(
+          regEx(/^yarn-path\s+"?(?<path>.+?)"?$/),
+          '$<path>',
+        );
       }
       if (yarnPath) {
         // resolve binary relative to `yarnrc`
@@ -150,7 +154,6 @@ export async function generateLockFile(
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      CI: 'true',
     };
 
     const commands: (string | CommandWithOptions)[] = [];
@@ -213,7 +216,7 @@ export async function generateLockFile(
       docker: {},
       toolConstraints,
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -358,7 +361,7 @@ export function fuzzyMatchAdditionalYarnrcYml<
   T extends { npmRegistries?: Record<string, unknown> },
 >(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
   const keys = new Map(
-    Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
+    Object.keys(coerceObject(existingYarnrRcYml.npmRegistries)).map((x) => [
       x.replace(regEx(/\/$/), '').replace(regEx(/^https?:/), ''),
       x,
     ]),
@@ -366,7 +369,9 @@ export function fuzzyMatchAdditionalYarnrcYml<
 
   return {
     ...additionalYarnRcYml,
-    npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
+    npmRegistries: Object.entries(
+      coerceObject(additionalYarnRcYml.npmRegistries),
+    )
       .map(([k, v]) => {
         const key = keys.get(k.replace(regEx(/\/$/), '')) ?? k;
         return { [key]: v };

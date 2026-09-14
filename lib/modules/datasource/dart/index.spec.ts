@@ -12,12 +12,12 @@ describe('modules/datasource/dart/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/non_sense').reply(200, '}');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'non_sense',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty fields', async () => {
@@ -29,12 +29,12 @@ describe('modules/datasource/dart/index', () => {
         .scope(baseUrl)
         .get('/shared_preferences')
         .reply(200, withoutVersions);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       const withoutLatest = {
         ...body,
@@ -44,22 +44,22 @@ describe('modules/datasource/dart/index', () => {
         .scope(baseUrl)
         .get('/shared_preferences')
         .reply(200, withoutLatest);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -74,12 +74,12 @@ describe('modules/datasource/dart/index', () => {
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {
@@ -88,7 +88,63 @@ describe('modules/datasource/dart/index', () => {
         datasource: DartDatasource.id,
         packageName: 'shared_preferences',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        homepage:
+          'https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences',
+        sourceUrl: 'https://github.com/flutter/plugins',
+        releases: [
+          {
+            version: '0.1.1',
+            releaseTimestamp: '2017-05-09T18:25:24.268Z',
+          },
+          { version: '0.2.0' },
+          { version: '0.2.0+1' },
+          { version: '0.2.3' },
+          { version: '0.2.4' },
+          { version: '0.2.4+1' },
+          { version: '0.2.5' },
+          { version: '0.3.0' },
+          { version: '0.3.1' },
+          { version: '0.3.2' },
+          { version: '0.3.3' },
+          { version: '0.4.0' },
+          { version: '0.4.1' },
+          { version: '0.4.2' },
+          { version: '0.4.3' },
+          { version: '0.5.0' },
+          { version: '0.5.1+1' },
+          { version: '0.5.1+2' },
+          { version: '0.5.2' },
+          { version: '0.5.2+1' },
+          { version: '0.5.2+2' },
+          { version: '0.5.3' },
+          { version: '0.5.3+1' },
+          { version: '0.5.3+2' },
+          { version: '0.5.3+3' },
+          { version: '0.5.3+4' },
+          { version: '0.5.3+5' },
+          { version: '0.5.4' },
+          { version: '0.5.4+1' },
+          { version: '0.5.4+3' },
+          { version: '0.5.4+5' },
+          { version: '0.5.4+6' },
+          { version: '0.5.4+8' },
+          { version: '0.5.4+9' },
+          { version: '0.5.5' },
+          { version: '0.5.6' },
+          { version: '0.5.6+1' },
+          { version: '0.5.6+2' },
+          { version: '0.5.6+3' },
+          { version: '0.5.7' },
+          { version: '0.5.7+1' },
+          { version: '0.5.7+2' },
+          { version: '0.5.7+3' },
+          {
+            version: '0.5.8',
+            releaseTimestamp: '2020-07-08T04:36:43.412Z',
+          },
+        ],
+      });
     });
 
     it('includes constraints from pubspec environment', async () => {

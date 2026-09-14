@@ -105,6 +105,7 @@ export const FILE_ACCESS_VIOLATION_ERROR = 'file-access-violation-error';
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
 export const IGNORABLE_HOST_ERROR = 'ignorable-host-error';
+export const HOST_BLOCKED = 'host-blocked';
 export const HOST_DISABLED = 'host-disabled';
 
 // Worker Error

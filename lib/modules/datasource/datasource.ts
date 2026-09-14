@@ -1,3 +1,4 @@
+import { isFunction } from '@sindresorhus/is';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { Http, HttpError } from '../../util/http/index.ts';
 import type {
@@ -29,7 +30,7 @@ export abstract class Datasource implements DatasourceApi {
   defaultRegistryUrls?: string[] | (() => string[]);
 
   getDefaultRegistryUrls(_packageName: string): string[] | undefined {
-    return typeof this.defaultRegistryUrls === 'function'
+    return isFunction(this.defaultRegistryUrls)
       ? this.defaultRegistryUrls()
       : this.defaultRegistryUrls;
   }

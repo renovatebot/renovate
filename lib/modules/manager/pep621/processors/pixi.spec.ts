@@ -179,6 +179,7 @@ requires-pixi = ">=0.40,<0.41"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e PIXI_CACHE_DIR ' +
             '-e RATTLER_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
@@ -248,6 +249,7 @@ requires-pixi = ">=0.38,<0.39"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e PIXI_CACHE_DIR ' +
             '-e RATTLER_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
