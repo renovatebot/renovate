@@ -788,6 +788,14 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: NpmDatasource.id,
     packageName: 'supabase',
   },
+  // https://github.com/superfly/flyctl-actions (there is no root-level
+  // Action for this purpose — the repo root has an unrelated action.yml, and
+  // the real usable Action lives at the `setup-flyctl` subpath)
+  'superfly/flyctl-actions/setup-flyctl': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'flyctl',
+    packageName: 'superfly/flyctl',
+  },
   // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {
     datasource: GithubReleasesDatasource.id,
