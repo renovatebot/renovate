@@ -240,6 +240,39 @@ describe('workers/repository/process/lookup/filter', () => {
       ]);
     });
 
+    it('coerces release versions that semver cannot parse when falling back to semver ranges', () => {
+      const dockerVersioning = allVersioning.get('docker');
+
+      const releases = [
+        { version: '1.2.3.4' },
+        { version: '2.0.0' },
+      ] satisfies Release[];
+
+      const config = partial<FilterConfig>({
+        // `>=1.0.0` is not valid docker versioning but is a valid semver range,
+        // so allowedVersions falls back to semver - and `1.2.3.4` is a valid
+        // docker version that semver has to coerce before it can match
+        versioning: 'docker',
+        allowedVersions: '>=1.0.0',
+        ignoreUnstable: false,
+        ignoreDeprecated: false,
+        respectLatest: false,
+      });
+
+      const filteredVersions = filterVersions(
+        config,
+        '1.0.0',
+        '2.0.0',
+        releases,
+        dockerVersioning,
+      );
+
+      expect(filteredVersions).toEqual([
+        { version: '1.2.3.4' },
+        { version: '2.0.0' },
+      ]);
+    });
+
     it('returns no versions if there is no current version', () => {
       const releases = [{ version: '1.0.1' }, { version: '1.2.0' }];
 

@@ -4548,6 +4548,26 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('returns no updates if the datasource rejects every candidate release', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'com.example:artifact';
+      config.versioning = mavenVersioningId;
+      config.datasource = MavenDatasource.id;
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+      });
+      // nothing survives postprocessing, so no bucket yields a release
+      postprocessMavenRelease.mockResolvedValue('reject');
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // the current version resolves, proving we reached the per-bucket loop
+      expect(res.currentVersion).toBe('1.0.0');
+      expect(res.updates).toBeEmpty();
+    });
+
     it('applies versionCompatibility for maven', async () => {
       config.currentValue = '12.4.2.jre8';
       config.packageName = 'com.microsoft.sqlserver:mssql-jdbc';

@@ -38,6 +38,20 @@ describe('workers/repository/process/lookup/rollback', () => {
       ).toBeNull();
     });
 
+    it('returns null if the release to roll back to carries no version', () => {
+      const versioningApi = partial<VersioningApi>({
+        isLessThanRange: () => true,
+        // the only candidate is unstable, so the stable pass finds nothing and
+        // the fallback pops a release whose version is empty
+        isStable: (version) => version !== '',
+        sortVersions: () => 0,
+      });
+
+      expect(
+        getRollbackUpdate(config, [{ version: '' }], versioningApi),
+      ).toBeNull();
+    });
+
     it('ignores versions for which isLessThanRange() throws', () => {
       const versioningApi = partial<VersioningApi>({
         isLessThanRange: () => {
