@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'GitTools/actions/gitversion/setup@v3',
+        with: { versionSpec: '6.8.2' },
+      },
+      expected: [
+        {
+          currentValue: '6.8.2',
+          datasource: 'github-releases',
+          depName: 'gitversion',
+          depType: 'uses-with',
+          packageName: 'GitTools/GitVersion',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'GitTools/actions/gitversion/setup@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'gitversion',
+          depType: 'uses-with',
+          packageName: 'GitTools/GitVersion',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'subosito/flutter-action@v2',
         with: { 'flutter-version': '3.24.3' },
       },
