@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'jfrog/setup-jfrog-cli@v4',
+        with: { version: '2.91.0' },
+      },
+      expected: [
+        {
+          currentValue: '2.91.0',
+          datasource: 'github-releases',
+          depName: 'jfrog-cli',
+          depType: 'uses-with',
+          packageName: 'jfrog/jfrog-cli',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jfrog/setup-jfrog-cli@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'jfrog-cli',
+          depType: 'uses-with',
+          packageName: 'jfrog/jfrog-cli',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'helm/chart-releaser-action@v1',
         with: { version: 'v1.7.0' },
       },
