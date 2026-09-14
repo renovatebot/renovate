@@ -47,3 +47,6 @@ pdm.lock
 # Git worktrees
 /.worktrees
 /.claude/worktrees
+
+# Stryker mutation testing sandbox
+/.stryker-tmp

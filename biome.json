@@ -34,6 +34,7 @@
       "!.pnpm-store",
       "!.worktrees/**/*",
       "!.claude/worktrees/**/*",
+      "!.stryker-tmp/**/*",
       "!**/dist",
       "!**/tmp",
       "!**/coverage",

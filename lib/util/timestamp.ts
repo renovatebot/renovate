@@ -4,8 +4,6 @@ import { z } from 'zod/v4';
 
 export type Timestamp = string & { __timestamp: never };
 
-const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-
 const millenium = 946684800000; // 2000-01-01T00:00:00.000Z
 const tomorrowOffset = 86400000; // 24 * 60 * 60 * 1000;
 
@@ -74,6 +72,7 @@ export function asTimestamp(input: unknown): Timestamp | null {
       return numberLikeOffsetDate.toISO() as Timestamp;
     }
 
+    const timezoneOffset = new Date().getTimezoneOffset() * 60000;
     const fallbackDate = DateTime.fromMillis(
       Date.parse(input) - timezoneOffset,
       { zone: 'UTC' },
