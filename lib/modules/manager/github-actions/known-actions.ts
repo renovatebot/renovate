@@ -940,6 +940,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'flyctl',
     packageName: 'superfly/flyctl',
   },
+  // https://github.com/swift-actions/setup-swift
+  'swift-actions/setup-swift': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'swift',
+    packageName: 'swiftlang/swift',
+    // swiftlang/swift tags releases like `swift-6.3.3-RELEASE`
+    extractVersion: '^swift-(?<version>.+)-RELEASE$',
+    withSchema: valSchema('swift-version'),
+  },
   // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {
     datasource: GithubReleasesDatasource.id,
