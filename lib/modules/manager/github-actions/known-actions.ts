@@ -405,6 +405,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'hashicorp/terraform',
     withSchema: valSchema('terraform_version'),
   },
+  // https://github.com/helm/chart-releaser-action
+  'helm/chart-releaser-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'chart-releaser',
+    packageName: 'helm/chart-releaser',
+  },
   // https://github.com/helm/chart-testing-action
   'helm/chart-testing-action': {
     datasource: GithubReleasesDatasource.id,

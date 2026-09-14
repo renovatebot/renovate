@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'helm/chart-releaser-action@v1',
+        with: { version: 'v1.7.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.7.0',
+          datasource: 'github-releases',
+          depName: 'chart-releaser',
+          depType: 'uses-with',
+          packageName: 'helm/chart-releaser',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-releaser-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'chart-releaser',
+          depType: 'uses-with',
+          packageName: 'helm/chart-releaser',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'azure/setup-kubectl@v4',
         with: { version: 'v1.31.0' },
       },
