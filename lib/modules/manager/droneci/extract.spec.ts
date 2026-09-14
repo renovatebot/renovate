@@ -9,6 +9,13 @@ describe('modules/manager/droneci/extract', () => {
       expect(extractPackageFile('nothing here', '', {})).toBeNull();
     });
 
+    it('ignores a multi-line image that is never terminated', () => {
+      const content = ['    image: "some/image\\', '      unterminated'].join(
+        '\n',
+      );
+      expect(extractPackageFile(content, '', {})).toBeNull();
+    });
+
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(Fixtures.get('.drone.yml'), '', {});
       expect(res?.deps).toEqual([
