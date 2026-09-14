@@ -92,11 +92,18 @@ function processSource(
     // the `helm pull oci://.../<chart>` convention. It is not part of the OCI
     // image, so strip it before building the dependency.
     const parts = registryURL.split('/');
-    if (
-      parts.length > 1 &&
-      parts[parts.length - 1] === parts[parts.length - 2]
-    ) {
-      registryURL = parts.slice(0, -1).join('/');
+    const lastPart = parts.at(-1);
+    if (parts.length > 1 && lastPart === parts.at(-2)) {
+      const dedupedURL = parts.slice(0, -1).join('/');
+      logger.warn(
+        {
+          repoURL: source.repoURL,
+          chartName: lastPart,
+          dedupedURL,
+        },
+        'ArgoCD OCI repoURL repeats the chart name at the end; using the deduplicated chart reference',
+      );
+      registryURL = dedupedURL;
     }
 
     return [
