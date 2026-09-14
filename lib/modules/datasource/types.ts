@@ -161,6 +161,13 @@ export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
+
+  /**
+   * Whether the version identifies a commit instead of a release, as Go's pseudo-versions do.
+   *
+   * An update between two pseudo-versions of the same package is a digest update: only the commit the version points at changed.
+   */
+  isPseudoVersion?(version: string): boolean;
   defaultRegistryUrls?: string[] | (() => string[]);
   defaultVersioning?: string | undefined;
   defaultConfig?: Record<string, unknown> | undefined;
