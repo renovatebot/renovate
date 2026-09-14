@@ -1,4 +1,3 @@
-import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
@@ -59,7 +58,10 @@ describe('modules/datasource/sdkman/index', () => {
       httpMock
         .scope(`https://api.sdkman.io/2/candidates`)
         .get('/java/linuxx64/versions/all')
-        .reply(200, Fixtures.get('java.csv'));
+        .reply(
+          200,
+          '11.0.14.1-jbr,11.0.30-sapmchn,11.0.32-amzn,11.0.32-kona,11.0.32-sem,11.0.32+1-ms\n',
+        );
 
       const res = await getPkgReleases({
         datasource: SdkmanDatasource.id,

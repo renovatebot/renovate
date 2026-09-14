@@ -28,6 +28,7 @@ export class SdkmanDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ packageName }, 'fetching sdkman release');
 
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -52,13 +53,10 @@ export class SdkmanDatasource extends Datasource {
         releases: versions?.map((version) => ({ version: version.trim() })),
       };
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
         return null;
       }
-      this.handleGenericErrors(err);
+      throw new ExternalHostError(err);
     }
   }
 
@@ -83,14 +81,10 @@ function constructPackageUrl(
     return null;
   }
 
-  if (
-    !url.searchParams.has('binaryArch') ||
-    url.searchParams.get('binaryArch') === null
-  ) {
+  const binaryArch = url.searchParams.get('binaryArch');
+  if (!binaryArch?.trim()) {
     throw new Error(`Missing required query parameter: 'binaryArch'`);
   }
-
-  const binaryArch = url.searchParams.get('binaryArch');
 
   if (binaryArch === null || isEmptyStringOrWhitespace(binaryArch)) {
     throw new Error(
