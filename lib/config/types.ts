@@ -204,6 +204,7 @@ export interface GlobalOnlyConfigLegacy {
   globalExtends?: string[];
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
+  packageCacheMemoryLimit?: number;
   platform?: PlatformId;
   processEnv?: Record<string, string>;
   prCommitsPerRunLimit?: number;

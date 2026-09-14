@@ -1,4 +1,5 @@
 import { partial } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
 import * as backend from './backend.ts';
 import type { PackageCacheBase } from './impl/base.ts';
 import * as index from './index.ts';
@@ -19,12 +20,58 @@ describe('util/cache/package/index', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('reports the configured backend type', () => {
+    vi.mocked(backend.getCacheType).mockReturnValue('file');
+
+    expect(index.getCacheType()).toBe('file');
+  });
+
   it('stores and retrieves via L1 without backend', async () => {
+    await index.init({});
+
     await index.set('_test-namespace', 'some-key', 'some-value', 5);
 
     const result = await index.get('_test-namespace', 'some-key');
 
     expect(result).toBe('some-value');
+  });
+
+  it('uses the configured default memory budget', async () => {
+    const { packageCacheMemoryLimit } = getConfig();
+    expect(packageCacheMemoryLimit).toBe(64);
+
+    await index.init({ packageCacheMemoryLimit });
+
+    expect(index.packageCache.memory?.maxSize).toBe(64 * 1024 ** 2);
+  });
+
+  it('uses the default memory budget when omitted', async () => {
+    await index.init({});
+
+    expect(index.packageCache.memory?.maxSize).toBe(64 * 1024 ** 2);
+  });
+
+  it.each([-1, 0.5, NaN, Infinity, Number.MAX_SAFE_INTEGER])(
+    'rejects invalid memory limit %s',
+    async (packageCacheMemoryLimit) => {
+      await expect(index.init({ packageCacheMemoryLimit })).rejects.toThrow(
+        'packageCacheMemoryLimit must be a non-negative integer in MiB',
+      );
+      expect(backend.init).not.toHaveBeenCalled();
+    },
+  );
+
+  it('applies the configured memory budget', async () => {
+    await index.init({ packageCacheMemoryLimit: 1 });
+
+    expect(index.packageCache.memory?.maxSize).toBe(1024 ** 2);
+  });
+
+  it('disables L1 when the configured memory budget is zero', async () => {
+    await index.init({ packageCacheMemoryLimit: 0 });
+    await index.set('_test-namespace', 'a', 'value', 10);
+
+    await expect(index.get('_test-namespace', 'a')).resolves.toBeUndefined();
   });
 
   it('delegates init to backend and wraps result', async () => {

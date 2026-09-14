@@ -1,4 +1,6 @@
 import { withTimeout } from 'async-mutex';
+import type { LRUCache } from 'lru-cache';
+import { logger } from '../../../logger/index.ts';
 import { getMutex } from '../../mutex.ts';
 import { PackageCacheStats } from '../../stats.ts';
 import type { PackageCacheBase } from './impl/base.ts';
@@ -8,12 +10,20 @@ import type { PackageCacheNamespace } from './types.ts';
 
 const DEFAULT_TIMEOUT_MS = 2 * 60 * 1000;
 
+export interface MemoryEntry {
+  value: unknown;
+}
+
 export class PackageCache {
-  readonly memory = new Map<string, unknown>();
+  readonly memory: LRUCache<string, MemoryEntry> | null;
   private readonly backend: PackageCacheBase | undefined;
 
-  constructor(backend?: PackageCacheBase) {
+  constructor(
+    backend: PackageCacheBase | undefined,
+    memory: LRUCache<string, MemoryEntry> | null,
+  ) {
     this.backend = backend;
+    this.memory = memory;
   }
 
   async get<T = unknown>(
@@ -21,16 +31,16 @@ export class PackageCache {
     key: string,
   ): Promise<T | undefined> {
     const combinedKey = getCombinedKey(namespace, key);
-    if (this.memory.has(combinedKey)) {
-      return this.memory.get(combinedKey) as T;
+    if (this.memory?.has(combinedKey)) {
+      return this.memory.get(combinedKey)!.value as T;
     }
 
     return await withTimeout(
       getMutex(combinedKey, 'package-cache'),
       DEFAULT_TIMEOUT_MS,
     ).runExclusive(async () => {
-      if (this.memory.has(combinedKey)) {
-        return this.memory.get(combinedKey) as T;
+      if (this.memory?.has(combinedKey)) {
+        return this.memory.get(combinedKey)!.value as T;
       }
 
       return await this.getUnsynced<T>(namespace, key);
@@ -50,7 +60,7 @@ export class PackageCache {
       backend.get<T>(namespace, key),
     );
 
-    this.memory.set(getCombinedKey(namespace, key), value);
+    this.setMemory(getCombinedKey(namespace, key), value);
 
     return value;
   }
@@ -94,7 +104,7 @@ export class PackageCache {
     value: unknown,
     hardTtlMinutes: number,
   ): Promise<void> {
-    this.memory.set(getCombinedKey(namespace, key), value);
+    this.setMemory(getCombinedKey(namespace, key), value);
 
     const backend = this.backend;
     if (backend) {
@@ -105,11 +115,35 @@ export class PackageCache {
   }
 
   softReset(): void {
-    this.memory.clear();
+    this.memory?.clear();
   }
 
   async destroy(): Promise<void> {
-    this.memory.clear();
+    this.softReset();
     await this.backend?.destroy();
+  }
+
+  private setMemory(key: string, value: unknown): void {
+    if (!this.memory) {
+      return;
+    }
+
+    const entry = { value };
+    let size: number;
+    try {
+      // Serialized bytes approximate retained data, not V8 heap usage. Include
+      // keys and an allowance for bookkeeping, including cached misses.
+      size =
+        Buffer.byteLength(JSON.stringify(entry)) + Buffer.byteLength(key) + 128;
+    } catch (err) {
+      this.memory.delete(key);
+      logger.once.debug(
+        { err },
+        'Unable to size package cache entry, skipping L1',
+      );
+      return;
+    }
+
+    this.memory.set(key, entry, { size });
   }
 }
