@@ -669,14 +669,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'kubernetes/kubernetes',
     withSchema: SetupKubectlWith,
   },
-  // https://github.com/cloudflare/wrangler-action
-  // https://github.com/biomejs/setup-biome
   // https://github.com/baptiste0928/cargo-install
   'baptiste0928/cargo-install': {
     datasource: CrateDatasource.id,
     packageName: '', // determined from the `crate` input
     withSchema: CargoInstallWith,
   },
+  // https://github.com/biomejs/setup-biome
   'biomejs/setup-biome': {
     datasource: NpmDatasource.id,
     packageName: '@biomejs/biome',
@@ -696,12 +695,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     // main-tool release tag
     extractVersion: '^v(?<version>\\d+\\.\\d+\\.\\d+)$',
   },
+  // https://github.com/cloudflare/wrangler-action
   'cloudflare/wrangler-action': {
     datasource: NpmDatasource.id,
     packageName: 'wrangler',
     withSchema: valSchema('wranglerVersion'),
   },
-  // https://github.com/cycjimmy/semantic-release-action
   // https://github.com/conda-incubator/setup-miniconda
   'conda-incubator/setup-miniconda': {
     datasource: GithubReleasesDatasource.id,
@@ -720,6 +719,7 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'cue',
     packageName: 'cue-lang/cue',
   },
+  // https://github.com/cycjimmy/semantic-release-action
   'cycjimmy/semantic-release-action': {
     datasource: NpmDatasource.id,
     packageName: 'semantic-release',
@@ -1053,7 +1053,6 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'flutter/flutter',
     withSchema: valSchema('flutter-version'),
   },
-  // https://github.com/terraform-linters/setup-tflint
   // https://github.com/supabase/setup-cli
   'supabase/setup-cli': {
     datasource: NpmDatasource.id,
@@ -1080,6 +1079,7 @@ export const knownActions: Record<string, KnownActionConfig> = {
     extractVersion: '^swift-(?<version>.+)-RELEASE$',
     withSchema: valSchema('swift-version'),
   },
+  // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {
     datasource: GithubReleasesDatasource.id,
     depName: 'tflint',
