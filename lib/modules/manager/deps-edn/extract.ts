@@ -223,9 +223,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   const mavenRepos = data['mvn/repos'];
   if (isPlainObject(mavenRepos)) {
     for (const [repoName, repoSpec] of Object.entries(mavenRepos)) {
+      // v8 ignore else -- object keys are always strings
       if (isString(repoName)) {
         if (isPlainObject(repoSpec) && isString(repoSpec.url)) {
           registryMap[repoName] = repoSpec.url;
+          // NOTE: any other repo spec is left alone. A coverage-ignore hint
+          // cannot suppress the implicit else on an `else if`.
         } else if (isString(repoSpec) && repoSpec === 'nil') {
           delete registryMap[repoName];
         }
