@@ -541,6 +541,16 @@ export const knownActions: Record<string, KnownActionConfig> = {
     versioning: npmVersioning.id,
     withSchema: valSchema('semantic_version'),
   },
+  // https://github.com/dagger/dagger-for-github
+  'dagger/dagger-for-github': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'dagger',
+    packageName: 'dagger/dagger',
+    // the repo also publishes per-SDK/component tags sharing the same
+    // version (e.g. `sdk/typescript/v0.21.9`, `helm/chart/v0.21.9`) — only
+    // match the bare release tag
+    extractVersion: '^v(?<version>\\d+\\..*)$',
+  },
   // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
     datasource: NpmDatasource.id,

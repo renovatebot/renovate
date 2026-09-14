@@ -4047,6 +4047,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'dagger/dagger-for-github@v8',
+        with: { version: 'v0.21.9' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.21.9',
+          datasource: 'github-releases',
+          depName: 'dagger',
+          depType: 'uses-with',
+          packageName: 'dagger/dagger',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dagger/dagger-for-github@v8',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'dagger',
+          depType: 'uses-with',
+          packageName: 'dagger/dagger',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
