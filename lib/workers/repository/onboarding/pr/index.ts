@@ -27,7 +27,7 @@ import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.
 import {
   OnboardingState,
   getDefaultConfigFileName,
-  getSemanticCommitPrTitle,
+  getOnboardingPrTitle,
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';
@@ -325,14 +325,6 @@ export async function ensureOnboardingPr(
   });
 
   return 'onboarding';
-}
-
-function getOnboardingPrTitle(config: RenovateConfig): string {
-  if (config.semanticCommits === 'enabled') {
-    return getSemanticCommitPrTitle(config);
-  }
-  // TODO #22198
-  return getInheritedOrGlobal('onboardingPrTitle')!;
 }
 
 async function getOnboardingConfigHashComment(): Promise<string> {

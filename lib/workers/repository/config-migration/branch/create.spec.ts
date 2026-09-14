@@ -4,6 +4,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { fs, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { createConfigMigrationBranch } from './create.ts';
 import type { MigratedData } from './migrated-data.ts';
 import { MigratedDataFactory } from './migrated-data.ts';
@@ -21,6 +22,7 @@ describe('workers/repository/config-migration/branch/create', () => {
   let migratedConfigData: MigratedData;
 
   beforeEach(() => {
+    GlobalConfig.reset();
     config = getConfig();
     config.baseBranch = 'dev';
     config.defaultBranch = 'master';
@@ -119,6 +121,32 @@ describe('workers/repository/config-migration/branch/create', () => {
         force: true,
         prTitle: 'Migrate Renovate config',
       });
+    });
+
+    it('applies the commitBody and commitTrailers values', async () => {
+      config.commitBody = 'Signed Off: {{{gitAuthor}}}';
+      config.commitTrailers = ['Signed-off-by: {{{gitAuthor}}}'];
+      config.gitAuthor = 'Bot <bot@botland.com>';
+
+      await createConfigMigrationBranch(config, migratedConfigData);
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          message:
+            'Migrate config renovate.json\n\nSigned Off: Bot <bot@botland.com>',
+          trailers: ['Signed-off-by: Bot <bot@botland.com>'],
+        }),
+      );
+    });
+
+    it('does not commit in dryRun mode', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+
+      const res = await createConfigMigrationBranch(config, migratedConfigData);
+
+      expect(res).toBeNull();
+      expect(scm.checkoutBranch).not.toHaveBeenCalled();
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
     });
 
     describe('applies the commitMessagePrefix value', () => {
