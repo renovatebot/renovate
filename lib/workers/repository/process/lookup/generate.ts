@@ -27,15 +27,12 @@ export async function generateUpdate(
     hasAttestation: release.attestation,
   };
 
-  // istanbul ignore if
   if (release.checksumUrl !== undefined) {
     update.checksumUrl = release.checksumUrl;
   }
-  // istanbul ignore if
   if (release.downloadUrl !== undefined) {
     update.downloadUrl = release.downloadUrl;
   }
-  // istanbul ignore if
   if (release.newDigest !== undefined) {
     update.newDigest = release.newDigest;
   }
@@ -61,7 +58,7 @@ export async function generateUpdate(
         newVersion,
         allVersions,
       })!;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
         'getNewValue error',
@@ -74,7 +71,6 @@ export async function generateUpdate(
   update.newMajor = versioningApi.getMajor(newVersion)!;
   update.newMinor = versioningApi.getMinor(newVersion)!;
   update.newPatch = versioningApi.getPatch(newVersion)!;
-  // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
     update.newValue = currentValue!;
