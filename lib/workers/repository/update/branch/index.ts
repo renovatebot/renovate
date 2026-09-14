@@ -17,11 +17,11 @@ import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { emojify } from '../../../../util/emoji.ts';
-import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
 import * as template from '../../../../util/template/index.ts';
 import { getCount, isLimitReached } from '../../../global/limits.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
+import { compileCommitBodyAndTrailers } from '../../model/commit-body.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
@@ -529,31 +529,19 @@ export async function processBranch(
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs
-      if (config.commitBody) {
-        // changelog is on first upgrade
-        config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
-          config.commitBody,
-          {
-            ...config,
-            logJSON: config.upgrades[0].logJSON,
-            releases: config.upgrades[0].releases,
-          },
-        )}`;
-
-        logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
-      }
-
-      if (config.commitTrailers) {
-        // Template expansions can produce broken trailers
-        config.commitTrailers = filterValidCommitTrailers(
-          config.commitTrailers.map((trailer) =>
-            template.compile(trailer, config),
-          ),
-        );
-        logger.trace(
-          `commitTrailers: ${JSON.stringify(config.commitTrailers)}`,
-        );
-      }
+      const compiledCommitMessage = compileCommitBodyAndTrailers(
+        config,
+        config.commitMessage!,
+        {
+          ...config,
+          // changelog is on first upgrade
+          logJSON: config.upgrades[0].logJSON,
+          releases: config.upgrades[0].releases,
+        },
+        config,
+      );
+      config.commitMessage = compiledCommitMessage.message;
+      config.commitTrailers = compiledCommitMessage.trailers;
 
       commitSha = await commitFilesToBranch(config);
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
