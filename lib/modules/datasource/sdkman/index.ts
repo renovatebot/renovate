@@ -87,12 +87,6 @@ function constructPackageUrl(
     throw new Error(`Missing required query parameter: 'binaryArch'`);
   }
 
-  if (binaryArch === null || isEmptyStringOrWhitespace(binaryArch)) {
-    throw new Error(
-      "Parameter 'binaryArch' is not allowed to be null or blank",
-    );
-  }
-
   url.searchParams.delete('binaryArch');
 
   return joinUrlParts(
