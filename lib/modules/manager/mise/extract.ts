@@ -76,7 +76,7 @@ export async function extractPackageFile(
 
   const result: PackageFileContent = { deps };
 
-  const lockFileName = getLockFileName(packageFile);
+  const lockFileName = await getLockFileName(packageFile);
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
 
   if (lockFileContent) {
@@ -87,6 +87,7 @@ export async function extractPackageFile(
         const lockedVersion = getLockedVersion(
           lockFileParsed.data,
           dep.depName!,
+          dep.currentValue,
         );
         if (lockedVersion) {
           dep.lockedVersion = lockedVersion;

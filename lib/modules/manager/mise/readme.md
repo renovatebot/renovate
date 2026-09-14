@@ -31,6 +31,9 @@ Renovate recognizes environment-specific lock files:
 - `mise.{env}.lock` - environment-specific lock files (e.g., `mise.production.lock`)
 - `mise.{env}.local.lock` - environment-specific local lock files, typically ignored alongside `mise.{env}.local.toml`
 
+Renovate also supports [monorepo](https://mise.jdx.dev/tasks/monorepo.html#lockfiles) root lock files (`monorepo_root = true` with `[monorepo] lockfile = true`).
+When a config file has no lock file in its own directory, Renovate uses the nearest lock file in a parent directory and matches locked versions on the lock file's `specifiers`.
+
 For more information about mise lock files, see the [mise lock file documentation](https://mise.jdx.dev/dev-tools/mise-lock.html).
 
 ### Trust model for lock file updates
