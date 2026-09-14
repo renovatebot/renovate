@@ -543,6 +543,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     withSchema: valSchema('wranglerVersion'),
   },
   // https://github.com/cycjimmy/semantic-release-action
+  // https://github.com/cue-lang/setup-cue
+  'cue-lang/setup-cue': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'cue',
+    packageName: 'cue-lang/cue',
+  },
   'cycjimmy/semantic-release-action': {
     datasource: NpmDatasource.id,
     packageName: 'semantic-release',
