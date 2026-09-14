@@ -4635,6 +4635,39 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'WillAbides/setup-go-faster@v1',
+        with: { 'go-version': '1.23.4' },
+      },
+      expected: [
+        {
+          currentValue: '1.23.4',
+          datasource: 'github-releases',
+          depName: 'go',
+          depType: 'uses-with',
+          packageName: 'actions/go-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'WillAbides/setup-go-faster@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'go',
+          depType: 'uses-with',
+          packageName: 'actions/go-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

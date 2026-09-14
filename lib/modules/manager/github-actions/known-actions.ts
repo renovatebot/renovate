@@ -1038,6 +1038,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: 'UpCloudLtd/upcloud-cli',
   },
+  // https://github.com/WillAbides/setup-go-faster
+  'WillAbides/setup-go-faster': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'go',
+    packageName: 'actions/go-versions',
+    versioning: npmVersioning.id,
+    extractVersion: actionsVersionsExtractVersion,
+    withSchema: valSchema('go-version'),
+  },
   'zizmorcore/zizmor-action': {
     datasource: DockerDatasource.id,
     packageName: 'ghcr.io/zizmorcore/zizmor',
