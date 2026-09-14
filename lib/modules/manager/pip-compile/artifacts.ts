@@ -138,15 +138,20 @@ export async function updateArtifacts({
         }
       }
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
+      const registryCredVars =
+        await getRegistryCredVarsFromPackageFiles(packageFiles);
       const execOptions = await getExecOptions(
         config,
         compileArgs.commandType,
         cwd,
-        await getRegistryCredVarsFromPackageFiles(packageFiles),
+        registryCredVars,
         pythonVersion,
       );
-      logger.trace({ cwd, cmd }, 'pip-compile command');
-      logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
+      // only the variable names: the values are registry credentials
+      logger.trace(
+        { cwd, cmd, registryCredVars: Object.keys(registryCredVars) },
+        'pip-compile command',
+      );
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
       if (status?.modified.includes(outputFileName)) {
