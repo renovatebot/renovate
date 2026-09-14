@@ -22,6 +22,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { createNuGetConfigXml } from './config-formatter.ts';
 import {
   DIRECTORY_BUILD_PROPS,
@@ -79,9 +80,11 @@ async function runDotnetRestore(
     updatedDeps,
   );
 
-  const dotnetVersion =
-    config.constraints?.dotnet ??
-    (await findGlobalJson(packageFileName))?.sdk?.version;
+  const dotnetVersion = await resolveToolConstraint(
+    config,
+    'dotnet',
+    async () => (await findGlobalJson(packageFileName))?.sdk?.version,
+  );
   const execOptions: ExecOptions = {
     docker: {},
     extraEnv: {
