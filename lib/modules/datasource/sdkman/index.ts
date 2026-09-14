@@ -66,6 +66,7 @@ export class SdkmanDatasource extends Datasource {
         namespace: `datasource-${SdkmanDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
+        cacheable: true,
       },
       () => this._getReleases(config),
     );
