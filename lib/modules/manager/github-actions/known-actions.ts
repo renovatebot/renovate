@@ -711,6 +711,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'jfrog-cli',
     packageName: 'jfrog/jfrog-cli',
   },
+  // https://github.com/julia-actions/setup-julia
+  'julia-actions/setup-julia': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'julia',
+    packageName: 'JuliaLang/julia',
+    // `'lts'`/`'pre'` are valid, documented values, but not ones we can
+    // pin/bump
+    withSchema: valSchemaSkippingLiterals('version', new Set(['lts', 'pre'])),
+  },
   // https://github.com/mozilla-actions/sccache-action
   'mozilla-actions/sccache-action': {
     datasource: GithubReleasesDatasource.id,

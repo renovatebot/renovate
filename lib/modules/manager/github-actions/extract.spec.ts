@@ -4159,6 +4159,56 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'julia-actions/setup-julia@v2',
+        with: { version: '1.10' },
+      },
+      expected: [
+        {
+          currentValue: '1.10',
+          datasource: 'github-releases',
+          depName: 'julia',
+          depType: 'uses-with',
+          packageName: 'JuliaLang/julia',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'julia-actions/setup-julia@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'julia',
+          depType: 'uses-with',
+          packageName: 'JuliaLang/julia',
+        },
+      ],
+    },
+    {
+      // `'lts'`/`'pre'` are valid, documented values, but not ones we can
+      // pin/bump
+      step: {
+        uses: 'julia-actions/setup-julia@v2',
+        with: { version: 'lts' },
+      },
+      expected: [
+        {
+          currentValue: 'lts',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+          datasource: 'github-releases',
+          depName: 'julia',
+          depType: 'uses-with',
+          packageName: 'JuliaLang/julia',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
