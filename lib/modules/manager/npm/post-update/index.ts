@@ -26,6 +26,7 @@ import type {
   PostUpdateConfig,
   Upgrade,
 } from '../../types.ts';
+import { artifactErrorMessageFromExecError } from '../../util.ts';
 import {
   NPM_CACHE_DIR,
   PNPM_CACHE_BASE_DIR,
@@ -53,8 +54,9 @@ import type {
 import * as yarn from './yarn.ts';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
-const getDirs = (arr: (string | null | undefined)[]): string[] =>
-  Array.from(new Set(arr.filter(isString)));
+function getDirs(arr: (string | null | undefined)[]): string[] {
+  return Array.from(new Set(arr.filter(isString)));
+}
 
 export function determineLockFileDirs(
   config: PostUpdateConfig,
@@ -62,7 +64,7 @@ export function determineLockFileDirs(
 ): DetermineLockFileDirsResult {
   const npmLockDirs: (string | undefined)[] = [];
   const yarnLockDirs: (string | undefined)[] = [];
-  const pnpmShrinkwrapDirs: (string | undefined)[] = [];
+  const pnpmLockFileDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
     // v8 ignore else -- TODO: add test #40625
@@ -73,7 +75,7 @@ export function determineLockFileDirs(
     ) {
       yarnLockDirs.push(upgrade.managerData?.yarnLock);
       npmLockDirs.push(upgrade.managerData?.npmLock);
-      pnpmShrinkwrapDirs.push(upgrade.managerData?.pnpmShrinkwrap);
+      pnpmLockFileDirs.push(upgrade.managerData?.pnpmLockFile);
     }
   }
 
@@ -87,7 +89,7 @@ export function determineLockFileDirs(
     return {
       yarnLockDirs: getDirs(yarnLockDirs),
       npmLockDirs: getDirs(npmLockDirs),
-      pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
+      pnpmLockFileDirs: getDirs(pnpmLockFileDirs),
     };
   }
 
@@ -110,26 +112,27 @@ export function determineLockFileDirs(
   for (const p of config.updatedPackageFiles!) {
     logger.trace(`Checking ${String(p.path)} for lock files`);
     const packageFile = getPackageFile(p.path);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!packageFile.managerData) {
       continue;
     }
     // push full lock file names and convert them later
     yarnLockDirs.push(packageFile.managerData.yarnLock);
     npmLockDirs.push(packageFile.managerData.npmLock);
-    pnpmShrinkwrapDirs.push(packageFile.managerData.pnpmShrinkwrap);
+    pnpmLockFileDirs.push(packageFile.managerData.pnpmLockFile);
   }
 
   return {
     yarnLockDirs: getDirs(yarnLockDirs),
     npmLockDirs: getDirs(npmLockDirs),
-    pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
+    pnpmLockFileDirs: getDirs(pnpmLockFileDirs),
   };
 }
 
 export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles,
+  originalNpmrcFiles = new Map<string, string>(),
 ): Promise<void> {
   if (!packageFiles.npm) {
     return;
@@ -156,7 +159,13 @@ export async function writeExistingFiles(
         !packageFile.managerData.npmrcFileName)
     ) {
       try {
-        await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
+        if (!originalNpmrcFiles.has(npmrcFilename)) {
+          const originalNpmrc = await readLocalFile(npmrcFilename, 'utf8');
+          if (isString(originalNpmrc)) {
+            originalNpmrcFiles.set(npmrcFilename, originalNpmrc);
+          }
+        }
+        await writeLocalFile(npmrcFilename, npmrc.replace(regEx(/\n?$/), '\n'));
       } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
@@ -196,15 +205,45 @@ export async function writeExistingFiles(
             widens.push(upgrade.depName!);
           }
           const { depName } = upgrade;
-          for (const packageName of packageNames) {
-            if (
-              'packages' in npmLockParsed &&
-              (packageName === `node_modules/${depName}` ||
-                packageName.startsWith(`node_modules/${depName}/`))
-            ) {
-              logger.trace({ packageName }, 'Massaging out package name');
-              lockFileChanged = true;
-              delete npmLockParsed.packages[packageName];
+          const oldVersion = upgrade.lockedVersion ?? upgrade.currentVersion;
+          if ('packages' in npmLockParsed) {
+            for (const packageName of packageNames) {
+              if (
+                packageName === `node_modules/${depName}` ||
+                packageName.startsWith(`node_modules/${depName}/`)
+              ) {
+                logger.trace({ packageName }, 'Massaging out package name');
+                lockFileChanged = true;
+                delete npmLockParsed.packages[packageName];
+                continue;
+              }
+              if (
+                !depName ||
+                !oldVersion ||
+                // Workspace entries (e.g. `packages/app`) and the root entry
+                // are link targets: `node_modules/<name>` points at them with
+                // `link: true`, so deleting one breaks npm with EMISSINGTARGET.
+                !packageName.startsWith('node_modules/')
+              ) {
+                continue;
+              }
+              // Lockstep monorepo siblings (e.g. vue -> @vue/server-renderer)
+              // pin the updated dep to its exact old version. Left in the lock
+              // they cannot resolve against the new version and npm fails with
+              // ERESOLVE, so massage them out too and let npm re-resolve them.
+              const entry = npmLockParsed.packages[packageName];
+              const pinned =
+                entry?.peerDependencies?.[depName] === oldVersion ||
+                entry?.dependencies?.[depName] === oldVersion ||
+                entry?.optionalDependencies?.[depName] === oldVersion;
+              if (pinned) {
+                logger.trace(
+                  { packageName, depName, oldVersion },
+                  'Massaging out lockstep sibling',
+                );
+                lockFileChanged = true;
+                delete npmLockParsed.packages[packageName];
+              }
             }
           }
         }
@@ -235,6 +274,18 @@ export async function writeExistingFiles(
         }
         await writeLocalFile(npmLockPath, existingNpmLock);
       }
+    }
+  }
+}
+
+async function restoreNpmrcFiles(
+  originalNpmrcFiles: Map<string, string>,
+): Promise<void> {
+  for (const [npmrcFilename, originalNpmrc] of originalNpmrcFiles) {
+    try {
+      await writeLocalFile(npmrcFilename, originalNpmrc);
+    } catch (err) {
+      logger.warn({ npmrcFilename, err }, 'Error restoring .npmrc');
     }
   }
 }
@@ -271,13 +322,11 @@ export async function writeUpdatedPackageFiles(
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
-    if (
-      !(
-        packageFile.path.endsWith('package.json') ||
-        packageFile.path.endsWith('pnpm-workspace.yaml') ||
-        packageFile.path.endsWith('.yarnrc.yml')
-      )
-    ) {
+    if (!(
+      packageFile.path.endsWith('package.json') ||
+      packageFile.path.endsWith('pnpm-workspace.yaml') ||
+      packageFile.path.endsWith('.yarnrc.yml')
+    )) {
       continue;
     }
     const contents =
@@ -393,9 +442,10 @@ export async function updateYarnBinary(
   return existingYarnrcYmlContent && yarnrcYml;
 }
 
-export async function getAdditionalFiles(
+async function getAdditionalFilesInner(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
+  originalNpmrcFiles: Map<string, string>,
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
@@ -419,7 +469,7 @@ export async function getAdditionalFiles(
   }
   const dirs = determineLockFileDirs(config, packageFiles);
   logger.trace({ dirs }, 'lock file dirs');
-  await writeExistingFiles(config, packageFiles);
+  await writeExistingFiles(config, packageFiles, originalNpmrcFiles);
   await writeUpdatedPackageFiles(config);
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
@@ -579,8 +629,7 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         fileName: yarnLock,
-        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+        stderr: artifactErrorMessageFromExecError(res, ''),
       });
     } else {
       const existingContent = await getFile(
@@ -600,7 +649,7 @@ export async function getAdditionalFiles(
         await updateYarnOffline(lockFileDir, updatedArtifacts);
       }
 
-      /* v8 ignore next 7 -- needs test */
+      /* v8 ignore next -- needs test */
       if (upgrades.some(yarn.isYarnUpdate)) {
         existingYarnrcYmlContent = await updateYarnBinary(
           lockFileDir,
@@ -610,20 +659,20 @@ export async function getAdditionalFiles(
       }
     }
     await resetNpmrcContent(lockFileDir, npmrcContent);
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (existingYarnrcYmlContent) {
       // TODO #22198
       await writeLocalFile(yarnRcYmlFilename!, existingYarnrcYmlContent);
     }
   }
 
-  for (const pnpmShrinkwrap of dirs.pnpmShrinkwrapDirs) {
-    const lockFileDir = upath.dirname(pnpmShrinkwrap);
+  for (const pnpmLockFile of dirs.pnpmLockFileDirs) {
+    const lockFileDir = upath.dirname(pnpmLockFile);
     const npmrcContent = await getNpmrcContent(lockFileDir);
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.managerData?.pnpmShrinkwrap === pnpmShrinkwrap,
+      (upgrade) => upgrade.managerData?.pnpmLockFile === pnpmLockFile,
     );
     const res = await pnpm.generateLockFile(lockFileDir, env, config, upgrades);
     if (res.error) {
@@ -650,13 +699,12 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        fileName: pnpmShrinkwrap,
-        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+        fileName: pnpmLockFile,
+        stderr: artifactErrorMessageFromExecError(res, ''),
       });
     } else {
       const existingContent = await getFile(
-        pnpmShrinkwrap,
+        pnpmLockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch,
       );
       if (res.lockFile === existingContent) {
@@ -665,7 +713,7 @@ export async function getAdditionalFiles(
         logger.debug('pnpm-lock.yaml needs updating');
         updatedArtifacts.push({
           type: 'addition',
-          path: pnpmShrinkwrap,
+          path: pnpmLockFile,
           // TODO: can be undefined? (#22198)
           contents: res.lockFile!,
         });
@@ -675,4 +723,20 @@ export async function getAdditionalFiles(
   }
 
   return { artifactErrors, artifactNotices, updatedArtifacts };
+}
+
+export async function getAdditionalFiles(
+  config: PostUpdateConfig<NpmManagerData>,
+  packageFiles: AdditionalPackageFiles,
+): Promise<WriteExistingFilesResult> {
+  const originalNpmrcFiles = new Map<string, string>();
+  try {
+    return await getAdditionalFilesInner(
+      config,
+      packageFiles,
+      originalNpmrcFiles,
+    );
+  } finally {
+    await restoreNpmrcFiles(originalNpmrcFiles);
+  }
 }

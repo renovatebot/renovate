@@ -12,6 +12,8 @@ export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['.terraform.lock.hcl'];
+export const lockFileMaintenanceIsDelegatedToPackageManager =
+  "Lock file maintenance is not implemented separately for Terragrunt. It reuses the [Terraform manager](../terraform/index.md)'s lock file logic in-process, so Renovate computes the updated `.terraform.lock.hcl` hashes directly instead of calling the `terragrunt` or `terraform` CLI.";
 
 export const url = 'https://terragrunt.gruntwork.io/docs';
 export const categories: Category[] = ['iac', 'terraform'];

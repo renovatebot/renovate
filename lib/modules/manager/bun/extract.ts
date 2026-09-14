@@ -1,4 +1,4 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
@@ -128,7 +128,7 @@ export async function extractAllPackageFiles(
     let workspaces = processResult?.packageFileResult?.managerData?.workspaces;
 
     // Check for nested packages property https://bun.com/docs/pm/catalogs#1-define-catalogs-in-root-package-json
-    if (typeof workspaces === 'object' && 'packages' in workspaces) {
+    if (isObject(workspaces) && 'packages' in workspaces) {
       workspaces = workspaces.packages;
     }
 

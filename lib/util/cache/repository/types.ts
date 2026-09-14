@@ -132,6 +132,17 @@ export interface BranchCache {
   result?: string;
 }
 
+/**
+ * Repository cache shared by the platforms which speak the Gitea API.
+ */
+export interface GiteaLikePlatformCache {
+  /**
+   * To avoid circular dependency problem, we use `unknown` type here.
+   */
+  pullRequestsCache?: unknown;
+  orgs?: Record<string, boolean>;
+}
+
 export interface RepoCacheData {
   configFileName?: string;
   httpCache?: Record<string, unknown>;
@@ -142,13 +153,8 @@ export interface RepoCacheData {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    forgejo?: {
-      pullRequestsCache?: unknown;
-      orgs?: Record<string, boolean>;
-    };
-    gitea?: {
-      pullRequestsCache?: unknown;
-    };
+    forgejo?: GiteaLikePlatformCache;
+    gitea?: GiteaLikePlatformCache;
     github?: {
       /**
        * To avoid circular dependency problem, we use `unknown` type here.

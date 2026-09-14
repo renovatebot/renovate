@@ -182,7 +182,7 @@ function getNewValue({
       );
     }
     const parsedRange = parseRange(npmCurrentValue);
-    const element = parsedRange[parsedRange.length - 1];
+    const element = parsedRange.at(-1)!;
     if (parsedRange.length === 1 && element.operator) {
       if (element.operator === '^') {
         const version = handleShort('^', npmCurrentValue, newVersion);

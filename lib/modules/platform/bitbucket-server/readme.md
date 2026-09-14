@@ -2,7 +2,7 @@
 
 ## Authentication
 
-First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the bot account.
+First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the Renovate account.
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
 - Set your HTTP access token as a `token` in your `config.js` file
@@ -13,9 +13,9 @@ If you use project or repository based HTTP access tokens, it can only be used a
 
 Remember to set `platform=bitbucket-server` somewhere in your Renovate config file.
 
-If you're not using `@renovate-bot` as username then set your custom `username` for the bot account.
+If you're not using `@renovate-bot` as username then set your custom `username` for the Renovate account.
 
-If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global bot config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
+If you use MySQL or MariaDB you must set `unicodeEmoji` to `false` in the global self-hosted config (`RENOVATE_CONFIG_FILE`) to prevent issues with emojis.
 
 ## Unsupported platform features/concepts
 

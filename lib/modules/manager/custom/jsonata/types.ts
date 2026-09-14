@@ -10,6 +10,12 @@ export interface JSONataManagerTemplates {
   currentDigestTemplate?: string;
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
+  /**
+   * Lets a JSONata manager reshape the updated value before it is written back,
+   * e.g. to re-pad a 4-segment version that the datasource returns as 3 segments
+   * Needed because the extracted value and the new value can differ in format
+   */
+  autoReplaceStringTemplate?: string;
 }
 
 export interface JSONataManagerConfig extends JSONataManagerTemplates {

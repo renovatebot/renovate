@@ -8,10 +8,6 @@ import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util.ts';
 
 import type { DataSource } from './types.ts';
 
-export type GoproxyFallback =
-  | ',' // WhenNotFoundOrGone
-  | '|'; // Always
-
 export function getSourceUrl(
   dataSource?: DataSource | null,
 ): string | undefined {

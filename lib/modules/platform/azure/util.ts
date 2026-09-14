@@ -11,6 +11,7 @@ import type { MergeStrategy } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import type { GitOptions } from '../../../types/git.ts';
 import type { HostRule, PrState } from '../../../types/index.ts';
+import { isProbablyJwt } from '../../../util/http/jwt.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
@@ -122,12 +123,12 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   if (!config.token && config.username && config.password) {
     authType = 'basic';
     authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (config.token?.length === 52) {
+  } else if (config.token && isProbablyJwt(config.token)) {
+    authType = 'bearer';
+    authValue = config.token;
+  } else {
     authType = 'basic';
     authValue = toBase64(`:${config.token}`);
-  } else {
-    authType = 'bearer';
-    authValue = config.token!;
   }
   addSecretForSanitizing(authValue, 'global');
   return {

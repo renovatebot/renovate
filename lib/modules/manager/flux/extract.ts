@@ -15,7 +15,6 @@ import { regEx } from '../../../util/regex.ts';
 import { isHttpUrl } from '../../../util/url.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
@@ -24,7 +23,11 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import { findDependencies } from '../helm-values/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import {
+  getOciChartDep,
+  isOCIRegistry,
+  removeOCIPrefix,
+} from '../helmv3/oci.ts';
 import { extractImage } from '../kustomize/extract.ts';
 import type {
   ExtractConfig,
@@ -70,6 +73,7 @@ function readManifest(
     resources: parseYaml(content, {
       customSchema: FluxResource,
       failureBehaviour: 'filter',
+      removeTemplates: true,
     }),
   };
 }
@@ -115,7 +119,7 @@ function resolveGitRepositoryPerSourceTag(
   dep.datasource = GitTagsDatasource.id;
   dep.packageName = gitUrl;
   if (isHttpUrl(gitUrl)) {
-    dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+    dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
   }
 }
 
@@ -129,18 +133,13 @@ function resolveHelmRepository(
     dep.registryUrls = matchingRepositories
       .map((repo) => {
         if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
-          // Change datasource to Docker
-          dep.datasource = DockerDatasource.id;
-          // Ensure the URL is a valid OCI path
-          dep.packageName = getDep(
-            `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
-            false,
-            registryAliases,
-          ).packageName;
+          Object.assign(
+            dep,
+            getOciChartDep(repo.spec.url, dep.depName, registryAliases),
+          );
           return null;
-        } else {
-          return repo.spec.url;
         }
+        return repo.spec.url;
       })
       .filter(isString);
 
@@ -156,12 +155,10 @@ function resolveHelmRepository(
     if (aliasUrl) {
       if (isOCIRegistry(aliasUrl)) {
         // Treat alias value as an OCI registry URL
-        dep.datasource = DockerDatasource.id;
-        dep.packageName = getDep(
-          `${removeOCIPrefix(aliasUrl)}/${dep.depName}`,
-          false,
-          registryAliases,
-        ).packageName;
+        Object.assign(
+          dep,
+          getOciChartDep(aliasUrl, dep.depName, registryAliases),
+        );
       } else {
         dep.registryUrls = [aliasUrl];
       }
@@ -401,7 +398,10 @@ function resolveResourceManifest(
           dep.packageName = gitUrl;
           dep.replaceString = resource.spec.ref.commit;
           if (isHttpUrl(gitUrl)) {
-            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+            dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
+          }
+          if (resource.spec.ref?.branch) {
+            dep.currentValue = resource.spec.ref.branch;
           }
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;

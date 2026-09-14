@@ -66,6 +66,9 @@ export async function extractPackageFile(
       res[field] = config[field];
     }
   }
+  if (config.autoReplaceStringTemplate) {
+    res.autoReplaceStringTemplate = config.autoReplaceStringTemplate;
+  }
 
   return res;
 }

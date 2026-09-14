@@ -68,7 +68,7 @@ async function build(): Promise<void> {
 async function buildMkdocs(version: string | undefined): Promise<void> {
   logger.info('Building Mkdocs site ...');
 
-  const mkdocsArgs = ['mkdocs', 'build'];
+  const mkdocsArgs = ['mkdocs', 'build', '--no-announcement'];
   if (version) {
     mkdocsArgs.push('--version', version);
   }

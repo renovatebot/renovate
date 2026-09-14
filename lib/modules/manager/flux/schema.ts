@@ -65,6 +65,7 @@ export const GitRepository = KubernetesResource.extend({
       .object({
         tag: z.string().optional(),
         commit: z.string().optional(),
+        branch: z.string().optional(),
       })
       .optional(),
   }),

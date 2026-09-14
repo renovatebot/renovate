@@ -1,31 +1,31 @@
-# syntax=docker/dockerfile:1.24.0@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
+# syntax=docker/dockerfile:1.27.0@sha256:bde3983e9c939224420ddaf6b784cc30e09b035a4dea01f581230c50809f372e
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.59.3@sha256:ca88338748b99829dafe94053ac10afd0e5c97f89a3f8618a409760c825fc77d AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.97.12@sha256:a078d4a12084035ddab3c60aedb46d210c4c7e9f29f1c8cd514d9d43eb39dbf7 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.59.3-full@sha256:d3746d07c1bec7c072c9e43ffb66f42b5443771673162b636163bcb7bfc995fa AS full-base
+FROM ghcr.io/renovatebot/base-image:13.97.12-full@sha256:041cd888573c596b4221204436c1d0afaccd58b41dc905faf199870a4ff59d54 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.59.3@sha256:ca88338748b99829dafe94053ac10afd0e5c97f89a3f8618a409760c825fc77d AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.97.12@sha256:a078d4a12084035ddab3c60aedb46d210c4c7e9f29f1c8cd514d9d43eb39dbf7 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.16.0
+RUN install-tool node 24.21.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 11.5.2
+RUN install-tool pnpm 11.26.0
 
 WORKDIR /usr/local/renovate
 
@@ -60,9 +60,6 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
-
-# TODO: remove this once https://github.com/pnpm/pnpm/pull/12400 lands
-ENV pnpm_config_platform_arch=${ARCH}
 
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./

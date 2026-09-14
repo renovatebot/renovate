@@ -26,6 +26,7 @@ import {
   prepareGradleCommand,
 } from '../gradle-wrapper/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import {
   isGcvLockFile,
   isGcvPropsFile,
@@ -37,7 +38,8 @@ export function isGradleExecutionAllowed(command: string): boolean {
 
   if (!allowlist.includes('gradleWrapper')) {
     logger.once.warn(
-      `Gradle wrapper command, \`${command}\`, was requested to run, but \`gradleWrapper\` is not permitted in the allowedUnsafeExecutions`,
+      { command },
+      'Gradle wrapper command was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
     );
     return false;
   }
@@ -220,12 +222,9 @@ export async function updateArtifacts({
       toolConstraints: [
         {
           toolName: 'java',
-          constraint:
-            config.constraints?.java ??
-            (await getJavaConstraint(
-              await getGradleVersion(gradlewFile),
-              gradlewFile,
-            )),
+          constraint: await resolveToolConstraint(config, 'java', async () =>
+            getJavaConstraint(await getGradleVersion(gradlewFile), gradlewFile),
+          ),
         },
       ],
     };
