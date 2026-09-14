@@ -74,7 +74,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types.ts';
-import { repoFingerprint } from '../util.ts';
+import { findPrInList, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
@@ -974,16 +974,6 @@ export async function getPr(prNo: number): Promise<GhPr | null> {
   return pr;
 }
 
-function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState.startsWith('!')) {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
 export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
@@ -1031,25 +1021,12 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  const pr = prList.find((p) => {
-    if (p.sourceBranch !== branchName) {
-      return false;
-    }
-
-    if (prTitle && prTitle.toUpperCase() !== p.title.toUpperCase()) {
-      return false;
-    }
-
-    if (!matchesState(p.state, state)) {
-      return false;
-    }
-
-    if (!config.forkToken && !looseEquals(config.repository, p.sourceRepo)) {
-      return false;
-    }
-
-    return true;
-  });
+  // PRs opened from a fork have a different sourceRepo, only allow those when
+  // renovate is authenticated with a fork token for this run.
+  const sameRepoPrList = config.forkToken
+    ? prList
+    : prList.filter((p) => looseEquals(config.repository, p.sourceRepo));
+  const pr = findPrInList(sameRepoPrList, { branchName, prTitle, state });
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
