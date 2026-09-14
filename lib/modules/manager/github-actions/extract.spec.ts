@@ -4604,6 +4604,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'swift-actions/setup-swift@v2',
+        with: { 'swift-version': '6.3.3' },
+      },
+      expected: [
+        {
+          currentValue: '6.3.3',
+          datasource: 'github-releases',
+          depName: 'swift',
+          depType: 'uses-with',
+          packageName: 'swiftlang/swift',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'swift-actions/setup-swift@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'swift',
+          depType: 'uses-with',
+          packageName: 'swiftlang/swift',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
