@@ -119,6 +119,28 @@ describe('modules/manager/mise/update-locked', () => {
     expect(updateLockedDependency(config)).toEqual({ status: 'unsupported' });
   });
 
+  it('treats a nonnumeric current version as an empty prefix', () => {
+    const lockFileContent = codeBlock`
+      [[tools.node]]
+      version = "latest"
+    `;
+    const config: UpdateLockedConfig = {
+      packageFile: 'mise.toml',
+      lockFile: 'mise.lock',
+      lockFileContent,
+      depName: 'node',
+      currentVersion: 'latest',
+      newVersion: 'v20.12.0',
+    };
+
+    expect(updateLockedDependency(config)).toMatchObject({
+      status: 'updated',
+      files: {
+        'mise.lock': lockFileContent.replace('latest', '20.12.0'),
+      },
+    });
+  });
+
   it('preserves a nonnumeric replacement version', () => {
     const lockFileContent = codeBlock`
       [[tools.example]]
