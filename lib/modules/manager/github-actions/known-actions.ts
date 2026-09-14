@@ -741,6 +741,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'julia',
     packageName: 'JuliaLang/julia',
   },
+  // https://github.com/moonrepo/setup-rust
+  'moonrepo/setup-rust': {
+    datasource: RustVersionDatasource.id,
+    packageName: 'rust',
+    withSchema: valSchema('channel'),
+  },
   // https://github.com/moonrepo/setup-toolchain
   'moonrepo/setup-toolchain': {
     datasource: GithubReleasesDatasource.id,
