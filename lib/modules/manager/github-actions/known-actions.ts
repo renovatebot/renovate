@@ -619,6 +619,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     versioning: gradleVersioning.id,
     withSchema: valSchema('gradle-version'),
   },
+  // https://github.com/hashicorp/setup-packer
+  'hashicorp/setup-packer': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'packer',
+    packageName: 'hashicorp/packer',
+  },
   // https://github.com/hashicorp/setup-terraform
   'hashicorp/setup-terraform': {
     datasource: GithubReleasesDatasource.id,
