@@ -734,6 +734,18 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: PypiDatasource.id,
     packageName: 'poetry',
   },
+  // https://github.com/stCarolas/setup-maven
+  'stCarolas/setup-maven': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'maven',
+    packageName: 'apache/maven',
+    // apache/maven tags its releases as `maven-X.Y.Z`
+    extractVersion: '^maven-(?<version>.+)$',
+    // the input also documents range/glob specs (e.g. `10.x`, `>=10.15.0`),
+    // not just pinned versions
+    versioning: npmVersioning.id,
+    withSchema: valSchema('maven-version'),
+  },
   // https://github.com/subosito/flutter-action
   'subosito/flutter-action': {
     datasource: GithubReleasesDatasource.id,

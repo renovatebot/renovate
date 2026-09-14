@@ -3871,6 +3871,39 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'stCarolas/setup-maven@v4.5',
+        with: { 'maven-version': '3.9.9' },
+      },
+      expected: [
+        {
+          currentValue: '3.9.9',
+          datasource: 'github-releases',
+          depName: 'maven',
+          depType: 'uses-with',
+          packageName: 'apache/maven',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'stCarolas/setup-maven@v4.5',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'maven',
+          depType: 'uses-with',
+          packageName: 'apache/maven',
+          versioning: 'npm',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
