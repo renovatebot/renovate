@@ -345,7 +345,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
-    it('does not set locked versions for engines, packageManager, and volta deps', async () => {
+    it('does not set locked versions for engines, packageManager, volta, and devEngines deps', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
           npm: '1.2.3',
@@ -393,6 +393,18 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               depName: 'pnpm',
               currentValue: '4.0.0',
               depType: 'volta',
+              datasource: 'npm',
+            },
+            {
+              depName: 'node',
+              currentValue: '22.0.0',
+              depType: 'devEngines.runtime',
+              datasource: 'node-version',
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '9.0.0',
+              depType: 'devEngines.packageManager',
               datasource: 'npm',
             },
           ],
@@ -445,6 +457,20 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
               depType: 'volta',
               datasource: 'npm',
               // volta deps should NOT have lockedVersion
+            },
+            {
+              depName: 'node',
+              currentValue: '22.0.0',
+              depType: 'devEngines.runtime',
+              datasource: 'node-version',
+              // devEngines.runtime deps should NOT have lockedVersion
+            },
+            {
+              depName: 'pnpm',
+              currentValue: '9.0.0',
+              depType: 'devEngines.packageManager',
+              datasource: 'npm',
+              // devEngines.packageManager deps should NOT have lockedVersion
             },
           ],
           lockFiles: ['package-lock.json'],
