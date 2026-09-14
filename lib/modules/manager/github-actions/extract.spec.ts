@@ -2045,6 +2045,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'expo/expo-github-action@v8',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'expo/expo-github-action@v8',
+        with: { 'eas-version': '23.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '23.2.0',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'ruby/setup-ruby@v1',
         with: {},
       },
@@ -2465,6 +2496,108 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'sigstore/cosign',
           depType: 'uses-with',
           packageName: 'sigstore/cosign',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43.100.0' },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: '43'`, quoted, matching the action's own default
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43' },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: 43`, unquoted, parses as a YAML number rather than a string
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': 43 },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-version': '43.100.0',
+          'renovate-image': 'ghcr.io/my-org/renovate',
+        },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/my-org/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/my-org/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
         },
       ],
     },

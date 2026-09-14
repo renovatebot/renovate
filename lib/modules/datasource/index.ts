@@ -7,7 +7,7 @@ import {
 } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
-import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { HOST_BLOCKED, HOST_DISABLED } from '../../constants/error-messages.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import {
   ATTR_RENOVATE_DATASOURCE,
@@ -428,7 +428,10 @@ async function fetchReleases(
       );
     }
   } catch (err) {
-    if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
+    if (
+      [HOST_BLOCKED, HOST_DISABLED].includes(err.message) ||
+      [HOST_BLOCKED, HOST_DISABLED].includes(err.err?.message)
+    ) {
       return null;
     }
     if (err instanceof ExternalHostError) {

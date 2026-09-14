@@ -134,6 +134,25 @@ const PnpmSetupWith: ActionSchema = z
     ...parsePnpmRuntime(runtime),
   ]);
 
+const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
+const RenovateGithubActionWith: ActionSchema = z
+  .object({
+    'renovate-version': z.string().optional(),
+    'renovate-image': z.string().optional(),
+  })
+  .transform(({ 'renovate-version': version, 'renovate-image': image }) => {
+    const [packageName, currentDigest] = (
+      image ?? renovateGithubActionDefaultImage
+    ).split('@');
+    return [
+      {
+        packageName,
+        ...(currentDigest ? { currentDigest } : {}),
+        ...parseValue(version),
+      },
+    ];
+  });
+
 /**
  * Community contributed actions with known version input schemas.
  */
@@ -188,6 +207,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     datasource: RustVersionDatasource.id,
     packageName: 'rust',
     withSchema: valSchema('toolchain'),
+  },
+  // https://github.com/expo/expo-github-action
+  'expo/expo-github-action': {
+    datasource: NpmDatasource.id,
+    packageName: 'eas-cli',
+    withSchema: valSchema('eas-version'),
   },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
@@ -244,6 +269,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: 'pypa/hatch',
     // Strip hatch- prefix from release tags
     extractVersion: '^hatch-(?<version>.+)$',
+  },
+  // https://github.com/renovatebot/github-action
+  'renovatebot/github-action': {
+    datasource: DockerDatasource.id,
+    packageName: '', // determined from `renovate-image` input, if set
+    withSchema: RenovateGithubActionWith,
   },
   'ruby/setup-ruby': {
     datasource: RubyVersionDatasource.id,

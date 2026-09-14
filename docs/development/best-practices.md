@@ -164,12 +164,16 @@ It is OK to not inline metadata if it's complex, but in that case first think wh
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a static `msg` component, so they can be automatically grouped or associated.
 
+When logging an error object, always put it under the `err` metadata key, at any log level.
+Bunyan only applies the error serializer (stack handling, redaction) to the `err` key, and a single key keeps error logs searchable.
+
 Good:
 
 ```ts
 logger.debug({ config }, 'Full config');
 logger.debug(`Generated branchName: ${branchName}`);
 logger.warn({ presetName }, 'Failed to look up preset');
+logger.debug({ packageFile, err: parsed.error }, 'Failed to parse file');
 ```
 
 Avoid:
@@ -177,6 +181,7 @@ Avoid:
 ```ts
 logger.debug({ branchName }, 'Generated branchName');
 logger.warn(`Failed to look up preset ${presetName}`);
+logger.debug({ packageFile, error: parsed.error }, 'Failed to parse file');
 ```
 
 ## Array constructor

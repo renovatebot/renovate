@@ -248,8 +248,32 @@ function stripRelativePresetsFromValue(value: unknown): boolean {
   return stripped;
 }
 
+type ConfigType = 'global' | 'inherit' | 'repo';
+
+/**
+ * Whether a `hostRules` `allowInternal` is honored from this kind of config.
+ *
+ * Only the self-hosted administrator's own configuration may grant access to internal hosts. The inherited config repository belongs to the organization rather than to them, so its rules only count where the administrator has opted into trusting them with `inheritConfigTrusted`.
+ */
+function mayGrantInternalHostAccess(configType: ConfigType): boolean {
+  if (configType === 'global') {
+    return true;
+  }
+  if (configType === 'inherit') {
+    return GlobalConfig.get('inheritConfigTrusted');
+  }
+  return false;
+}
+
+function allowInternalNotAllowedMessage(configType: ConfigType): string {
+  if (configType === 'inherit') {
+    return 'hostRules `allowInternal` is not allowed in inherited config, as this Renovate instance has not set `inheritConfigTrusted=true`. The administrator can either set it, or move the rule to their global config or a `repositories[]` entry.';
+  }
+  return `hostRules \`allowInternal\` is only allowed in the self-hosted administrator's own configuration.`;
+}
+
 export async function validateConfig(
-  configType: 'global' | 'inherit' | 'repo',
+  configType: ConfigType,
   config: AllConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -825,9 +849,9 @@ export async function validateConfig(
                         message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
                       });
                     }
-                    if (
-                      !(isString(statusCheckValue) || null === statusCheckValue)
-                    ) {
+                    if (!(
+                      isString(statusCheckValue) || null === statusCheckValue
+                    )) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
@@ -896,9 +920,9 @@ export async function validateConfig(
                           });
                         }
                       } else if (subKey === 'description') {
-                        if (
-                          !(isString(subValue) || isArray(subValue, isString))
-                        ) {
+                        if (!(
+                          isString(subValue) || isArray(subValue, isString)
+                        )) {
                           errors.push({
                             topic: ConfigValidationTopic.Error,
                             message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
@@ -1036,6 +1060,19 @@ export async function validateConfig(
                 topic: ConfigValidationTopic.Error,
                 message:
                   'Invalid value for hostRules matchHost. It cannot be an empty string.',
+              });
+            }
+
+            if (
+              !isUndefined(rule.allowInternal) &&
+              !mayGrantInternalHostAccess(configType)
+            ) {
+              errors.push({
+                // like disallowed `headers` below, `Security` only where the rules are actually applied - see the comment there
+                topic: parentPath
+                  ? ConfigValidationTopic.Error
+                  : ConfigValidationTopic.Security,
+                message: allowInternalNotAllowedMessage(configType),
               });
             }
 

@@ -153,14 +153,12 @@ export async function extractPackageFile(
 
   if (res.deps.length === 0) {
     logger.debug('Package file has no deps');
-    if (
-      !(
-        !!res.managerData?.packageJsonName ||
-        !!res.packageFileVersion ||
-        !!npmrc ||
-        workspacesPackages
-      )
-    ) {
+    if (!(
+      !!res.managerData?.packageJsonName ||
+      !!res.packageFileVersion ||
+      !!npmrc ||
+      workspacesPackages
+    )) {
       logger.debug('Skipping file');
       return null;
     }

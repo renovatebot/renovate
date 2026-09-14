@@ -93,6 +93,13 @@ export interface HttpOptions {
   memCache?: boolean;
   cacheProvider?: HttpCacheProvider;
   readOnly?: boolean;
+
+  /**
+   * The response body becomes Renovate configuration, so an internal host must be permitted by a deliberately-scoped `allowInternal` grant rather than an implicit one - see `applyHostGuard`.
+   *
+   * Set it on any request whose response is interpreted as config, no matter which `hostType` the request is made with.
+   */
+  responseBecomesConfig?: boolean;
 }
 
 export interface HttpHeaders extends IncomingHttpHeaders {

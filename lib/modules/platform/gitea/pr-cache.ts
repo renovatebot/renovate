@@ -52,8 +52,7 @@ class RepoPrCache {
     repoCache.platform ??= {};
     const platformCache = (repoCache.platform[platform] ??= {});
     let pullRequestCache = platformCache.pullRequestsCache as
-      | PrCacheData
-      | undefined;
+      PrCacheData | undefined;
     if (
       isNullOrUndefined(pullRequestCache) ||
       pullRequestCache.author !== author

@@ -98,6 +98,7 @@ describe('workers/global/initialize', () => {
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Allowed': 'yes' },
+        internalHostGrant: { implicit: true },
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { denied: ['Authorization'] },
