@@ -4477,6 +4477,53 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: { crystal: '1.21.0', shards: 'v0.20.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.21.0',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/crystal',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/crystal',
+        },
+        {
+          currentValue: 'v0.20.0',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/shards',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/shards',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 possible inputs
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: { crystal: '1.21.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.21.0',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/crystal',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/crystal',
+        },
+      ],
+    },
+    {
+      // neither input is set, so no deps should be extracted at all (rather
+      // than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: {},
+      },
+      expected: [],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

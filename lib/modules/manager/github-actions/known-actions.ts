@@ -462,6 +462,35 @@ const MoonrepoSetupToolchainWith: ActionSchema = z
     },
   );
 
+// `crystal-lang/install-crystal` can yield up to 2 dependencies from a
+// single step: the Crystal compiler itself, and the shards package manager.
+// Both inputs are optional, so only emit a dependency for the ones a
+// workflow actually sets.
+const InstallCrystalWith: ActionSchema = z
+  .object({
+    crystal: z.string().optional(),
+    shards: z.string().optional(),
+  })
+  .transform(({ crystal, shards }) => {
+    const deps: PackageDependency[] = [];
+
+    if (crystal) {
+      deps.push({
+        packageName: 'crystal-lang/crystal',
+        ...parseValue(crystal),
+      });
+    }
+
+    if (shards) {
+      deps.push({
+        packageName: 'crystal-lang/shards',
+        ...parseValue(shards),
+      });
+    }
+
+    return deps;
+  });
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -611,6 +640,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     withSchema: valSchema('wranglerVersion'),
   },
   // https://github.com/cycjimmy/semantic-release-action
+  // https://github.com/crystal-lang/install-crystal
+  'crystal-lang/install-crystal': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined per dependency: crystal, shards
+    withSchema: InstallCrystalWith,
+  },
   // https://github.com/cue-lang/setup-cue
   'cue-lang/setup-cue': {
     datasource: GithubReleasesDatasource.id,
