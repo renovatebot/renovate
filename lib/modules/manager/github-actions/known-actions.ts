@@ -792,6 +792,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'julia',
     packageName: 'JuliaLang/julia',
   },
+  // https://github.com/jwlawson/actions-setup-cmake
+  'jwlawson/actions-setup-cmake': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'cmake',
+    packageName: 'Kitware/CMake',
+    withSchema: valSchema('cmake-version'),
+  },
   // https://github.com/moonrepo/setup-rust
   'moonrepo/setup-rust': {
     datasource: RustVersionDatasource.id,
