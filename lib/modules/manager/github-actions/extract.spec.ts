@@ -1223,6 +1223,10 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps).toMatchObject([
         {
           depName: 'https://github.com/actions/setup-node',
+          packageName: 'actions/setup-node',
+          currentValue: 'v4.4.0',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
           depType: 'action',
         },
         {
