@@ -3,12 +3,17 @@ import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
 import type { ConstraintName } from '../../util/exec/types.ts';
+import { readLocalFile } from '../../util/fs/index.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
-import type { PackageDependency, ToolConstraintsConfig } from './types.ts';
+import type {
+  PackageDependency,
+  ToolConstraintsConfig,
+  UpdateArtifactsResult,
+} from './types.ts';
 
 export function applyGitSource(
   dep: PackageDependency,
@@ -68,6 +73,30 @@ export function artifactErrorMessageFromExecError(
   }
 
   return message;
+}
+
+/**
+ * Read a binary lock file back after the package manager has run and turn it into an artifact result.
+ *
+ * Returns `null` when the file is gone or byte-identical to `oldContent`, which is what `updateArtifacts()` returns for "nothing changed".
+ */
+export async function readUpdatedBinaryLockFile(
+  lockFileName: string,
+  oldContent: Buffer,
+): Promise<UpdateArtifactsResult[] | null> {
+  const newContent = await readLocalFile(lockFileName);
+  if (!newContent || Buffer.compare(oldContent, newContent) === 0) {
+    return null;
+  }
+  return [
+    {
+      file: {
+        type: 'addition',
+        path: lockFileName,
+        contents: newContent,
+      },
+    },
+  ];
 }
 
 /**

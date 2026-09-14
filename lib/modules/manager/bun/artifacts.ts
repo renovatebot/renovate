@@ -11,13 +11,9 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from '../npm/utils.ts';
+import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import { readUpdatedBinaryLockFile, resolveToolConstraint } from '../util.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -50,52 +46,43 @@ export async function updateArtifacts(
   }
 
   const pkgFileDir = upath.dirname(packageFileName);
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
   const { additionalNpmrcContent } = processHostRules();
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
+    return await withNpmrcHostRules(
+      pkgFileDir,
+      additionalNpmrcContent,
+      async () => {
+        await writeLocalFile(packageFileName, newPackageFileContent);
+        if (isLockFileMaintenance) {
+          await deleteLocalFile(lockFileName);
+        }
 
-    let cmd = 'bun install';
+        let cmd = 'bun install';
 
-    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
-      cmd += ' --ignore-scripts';
-    }
+        if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+          cmd += ' --ignore-scripts';
+        }
 
-    const execOptions: ExecOptions = {
-      cwdFile: lockFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'bun',
-          constraint: await resolveToolConstraint(config, 'bun'),
-        },
-      ],
-    };
+        const execOptions: ExecOptions = {
+          cwdFile: lockFileName,
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'bun',
+              constraint: await resolveToolConstraint(config, 'bun'),
+            },
+          ],
+        };
 
-    await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
+        await exec(cmd, execOptions);
 
-    const newLockFileContent = await readLocalFile(lockFileName);
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
+        return await readUpdatedBinaryLockFile(
+          lockFileName,
+          oldLockFileContent,
+        );
       },
-    ];
+    );
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
