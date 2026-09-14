@@ -211,12 +211,9 @@ export async function lookupUpdates(
     );
     if (config.currentValue && !isString(config.currentValue)) {
       // If currentValue is not a string, then it's invalid
-      // v8 ignore else -- TODO: add test #40625
-      if (config.currentValue) {
-        logger.debug(
-          `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
-        );
-      }
+      logger.debug(
+        `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
+      );
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
