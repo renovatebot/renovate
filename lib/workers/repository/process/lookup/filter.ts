@@ -139,7 +139,7 @@ export function filterVersions(
         semver.satisfies(
           semver.valid(r.version)
             ? r.version
-            : /* v8 ignore start: not reachable, but it's safer to preserve it */ semver.coerce(
+            : /* v8 ignore start: not reachable - would need a version valid in the configured versioning but not in semver, see #40625 */ semver.coerce(
                 r.version,
               )!,
           /* v8 ignore stop */
