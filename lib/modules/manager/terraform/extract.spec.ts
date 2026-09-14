@@ -872,6 +872,34 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
+    it('extracts no locks when the lock file cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const res = await extractPackageFile(
+        lockedVersion,
+        'lockedVersion.tf',
+        {},
+      );
+      expect(res?.deps.every((dep) => dep.lockedVersion === undefined)).toBe(
+        true,
+      );
+    });
+
+    it('extracts no locks when the lock file holds none', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
+      fs.readLocalFile.mockResolvedValueOnce('# nothing to see here');
+
+      const res = await extractPackageFile(
+        lockedVersion,
+        'lockedVersion.tf',
+        {},
+      );
+      expect(res?.deps.every((dep) => dep.lockedVersion === undefined)).toBe(
+        true,
+      );
+    });
+
     it('update lockfile constraints with range strategy update-lockfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockedVersionLockfile);
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');

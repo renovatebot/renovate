@@ -42,6 +42,9 @@ export function extractTFLintPlugin(
         if (kvMatch?.groups) {
           if (kvMatch.groups.key === 'version') {
             currentVersion = kvMatch.groups.value;
+            // NOTE: the key regex only matches these two, so the implicit else
+            // never runs. A coverage-ignore hint cannot suppress it on an
+            // `else if`.
           } else if (kvMatch.groups.key === 'source') {
             pluginSource = kvMatch.groups.value;
           }
