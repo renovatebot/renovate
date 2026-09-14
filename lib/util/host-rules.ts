@@ -598,6 +598,17 @@ export function basicAuthHeaderValue(credentials: BasicCredentials): string {
 }
 
 /**
+ * The `user:password` userinfo of a Basic credential, percent-encoded so that
+ * it can be embedded in a URL.
+ */
+export function encodeBasicUserinfo({
+  username,
+  password,
+}: BasicCredentials): string {
+  return `${encodeURIComponent(username ?? '')}:${encodeURIComponent(password)}`;
+}
+
+/**
  * @returns a deep copy of all known host rules without any filtering
  */
 export function getAll(): HostRule[] {

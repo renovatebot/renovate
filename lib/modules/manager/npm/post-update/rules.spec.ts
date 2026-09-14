@@ -143,6 +143,56 @@ describe('modules/manager/npm/post-update/rules', () => {
       );
     });
 
+    it('prefers username and password over token', () => {
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'registry.company.com',
+        username: 'user123',
+        password: 'pass123',
+        token: 'token123',
+      });
+
+      const res = processHostRules();
+
+      expect(res).toEqual({
+        additionalNpmrcContent: [
+          '//registry.company.com/:username=user123',
+          '//registry.company.com/:_password=cGFzczEyMw==',
+        ],
+        additionalYarnRcYml: {
+          npmRegistries: {
+            '//registry.company.com/': {
+              npmAuthIdent: 'user123:pass123',
+            },
+          },
+        },
+      });
+    });
+
+    it('writes an empty username for a password without one', () => {
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'registry.company.com',
+        password: 'pass123',
+      });
+
+      const res = processHostRules();
+
+      expect(res).toEqual({
+        additionalNpmrcContent: [
+          '//registry.company.com/:username=',
+          '//registry.company.com/:_password=cGFzczEyMw==',
+        ],
+        additionalYarnRcYml: {
+          npmRegistries: {
+            '//registry.company.com/': {
+              npmAuthIdent: ':pass123',
+            },
+          },
+        },
+      });
+    });
+
     it('uses rules without host type', () => {
       hostRules.add({
         matchHost: 'registry.company.com',

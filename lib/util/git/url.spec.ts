@@ -203,6 +203,24 @@ describe('util/git/url', () => {
       );
     });
 
+    it('prefers username and password over token', () => {
+      hostRules.add({
+        username: 'user',
+        password: 'pass',
+        token: 'token',
+      });
+      expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
+        'https://user:pass@foo.bar/',
+      );
+    });
+
+    it('returns https url with a password and no username', () => {
+      hostRules.add({ password: 'pass' });
+      expect(getRemoteUrlWithToken('https://foo.bar/')).toBe(
+        'https://:pass@foo.bar/',
+      );
+    });
+
     it('returns https url with encoded gitlab token', () => {
       hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://gitlab.com/some/repo.git')).toBe(

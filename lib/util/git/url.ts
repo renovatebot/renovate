@@ -71,19 +71,18 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
   }
 
   const hostRule = hostRules.find({ url: coercedUrl, hostType });
+  const auth = hostRules.resolveAuth(hostRule);
 
-  if (hostRule?.token) {
-    logger.debug(`Found hostRules token for url ${url}`);
+  if (auth?.type === 'basic') {
+    logger.debug(`Found hostRules username and password for url ${url}`);
 
-    return getHttpUrl(url, encodeURIComponent(hostRule.token));
+    return getHttpUrl(url, hostRules.encodeBasicUserinfo(auth));
   }
 
-  if (hostRule?.username && hostRule?.password) {
-    logger.debug(`Found hostRules username and password for url ${url}`);
-    const encodedUsername = encodeURIComponent(hostRule.username);
-    const encodedPassword = encodeURIComponent(hostRule.password);
+  if (auth?.type === 'token') {
+    logger.debug(`Found hostRules token for url ${url}`);
 
-    return getHttpUrl(url, `${encodedUsername}:${encodedPassword}`);
+    return getHttpUrl(url, encodeURIComponent(auth.token));
   }
 
   return url;

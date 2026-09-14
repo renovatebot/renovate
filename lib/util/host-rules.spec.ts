@@ -9,6 +9,7 @@ import {
   basicUserinfo,
   clear,
   confidentialFields,
+  encodeBasicUserinfo,
   filterAllowedHeaders,
   find,
   findAll,
@@ -1404,6 +1405,18 @@ describe('util/host-rules', () => {
 
     it('encodes a credential without a username', () => {
       expect(basicAuthHeaderValue({ password: 'pass' })).toBe('Basic OnBhc3M=');
+    });
+  });
+
+  describe('encodeBasicUserinfo()', () => {
+    it('percent-encodes the username and the password', () => {
+      expect(encodeBasicUserinfo({ username: 'u$er', password: 'p@ss' })).toBe(
+        'u%24er:p%40ss',
+      );
+    });
+
+    it('substitutes an empty username', () => {
+      expect(encodeBasicUserinfo({ password: 'p@ss' })).toBe(':p%40ss');
     });
   });
 
