@@ -61,9 +61,7 @@ export interface RepositoryReference {
 }
 
 export type ActionReference =
-  | DockerReference
-  | LocalReference
-  | RepositoryReference;
+  DockerReference | LocalReference | RepositoryReference;
 
 export interface CommentData {
   pinnedVersion?: string;
@@ -102,7 +100,7 @@ export interface ParsedUsesLine {
  */
 export type ActionSchema = z.ZodType<PackageDependency[]>;
 
-export interface CommunityActionConfig {
+export interface KnownActionConfig {
   datasource: string;
   depName?: string;
   packageName: string;

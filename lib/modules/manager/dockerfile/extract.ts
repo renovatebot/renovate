@@ -276,7 +276,7 @@ export function extractPackageFile(
 
   const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
-  for (let lineNumber = 0; lineNumber < lines.length; ) {
+  for (let lineNumber = 0; lineNumber < lines.length;) {
     const lineNumberInstrStart = lineNumber;
     let instruction = lines[lineNumber];
 

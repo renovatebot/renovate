@@ -9,12 +9,7 @@ import type { FileAddition, FileChange, StatusResult } from './types.ts';
  * and `renamed` which describes a deletion followed by an addition.
  */
 export type RepoStatusBucket =
-  | 'modified'
-  | 'not_added'
-  | 'created'
-  | 'conflicted'
-  | 'renamed'
-  | 'deleted';
+  'modified' | 'not_added' | 'created' | 'conflicted' | 'renamed' | 'deleted';
 
 /**
  * Extra metadata which can be attached to a {@link FileAddition}.

@@ -85,8 +85,7 @@ function resolveVulnerabilityConcurrentLimit(
   // `branchConcurrentLimit`, even though both are valid nested options (see docs for `vulnerabilityAlerts`).
   // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
   const vulnerabilityAlerts = config.vulnerabilityAlerts as
-    | RenovateConfig
-    | undefined;
+    RenovateConfig | undefined;
   const vulnerabilityAlertsDefault = getDefault(
     getOptions().find((option) => option.name === 'vulnerabilityAlerts')!,
   ) as RenovateConfig;

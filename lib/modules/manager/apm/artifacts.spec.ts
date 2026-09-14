@@ -254,6 +254,32 @@ describe('modules/manager/apm/artifacts', () => {
       ]);
     });
 
+    it('falls back to the extracted apm constraint', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
+      fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+      git.getRepoStatus.mockResolvedValueOnce(
+        repoStatus({ modified: ['apm.lock.yaml'] }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.1.0' }, { version: '0.2.0' }],
+      });
+
+      await updateArtifacts({
+        packageFileName: 'apm.yml',
+        updatedDeps: [{ depName: 'owner/repo' }],
+        newPackageFileContent: 'new',
+        config: { ...config, extractedConstraints: { apm: '0.2.0' } },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool apm 0.2.0' },
+        { cmd: 'apm install' },
+      ]);
+    });
+
     it('rethrows TEMPORARY_ERROR', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');

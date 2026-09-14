@@ -148,6 +148,29 @@ describe('util/merge-confidence/index', () => {
         ).resolves.toBe('high');
       });
 
+      it('returns neutral if the API returns an unknown confidence level', async () => {
+        const datasource = 'npm';
+        const depName = 'renovate';
+        const currentVersion = '24.3.0';
+        const newVersion = '25.0.0';
+        httpMock
+          .scope(apiBaseUrl)
+          .get(
+            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`,
+          )
+          .reply(200, { confidence: 'not-a-confidence-level' });
+
+        await expect(
+          getMergeConfidenceLevel(
+            datasource,
+            depName,
+            currentVersion,
+            newVersion,
+            'major',
+          ),
+        ).resolves.toBe('neutral');
+      });
+
       it('escapes a package name containing a forward slash', async () => {
         const datasource = 'npm';
         const packageName = '@jest/global';

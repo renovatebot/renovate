@@ -301,7 +301,7 @@ async function releaseNotesResult(
 function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
   const lines = text.split(newlineRegex);
-  const tokens = markdown.parse(text, undefined);
+  const tokens = markdown.parse(text, {});
   tokens.forEach((token) => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substring(1);

@@ -8,6 +8,7 @@ import {
   applyGitSource,
   artifactErrorMessageFromExecError,
   fileChangesToArtifactResults,
+  resolveToolConstraint,
 } from './util.ts';
 
 describe('modules/manager/util', () => {
@@ -238,5 +239,77 @@ describe('modules/manager/util', () => {
       { file: { type: 'addition', path: 'foo', contents: 'bar' } },
       { file: { type: 'deletion', path: 'baz' } },
     ]);
+  });
+
+  describe('resolveToolConstraint()', () => {
+    it('prefers the user configured constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '==3.12' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '==3.11',
+      );
+
+      expect(constraint).toBe('==3.12');
+    });
+
+    it('prefers the derived constraint over the extracted one', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => Promise.resolve('==3.11'),
+      );
+
+      expect(constraint).toBe('==3.11');
+    });
+
+    it('falls back to the extracted constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => null,
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns the extracted constraint when nothing can be derived', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns undefined when no constraint is known', async () => {
+      const constraint = await resolveToolConstraint({}, 'python', () => null);
+
+      expect(constraint).toBeUndefined();
+    });
+
+    it('treats an empty string as not set', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('accepts the null constraints of a post-update config', async () => {
+      const constraint = await resolveToolConstraint(
+        { constraints: null, extractedConstraints: null },
+        'node',
+      );
+
+      expect(constraint).toBeUndefined();
+    });
   });
 });

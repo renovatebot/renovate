@@ -1,12 +1,19 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
+import type { ConstraintName } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
-import type { PackageDependency, UpdateArtifactsResult } from './types.ts';
+import type {
+  PackageDependency,
+  ToolConstraintsConfig,
+  UpdateArtifactsResult,
+} from './types.ts';
 
 export function applyGitSource(
   dep: PackageDependency,
@@ -76,4 +83,39 @@ export function fileChangesToArtifactResults(
   changes: FileChange[],
 ): UpdateArtifactsResult[] {
   return changes.map((file) => ({ file }));
+}
+
+/**
+ * Resolve the constraint for a tool that `updateArtifacts()` has to run.
+ *
+ * The precedence is:
+ *
+ * 1. `constraints`, because the user asked for it explicitly
+ * 2. `derive`, because it reads the package files as the branch changed them,
+ *    so it can be newer than what extraction saw
+ * 3. `extractedConstraints`, as collected while extracting the base branch
+ *
+ * Managers that have no way to derive the constraint at artifact time can omit
+ * `derive`. An empty string counts as "not set" at every step, so it never
+ * shadows a value further down the list.
+ *
+ * This is the only place that reads `constraints` and `extractedConstraints`
+ * from the config; the `renovate/prefer-resolve-tool-constraint` lint rule
+ * keeps managers from reading them directly.
+ */
+export async function resolveToolConstraint(
+  config: ToolConstraintsConfig,
+  toolName: ConstraintName,
+  derive?: () => MaybePromise<string | null | undefined>,
+): Promise<string | undefined> {
+  const configured = config.constraints?.[toolName];
+  if (isNonEmptyString(configured)) {
+    return configured;
+  }
+  const derived = await derive?.();
+  if (isNonEmptyString(derived)) {
+    return derived;
+  }
+  const extracted = config.extractedConstraints?.[toolName];
+  return isNonEmptyString(extracted) ? extracted : undefined;
 }

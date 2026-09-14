@@ -1,10 +1,7 @@
 import { coerceArray } from '../../../util/array.ts';
-import { trimTrailingSlash } from '../../../util/url.ts';
 import { parseYaml } from '../../../util/yaml.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import { getDep } from '../dockerfile/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -43,32 +40,29 @@ export function extractDefinition(
 function processHelmCharts(
   source: SveltosHelmSource,
   registryAliases: Record<string, string> | undefined,
-): PackageDependency | null {
+): PackageDependency {
   const dep: PackageDependency = {
     depName: source.chartName,
     currentValue: source.chartVersion,
-    datasource: HelmDatasource.id,
   };
 
   if (isOCIRegistry(source.repositoryURL)) {
-    const image = trimTrailingSlash(removeOCIPrefix(source.repositoryURL));
-
-    dep.datasource = DockerDatasource.id;
-    dep.packageName = getDep(
-      `${image}/${source.chartName}`,
-      false,
-      registryAliases,
-    ).packageName;
-  } else {
-    dep.packageName = removeRepositoryName(
-      source.repositoryName,
-      source.chartName,
-    );
-    dep.registryUrls = [source.repositoryURL];
-    dep.datasource = HelmDatasource.id;
+    return {
+      ...dep,
+      ...getOciChartDep(
+        source.repositoryURL,
+        source.chartName,
+        registryAliases,
+      ),
+    };
   }
 
-  return dep;
+  return {
+    ...dep,
+    packageName: removeRepositoryName(source.repositoryName, source.chartName),
+    registryUrls: [source.repositoryURL],
+    datasource: HelmDatasource.id,
+  };
 }
 
 function processAppSpec(
@@ -86,10 +80,8 @@ function processAppSpec(
 
   for (const source of coerceArray(helmCharts)) {
     const dep = processHelmCharts(source, config?.registryAliases);
-    if (dep) {
-      dep.depType = depType;
-      deps.push(dep);
-    }
+    dep.depType = depType;
+    deps.push(dep);
   }
 
   return deps;

@@ -52,9 +52,11 @@ function reconcilePackageVersions(
       versions = versions.filter((v) => !deletedVersions.has(v));
     }
 
+    // v8 ignore else -- needs a delta that only removes versions
     if (addedVersions.length > 0) {
       const existingVersions = new Set(versions);
       for (const addedVersion of addedVersions) {
+        // v8 ignore else -- needs a delta re-adding a version already present
         if (!existingVersions.has(addedVersion)) {
           const version = copystr(addedVersion);
           versions.push(version);
@@ -94,6 +96,7 @@ function cacheResult(
   result: VersionsEndpointResult,
 ): void {
   const registryHostname = parseUrl(registryUrl)?.hostname;
+  // v8 ignore else -- needs a result cached for a non-rubygems.org host
   if (registryHostname === 'rubygems.org') {
     memCache.set(registryUrl, result);
   }
@@ -275,6 +278,7 @@ export class VersionsEndpointCache {
         contentTail,
       });
     } catch (err) {
+      // v8 ignore else -- needs a non-http failure during the sync
       if (err instanceof HttpError) {
         const responseStatus = err.response?.statusCode;
 

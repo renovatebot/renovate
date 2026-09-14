@@ -7,7 +7,7 @@ vi.mock('../fs/index.ts');
 describe('util/git/file-changes', () => {
   beforeEach(() => {
     fs.readLocalFile.mockImplementation((file) =>
-      Promise.resolve(`content of ${file as string}`),
+      Promise.resolve(`content of ${file}`),
     );
   });
 
@@ -19,7 +19,7 @@ describe('util/git/file-changes', () => {
       deleted: ['deleted.txt'],
     });
 
-    expect(await collectFileChanges(status)).toEqual([
+    await expect(collectFileChanges(status)).resolves.toEqual([
       {
         type: 'addition',
         path: 'modified.txt',
@@ -42,11 +42,11 @@ describe('util/git/file-changes', () => {
       deleted: ['deleted.txt'],
     });
 
-    expect(
-      await collectFileChanges(status, {
+    await expect(
+      collectFileChanges(status, {
         include: ['deleted', 'conflicted', 'created'],
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { type: 'deletion', path: 'deleted.txt' },
       {
         type: 'addition',
@@ -66,7 +66,9 @@ describe('util/git/file-changes', () => {
       renamed: [{ from: 'old.txt', to: 'new.txt' }],
     });
 
-    expect(await collectFileChanges(status, { include: ['renamed'] })).toEqual([
+    await expect(
+      collectFileChanges(status, { include: ['renamed'] }),
+    ).resolves.toEqual([
       { type: 'deletion', path: 'old.txt' },
       { type: 'addition', path: 'new.txt', contents: 'content of new.txt' },
     ]);
@@ -82,12 +84,12 @@ describe('util/git/file-changes', () => {
       ],
     });
 
-    expect(
-      await collectFileChanges(status, {
+    await expect(
+      collectFileChanges(status, {
         include: ['modified', 'deleted', 'renamed'],
         filter: (path) => path.startsWith('sub/'),
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         type: 'addition',
         path: 'sub/modified.txt',
@@ -106,13 +108,13 @@ describe('util/git/file-changes', () => {
   it('attaches addition metadata', async () => {
     const status = partial<StatusResult>({ not_added: ['bin/tool'] });
 
-    expect(
-      await collectFileChanges(status, {
+    await expect(
+      collectFileChanges(status, {
         include: ['not_added'],
         additionMetadata: (path) =>
           Promise.resolve({ isExecutable: path.startsWith('bin/') }),
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         type: 'addition',
         path: 'bin/tool',
@@ -123,10 +125,10 @@ describe('util/git/file-changes', () => {
   });
 
   it('tolerates missing buckets', async () => {
-    expect(
-      await collectFileChanges(partial<StatusResult>({}), {
+    await expect(
+      collectFileChanges(partial<StatusResult>({}), {
         include: ['modified', 'deleted', 'renamed'],
       }),
-    ).toEqual([]);
+    ).resolves.toEqual([]);
   });
 });

@@ -3,7 +3,9 @@ import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -1543,6 +1545,66 @@ describe('modules/datasource/go/releases-goproxy', () => {
           ],
           tags: { latest: 'v0.1.0' },
         });
+      });
+    });
+
+    describe('package cache', () => {
+      const privateUrl = 'https://artifactory.example.com/api/go/go';
+
+      let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+      beforeEach(() => {
+        setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+      });
+
+      afterEach(() => {
+        setCache.mockRestore();
+        GlobalConfig.reset();
+      });
+
+      function mockProxy(url: string): void {
+        httpMock
+          .scope(`${url}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0 2018-01-01T00:00:00Z\n')
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+      }
+
+      it('caches modules served by the public proxy', async () => {
+        vi.stubEnv('GOPROXY', baseUrl);
+        mockProxy(baseUrl);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(setCache).toHaveBeenCalledOnce();
+      });
+
+      it('does not cache modules served by a private proxy', async () => {
+        vi.stubEnv('GOPROXY', privateUrl);
+        mockProxy(privateUrl);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(setCache).not.toHaveBeenCalled();
+      });
+
+      it('caches modules served by a private proxy if cachePrivatePackages is enabled', async () => {
+        GlobalConfig.set({ cachePrivatePackages: true });
+        vi.stubEnv('GOPROXY', privateUrl);
+        mockProxy(privateUrl);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(setCache).toHaveBeenCalledOnce();
       });
     });
   });
