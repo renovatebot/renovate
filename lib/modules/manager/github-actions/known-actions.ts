@@ -429,6 +429,11 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'kubectl',
     packageName: 'kubernetes/kubernetes',
   },
+  // https://github.com/biomejs/setup-biome
+  'biomejs/setup-biome': {
+    datasource: NpmDatasource.id,
+    packageName: '@biomejs/biome',
+  },
   // https://github.com/cloudflare/wrangler-action
   'cloudflare/wrangler-action': {
     datasource: NpmDatasource.id,
