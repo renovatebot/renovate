@@ -4399,6 +4399,53 @@ describe('modules/manager/github-actions/extract', () => {
       },
       expected: [],
     },
+    {
+      step: {
+        uses: 'moonrepo/setup-toolchain@v1',
+        with: { 'moon-version': '1.35.0', 'proto-version': '0.51.4' },
+      },
+      expected: [
+        {
+          currentValue: '1.35.0',
+          datasource: 'github-releases',
+          depName: 'moonrepo/moon',
+          depType: 'uses-with',
+          packageName: 'moonrepo/moon',
+        },
+        {
+          currentValue: '0.51.4',
+          datasource: 'github-releases',
+          depName: 'moonrepo/proto',
+          depType: 'uses-with',
+          packageName: 'moonrepo/proto',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 possible inputs
+      step: {
+        uses: 'moonrepo/setup-toolchain@v1',
+        with: { 'moon-version': '1.35.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.35.0',
+          datasource: 'github-releases',
+          depName: 'moonrepo/moon',
+          depType: 'uses-with',
+          packageName: 'moonrepo/moon',
+        },
+      ],
+    },
+    {
+      // neither input is set, so no deps should be extracted at all (rather
+      // than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'moonrepo/setup-toolchain@v1',
+        with: {},
+      },
+      expected: [],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

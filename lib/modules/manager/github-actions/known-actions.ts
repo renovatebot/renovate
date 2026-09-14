@@ -432,6 +432,36 @@ const GraalvmSetupWith: ActionSchema = z
     return deps;
   });
 
+// `moonrepo/setup-toolchain` can yield up to 2 dependencies from a single
+// step: the `moon` binary and the `proto` binary. Both inputs are optional,
+// so only emit a dependency for the ones a workflow actually sets.
+const MoonrepoSetupToolchainWith: ActionSchema = z
+  .object({
+    'moon-version': z.string().optional(),
+    'proto-version': z.string().optional(),
+  })
+  .transform(
+    ({ 'moon-version': moonVersion, 'proto-version': protoVersion }) => {
+      const deps: PackageDependency[] = [];
+
+      if (moonVersion) {
+        deps.push({
+          packageName: 'moonrepo/moon',
+          ...parseValue(moonVersion),
+        });
+      }
+
+      if (protoVersion) {
+        deps.push({
+          packageName: 'moonrepo/proto',
+          ...parseValue(protoVersion),
+        });
+      }
+
+      return deps;
+    },
+  );
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -778,6 +808,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     // `'lts'`/`'pre'` are valid, documented values, but not ones we can
     // pin/bump
     withSchema: valSchemaSkippingLiterals('version', new Set(['lts', 'pre'])),
+  },
+  // https://github.com/moonrepo/setup-toolchain
+  'moonrepo/setup-toolchain': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined per dependency: moon-version, proto-version
+    withSchema: MoonrepoSetupToolchainWith,
   },
   // https://github.com/mozilla-actions/sccache-action
   'mozilla-actions/sccache-action': {
