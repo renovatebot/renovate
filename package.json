@@ -65,6 +65,7 @@
     "type-check": "run-s 'generate:*' 'tsc --noEmit {@}' --",
     "update-static-data": "run-s 'update-static-data:*'",
     "update-static-data:distro-info": "node tools/static-data/generate-distro-info.mjs",
+    "update-static-data:java-lts-versions": "node tools/static-data/generate-java-lts-versions.ts",
     "update-static-data:lambda-node-schedule": "node tools/static-data/generate-lambda-node-schedule.mjs",
     "update-static-data:mise-registry": "node tools/static-data/generate-mise-registry.ts",
     "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs"

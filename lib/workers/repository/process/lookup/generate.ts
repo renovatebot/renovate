@@ -51,13 +51,17 @@ export async function generateUpdate(
 
   if (currentValue) {
     try {
-      update.newValue = versioningApi.getNewValue({
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-        allVersions,
-      })!;
+      if (config.isLockfileOnly) {
+        update.newValue = currentValue;
+      } else {
+        update.newValue = versioningApi.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+          allVersions,
+        })!;
+      }
     } catch (err) {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
@@ -101,7 +105,10 @@ export async function generateUpdate(
   if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
-  if (rangeStrategy === 'update-lockfile' && currentValue === update.newValue) {
+  if (
+    (config.isLockfileOnly || rangeStrategy === 'update-lockfile') &&
+    currentValue === update.newValue
+  ) {
     update.isLockfileUpdate = true;
   }
   if (

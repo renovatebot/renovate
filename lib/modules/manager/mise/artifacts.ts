@@ -11,7 +11,7 @@ import type {
   ExtraEnv,
   ToolConstraint,
 } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
@@ -126,11 +126,14 @@ async function getMiseLockToolConstraints(
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
+  newPackageFileContent,
+  newLockFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const lockFileName = getLockFileName(packageFileName);
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
+  const originalLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const currentLockFileContent = newLockFileContent ?? originalLockFileContent;
+  if (!currentLockFileContent) {
     logger.debug({ lockFileName }, 'No mise lock file found');
     return null;
   }
@@ -227,9 +230,16 @@ export async function updateArtifacts({
     : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
+    await writeLocalFile(packageFileName, newPackageFileContent);
+    if (newLockFileContent) {
+      await writeLocalFile(lockFileName, newLockFileContent);
+    }
     await exec(commands, execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (!newLockFileContent || existingLockFileContent === newLockFileContent) {
+    const refreshedLockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (
+      !refreshedLockFileContent ||
+      originalLockFileContent === refreshedLockFileContent
+    ) {
       return null;
     }
 
@@ -239,7 +249,7 @@ export async function updateArtifacts({
         file: {
           type: 'addition',
           path: lockFileName,
-          contents: newLockFileContent,
+          contents: refreshedLockFileContent,
         },
       },
     ];
