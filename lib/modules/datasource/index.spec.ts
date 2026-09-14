@@ -14,6 +14,7 @@ import datasources from './api.ts';
 import { getDefaultVersioning } from './common.ts';
 import { Datasource } from './datasource.ts';
 import {
+  applyDatasourceDefaultConfig,
   getDatasourceList,
   getDatasources,
   getDigest,
@@ -152,6 +153,44 @@ describe('modules/datasource/index', () => {
   describe('getDefaultVersioning()', () => {
     it('returns semver if undefined', () => {
       expect(getDefaultVersioning(undefined)).toBe('semver-coerced');
+    });
+  });
+
+  describe('applyDatasourceDefaultConfig()', () => {
+    it('lets the datasource defaults win over the given config', async () => {
+      class DummyDatasourceWithDefaultConfig extends DummyDatasource {
+        override defaultConfig = { commitMessageTopic: 'Dummy {{depName}}' };
+      }
+      datasources.set(datasource, new DummyDatasourceWithDefaultConfig());
+
+      const res = await applyDatasourceDefaultConfig({
+        datasource,
+        packageName,
+        commitMessageTopic: 'dependency {{depName}}',
+      });
+
+      expect(res).toEqual({
+        datasource,
+        packageName,
+        commitMessageTopic: 'Dummy {{depName}}',
+      });
+    });
+
+    it('keeps the config as-is for a datasource without defaults', async () => {
+      datasources.set(datasource, new DummyDatasource());
+
+      const res = await applyDatasourceDefaultConfig({
+        datasource,
+        packageName,
+      });
+
+      expect(res).toEqual({ datasource, packageName });
+    });
+
+    it('keeps the config as-is without a datasource', async () => {
+      const res = await applyDatasourceDefaultConfig({ packageName });
+
+      expect(res).toEqual({ packageName });
     });
   });
 
