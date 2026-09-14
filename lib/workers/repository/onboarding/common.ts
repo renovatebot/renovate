@@ -8,6 +8,14 @@ export function getSemanticCommitPrTitle(config: RenovateConfig): string {
   return `${config.semanticCommitType ?? 'chore'}: ${getInheritedOrGlobal('onboardingPrTitle')}`;
 }
 
+export function getOnboardingPrTitle(config: RenovateConfig): string {
+  if (config.semanticCommits === 'enabled') {
+    return getSemanticCommitPrTitle(config);
+  }
+  // TODO #22198
+  return getInheritedOrGlobal('onboardingPrTitle')!;
+}
+
 export function getDefaultConfigFileName(): string {
   const configFileNames = getConfigFileNames();
   const onboardingConfigFileName = getInheritedOrGlobal(
