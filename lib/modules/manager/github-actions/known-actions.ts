@@ -226,6 +226,47 @@ const TflintWith: ActionSchema = z
     return [parseValue(version)];
   });
 
+// `helm/kind-action` can yield up to 3 dependencies from a single step: the
+// `kind` binary itself, the `kindest/node` image it boots, and (optionally) a
+// pinned `kubectl` binary. All 3 inputs are optional, so only emit a
+// dependency for the ones a workflow actually sets.
+const KindActionWith: ActionSchema = z
+  .object({
+    version: z.string().optional(),
+    node_image: z.string().optional(),
+    kubectl_version: z.string().optional(),
+  })
+  .transform(({ version, node_image, kubectl_version }) => {
+    const deps: PackageDependency[] = [];
+
+    if (version) {
+      deps.push({
+        packageName: 'kubernetes-sigs/kind',
+        ...parseValue(version),
+      });
+    }
+
+    if (node_image) {
+      // `node_image` may be pinned by digest (e.g.
+      // `kindest/node:v1.31.0@sha256:...`), so reuse the same Docker
+      // image-reference parsing as `aws-actions/amazon-ecs-render-task-definition`
+      // rather than naively splitting on `:`.
+      deps.push({
+        datasource: DockerDatasource.id,
+        ...parseImageValue(node_image),
+      });
+    }
+
+    if (kubectl_version) {
+      deps.push({
+        packageName: 'kubernetes/kubernetes',
+        ...parseValue(kubectl_version),
+      });
+    }
+
+    return deps;
+  });
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -427,6 +468,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'chart-testing',
     packageName: 'helm/chart-testing',
+  },
+  // https://github.com/helm/kind-action
+  'helm/kind-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined per dependency: `version`, `node_image`, `kubectl_version`
+    withSchema: KindActionWith,
   },
   'jakebailey/pyright-action': {
     datasource: NpmDatasource.id,
