@@ -90,6 +90,15 @@ function resolveRepoPath(
   if (platform === 'github') {
     return segments.slice(0, 2).join('/');
   }
+  // Azure DevOps paths are `org/project[/team-project]/_git/repo`, so `_git` marks the
+  // repository boundary exactly: the segment after it is the last one belonging to the
+  // repository, and anything beyond is a virtual-package subpath.
+  if (platform === 'azure') {
+    const gitSegment = segments.indexOf('_git');
+    if (gitSegment !== -1 && segments.length > gitSegment + 1) {
+      return segments.slice(0, gitSegment + 2).join('/');
+    }
+  }
   let boundary = segments.length;
   for (let i = 2; i < segments.length; i++) {
     if (
