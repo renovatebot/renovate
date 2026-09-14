@@ -11,7 +11,11 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as apkVersioning } from '../../versioning/apk/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { parseApkIndexFile } from './parser.ts';
 import type { ApkPackage } from './types.ts';
 import { constructComponentUrls } from './url.ts';
@@ -171,12 +175,7 @@ export class ApkDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore if -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.debug(`Getting APK releases for ${packageName} from ${registryUrl}`);
 
     const componentUrls = constructComponentUrls(registryUrl);

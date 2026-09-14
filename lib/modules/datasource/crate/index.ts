@@ -15,9 +15,9 @@ import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as cargoVersioning from '../../versioning/cargo/index.ts';
 import { Datasource } from '../datasource.ts';
 import type {
-  GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
+  RegistryGetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types.ts';
@@ -61,15 +61,7 @@ export class CrateDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore if -- should never happen */
-    if (!registryUrl) {
-      logger.warn(
-        'crate datasource: No registryUrl specified, cannot perform getReleases',
-      );
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const registryInfo = await CrateDatasource.fetchRegistryInfo({
       packageName,
       registryUrl,
@@ -141,11 +133,12 @@ export class CrateDatasource extends Datasource {
     return result;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${CrateDatasource.id}`,
-        // TODO: types (#22198)
         key: `${config.registryUrl}/${config.packageName}`,
         cacheable: CrateDatasource.isCratesIo(config.registryUrl),
         fallback: true,
@@ -327,12 +320,7 @@ export class CrateDatasource extends Datasource {
   private static async fetchRegistryInfo({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<RegistryInfo | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<RegistryInfo | null> {
     const isSparseRegistry = CrateDatasource.isSparseRegistry(registryUrl);
     const registryFetchUrl = isSparseRegistry
       ? registryUrl.replace(regEx(/^sparse\+/), '')

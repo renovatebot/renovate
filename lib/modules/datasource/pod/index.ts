@@ -12,7 +12,7 @@ import { refusedHostMessage } from '../../../util/http/util.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
 import { massageGithubUrl } from '../metadata.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 
 type URLFormatOptions =
   | 'withShardWithSpec'
@@ -209,12 +209,7 @@ export class PodDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const podName = packageName.replace(regEx(/\/.*$/), '');
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
     // In order to not abuse github API limits, query CDN instead
@@ -238,12 +233,13 @@ export class PodDatasource extends Datasource {
     return result;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         ttlMinutes: 30,
         namespace: `datasource-${PodDatasource.id}`,
-        // TODO: types (#22198)
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },

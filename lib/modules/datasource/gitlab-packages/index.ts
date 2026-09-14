@@ -2,7 +2,7 @@ import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
 import type { GitlabPackage } from './types.ts';
 
@@ -42,12 +42,7 @@ export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   private async fetchReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const [projectPart, packagePart] = packageName.split(':', 2);
 
     const apiUrl = GitlabPackagesDatasource.getGitlabPackageApiUrl(
@@ -83,10 +78,11 @@ export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
     return result.releases?.length ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
         key: `${config.registryUrl}-${config.packageName}`,
         fallback: true,
       },

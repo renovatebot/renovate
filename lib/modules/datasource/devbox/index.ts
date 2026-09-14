@@ -4,7 +4,7 @@ import { HttpError } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as devboxVersioning from '../../versioning/devbox/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { DevboxResponse } from './schema.ts';
 
@@ -25,7 +25,7 @@ export class DevboxDatasource extends Datasource {
   async getReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
       releases: [],
     };
@@ -33,7 +33,7 @@ export class DevboxDatasource extends Datasource {
     logger.trace({ registryUrl, packageName }, 'fetching devbox release');
 
     const devboxPkgUrl = joinUrlParts(
-      registryUrl!,
+      registryUrl,
       `/pkg?name=${encodeURIComponent(packageName)}`,
     );
 

@@ -58,10 +58,22 @@ export abstract class Datasource<
 
   protected readonly http: H;
 
+  /**
+   * A datasource with a non-empty `defaultRegistryUrls` may declare its
+   * parameter as `RegistryGetReleasesConfig`: TypeScript's method parameter
+   * bivariance allows the narrower override, and the datasource index
+   * guarantees the value.
+   */
   abstract getReleases(
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null>;
 
+  /**
+   * A datasource with a non-empty `defaultRegistryUrls` may declare its
+   * parameter as `RegistryDigestConfig`: TypeScript's method parameter
+   * bivariance allows the narrower override, and the datasource index
+   * guarantees the value.
+   */
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
   postprocessRelease?(

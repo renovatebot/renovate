@@ -2,7 +2,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/node/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { NodeReleases } from './schema.ts';
 
@@ -26,11 +26,7 @@ export class NodeVersionDatasource extends Datasource {
 
   private async fetchReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const result: ReleaseResult = {
       homepage: 'https://nodejs.org',
       sourceUrl: 'https://github.com/nodejs/node',
@@ -56,10 +52,11 @@ export class NodeVersionDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
         key: `${config.registryUrl}`,
         fallback: true,
       },

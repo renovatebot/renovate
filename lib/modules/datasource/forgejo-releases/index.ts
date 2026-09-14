@@ -5,8 +5,8 @@ import { Datasource } from '../datasource.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
 import { Commits, Tag } from '../forgejo-tags/schema.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
 import { Releases } from './schema.ts';
@@ -39,7 +39,7 @@ export class ForgejoReleasesDatasource extends Datasource<ForgejoHttp> {
   private async _getReleases({
     registryUrl,
     packageName: repo,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `${ForgejoTagsDatasource.getApiUrl(
       registryUrl,
     )}repos/${repo}/releases?draft=false`;
@@ -67,7 +67,9 @@ export class ForgejoReleasesDatasource extends Datasource<ForgejoHttp> {
     return dependency;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: ForgejoReleasesDatasource.cacheNamespace,
@@ -114,7 +116,7 @@ export class ForgejoReleasesDatasource extends Datasource<ForgejoHttp> {
   // getDigest fetched the latest commit for repository main branch
   // however, if newValue is provided, then getTagCommit is called
   private async _getDigest(
-    { packageName: repo, registryUrl }: DigestConfig,
+    { packageName: repo, registryUrl }: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     if (newValue?.length) {
@@ -134,7 +136,7 @@ export class ForgejoReleasesDatasource extends Datasource<ForgejoHttp> {
   }
 
   override getDigest(
-    config: DigestConfig,
+    config: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     return withCache(

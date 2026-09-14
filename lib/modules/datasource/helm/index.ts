@@ -15,7 +15,7 @@ import { ensureTrailingSlash } from '../../../util/url.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import * as helmVersioning from '../../versioning/helm/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { HelmRepository } from './schema.ts';
 
 export class HelmDatasource extends Datasource {
@@ -75,7 +75,7 @@ export class HelmDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl: helmRepository,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next -- should never happen */
     if (!helmRepository) {
       return null;

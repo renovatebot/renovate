@@ -8,7 +8,7 @@ import { joinUrlParts } from '../../../util/url.ts';
 import { GithubContentResponse } from '../../platform/github/schema.ts';
 import semver from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { BitriseStepFile } from './schema.ts';
 
 export class BitriseDatasource extends Datasource<GithubHttp> {
@@ -34,12 +34,7 @@ export class BitriseDatasource extends Datasource<GithubHttp> {
   private async fetchReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const parsedUrl = parseGitUrl(registryUrl);
     if (detectPlatform(registryUrl) !== 'github') {
       logger.once.warn(
@@ -121,7 +116,9 @@ export class BitriseDatasource extends Datasource<GithubHttp> {
     };
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}/${config.packageName}`,

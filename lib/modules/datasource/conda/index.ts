@@ -5,7 +5,11 @@ import { HttpError } from '../../../util/http/index.ts';
 import { Timestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import * as prefixDev from './prefix-dev.ts';
 import { CondaPackage } from './schema.ts';
@@ -33,12 +37,8 @@ export class CondaDatasource extends Datasource {
   private async fetchReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace({ registryUrl, packageName }, 'fetching conda package');
-
-    if (!registryUrl) {
-      return null;
-    }
 
     // fast.prefix.dev is a alias, deprecated, but still running.
     // We expect registryUrl to be `https://prefix.dev/${channel}` here.
@@ -88,10 +88,11 @@ export class CondaDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },

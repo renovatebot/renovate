@@ -1,8 +1,7 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, registryUrl } from './common.ts';
 import { EndoflifeDateVersions } from './schema.ts';
 
@@ -23,11 +22,7 @@ export class EndoflifeDateDatasource extends Datasource {
   private async fetchReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (!isNonEmptyString(registryUrl)) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`${datasource}.getReleases(${registryUrl}, ${packageName})`);
 
     const result: ReleaseResult = {
@@ -47,11 +42,12 @@ export class EndoflifeDateDatasource extends Datasource {
     }
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `${config.registryUrl!}:${config.packageName}`,
+        key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
       () => this.fetchReleases(config),

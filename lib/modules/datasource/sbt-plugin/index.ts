@@ -10,7 +10,7 @@ import { MAVEN_REPO } from '../maven/common.ts';
 import { downloadHttpContent } from '../maven/util.ts';
 import { extractPageLinks, getLatestVersion } from '../sbt-package/util.ts';
 import type {
-  GetReleasesConfig,
+  RegistryGetReleasesConfig,
   RegistryStrategy,
   ReleaseResult,
 } from '../types.ts';
@@ -223,12 +223,7 @@ export class SbtPluginDatasource extends Datasource {
   override async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const [groupId, artifactId] = packageName.split(':');
     const groupIdSplit = groupId.split('.');
     const artifactIdSplit = artifactId.split('_');

@@ -4,7 +4,6 @@ import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
-import { CondaDatasource } from './index.ts';
 
 const packageName = 'main/pytest';
 const depUrl = `/${packageName}`;
@@ -163,15 +162,6 @@ describe('modules/datasource/conda/index', () => {
           { version: '6.2.5' },
         ],
       });
-    });
-
-    it('returns null without registryUrl', async () => {
-      const condaDatasource = new CondaDatasource();
-      const res = await condaDatasource.getReleases({
-        registryUrl: '',
-        packageName,
-      });
-      expect(res).toBeNull();
     });
 
     it('handles null html_url and dev_url without throwing', async () => {

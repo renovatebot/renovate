@@ -4,8 +4,8 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
 import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
@@ -30,7 +30,7 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   private async fetchReleases({
     registryUrl,
     packageName: repo,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const depHost = getDepHost(registryUrl);
 
     const urlEncodedRepo = encodeURIComponent(repo);
@@ -60,7 +60,9 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
     return dependency;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `getReleases:${getDepHost(config.registryUrl)}:${config.packageName}`,
@@ -76,7 +78,7 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
    * Returs the latest commit hash of the repository.
    */
   private async fetchDigest(
-    { packageName: repo, registryUrl }: DigestConfig,
+    { packageName: repo, registryUrl }: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);
@@ -120,7 +122,7 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   }
 
   override getDigest(
-    config: DigestConfig,
+    config: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     return this.cached(

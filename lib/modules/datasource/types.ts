@@ -32,6 +32,15 @@ export interface DigestConfig {
 }
 
 /**
+ * `DigestConfig` as received by datasources that declare
+ * `defaultRegistryUrls`: the datasource index always resolves a registry
+ * URL for them before calling `getDigest()`.
+ */
+export interface RegistryDigestConfig extends DigestConfig {
+  registryUrl: string;
+}
+
+/**
  * What the datasource index's `getDigest()` receives from the lookup worker.
  */
 export interface GetDigestInputConfig extends DigestConfig, RegistryUrlsConfig {
@@ -55,6 +64,15 @@ export interface GetReleasesConfig {
    */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   constraintsFiltering?: ConstraintsFilter;
+}
+
+/**
+ * `GetReleasesConfig` as received by datasources that declare
+ * `defaultRegistryUrls`: the datasource index always resolves a registry
+ * URL for them before calling `getReleases()`.
+ */
+export interface RegistryGetReleasesConfig extends GetReleasesConfig {
+  registryUrl: string;
 }
 
 /**
@@ -165,7 +183,19 @@ export type RegistryStrategy =
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
+  /**
+   * A datasource with a non-empty `defaultRegistryUrls` may declare its
+   * parameter as `RegistryDigestConfig`: TypeScript's method parameter
+   * bivariance allows the narrower override, and the datasource index
+   * guarantees the value.
+   */
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
+  /**
+   * A datasource with a non-empty `defaultRegistryUrls` may declare its
+   * parameter as `RegistryGetReleasesConfig`: TypeScript's method parameter
+   * bivariance allows the narrower override, and the datasource index
+   * guarantees the value.
+   */
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   defaultRegistryUrls?: string[];
   defaultVersioning?: string | undefined;

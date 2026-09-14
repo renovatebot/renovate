@@ -9,7 +9,7 @@ import { joinUrlParts } from '../../../util/url.ts';
 import * as semanticVersioning from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { Release } from '../index.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   DenoAPIModuleResponse,
   DenoAPIModuleVersionResponse,
@@ -38,9 +38,7 @@ export class DenoDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const massagedRegistryUrl = registryUrl!;
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const extractResult = regEx(
       /^(?:https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/,
     ).exec(packageName);
@@ -57,7 +55,7 @@ export class DenoDatasource extends Datasource {
 
     // https://apiland.deno.dev/v2/modules/postgres
     const moduleAPIURL = joinUrlParts(
-      massagedRegistryUrl,
+      registryUrl,
       'v2/modules',
       massagedPackageName,
     );
@@ -65,11 +63,12 @@ export class DenoDatasource extends Datasource {
     return await this.getReleaseResult(moduleAPIURL);
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        // TODO: types (#22198)
         key: `getReleases:${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },

@@ -18,9 +18,9 @@ import { MAVEN_REPO } from '../maven/common.ts';
 import { MavenDatasource } from '../maven/index.ts';
 import { downloadHttpContent, downloadHttpProtocol } from '../maven/util.ts';
 import type {
-  GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
+  RegistryGetReleasesConfig,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -335,13 +335,9 @@ export class SbtPackageDatasource extends MavenDatasource {
   }
 
   override async getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const { packageName, registryUrl } = config;
-    // istanbul ignore if
-    if (!registryUrl) {
-      return null;
-    }
 
     const sbtReleases = await this.getSbtReleases(registryUrl, packageName);
     if (sbtReleases) {

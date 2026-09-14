@@ -13,8 +13,8 @@ import { GithubHttp } from '../../../util/http/github.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types.ts';
@@ -221,7 +221,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource<GithubHttp> {
       currentValue,
       currentDigest,
       registryUrl,
-    }: DigestConfig,
+    }: RegistryDigestConfig,
     newValue: string,
   ): Promise<string | null> {
     logger.debug(
@@ -266,7 +266,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource<GithubHttp> {
    *  - Sanitize the versions if desired (e.g. strip out leading 'v')
    *  - Return a dependency object containing sourceUrl string and releases array
    */
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
+  async getReleases(config: RegistryGetReleasesConfig): Promise<ReleaseResult> {
     const releasesResult = await queryReleases(config, this.http);
     const releases = releasesResult.map((item) => {
       const { version, releaseTimestamp, isStable } = item;

@@ -2,7 +2,7 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { UnityPackageReleasesJSON } from './schema.ts';
 
 export class Unity3dPackagesDatasource extends Datasource {
@@ -23,7 +23,7 @@ export class Unity3dPackagesDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const response = await this.http.getJson(
       `${registryUrl}/${packageName}`,
       UnityPackageReleasesJSON,
@@ -59,7 +59,9 @@ export class Unity3dPackagesDatasource extends Datasource {
     return result;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${Unity3dPackagesDatasource.id}`,

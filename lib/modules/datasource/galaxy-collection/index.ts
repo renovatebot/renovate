@@ -6,7 +6,11 @@ import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import {
   GalaxyV3,
   GalaxyV3DetailedVersion,
@@ -45,8 +49,8 @@ export class GalaxyCollectionDatasource extends Datasource {
   private async fetchReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const baseUrl = this.constructBaseUrl(registryUrl!, packageName);
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
+    const baseUrl = this.constructBaseUrl(registryUrl, packageName);
 
     const { val: baseProject, err: baseErr } = await this.http
       .getJsonSafe(baseUrl, GalaxyV3)
@@ -107,7 +111,9 @@ export class GalaxyCollectionDatasource extends Datasource {
     };
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `getReleases:${config.registryUrl}:${config.packageName}`,

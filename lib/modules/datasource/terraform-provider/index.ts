@@ -7,7 +7,11 @@ import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import { TerraformDatasource } from '../terraform-module/base.ts';
 import { createSDBackendURL } from '../terraform-module/utils.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type {
+  GetReleasesConfig,
+  RegistryGetReleasesConfig,
+  ReleaseResult,
+} from '../types.ts';
 import {
   OpenTofuProviderDocsResponse,
   OpenTofuProviderPackagesResponse,
@@ -53,11 +57,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   private async fetchReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(
       `terraform-provider.getDependencies() packageName: ${packageName}`,
     );
@@ -79,7 +79,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return await this.queryProviderRegistry(registryUrl, packageName);
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const url = config.registryUrl;
     const repo = TerraformProviderDatasource.getRepository(config);
     return this.cached(
