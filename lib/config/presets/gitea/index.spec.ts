@@ -3,7 +3,11 @@ import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { setBaseUrl } from '../../../util/http/gitea.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util.ts';
+import {
+  PRESET_INVALID,
+  PRESET_INVALID_JSON,
+  PRESET_NOT_FOUND,
+} from '../util.ts';
 import * as gitea from './index.ts';
 
 const giteaApiHost = gitea.Endpoint;
@@ -21,6 +25,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/some-filename.json`)
         .reply(200, {
+          type: 'file',
+          name: 'some-filename.json',
+          path: 'some-filename.json',
           content: toBase64('{"from":"api"}'),
         });
 
@@ -38,6 +45,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/some-filename.json5`)
         .reply(200, {
+          type: 'file',
+          name: 'some-filename.json5',
+          path: 'some-filename.json5',
           content: toBase64('{from:"api"}'),
         });
 
@@ -55,6 +65,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/some-filename.jsonc`)
         .reply(200, {
+          type: 'file',
+          name: 'some-filename.jsonc',
+          path: 'some-filename.jsonc',
           content: toBase64('{"from": /* secret! */ "api"}'),
         });
 
@@ -65,6 +78,26 @@ describe('config/presets/gitea/index', () => {
         null,
       );
       expect(res).toEqual({ from: 'api' });
+    });
+
+    it('throws for non-file response', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .reply(200, {
+          type: 'dir',
+          name: 'some-filename.json',
+          path: 'some-filename.json',
+        });
+
+      await expect(
+        gitea.fetchJSONFile(
+          'some/repo',
+          'some-filename.json',
+          giteaApiHost,
+          null,
+        ),
+      ).rejects.toThrow(PRESET_INVALID);
     });
 
     it('throws external host error', async () => {
@@ -95,14 +128,21 @@ describe('config/presets/gitea/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        'dep not found',
+      );
     });
 
     it('throws if invalid content', async () => {
       httpMock
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, { content: toBase64('invalid') });
+        .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
+          content: toBase64('invalid'),
+        });
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON,
@@ -114,6 +154,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('not json'),
         });
 
@@ -127,6 +170,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"foo":"bar"}'),
         });
 
@@ -139,6 +185,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
+          type: 'file',
+          name: 'somefile.json',
+          path: 'somefile.json',
           content: toBase64('{"somename":{"foo":"bar"}}'),
         });
       const content = await gitea.getPreset({
@@ -153,6 +202,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
+          type: 'file',
+          name: 'somefile.json',
+          path: 'somefile.json',
           content: Buffer.from(
             '{"somename":{"somesubname":{"foo":"bar"}}}',
           ).toString('base64'),
@@ -170,6 +222,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/custom.json`)
         .reply(200, {
+          type: 'file',
+          name: 'custom.json',
+          path: 'custom.json',
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await gitea.getPreset({
@@ -184,6 +239,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/path%2Fcustom.json`)
         .reply(200, {
+          type: 'file',
+          name: 'custom.json',
+          path: 'path/custom.json',
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await gitea.getPreset({
@@ -199,6 +257,9 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
+          type: 'file',
+          name: 'somefile.json',
+          path: 'somefile.json',
           content: toBase64('{}'),
         });
       await expect(
@@ -216,11 +277,14 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea.getPresetFromEndpoint('some/repo', 'default', undefined),
-      ).toEqual({ from: 'api' });
+      await expect(
+        gitea.getPresetFromEndpoint('some/repo', 'default', undefined),
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint', async () => {
@@ -228,10 +292,13 @@ describe('config/presets/gitea/index', () => {
         .scope('https://api.gitea.example.org')
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea
+      await expect(
+        gitea
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -239,7 +306,7 @@ describe('config/presets/gitea/index', () => {
             'https://api.gitea.example.org',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses default endpoint with a tag', async () => {
@@ -247,17 +314,20 @@ describe('config/presets/gitea/index', () => {
         .scope(giteaApiHost)
         .get(`${basePath}/default.json?ref=someTag`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea.getPresetFromEndpoint(
+      await expect(
+        gitea.getPresetFromEndpoint(
           'some/repo',
           'default',
           undefined,
           giteaApiHost,
           'someTag',
         ),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint with a tag', async () => {
@@ -265,10 +335,13 @@ describe('config/presets/gitea/index', () => {
         .scope('https://api.gitea.example.org')
         .get(`${basePath}/default.json?ref=someTag`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await gitea
+      await expect(
+        gitea
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -277,7 +350,7 @@ describe('config/presets/gitea/index', () => {
             'someTag',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
   });
 });

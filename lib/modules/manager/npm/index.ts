@@ -19,6 +19,8 @@ export const lockFileNames = [
   'pnpm-lock.yaml',
   'yarn.lock',
 ];
+export const lockFileMaintenanceIsDelegatedToPackageManager =
+  'Delegated to the underlying package manager CLI - `npm`, `pnpm`, or Yarn - depending on which lock file is present.';
 
 export const displayName = 'npm';
 export const url = 'https://docs.npmjs.com';

@@ -69,7 +69,8 @@ export function updateAtPosition(
     // TODO: validate newValue (#22198)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
-  } else if (
+  }
+  if (
     upgrade.datasource === 'docker' ||
     upgrade.datasource === 'buildpacks-registry'
   ) {

@@ -14,6 +14,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { parsePubspec, parsePubspecLock } from './utils.ts';
 
 const SDK_NAMES = ['dart', 'flutter'];
@@ -47,17 +48,17 @@ export async function updateArtifacts({
     const toolName = isFlutter ? 'flutter' : 'dart';
     const cmd = getExecCommand(toolName, updatedDeps, isLockFileMaintenance);
 
-    let constraint = config.constraints?.[toolName];
-    if (!constraint) {
+    const constraint = await resolveToolConstraint(config, toolName, () => {
       const pubspec = parsePubspec(packageFileName, newPackageFileContent);
       const pubspecToolName = isFlutter ? 'flutter' : 'sdk';
-      constraint = pubspec?.environment[pubspecToolName];
-
-      if (!constraint) {
-        const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
-        constraint = pubspecLock?.sdks[toolName];
+      const pubspecConstraint = pubspec?.environment[pubspecToolName];
+      if (pubspecConstraint) {
+        return pubspecConstraint;
       }
-    }
+
+      const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
+      return pubspecLock?.sdks[toolName];
+    });
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -108,24 +109,22 @@ function getExecCommand(
 ): string {
   if (isLockFileMaintenance) {
     return `${toolName} pub upgrade`;
-  } else {
-    const depNames = updatedDeps.map((dep) => dep.depName).filter(isString);
-    if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
-      return `${toolName} ${PUB_GET_COMMAND}`;
-    }
-    // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
-    // we use Flutter over Dart to run `pub get` as it is a Flutter project.
-    else if (
-      depNames.length === 2 &&
-      depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
-    ) {
-      return `flutter ${PUB_GET_COMMAND}`;
-    } else {
-      const depNamesCmd = depNames
-        .filter((depName) => !SDK_NAMES.includes(depName))
-        .map(quote)
-        .join(' ');
-      return `${toolName} pub upgrade ${depNamesCmd}`;
-    }
   }
+  const depNames = updatedDeps.map((dep) => dep.depName).filter(isString);
+  if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
+    return `${toolName} ${PUB_GET_COMMAND}`;
+  }
+  // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
+  // we use Flutter over Dart to run `pub get` as it is a Flutter project.
+  if (
+    depNames.length === 2 &&
+    depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
+  ) {
+    return `flutter ${PUB_GET_COMMAND}`;
+  }
+  const depNamesCmd = depNames
+    .filter((depName) => !SDK_NAMES.includes(depName))
+    .map(quote)
+    .join(' ');
+  return `${toolName} pub upgrade ${depNamesCmd}`;
 }

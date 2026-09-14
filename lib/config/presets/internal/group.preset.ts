@@ -367,6 +367,7 @@ const staticGroups = {
           '!docker.io/calico/node',
           '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
+          '!docker.io/kindest/node',
         ],
       },
     ],
@@ -478,8 +479,6 @@ const staticGroups = {
     ],
   },
   recommended: {
-    description:
-      'Use curated list of recommended non-monorepo package groupings.',
     extends: [
       'group:nodeJs',
       'group:allApollographql',
@@ -536,7 +535,8 @@ const staticGroups = {
       'group:springWs',
       'group:symfony',
     ],
-    ignoreDeps: [], // Hack to improve onboarding PR description
+    overrideDescription:
+      'Use curated list of recommended non-monorepo package groupings.',
   },
   remark: {
     description: 'Group remark packages together.',
@@ -811,6 +811,17 @@ const staticGroups = {
       },
     ],
   },
+  stylelint: {
+    description: 'Group stylelint packages together.',
+    packageRules: [
+      {
+        extends: ['packages:stylelint'],
+        groupName: 'stylelint packages',
+        groupSlug: 'stylelint',
+        separateMajorMinor: false,
+      },
+    ],
+  },
   symfony: {
     description: 'Group PHP Symfony packages together.',
     packageRules: [
@@ -885,6 +896,15 @@ const staticGroups = {
       },
     ],
   },
+  vitePlus: {
+    description: 'Group all Vite+ related packages together.',
+    packageRules: [
+      {
+        extends: ['packages:vitePlus'],
+        groupName: 'Vite+ packages',
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
@@ -905,9 +925,8 @@ for (const monorepo of Object.keys(monorepos.presets)) {
   };
 }
 config.monorepos = {
-  description: 'Group known monorepo packages together.',
   extends: monorepoNames,
-  ignoreDeps: [], // Hack to improve onboarding PR description
+  overrideDescription: 'Group known monorepo packages together.',
 };
 
 export const presets: Record<string, Preset> = config;

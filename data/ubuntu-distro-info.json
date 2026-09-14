@@ -145,7 +145,7 @@
     "eol": "2019-04-25",
     "eol_server": "2019-04-25",
     "eol_esm": "2024-04-25",
-    "eol_legacy": "2026-04-28"
+    "eol_legacy": "2029-04-26"
   },
   "v14.10": {
     "codename": "Utopic Unicorn",
@@ -176,7 +176,7 @@
     "eol": "2021-04-30",
     "eol_server": "2021-04-30",
     "eol_esm": "2026-04-23",
-    "eol_legacy": "2028-04-25"
+    "eol_legacy": "2031-04-30"
   },
   "v16.10": {
     "codename": "Yakkety Yak",
@@ -207,7 +207,7 @@
     "eol": "2023-05-31",
     "eol_server": "2023-05-31",
     "eol_esm": "2028-04-26",
-    "eol_legacy": "2030-04-30"
+    "eol_legacy": "2033-04-28"
   },
   "v18.10": {
     "codename": "Cosmic Cuttlefish",
@@ -238,7 +238,7 @@
     "eol": "2025-05-29",
     "eol_server": "2025-05-29",
     "eol_esm": "2030-04-23",
-    "eol_legacy": "2032-04-27"
+    "eol_legacy": "2035-04-26"
   },
   "v20.10": {
     "codename": "Groovy Gorilla",
@@ -269,7 +269,7 @@
     "eol": "2027-06-01",
     "eol_server": "2027-06-01",
     "eol_esm": "2032-04-21",
-    "eol_legacy": "2034-04-25"
+    "eol_legacy": "2037-04-30"
   },
   "v22.10": {
     "codename": "Kinetic Kudu",
@@ -300,7 +300,7 @@
     "eol": "2029-05-31",
     "eol_server": "2029-05-31",
     "eol_esm": "2034-04-25",
-    "eol_legacy": "2036-04-29"
+    "eol_legacy": "2039-04-28"
   },
   "v24.10": {
     "codename": "Oracular Oriole",
@@ -331,7 +331,7 @@
     "eol": "2031-05-29",
     "eol_server": "2031-05-29",
     "eol_esm": "2036-04-23",
-    "eol_legacy": "2038-04-27"
+    "eol_legacy": "2041-04-30"
   },
   "v26.10": {
     "codename": "Stonking Stingray",

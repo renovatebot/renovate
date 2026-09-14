@@ -60,10 +60,10 @@ const qKotlinSingleObjectVarAssignment = q.alt(
 );
 
 // object foo { ... }
-const qKotlinMultiObjectExpr = (
+function qKotlinMultiObjectExpr(
   search: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.alt(
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(
     q.sym<Ctx>('object').sym(storeVarToken).tree({
       type: 'wrapped-tree',
       maxDepth: 1,
@@ -75,6 +75,7 @@ const qKotlinMultiObjectExpr = (
     }),
     qKotlinSingleObjectVarAssignment,
   );
+}
 
 export const qKotlinMultiObjectVarAssignment = qKotlinMultiObjectExpr(
   qKotlinMultiObjectExpr(

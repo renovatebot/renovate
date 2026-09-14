@@ -254,8 +254,11 @@ const DenoPackageFile = z
       .optional(
         z.object({
           types: CompilerOptionsTypes,
-          jsxImportSource: CompilerOptionsJsxImportSource,
-          jsxImportSourceTypes: CompilerOptionsJsxImportSourceTypes,
+          jsxImportSource: CompilerOptionsJsxImportSource.optional().default(
+            [],
+          ),
+          jsxImportSourceTypes:
+            CompilerOptionsJsxImportSourceTypes.optional().default([]),
         }),
       )
       .default({ types: [], jsxImportSource: [], jsxImportSourceTypes: [] }),

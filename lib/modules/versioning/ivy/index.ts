@@ -16,7 +16,7 @@ import {
 
 export const id = 'ivy';
 export const displayName = 'Ivy';
-export const urls = ['https://ant.apache.org/ivy/'];
+export const urls = ['[Apache Ivy](https://ant.apache.org/ivy/)'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
@@ -81,7 +81,7 @@ function matches(a: string, b: string): boolean {
     }
     const tokens = tokenize(a);
     if (tokens.length) {
-      const token = tokens[tokens.length - 1];
+      const token = tokens.at(-1)!;
       if (token.type === TYPE_QUALIFIER) {
         return token.val.toLowerCase() === value;
       }

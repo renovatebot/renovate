@@ -1,5 +1,6 @@
 import { XmlDocument, type XmlElement } from 'xmldoc';
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
 
 const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>';
 
@@ -102,11 +103,12 @@ function trimMetadataXml(metadata: XmlDocument, input: string): string {
   const version = metadata.descendantWithPath('version')?.val;
   const latest = metadata.descendantWithPath('versioning.latest')?.val;
   const release = metadata.descendantWithPath('versioning.release')?.val;
-  const versions =
+  const versions = coerceArray(
     metadata
       .descendantWithPath('versioning.versions')
       ?.childrenNamed('version')
-      .map((child) => child.val) ?? [];
+      .map((child) => child.val),
+  );
   const snapshot = metadata.descendantWithPath('versioning.snapshot');
   const timestamp = snapshot?.childNamed('timestamp')?.val;
   const buildNumber = snapshot?.childNamed('buildNumber')?.val;

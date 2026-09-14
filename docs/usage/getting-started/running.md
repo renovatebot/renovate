@@ -10,14 +10,14 @@ If you're using the Mend Renovate App, or if someone else is hosting Renovate fo
 
 ## Self-Hosting Renovate
 
-When self-hosting Renovate you're the "administrator" of the bot, this means you:
+When self-hosting Renovate you're the "administrator" of that deployment, this means you:
 
 - provide the infrastructure that Renovate runs on,
 - provision Renovate's global config,
-- make sure Renovate bot runs regularly,
-- make sure Renovate bot itself is updated
+- make sure Renovate runs regularly,
+- make sure Renovate itself is updated
 
-If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
+If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate.
 
 If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository](https://github.com/mend/renovate-ce-ee).
 
@@ -86,23 +86,25 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` and self-hosted GitLab.
 Details for how it works can be found in the project.
 
-#### Mend Renovate Community Edition / Enterprise Edition
+#### Mend Renovate Self-Hosted (Community Edition / Enterprise Edition)
 
-Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are closed-source offerings of Renovate for self-hosted users.
-Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
+Mend Renovate Self-Hosted Community Edition (sometimes "Renovate CE"/"CE") and Enterprise Edition (sometimes "Renovate EE"/"EE") are closed-source offerings of Renovate for self-hosted users.
+
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit after processing all repositories
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
 - It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
-- It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
+- It is released every 2 weeks in a slightly slower and more stable cadence than Renovate OSS, which releases on every commit
+- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL-3.0-only)
 
 Plus, the Enterprise Edition has:
 
 - Horizontal scaling to run multiple 'worker' containers
 - Dedicated support from Mend.io
 - Premium features, including Smart Merge Control
+
+Mend Renovate Self-Hosted CE and EE have support for GitHub.com, GitHub Enterprise Server, GitLab.com, GitLab Self-Managed, and Bitbucket Data Center.
 
 Go to the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
 
@@ -162,11 +164,11 @@ Any other (`*.js`, `*.ts`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is sup
 Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
 Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
 
-Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
+Some config is global-only, meaning that either it is only applicable to the administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
-Your bot's global config can include both global as well as non-global configuration options, while user/repo config can only include non-global options.
+Your global config can include both global as well as non-global configuration options, while user/repo config can only include non-global options.
 We recommend that you keep as much of the non-global config as possible in repository config files.
-This way the Renovate end users can see as much of the bot's configuration as possible.
+This way the Renovate end users can see as much of the configuration as possible.
 
 If you are configuring Renovate using environment variables, there are two possibilities:
 
@@ -224,10 +226,10 @@ The `.mts` extension is always treated as an ES module, and `.cts` is always tre
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
 We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
-We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@some.domain.test>"`.
+We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate <renovate@some.domain.test>"`.
 
 !!! warning
-  We recommend you use a single, dedicated username for your Renovate bot.
+  We recommend you use a single, dedicated username for your Renovate.
   Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
 #### Docs

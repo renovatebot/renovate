@@ -161,6 +161,37 @@ describe('modules/versioning/cargo/index', () => {
   );
 
   it.each`
+    subRange           | superRange       | expected
+    ${'1.70'}          | ${'1.63'}        | ${true}
+    ${'1.63'}          | ${'1.70'}        | ${false}
+    ${'1.2.3'}         | ${'1.2'}         | ${true}
+    ${'0.4'}           | ${'0.4.1'}       | ${false}
+    ${'^1.5'}          | ${'^1.0'}        | ${true}
+    ${'>=1.5'}         | ${'>=1.0'}       | ${true}
+    ${'>=1.0, <1.5'}   | ${'>=1.0, <2.0'} | ${true}
+    ${'>=1.0, <2.0'}   | ${'>=1.0, <1.5'} | ${false}
+    ${'not-a-version'} | ${'1.0'}         | ${false}
+  `(
+    'subset("$subRange", "$superRange") === $expected',
+    ({ subRange, superRange, expected }) => {
+      expect(semver.subset?.(subRange, superRange)).toBe(expected);
+    },
+  );
+
+  it.each`
+    subRange           | superRange | expected
+    ${'1.70'}          | ${'1.63'}  | ${true}
+    ${'1.63'}          | ${'1.70'}  | ${true}
+    ${'1.0'}           | ${'3.0'}   | ${false}
+    ${'not-a-version'} | ${'1.0'}   | ${false}
+  `(
+    'intersects("$subRange", "$superRange") === $expected',
+    ({ subRange, superRange, expected }) => {
+      expect(semver.intersects?.(subRange, superRange)).toBe(expected);
+    },
+  );
+
+  it.each`
     currentVersion     | newVersion         | expected
     ${'0.0.1'}         | ${'0.0.1'}         | ${false}
     ${'0.0.1'}         | ${'0.0.2'}         | ${true}

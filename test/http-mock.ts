@@ -149,7 +149,7 @@ function massageHttpMockStacktrace(err: Error): void {
 
   const lines = content.slice(0, idx).split('\n');
   const lineNum = lines.length;
-  const linePos = lines[lines.length - 1].length + 1;
+  const linePos = lines.at(-1)!.length + 1;
 
   const stackLine = `    at <test> (${state.testPath}:${lineNum}:${linePos})`;
   err.stack = err.stack.replace(/\+\+\+.*$/s, stackLine);

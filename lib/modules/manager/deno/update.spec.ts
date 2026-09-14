@@ -58,7 +58,7 @@ describe('modules/manager/deno/update', () => {
 
         expect(() =>
           updateDependency({ fileContent, packageFile: 'deno.json', upgrade }),
-        ).toThrow();
+        ).toThrow(Error);
       });
 
       it('updates dependency in scopes', () => {
@@ -995,7 +995,9 @@ describe('modules/manager/deno/update', () => {
     describe('package.json', () => {
       // ported from lib/modules/manager/npm/update/dependency/index.spec.ts
       it('replaces a dependency value', () => {
-        const readFixture = (x: string): string => Fixtures.get(x, '../npm');
+        function readFixture(x: string): string {
+          return Fixtures.get(x, '../npm');
+        }
 
         const input01Content = readFixture('inputs/01.json');
         const upgrade: Upgrade = {

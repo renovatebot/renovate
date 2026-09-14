@@ -5,6 +5,7 @@ import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { find } from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { parseLine } from '../gomod/line-parser.ts';
@@ -46,6 +47,16 @@ function determineDatasource(
   const hostUrl = `https://${hostname}`;
   const platform = detectPlatform(repository) ?? detectPlatform(hostUrl);
 
+  if (platform === 'forgejo') {
+    logger.debug(
+      { repository, hostname },
+      'Found forgejo dependency with custom registryUrl',
+    );
+    return {
+      datasource: ForgejoTagsDatasource.id,
+      registryUrls: [hostUrl],
+    };
+  }
   if (hostname === 'github.com') {
     logger.debug({ repository, hostname }, 'Found github dependency');
     return { datasource: GithubTagsDatasource.id };
@@ -84,6 +95,7 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostUrl] };
   }
   for (const [hostType, sourceId] of [
+    ['forgejo', ForgejoTagsDatasource.id],
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
@@ -97,7 +109,7 @@ function determineDatasource(
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType github nor gitlab',
+    'Provided hostname did not match any of the hostRules of hostType forgejo, github nor gitlab',
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostUrl] };
 }

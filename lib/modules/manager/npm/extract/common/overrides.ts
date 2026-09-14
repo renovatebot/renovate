@@ -22,8 +22,7 @@ export function extractOverrideDepsRec(
     if (isString(versionValue)) {
       // special handling for "." override dependency name
       // "." means the constraint is applied to the parent dep
-      const currDepName =
-        overrideName === '.' ? parents[parents.length - 1] : overrideName;
+      const currDepName = overrideName === '.' ? parents.at(-1)! : overrideName;
       const dep: PackageDependency<NpmManagerData> = {
         depName: currDepName,
         depType: 'overrides',

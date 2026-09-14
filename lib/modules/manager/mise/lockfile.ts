@@ -1,13 +1,7 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex.ts';
 import type { MiseLockFile } from './schema.ts';
-
-export interface MiseConfigType {
-  /** True when config filename contains `.local.` (e.g. mise.local.toml) */
-  isLocal: boolean;
-  /** Environment name extracted from filename, e.g. 'test' for mise.test.toml */
-  env?: string;
-}
+import type { MiseConfigType } from './types.ts';
 
 /**
  * Parses the config file name to determine its type (local, env-specific, or default).
