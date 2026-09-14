@@ -675,6 +675,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'jfrog-cli',
     packageName: 'jfrog/jfrog-cli',
   },
+  // https://github.com/mozilla-actions/sccache-action
+  'mozilla-actions/sccache-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'sccache',
+    packageName: 'mozilla/sccache',
+  },
   // https://github.com/opentofu/setup-opentofu
   'opentofu/setup-opentofu': {
     datasource: GithubReleasesDatasource.id,

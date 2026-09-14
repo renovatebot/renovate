@@ -3985,6 +3985,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'mozilla-actions/sccache-action@v0.0.9',
+        with: { version: 'v0.18.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.18.0',
+          datasource: 'github-releases',
+          depName: 'sccache',
+          depType: 'uses-with',
+          packageName: 'mozilla/sccache',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'mozilla-actions/sccache-action@v0.0.9',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'sccache',
+          depType: 'uses-with',
+          packageName: 'mozilla/sccache',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
