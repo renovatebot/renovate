@@ -1,6 +1,5 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import * as memCache from '../../../util/cache/memory/index.ts';
-import { getCache } from '../../../util/cache/repository/index.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import type {
   GitlabHttp,
@@ -8,54 +7,40 @@ import type {
 } from '../../../util/http/gitlab.ts';
 import { regEx } from '../../../util/regex.ts';
 import { getQueryString } from '../../../util/url.ts';
+import { PlatformPrCache } from '../utils/pr-cache.ts';
 import { GitLabMergeRequests } from './schema.ts';
 import type { GitlabPr, GitlabPrCacheData } from './types.ts';
 import { prInfo } from './utils.ts';
 
-export class GitlabPrCache {
-  private items: GitlabPr[] = [];
-  private cache: GitlabPrCacheData;
+const millisecondsRegex = regEx(/\.\d\d\dZ$/);
+
+function isOutdatedFormat(cache: GitlabPrCacheData): boolean {
+  return isString(cache.updated_at) && millisecondsRegex.test(cache.updated_at);
+}
+
+export class GitlabPrCache extends PlatformPrCache<
+  GitlabPr,
+  GitlabPrCacheData
+> {
+  private http: GitlabHttp;
   private repo: string;
   private ignorePrAuthor: boolean;
 
   private constructor(
+    http: GitlabHttp,
     repo: string,
     author: string | null,
     ignorePrAuthor: boolean,
   ) {
+    super({
+      platform: 'gitlab',
+      author,
+      createCache: () => ({ items: {}, updated_at: null, author }),
+      isOutdated: isOutdatedFormat,
+    });
+    this.http = http;
     this.repo = repo;
     this.ignorePrAuthor = ignorePrAuthor;
-    const repoCache = getCache();
-    repoCache.platform ??= {};
-    repoCache.platform.gitlab ??= {};
-
-    let pullRequestCache = repoCache.platform.gitlab
-      .pullRequestsCache as GitlabPrCacheData;
-    if (!pullRequestCache) {
-      logger.debug('Initializing new PR cache at repository cache');
-      pullRequestCache = {
-        items: {},
-        updated_at: null,
-        author,
-      };
-    } else if (pullRequestCache.author !== author) {
-      logger.debug('Resetting PR cache because authors do not match');
-      pullRequestCache = {
-        items: {},
-        updated_at: null,
-        author,
-      };
-    } else if (pullRequestCache.updated_at?.match(regEx(/\.\d\d\dZ$/))) {
-      logger.debug('Resetting PR cache of older format');
-      pullRequestCache = {
-        items: {},
-        updated_at: null,
-        author,
-      };
-    }
-    repoCache.platform.gitlab.pullRequestsCache = pullRequestCache;
-    this.cache = pullRequestCache;
-    this.updateItems();
   }
 
   private static async init(
@@ -64,19 +49,9 @@ export class GitlabPrCache {
     author: string | null,
     ignorePrAuthor: boolean,
   ): Promise<GitlabPrCache> {
-    const res = new GitlabPrCache(repo, author, ignorePrAuthor);
-    const isSynced = memCache.get<true | undefined>('gitlab-pr-cache-synced');
-
-    if (!isSynced) {
-      await res.sync(http);
-      memCache.set('gitlab-pr-cache-synced', true);
-    }
-
+    const res = new GitlabPrCache(http, repo, author, ignorePrAuthor);
+    await res.ensureSynced();
     return res;
-  }
-
-  private getPrs(): GitlabPr[] {
-    return this.items;
   }
 
   static async getPrs(
@@ -92,12 +67,6 @@ export class GitlabPrCache {
       ignorePrAuthor,
     );
     return prCache.getPrs();
-  }
-
-  private setPr(pr: GitlabPr): void {
-    logger.debug(`Adding PR #${pr.number} to the PR cache`);
-    this.cache.items[pr.number] = pr;
-    this.updateItems();
   }
 
   static async setPr(
@@ -116,7 +85,7 @@ export class GitlabPrCache {
     prCache.setPr(item);
   }
 
-  private async sync(http: GitlabHttp): Promise<GitlabPrCache> {
+  protected override async sync(): Promise<void> {
     logger.debug('Syncing PR list');
 
     const searchParams: Record<string, string> = {
@@ -138,7 +107,7 @@ export class GitlabPrCache {
     }
 
     const query: string | null = getQueryString(searchParams);
-    const { body: items } = await http.getJson(
+    const { body: items } = await this.http.getJson(
       `/projects/${this.repo}/merge_requests?${query}`,
       opts,
       GitLabMergeRequests,
@@ -151,20 +120,9 @@ export class GitlabPrCache {
       }
 
       const [{ updated_at }] = items;
-      this.cache.updated_at = updated_at.replace(regEx(/\.\d\d\dZ$/), 'Z');
+      this.cache.updated_at = updated_at.replace(millisecondsRegex, 'Z');
     }
 
     this.updateItems();
-
-    return this;
-  }
-
-  /**
-   * Ensure the pr cache starts with the most recent PRs.
-   */
-  private updateItems(): void {
-    this.items = Object.values(this.cache.items).sort(
-      (a, b) => b.number - a.number,
-    );
   }
 }

@@ -3,6 +3,7 @@ import type {
   RepositoryCacheType,
   UpdateType,
 } from '../../../config/types.ts';
+import type { PlatformId } from '../../../constants/platforms.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { RepoInitConfig } from '../../../workers/repository/init/types.ts';
 import type { ExtractResult } from '../../../workers/repository/process/extract-update.ts';
@@ -133,13 +134,15 @@ export interface BranchCache {
 }
 
 /**
- * Repository cache shared by the platforms which speak the Gitea API.
+ * Repository cache of a single platform. Every platform only uses the fields it needs.
  */
-export interface GiteaLikePlatformCache {
+export interface PlatformRepoCache {
   /**
    * To avoid circular dependency problem, we use `unknown` type here.
    */
   pullRequestsCache?: unknown;
+  graphqlPageCache?: unknown;
+  issuesCache?: Record<number, unknown>;
   orgs?: Record<string, boolean>;
 }
 
@@ -152,27 +155,7 @@ export interface RepoCacheData {
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
-  platform?: {
-    forgejo?: GiteaLikePlatformCache;
-    gitea?: GiteaLikePlatformCache;
-    github?: {
-      /**
-       * To avoid circular dependency problem, we use `unknown` type here.
-       */
-      pullRequestsCache?: unknown;
-      graphqlPageCache?: unknown;
-      issuesCache?: Record<number, unknown>;
-    };
-    bitbucket?: {
-      pullRequestsCache?: unknown;
-    };
-    gitlab?: {
-      pullRequestsCache?: unknown;
-    };
-    'bitbucket-server'?: {
-      pullRequestsCache?: unknown;
-    };
-  };
+  platform?: Partial<Record<PlatformId, PlatformRepoCache>>;
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;
   reconfigureBranchCache?: ReconfigureBranchCache;
