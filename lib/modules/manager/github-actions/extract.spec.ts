@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'subosito/flutter-action@v2',
+        with: { 'flutter-version': '3.24.3' },
+      },
+      expected: [
+        {
+          currentValue: '3.24.3',
+          datasource: 'github-releases',
+          depName: 'flutter',
+          depType: 'uses-with',
+          packageName: 'flutter/flutter',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'subosito/flutter-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'flutter',
+          depType: 'uses-with',
+          packageName: 'flutter/flutter',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'aquaproj/aqua-installer@v3',
         with: { aqua_version: 'v2.62.3' },
       },
