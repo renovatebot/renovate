@@ -27,6 +27,8 @@ import type {
   UpdateArtifactsResult,
 } from '../types.ts';
 import {
+  artifactErrorResult,
+  fileAddition,
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
@@ -403,36 +405,20 @@ export async function updateArtifacts({
     const res: UpdateArtifactsResult[] = [];
     if (status.modified.includes(sumFileName)) {
       logger.debug('Returning updated go.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: sumFileName,
-          contents: await readLocalFile(sumFileName),
-        },
-      });
+      res.push(fileAddition(sumFileName, await readLocalFile(sumFileName)));
     }
 
     if (status.modified.includes(goWorkSumFileName)) {
       logger.debug('Returning updated go.work.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: goWorkSumFileName,
-          contents: await readLocalFile(goWorkSumFileName),
-        },
-      });
+      res.push(
+        fileAddition(goWorkSumFileName, await readLocalFile(goWorkSumFileName)),
+      );
     }
 
     for (const f of dependentFiles) {
       if (status.modified.includes(f)) {
         logger.trace(`Returning updated ${f}`);
-        res.push({
-          file: {
-            type: 'addition',
-            path: f,
-            contents: await readLocalFile(f),
-          },
-        });
+        res.push(fileAddition(f, await readLocalFile(f)));
       }
     }
 
@@ -441,13 +427,7 @@ export async function updateArtifacts({
       logger.debug('Returning updated go source files for import path changes');
       for (const f of status.modified) {
         if (f.endsWith('.go')) {
-          res.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
+          res.push(fileAddition(f, await readLocalFile(f)));
         }
       }
     }
@@ -528,14 +508,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update go.sum');
-    return [
-      {
-        artifactError: {
-          fileName: sumFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(sumFileName, err);
   }
 }
 

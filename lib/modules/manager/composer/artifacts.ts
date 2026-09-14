@@ -38,6 +38,8 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
+  artifactErrorResult,
+  fileAddition,
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
@@ -231,13 +233,7 @@ export async function updateArtifacts({
     }
     logger.debug('Returning updated composer.lock');
     const res: UpdateArtifactsResult[] = [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: await readLocalFile(lockFileName),
-        },
-      },
+      fileAddition(lockFileName, await readLocalFile(lockFileName)),
     ];
 
     if (!commitVendorFiles) {
@@ -272,13 +268,6 @@ export async function updateArtifacts({
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

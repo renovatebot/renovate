@@ -14,7 +14,11 @@ import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { fileChangesToArtifactResults } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+} from '../util.ts';
 
 const pluginRegex = regEx(`^\\s*plugin\\s*(['"])(?<plugin>[^'"]+)(['"])`);
 
@@ -49,14 +53,7 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
     logger.warn({ err }, 'Podfile could not be written');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
@@ -91,18 +88,11 @@ export async function updateArtifacts({
   try {
     await exec(cmd, execOptions);
   } catch (err) {
-    // istanbul ignore if
+    /* v8 ignore if -- defensive rethrow, not reproduced in the cocoapods specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.stderr ?? err.stdout ?? err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 
   const status = await getRepoStatus();
@@ -112,13 +102,7 @@ export async function updateArtifacts({
   logger.debug(`Returning updated lockfile: ${lockFileName}`);
   const lockFileContent = await readLocalFile(lockFileName);
   const res: UpdateArtifactsResult[] = [
-    {
-      file: {
-        type: 'addition',
-        path: lockFileName,
-        contents: lockFileContent,
-      },
-    },
+    fileAddition(lockFileName, lockFileContent),
   ];
 
   const podsDir = upath.join(upath.dirname(packageFileName), 'Pods');
