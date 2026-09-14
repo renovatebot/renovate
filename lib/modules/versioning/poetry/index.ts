@@ -65,11 +65,10 @@ function isLessThanRange(version: string, range: string): boolean {
   );
 }
 
-export function isValid(input: string): boolean {
-  if (!input) {
-    return false;
-  }
-
+/**
+ * Whether the input is a range poetry's own syntax can express, which is what the npm-based implementation here understands.
+ */
+function isPoetryRange(input: string): boolean {
   try {
     return npm.isValid(poetry2npm(input, true));
   } catch {
@@ -81,12 +80,25 @@ export function isValid(input: string): boolean {
   }
 }
 
+export function isValid(input: string): boolean {
+  if (!input) {
+    return false;
+  }
+
+  // Poetry accepts every PEP 440 specifier, including the ones its own syntax cannot express, such as the exclusions in `>=2.6, !=3.0.*, <4`
+  return isPoetryRange(input) || pep440.isValid(input);
+}
+
 function isStable(version: string): boolean {
   const semverVersion = poetry2semver(version);
   return !!(semverVersion && npm.isStable(semverVersion));
 }
 
 function matches(version: string, range: string): boolean {
+  if (!isPoetryRange(range)) {
+    return pep440.matches(version, range);
+  }
+
   const semverVersion = poetry2semver(version);
   return !!(
     isVersion(version) &&
