@@ -287,7 +287,6 @@
         "lib/modules/datasource/deb/index.ts",
         "lib/modules/datasource/deno/index.ts",
         "lib/modules/datasource/docker/index.ts",
-        "lib/modules/datasource/dotnet-version/index.ts",
         "lib/modules/datasource/elm-package/index.ts",
         "lib/modules/datasource/endoflife-date/index.ts",
         "lib/modules/datasource/forgejo-releases/index.ts",
