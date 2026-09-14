@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
+import { supportsHtmlComments } from '../../../../modules/platform/capabilities.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { toSha256 } from '../../../../util/hash.ts';
@@ -18,10 +19,9 @@ export async function rebaseOnboardingBranch(
   logger.debug('Checking if onboarding branch needs rebasing');
 
   // skip platforms that do not support html comments in pr
-  const platform = GlobalConfig.get('platform');
-  if (!['github', 'gitea', 'gitlab'].includes(platform)) {
+  if (!supportsHtmlComments()) {
     logger.debug(
-      `Skipping rebase as ${platform} does not support html comments`,
+      `Skipping rebase as ${GlobalConfig.get('platform')} does not support html comments`,
     );
     return null;
   }

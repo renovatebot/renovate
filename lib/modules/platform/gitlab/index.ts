@@ -49,6 +49,7 @@ import type {
   FindPRConfig,
   Issue,
   MergePRConfig,
+  PlatformCapabilities,
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
@@ -117,6 +118,10 @@ export function resetPlatform(): void {
 }
 
 export const id = 'gitlab';
+
+export const capabilities = {
+  htmlComments: true,
+} satisfies PlatformCapabilities;
 
 let draftPrefix = DRAFT_PREFIX;
 let botUserName: string;

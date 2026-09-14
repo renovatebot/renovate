@@ -10,6 +10,7 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import { setPlatformCapabilities } from '../../../../modules/platform/capabilities.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
@@ -354,6 +355,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         onboarding: true,
         onboardingBranch: config.onboardingBranch,
       });
+      setPlatformCapabilities({ htmlComments: true });
       const dummyCache = {
         onboardingBranchCache: {
           defaultBranchSha: defaultSha,
@@ -463,6 +465,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           onboarding: true,
           onboardingBranch: config.onboardingBranch,
         });
+        setPlatformCapabilities({ htmlComments: true });
         config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
         scm.getFileList.mockResolvedValueOnce(['package.json']);
@@ -477,6 +480,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           onboarding: true,
           onboardingBranch: config.onboardingBranch,
         });
+        setPlatformCapabilities(undefined);
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({}));
 
         await checkOnboardingBranch(config);

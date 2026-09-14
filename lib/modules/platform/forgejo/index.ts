@@ -2,8 +2,13 @@ import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
 import { createPlatform } from '../gitea/index.ts';
+import type { PlatformCapabilities } from '../types.ts';
 
 export const id = 'forgejo';
+
+export const capabilities = {
+  htmlComments: true,
+} satisfies PlatformCapabilities;
 
 export const forgejoHttp = new ForgejoHttp();
 

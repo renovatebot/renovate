@@ -1,6 +1,7 @@
 import type { BranchStatus } from '../../../types/index.ts';
 import type {
   Issue,
+  PlatformCapabilities,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -9,6 +10,10 @@ import type {
 
 export const id = 'local';
 export const experimental = true;
+
+export const capabilities = {
+  git: false,
+} satisfies PlatformCapabilities;
 
 export function initPlatform(params: PlatformParams): Promise<PlatformResult> {
   const dryRun = params.dryRun === 'extract' ? 'extract' : 'lookup';

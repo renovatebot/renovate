@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
+import { supportsGit } from '../../modules/platform/capabilities.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
@@ -70,8 +71,8 @@ export async function writeLocalFile(
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
   // This a failsafe and hopefully will never be triggered
-  if (GlobalConfig.get('platform') === 'local') {
-    throw new Error('Cannot delete file when platform=local');
+  if (!supportsGit()) {
+    throw new Error('Cannot delete file when the platform has no git remote');
   }
   const localDir = GlobalConfig.get('localDir');
   if (localDir) {

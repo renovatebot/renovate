@@ -30,6 +30,7 @@ import type {
   FindPRConfig,
   Issue,
   MergePRConfig,
+  PlatformCapabilities,
   PlatformModule,
   PlatformParams,
   PlatformResult,
@@ -84,6 +85,10 @@ interface GiteaRepoConfig {
 }
 
 export const id = 'gitea';
+
+export const capabilities = {
+  htmlComments: true,
+} satisfies PlatformCapabilities;
 
 export const giteaHttp = new GiteaHttp();
 

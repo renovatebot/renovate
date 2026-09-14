@@ -1,6 +1,7 @@
 // Check for missing or pending http mocks
 import './http-mock.ts';
 import { mockDeep } from 'vitest-mock-extended';
+import { setPlatformCapabilities } from '../lib/modules/platform/capabilities.ts';
 import type { Platform, PlatformScm } from '../lib/modules/platform/index.ts';
 import * as _fixtures from './fixtures.ts';
 
@@ -32,6 +33,12 @@ Object.defineProperty(global, 'fixtures', { value: _fixtures });
 declare global {
   const fixtures: typeof _fixtures;
 }
+
+// The platform capability registry is module state which `setPlatformApi()` fills in production, so
+// reset it between tests to keep the defaults deterministic.
+beforeEach(() => {
+  setPlatformCapabilities(undefined);
+});
 
 vi.mock('../lib/util/mutex.ts', () => ({
   initMutexes: () => vi.fn(),
