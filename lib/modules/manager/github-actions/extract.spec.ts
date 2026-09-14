@@ -4209,6 +4209,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'cargo-bins/cargo-binstall@v1',
+        with: { version: 'v1.23.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.23.0',
+          datasource: 'github-releases',
+          depName: 'cargo-bins/cargo-binstall',
+          depType: 'uses-with',
+          packageName: 'cargo-bins/cargo-binstall',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cargo-bins/cargo-binstall@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'cargo-bins/cargo-binstall',
+          depType: 'uses-with',
+          packageName: 'cargo-bins/cargo-binstall',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

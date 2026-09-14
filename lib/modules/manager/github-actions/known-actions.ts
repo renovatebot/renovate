@@ -528,6 +528,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'buf',
     packageName: 'bufbuild/buf',
   },
+  // https://github.com/cargo-bins/cargo-binstall
+  'cargo-bins/cargo-binstall': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'cargo-bins/cargo-binstall',
+    // the repo also publishes releases for its internal sub-crates (e.g.
+    // `detect-targets-v0.1.91`, `binstalk-v0.28.81`) — only match the bare
+    // main-tool release tag
+    extractVersion: '^v(?<version>\\d+\\.\\d+\\.\\d+)$',
+  },
   'cloudflare/wrangler-action': {
     datasource: NpmDatasource.id,
     packageName: 'wrangler',
