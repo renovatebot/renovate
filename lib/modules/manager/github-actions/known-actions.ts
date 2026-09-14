@@ -500,6 +500,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
   },
+  // https://github.com/goreleaser/goreleaser-action
+  'goreleaser/goreleaser-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'goreleaser/goreleaser',
+    // the default value (`~> v2`) is itself a range, not a pinned version
+    versioning: npmVersioning.id,
+  },
   // https://github.com/gradle/actions (there is no root-level Action, only
   // subpaths such as `setup-gradle` are usable)
   'gradle/actions/setup-gradle': {
