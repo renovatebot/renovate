@@ -43,34 +43,31 @@ function updateCatalogValue(
 function findCatalogTargets(
   parsedContents: Record<string, unknown>,
   catalogName: string,
-): Record<string, string>[] {
-  const targets: Record<string, string>[] = [];
+): Record<PropertyKey, unknown>[] {
+  const targets: Record<PropertyKey, unknown>[] = [];
   const workspaces = parsedContents.workspaces;
 
   if (catalogName === 'default') {
     // Default catalog: look in `catalog` at top level and under `workspaces`
     if (isPlainObject(parsedContents.catalog)) {
-      targets.push(parsedContents.catalog as Record<string, string>);
+      targets.push(parsedContents.catalog);
     }
     if (isPlainObject(workspaces) && isPlainObject(workspaces.catalog)) {
-      targets.push(workspaces.catalog as Record<string, string>);
+      targets.push(workspaces.catalog);
     }
   } else {
     // Named catalog: look in `catalogs.<name>` at top level and under `workspaces`
-    if (
-      isPlainObject(parsedContents.catalogs) &&
-      isPlainObject(parsedContents.catalogs[catalogName])
-    ) {
-      targets.push(
-        parsedContents.catalogs[catalogName] as Record<string, string>,
-      );
+    if (isPlainObject(parsedContents.catalogs)) {
+      const catalog = parsedContents.catalogs[catalogName];
+      if (isPlainObject(catalog)) {
+        targets.push(catalog);
+      }
     }
-    if (
-      isPlainObject(workspaces) &&
-      isPlainObject(workspaces.catalogs) &&
-      isPlainObject(workspaces.catalogs[catalogName])
-    ) {
-      targets.push(workspaces.catalogs[catalogName] as Record<string, string>);
+    if (isPlainObject(workspaces) && isPlainObject(workspaces.catalogs)) {
+      const catalog = workspaces.catalogs[catalogName];
+      if (isPlainObject(catalog)) {
+        targets.push(catalog);
+      }
     }
   }
 
