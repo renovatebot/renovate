@@ -4178,6 +4178,27 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('does not skip when the current version is unresolvable but a locked version is set', async () => {
+      // `^5.0.0` matches none of the published versions, so no current version
+      // can be resolved - but a lockedVersion means this is not invalid
+      config.currentValue = '^5.0.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'replace';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // returning before `currentVersion` is recorded proves the early return
+      // was taken, and the missing skipReason proves it was the lockedVersion path
+      expect(res.currentVersion).toBeUndefined();
+      expect(res.skipReason).toBeUndefined();
+      expect(res.updates).toBeEmpty();
+    });
+
     it('handles digest pin', async () => {
       config.currentValue = '8.0.0';
       config.packageName = 'node';
