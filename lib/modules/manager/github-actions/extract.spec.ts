@@ -3745,6 +3745,39 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'j178/prek-action@v1',
+        with: { 'prek-version': '0.3.x' },
+      },
+      expected: [
+        {
+          currentValue: '0.3.x',
+          datasource: 'github-releases',
+          depName: 'prek',
+          depType: 'uses-with',
+          packageName: 'j178/prek',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'j178/prek-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'prek',
+          depType: 'uses-with',
+          packageName: 'j178/prek',
+          versioning: 'npm',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

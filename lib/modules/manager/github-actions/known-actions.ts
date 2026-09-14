@@ -598,6 +598,16 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: '', // determined per dependency: `version`, `node_image`, `kubectl_version`
     withSchema: KindActionWith,
   },
+  // https://github.com/j178/prek-action
+  'j178/prek-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'prek',
+    packageName: 'j178/prek',
+    // the value may be a semver range (e.g. `0.3.x`, `<=1.0.0`), not just a
+    // pinned version
+    versioning: npmVersioning.id,
+    withSchema: valSchema('prek-version'),
+  },
   'jakebailey/pyright-action': {
     datasource: NpmDatasource.id,
     packageName: 'pyright',
