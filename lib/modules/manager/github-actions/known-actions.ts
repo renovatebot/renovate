@@ -5,6 +5,7 @@ import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { GradleVersionDatasource } from '../../datasource/gradle-version/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
@@ -12,6 +13,7 @@ import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
+import * as gradleVersioning from '../../versioning/gradle/index.ts';
 import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import { splitImageParts } from '../dockerfile/extract.ts';
@@ -334,6 +336,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
+  },
+  // https://github.com/gradle/actions (there is no root-level Action, only
+  // subpaths such as `setup-gradle` are usable)
+  'gradle/actions/setup-gradle': {
+    datasource: GradleVersionDatasource.id,
+    depName: 'gradle',
+    packageName: 'gradle/gradle',
+    versioning: gradleVersioning.id,
+    withSchema: valSchema('gradle-version'),
   },
   // https://github.com/hashicorp/setup-terraform
   'hashicorp/setup-terraform': {
