@@ -15,6 +15,7 @@ import { manualChangelogUrls, manualSourceUrls } from './metadata-manual.ts';
 import type { ReleaseResult } from './types.ts';
 
 const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
+const gitPlusPrefix = regEx('^git\\+');
 const gitPrefix = regEx('^git:/?/?');
 
 export function massageUrl(sourceUrl: string): string {
@@ -66,6 +67,9 @@ function massageGitAtUrl(url: string): string {
   if (url.startsWith('git@')) {
     massagedUrl = url.replace(':', '/').replace('git@', 'https://');
   }
+
+  massagedUrl = massagedUrl.replace(gitPlusPrefix, '');
+
   return massagedUrl;
 }
 
