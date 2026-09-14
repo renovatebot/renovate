@@ -972,6 +972,29 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('bumps instead of updating the lockfile for vulnerabilityAlerts without a locked version', async () => {
+      config.currentValue = '^1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // without a lockfile to update the strategy falls back to bump, which
+      // widens the range rather than leaving it untouched
+      expect(updates).toMatchObject([
+        {
+          isBump: true,
+          newValue: '^1.0.1',
+          newVersion: '1.0.1',
+        },
+      ]);
+    });
+
     it('uses highest available version for vulnerabilityAlerts when vulnerabilityFixStrategy=highest', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
