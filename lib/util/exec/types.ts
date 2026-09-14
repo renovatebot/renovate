@@ -20,6 +20,9 @@ export const toolDefinitions = [
     name: 'bazelisk',
   },
   {
+    name: 'buf',
+  },
+  {
     name: 'bun',
   },
   {
