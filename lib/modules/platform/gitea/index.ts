@@ -41,6 +41,10 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { findPrInList, repoFingerprint } from '../util.ts';
+import {
+  ensureCommentRemovalWith,
+  ensureCommentWith,
+} from '../utils/comments.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
@@ -92,18 +96,8 @@ function toRenovateIssue(data: Issue): Issue {
   };
 }
 
-function findCommentByTopic(
-  comments: Comment[],
-  topic: string,
-): Comment | null {
-  return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`)) ?? null;
-}
-
-function findCommentByContent(
-  comments: Comment[],
-  content: string,
-): Comment | null {
-  return comments.find((c) => c.body.trim() === content) ?? null;
+function getCommentBody(comment: Comment): string {
+  return comment.body;
 }
 
 interface FetchRepositoriesArgs {
@@ -951,51 +945,28 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       }
     },
 
-    async ensureComment({
-      number: issue,
-      topic,
-      content,
-    }: EnsureCommentConfig): Promise<boolean> {
+    async ensureComment(ensureConfig: EnsureCommentConfig): Promise<boolean> {
+      const { number: issue, topic } = ensureConfig;
       try {
-        let body = sanitize(content);
-        const commentList = await helper.getComments(
-          http,
-          config.repository,
-          issue,
+        return await ensureCommentWith(
+          { ...ensureConfig, content: sanitize(ensureConfig.content) },
+          {
+            getComments: () =>
+              helper.getComments(http, config.repository, issue),
+            getBody: getCommentBody,
+            addComment: async (body) => {
+              await helper.createComment(http, config.repository, issue, body);
+            },
+            editComment: async (comment, body) => {
+              await helper.updateComment(
+                http,
+                config.repository,
+                comment.id,
+                body,
+              );
+            },
+          },
         );
-
-        // Search comment by either topic or exact body
-        let comment: Comment | null = null;
-        if (topic) {
-          comment = findCommentByTopic(commentList, topic);
-          body = `### ${topic}\n\n${body}`;
-        } else {
-          comment = findCommentByContent(commentList, body);
-        }
-
-        // Create a new comment if no match has been found, otherwise update if necessary
-        if (!comment) {
-          comment = await helper.createComment(
-            http,
-            config.repository,
-            issue,
-            body,
-          );
-          logger.info(
-            { repository: config.repository, issue, comment: comment.id },
-            'Comment added',
-          );
-        } else if (comment.body === body) {
-          logger.debug(`Comment #${comment.id} is already up-to-date`);
-        } else {
-          await helper.updateComment(http, config.repository, comment.id, body);
-          logger.debug(
-            { repository: config.repository, issue, comment: comment.id },
-            'Comment updated',
-          );
-        }
-
-        return true;
       } catch (err) {
         logger.warn({ err, issue, subject: topic }, 'Error ensuring comment');
         return false;
@@ -1006,40 +977,24 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       deleteConfig: EnsureCommentRemovalConfig,
     ): Promise<void> {
       const { number: issue } = deleteConfig;
-      const key =
-        deleteConfig.type === 'by-topic'
-          ? deleteConfig.topic
-          : deleteConfig.content;
-      logger.debug(`Ensuring comment "${key}" in #${issue} is removed`);
-      const commentList = await helper.getComments(
-        http,
-        config.repository,
-        issue,
-      );
-
-      let comment: Comment | null = null;
-      // v8 ignore else -- TODO: add test #40625
-      if (deleteConfig.type === 'by-topic') {
-        comment = findCommentByTopic(commentList, deleteConfig.topic);
-      } else if (deleteConfig.type === 'by-content') {
-        const body = sanitize(deleteConfig.content);
-        comment = findCommentByContent(commentList, body);
-      }
-
-      // Abort and do nothing if no matching comment was found
-      if (!comment) {
-        return;
-      }
-
-      // Try to delete comment
-      try {
-        await helper.deleteComment(http, config.repository, comment.id);
-      } catch (err) {
-        logger.warn(
-          { err, issue, config: deleteConfig },
-          'Error deleting comment',
-        );
-      }
+      const removeConfig: EnsureCommentRemovalConfig =
+        deleteConfig.type === 'by-content'
+          ? { ...deleteConfig, content: sanitize(deleteConfig.content) }
+          : deleteConfig;
+      await ensureCommentRemovalWith(removeConfig, {
+        getComments: () => helper.getComments(http, config.repository, issue),
+        getBody: getCommentBody,
+        deleteComment: async (comment) => {
+          try {
+            await helper.deleteComment(http, config.repository, comment.id);
+          } catch (err) {
+            logger.warn(
+              { err, issue, config: deleteConfig },
+              'Error deleting comment',
+            );
+          }
+        },
+      });
     },
 
     async getBranchPr(branchName: string): Promise<Pr | null> {
