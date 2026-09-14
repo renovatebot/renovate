@@ -407,6 +407,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'casey/just',
     withSchema: valSchema('just-version'),
   },
+  // https://github.com/GitTools/actions (there is no root-level Action, only
+  // subpaths are usable; the sibling `GitTools/actions/gitreleasemanager/setup`
+  // is a separate, unrelated Action)
+  'GitTools/actions/gitversion/setup': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'gitversion',
+    packageName: 'GitTools/GitVersion',
+    withSchema: valSchema('versionSpec'),
+  },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
