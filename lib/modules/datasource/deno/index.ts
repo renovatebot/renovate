@@ -20,8 +20,6 @@ export class DenoDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  override readonly registryStrategy = 'first';
-
   override readonly defaultVersioning = semanticVersioning.id;
 
   override readonly defaultRegistryUrls = ['https://apiland.deno.dev'];

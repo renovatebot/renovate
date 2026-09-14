@@ -11,8 +11,6 @@ export class NpmDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  override readonly registryStrategy = 'first';
-
   override readonly defaultVersioning = npmVersioning.id;
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
