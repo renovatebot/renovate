@@ -6,6 +6,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export const delimiters = ['"', "'"];
 
@@ -20,17 +21,10 @@ export function extractRubyVersion(txt: string): string | null {
   return quotedVersion.substring(1, quotedVersion.length - 1);
 }
 
-export async function getRubyConstraint(
-  updateArtifact: UpdateArtifact,
+async function getRubyConstraintFromFiles(
+  packageFileName: string,
+  newPackageFileContent: string,
 ): Promise<string | null> {
-  const { packageFileName, config, newPackageFileContent } = updateArtifact;
-  const { constraints = {} } = config;
-  const { ruby } = constraints;
-
-  if (ruby) {
-    logger.debug('Using ruby constraint from config');
-    return ruby;
-  }
   const rubyMatch = extractRubyVersion(newPackageFileContent);
   if (rubyMatch) {
     logger.debug('Using ruby version from gemfile');
@@ -60,18 +54,18 @@ export async function getRubyConstraint(
   return null;
 }
 
-export function getBundlerConstraint(
-  updateArtifact: Pick<UpdateArtifact, 'config'>,
+export async function getRubyConstraint(
+  updateArtifact: UpdateArtifact,
+): Promise<string | undefined> {
+  const { packageFileName, config, newPackageFileContent } = updateArtifact;
+  return await resolveToolConstraint(config, 'ruby', () =>
+    getRubyConstraintFromFiles(packageFileName, newPackageFileContent),
+  );
+}
+
+function getBundlerConstraintFromLockFile(
   existingLockFileContent: string,
 ): string | null {
-  const { config } = updateArtifact;
-  const { constraints = {} } = config;
-  const { bundler } = constraints;
-
-  if (bundler) {
-    logger.debug('Using bundler constraint from config');
-    return bundler;
-  }
   const bundledWith = regEx(/\nBUNDLED WITH\n\s+(?<version>.*?)(?:\n|$)/).exec(
     existingLockFileContent,
   );
@@ -81,6 +75,16 @@ export function getBundlerConstraint(
   }
 
   return null;
+}
+
+export async function getBundlerConstraint(
+  updateArtifact: Pick<UpdateArtifact, 'config'>,
+  existingLockFileContent: string,
+): Promise<string | undefined> {
+  const { config } = updateArtifact;
+  return await resolveToolConstraint(config, 'bundler', () =>
+    getBundlerConstraintFromLockFile(existingLockFileContent),
+  );
 }
 
 export async function getLockFilePath(

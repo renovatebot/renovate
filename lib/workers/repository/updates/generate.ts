@@ -499,9 +499,16 @@ export function generateBranchConfig(
   }
 
   config.constraints = {};
+  config.extractedConstraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
+    }
+    if (upgrade.extractedConstraints) {
+      config.extractedConstraints = {
+        ...config.extractedConstraints,
+        ...upgrade.extractedConstraints,
+      };
     }
   }
 

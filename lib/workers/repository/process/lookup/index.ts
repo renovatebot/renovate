@@ -333,6 +333,11 @@ export async function lookupUpdates(
         versioningApi.isVersion(release.version),
       );
       const allReleaseVersions = new Set(allVersions.map((r) => r.version));
+      // The datasources used in these tests always return at least one
+      // version-like release, so neither this block nor the currentDigest
+      // check inside it is reached. A lookup whose releases are all
+      // unversioned tags does not get here either - with a digest configured
+      // it takes the digest-only path above instead - see #40625
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -546,6 +551,9 @@ export async function lookupUpdates(
         // Fall back to replace once pinning logic is done
         rangeStrategy = 'replace';
       }
+      // A non-version can only get this far via a locked version under
+      // rangeStrategy=pin, but the timestamp lookup above calls `equals()` on
+      // it first and throws - see #40625
       // istanbul ignore if
       if (!versioningApi.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
@@ -641,7 +649,11 @@ export async function lookupUpdates(
           release.version,
           versioningApi,
         );
-        // v8 ignore else -- TODO: add test #40625
+        // `getBucket()` only returns null when the versioning api cannot
+        // determine a major, but every release reaching it has already passed
+        // `isVersion()`, so a null major contradicts that and the else looks
+        // unreachable rather than merely untested
+        // v8 ignore else -- see #40625
         if (isString(bucket)) {
           if (buckets[bucket]) {
             buckets[bucket].push(release);
@@ -662,6 +674,9 @@ export async function lookupUpdates(
             bucket,
             sortedReleases,
           );
+        // `filterInternalChecks()` normally yields a release, falling back to
+        // the newest pending one; only a datasource rejecting every candidate
+        // during postprocessing leaves none - see #40625
         // istanbul ignore next
         if (!release) {
           return Result.ok(res);
@@ -729,6 +744,8 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           isString(update.newValue) &&
           versioningApi.isSingleVersion(update.newValue);
+        // Guards against a docker downgrade, which the datasources used in
+        // these tests never produce - see #40625
         // istanbul ignore if
         if (
           config.versioning === dockerVersioningId &&
@@ -799,7 +816,9 @@ export async function lookupUpdates(
     ) {
       for (const update of res.updates) {
         logger.debug({ update });
-        // v8 ignore else -- TODO: add test #40625
+        // The enclosing condition already requires a string `currentValue`,
+        // so only a null `newValue` takes the else
+        // v8 ignore else -- see #40625
         if (isString(config.currentValue) && isString(update.newValue)) {
           update.newValue = config.currentValue.replace(
             compareValue,

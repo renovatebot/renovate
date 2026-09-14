@@ -24,6 +24,38 @@ describe('modules/datasource/cpan/index', () => {
       ).resolves.toBeNull();
     });
 
+    it('omits the latest tag if no release is marked latest', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post('/v1/file/_search')
+        .reply(200, {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  module: [{ name: 'Foo::Bar', version: '1.0' }],
+                  distribution: 'Foo-Bar',
+                  date: '2020-01-01T00:00:00',
+                  deprecated: false,
+                  maturity: 'released',
+                  status: 'cpan',
+                },
+              },
+            ],
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: CpanDatasource.id,
+        packageName: 'Foo::Bar',
+      });
+      expect(res).toMatchObject({
+        releases: [{ version: '1.0' }],
+        changelogUrl: 'https://metacpan.org/dist/Foo-Bar/changes',
+        homepage: 'https://metacpan.org/pod/Foo::Bar',
+      });
+      expect(res?.tags).toBeUndefined();
+    });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).post('/v1/file/_search').reply(404);
       await expect(
