@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'aquaproj/aqua-installer@v3',
+        with: { aqua_version: 'v2.62.3' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.62.3',
+          datasource: 'github-releases',
+          depName: 'aqua',
+          depType: 'uses-with',
+          packageName: 'aquaproj/aqua',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquaproj/aqua-installer@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'aqua',
+          depType: 'uses-with',
+          packageName: 'aquaproj/aqua',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'cycjimmy/semantic-release-action@v4',
         with: { semantic_version: '^24.0.0' },
       },
