@@ -447,6 +447,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: PypiDatasource.id,
     packageName: 'pdm',
   },
+  // https://github.com/peaceiris/actions-hugo
+  'peaceiris/actions-hugo': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'hugo',
+    packageName: 'gohugoio/hugo',
+    withSchema: valSchema('hugo-version'),
+  },
   'pnpm/action-setup': {
     datasource: NpmDatasource.id,
     packageName: 'pnpm',
