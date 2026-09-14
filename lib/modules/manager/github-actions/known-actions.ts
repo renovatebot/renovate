@@ -226,6 +226,25 @@ const TflintWith: ActionSchema = z
     return [parseValue(version)];
   });
 
+// `'latest'` is a valid, documented value for `version` (it's also the
+// action's own default), but it isn't a version we can pin/bump, so treat it
+// as present-but-unsupported rather than as an invalid value.
+const SetupKubectlWith: ActionSchema = z
+  .object({ version: z.string().optional() })
+  .transform(({ version }) => {
+    if (version === 'latest') {
+      return [
+        {
+          currentValue: version,
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ];
+    }
+    return [parseValue(version)];
+  });
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -315,6 +334,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'helm',
     packageName: 'helm/helm',
+  },
+  // https://github.com/azure/setup-kubectl
+  'azure/setup-kubectl': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'kubectl',
+    packageName: 'kubernetes/kubernetes',
+    withSchema: SetupKubectlWith,
   },
   // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
