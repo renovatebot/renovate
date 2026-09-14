@@ -950,7 +950,7 @@ describe('modules/platform/codecommit/index', () => {
       expect(res).toBeTrue();
 
       expect(logger.logger.info).toHaveBeenCalledWith(
-        { repository: 'repositoryName', prNo: 42, topic: 'some-subject' },
+        { issueNo: 42, topic: 'some-subject' },
         'Comment added',
       );
     });
@@ -984,7 +984,7 @@ describe('modules/platform/codecommit/index', () => {
       expect(res).toBeTrue();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { repository: 'repositoryName', prNo: 42, topic: 'some-subject' },
+        { issueNo: 42, topic: 'some-subject' },
         'Comment updated',
       );
     });
@@ -1017,7 +1017,7 @@ describe('modules/platform/codecommit/index', () => {
       expect(res).toBeTrue();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { repository: 'repositoryName', prNo: 42, topic: 'some-subject' },
+        { issueNo: 42, topic: 'some-subject' },
         'Comment is already up-to-date',
       );
     });
@@ -1050,7 +1050,7 @@ describe('modules/platform/codecommit/index', () => {
       expect(res).toBeTrue();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { repository: 'repositoryName', prNo: 42, topic: null },
+        { issueNo: 42, topic: null },
         'Comment is already up-to-date',
       );
     });
