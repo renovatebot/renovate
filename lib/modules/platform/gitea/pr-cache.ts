@@ -5,37 +5,54 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-import type { GiteaHttp } from '../../../util/http/gitea.ts';
-import type { HttpResponse } from '../../../util/http/types.ts';
 import {
   getQueryString,
   parseLinkHeader,
   parseUrl,
 } from '../../../util/url.ts';
 import type { Pr } from '../types.ts';
-import type { GiteaPrCacheData, PR } from './types.ts';
+import type { PR } from './schema.ts';
+import { PRList } from './schema.ts';
+import type { GiteaLikeHttp, GiteaPlatformKey, PrCacheData } from './types.ts';
 import { API_PATH, toRenovatePR } from './utils.ts';
 
-export class GiteaPrCache {
-  private cache: GiteaPrCacheData;
-  private items: Pr[] = [];
-  private repo: string;
-  private readonly ignorePrAuthor: boolean;
-  private author: string | null;
+function syncedCacheKey(platform: GiteaPlatformKey): string {
+  return `${platform}-pr-cache-synced`;
+}
 
-  private constructor(
-    repo: string,
-    ignorePrAuthor: boolean,
-    author: string | null,
+interface RepoPrCacheOptions {
+  repo: string;
+  ignorePrAuthor: boolean;
+  author: string;
+}
+
+/**
+ * The PRs of a single repository, backed by the repository cache.
+ */
+class RepoPrCache {
+  private readonly http: GiteaLikeHttp;
+  private readonly platform: GiteaPlatformKey;
+  private readonly cache: PrCacheData;
+  private items: Pr[] = [];
+  private readonly repo: string;
+  private readonly ignorePrAuthor: boolean;
+  private readonly author: string;
+
+  constructor(
+    http: GiteaLikeHttp,
+    platform: GiteaPlatformKey,
+    { repo, ignorePrAuthor, author }: RepoPrCacheOptions,
   ) {
+    this.http = http;
+    this.platform = platform;
     this.repo = repo;
     this.ignorePrAuthor = ignorePrAuthor;
     this.author = author;
     const repoCache = getCache();
     repoCache.platform ??= {};
-    repoCache.platform.gitea ??= {};
-    let pullRequestCache = repoCache.platform.gitea.pullRequestsCache as
-      GiteaPrCacheData | undefined;
+    const platformCache = (repoCache.platform[platform] ??= {});
+    let pullRequestCache = platformCache.pullRequestsCache as
+      PrCacheData | undefined;
     if (
       isNullOrUndefined(pullRequestCache) ||
       pullRequestCache.author !== author
@@ -46,60 +63,18 @@ export class GiteaPrCache {
         author,
       };
     }
-    repoCache.platform.gitea.pullRequestsCache = pullRequestCache;
+    platformCache.pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
     this.updateItems();
   }
 
-  static forceSync(): void {
-    memCache.set('gitea-pr-cache-synced', false);
-  }
-
-  private static async init(
-    http: GiteaHttp,
-    repo: string,
-    ignorePrAuthor: boolean,
-    author: string | null,
-  ): Promise<GiteaPrCache> {
-    const res = new GiteaPrCache(repo, ignorePrAuthor, author);
-    const isSynced = memCache.get<true | undefined>('gitea-pr-cache-synced');
-
-    if (!isSynced) {
-      await res.sync(http);
-      memCache.set('gitea-pr-cache-synced', true);
-    }
-
-    return res;
-  }
-
-  private getPrs(): Pr[] {
+  get prs(): Pr[] {
     return this.items;
   }
 
-  static async getPrs(
-    http: GiteaHttp,
-    repo: string,
-    ignorePrAuthor: boolean,
-    author: string,
-  ): Promise<Pr[]> {
-    const prCache = await GiteaPrCache.init(http, repo, ignorePrAuthor, author);
-    return prCache.getPrs();
-  }
-
-  private setPr(item: Pr): void {
+  setPr(item: Pr): void {
     this.cache.items[item.number] = item;
     this.updateItems();
-  }
-
-  static async setPr(
-    http: GiteaHttp,
-    repo: string,
-    ignorePrAuthor: boolean,
-    author: string,
-    item: Pr,
-  ): Promise<void> {
-    const prCache = await GiteaPrCache.init(http, repo, ignorePrAuthor, author);
-    prCache.setPr(item);
   }
 
   private reconcile(rawItems: (PR | null)[]): boolean {
@@ -111,7 +86,10 @@ export class GiteaPrCache {
 
     for (const rawItem of rawItems) {
       if (!rawItem) {
-        logger.warn('Gitea PR is empty, throwing temporary error');
+        logger.warn(
+          { platform: this.platform },
+          'PR is empty, throwing temporary error',
+        );
         // Gitea API sometimes returns empty PRs, so we throw a temporary error
         // https://github.com/go-gitea/gitea/blob/fcd096231ac2deaefbca10a7db1b9b01f1da93d7/services/convert/pull.go#L34-L52
         throw new Error(TEMPORARY_ERROR);
@@ -142,7 +120,7 @@ export class GiteaPrCache {
     return needNextPage;
   }
 
-  private async sync(http: GiteaHttp): Promise<GiteaPrCache> {
+  async sync(): Promise<void> {
     let query: string | null = getQueryString({
       state: 'all',
       sort: 'recentupdate',
@@ -152,18 +130,18 @@ export class GiteaPrCache {
       // https://forgejo.org/docs/latest/admin/config-cheat-sheet/#api-api
       limit: this.items.length ? 20 : 100,
       // Supported since Gitea 1.23.0 and Forgejo v10.0.0.
-      // Will be ignoded by older instances.
+      // Will be ignored by older instances.
       ...(this.ignorePrAuthor ? {} : { poster: this.author }),
     });
 
     while (query) {
-      // TODO: use zod, typescript can't infer the type of the response #22198
-      const res: HttpResponse<(PR | null)[]> = await http.getJsonUnchecked(
+      const res = await this.http.getJson(
         `${API_PATH}/repos/${this.repo}/pulls?${query}`,
         {
           memCache: false,
           paginate: false,
         },
+        PRList,
       );
 
       const needNextPage = this.reconcile(res.body);
@@ -176,8 +154,6 @@ export class GiteaPrCache {
     }
 
     this.updateItems();
-
-    return this;
   }
 
   /**
@@ -186,5 +162,65 @@ export class GiteaPrCache {
    */
   private updateItems(): void {
     this.items = Object.values(this.cache.items).reverse();
+  }
+}
+
+/**
+ * PR cache of one platform. `initRepo()` records the repository, the
+ * repository cache itself is bound on first use because it is initialized
+ * after `platform.initRepo()`.
+ */
+export class GiteaPrCache {
+  private readonly http: GiteaLikeHttp;
+  private readonly platform: GiteaPlatformKey;
+  private repoOptions: RepoPrCacheOptions | null = null;
+  private repoCache: RepoPrCache | null = null;
+
+  constructor(http: GiteaLikeHttp, platform: GiteaPlatformKey) {
+    this.http = http;
+    this.platform = platform;
+  }
+
+  initRepo(repo: string, ignorePrAuthor: boolean, author: string): void {
+    this.repoOptions = { repo, ignorePrAuthor, author };
+    this.repoCache = null;
+  }
+
+  reset(): void {
+    this.repoOptions = null;
+    this.repoCache = null;
+  }
+
+  forceSync(): void {
+    memCache.set(syncedCacheKey(this.platform), false);
+  }
+
+  private async open(): Promise<RepoPrCache> {
+    if (!this.repoOptions) {
+      throw new Error('PR cache used before initRepo()');
+    }
+    this.repoCache ??= new RepoPrCache(
+      this.http,
+      this.platform,
+      this.repoOptions,
+    );
+    const isSynced = memCache.get<true | undefined>(
+      syncedCacheKey(this.platform),
+    );
+    if (!isSynced) {
+      await this.repoCache.sync();
+      memCache.set(syncedCacheKey(this.platform), true);
+    }
+    return this.repoCache;
+  }
+
+  async getPrs(): Promise<Pr[]> {
+    const repoCache = await this.open();
+    return repoCache.prs;
+  }
+
+  async setPr(item: Pr): Promise<void> {
+    const repoCache = await this.open();
+    repoCache.setPr(item);
   }
 }
