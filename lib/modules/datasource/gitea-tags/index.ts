@@ -11,10 +11,8 @@ import type {
 } from '../types.ts';
 import { Commits, Tag, Tags } from './schema.ts';
 
-export class GiteaTagsDatasource extends Datasource {
+export class GiteaTagsDatasource extends Datasource<GiteaHttp> {
   static readonly id = 'gitea-tags';
-
-  override http = new GiteaHttp(GiteaTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://gitea.com'];
 
@@ -31,7 +29,7 @@ export class GiteaTagsDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(GiteaTagsDatasource.id);
+    super(GiteaTagsDatasource.id, new GiteaHttp(GiteaTagsDatasource.id));
   }
 
   static getRegistryURL(registryUrl?: string): string {

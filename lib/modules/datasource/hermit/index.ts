@@ -17,7 +17,7 @@ import type { HermitSearchResult } from './types.ts';
  * repository. It expects the search manifest to come from an asset `index.json` from
  * a release named index.
  */
-export class HermitDatasource extends Datasource {
+export class HermitDatasource extends Datasource<GithubHttp> {
   static readonly id = 'hermit';
 
   override readonly customRegistrySupport = true;
@@ -35,8 +35,7 @@ export class HermitDatasource extends Datasource {
   pathRegex: RegExp;
 
   constructor() {
-    super(HermitDatasource.id);
-    this.http = new GithubHttp(id);
+    super(HermitDatasource.id, new GithubHttp(id));
     this.pathRegex = regEx('^/(?<owner>[^/]+)/(?<repo>[^/]+)$');
   }
 

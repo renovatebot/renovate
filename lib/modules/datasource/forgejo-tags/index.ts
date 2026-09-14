@@ -11,10 +11,8 @@ import type {
 } from '../types.ts';
 import { Commits, Tag, Tags } from './schema.ts';
 
-export class ForgejoTagsDatasource extends Datasource {
+export class ForgejoTagsDatasource extends Datasource<ForgejoHttp> {
   static readonly id = 'forgejo-tags';
-
-  override http = new ForgejoHttp(ForgejoTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://code.forgejo.org'];
 
@@ -31,7 +29,7 @@ export class ForgejoTagsDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(ForgejoTagsDatasource.id);
+    super(ForgejoTagsDatasource.id, new ForgejoHttp(ForgejoTagsDatasource.id));
   }
 
   static getRegistryURL(registryUrl?: string): string {

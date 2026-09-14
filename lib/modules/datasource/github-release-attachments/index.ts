@@ -31,12 +31,10 @@ function inferHashAlg(digest: string): string {
   }
 }
 
-export class GithubReleaseAttachmentsDatasource extends Datasource {
+export class GithubReleaseAttachmentsDatasource extends Datasource<GithubHttp> {
   static readonly id = 'github-release-attachments';
 
   override readonly defaultRegistryUrls = ['https://github.com'];
-
-  override http: GithubHttp;
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
@@ -47,8 +45,10 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(GithubReleaseAttachmentsDatasource.id);
-    this.http = new GithubHttp(GithubReleaseAttachmentsDatasource.id);
+    super(
+      GithubReleaseAttachmentsDatasource.id,
+      new GithubHttp(GithubReleaseAttachmentsDatasource.id),
+    );
   }
 
   private async _findDigestFile(

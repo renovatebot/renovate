@@ -32,8 +32,7 @@ export class SbtPluginDatasource extends Datasource {
     'The source URL is determined from the `scm` tags in the results.';
 
   constructor() {
-    super(SbtPluginDatasource.id);
-    this.http = new Http('sbt');
+    super(SbtPluginDatasource.id, new Http('sbt'));
   }
 
   // istanbul ignore next: to be rewritten
