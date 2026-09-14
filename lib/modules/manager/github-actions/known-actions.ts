@@ -780,6 +780,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'pulumi/pulumi',
     withSchema: valSchema('pulumi-version'),
   },
+  // https://github.com/PyO3/maturin-action
+  'PyO3/maturin-action': {
+    datasource: PypiDatasource.id,
+    packageName: 'maturin',
+    withSchema: valSchema('maturin-version'),
+  },
   // https://github.com/pypa/hatch/tree/install
   'pypa/hatch': {
     datasource: GithubReleasesDatasource.id,

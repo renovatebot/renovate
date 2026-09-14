@@ -4240,6 +4240,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'PyO3/maturin-action@v1',
+        with: { 'maturin-version': 'v1.7.4' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.7.4',
+          datasource: 'pypi',
+          depName: 'maturin',
+          depType: 'uses-with',
+          packageName: 'maturin',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'PyO3/maturin-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'maturin',
+          depType: 'uses-with',
+          packageName: 'maturin',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
