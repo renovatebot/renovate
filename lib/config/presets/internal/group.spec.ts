@@ -10,4 +10,14 @@ describe('config/presets/internal/group', () => {
   it.each(presetNames)('group:%s contains packageRules', (name: string) => {
     expect(presets[name]).toHaveProperty('packageRules');
   });
+
+  it('enables Vite+ version reconciliation for the Vite+ group', () => {
+    expect(presets.vitePlus).toMatchObject({
+      packageRules: [
+        {
+          postUpdateOptions: ['vitePlusSyncVersions'],
+        },
+      ],
+    });
+  });
 });

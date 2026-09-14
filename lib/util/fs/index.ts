@@ -1,3 +1,4 @@
+import { tmpdir } from 'node:os';
 import stream from 'node:stream';
 import util from 'node:util';
 import { isNonEmptyString } from '@sindresorhus/is';
@@ -10,6 +11,18 @@ import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts'
 import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
 export const pipeline = util.promisify(stream.pipeline);
+
+export async function withSystemTempDir<T>(
+  prefix: string,
+  callback: (path: string) => Promise<T>,
+): Promise<T> {
+  const path = await fs.mkdtemp(upath.join(tmpdir(), prefix));
+  try {
+    return await callback(path);
+  } finally {
+    await fs.remove(path);
+  }
+}
 
 export function getParentDir(fileName: string): string {
   return upath.parse(fileName).dir;

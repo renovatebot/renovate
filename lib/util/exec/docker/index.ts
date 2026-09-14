@@ -148,6 +148,7 @@ export async function generateDockerCommand(
   preCommands: (string | CommandWithOptions)[],
   options: DockerOptions,
   sideCarImage: string,
+  hasInput = false,
 ): Promise<string> {
   const { envVars, cwd } = options;
   const volumes = coerceArray(options.volumes);
@@ -160,6 +161,9 @@ export async function generateDockerCommand(
     dockerCliOptions,
   } = GlobalConfig.get();
   const result = ['docker run --rm'];
+  if (hasInput) {
+    result.push('-i');
+  }
   const containerName = getContainerName(sideCarName, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);
   result.push(`--name=${containerName}`);
@@ -210,13 +214,14 @@ export async function generateDockerCommand(
       isCommandWithOptions(preCommand) &&
       isString(join(preCommand.command))
     ) {
+      const command = `${join(preCommand.command)}${hasInput ? ' </dev/null' : ''}`;
       if (preCommand.ignoreFailure) {
-        bashCommandParts.push(`${join(preCommand.command)} || true`);
+        bashCommandParts.push(`${command} || true`);
       } else {
-        bashCommandParts.push(join(preCommand.command));
+        bashCommandParts.push(command);
       }
     } else if (isString(preCommand)) {
-      bashCommandParts.push(preCommand);
+      bashCommandParts.push(`${preCommand}${hasInput ? ' </dev/null' : ''}`);
     }
   }
 

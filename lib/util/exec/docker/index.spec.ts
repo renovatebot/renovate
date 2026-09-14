@@ -171,6 +171,20 @@ describe('util/exec/docker/index', () => {
       expect(res).toBe(command(sideCarName));
     });
 
+    it('keeps stdin open when the child command receives input', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      expect(res).toContain('docker run --rm -i ');
+      expect(res).toEndWith("bash -l -c 'foo </dev/null && bar'");
+    });
+
     it('keeps shell metacharacters inert in the outer command', async () => {
       mockExecAll();
       // A manager quotes untrusted values with shlex before handing them over.
