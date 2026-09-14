@@ -3934,6 +3934,56 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'supabase/setup-cli@v1',
+        with: { version: '1.200.3' },
+      },
+      expected: [
+        {
+          currentValue: '1.200.3',
+          datasource: 'npm',
+          depName: 'supabase',
+          depType: 'uses-with',
+          packageName: 'supabase',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'supabase/setup-cli@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'supabase',
+          depType: 'uses-with',
+          packageName: 'supabase',
+        },
+      ],
+    },
+    {
+      // `'latest'`/`'beta'` are valid, documented values, but not ones we
+      // can pin/bump — the value is passed through as-is, and the
+      // versioning layer skips proposing an update since it isn't a real
+      // version
+      step: {
+        uses: 'supabase/setup-cli@v1',
+        with: { version: 'beta' },
+      },
+      expected: [
+        {
+          currentValue: 'beta',
+          datasource: 'npm',
+          depName: 'supabase',
+          depType: 'uses-with',
+          packageName: 'supabase',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
