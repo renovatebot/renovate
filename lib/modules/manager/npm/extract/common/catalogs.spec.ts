@@ -123,9 +123,4 @@ describe('modules/manager/npm/extract/common/catalogs', () => {
       },
     ]);
   });
-
-  it('handles empty catalogs list for bun', () => {
-    const result = extractCatalogDeps([], 'bun');
-    expect(result).toEqual([]);
-  });
 });

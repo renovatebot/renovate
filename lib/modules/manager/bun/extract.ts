@@ -8,14 +8,11 @@ import {
 
 import { extractCatalogDeps } from '../npm/extract/common/catalogs.ts';
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
-import type { Catalog, NpmPackage } from '../npm/extract/types.ts';
+import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
-import {
-  type BunCatalogs,
-  BunCatalogs as BunCatalogsSchema,
-} from './schema.ts';
+import { BunCatalogs } from './schema.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
@@ -63,33 +60,6 @@ async function processPackageFile(
   };
 }
 
-/**
- * Convert parsed bun catalog fields into an array of Catalog entries,
- * following the same pattern as pnpmCatalogsToArray / yarnCatalogsToArray.
- *
- * @see https://bun.sh/docs/install/catalogs
- */
-function bunCatalogsToArray({
-  catalog: defaultCatalogDeps,
-  catalogs: namedCatalogs,
-}: BunCatalogs): Catalog[] {
-  const result: Catalog[] = [];
-
-  if (defaultCatalogDeps !== undefined) {
-    result.push({ name: 'default', dependencies: defaultCatalogDeps });
-  }
-
-  if (!namedCatalogs) {
-    return result;
-  }
-
-  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
-    result.push({ name, dependencies });
-  }
-
-  return result;
-}
-
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   matchedFiles: string[],
@@ -111,17 +81,8 @@ export async function extractAllPackageFiles(
     const processResult = await processPackageFile(packageFile, config);
     if (processResult) {
       const { packageFileResult: res, packageJson } = processResult;
-
-      // Extract bun catalog dependencies from the root package.json
-      const parseResult = BunCatalogsSchema.safeParse(packageJson);
-      if (parseResult.success) {
-        const bunCatalogs = bunCatalogsToArray(parseResult.data);
-        if (bunCatalogs.length > 0) {
-          const catalogDeps = extractCatalogDeps(bunCatalogs, 'bun');
-          res.deps.push(...catalogDeps);
-        }
-      }
-
+      const catalogs = BunCatalogs.parse(packageJson);
+      res.deps.push(...extractCatalogDeps(catalogs, 'bun'));
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
     // Check if package.json contains workspaces

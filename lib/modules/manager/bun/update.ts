@@ -12,86 +12,44 @@ import type { UpdateDependencyConfig } from '../types.ts';
 
 const bunCatalogRe = regEx(`^${BUN_CATALOG_DEPENDENCY}\\.(?<catalogName>.+)$`);
 
+function getCatalog(scope: unknown, catalogName: string): unknown {
+  if (!isPlainObject(scope)) {
+    return null;
+  }
+  if (catalogName === 'default') {
+    return scope.catalog;
+  }
+  return isPlainObject(scope.catalogs) ? scope.catalogs[catalogName] : null;
+}
+
 /**
- * Locate and update a catalog entry in the parsed package.json object.
- * Bun supports catalogs at the top level or under the `workspaces` object.
- *
- * Returns `true` if the value was found and updated, `false` otherwise.
+ * Bun catalogs live at the top level of the root `package.json` or under its
+ * `workspaces` object. Returns the catalog object containing `depName`.
  */
-function updateCatalogValue(
+function findCatalogWithDep(
   parsedContents: Record<string, unknown>,
   catalogName: string,
   depName: string,
-  newValue: string,
-): boolean {
-  const targets = findCatalogTargets(parsedContents, catalogName);
-
-  for (const target of targets) {
-    if (depName in target) {
-      target[depName] = newValue;
-      return true;
+): Record<PropertyKey, unknown> | null {
+  for (const scope of [parsedContents, parsedContents.workspaces]) {
+    const catalog = getCatalog(scope, catalogName);
+    if (isPlainObject(catalog) && depName in catalog) {
+      return catalog;
     }
   }
-
-  return false;
+  return null;
 }
 
-/**
- * Find all possible catalog objects where a dependency might live.
- * Checks both top-level and `workspaces`-nested locations.
- */
-function findCatalogTargets(
-  parsedContents: Record<string, unknown>,
-  catalogName: string,
-): Record<PropertyKey, unknown>[] {
-  const targets: Record<PropertyKey, unknown>[] = [];
-  const workspaces = parsedContents.workspaces;
-
-  if (catalogName === 'default') {
-    // Default catalog: look in `catalog` at top level and under `workspaces`
-    if (isPlainObject(parsedContents.catalog)) {
-      targets.push(parsedContents.catalog);
-    }
-    if (isPlainObject(workspaces) && isPlainObject(workspaces.catalog)) {
-      targets.push(workspaces.catalog);
-    }
-  } else {
-    // Named catalog: look in `catalogs.<name>` at top level and under `workspaces`
-    if (isPlainObject(parsedContents.catalogs)) {
-      const catalog = parsedContents.catalogs[catalogName];
-      if (isPlainObject(catalog)) {
-        targets.push(catalog);
-      }
-    }
-    if (isPlainObject(workspaces) && isPlainObject(workspaces.catalogs)) {
-      const catalog = workspaces.catalogs[catalogName];
-      if (isPlainObject(catalog)) {
-        targets.push(catalog);
-      }
-    }
-  }
-
-  return targets;
-}
-
-export function updateDependency({
-  fileContent,
-  packageFile: packageFileName,
-  upgrade,
-}: UpdateDependencyConfig): string | null {
+export function updateDependency(
+  config: UpdateDependencyConfig,
+): string | null {
+  const { fileContent, upgrade } = config;
   const { depType, depName } = upgrade;
 
-  const catalogMatch = bunCatalogRe.exec(depType ?? '');
-  if (!catalogMatch?.groups) {
-    // Not a bun catalog dependency, delegate to the npm manager's updateDependency
-    return npmUpdateDependency({
-      fileContent,
-      packageFile: packageFileName,
-      upgrade,
-    });
+  const catalogName = bunCatalogRe.exec(depType ?? '')?.groups?.catalogName;
+  if (!catalogName) {
+    return npmUpdateDependency(config);
   }
-
-  const catalogName = catalogMatch.groups.catalogName;
 
   let { newValue } = upgrade;
   newValue = getNewGitValue(upgrade) ?? newValue;
@@ -104,45 +62,21 @@ export function updateDependency({
 
   logger.debug(`bun.updateDependency(): ${depType}.${depName} = ${newValue}`);
 
-  let parsedContents: Record<string, unknown>;
   try {
-    parsedContents = JSON.parse(fileContent);
-  } catch {
-    logger.debug('Error parsing package.json for bun catalog update');
-    return null;
-  }
-
-  // Check if already at the desired version
-  const targets = findCatalogTargets(parsedContents, catalogName);
-  for (const target of targets) {
-    if (target[depName] === newValue) {
+    const parsedContents: Record<string, unknown> = JSON.parse(fileContent);
+    const catalog = findCatalogWithDep(parsedContents, catalogName, depName);
+    if (!catalog) {
+      logger.debug({ catalogName, depName }, 'Bun catalog entry not found');
+      return null;
+    }
+    if (catalog[depName] === newValue) {
       logger.trace('Version is already updated');
       return fileContent;
     }
-  }
-
-  const updated = updateCatalogValue(
-    parsedContents,
-    catalogName,
-    depName,
-    newValue,
-  );
-  if (!updated) {
-    logger.debug(
-      { catalogName, depName },
-      'Could not find bun catalog entry to update',
-    );
-    return null;
-  }
-
-  // Use jsonc-weaver to preserve original formatting
-  try {
+    catalog[depName] = newValue;
     return weave(fileContent, parsedContents);
   } catch (err) {
-    logger.warn(
-      { err },
-      'Error weaving JSON to preserve formatting for bun catalog update',
-    );
+    logger.debug({ err }, 'Error updating bun catalog dependency');
     return null;
   }
 }
