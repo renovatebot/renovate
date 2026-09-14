@@ -20,3 +20,38 @@ const BufGenYamlPlugin = z
 export const BufGenYaml = z.object({
   plugins: LooseArray(BufGenYamlPlugin).optional(),
 });
+
+/**
+ * `buf.yaml` module manifest. `deps[]` entries are BSR module references,
+ * e.g. `buf.build/googleapis/googleapis` — optionally with a trailing
+ * `:<reference>` label. The list is identical in shape for `v1` and `v2`.
+ */
+export const BufYaml = z
+  .object({
+    deps: LooseArray(z.string()).optional(),
+  })
+  .loose();
+
+/**
+ * A single `deps[]` entry from `buf.lock`, covering both config versions.
+ *
+ * v1: the module is spelled out as `remote` / `owner` / `repository`.
+ * v2: it is a single `name` (e.g. `buf.build/googleapis/googleapis`).
+ * Both pin a resolved `commit` (32-char hex) and content `digest`.
+ */
+const BufLockDep = z
+  .object({
+    name: z.string().optional(),
+    remote: z.string().optional(),
+    owner: z.string().optional(),
+    repository: z.string().optional(),
+    commit: z.string().optional(),
+    digest: z.string().optional(),
+  })
+  .loose();
+
+export const BufLock = z
+  .object({
+    deps: LooseArray(BufLockDep).optional(),
+  })
+  .loose();
