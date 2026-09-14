@@ -63,7 +63,7 @@ import {
   ensureCommentRemovalWith,
   ensureCommentWith,
 } from '../utils/comments.ts';
-import { smartTruncate } from '../utils/pr-body.ts';
+import { rewriteRelativeLinks, smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -942,13 +942,13 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
 }
 
 export function massageMarkdown(input: string): string {
-  const desc = input
+  let desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
     .replace(regEx(/\bPR: #/g), 'MR: !')
     .replace(regEx(/\bPR\b/g), 'MR')
-    .replace(regEx(/\bPRs\b/g), 'MRs')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
-    .replace(regEx(/\]\(\.\.\/issues\//g), '](#')
+    .replace(regEx(/\bPRs\b/g), 'MRs');
+  desc = rewriteRelativeLinks(desc, { issues: '#', pulls: '!' });
+  desc = desc
     // Strip unicode null characters as GitLab markdown does not permit them
     // oxlint-disable-next-line no-control-regex
     .replace(regEx(/\u0000/g), '');
