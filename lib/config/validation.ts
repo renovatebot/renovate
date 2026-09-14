@@ -97,6 +97,8 @@ const ignoredNodes = [
   'headers',
   'depType',
   'npmToken',
+  // fake change for Stryker
+
   'packageFile',
   'forkToken',
   'repository',
