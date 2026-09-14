@@ -289,6 +289,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     extractVersion: actionsVersionsExtractVersion,
     withSchema: valSchema('python-version'),
   },
+  // https://github.com/aquaproj/aqua-installer
+  'aquaproj/aqua-installer': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'aqua',
+    packageName: 'aquaproj/aqua',
+    withSchema: valSchema('aqua_version'),
+  },
   // https://github.com/aquasecurity/setup-trivy
   'aquasecurity/setup-trivy': {
     datasource: GithubReleasesDatasource.id,
