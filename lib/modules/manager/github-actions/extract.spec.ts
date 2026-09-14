@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'peaceiris/actions-hugo@v3',
+        with: { 'hugo-version': '0.166.0' },
+      },
+      expected: [
+        {
+          currentValue: '0.166.0',
+          datasource: 'github-releases',
+          depName: 'hugo',
+          depType: 'uses-with',
+          packageName: 'gohugoio/hugo',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'peaceiris/actions-hugo@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'hugo',
+          depType: 'uses-with',
+          packageName: 'gohugoio/hugo',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'jfrog/setup-jfrog-cli@v4',
         with: { version: '2.91.0' },
       },
