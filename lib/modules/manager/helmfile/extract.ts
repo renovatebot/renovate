@@ -133,6 +133,9 @@ export async function extractPackageFile(
       }
       if (ociDep) {
         Object.assign(res, ociDep);
+        // NOTE: `repoName` is only left null when `ociDep` was set, so the
+        // implicit else never runs. A coverage-ignore hint cannot suppress it
+        // on an `else if`.
       } else if (repoName) {
         res.registryUrls = [registryData[repoName]?.url]
           .concat([config.registryAliases?.[repoName]] as string[])
