@@ -272,7 +272,6 @@
         "lib/modules/datasource/aws-eks-addon/index.ts",
         "lib/modules/datasource/aws-machine-image/index.ts",
         "lib/modules/datasource/aws-rds/index.ts",
-        "lib/modules/datasource/azure-bicep-resource/index.ts",
         "lib/modules/datasource/azure-pipelines-tasks/index.ts",
         "lib/modules/datasource/azure-tags/index.ts",
         "lib/modules/datasource/bazel/index.ts",
