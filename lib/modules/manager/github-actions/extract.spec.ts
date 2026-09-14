@@ -4109,6 +4109,56 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: { sdk: '3.5.3' },
+      },
+      expected: [
+        {
+          currentValue: '3.5.3',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+        },
+      ],
+    },
+    {
+      // `'stable'` is a valid, documented channel name (and the action's
+      // own default), but not one we can pin/bump
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: { sdk: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

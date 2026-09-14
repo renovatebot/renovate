@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 
 import { regEx } from '../../../util/regex.ts';
+import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
@@ -550,6 +551,19 @@ export const knownActions: Record<string, KnownActionConfig> = {
     // version (e.g. `sdk/typescript/v0.21.9`, `helm/chart/v0.21.9`) — only
     // match the bare release tag
     extractVersion: '^v(?<version>\\d+\\..*)$',
+  },
+  // https://github.com/dart-lang/setup-dart
+  'dart-lang/setup-dart': {
+    datasource: DartVersionDatasource.id,
+    depName: 'dart',
+    packageName: 'dart-lang/sdk',
+    // `'stable'`/`'beta'`/`'dev'` are valid, documented channel names (and
+    // `'stable'` is the action's own default), but not versions we can
+    // pin/bump
+    withSchema: valSchemaSkippingLiterals(
+      'sdk',
+      new Set(['stable', 'beta', 'dev']),
+    ),
   },
   // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
