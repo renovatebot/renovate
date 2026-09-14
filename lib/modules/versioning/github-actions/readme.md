@@ -10,5 +10,5 @@ If you have previously used an unpinned version, such as `@v7`, Renovate will mi
 
 ```diff
 -       uses: astral-sh/setup-uv@v7
-+       uses: astral-sh/setup-uv@v10.0.1
++       uses: astral-sh/setup-uv@v10.1.0
 ```
