@@ -3557,6 +3557,39 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'goreleaser/goreleaser-action@v6',
+        with: { version: 'v2.4.4' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.4.4',
+          datasource: 'github-releases',
+          depName: 'goreleaser/goreleaser',
+          depType: 'uses-with',
+          packageName: 'goreleaser/goreleaser',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'goreleaser/goreleaser-action@v6',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'goreleaser/goreleaser',
+          depType: 'uses-with',
+          packageName: 'goreleaser/goreleaser',
+          versioning: 'npm',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
