@@ -2878,6 +2878,85 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'helm/kind-action@v1',
+        with: {
+          version: 'v0.33.0',
+          node_image: 'kindest/node:v1.31.0',
+          kubectl_version: 'v1.31.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.33.0',
+          datasource: 'github-releases',
+          depName: 'kubernetes-sigs/kind',
+          depType: 'uses-with',
+          packageName: 'kubernetes-sigs/kind',
+        },
+        {
+          currentValue: 'v1.31.0',
+          datasource: 'docker',
+          depName: 'kindest/node',
+          depType: 'uses-with',
+          packageName: 'kindest/node',
+        },
+        {
+          currentValue: 'v1.31.0',
+          datasource: 'github-releases',
+          depName: 'kubernetes/kubernetes',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 3 possible inputs
+      step: {
+        uses: 'helm/kind-action@v1',
+        with: { version: 'v0.33.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.33.0',
+          datasource: 'github-releases',
+          depName: 'kubernetes-sigs/kind',
+          depType: 'uses-with',
+          packageName: 'kubernetes-sigs/kind',
+        },
+      ],
+    },
+    {
+      // none of the inputs are set, so no deps should be extracted at all
+      // (rather than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'helm/kind-action@v1',
+        with: {},
+      },
+      expected: [],
+    },
+    {
+      // `node_image` may be pinned by digest instead of (or alongside) a tag
+      step: {
+        uses: 'helm/kind-action@v1',
+        with: {
+          node_image:
+            'kindest/node:v1.31.0@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.31.0',
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'kindest/node',
+          depType: 'uses-with',
+          packageName: 'kindest/node',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'GitTools/actions/gitversion/setup@v3',
         with: { versionSpec: '6.8.2' },
       },
