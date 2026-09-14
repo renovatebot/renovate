@@ -225,7 +225,10 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-config';
       return Result.ok(res);
     }
-    let compareValue = config.currentValue;
+    let compareValue =
+      config.isLockfileOnly && config.lockedVersion
+        ? config.lockedVersion
+        : config.currentValue;
     if (
       isString(config.currentValue) &&
       isString(config.versionCompatibility)
@@ -684,7 +687,7 @@ export async function lookupUpdates(
         const newVersion = release.version;
         const update = await generateUpdate(
           config,
-          compareValue,
+          config.isLockfileOnly ? config.currentValue : compareValue,
           versioningApi,
           // TODO #22198
 

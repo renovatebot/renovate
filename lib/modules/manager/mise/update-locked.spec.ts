@@ -79,6 +79,27 @@ describe('modules/manager/mise/update-locked', () => {
     });
   });
 
+  it('recognizes an already-updated multi-version tool entry', () => {
+    const config: UpdateLockedConfig = {
+      packageFile: 'mise.toml',
+      lockFile: 'mise.lock',
+      lockFileContent: codeBlock`
+        [[tools.python]]
+        version = "3.10.17"
+
+        [[tools.python]]
+        version = "3.11.13"
+      `,
+      depName: 'python',
+      currentVersion: '3.11.12',
+      newVersion: '3.11.13',
+    };
+
+    expect(updateLockedDependency(config)).toEqual({
+      status: 'already-updated',
+    });
+  });
+
   it('does not update a different entry for a multi-version tool', () => {
     const config: UpdateLockedConfig = {
       packageFile: 'mise.toml',

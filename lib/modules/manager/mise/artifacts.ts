@@ -131,9 +131,9 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const lockFileName = getLockFileName(packageFileName);
-  const existingLockFileContent =
-    newLockFileContent ?? (await readLocalFile(lockFileName, 'utf8'));
-  if (!existingLockFileContent) {
+  const originalLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const currentLockFileContent = newLockFileContent ?? originalLockFileContent;
+  if (!currentLockFileContent) {
     logger.debug({ lockFileName }, 'No mise lock file found');
     return null;
   }
@@ -238,7 +238,7 @@ export async function updateArtifacts({
     const refreshedLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (
       !refreshedLockFileContent ||
-      existingLockFileContent === refreshedLockFileContent
+      originalLockFileContent === refreshedLockFileContent
     ) {
       return null;
     }

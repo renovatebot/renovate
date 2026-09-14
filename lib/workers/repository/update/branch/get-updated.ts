@@ -90,7 +90,8 @@ function removeUnrefreshedLockfileOnlyChanges(
   packageFiles: FileChange[],
   updatedDeps: BranchUpgradeConfig[],
   results: UpdateArtifactsResult[] | null,
-): void {
+): string[] {
+  const removedLockFiles: string[] = [];
   const refreshedFiles = new Set(
     coerceArray(results).flatMap((result) =>
       result.file ? [result.file.path] : [],
@@ -108,6 +109,28 @@ function removeUnrefreshedLockfileOnlyChanges(
     const path = packageFiles[index].path;
     if (lockFiles.has(path) && !refreshedFiles.has(path)) {
       packageFiles.splice(index, 1);
+      removedLockFiles.push(path);
+    }
+  }
+  return removedLockFiles;
+}
+
+function reportUnrefreshedLockfileOnlyChanges(
+  removedLockFiles: string[],
+  results: UpdateArtifactsResult[] | null,
+  artifactErrors: ArtifactError[],
+): void {
+  const artifactErrorFiles = new Set(
+    coerceArray(results).flatMap((result) =>
+      result.artifactError ? [result.artifactError.fileName] : [],
+    ),
+  );
+  for (const lockFile of removedLockFiles) {
+    if (!artifactErrorFiles.has(lockFile)) {
+      artifactErrors.push({
+        fileName: lockFile,
+        stderr: 'Lockfile-only update could not be refreshed',
+      });
     }
   }
 }
@@ -123,10 +146,12 @@ function removeSupersededLockFileChanges(
     ),
   );
   const lockFiles = new Set(
-    updatedDeps.flatMap((upgrade) => [
-      upgrade.lockFile,
-      ...coerceArray(upgrade.lockFiles),
-    ]),
+    updatedDeps
+      .filter((upgrade) => upgrade.isLockfileOnly)
+      .flatMap((upgrade) => [
+        upgrade.lockFile,
+        ...coerceArray(upgrade.lockFiles),
+      ]),
   );
   for (let index = packageFiles.length - 1; index >= 0; index -= 1) {
     const path = packageFiles[index].path;
@@ -415,16 +440,23 @@ export async function getUpdatedPackageFiles(
             packageFile.path,
           ),
         });
-        removeUnrefreshedLockfileOnlyChanges(
-          updatedPackageFiles,
-          updatedDeps,
-          results,
-        );
-        removeSupersededLockFileChanges(
-          updatedPackageFiles,
-          updatedDeps,
-          results,
-        );
+        if (manager === 'mise') {
+          const removedLockFiles = removeUnrefreshedLockfileOnlyChanges(
+            updatedPackageFiles,
+            updatedDeps,
+            results,
+          );
+          reportUnrefreshedLockfileOnlyChanges(
+            removedLockFiles,
+            results,
+            artifactErrors,
+          );
+          removeSupersededLockFileChanges(
+            updatedPackageFiles,
+            updatedDeps,
+            results,
+          );
+        }
         processUpdateArtifactResults(
           results,
           updatedArtifacts,

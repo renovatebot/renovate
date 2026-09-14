@@ -1507,6 +1507,26 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('uses lockedVersion to look up an unversioned lockfile-only selector', async () => {
+      config.currentValue = 'latest';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: 'latest',
+        newVersion: '1.4.1',
+      });
+    });
+
     it('allows lockfile-only selectors to cross versioning compatibility boundaries', async () => {
       config.currentValue = '1.2.1-alpine';
       config.lockedVersion = '1.2.1-alpine';

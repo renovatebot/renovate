@@ -257,6 +257,12 @@ describe('workers/repository/update/branch/get-updated', () => {
           contents: '[tools]\nnode = "22"\n',
         },
       ]);
+      expect(result.artifactErrors).toEqual([
+        {
+          fileName: 'mise.lock',
+          stderr: 'Lockfile-only update could not be refreshed',
+        },
+      ]);
     });
 
     it('replaces a hand-edited lockfile with the refreshed artifact', async () => {

@@ -371,7 +371,7 @@ function extractSelectorLockedDependency(
     resolvedToolConfig.currentValue ?? lockedVersion;
   return {
     ...createDependency(depName, version, resolvedToolConfig, depType),
-    currentValue: comparableLockedVersion,
+    currentValue: version,
     lockedVersion: comparableLockedVersion,
     rangeStrategy: 'update-lockfile',
     isLockfileOnly: true,

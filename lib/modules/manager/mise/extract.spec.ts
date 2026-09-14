@@ -1201,12 +1201,12 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'node',
-            currentValue: '20.11.0',
+            currentValue: '20',
             lockedVersion: '20.11.0',
           },
           {
             depName: 'python',
-            currentValue: '3.10.17',
+            currentValue: '3.10',
             lockedVersion: '3.10.17',
           },
         ],
@@ -1260,7 +1260,7 @@ describe('modules/manager/mise/extract', () => {
       expect(result?.lockFiles).toEqual(['mise.test.lock']);
       expect(result?.deps[0]).toMatchObject({
         depName: 'node',
-        currentValue: '18.19.0',
+        currentValue: '18',
         lockedVersion: '18.19.0',
       });
     });
@@ -1274,7 +1274,7 @@ describe('modules/manager/mise/extract', () => {
       const result = await extractPackageFile(content, 'mise.toml');
       expect(result?.deps[0]).toMatchObject({
         depName: 'core:node',
-        currentValue: '20.11.0',
+        currentValue: '20',
         lockedVersion: '20.11.0',
       });
     });
@@ -1294,7 +1294,7 @@ describe('modules/manager/mise/extract', () => {
 
       expect(result?.deps[0]).toMatchObject({
         depName: 'ubi:cli/cli',
-        currentValue: '2.63.0',
+        currentValue: '2',
         lockedVersion: '2.63.0',
         isLockfileOnly: true,
         rangeStrategy: 'update-lockfile',
@@ -1317,7 +1317,7 @@ describe('modules/manager/mise/extract', () => {
 
       expect(result?.deps[0]).toMatchObject({
         depName: 'node',
-        currentValue: '22.14.0',
+        currentValue: '22',
         lockedVersion: '22.14.0',
         isLockfileOnly: true,
       });
@@ -1355,7 +1355,7 @@ describe('modules/manager/mise/extract', () => {
       const result = await extractPackageFile(content, 'mise.toml');
       expect(result?.deps[0]).toMatchObject({
         depName: 'python',
-        currentValue: '3.10.17',
+        currentValue: '3.10',
         lockedVersion: '3.10.17',
       });
     });
@@ -1384,7 +1384,7 @@ describe('modules/manager/mise/extract', () => {
       expect(result?.deps).toMatchObject([
         {
           depName: 'node',
-          currentValue: '22.14.0',
+          currentValue: 'lts',
           lockedVersion: '22.14.0',
           ignoreUnstable: true,
           isLockfileOnly: true,
@@ -1392,7 +1392,7 @@ describe('modules/manager/mise/extract', () => {
         },
         {
           depName: 'java',
-          currentValue: '25.0.3+9.0.LTS',
+          currentValue: 'temurin-25',
           lockedVersion: '25.0.3+9.0.LTS',
           allowedVersions: '/^(?:\\x74emurin\\x2d)?25(?:\\.|-|\\+|$)/',
           isLockfileOnly: true,
@@ -1400,7 +1400,7 @@ describe('modules/manager/mise/extract', () => {
         },
         {
           depName: 'protoc',
-          currentValue: '30.2',
+          currentValue: 'latest',
           lockedVersion: '30.2',
           isLockfileOnly: true,
           rangeStrategy: 'update-lockfile',
@@ -1423,7 +1423,7 @@ describe('modules/manager/mise/extract', () => {
 
       expect(result?.deps[0]).toMatchObject({
         depName: 'golangci-lint',
-        currentValue: '2.12.0',
+        currentValue: '2',
         lockedVersion: '2.12.0',
         allowedVersions: '/^2(?:\\.|-|\\+|$)/',
         isLockfileOnly: true,
@@ -1446,7 +1446,7 @@ describe('modules/manager/mise/extract', () => {
 
       expect(result?.deps[0]).toMatchObject({
         depName: 'node',
-        currentValue: '20.11.0',
+        currentValue: '20',
         lockedVersion: '20.11.0',
         allowedVersions: '/^(?:\\x76)?20(?:\\.|-|\\+|$)/',
         isLockfileOnly: true,
@@ -1468,7 +1468,7 @@ describe('modules/manager/mise/extract', () => {
 
       expect(result?.deps[0]).toMatchObject({
         depName: 'github:cli/cli',
-        currentValue: 'v2.64.0',
+        currentValue: '2',
         lockedVersion: 'v2.64.0',
         allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
         isLockfileOnly: true,
@@ -1490,7 +1490,7 @@ describe('modules/manager/mise/extract', () => {
 
       expect(result?.deps[0]).toMatchObject({
         allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
-        currentValue: '2.64.0',
+        currentValue: '2',
         lockedVersion: '2.64.0',
       });
     });
@@ -1523,7 +1523,7 @@ describe('modules/manager/mise/extract', () => {
       expect(result?.deps).toMatchObject([
         {
           depName: 'java',
-          currentValue: '25.0.3+9.0.LTS',
+          currentValue: 'lts',
           lockedVersion: '25.0.3+9.0.LTS',
           allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|\\+|$)/',
           ignoreUnstable: true,

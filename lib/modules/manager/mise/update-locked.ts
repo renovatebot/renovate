@@ -53,6 +53,7 @@ function getVersionValueNode(
   depName: string,
   lockFileData: MiseLockFile,
   currentVersion: string,
+  newVersion: string,
 ): { currentLockedVersion: string; versionNode: AST.TOMLValue } | undefined {
   const toolName = getToolName(depName, lockFileData);
   const lockedTools = lockfile.getLockedTool(lockFileData, depName);
@@ -66,7 +67,9 @@ function getVersionValueNode(
       : lockedTools.findIndex(
           ({ version }) =>
             version === currentVersion ||
-            formatLockedVersion(version, currentVersion) === version,
+            formatLockedVersion(version, currentVersion) === version ||
+            version === newVersion ||
+            formatLockedVersion(version, newVersion) === version,
         );
   if (toolIndex === -1) {
     return undefined;
@@ -125,6 +128,7 @@ export function updateLockedDependency(
       depName,
       parsed.data,
       config.currentVersion,
+      newVersion,
     );
     if (!lockedVersion) {
       return { status: 'unsupported' };
