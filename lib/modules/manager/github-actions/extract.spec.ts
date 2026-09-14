@@ -4078,6 +4078,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'foundry-rs/foundry-toolchain@v1',
+        with: { version: 'v1.8.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.8.1',
+          datasource: 'github-releases',
+          depName: 'foundry',
+          depType: 'uses-with',
+          packageName: 'foundry-rs/foundry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'foundry-rs/foundry-toolchain@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'foundry',
+          depType: 'uses-with',
+          packageName: 'foundry-rs/foundry',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

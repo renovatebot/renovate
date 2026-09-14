@@ -600,6 +600,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'casey/just',
     withSchema: valSchema('just-version'),
   },
+  // https://github.com/foundry-rs/foundry-toolchain
+  'foundry-rs/foundry-toolchain': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'foundry',
+    packageName: 'foundry-rs/foundry',
+  },
   // https://github.com/GitTools/actions (there is no root-level Action, only
   // subpaths are usable; the sibling `GitTools/actions/gitreleasemanager/setup`
   // is a separate, unrelated Action)
