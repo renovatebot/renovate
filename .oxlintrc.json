@@ -323,7 +323,6 @@
         "lib/modules/datasource/packagist/index.ts",
         "lib/modules/datasource/pod/index.ts",
         "lib/modules/datasource/python-version/index.ts",
-        "lib/modules/datasource/repology/index.ts",
         "lib/modules/datasource/rpm/index.ts",
         "lib/modules/datasource/ruby-version/index.ts",
         "lib/modules/datasource/rust-version/index.ts",
