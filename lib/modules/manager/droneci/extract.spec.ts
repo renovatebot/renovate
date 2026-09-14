@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -10,9 +11,12 @@ describe('modules/manager/droneci/extract', () => {
     });
 
     it('ignores a multi-line image that is never terminated', () => {
-      const content = ['    image: "some/image\\', '      unterminated'].join(
-        '\n',
-      );
+      const content = codeBlock`
+        steps:
+          - name: build
+            image: "some/image\\
+              unterminated
+      `;
       expect(extractPackageFile(content, '', {})).toBeNull();
     });
 
