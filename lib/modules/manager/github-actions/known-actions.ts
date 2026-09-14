@@ -445,6 +445,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: 'aquasecurity/trivy',
   },
+  // https://github.com/astral-sh/ruff-action
+  'astral-sh/ruff-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'ruff',
+    packageName: 'astral-sh/ruff',
+  },
   // https://github.com/astral-sh/setup-uv
   'astral-sh/setup-uv': {
     datasource: GithubReleasesDatasource.id,

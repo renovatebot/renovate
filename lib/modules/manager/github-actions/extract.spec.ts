@@ -3683,6 +3683,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'astral-sh/ruff-action@v3',
+        with: { version: '0.16.7' },
+      },
+      expected: [
+        {
+          currentValue: '0.16.7',
+          datasource: 'github-releases',
+          depName: 'ruff',
+          depType: 'uses-with',
+          packageName: 'astral-sh/ruff',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'astral-sh/ruff-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'ruff',
+          depType: 'uses-with',
+          packageName: 'astral-sh/ruff',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
