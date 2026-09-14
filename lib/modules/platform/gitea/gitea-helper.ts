@@ -3,7 +3,7 @@ import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-import type { GiteaHttpOptions } from '../../../util/http/gitea.ts';
+import type { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea.ts';
 import { getQueryString } from '../../../util/url.ts';
 import {
   Branch,
@@ -23,7 +23,6 @@ import type {
   CombinedCommitStatus,
   CommentCreateParams,
   CommitStatusCreateParams,
-  GiteaLikeHttp,
   GiteaPlatformKey,
   IssueCreateParams,
   IssueSearchParams,
@@ -50,7 +49,7 @@ const commitStatusStates: CommitStatusType[] = [
 ];
 
 export async function getCurrentUser(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   options: GiteaHttpOptions = {},
 ): Promise<User> {
   const url = `${API_PATH}/user`;
@@ -59,7 +58,7 @@ export async function getCurrentUser(
 }
 
 export async function getVersion(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   options: GiteaHttpOptions = {},
 ): Promise<string> {
   const url = `${API_PATH}/version`;
@@ -68,7 +67,7 @@ export async function getVersion(
 }
 
 export async function isOrg(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   platform: GiteaPlatformKey,
   organization: string,
 ): Promise<boolean> {
@@ -95,7 +94,7 @@ export async function isOrg(
 }
 
 export async function searchRepos(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   params: RepoSearchParams,
   options?: GiteaHttpOptions,
 ): Promise<Repo[]> {
@@ -120,7 +119,7 @@ export async function searchRepos(
 }
 
 export async function orgListRepos(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   organization: string,
   options?: GiteaHttpOptions,
 ): Promise<Repo[]> {
@@ -138,7 +137,7 @@ export async function orgListRepos(
 }
 
 export async function getRepo(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   options: GiteaHttpOptions = {},
 ): Promise<Repo> {
@@ -148,7 +147,7 @@ export async function getRepo(
 }
 
 export async function getRepoContents(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   filePath: string,
   ref?: string | null,
@@ -164,7 +163,7 @@ export async function getRepoContents(
 }
 
 export async function createPR(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   params: PRCreateParams,
   options?: GiteaHttpOptions,
@@ -183,7 +182,7 @@ export async function createPR(
 }
 
 export async function updatePR(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   params: PRUpdateParams,
@@ -203,7 +202,7 @@ export async function updatePR(
 }
 
 export async function closePR(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   options?: GiteaHttpOptions,
@@ -215,7 +214,7 @@ export async function closePR(
 }
 
 export async function mergePR(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   params: PRMergeParams,
@@ -229,7 +228,7 @@ export async function mergePR(
 }
 
 export async function getPR(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   options: GiteaHttpOptions = {},
@@ -240,7 +239,7 @@ export async function getPR(
 }
 
 export async function getPRByBranch(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   base: string,
   head: string,
@@ -260,7 +259,7 @@ export async function getPRByBranch(
 }
 
 export async function requestPrReviewers(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   params: PrReviewersParams,
@@ -274,7 +273,7 @@ export async function requestPrReviewers(
 }
 
 export async function createIssue(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   params: IssueCreateParams,
   options?: GiteaHttpOptions,
@@ -293,7 +292,7 @@ export async function createIssue(
 }
 
 export async function updateIssue(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   params: IssueUpdateParams,
@@ -313,7 +312,7 @@ export async function updateIssue(
 }
 
 export async function updateIssueLabels(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   params: IssueUpdateLabelsParams,
@@ -333,7 +332,7 @@ export async function updateIssueLabels(
 }
 
 export async function closeIssue(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   options?: GiteaHttpOptions,
@@ -345,7 +344,7 @@ export async function closeIssue(
 }
 
 export async function searchIssues(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   params: IssueSearchParams,
   options?: GiteaHttpOptions,
@@ -365,7 +364,7 @@ export async function searchIssues(
 }
 
 export async function getIssue(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   options: GiteaHttpOptions = {},
@@ -376,7 +375,7 @@ export async function getIssue(
 }
 
 export async function getRepoLabels(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   options: GiteaHttpOptions = {},
 ): Promise<Label[]> {
@@ -387,7 +386,7 @@ export async function getRepoLabels(
 }
 
 export async function getOrgLabels(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   orgName: string,
   options: GiteaHttpOptions = {},
 ): Promise<Label[]> {
@@ -398,7 +397,7 @@ export async function getOrgLabels(
 }
 
 export async function unassignLabel(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   issue: number,
   label: number,
@@ -409,7 +408,7 @@ export async function unassignLabel(
 }
 
 export async function createComment(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   issue: number,
   body: string,
@@ -430,7 +429,7 @@ export async function createComment(
 }
 
 export async function updateComment(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   body: string,
@@ -451,7 +450,7 @@ export async function updateComment(
 }
 
 export async function deleteComment(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   idx: number,
   options?: GiteaHttpOptions,
@@ -461,7 +460,7 @@ export async function deleteComment(
 }
 
 export async function getComments(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   issue: number,
   options: GiteaHttpOptions = {},
@@ -473,7 +472,7 @@ export async function getComments(
 }
 
 export async function createCommitStatus(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   branchCommit: string,
   params: CommitStatusCreateParams,
@@ -518,7 +517,7 @@ function filterStatus(data: CommitStatus[]): CommitStatus[] {
 }
 
 export async function getCombinedCommitStatus(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   branchName: string,
   options?: GiteaHttpOptions,
@@ -548,7 +547,7 @@ export async function getCombinedCommitStatus(
 }
 
 export async function getBranch(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repoPath: string,
   branchName: string,
   options: GiteaHttpOptions = {},
