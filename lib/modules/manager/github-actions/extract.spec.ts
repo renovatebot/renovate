@@ -3590,6 +3590,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'opentofu/setup-opentofu@v1',
+        with: { tofu_version: '1.8.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.8.0',
+          datasource: 'github-releases',
+          depName: 'opentofu',
+          depType: 'uses-with',
+          packageName: 'opentofu/opentofu',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'opentofu/setup-opentofu@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'opentofu',
+          depType: 'uses-with',
+          packageName: 'opentofu/opentofu',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
