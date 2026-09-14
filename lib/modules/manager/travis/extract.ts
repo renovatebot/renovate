@@ -48,6 +48,9 @@ export function extractPackageFile(
             currentValue: currentValue.toString(),
           });
         });
+        // NOTE: `node_js` is either an array, handled above, or a string, so the
+        // implicit else never runs. A coverage-ignore hint cannot suppress it
+        // on an `else if`.
       } else if (isString(item.node_js)) {
         deps.push({
           depName: 'node',
