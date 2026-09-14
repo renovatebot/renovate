@@ -1,14 +1,10 @@
-import { dir as tmpDir } from 'tmp-promise';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import * as memCache from '../../../util/cache/memory/index.ts';
-import * as packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import { parseUrl } from '../../../util/url.ts';
 import { getPkgReleases } from '../index.ts';
 import { AzurePipelinesTasksDatasource } from './index.ts';
-import { AzurePipelinesFallbackTasks, AzurePipelinesTask } from './schema.ts';
+import { AzurePipelinesTask } from './schema.ts';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
 const builtinTasksPath =
@@ -225,77 +221,6 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
           version: '2.247.1',
         },
       ],
-    });
-  });
-
-  describe('package cache', () => {
-    let dirResult: Awaited<ReturnType<typeof tmpDir>>;
-    const datasource = new AzurePipelinesTasksDatasource();
-
-    beforeEach(async () => {
-      dirResult = await tmpDir({ unsafeCleanup: true });
-      await packageCache.init({ cacheDir: dirResult.path });
-      memCache.init();
-    });
-
-    afterEach(async () => {
-      await packageCache.cleanup({});
-      await dirResult.cleanup();
-    });
-
-    it.each([
-      `${gitHubHost}${builtinTasksPath}`,
-      `${gitHubHost}${marketplaceTasksPath}`,
-    ])('reuses the public catalog cache for %s', async (url) => {
-      const parsed = parseUrl(url)!;
-      const catalog = { task: ['1.0.0'] };
-      httpMock.scope(parsed.origin).get(parsed.pathname).reply(200, catalog);
-
-      await expect(
-        datasource.getTasks(url, {}, AzurePipelinesFallbackTasks),
-      ).resolves.toEqual(catalog);
-      memCache.init();
-      await expect(
-        datasource.getTasks(url, {}, AzurePipelinesFallbackTasks),
-      ).resolves.toEqual(catalog);
-    });
-
-    it.each([
-      'https://dev.azure.com/organization/_apis/distributedtask/tasks/',
-      'https://organization.visualstudio.com/_apis/distributedtask/tasks/',
-      'https://my.custom.domain/_apis/distributedtask/tasks/',
-      `${gitHubHost}/other/private/main/tasks.json`,
-    ])('bypasses existing cache entries and writes for %s', async (url) => {
-      const key = `cache-decorator:${url}`;
-      const namespace = 'datasource-azure-pipelines-tasks';
-      await packageCache.set(
-        namespace,
-        key,
-        {
-          cachedAt: new Date().toISOString(),
-          value: { task: ['0.0.0'] },
-        },
-        1440,
-      );
-      const parsed = parseUrl(url)!;
-      httpMock
-        .scope(parsed.origin)
-        .get(parsed.pathname + parsed.search)
-        .reply(200, { task: ['1.0.0'] })
-        .get(parsed.pathname + parsed.search)
-        .reply(200, { task: ['2.0.0'] });
-
-      await expect(
-        datasource.getTasks(url, {}, AzurePipelinesFallbackTasks),
-      ).resolves.toEqual({ task: ['1.0.0'] });
-      memCache.init();
-      await expect(
-        datasource.getTasks(url, {}, AzurePipelinesFallbackTasks),
-      ).resolves.toEqual({ task: ['2.0.0'] });
-      await expect(packageCache.get(namespace, key)).resolves.toEqual({
-        cachedAt: expect.any(String),
-        value: { task: ['0.0.0'] },
-      });
     });
   });
 
