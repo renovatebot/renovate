@@ -207,6 +207,25 @@ const SetupJavaWith: ActionSchema = z
     },
   );
 
+// `'latest'` is a valid, documented value for `tflint_version` (it's also the
+// action's own default), but it isn't a version we can pin/bump, so treat it
+// as present-but-unsupported rather than as an invalid value.
+const TflintWith: ActionSchema = z
+  .object({ tflint_version: z.string().optional() })
+  .transform(({ tflint_version: version }) => {
+    if (version === 'latest') {
+      return [
+        {
+          currentValue: version,
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ];
+    }
+    return [parseValue(version)];
+  });
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -432,6 +451,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: 'sigstore/cosign',
     withSchema: valSchema('cosign-release'),
+  },
+  // https://github.com/terraform-linters/setup-tflint
+  'terraform-linters/setup-tflint': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'tflint',
+    packageName: 'terraform-linters/tflint',
+    withSchema: TflintWith,
   },
   'UpCloudLtd/upcloud-cli-action': {
     datasource: GithubReleasesDatasource.id,

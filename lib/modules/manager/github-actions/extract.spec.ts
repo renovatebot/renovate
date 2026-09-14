@@ -2878,6 +2878,55 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'terraform-linters/setup-tflint@v4',
+        with: { tflint_version: 'v0.64.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.64.0',
+          datasource: 'github-releases',
+          depName: 'tflint',
+          depType: 'uses-with',
+          packageName: 'terraform-linters/tflint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'terraform-linters/setup-tflint@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'tflint',
+          depType: 'uses-with',
+          packageName: 'terraform-linters/tflint',
+        },
+      ],
+    },
+    {
+      // `'latest'` is a valid, documented value, but not one we can pin/bump
+      step: {
+        uses: 'terraform-linters/setup-tflint@v4',
+        with: { tflint_version: 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+          datasource: 'github-releases',
+          depName: 'tflint',
+          depType: 'uses-with',
+          packageName: 'terraform-linters/tflint',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'UpCloudLtd/upcloud-cli-action@main',
         with: { version: 'v3.35.0' },
       },
