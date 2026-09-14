@@ -58,14 +58,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent: 'unparseable',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { stderr: 'Failed to parse new package file content' } },
     ]);
   });
@@ -81,14 +81,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no dependency name is found', async () => {
@@ -102,14 +102,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no registryUrl is found', async () => {
@@ -123,14 +123,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if no packageName is found', async () => {
@@ -144,14 +144,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: DockerDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if neither currentVersion or newVersion is found', async () => {
@@ -165,14 +165,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if newVersion is not found and currentVersion is already inflated', async () => {
@@ -188,14 +188,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if old version is not inflated and kustomizeInflateHelmCharts is not enabled', async () => {
@@ -218,8 +218,8 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
@@ -228,7 +228,7 @@ describe('modules/manager/kustomize/artifacts', () => {
           postUpdateOptions: [],
         },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
 
@@ -252,14 +252,14 @@ describe('modules/manager/kustomize/artifacts', () => {
         datasource: HelmDatasource.id,
       },
     ];
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
 
@@ -290,8 +290,8 @@ describe('modules/manager/kustomize/artifacts', () => {
       },
     ];
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
@@ -300,7 +300,7 @@ describe('modules/manager/kustomize/artifacts', () => {
           postUpdateOptions: [],
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -345,14 +345,14 @@ describe('modules/manager/kustomize/artifacts', () => {
       },
     ];
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -389,14 +389,14 @@ describe('modules/manager/kustomize/artifacts', () => {
       },
     ];
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -433,14 +433,14 @@ describe('modules/manager/kustomize/artifacts', () => {
       },
     ];
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -482,14 +482,14 @@ describe('modules/manager/kustomize/artifacts', () => {
       releases: [{ version: '2.7.0' }, { version: '3.17.0' }],
     });
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -536,14 +536,14 @@ describe('modules/manager/kustomize/artifacts', () => {
       releases: [{ version: '2.7.0' }, { version: '3.17.0' }],
     });
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -597,8 +597,8 @@ describe('modules/manager/kustomize/artifacts', () => {
       },
     ];
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
@@ -607,7 +607,7 @@ describe('modules/manager/kustomize/artifacts', () => {
           postUpdateOptions: [],
         },
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -635,8 +635,8 @@ describe('modules/manager/kustomize/artifacts', () => {
       },
     ];
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps,
         newPackageFileContent,
@@ -645,7 +645,7 @@ describe('modules/manager/kustomize/artifacts', () => {
           postUpdateOptions: [],
         },
       }),
-    ).toEqual([{ artifactError: { stderr: 'not found' } }]);
+    ).resolves.toEqual([{ artifactError: { stderr: 'not found' } }]);
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -686,8 +686,8 @@ describe('modules/manager/kustomize/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.localPathExists.mockResolvedValueOnce(false);
 
-    expect(
-      await kustomize.updateArtifacts({
+    await expect(
+      kustomize.updateArtifacts({
         packageFileName,
         updatedDeps: [
           {
@@ -701,7 +701,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         newPackageFileContent,
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: "helm pull --untar --untardir 'charts/example && ls -lart; -1.0.0' --version 1.0.0 --repo https://github.com.com/example/example 'example && ls -lart; '",

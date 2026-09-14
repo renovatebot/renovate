@@ -9,19 +9,20 @@ import {
 import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
-import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
+import type { StaticTooling } from '../asdf/types.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { BackendToolingConfig } from './backends.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
+  createGitlabToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -31,7 +32,7 @@ import {
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
-import type { ToolingDefinition } from './upgradeable-tooling.ts';
+import type { BackendToolingConfig, ToolingDefinition } from './types.ts';
 import {
   asdfTooling,
   getOrderedMiseRegistryBackends,
@@ -78,7 +79,9 @@ export async function extractPackageFile(
   }
 
   for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
-    for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
+    for (const [name, toolData] of Object.entries(
+      coerceObject(taskData.tools),
+    )) {
       toolEntries.push([name, toolData, `task-${taskName}-tools`]);
     }
   }
@@ -96,7 +99,7 @@ export async function extractPackageFile(
       lockFileData = lockFileParsed.data;
     } else {
       logger.debug(
-        { lockFileName, error: lockFileParsed.error },
+        { lockFileName, err: lockFileParsed.error },
         'Failed to parse mise lock file',
       );
     }
@@ -215,6 +218,8 @@ function getToolConfig(
       return createGemToolConfig(toolName);
     case 'github':
       return createGithubToolConfig(toolName, version, toolOptions);
+    case 'gitlab':
+      return createGitlabToolConfig(toolName, version, toolOptions);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':
@@ -317,7 +322,10 @@ function getSelectorConfig(
   let prefixPattern = '';
   if (effectivePrefix) {
     prefixPattern = `(?:${RegExp.escape(effectivePrefix)})?`;
-  } else if (datasource === GithubReleasesDatasource.id) {
+  } else if (
+    datasource === GithubReleasesDatasource.id ||
+    datasource === NodeVersionDatasource.id
+  ) {
     prefixPattern = `(?:${RegExp.escape('v')})?`;
   }
   const precisionPattern = minor

@@ -30,4 +30,93 @@ describe('modules/manager/mise/update-locked', () => {
       },
     });
   });
+
+  it('removes a datasource prefix when the locked version is bare', () => {
+    const lockFileContent = codeBlock`
+      [[tools.node]]
+      version = "20.11.0"
+    `;
+    const config: UpdateLockedConfig = {
+      packageFile: 'mise.toml',
+      packageFileContent: '[tools]\nnode = "20"\n',
+      lockFile: 'mise.lock',
+      lockFileContent,
+      depName: 'node',
+      currentVersion: '20.11.0',
+      newVersion: 'v20.12.0',
+    };
+
+    expect(updateLockedDependency(config)).toMatchObject({
+      status: 'updated',
+      files: {
+        'mise.lock': lockFileContent.replace('20.11.0', '20.12.0'),
+      },
+    });
+  });
+
+  it('updates the matching entry for a multi-version tool', () => {
+    const lockFileContent = codeBlock`
+      [[tools.python]]
+      version = "3.10.17"
+
+      [[tools.python]]
+      version = "3.11.12"
+    `;
+    const config: UpdateLockedConfig = {
+      packageFile: 'mise.toml',
+      lockFile: 'mise.lock',
+      lockFileContent,
+      depName: 'python',
+      currentVersion: '3.11.12',
+      newVersion: '3.11.13',
+    };
+
+    expect(updateLockedDependency(config)).toEqual({
+      status: 'updated',
+      files: {
+        'mise.lock': lockFileContent.replace('3.11.12', '3.11.13'),
+      },
+    });
+  });
+
+  it('does not update a different entry for a multi-version tool', () => {
+    const config: UpdateLockedConfig = {
+      packageFile: 'mise.toml',
+      lockFile: 'mise.lock',
+      lockFileContent: codeBlock`
+        [[tools.python]]
+        version = "3.10.17"
+
+        [[tools.python]]
+        version = "3.11.12"
+      `,
+      depName: 'python',
+      currentVersion: '3.12.0',
+      newVersion: '3.12.1',
+    };
+
+    expect(updateLockedDependency(config)).toEqual({ status: 'unsupported' });
+  });
+
+  it('preserves a nonnumeric replacement version', () => {
+    const lockFileContent = codeBlock`
+      [[tools.example]]
+      version = "20.0.0"
+    `;
+    const config: UpdateLockedConfig = {
+      packageFile: 'mise.toml',
+      lockFile: 'mise.lock',
+      lockFileContent,
+      depName: 'example',
+      currentVersion: '20.0.0',
+      newVersion: 'nightly',
+    };
+
+    expect(updateLockedDependency(config)).toMatchObject({
+      status: 'updated',
+      files: {
+        'mise.lock': lockFileContent.replace('20.0.0', 'nightly'),
+      },
+    });
+  });
 });

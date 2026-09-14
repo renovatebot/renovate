@@ -112,9 +112,7 @@ function extractFromSection(
 
 function isPipRequirements(
   section?:
-    | Record<string, PipRequirement>
-    | Record<string, string>
-    | PipSource[],
+    Record<string, PipRequirement> | Record<string, string> | PipSource[],
 ): section is Record<string, PipRequirement> {
   return (
     !isArray(section) &&

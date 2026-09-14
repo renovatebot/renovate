@@ -56,7 +56,7 @@ export async function generateUpdate(
 
   if (currentValue) {
     try {
-      if (config.isLockfileOnly && rangeStrategy === 'update-lockfile') {
+      if (config.isLockfileOnly) {
         update.newValue = currentValue;
       } else {
         update.newValue = versioningApi.getNewValue({
@@ -111,7 +111,10 @@ export async function generateUpdate(
   if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
-  if (rangeStrategy === 'update-lockfile' && currentValue === update.newValue) {
+  if (
+    (config.isLockfileOnly || rangeStrategy === 'update-lockfile') &&
+    currentValue === update.newValue
+  ) {
     update.isLockfileUpdate = true;
   }
   if (

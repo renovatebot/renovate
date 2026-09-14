@@ -733,7 +733,7 @@ export class DockerDatasource extends Datasource {
   private async getDockerApiTags(
     registryHost: string,
     dockerRepository: string,
-  ): Promise<string[] | null> {
+  ): Promise<string[] | undefined> {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
@@ -753,7 +753,7 @@ export class DockerDatasource extends Datasource {
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
-      return null;
+      return undefined;
     }
     let page = 0;
     const hostsNeedingAllPages = [
@@ -833,10 +833,10 @@ export class DockerDatasource extends Datasource {
   private async _getTags(
     registryHost: string,
     dockerRepository: string,
-  ): Promise<string[] | null> {
+  ): Promise<string[] | undefined> {
     try {
       const isQuay = registryHost === 'https://quay.io';
-      let tags: string[] | null;
+      let tags: string[] | undefined;
       if (isQuay) {
         try {
           // Due to pagination and sorting limits on Quay Docker v2 API implementation we try the Quay v1 API first
@@ -921,11 +921,12 @@ export class DockerDatasource extends Datasource {
   getTags(
     registryHost: string,
     dockerRepository: string,
-  ): Promise<string[] | null> {
+  ): Promise<string[] | undefined> {
     return withCache(
       {
         namespace: 'datasource-docker-tags',
         key: `${registryHost}:${dockerRepository}`,
+        cacheable: registryHost === DOCKER_HUB,
       },
       () => this._getTags(registryHost, dockerRepository),
     );

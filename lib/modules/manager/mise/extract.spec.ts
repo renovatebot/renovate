@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -12,18 +13,20 @@ const mise1toml = Fixtures.get('Mise.1.toml');
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('', miseFilename)).toBeNull();
+      await expect(extractPackageFile('', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for invalid TOML', async () => {
-      expect(await extractPackageFile('foo', miseFilename)).toBeNull();
+      await expect(extractPackageFile('foo', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for empty tools section', async () => {
       const content = codeBlock`
       [tools]
     `;
-      expect(await extractPackageFile(content, miseFilename)).toBeNull();
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
     });
 
     it('extracts tools - mise core plugins', async () => {
@@ -782,6 +785,40 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts gitlab backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "gitlab:gitlab-org/cli" = "v1.54.0"
+      "gitlab:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "gitlab:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'gitlab:gitlab-org/cli',
+            currentValue: 'v1.54.0',
+            packageName: 'gitlab-org/cli',
+            datasource: 'gitlab-releases',
+          },
+          {
+            depName: 'gitlab:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+          },
+          {
+            depName: 'gitlab:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x76(?<version>.+)',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', async () => {
       const content = codeBlock`
       [tools]
@@ -1105,24 +1142,6 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('resolves tools from the mise registry data file via cargo backend', async () => {
-      const content = codeBlock`
-      [tools]
-      magika = "0.3.1"
-    `;
-      const result = await extractPackageFile(content, miseFilename);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'magika',
-            currentValue: '0.3.1',
-            datasource: 'crate',
-            packageName: 'magika-cli',
-          },
-        ],
-      });
-    });
-
     it('resolves tools from the mise registry data file via github backend', async () => {
       const content = codeBlock`
       [tools]
@@ -1412,6 +1431,28 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('allows the node datasource v prefix for a bare locked version', async () => {
+      const lockFileContent = codeBlock`
+        [[tools.node]]
+        version = "20.11.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20.11.0',
+        lockedVersion: '20.11.0',
+        allowedVersions: '/^(?:\\x76)?20(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+      });
+    });
+
     it('allows a datasource prefix from the locked version', async () => {
       const lockFileContent = codeBlock`
         [[tools."github:cli/cli"]]
@@ -1549,7 +1590,7 @@ describe('modules/manager/mise/extract', () => {
 
       const result = await extractPackageFile(content, 'mise.toml');
 
-      for (const dep of result?.deps ?? []) {
+      for (const dep of coerceArray(result?.deps)) {
         expect(dep).not.toHaveProperty('isLockfileOnly');
         expect(dep).not.toHaveProperty('allowedVersions');
       }

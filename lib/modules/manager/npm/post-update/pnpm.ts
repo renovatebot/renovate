@@ -130,8 +130,9 @@ export async function generateLockFile(
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
 
     if (lockUpdates.length !== upgrades.length) {
-      // This command updates the lock file based on package.json
-      commands.push(`pnpm install ${args}`);
+      // This command updates the lock file based on package.json.
+      // Pass `--no-frozen-lockfile` to ensure the lockfile is updated
+      commands.push(`pnpm install ${args} --no-frozen-lockfile`);
     }
 
     // rangeStrategy = update-lockfile

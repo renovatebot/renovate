@@ -11,6 +11,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { getFile } from '../../../../util/git/index.ts';
 import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
 import { coerceString } from '../../../../util/string.ts';
@@ -74,7 +75,7 @@ function getUpdatedLockFileContent(
   updatedFileContents: Record<string, string>,
 ): string | undefined {
   for (const upgrade of updatedDeps) {
-    const lockFiles = [upgrade.lockFile, ...(upgrade.lockFiles ?? [])];
+    const lockFiles = [upgrade.lockFile, ...coerceArray(upgrade.lockFiles)];
     for (const lockFile of lockFiles) {
       if (lockFile && updatedFileContents[lockFile] !== undefined) {
         return updatedFileContents[lockFile];
@@ -85,18 +86,51 @@ function getUpdatedLockFileContent(
   return undefined;
 }
 
-function removeUpdatedLockFileChanges(
+function removeUnrefreshedLockfileOnlyChanges(
   packageFiles: FileChange[],
   updatedDeps: BranchUpgradeConfig[],
+  results: UpdateArtifactsResult[] | null,
 ): void {
+  const refreshedFiles = new Set(
+    coerceArray(results).flatMap((result) =>
+      result.file ? [result.file.path] : [],
+    ),
+  );
+  const lockFiles = new Set(
+    updatedDeps
+      .filter((upgrade) => upgrade.isLockfileOnly)
+      .flatMap((upgrade) => [
+        upgrade.lockFile,
+        ...coerceArray(upgrade.lockFiles),
+      ]),
+  );
+  for (let index = packageFiles.length - 1; index >= 0; index -= 1) {
+    const path = packageFiles[index].path;
+    if (lockFiles.has(path) && !refreshedFiles.has(path)) {
+      packageFiles.splice(index, 1);
+    }
+  }
+}
+
+function removeSupersededLockFileChanges(
+  packageFiles: FileChange[],
+  updatedDeps: BranchUpgradeConfig[],
+  results: UpdateArtifactsResult[] | null,
+): void {
+  const artifactFiles = new Set(
+    coerceArray(results).flatMap((result) =>
+      result.file ? [result.file.path] : [],
+    ),
+  );
   const lockFiles = new Set(
     updatedDeps.flatMap((upgrade) => [
       upgrade.lockFile,
-      ...(upgrade.lockFiles ?? []),
+      ...coerceArray(upgrade.lockFiles),
     ]),
   );
   for (let index = packageFiles.length - 1; index >= 0; index -= 1) {
-    if (lockFiles.has(packageFiles[index].path)) {
+    const path = packageFiles[index].path;
+    if (lockFiles.has(path) && artifactFiles.has(path)) {
       packageFiles.splice(index, 1);
     }
   }
@@ -317,7 +351,7 @@ export async function getUpdatedPackageFiles(
       }
       if (newContent !== packageFileContent) {
         if (reuseExistingBranch) {
-          // This ensure it's always 1 commit from the bot
+          // This ensure it's always 1 commit from Renovate
           logger.debug(
             { packageFile, depName },
             'Need to update package file so will rebase first',
@@ -381,15 +415,22 @@ export async function getUpdatedPackageFiles(
             packageFile.path,
           ),
         });
-        const hasArtifactError = processUpdateArtifactResults(
+        removeUnrefreshedLockfileOnlyChanges(
+          updatedPackageFiles,
+          updatedDeps,
+          results,
+        );
+        removeSupersededLockFileChanges(
+          updatedPackageFiles,
+          updatedDeps,
+          results,
+        );
+        processUpdateArtifactResults(
           results,
           updatedArtifacts,
           artifactErrors,
           artifactNotices,
         );
-        if (hasArtifactError) {
-          removeUpdatedLockFileChanges(updatedPackageFiles, updatedDeps);
-        }
         if (isNonEmptyArray(results)) {
           await checkForPendingVersions(
             manager,
@@ -557,8 +598,7 @@ function processUpdateArtifactResults(
   updatedArtifacts: FileChange[],
   artifactErrors: ArtifactError[],
   artifactNotices: ArtifactNotice[],
-): boolean {
-  let hasArtifactError = false;
+): void {
   if (isNonEmptyArray(results)) {
     for (const res of results) {
       const { file, notice, artifactError } = res;
@@ -568,7 +608,6 @@ function processUpdateArtifactResults(
 
       if (artifactError) {
         artifactErrors.push(artifactError);
-        hasArtifactError = true;
       }
 
       if (notice) {
@@ -576,7 +615,6 @@ function processUpdateArtifactResults(
       }
     }
   }
-  return hasArtifactError;
 }
 
 /**

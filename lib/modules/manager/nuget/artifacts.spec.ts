@@ -73,14 +73,14 @@ describe('modules/manager/nuget/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     git.getFiles.mockResolvedValueOnce({ 'packages.lock.json': null });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
 
@@ -95,14 +95,14 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'path/with space/packages.lock.json': 'Current packages.lock.json',
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'path/with space/project.csproj',
         updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: "dotnet restore 'path/with space/project.csproj' --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
@@ -127,8 +127,8 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'packages.lock.json': 'New packages.lock.json',
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [
           { depName: 'dep', registryUrls: ['https://contoso.com/packages/'] },
@@ -136,7 +136,7 @@ describe('modules/manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config: { ...config, postUpdateOptions: ['dotnetWorkloadRestore'] },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New packages.lock.json',
@@ -180,14 +180,14 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'packages.lock.json': 'New packages.lock.json',
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'otherfile.props',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
 
@@ -205,14 +205,14 @@ describe('modules/manager/nuget/artifacts', () => {
       'packages.lock.json': 'New packages.lock.json',
     });
 
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'Directory.Build.props',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New packages.lock.json',
@@ -242,14 +242,14 @@ describe('modules/manager/nuget/artifacts', () => {
       'src/packages.lock.json': 'New packages.lock.json',
     });
 
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'src/Directory.Build.props',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New packages.lock.json',
@@ -274,14 +274,14 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'packages.lock.json': 'New packages.lock.json',
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
 
@@ -294,8 +294,8 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'packages.lock.json': 'New packages.lock.json',
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -304,7 +304,7 @@ describe('modules/manager/nuget/artifacts', () => {
           isLockFileMaintenance: true,
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New packages.lock.json',
@@ -344,14 +344,14 @@ describe('modules/manager/nuget/artifacts', () => {
     });
 
     findGlobalJson.mockResolvedValueOnce({ sdk: { version: '7.0.100' } });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New packages.lock.json',
@@ -405,14 +405,14 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'packages.lock.json': 'New packages.lock.json',
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config: { ...config, constraints: { dotnet: '7.0.100' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New packages.lock.json',
@@ -459,14 +459,14 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getLocalFiles.mockResolvedValueOnce({
       'packages.lock.json': 'New packages.lock.json',
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New packages.lock.json',
@@ -499,14 +499,14 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    expect(
-      await nuget.updateArtifacts({
+    await expect(
+      nuget.updateArtifacts({
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'packages.lock.json',

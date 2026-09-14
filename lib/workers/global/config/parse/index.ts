@@ -53,7 +53,7 @@ export async function parseConfigs(
     isNonEmptyArray(fileConfig.extends) &&
     isNonEmptyArray(additionalFileConfig.extends)
   ) {
-    config.extends = [...fileConfig.extends, ...(config.extends ?? [])];
+    config.extends = [...fileConfig.extends, ...coerceArray(config.extends)];
   }
   config = mergeChildConfig(config, envConfig);
   config = mergeChildConfig(config, cliConfig);
@@ -123,9 +123,9 @@ export async function parseConfigs(
   // TODO #41551
   if (isNonEmptyArray(cliConfig.repositories)) {
     const existingRepos = [
-      ...(fileConfig.repositories ?? []),
-      ...(additionalFileConfig.repositories ?? []),
-      ...(envConfig.repositories ?? []),
+      ...coerceArray(fileConfig.repositories),
+      ...coerceArray(additionalFileConfig.repositories),
+      ...coerceArray(envConfig.repositories),
     ];
 
     if (isNonEmptyArray(existingRepos)) {

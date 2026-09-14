@@ -111,28 +111,28 @@ describe('modules/manager/npm/post-update/node-version', () => {
 
   describe('getNodeToolConstraint()', () => {
     it('returns getNodeUpdate', async () => {
-      expect(
-        await getNodeToolConstraint(
+      await expect(
+        getNodeToolConstraint(
           config,
           [{ depName: 'node', newValue: '16.15.0' }],
           '',
           new Lazy(() => Promise.resolve({})),
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         toolName: 'node',
         constraint: '16.15.0',
       });
     });
 
     it('returns getNodeConstraint', async () => {
-      expect(
-        await getNodeToolConstraint(
+      await expect(
+        getNodeToolConstraint(
           config,
           [],
           '',
           new Lazy(() => Promise.resolve({})),
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         toolName: 'node',
         constraint: '^12.16.0',
       });

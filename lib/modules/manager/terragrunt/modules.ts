@@ -13,16 +13,16 @@ import { extractTerragruntProvider } from './providers.ts';
 import type { ExtractionResult, TerraformManagerData } from './types.ts';
 
 export const githubRefMatchRegex = regEx(
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
+  /github\.com(?:[/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(?:depth=\d+&)?ref=(?<tag>.*?)(?:&depth=\d+)?$/i,
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<host>[^/]*)\/(?<path>.*))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<host>[^/]*)\/(?<path>.*))\?(?:depth=\d+&)?ref=(?<tag>.*?)(?:&depth=\d+)?$/,
 );
 export const tfrVersionMatchRegex = regEx(
   /tfr:\/\/(?<registry>.*?)\/(?<org>[^/]+?)\/(?<name>[^/]+?)\/(?<cloud>[^/?]+).*\?(?:ref|version)=(?<currentValue>.*?)$/,
 );
 const hostnameMatchRegex = regEx(
-  /^(?<hostname>[a-zA-Z\d]([a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
+  /^(?<hostname>[a-zA-Z\d](?:[a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
 );
 
 export function extractTerragruntModule(

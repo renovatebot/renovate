@@ -1,10 +1,8 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
 const genericCaseFileContent = Fixtures.get('generic-case.main.kts');
-const customRepositoriesFileContent = Fixtures.get(
-  'custom-repositories.main.kts',
-);
 const missingPartsFileContent = Fixtures.get('missing-parts.main.kts');
 
 describe('modules/manager/kotlin-script/extract', () => {
@@ -42,6 +40,18 @@ describe('modules/manager/kotlin-script/extract', () => {
 
     it('detects custom repository definitions', () => {
       // when
+      const customRepositoriesFileContent = codeBlock`
+        #!/usr/bin/env kotlin
+        @file:Repository("https://jitpack.io")
+        @file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.22.0")
+        @file:DependsOn("org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r")
+        @file:Repository("https://some.other.repo/foo/bar/baz")
+        @file:Repository("")
+
+        // ...
+
+        println("Hello world")
+      `;
       const packageFile = extractPackageFile(customRepositoriesFileContent);
 
       // then

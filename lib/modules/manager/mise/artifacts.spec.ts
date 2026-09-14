@@ -953,7 +953,7 @@ tools = { node = [{ version = "20.11.0" }] }
     });
 
     it('returns update-failed in case of errors', () => {
-      vi.spyOn(lockfile, 'getLockedVersion').mockImplementationOnce(() => {
+      vi.spyOn(lockfile, 'getLockedTool').mockImplementationOnce(() => {
         throw new Error('unexpected error');
       });
 

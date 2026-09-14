@@ -21,6 +21,7 @@ import {
   getErrors,
   getWarnings,
 } from '../../errors-warnings.ts';
+import type { RepositoryResult } from '../../result.ts';
 import { getPlatformPrOptions } from '../../update/pr/index.ts';
 import { prepareLabels } from '../../update/pr/labels.ts';
 import { addParticipants } from '../../update/pr/participants.ts';
@@ -199,12 +200,9 @@ export async function ensureOnboardingPr(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]> | null,
   branches: BranchConfig[],
-): Promise<void> {
-  if (
-    config.repoIsOnboarded === true ||
-    (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
-  ) {
-    return;
+): Promise<RepositoryResult> {
+  if (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested) {
+    return 'onboarding';
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
@@ -231,7 +229,7 @@ export async function ensureOnboardingPr(
         logger.info(
           'DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving',
         );
-        return;
+        return 'onboarding';
       }
       await ensureComment({
         number: existingPr.number,
@@ -240,12 +238,12 @@ export async function ensureOnboardingPr(
           `:warning: This PR has a merge conflict which Renovate is unable to automatically resolve, so updates to this PR description are now paused. Please resolve the merge conflict manually.\n\n`,
         ),
       });
-      return;
+      return 'onboarding';
     }
   }
 
   if (OnboardingState.onboardingCacheValid) {
-    return;
+    return 'onboarding';
   }
 
   const onboardingConfigHashComment = await getOnboardingConfigHashComment();
@@ -332,7 +330,7 @@ export async function ensureOnboardingPr(
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
       logger.debug(`Pull Request #${existingPr.number} does not need updating`);
-      return;
+      return 'onboarding';
     }
     // PR must need updating
     if (GlobalConfig.get('dryRun')) {
@@ -345,7 +343,7 @@ export async function ensureOnboardingPr(
       });
       logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
     }
-    return;
+    return 'onboarding';
   }
   logger.debug('Creating onboarding PR');
   const labels: string[] = prepareLabels(config);
@@ -386,10 +384,12 @@ export async function ensureOnboardingPr(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
       );
       await scm.deleteBranch(onboardingBranch);
-      return;
+      return 'onboarding';
     }
     throw err;
   }
+
+  return 'onboarding';
 }
 
 function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {

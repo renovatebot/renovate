@@ -94,7 +94,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           { type: 'addition', path: 'index.html', contents: 'updated-file' },
         ],
@@ -136,7 +136,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           { type: 'addition', path: 'index.html', contents: 'updated-file' },
         ],
@@ -174,7 +174,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       } satisfies BranchUpgradeConfig);
       npm.updateDependency.mockReturnValue('some new content');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -203,7 +203,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedArtifacts: [
           {
             type: 'addition',
@@ -228,6 +228,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: '',
         lockFile: 'mise.lock',
         isLockfileUpdate: true,
+        isLockfileOnly: true,
         depName: 'node',
         currentVersion: '20.0.0',
         newVersion: '22.0.0',
@@ -242,13 +243,68 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       mise.updateArtifacts.mockResolvedValueOnce([]);
 
-      await getUpdatedPackageFiles(config);
+      const result = await getUpdatedPackageFiles(config);
 
       expect(mise.updateArtifacts).toHaveBeenCalledWith(
         expect.objectContaining({
           newLockFileContent: 'updated lock with target version',
         }),
       );
+      expect(result.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'mise.toml',
+          contents: '[tools]\nnode = "22"\n',
+        },
+      ]);
+    });
+
+    it('replaces a hand-edited lockfile with the refreshed artifact', async () => {
+      config.upgrades.push({
+        packageFile: 'mise.toml',
+        manager: 'mise',
+        branchName: '',
+        lockFile: 'mise.lock',
+        isLockfileUpdate: true,
+        isLockfileOnly: true,
+        depName: 'node',
+        currentVersion: '20.0.0',
+        newVersion: '20.1.0',
+      });
+      git.getFile.mockResolvedValue('existing content');
+      mise.updateLockedDependency.mockReturnValueOnce({
+        status: 'updated',
+        files: {
+          'mise.toml': '[tools]\nnode = "20"\n',
+          'mise.lock': 'hand-edited lock',
+        },
+      });
+      mise.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'mise.lock',
+            contents: 'refreshed lock',
+          },
+        },
+      ]);
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'mise.toml',
+          contents: '[tools]\nnode = "20"\n',
+        },
+      ]);
+      expect(result.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: 'refreshed lock',
+        },
+      ]);
     });
 
     it('does not retain a hand-edited mise lockfile when artifact refresh fails', async () => {
@@ -258,6 +314,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: '',
         lockFile: 'mise.lock',
         isLockfileUpdate: true,
+        isLockfileOnly: true,
         depName: 'node',
         currentVersion: '20.0.0',
         newVersion: '22.0.0',
@@ -284,6 +341,45 @@ describe('workers/repository/update/branch/get-updated', () => {
           type: 'addition',
           path: 'mise.toml',
           contents: '[tools]\nnode = "22"\n',
+        },
+      ]);
+    });
+
+    it('retains ordinary lockfile changes when artifact refresh fails', async () => {
+      config.upgrades.push({
+        packageFile: 'mise.toml',
+        manager: 'mise',
+        branchName: '',
+        lockFile: 'mise.lock',
+        isLockfileUpdate: true,
+        depName: 'node',
+        currentVersion: '20.0.0',
+        newVersion: '20.1.0',
+      });
+      git.getFile.mockResolvedValue('existing content');
+      mise.updateLockedDependency.mockReturnValueOnce({
+        status: 'updated',
+        files: {
+          'mise.toml': '[tools]\nnode = "20.1.0"\n',
+          'mise.lock': 'ordinary lock update',
+        },
+      });
+      mise.updateArtifacts.mockResolvedValueOnce([
+        { artifactError: { fileName: 'mise.lock', stderr: 'mise failed' } },
+      ]);
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'mise.toml',
+          contents: '[tools]\nnode = "20.1.0"\n',
+        },
+        {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: 'ordinary lock update',
         },
       ]);
     });
@@ -399,7 +495,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedArtifacts: [
           {
             type: 'addition',
@@ -533,7 +629,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -579,7 +675,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -605,7 +701,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
@@ -627,7 +723,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
       });
     });
@@ -641,7 +737,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       } satisfies BranchUpgradeConfig);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -783,7 +879,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedArtifacts: [
           {
             type: 'addition',
@@ -818,7 +914,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedArtifacts: [
           {
             type: 'addition',
@@ -1065,7 +1161,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       npm.updateDependency.mockReturnValue('old version');
       npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -1089,7 +1185,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         bumpedContent: 'version: 0.0.2',
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updatedPackageFiles: [
           {
             type: 'addition',

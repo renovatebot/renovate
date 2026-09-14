@@ -5,6 +5,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { safeStringify } from '../../../util/stringify.ts';
@@ -102,8 +103,8 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
   upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
   upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
   upgrade.commitMessage = upgrade.commitMessage.replace(
-    regEx(/to vv(\d)/),
-    'to v$1',
+    regEx(/to vv(?<digit>\d)/),
+    'to v$<digit>',
   );
   if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
     // We only need to lowercase the first line
@@ -468,14 +469,14 @@ export function generateBranchConfig(
   config.labels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.labels ?? [])
+        .map((upgrade) => coerceArray(upgrade.labels))
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
   config.addLabels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.addLabels ?? [])
+        .map((upgrade) => coerceArray(upgrade.addLabels))
         .reduce((a, b) => a.concat(b), []),
     ),
   ];

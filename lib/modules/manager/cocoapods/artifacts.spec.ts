@@ -57,28 +57,28 @@ describe('modules/manager/cocoapods/artifacts', () => {
 
   it('returns null if no Podfile.lock found', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if no updatedDeps were provided', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null for invalid local directory', async () => {
@@ -87,28 +87,28 @@ describe('modules/manager/cocoapods/artifacts', () => {
       localDir: '',
     });
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config: {},
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if updatedDeps is empty', async () => {
     const execSnapshots = mockExecAll();
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('returns null if unchanged', async () => {
@@ -122,15 +122,15 @@ describe('modules/manager/cocoapods/artifacts', () => {
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);
   });
 
   it('returns updated Podfile', async () => {
@@ -146,15 +146,20 @@ describe('modules/manager/cocoapods/artifacts', () => {
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       }),
-    ).toMatchObject([{ file: { contents: 'New Podfile' } }]);
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toMatchObject([{ file: { contents: 'New Podfile' } }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c \'install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install\'',
+      },
+    ]);
   });
 
   it('returns updated Podfile and Pods files', async () => {
@@ -174,20 +179,25 @@ describe('modules/manager/cocoapods/artifacts', () => {
         deleted: ['Pods/Deleted'],
       }),
     );
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toMatchObject([
+    ).resolves.toMatchObject([
       { file: { type: 'addition', path: 'Podfile.lock' } },
       { file: { type: 'addition', path: 'Pods/Manifest.lock' } },
       { file: { type: 'addition', path: 'Pods/New' } },
       { file: { type: 'deletion', path: 'Pods/Deleted' } },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c \'install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && pod install\'',
+      },
+    ]);
   });
 
   it('catches write error', async () => {
@@ -198,14 +208,14 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Podfile.lock', stderr: 'not found' } },
     ]);
     expect(execSnapshots).toBeEmpty();
@@ -219,17 +229,17 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.outputCacheFile.mockResolvedValueOnce();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile.lock');
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Podfile.lock', stderr: 'exec exception' } },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);
   });
 
   it('dynamically selects Docker image tag', async () => {

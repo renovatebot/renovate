@@ -4,6 +4,7 @@ import {
   isNumber,
   isUndefined,
 } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import {
@@ -28,7 +29,7 @@ import {
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getElapsedHours } from '../../../../util/date.ts';
-import { stripEmojis } from '../../../../util/emoji.ts';
+import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
 import { memoize } from '../../../../util/memoize.ts';
@@ -145,13 +146,14 @@ function addPullRequestNoteIfAttestationHasBeenLost(
   ) {
     upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
-      [
-        '> :stop_sign: **Caution**',
-        '>',
-        `> ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.`,
-        `> Verify that release ${newVersion} was published by the expected author.`,
-        '\n',
-      ].join('\n'),
+      emojify(
+        codeBlock`
+          > :stop_sign: **Caution**
+          >
+          > ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
+          > Verify that release ${newVersion} was published by the expected author.
+        `,
+      ),
     );
   }
 }
@@ -178,6 +180,9 @@ export async function ensurePr(
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
+  const dependencyDashboardApproved =
+    dependencyDashboardCheck === 'approvePr' ||
+    dependencyDashboardCheck === 'unpend';
   // Check if PR already exists
   const existingPr =
     (await platform.getBranchPr(branchName, config.baseBranch)) ??
@@ -206,7 +211,7 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
-  if (dependencyDashboardCheck === 'approvePr') {
+  if (dependencyDashboardApproved) {
     logger.debug('Forcing PR because of dependency dashboard approval');
     config.forcePr = true;
   }
@@ -249,7 +254,7 @@ export async function ensurePr(
       logger.debug('Branch status success');
     } else if (
       config.prCreation === 'approval' &&
-      dependencyDashboardCheck !== 'approvePr'
+      !dependencyDashboardApproved
     ) {
       return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
     } else if (config.prCreation === 'not-pending' && !config.forcePr) {
@@ -334,13 +339,14 @@ export async function ensurePr(
       } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes.push(
-          [
-            '> :exclamation: **Important**',
-            '> ',
-            '> Release Notes retrieval for this PR were skipped because no github.com credentials were available. ',
-            '> If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).',
-            '\n',
-          ].join('\n'),
+          emojify(
+            codeBlock`
+              > :exclamation: **Important**
+              >
+              > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+              > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+            `,
+          ),
         );
       }
     }
@@ -532,10 +538,10 @@ export async function ensurePr(
       pr = { number: 0 } as never;
     } else {
       try {
+        // for a vulnerability alert this checks the VulnerabilityConcurrentPRs count
         if (
           !dependencyDashboardCheck &&
-          isLimitReached('ConcurrentPRs', prConfig) &&
-          !config.isVulnerabilityAlert
+          isLimitReached('ConcurrentPRs', prConfig)
         ) {
           logger.debug('Skipping PR - limit reached');
           return { type: 'without-pr', prBlockedBy: 'RateLimited' };
@@ -551,7 +557,11 @@ export async function ensurePr(
           milestone: config.milestone,
         });
 
-        incCountValue('ConcurrentPRs');
+        incCountValue(
+          config.isVulnerabilityAlert
+            ? 'VulnerabilityConcurrentPRs'
+            : 'ConcurrentPRs',
+        );
         incCountValue('HourlyPRs');
         logger.info(
           { pr: pr?.number, prTitle, labels: pr?.labels },
@@ -589,6 +599,13 @@ export async function ensurePr(
         'This PR was configured for branch automerge. However, this is not possible, so it has been raised as a PR instead.';
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
+      }
+      if (
+        config.branchAutomergeFailureMessage ===
+        'automerge aborted - merge queue'
+      ) {
+        content +=
+          '\n___\n * The base branch only accepts changes through its merge queue and rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or allow Renovate to bypass the merge queue.';
       }
       content = platform.massageMarkdown(content, config.rebaseLabel);
       logger.debug('Adding branch automerge failure message to PR');

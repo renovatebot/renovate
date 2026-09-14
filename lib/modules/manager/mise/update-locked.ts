@@ -8,7 +8,6 @@ import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
 import * as lockfile from './lockfile.ts';
 import { MiseLockFile } from './schema.ts';
 
-const numericVersionRegex = regEx(/^\d/);
 const versionPrefixRegex = regEx(/^(?<prefix>[^\d]*)\d/);
 
 function getToolName(depName: string, lockFileData: MiseLockFile): string {
@@ -31,9 +30,11 @@ function formatLockedVersion(
   currentVersion: string,
   newVersion: string,
 ): string {
-  const prefix = versionPrefixRegex.exec(currentVersion)?.groups?.prefix;
-  if (prefix && numericVersionRegex.test(newVersion)) {
-    return `${prefix}${newVersion}`;
+  const currentPrefix =
+    versionPrefixRegex.exec(currentVersion)?.groups?.prefix ?? '';
+  const newPrefix = versionPrefixRegex.exec(newVersion)?.groups?.prefix;
+  if (newPrefix !== undefined) {
+    return `${currentPrefix}${newVersion.slice(newPrefix.length)}`;
   }
   return newVersion;
 }
@@ -51,34 +52,53 @@ function getVersionValueNode(
   content: string,
   depName: string,
   lockFileData: MiseLockFile,
-): AST.TOMLValue | undefined {
+  currentVersion: string,
+): { currentLockedVersion: string; versionNode: AST.TOMLValue } | undefined {
   const toolName = getToolName(depName, lockFileData);
-  if (!toolName || !lockfile.getLockedTool(lockFileData, depName)?.length) {
+  const lockedTools = lockfile.getLockedTool(lockFileData, depName);
+  if (!toolName || !lockedTools?.length) {
     return undefined;
   }
 
-  const table = astTableForTool(content, toolName);
+  const toolIndex =
+    lockedTools.length === 1
+      ? 0
+      : lockedTools.findIndex(
+          ({ version }) =>
+            version === currentVersion ||
+            formatLockedVersion(version, currentVersion) === version,
+        );
+  if (toolIndex === -1) {
+    return undefined;
+  }
+
+  const table = astTableForTool(content, toolName, toolIndex);
   const versionKeyValue = table?.body.find(
     (keyValue) => getVersionKeyValue(keyValue.key) === 'version',
   );
-  return versionKeyValue?.value.type === 'TOMLValue'
-    ? versionKeyValue.value
-    : undefined;
+  if (versionKeyValue?.value.type !== 'TOMLValue') {
+    return undefined;
+  }
+  return {
+    currentLockedVersion: lockedTools[toolIndex].version,
+    versionNode: versionKeyValue.value,
+  };
 }
 
 function astTableForTool(
   content: string,
   toolName: string,
+  toolIndex: number,
 ): AST.TOMLTable | undefined {
   const ast = parseTOMLDocument(content);
-  return ast.body[0].body.find(
+  return ast.body[0]?.body.find(
     (node): node is AST.TOMLTable =>
       node.type === 'TOMLTable' &&
       node.kind === 'array' &&
       node.resolvedKey.length === 3 &&
       node.resolvedKey[0] === 'tools' &&
       node.resolvedKey[1] === toolName &&
-      node.resolvedKey[2] === 0,
+      node.resolvedKey[2] === toolIndex,
   );
 }
 
@@ -100,19 +120,17 @@ export function updateLockedDependency(
       return { status: 'unsupported' };
     }
 
-    const currentVersionValue = lockfile.getLockedVersion(parsed.data, depName);
-    if (!currentVersionValue) {
-      return { status: 'unsupported' };
-    }
-
-    const versionNode = getVersionValueNode(
+    const lockedVersion = getVersionValueNode(
       lockFileContent,
       depName,
       parsed.data,
+      config.currentVersion,
     );
-    if (!versionNode) {
+    if (!lockedVersion) {
       return { status: 'unsupported' };
     }
+    const { currentLockedVersion: currentVersionValue, versionNode } =
+      lockedVersion;
 
     const currentLockedVersion = lockFileContent.slice(
       versionNode.range[0],

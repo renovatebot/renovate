@@ -4,6 +4,7 @@ import {
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
+  createGitlabToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -114,16 +115,14 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'BurntSushi/ripgrep',
         datasource: 'github-releases',
         currentValue: '14.1.1',
-        extractVersion: '^v?(?<version>.+)',
       });
     });
 
-    it('should normalize a leading v in the version', () => {
+    it('should preserve a leading v in the version', () => {
       expect(createGithubToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
         packageName: 'cli/cli',
         datasource: 'github-releases',
         currentValue: 'v2.64.0',
-        extractVersion: '^v?(?<version>.+)',
       });
     });
 
@@ -160,7 +159,6 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: '1.0.0',
-        extractVersion: '^v?(?<version>.+)',
       });
     });
 
@@ -171,7 +169,6 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'some/repo',
         datasource: 'github-releases',
         currentValue: 'v1.0.0',
-        extractVersion: '^v?(?<version>.+)',
       });
     });
 
@@ -198,6 +195,54 @@ describe('modules/manager/mise/backends', () => {
         datasource: 'github-releases',
         currentValue: '1.0.0',
         extractVersion: '^\\x70refix\\[test\\]\\(v\\)(?<version>.+)',
+      });
+    });
+  });
+
+  describe('createGitlabToolConfig()', () => {
+    it('should create a tooling config with empty options', () => {
+      expect(
+        createGitlabToolConfig('gitlab-org/cli', '1.54.0', {}),
+      ).toStrictEqual({
+        packageName: 'gitlab-org/cli',
+        datasource: 'gitlab-releases',
+        currentValue: '1.54.0',
+      });
+    });
+
+    it('should not set extractVersion if the version has leading v', () => {
+      expect(
+        createGitlabToolConfig('gitlab-org/cli', 'v1.54.0', {}),
+      ).toStrictEqual({
+        packageName: 'gitlab-org/cli',
+        datasource: 'gitlab-releases',
+        currentValue: 'v1.54.0',
+      });
+    });
+
+    it('should set extractVersion with custom version_prefix', () => {
+      expect(
+        createGitlabToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'release-',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'gitlab-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+      });
+    });
+
+    it('should escape special regex characters in version_prefix', () => {
+      expect(
+        createGitlabToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'v1.0+',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'gitlab-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^\\x761\\.0\\+(?<version>.+)',
       });
     });
   });

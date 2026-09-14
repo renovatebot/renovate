@@ -23,6 +23,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
+      'workarounds:groupings',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
@@ -135,6 +136,19 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  groupings: {
+    description: 'Groupings for specific package updates.',
+    packageRules: [
+      {
+        description:
+          'Group commander major updates, they depend on each other.',
+        groupName: 'commander',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@commander-js/extra-typings', 'commander'],
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore `http4s` digest-based `1.x` milestones.',
     packageRules: [
@@ -243,6 +257,14 @@ export const presets: Record<string, Preset> = {
           'sapmachine',
         ],
         versioning: 'docker',
+      },
+      {
+        description:
+          'Use partial semver versioning for partial mise Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
+        matchCurrentValue: '/^\\d+(?:\\.\\d+)?$/',
+        matchDatasources: ['java-version'],
+        matchManagers: ['mise'],
+        versioning: 'semver-partial',
       },
       {
         allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',

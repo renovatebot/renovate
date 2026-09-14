@@ -100,27 +100,27 @@ describe('modules/manager/poetry/artifacts', () => {
     it('returns null if no poetry.lock found', async () => {
       const execSnapshots = mockExecAll();
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: '',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toEqual([]);
     });
 
     it('returns null if updatedDeps is empty', async () => {
       const execSnapshots = mockExecAll();
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps: [],
           newPackageFileContent: '',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toEqual([]);
     });
 
@@ -130,14 +130,14 @@ describe('modules/manager/poetry/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
       fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: '',
           config,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'poetry update --lock --no-interaction dep1',
@@ -156,14 +156,14 @@ describe('modules/manager/poetry/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: '{}',
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -202,14 +202,14 @@ describe('modules/manager/poetry/artifacts', () => {
         password: 'passwordFour',
       });
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: pyproject10toml,
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -251,14 +251,14 @@ describe('modules/manager/poetry/artifacts', () => {
         ),
       );
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: pyproject13toml,
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -298,14 +298,14 @@ describe('modules/manager/poetry/artifacts', () => {
         ),
       );
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: pyproject13toml,
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -331,8 +331,8 @@ describe('modules/manager/poetry/artifacts', () => {
       hostRules.add({ password: 'unscoped-password' });
       hostRules.add({ hostType: 'pypi', password: 'scoped-password' });
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: `
@@ -342,7 +342,7 @@ describe('modules/manager/poetry/artifacts', () => {
         `,
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -366,14 +366,14 @@ describe('modules/manager/poetry/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: '{}',
           config,
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -408,8 +408,8 @@ describe('modules/manager/poetry/artifacts', () => {
         releases: [{ version: '1.2.0' }],
       });
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: pyproject1toml,
@@ -420,7 +420,7 @@ describe('modules/manager/poetry/artifacts', () => {
             },
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -483,8 +483,8 @@ describe('modules/manager/poetry/artifacts', () => {
         releases: [{ version: '1.2.0' }],
       });
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: pyproject1toml,
@@ -495,7 +495,7 @@ describe('modules/manager/poetry/artifacts', () => {
             },
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -565,8 +565,8 @@ describe('modules/manager/poetry/artifacts', () => {
         releases: [{ version: '1.0.0' }, { version: '1.2.0' }],
       });
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: pyproject1toml,
@@ -575,7 +575,7 @@ describe('modules/manager/poetry/artifacts', () => {
             constraints: {},
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -626,8 +626,8 @@ describe('modules/manager/poetry/artifacts', () => {
         releases: [{ version: '1.2.0' }],
       });
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: pyproject1toml,
@@ -636,7 +636,7 @@ describe('modules/manager/poetry/artifacts', () => {
             constraints: {},
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',
@@ -662,14 +662,16 @@ describe('modules/manager/poetry/artifacts', () => {
         throw new Error('not found');
       });
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: '{}',
           config,
         }),
-      ).toMatchObject([{ artifactError: { fileName: 'poetry.lock' } }]);
+      ).resolves.toMatchObject([
+        { artifactError: { fileName: 'poetry.lock' } },
+      ]);
       expect(execSnapshots).toMatchObject([]);
     });
 
@@ -679,8 +681,8 @@ describe('modules/manager/poetry/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
       fs.readLocalFile.mockResolvedValueOnce('Old poetry.lock');
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      expect(
-        await updateArtifacts({
+      await expect(
+        updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps: [],
           newPackageFileContent: '{}',
@@ -689,7 +691,7 @@ describe('modules/manager/poetry/artifacts', () => {
             isLockFileMaintenance: true,
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             contents: 'New poetry.lock',

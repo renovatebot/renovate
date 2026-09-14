@@ -6,9 +6,7 @@ import { regEx } from '../../../../util/regex.ts';
 type AuthField = 'token' | 'username' | 'password';
 
 type HttpsAuthField =
-  | 'httpscertificate'
-  | 'httpsprivatekey'
-  | 'httpscertificateauthority';
+  'httpscertificate' | 'httpsprivatekey' | 'httpscertificateauthority';
 
 function isAuthField(x: unknown): x is AuthField {
   return x === 'token' || x === 'username' || x === 'password';
