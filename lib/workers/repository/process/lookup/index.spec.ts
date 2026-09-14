@@ -173,6 +173,27 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('warns if there is nothing to roll back to', async () => {
+      // below every published version, so nothing satisfies it and nothing is older
+      config.currentValue = '0.0.0-alpha';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toBeEmpty();
+      expect(res.warnings).toEqual([
+        {
+          topic: 'q',
+          message: "Can't find version matching 0.0.0-alpha for npm package q",
+        },
+      ]);
+    });
+
     it('returns rollback for ranged version', async () => {
       config.currentValue = '^0.9.99';
       config.packageName = 'q';
@@ -947,6 +968,29 @@ describe('workers/repository/process/lookup/index', () => {
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
           hasAttestation: false,
+        },
+      ]);
+    });
+
+    it('bumps instead of updating the lockfile for vulnerabilityAlerts without a locked version', async () => {
+      config.currentValue = '^1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // without a lockfile to update the strategy falls back to bump, which
+      // widens the range rather than leaving it untouched
+      expect(updates).toMatchObject([
+        {
+          isBump: true,
+          newValue: '^1.0.1',
+          newVersion: '1.0.1',
         },
       ]);
     });
@@ -4178,6 +4222,27 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('does not skip when the current version is unresolvable but a locked version is set', async () => {
+      // `^5.0.0` matches none of the published versions, so no current version
+      // can be resolved - but a lockedVersion means this is not invalid
+      config.currentValue = '^5.0.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'replace';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // returning before `currentVersion` is recorded proves the early return
+      // was taken, and the missing skipReason proves it was the lockedVersion path
+      expect(res.currentVersion).toBeUndefined();
+      expect(res.skipReason).toBeUndefined();
+      expect(res.updates).toBeEmpty();
+    });
+
     it('handles digest pin', async () => {
       config.currentValue = '8.0.0';
       config.packageName = 'node';
@@ -4481,6 +4546,26 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'node',
         warnings: [],
       });
+    });
+
+    it('returns no updates if the datasource rejects every candidate release', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'com.example:artifact';
+      config.versioning = mavenVersioningId;
+      config.datasource = MavenDatasource.id;
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+      });
+      // nothing survives postprocessing, so no bucket yields a release
+      postprocessMavenRelease.mockResolvedValue('reject');
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // the current version resolves, proving we reached the per-bucket loop
+      expect(res.currentVersion).toBe('1.0.0');
+      expect(res.updates).toBeEmpty();
     });
 
     it('applies versionCompatibility for maven', async () => {
