@@ -116,7 +116,7 @@ export class HexpmBobDatasource extends Datasource {
   private static isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
       case 'elixir':
-        return regEx(/^v\d+\.\d+\.\d+($|-otp)/).test(version);
+        return regEx(/^v\d+\.\d+\.\d+(?:$|-otp)/).test(version);
       case 'erlang':
         return version.startsWith('OTP-');
     }

@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import * as _datasourceCommon from '../../../../modules/datasource/common.ts';
 import { Datasource } from '../../../../modules/datasource/datasource.ts';
 import type {
@@ -288,6 +289,50 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         expect(res.pendingChecks).toBeFalse();
         expect(res.pendingReleases).toHaveLength(0);
         expect(res.release?.version).toBe('1.0.4');
+      });
+
+      it('returns the latest release, if minimumReleaseAgeBehaviour is not set', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.4',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '100 days';
+        // minimumReleaseAgeBehaviour deliberately left unset
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'patch',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+        expect(res.release?.version).toBe('1.0.4');
+        // the release is not recorded against either behaviour, so neither is reported
+        expect(logger.logger.once.warn).not.toHaveBeenCalledWith(
+          expect.stringContaining(
+            'minimumReleaseAgeBehaviour=timestamp-optional',
+          ),
+        );
+        expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+          expect.objectContaining({ check: 'minimumReleaseAge' }),
+          expect.any(String),
+        );
       });
 
       it('returns latest release, if minimumReleaseAgeBehaviour=timestamp-required but minimumReleaseAge=0 days', async () => {

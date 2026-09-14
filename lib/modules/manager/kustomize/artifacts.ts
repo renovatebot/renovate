@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
@@ -15,6 +16,7 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { generateHelmEnvs } from './common.ts';
 import { parseKustomize } from './extract.ts';
 
@@ -130,14 +132,15 @@ export async function updateArtifacts({
   );
 
   try {
+    const helmConstraint = await resolveToolConstraint(config, 'helm');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',
-      constraint: config.constraints?.helm,
+      constraint: helmConstraint,
     };
 
     const execOptions: ExecOptions = {
       docker: {},
-      extraEnv: generateHelmEnvs(config),
+      extraEnv: generateHelmEnvs(helmConstraint),
       toolConstraints: [helmToolConstraint],
     };
 
@@ -186,8 +189,8 @@ export async function updateArtifacts({
     }
 
     const status = await getRepoStatus();
-    const chartsAddition = status?.not_added ?? [];
-    const chartsDeletion = status?.deleted ?? [];
+    const chartsAddition = coerceArray(status?.not_added);
+    const chartsDeletion = coerceArray(status?.deleted);
 
     const fileChanges: UpdateArtifactsResult[] = [];
 

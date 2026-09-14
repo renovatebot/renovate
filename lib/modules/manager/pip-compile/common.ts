@@ -1,8 +1,7 @@
-import { isString } from '@sindresorhus/is';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import { isNotNullOrUndefined } from '../../../util/array.ts';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
 import type {
   ExecOptions,
   ExtraEnv,
@@ -14,72 +13,41 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import type {
   CommandType,
   PipCompileArgs,
   SupportedManagers,
 } from './types.ts';
 
-export function getPythonVersionConstraint(
+export async function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
   extractedPythonVersion: string | undefined,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, 'python', () => {
+    if (extractedPythonVersion) {
+      logger.debug('Using python constraint extracted from the lock file');
+      return `==${extractedPythonVersion}`;
+    }
 
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  if (extractedPythonVersion) {
-    logger.debug('Using python constraint extracted from the lock file');
-    return `==${extractedPythonVersion}`;
-  }
-
-  return undefined;
+    return undefined;
+  });
 }
 
-export function getPipToolsVersionConstraint(
-  config: UpdateArtifactsConfig,
-): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (isString(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
-
-export function getUvVersionConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { uv } = constraints;
-
-  if (isString(uv)) {
-    logger.debug('Using uv constraint from config');
-    return uv;
-  }
-
-  return '';
-}
-
-export function getToolVersionConstraint(
+export async function getToolVersionConstraint(
   config: UpdateArtifactsConfig,
   commandType: CommandType,
-): ToolConstraint {
+): Promise<ToolConstraint> {
   if (commandType === 'uv') {
     return {
       toolName: 'uv',
-      constraint: getUvVersionConstraint(config),
+      constraint: await resolveToolConstraint(config, 'uv'),
     };
   }
 
   return {
     toolName: 'pip-tools',
-    constraint: getPipToolsVersionConstraint(config),
+    constraint: await resolveToolConstraint(config, 'pipTools'),
   };
 }
 
@@ -90,7 +58,10 @@ export async function getExecOptions(
   extraEnv: ExtraEnv<string>,
   extractedPythonVersion: string | undefined,
 ): Promise<ExecOptions> {
-  const constraint = getPythonVersionConstraint(config, extractedPythonVersion);
+  const constraint = await getPythonVersionConstraint(
+    config,
+    extractedPythonVersion,
+  );
   const execOptions: ExecOptions = {
     cwd: ensureLocalPath(cwd),
     docker: {},
@@ -99,7 +70,7 @@ export async function getExecOptions(
         toolName: 'python',
         constraint,
       },
-      getToolVersionConstraint(config, commandType),
+      await getToolVersionConstraint(config, commandType),
     ],
     extraEnv: {
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
@@ -113,7 +84,7 @@ export async function getExecOptions(
 }
 
 export const constraintLineRegex = regEx(
-  /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
+  /^(?:#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
 );
 
 export const disallowedPipOptions = [
@@ -229,17 +200,17 @@ export function extractHeaderCommand(
     if (arg.includes('=')) {
       const [option, value] = arg.split('=');
       if (option === '--extra') {
-        result.extra = result.extra ?? [];
+        result.extra = coerceArray(result.extra);
         result.extra.push(value);
       } else if (option === '--extra-index-url') {
-        result.extraIndexUrl = result.extraIndexUrl ?? [];
+        result.extraIndexUrl = coerceArray(result.extraIndexUrl);
         result.extraIndexUrl.push(value);
         // TODO: add to secrets? next PR
       } else if (['--constraint', '--constraints'].includes(option)) {
-        result.constraintsFiles = result.constraintsFiles ?? [];
+        result.constraintsFiles = coerceArray(result.constraintsFiles);
         result.constraintsFiles.push(value);
       } else if (['--override', '--overrides'].includes(option)) {
-        result.overridesFiles = result.overridesFiles ?? [];
+        result.overridesFiles = coerceArray(result.overridesFiles);
         result.overridesFiles.push(value);
       } else if (option === '--output-file') {
         if (result.outputFile) {
@@ -292,7 +263,7 @@ export function extractHeaderCommand(
 }
 
 const pythonVersionRegex = regEx(
-  /^(#.*?\r?\n)*# This file is autogenerated by pip-compile with Python (?<pythonVersion>\d+(\.\d+)*)\s/,
+  /^(?:#.*?\r?\n)*# This file is autogenerated by pip-compile with Python (?<pythonVersion>\d+(?:\.\d+)*)\s/,
   'i',
 );
 
@@ -375,8 +346,8 @@ export function getRegistryCredVarsFromPackageFiles(
   const urls: string[] = [];
   for (const packageFile of packageFiles) {
     urls.push(
-      ...(packageFile.registryUrls ?? []),
-      ...(packageFile.additionalRegistryUrls ?? []),
+      ...coerceArray(packageFile.registryUrls),
+      ...coerceArray(packageFile.additionalRegistryUrls),
     );
   }
   logger.debug(urls, 'Extracted registry URLs from package files');

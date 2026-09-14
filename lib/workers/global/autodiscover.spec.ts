@@ -39,7 +39,7 @@ describe('workers/global/autodiscover', () => {
   });
 
   it('returns if not autodiscovering', async () => {
-    expect(await autodiscoverRepositories(config)).toEqual(config);
+    await expect(autodiscoverRepositories(config)).resolves.toEqual(config);
   });
 
   it('autodiscovers github but empty', async () => {

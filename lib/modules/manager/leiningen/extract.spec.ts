@@ -72,75 +72,118 @@ describe('modules/manager/leiningen/extract', () => {
   });
 
   it('extractPackageFile', () => {
-    expect(extractPackageFile(leinProjectClj)).toMatchSnapshot({
+    expect(extractPackageFile(leinProjectClj)).toMatchObject({
       deps: [
-        { depName: 'org.clojure:clojure', currentValue: '1.3.0' },
-        { depName: 'org.jclouds:jclouds', currentValue: '1.0' },
-        { depName: 'net.sf.ehcache:ehcache', currentValue: '2.3.1' },
-        { depName: 'log4j:log4j', currentValue: '1.2.15' },
-        { depName: 'net.3scale:3scale-api', currentValue: '3.0.2' },
-        { depName: 'org.lwjgl.lwjgl:lwjgl', currentValue: '2.8.5' },
-        { depName: 'org.lwjgl.lwjgl:lwjgl-platform', currentValue: '2.8.5' },
-        { depName: 'org.clojure:clojure', currentValue: '1.4.0' },
-        { depName: 'org.clojure:clojure', currentValue: '1.5.0' },
         {
-          depName: 'clj-stacktrace:clj-stacktrace',
+          currentValue: '1.3.0',
+          depName: 'org.clojure:clojure',
+          depType: 'dependencies',
+          registryUrls: [
+            'https://download.java.net/maven/2',
+            'https://oss.sonatype.org/content/repositories/releases',
+            'https://blueant.com/archiva/snapshots',
+            'https://blueant.com/archiva/internal',
+          ],
+        },
+        {
+          currentValue: '1.0',
+          depName: 'org.jclouds:jclouds',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '2.3.1',
+          depName: 'net.sf.ehcache:ehcache',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '1.2.15',
+          depName: 'log4j:log4j',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '3.0.2',
+          depName: 'net.3scale:3scale-api',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '2.8.5',
+          depName: 'org.lwjgl.lwjgl:lwjgl',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '2.8.5',
+          depName: 'org.lwjgl.lwjgl:lwjgl-platform',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '1.4.0',
+          depName: 'org.clojure:clojure',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '1.5.0',
+          depName: 'org.clojure:clojure',
+          depType: 'dependencies',
+        },
+        {
           currentValue: '0.2.4',
+          depName: 'clj-stacktrace:clj-stacktrace',
+          depType: 'dependencies',
           sharedVariableName: 'clj-stacktrace-version',
         },
         {
-          depName: 'clj-time:clj-time',
           currentValue: '0.12.0',
+          depName: 'clj-time:clj-time',
           depType: 'managed-dependencies',
         },
         {
-          depName: 'me.raynes:fs',
           currentValue: '1.4.6',
+          depName: 'me.raynes:fs',
           depType: 'managed-dependencies',
         },
         {
+          currentValue: '1.1.1',
           depName: 'lein-pprint:lein-pprint',
-          currentValue: '1.1.1',
           depType: 'plugins',
         },
         {
-          depName: 'lein-assoc:lein-assoc',
           currentValue: '0.1.0',
+          depName: 'lein-assoc:lein-assoc',
           depType: 'plugins',
         },
         {
-          depName: 's3-wagon-private:s3-wagon-private',
           currentValue: '1.1.1',
+          depName: 's3-wagon-private:s3-wagon-private',
           depType: 'plugins',
         },
         {
+          currentValue: '0.0.1',
           depName: 'lein-foo:lein-foo',
-          currentValue: '0.0.1',
           depType: 'plugins',
         },
         {
+          currentValue: '0.0.1',
           depName: 'lein-bar:lein-bar',
-          currentValue: '0.0.1',
           depType: 'plugins',
         },
         {
-          depName: 'cider:cider-nrepl',
           currentValue: '0.7.1',
+          depName: 'cider:cider-nrepl',
           depType: 'plugins',
         },
         {
-          depName: 'com.theoryinpractise:clojure-maven-plugin',
           currentValue: '1.3.13',
+          depName: 'com.theoryinpractise:clojure-maven-plugin',
           depType: 'pom-plugins',
         },
         {
-          depName: 'org.apache.tomcat.maven:tomcat7-maven-plugin',
           currentValue: '2.1',
+          depName: 'org.apache.tomcat.maven:tomcat7-maven-plugin',
           depType: 'pom-plugins',
         },
         {
-          depName: 'com.google.appengine:appengine-maven-plugin',
           currentValue: '1.9.68',
+          depName: 'com.google.appengine:appengine-maven-plugin',
           depType: 'pom-plugins',
         },
       ],

@@ -13,9 +13,6 @@ import { extractPackageFile } from './index.ts';
 const azurePipelinesFilename = 'azure-pipelines.yaml';
 
 const azurePipelines = Fixtures.get('azure-pipelines.yaml');
-const azurePipelinesNoDependency = Fixtures.get(
-  'azure-pipelines-no-dependency.yaml',
-);
 
 describe('modules/manager/azure-pipelines/extract', () => {
   afterEach(() => {
@@ -243,6 +240,15 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should return null when there is no dependency found', () => {
+      const azurePipelinesNoDependency = codeBlock`
+        resources:
+          pipelines:
+            - pipeline: MyAppA
+              source: MyCIPipelineA
+            - pipeline: MyAppB
+              source: MyCIPipelineB
+              trigger: true
+      `;
       expect(
         extractPackageFile(azurePipelinesNoDependency, azurePipelinesFilename, {
           repository: 'repo',

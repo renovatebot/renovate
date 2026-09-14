@@ -164,12 +164,16 @@ It is OK to not inline metadata if it's complex, but in that case first think wh
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a static `msg` component, so they can be automatically grouped or associated.
 
+When logging an error object, always put it under the `err` metadata key, at any log level.
+Bunyan only applies the error serializer (stack handling, redaction) to the `err` key, and a single key keeps error logs searchable.
+
 Good:
 
 ```ts
 logger.debug({ config }, 'Full config');
 logger.debug(`Generated branchName: ${branchName}`);
 logger.warn({ presetName }, 'Failed to look up preset');
+logger.debug({ packageFile, err: parsed.error }, 'Failed to parse file');
 ```
 
 Avoid:
@@ -177,6 +181,7 @@ Avoid:
 ```ts
 logger.debug({ branchName }, 'Generated branchName');
 logger.warn(`Failed to look up preset ${presetName}`);
+logger.debug({ packageFile, error: parsed.error }, 'Failed to parse file');
 ```
 
 ## Array constructor
@@ -292,9 +297,9 @@ if (end) {
   - `mockDeep` returns a mock for any property access, so typos in mocked names won't fail the test
 - Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
-- Avoid `toMatchSnapshot`, only use it for:
-  - huge strings like the Renovate PR body text
-  - huge complex objects where you only need to test parts
+- Do not use snapshot matchers (`toMatchSnapshot`, `toMatchInlineSnapshot`, `toThrowErrorMatchingSnapshot`), write explicit assertions instead
+  - For huge strings like the Renovate PR body text, assert on the sections the test is about with `toContain`, `toStartWith` or `toEndWith`; compare the whole string with `toBe` only when producing exactly that text is the point of the test
+  - For huge complex objects where you only need to test parts, use `toMatchObject`
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
   - Use `partial<T>()` from `test/util` if only a partial object is required

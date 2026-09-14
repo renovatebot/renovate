@@ -1,7 +1,7 @@
 import { isPlainObject, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types/index.ts';
-import { hasKey } from '../../../../util/object.ts';
+import { coerceObject, hasKey } from '../../../../util/object.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { massage, parse as parseToml } from '../../../../util/toml.ts';
 import type { PackageDependency } from '../../types.ts';
@@ -180,9 +180,7 @@ function extractDependency({
   versionSubContent,
 }: {
   descriptor:
-    | string
-    | GradleCatalogModuleDescriptor
-    | GradleCatalogArtifactDescriptor;
+    string | GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor;
   versions: Record<string, GradleVersionPointerTarget>;
   depStartIndex: number;
   depSubContent: string;
@@ -250,8 +248,8 @@ export function parseCatalog(
   content: string,
 ): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   const tomlContent = parseToml(massage(content)) as GradleCatalog;
-  const versions = tomlContent.versions ?? {};
-  const libs = tomlContent.libraries ?? {};
+  const versions = coerceObject(tomlContent.versions);
+  const libs = coerceObject(tomlContent.libraries);
   const libStartIndex = content.indexOf('libraries');
   const libSubContent = content.slice(libStartIndex);
   const versionStartIndex = content.indexOf('versions');
@@ -290,7 +288,7 @@ export function parseCatalog(
     extractedDeps.push(dependency);
   }
 
-  const plugins = tomlContent.plugins ?? {};
+  const plugins = coerceObject(tomlContent.plugins);
   const pluginsStartIndex = content.indexOf('[plugins]');
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {

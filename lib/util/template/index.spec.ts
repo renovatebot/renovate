@@ -122,7 +122,7 @@ describe('util/template/index', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
     const output = template.compile(userTemplate, {});
-    expect(output).toMatchSnapshot();
+    expect(output).toBe('{\n  "some": {\n    "fancy": "json"\n  }\n}');
   });
 
   it('to JSON', () => {

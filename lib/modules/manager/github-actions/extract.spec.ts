@@ -8,53 +8,6 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const runnerTestWorkflowMacos = codeBlock`
-jobs:
-  test1:
-     runs-on: \${{ env.RUNNER }}
-  test2:
-      runs-on: abc-123
-  test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-      runs-on: macos-15-intel
-  test6:
-      runs-on: macos-26-intel
-`;
-
-const runnerTestWorkflowUbuntu = codeBlock`
-jobs:
-  test1:
-    runs-on: ubuntu-latest
-  test2:
-    runs-on:
-      ubuntu-22.04
-  test3:
-     runs-on:
-       group: ubuntu-runners
-       labels: ubuntu-20.04-16core
-  test4:
-      runs-on: ubuntu-22.04-arm
-`;
-
-const runnerTestWorkflowWindows = codeBlock`
-jobs:
-  test1:
-    runs-on: |
-      windows-2019
-  test2:
-    runs-on: >
-      windows-2022
-  test3:
-    runs-on: [windows-2022, selfhosted]
-  test4:
-      runs-on: windows-11-arm
-  test5:
-      runs-on: windows-2025
-`;
-
 describe('modules/manager/github-actions/extract', () => {
   beforeEach(() => {
     GlobalConfig.reset();
@@ -62,15 +15,15 @@ describe('modules/manager/github-actions/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(
-        await extractPackageFile('nothing here', 'empty-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'empty-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid yaml', async () => {
-      expect(
-        await extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts multiple docker image lines from yaml configuration file', async () => {
@@ -78,10 +31,99 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_1.yml'),
         'workflow_1.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
-        6,
-      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'replicated/dockerfilelint',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'actions/docker',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          currentValue: '6',
+          currentDigest:
+            'sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'redis',
+          currentValue: '5',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'postgres',
+          currentValue: '10',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
     });
 
     it('extracts multiple action tag lines from yaml configuration file', async () => {
@@ -89,13 +131,90 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-tags'),
-      ).toHaveLength(7);
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-digest'),
-      ).toHaveLength(1);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentValue: 'v1.1.0',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: '1.0.0',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          enabled: false,
+          skipReason: 'unversioned-reference',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145',
+        },
+        {
+          depName: 'docker/build-push-action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: 'v2.4.0',
+          currentDigest: 'ec3a7ce113134d7a93b817d10a8272cb61118579',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0',
+        },
+        {
+          depName: 'actions-rs/toolchain',
+          currentValue: 'v1.0.7',
+          currentDigest: '16499b5e05bf2e26879000db0c1d13f7e13fa3af',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7',
+        },
+        {
+          depName: 'actions-rs/cargo',
+          currentValue: 'v1.0.3',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
     });
 
     it('use github.com as registry when no settings provided', async () => {
@@ -579,6 +698,58 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('extracts a reusable workflow call as a workflow', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+        jobs:
+          release:
+            uses: some-org/some-repo/.github/workflows/release.yml@v1.2.3
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'some-org/some-repo',
+          currentValue: 'v1.2.3',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+          depType: 'workflow',
+          replaceString:
+            'some-org/some-repo/.github/workflows/release.yml@v1.2.3',
+          autoReplaceStringTemplate:
+            '{{depName}}/.github/workflows/release.yml@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        },
+      ]);
+    });
+
+    it.each`
+      uses                                                            | depType
+      ${'some-org/some-repo/.github/workflows/release.yml@v1'}        | ${'workflow'}
+      ${'some-org/some-repo/.github/workflows/release.yaml@v1'}       | ${'workflow'}
+      ${'actions/checkout@v4'}                                        | ${'action'}
+      ${'github/codeql-action/init@v3'}                               | ${'action'}
+      ${'some-org/some-repo/.github/workflows/sub/release.yml@v1'}    | ${'action'}
+      ${'some-org/some-repo/.github/workflows@v1'}                    | ${'action'}
+      ${'some-org/some-repo/.github/workflows/release.json@v1'}       | ${'action'}
+      ${'some-org/some-repo/nested/.github/workflows/release.yml@v1'} | ${'action'}
+    `(
+      'gives $uses the depType $depType',
+      async ({ uses, depType }: { uses: string; depType: string }) => {
+        const res = await extractPackageFile(
+          codeBlock`
+          jobs:
+            build:
+              steps:
+                - uses: ${uses}
+          `,
+          '.github/workflows/ci.yml',
+        );
+
+        expect(res?.deps[0]).toMatchObject({ depType });
+      },
+    );
+
     it('disables naked SHA pins without version comment', async () => {
       const res = await extractPackageFile(
         codeBlock`
@@ -726,6 +897,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple macos action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowMacos = codeBlock`
+      jobs:
+        test1:
+           runs-on: \${{ env.RUNNER }}
+        test2:
+            runs-on: abc-123
+        test3:
+          runs-on: "macos-12-large"
+        test4:
+          runs-on: 'macos-latest'
+        test5:
+            runs-on: macos-15-intel
+        test6:
+            runs-on: macos-26-intel
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowMacos,
         'workflow.yml',
@@ -772,6 +958,20 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowUbuntu = codeBlock`
+      jobs:
+        test1:
+          runs-on: ubuntu-latest
+        test2:
+          runs-on:
+            ubuntu-22.04
+        test3:
+           runs-on:
+             group: ubuntu-runners
+             labels: ubuntu-20.04-16core
+        test4:
+            runs-on: ubuntu-22.04-arm
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowUbuntu,
         'workflow.yml',
@@ -810,6 +1010,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple windows action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowWindows = codeBlock`
+      jobs:
+        test1:
+          runs-on: |
+            windows-2019
+        test2:
+          runs-on: >
+            windows-2022
+        test3:
+          runs-on: [windows-2022, selfhosted]
+        test4:
+            runs-on: windows-11-arm
+        test5:
+            runs-on: windows-2025
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowWindows,
         'workflow.yml',
@@ -994,6 +1209,38 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
+    it('extracts x-version from actions/setup-x referenced by an https:// URL', async () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: https://github.com/actions/setup-node@v4.4.0
+                with:
+                  node-version: '23.7.0'
+        `;
+
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'https://github.com/actions/setup-node',
+          packageName: 'actions/setup-node',
+          currentValue: 'v4.4.0',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '23.7.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+      ]);
+    });
+
     it('handles actions/setup-x without x-version field', async () => {
       const yamlContent = codeBlock`
         jobs:
@@ -1005,11 +1252,18 @@ describe('modules/manager/github-actions/extract', () => {
                   registry-url: 'https://npm.pkg.github.com'
         `;
       const res = await extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'actions/setup-node',
-        depType: 'action',
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/setup-node',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ]);
     });
 
     it('extracts x-version from actions/setup-x in composite action', async () => {
@@ -1150,7 +1404,9 @@ describe('modules/manager/github-actions/extract', () => {
           using: 'node20'
           main: 'index.js'
         `;
-      expect(await extractPackageFile(yamlContent, 'action.yml')).toBeNull();
+      await expect(
+        extractPackageFile(yamlContent, 'action.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts actions and with-version inputs nested in a parallel block', async () => {
@@ -1275,6 +1531,154 @@ describe('modules/manager/github-actions/extract', () => {
   it.each([
     {
       step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0.404' },
+      },
+      expected: [
+        {
+          currentValue: '8.0.404',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      // multiple SDKs, one per line, aren't a single version we can update
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '3.1.x\n5.0.x' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          currentValue: '3.1.x\n5.0.x',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'adopt', 'java-version': '11' },
+      },
+      expected: [
+        {
+          currentValue: '11',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: {
+          distribution: 'temurin',
+          'java-version': '21',
+          'java-package': 'jre',
+        },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jre',
+          depType: 'uses-with',
+          packageName: 'java-jre',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // we can't reliably track version updates for distributions other
+      // than Temurin/Adopt
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'zulu', 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'aquasecurity/setup-trivy@v0.2.6',
         with: {},
       },
@@ -1425,6 +1829,94 @@ describe('modules/manager/github-actions/extract', () => {
           skipReason: 'unspecified-version',
           packageName: 'astral-sh/uv',
           versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: 'amazon/amazon-ecs-sample:latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:v1.2.3',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.2.3',
+          datasource: 'docker',
+          depName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+          depType: 'uses-with',
+          packageName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image:
+            'amazon/amazon-ecs-sample@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      // the image is templated, so we can't reliably determine what to update
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '${{ steps.build-image.outputs.image }}',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'contains-variable',
         },
       ],
     },
@@ -1823,6 +2315,37 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'deno',
           depType: 'uses-with',
           packageName: 'deno',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'expo/expo-github-action@v8',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'expo/expo-github-action@v8',
+        with: { 'eas-version': '23.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '23.2.0',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
         },
       ],
     },
@@ -2253,6 +2776,108 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43.100.0' },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: '43'`, quoted, matching the action's own default
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43' },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: 43`, unquoted, parses as a YAML number rather than a string
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': 43 },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-version': '43.100.0',
+          'renovate-image': 'ghcr.io/my-org/renovate',
+        },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/my-org/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/my-org/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'UpCloudLtd/upcloud-cli-action@main',
         with: { version: 'v3.35.0' },
       },
@@ -2311,6 +2936,23 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       // the lockfile only records `OWNER/REPO@REF` pins, so a `docker://` image is still ours to pin
       expect(res?.deps[1]).not.toHaveProperty('digestManagedExternally');
+    });
+
+    it('marks a reusable workflow call, which the lockfile records too', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          jobs:
+            release:
+              uses: some-org/some-repo/.github/workflows/release.yml@v1
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        { depType: 'workflow', digestManagedExternally: true },
+      ]);
     });
 
     it('leaves a workflow which is not onboarded alone', async () => {
