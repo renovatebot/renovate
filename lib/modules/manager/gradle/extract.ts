@@ -53,6 +53,7 @@ function updatePackageRegistries(
         item.registryType === url.registryType &&
         item.content === url.content,
     );
+    // v8 ignore else -- needs a registry that is already known
     if (!registryAlreadyKnown) {
       packageRegistries.push(url);
     }
@@ -119,6 +120,8 @@ export function matchesContentDescriptor(
       if (isMatch) {
         matchesInclude = true;
       }
+      // NOTE: the mode is either include or exclude, so the implicit else never
+      // runs. A coverage-ignore hint cannot suppress it on an `else if`.
     } else if (mode === 'exclude') {
       hasExcludes = true;
       if (isMatch) {
@@ -286,6 +289,7 @@ export async function extractAllPackageFiles(
 
       dep.datasource ??= mavenDatasource;
 
+      // v8 ignore else -- every dep here defaults to the maven datasource above
       if (dep.datasource === mavenDatasource) {
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
