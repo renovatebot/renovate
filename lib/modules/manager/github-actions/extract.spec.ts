@@ -4302,6 +4302,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'superfly/flyctl-actions/setup-flyctl@master',
+        with: { version: '0.4.102' },
+      },
+      expected: [
+        {
+          currentValue: '0.4.102',
+          datasource: 'github-releases',
+          depName: 'flyctl',
+          depType: 'uses-with',
+          packageName: 'superfly/flyctl',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'superfly/flyctl-actions/setup-flyctl@master',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'flyctl',
+          depType: 'uses-with',
+          packageName: 'superfly/flyctl',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
