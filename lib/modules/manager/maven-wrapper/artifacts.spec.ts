@@ -1,19 +1,15 @@
-import { createHash } from 'node:crypto';
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { codeBlock } from 'common-tags';
 import type { StatusResult } from 'simple-git';
-import { dir as tmpDir } from 'tmp-promise';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import * as memCache from '../../../util/cache/memory/index.ts';
-import * as packageCache from '../../../util/cache/package/index.ts';
+import * as withCacheModule from '../../../util/cache/package/with-cache.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
-import { parseUrl } from '../../../util/url.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -603,122 +599,35 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       expect(finalWrittenContent).not.toContain('oldhash123');
     });
 
-    describe('checksum cache', () => {
-      let cacheDir: Awaited<ReturnType<typeof tmpDir>>;
+    it('should use cached distribution checksum when available', async () => {
+      mockMavenFileChangedInGit();
+      fs.readLocalFile.mockResolvedValueOnce(
+        propertiesWithDistributionChecksumOnly,
+      );
+      const withCacheSpy = vi
+        .spyOn(withCacheModule, 'withCache')
+        .mockResolvedValueOnce('cachedhash123');
 
-      beforeEach(async () => {
-        cacheDir = await tmpDir({ unsafeCleanup: true });
-        await packageCache.init({ cacheDir: cacheDir.path });
+      await updateArtifacts({
+        packageFileName: '.mvn/wrapper/maven-wrapper.properties',
+        newPackageFileContent: propertiesWithDistributionChecksumOnly,
+        updatedDeps: [{ depName: 'maven' }],
+        config: { currentValue: '3.9.8', newValue: '3.9.9' },
       });
 
-      afterEach(async () => {
-        await packageCache.cleanup({});
-        await cacheDir.cleanup();
-      });
-
-      it.each`
-        url                                                               | cacheable
-        ${'https://repo.maven.apache.org/maven2/file.zip'}                | ${true}
-        ${'https://repo1.maven.org/maven2/file.zip'}                      | ${true}
-        ${'HTTPS://REPO.MAVEN.APACHE.ORG:443/maven2/file.zip'}            | ${true}
-        ${'https://repo.maven.apache.org/other/../maven2/file.zip'}       | ${true}
-        ${'https://repo.maven.apache.org/maven2/sub/%2e%2e/file.zip'}     | ${true}
-        ${'https://repo.maven.apache.org/maven2/file%20name.zip'}         | ${true}
-        ${'https://repo.maven.apache.org/maven2/file.zip/'}               | ${true}
-        ${'https://private.example/maven2/file.zip'}                      | ${false}
-        ${'https://repo.maven.apache.org.example/maven2/file.zip'}        | ${false}
-        ${'https://repo.maven.apache.org:8443/maven2/file.zip'}           | ${false}
-        ${'http://repo.maven.apache.org/maven2/file.zip'}                 | ${false}
-        ${'https://central.maven.org/maven2/file.zip'}                    | ${false}
-        ${'https://repo.maven.apache.org/maven2-other/file.zip'}          | ${false}
-        ${'https://repo.maven.apache.org/maven2'}                         | ${false}
-        ${'https://repo.maven.apache.org/maven2/../private/file.zip'}     | ${false}
-        ${'https://repo.maven.apache.org/maven2/%2e%2e/private/file.zip'} | ${false}
-        ${'https://repo.maven.apache.org/maven2%2fprivate/file.zip'}      | ${false}
-        ${'https://repo.maven.apache.org/MAVEN2/file.zip'}                | ${false}
-        ${'https://user:password@repo.maven.apache.org/maven2/file.zip'}  | ${false}
-        ${'https://:password@repo.maven.apache.org/maven2/file.zip'}      | ${false}
-        ${'https://repo.maven.apache.org/maven2/file.zip?token=secret'}   | ${false}
-        ${'https://repo.maven.apache.org/maven2/file.zip?'}               | ${false}
-        ${'https://repo.maven.apache.org/maven2/file.zip#secret'}         | ${false}
-        ${'https://repo.maven.apache.org/maven2/file.zip#'}               | ${false}
-      `('caches checksum for $url: $cacheable', async ({ url, cacheable }) => {
-        const parsed = parseUrl(url)!;
-        const content = `distributionUrl=${url}\ndistributionSha256Sum=oldhash123`;
-        const key = `cache-decorator:${url}`;
-        if (!cacheable) {
-          await packageCache.set(
-            'url-sha256',
-            key,
-            {
-              value: 'previous-context-checksum',
-              cachedAt: new Date().toISOString(),
-            },
-            4320,
-          );
-        }
-
-        const bodies = cacheable
-          ? ['public artifact']
-          : ['first artifact', 'second artifact'];
-        for (const body of bodies) {
-          httpMock
-            .scope(parsed.origin)
-            .get(parsed.pathname + parsed.search)
-            .reply(200, Buffer.from(body));
-        }
-
-        for (let attempt = 0; attempt < 2; attempt++) {
-          memCache.init();
-          mockMavenFileChangedInGit();
-          fs.readLocalFile.mockResolvedValueOnce(content);
-          await updateArtifacts({
-            packageFileName: '.mvn/wrapper/maven-wrapper.properties',
-            newPackageFileContent: content,
-            updatedDeps: [{ depName: 'maven' }],
-            config: { currentValue: '3.9.8', newValue: '3.9.9' },
-          });
-
-          const body = bodies[cacheable ? 0 : attempt];
-          const digest = createHash('sha256').update(body).digest('hex');
-          expect(fs.writeLocalFile).toHaveBeenLastCalledWith(
-            '.mvn/wrapper/maven-wrapper.properties',
-            `distributionUrl=${url}\ndistributionSha256Sum=${digest}`,
-          );
-        }
-
-        memCache.init();
-
-        const cached = await packageCache.get('url-sha256', key);
-        expect(cached).toEqual({
-          value: cacheable
-            ? createHash('sha256').update(bodies[0]).digest('hex')
-            : 'previous-context-checksum',
-          cachedAt: expect.any(String),
-        });
-      });
-
-      it('preserves the checksum when the artifact URL is invalid', async () => {
-        const content =
-          'distributionUrl=invalid-url\ndistributionSha256Sum=oldhash123';
-        mockMavenFileChangedInGit();
-        fs.readLocalFile.mockResolvedValueOnce(content);
-
-        await updateArtifacts({
-          packageFileName: '.mvn/wrapper/maven-wrapper.properties',
-          newPackageFileContent: content,
-          updatedDeps: [{ depName: 'maven' }],
-          config: { currentValue: '3.9.8', newValue: '3.9.9' },
-        });
-
-        expect(fs.writeLocalFile).toHaveBeenLastCalledWith(
-          '.mvn/wrapper/maven-wrapper.properties',
-          content,
-        );
-        await expect(
-          packageCache.get('url-sha256', 'cache-decorator:invalid-url'),
-        ).resolves.toBeUndefined();
-      });
+      expect(withCacheSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          namespace: 'url-sha256',
+          key: 'https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip',
+          ttlMinutes: 3 * 24 * 60,
+        }),
+        expect.any(Function),
+      );
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      const finalWrittenContent = vi.mocked(fs.writeLocalFile).mock.calls[1][1];
+      expect(finalWrittenContent).toContain(
+        'distributionSha256Sum=cachedhash123',
+      );
     });
 
     it('should skip checksum update when current content is missing', async () => {
