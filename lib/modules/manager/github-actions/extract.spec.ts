@@ -2878,6 +2878,117 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'erlef/setup-beam@v1',
+        with: {
+          'otp-version': '27.1.2',
+          'elixir-version': '1.17.3',
+          'gleam-version': '1.5.1',
+          'rebar3-version': '3.24.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: '27.1.2',
+          datasource: 'github-releases',
+          depName: 'erlang/otp',
+          depType: 'uses-with',
+          packageName: 'erlang/otp',
+        },
+        {
+          currentValue: '1.17.3',
+          datasource: 'github-releases',
+          depName: 'elixir-lang/elixir',
+          depType: 'uses-with',
+          packageName: 'elixir-lang/elixir',
+        },
+        {
+          currentValue: '1.5.1',
+          datasource: 'github-releases',
+          depName: 'gleam-lang/gleam',
+          depType: 'uses-with',
+          packageName: 'gleam-lang/gleam',
+        },
+        {
+          currentValue: '3.24.0',
+          datasource: 'github-releases',
+          depName: 'erlang/rebar3',
+          depType: 'uses-with',
+          packageName: 'erlang/rebar3',
+        },
+      ],
+    },
+    {
+      // most workflows only set a subset of the 4 possible inputs
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'otp-version': '27.1.2' },
+      },
+      expected: [
+        {
+          currentValue: '27.1.2',
+          datasource: 'github-releases',
+          depName: 'erlang/otp',
+          depType: 'uses-with',
+          packageName: 'erlang/otp',
+        },
+      ],
+    },
+    {
+      // none of the inputs are set, so no deps should be extracted at all
+      // (rather than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: {},
+      },
+      expected: [],
+    },
+    {
+      // `'nightly'` is a valid, documented value for rebar3-version, but not
+      // one we can pin/bump — the value is passed through as-is, and the
+      // versioning layer skips proposing an update since it isn't a real
+      // version
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'rebar3-version': 'nightly' },
+      },
+      expected: [
+        {
+          currentValue: 'nightly',
+          datasource: 'github-releases',
+          depName: 'erlang/rebar3',
+          depType: 'uses-with',
+          packageName: 'erlang/rebar3',
+        },
+      ],
+    },
+    {
+      // `false` is a valid, documented value for otp-version (skip
+      // installing OTP for Gleam-only workflows), but not one we can
+      // pin/bump — same pass-through treatment as rebar3-version's
+      // `nightly` above
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'otp-version': 'false', 'gleam-version': '1.5.0' },
+      },
+      expected: [
+        {
+          currentValue: 'false',
+          datasource: 'github-releases',
+          depName: 'erlang/otp',
+          depType: 'uses-with',
+          packageName: 'erlang/otp',
+        },
+        {
+          currentValue: '1.5.0',
+          datasource: 'github-releases',
+          depName: 'gleam-lang/gleam',
+          depType: 'uses-with',
+          packageName: 'gleam-lang/gleam',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'helm/kind-action@v1',
         with: {
           version: 'v0.33.0',
