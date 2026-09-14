@@ -394,6 +394,44 @@ const ErlefSetupBeamWith: ActionSchema = z
     },
   );
 
+// `graalvm/setup-graalvm` can yield up to 2 dependencies from a single step:
+// the JDK version it's built on, and the GraalVM distribution version
+// itself. Both inputs are optional, so only emit a dependency for the ones
+// a workflow actually sets.
+//
+// `graalvm/graalvm-ce-builds` has used several tag-naming conventions over
+// its history (`vm-ce-`, `vm-`, `jdk-`, `graal-`), and still alternates
+// between `jdk-` and `graal-` prefixes for releases after GraalVM's 2023
+// unification with JDK versioning, so we match both of those current-era
+// prefixes rather than either one alone.
+const GraalvmSetupWith: ActionSchema = z
+  .object({
+    'java-version': z.string().optional(),
+    version: z.string().optional(),
+  })
+  .transform(({ 'java-version': javaVersion, version }) => {
+    const deps: PackageDependency[] = [];
+
+    if (javaVersion) {
+      deps.push({
+        datasource: JavaVersionDatasource.id,
+        packageName: 'java-jdk',
+        ...parseValue(javaVersion),
+      });
+    }
+
+    if (version) {
+      deps.push({
+        datasource: GithubReleasesDatasource.id,
+        packageName: 'graalvm/graalvm-ce-builds',
+        extractVersion: '^(?:jdk|graal)-(?<version>.+)$',
+        ...parseValue(version),
+      });
+    }
+
+    return deps;
+  });
+
 const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
 const RenovateGithubActionWith: ActionSchema = z
   .object({
@@ -654,6 +692,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'goreleaser/goreleaser',
     // the default value (`~> v2`) is itself a range, not a pinned version
     versioning: npmVersioning.id,
+  },
+  // https://github.com/graalvm/setup-graalvm
+  'graalvm/setup-graalvm': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined per dependency: java-version, version
+    withSchema: GraalvmSetupWith,
   },
   // https://github.com/gradle/actions (there is no root-level Action, only
   // subpaths such as `setup-gradle` are usable)

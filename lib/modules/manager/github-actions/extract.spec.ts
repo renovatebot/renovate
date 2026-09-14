@@ -4333,6 +4333,72 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': '21', version: '21.0.1' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+        {
+          currentValue: '21.0.1',
+          datasource: 'github-releases',
+          depName: 'graalvm/graalvm-ce-builds',
+          depType: 'uses-with',
+          extractVersion: '^(?:jdk|graal)-(?<version>.+)$',
+          packageName: 'graalvm/graalvm-ce-builds',
+        },
+      ],
+    },
+    {
+      // the repo alternates between `jdk-` and `graal-` tag prefixes for
+      // current-era releases, so both must be matched
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { version: '25.3.4.1' },
+      },
+      expected: [
+        {
+          currentValue: '25.3.4.1',
+          datasource: 'github-releases',
+          depName: 'graalvm/graalvm-ce-builds',
+          depType: 'uses-with',
+          extractVersion: '^(?:jdk|graal)-(?<version>.+)$',
+          packageName: 'graalvm/graalvm-ce-builds',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 possible inputs
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': '21' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // neither input is set, so no deps should be extracted at all (rather
+      // than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: {},
+      },
+      expected: [],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
