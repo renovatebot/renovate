@@ -1,6 +1,7 @@
 import { isString } from '@sindresorhus/is';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../../../modules/versioning/types.ts';
+import { classifyRelease } from './update-type.ts';
 
 export interface BucketConfig {
   separateMajorMinor?: boolean;
@@ -24,7 +25,6 @@ export function getBucket(
   if (!separateMajorMinor) {
     return 'latest';
   }
-  const fromMajor = versioningApi.getMajor(currentVersion);
   const toMajor = versioningApi.getMajor(newVersion);
 
   // istanbul ignore if: error case
@@ -32,8 +32,10 @@ export function getBucket(
     return null;
   }
 
+  const updateType = classifyRelease(versioningApi, currentVersion, newVersion);
+
   // Check for major update type first
-  if (fromMajor !== toMajor) {
+  if (updateType === 'major') {
     if (separateMultipleMajor) {
       return `v${toMajor}`;
     }
@@ -43,6 +45,7 @@ export function getBucket(
 
   // If we reach here then we know it's non-major
 
+  // A versioning which cannot name the minor of either version cannot name a minor bucket either, so fall back to the shared non-major bucket
   const fromMinor = versioningApi.getMinor(currentVersion);
   const toMinor = versioningApi.getMinor(newVersion);
 
@@ -52,7 +55,7 @@ export function getBucket(
   }
 
   // Check the minor update type first
-  if (fromMinor !== toMinor) {
+  if (updateType === 'minor') {
     if (separateMultipleMinor) {
       return `v${toMajor}.${toMinor}`;
     }
