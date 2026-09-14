@@ -384,6 +384,13 @@ interface ManagerApiBase extends ModuleApi {
    * or conditional, instead of a plain `true`/`false`.
    */
   lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
+  /**
+   * Whether `updateDependency()` applies its change outside the package file,
+   * e.g. by modifying the checkout on disk, and therefore may return the
+   * package file unchanged. Such an unchanged package file must still be
+   * treated as updated, so that `updateArtifacts()` runs for it.
+   */
+  updatesFilesOutOfBand?: boolean;
 
   lockFileNames?: string[];
   supersedesManagers?: string[];
