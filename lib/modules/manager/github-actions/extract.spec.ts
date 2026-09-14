@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'cloudflare/wrangler-action@v3',
+        with: { wranglerVersion: '3.78.0' },
+      },
+      expected: [
+        {
+          currentValue: '3.78.0',
+          datasource: 'npm',
+          depName: 'wrangler',
+          depType: 'uses-with',
+          packageName: 'wrangler',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cloudflare/wrangler-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'wrangler',
+          depType: 'uses-with',
+          packageName: 'wrangler',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'peaceiris/actions-hugo@v3',
         with: { 'hugo-version': '0.166.0' },
       },
