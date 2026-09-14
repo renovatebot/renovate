@@ -689,6 +689,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     // Strip hatch- prefix from release tags
     extractVersion: '^hatch-(?<version>.+)$',
   },
+  // https://github.com/raven-actions/actionlint
+  'raven-actions/actionlint': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'actionlint',
+    packageName: 'rhysd/actionlint',
+  },
   // https://github.com/renovatebot/github-action
   'renovatebot/github-action': {
     datasource: DockerDatasource.id,

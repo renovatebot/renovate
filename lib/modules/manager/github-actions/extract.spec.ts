@@ -3809,6 +3809,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'raven-actions/actionlint@v2',
+        with: { version: 'v1.7.12' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.7.12',
+          datasource: 'github-releases',
+          depName: 'actionlint',
+          depType: 'uses-with',
+          packageName: 'rhysd/actionlint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'raven-actions/actionlint@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'actionlint',
+          depType: 'uses-with',
+          packageName: 'rhysd/actionlint',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
