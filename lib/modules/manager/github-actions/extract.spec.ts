@@ -2878,6 +2878,37 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'snok/install-poetry@v1',
+        with: { version: '1.8.3' },
+      },
+      expected: [
+        {
+          currentValue: '1.8.3',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'snok/install-poetry@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'terraform-linters/setup-tflint@v4',
         with: { tflint_version: 'v0.64.0' },
       },

@@ -452,6 +452,11 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'sigstore/cosign',
     withSchema: valSchema('cosign-release'),
   },
+  // https://github.com/snok/install-poetry
+  'snok/install-poetry': {
+    datasource: PypiDatasource.id,
+    packageName: 'poetry',
+  },
   // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {
     datasource: GithubReleasesDatasource.id,
