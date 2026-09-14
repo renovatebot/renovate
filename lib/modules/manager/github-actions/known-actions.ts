@@ -316,6 +316,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'helm',
     packageName: 'helm/helm',
   },
+  // https://github.com/azure/setup-kubectl
+  'azure/setup-kubectl': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'kubectl',
+    packageName: 'kubernetes/kubernetes',
+  },
   // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
     datasource: NpmDatasource.id,
