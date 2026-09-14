@@ -30,7 +30,7 @@ import type {
   FindPRConfig,
   Issue,
   MergePRConfig,
-  Platform,
+  PlatformModule,
   PlatformParams,
   PlatformResult,
   Pr,
@@ -176,7 +176,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     return repos.filter(usableRepo).map((r) => r.full_name);
   }
 
-  const platform: Platform = {
+  const platform: PlatformModule = {
     async initPlatform({
       endpoint,
       token,

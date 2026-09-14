@@ -3,7 +3,7 @@ import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { setRepositoryLogLevelRemaps } from '../../../logger/remap.ts';
-import { platform } from '../../../modules/platform/index.ts';
+import { platformSupports } from '../../../modules/platform/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { clone } from '../../../util/clone.ts';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git/index.ts';
@@ -27,7 +27,10 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 }
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
-  if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
+  if (
+    config.filterUnavailableUsers &&
+    !platformSupports('filterUnavailableUsers')
+  ) {
     const platform = GlobalConfig.get('platform');
     logger.warn(
       { platform },
@@ -35,7 +38,10 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
     );
   }
 
-  if (config.expandCodeOwnersGroups && !platform.expandGroupMembers) {
+  if (
+    config.expandCodeOwnersGroups &&
+    !platformSupports('expandGroupMembers')
+  ) {
     const platform = GlobalConfig.get('platform');
     logger.warn(
       { platform },

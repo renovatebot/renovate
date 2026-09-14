@@ -16,10 +16,9 @@ async function addCodeOwners(
 ): Promise<string[]> {
   const codeOwners = await codeOwnersForPr(pr);
 
-  const assignees =
-    config.expandCodeOwnersGroups && platform.expandGroupMembers
-      ? await platform.expandGroupMembers(codeOwners)
-      : codeOwners;
+  const assignees = config.expandCodeOwnersGroups
+    ? await platform.expandGroupMembers(codeOwners)
+    : codeOwners;
 
   return [...new Set(assigneesOrReviewers.concat(assignees))];
 }
@@ -28,7 +27,7 @@ function filterUnavailableUsers(
   config: RenovateConfig,
   users: string[],
 ): Promise<string[]> {
-  return config.filterUnavailableUsers && platform.filterUnavailableUsers
+  return config.filterUnavailableUsers
     ? platform.filterUnavailableUsers(users)
     : Promise.resolve(users);
 }

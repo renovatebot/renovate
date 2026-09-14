@@ -4,7 +4,7 @@ import { PLATFORM_HOST_TYPES, type PlatformId } from '../../constants/index.ts';
 import { loadModules } from '../../util/modules.ts';
 import api from './api.ts';
 import * as platform from './index.ts';
-import type { Platform } from './types.ts';
+import type { PlatformModule } from './types.ts';
 
 vi.unmock('./index.ts');
 vi.unmock('./scm.ts');
@@ -15,7 +15,10 @@ describe('modules/platform/index', () => {
   });
 
   it('validates', async () => {
-    function validate(module: Platform | undefined, name: string): boolean {
+    function validate(
+      module: PlatformModule | undefined,
+      name: string,
+    ): boolean {
       // TODO: test required api (#9650)
       if (!module?.initPlatform) {
         throw Error(`Missing api on ${name}`);
@@ -255,6 +258,83 @@ describe('modules/platform/index', () => {
       expect(new Set(platform.getPlatformList())).toEqual(
         new Set(PLATFORM_HOST_TYPES),
       );
+    });
+  });
+
+  describe('defaults', () => {
+    // `local` implements none of the defaulted members
+    beforeEach(() => {
+      platform.setPlatformApi('local');
+    });
+
+    it('returns no issue', async () => {
+      await expect(platform.platform.getIssue(1)).resolves.toBeNull();
+    });
+
+    it('returns no vulnerability alerts', async () => {
+      await expect(
+        platform.platform.getVulnerabilityAlerts(),
+      ).resolves.toBeEmptyArray();
+    });
+
+    it('does not force rebase', async () => {
+      await expect(
+        platform.platform.getBranchForceRebase('main'),
+      ).resolves.toBeFalse();
+    });
+
+    it('does not refresh PRs', async () => {
+      await expect(platform.platform.refreshPr(1)).resolves.toBeUndefined();
+    });
+
+    it('does not expand group members', async () => {
+      await expect(
+        platform.platform.expandGroupMembers(['@group']),
+      ).resolves.toEqual(['@group']);
+    });
+
+    it('does not filter out users', async () => {
+      await expect(
+        platform.platform.filterUnavailableUsers(['user']),
+      ).resolves.toEqual(['user']);
+    });
+
+    it('limits labels to 50 characters', () => {
+      expect(platform.platform.labelCharLimit()).toBe(50);
+    });
+
+    it('extracts plain CODEOWNERS rules', () => {
+      const [rule] = platform.platform.extractRulesFromCodeOwnersLines([
+        'src/** @jimmy @maria',
+      ]);
+
+      expect(rule).toMatchObject({
+        usernames: ['@jimmy', '@maria'],
+        pattern: 'src/**',
+        score: 6,
+      });
+      expect(rule.match('src/index.ts')).toBeTrue();
+      expect(rule.match('docs/index.md')).toBeFalse();
+    });
+
+    it('keeps the platform implementation when there is one', () => {
+      platform.setPlatformApi('gitlab');
+
+      expect(platform.platform.labelCharLimit()).toBe(255);
+    });
+  });
+
+  describe('platformSupports', () => {
+    it('is false for a defaulted member', () => {
+      platform.setPlatformApi('local');
+
+      expect(platform.platformSupports('expandGroupMembers')).toBeFalse();
+    });
+
+    it('is true for an implemented member', () => {
+      platform.setPlatformApi('gitlab');
+
+      expect(platform.platformSupports('expandGroupMembers')).toBeTrue();
     });
   });
 });
