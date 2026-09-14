@@ -82,6 +82,31 @@ function valSchema(
 
 const VersionVal = valSchema('version');
 
+/**
+ * A single dependency, versioned by the given `with:` input, where some
+ * documented literal values (e.g. `latest`, `nightly`) are present-but-not-
+ * pinnable rather than an actual error.
+ */
+function valSchemaSkippingLiterals(
+  key: string,
+  literals: ReadonlySet<string>,
+): ActionSchema {
+  return z.object({ [key]: z.string().optional() }).transform((val) => {
+    const value = val[key];
+    if (value && literals.has(value)) {
+      return [
+        {
+          currentValue: value,
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ];
+    }
+    return [parseValue(value)];
+  });
+}
+
 // Shared by the `actions/setup-{go,node,python}` entries below, whose
 // releases are published as `actions/{go,node,python}-versions` GitHub
 // releases, tagged like `20.11.0` or `20.11.0-1` (a build number suffix).
@@ -761,6 +786,15 @@ export const knownActions: Record<string, KnownActionConfig> = {
     withSchema: valSchema('flutter-version'),
   },
   // https://github.com/terraform-linters/setup-tflint
+  // https://github.com/supabase/setup-cli
+  'supabase/setup-cli': {
+    datasource: NpmDatasource.id,
+    packageName: 'supabase',
+    withSchema: valSchemaSkippingLiterals(
+      'version',
+      new Set(['latest', 'beta']),
+    ),
+  },
   'terraform-linters/setup-tflint': {
     datasource: GithubReleasesDatasource.id,
     depName: 'tflint',
