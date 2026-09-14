@@ -2,9 +2,10 @@ import { isEmptyString } from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
+import { findGithubComHostRule } from '../check-token.ts';
 import { detectPlatform } from '../common.ts';
 import type { ResolvedChildEnv } from '../exec/utils.ts';
-import { find, getAll } from '../host-rules.ts';
+import { getAll } from '../host-rules.ts';
 import { regEx } from '../regex.ts';
 import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
 import { addGitConfigEnvironmentVariables } from './config.ts';
@@ -150,10 +151,7 @@ export function getGitEnvironmentVariables(
   let gitEnvironmentVariables: ResolvedChildEnv = { ...environmentVariables };
 
   // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
-  const gitHubHostRule = find({
-    hostType: 'github',
-    url: 'https://api.github.com/',
-  });
+  const gitHubHostRule = findGithubComHostRule();
 
   if (gitHubHostRule?.token) {
     gitEnvironmentVariables = getGitAuthenticatedEnvironmentVariables(

@@ -1,12 +1,11 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { logger } from '../../../logger/index.ts';
-import { findGithubToken } from '../../../util/check-token.ts';
+import { findGithubComToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
@@ -25,12 +24,7 @@ export async function updateArtifacts({
 
   let cmd = `nix --extra-experimental-features 'nix-command flakes' `;
 
-  const token = findGithubToken(
-    hostRules.find({
-      hostType: 'github',
-      url: 'https://api.github.com/',
-    }),
-  );
+  const token = findGithubComToken();
 
   if (token) {
     cmd += `--extra-access-tokens github.com=${quote(token)} `;
