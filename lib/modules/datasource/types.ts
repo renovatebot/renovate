@@ -133,6 +133,8 @@ export type RegistryStrategy =
    * Only the first registry URL is queried.
    *
    * If multiple URLs are configured a warning is logged and the rest are ignored. Returns whatever the first registry returns, including `null`.
+   *
+   * The default.
    */
   | 'first'
   /**
@@ -142,8 +144,6 @@ export type RegistryStrategy =
    * An `ExternalHostError` aborts immediately (unless the cause is `HOST_DISABLED`, which returns `null`).
    *
    * Returns `null` when all registries are exhausted without a result.
-   *
-   * The default when `registryStrategy` is `undefined`.
    */
   | 'hunt'
   /**
@@ -170,10 +170,11 @@ export interface DatasourceApi extends ModuleApi {
 
   /**
    * Strategy to use when multiple registryUrls are available to the datasource.
+   * Defaults to `first`.
    *
    * @see RegistryStrategy
    */
-  registryStrategy?: RegistryStrategy | undefined;
+  registryStrategy: RegistryStrategy;
 
   /**
    * Whether release timestamp can be returned.

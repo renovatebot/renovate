@@ -22,8 +22,6 @@ export class DenoDatasource extends Datasource {
     return true;
   }
 
-  override readonly registryStrategy = 'first';
-
   override readonly defaultVersioning = semanticVersioning.id;
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
