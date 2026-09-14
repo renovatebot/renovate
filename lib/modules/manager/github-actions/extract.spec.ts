@@ -3620,6 +3620,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'abatilo/actions-poetry@v3',
+        with: { 'poetry-version': '1.8.3' },
+      },
+      expected: [
+        {
+          currentValue: '1.8.3',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'abatilo/actions-poetry@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
