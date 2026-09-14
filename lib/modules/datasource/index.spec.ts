@@ -59,33 +59,9 @@ class DummyDatasource extends Datasource {
   }
 }
 
-class DummyDatasource2 extends Datasource {
-  override defaultRegistryUrls = function () {
-    return ['https://reg1.com'];
-  };
-  private registriesMock: RegistriesMock;
-
-  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
-    super(datasource);
-    this.registriesMock = registriesMock;
-  }
-
-  override getReleases({
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const fn = this.registriesMock[registryUrl!];
-    if (isFunction(fn)) {
-      return Promise.resolve(fn());
-    }
-    return Promise.resolve(fn ?? null);
-  }
-}
-
 class DummyDatasource3 extends Datasource {
   override customRegistrySupport = false;
-  override defaultRegistryUrls = function () {
-    return ['https://reg1.com'];
-  };
+  override defaultRegistryUrls = ['https://reg1.com'];
   private registriesMock: RegistriesMock;
 
   constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -365,19 +341,7 @@ describe('modules/datasource/index', () => {
       expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
     });
 
-    it('defaultRegistryUrls function works', async () => {
-      datasources.set(datasource, new DummyDatasource2());
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
-      expect(res).toMatchObject({
-        releases: [{ version: '1.2.3' }],
-        registryUrl: 'https://reg1.com',
-      });
-    });
-
-    it('defaultRegistryUrls function with customRegistrySupport works', async () => {
+    it('datasource defaultRegistryUrls without customRegistrySupport works', async () => {
       datasources.set(datasource, new DummyDatasource3());
       const res = await getPkgReleases({
         datasource,
@@ -390,11 +354,24 @@ describe('modules/datasource/index', () => {
     });
 
     // for coverage
-    it('undefined defaultRegistryUrls with customRegistrySupport works', async () => {
+    it('undefined defaultRegistryUrls without customRegistrySupport works', async () => {
       datasources.set(datasource, new DummyDatasource4());
       const res = await getPkgReleases({
         datasource,
         packageName,
+      });
+      expect(res).toBeNull();
+    });
+
+    it('ignores additionalRegistryUrls without default registry urls', async () => {
+      class NoDefaultsDatasource extends DummyDatasource {
+        override defaultRegistryUrls = undefined as never;
+      }
+      datasources.set(datasource, new NoDefaultsDatasource());
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        additionalRegistryUrls: ['https://reg1.com'],
       });
       expect(res).toBeNull();
     });
