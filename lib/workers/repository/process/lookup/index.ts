@@ -334,7 +334,9 @@ export async function lookupUpdates(
       const allReleaseVersions = new Set(allVersions.map((r) => r.version));
       // The datasources used in these tests always return at least one
       // version-like release, so neither this block nor the currentDigest
-      // check inside it is reached - see #40625
+      // check inside it is reached. A lookup whose releases are all
+      // unversioned tags does not get here either - with a digest configured
+      // it takes the digest-only path above instead - see #40625
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -642,7 +644,9 @@ export async function lookupUpdates(
           versioningApi,
         );
         // `getBucket()` only returns null when the versioning api cannot
-        // determine a major, which no datasource here produces
+        // determine a major, but every release reaching it has already passed
+        // `isVersion()`, so a null major contradicts that and the else looks
+        // unreachable rather than merely untested
         // v8 ignore else -- see #40625
         if (isString(bucket)) {
           if (buckets[bucket]) {
@@ -664,8 +668,9 @@ export async function lookupUpdates(
             bucket,
             sortedReleases,
           );
-        // `filterInternalChecks()` always yields a release, falling back to
-        // the newest pending one - see #40625
+        // `filterInternalChecks()` normally yields a release, falling back to
+        // the newest pending one; only a datasource rejecting every candidate
+        // during postprocessing leaves none - see #40625
         // istanbul ignore next
         if (!release) {
           return Result.ok(res);

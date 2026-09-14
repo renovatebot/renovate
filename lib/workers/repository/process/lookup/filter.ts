@@ -139,7 +139,7 @@ export function filterVersions(
         semver.satisfies(
           semver.valid(r.version)
             ? r.version
-            : /* v8 ignore start: not reachable - would need a version valid in the configured versioning but not in semver, see #40625 */ semver.coerce(
+            : /* v8 ignore start: only for a version the configured versioning accepts but semver cannot parse, e.g. a four-part docker tag, see #40625 */ semver.coerce(
                 r.version,
               )!,
           /* v8 ignore stop */

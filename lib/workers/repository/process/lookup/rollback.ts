@@ -66,8 +66,9 @@ export function getRollbackUpdate(
     newVersion = newRelease?.version;
     registryUrl = newRelease?.registryUrl;
   }
-  // `lessThanVersions` is non-empty by this point, so the pop above always
-  // yields a release carrying a version - see #40625
+  // A real datasource always yields a release carrying a version here, so this
+  // only guards against malformed release data; `rollback.spec.ts` reaches it
+  // with a hand-built versioning api - see #40625
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
