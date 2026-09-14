@@ -37,15 +37,18 @@ function determineDependencyToUpdate({
 
 function generateToolingTable(): string {
   let table = codeBlock`
-    | Action | \`with\` input(s) used | Dependency |
-    | --- | --- | --- |
+    | Action | \`with\` input(s) used | Dependency | Default versioning |
+    | --- | --- | --- | --- |
     `;
   table += '\n';
 
   for (const [name, cfg] of Object.entries(knownActions)) {
     const withFields = getWithSchemaFields(cfg.withSchema);
+    const versioning = cfg.versioning
+      ? `[\`${cfg.versioning}\`](../../versioning/${cfg.versioning}/index.md)`
+      : '<sup>1</sup>';
 
-    table += `| [\`${name}\`](https://github.com/${name}) | \`${withFields.join('`, `')}\` | ${determineDependencyToUpdate(cfg)} |\n`;
+    table += `| [\`${name}\`](https://github.com/${name}) | \`${withFields.join('`, `')}\` | ${determineDependencyToUpdate(cfg)} | ${versioning} |\n`;
   }
 
   return table;
@@ -57,8 +60,5 @@ export async function generateManagerGithubActionsCommunity(
   const indexFileName = `${dist}/modules/manager/github-actions/index.md`;
   let indexContent = await readFile(indexFileName);
   indexContent = replaceContent(indexContent, generateToolingTable());
-  await updateFile(
-    `${dist}/modules/manager/github-actions/index.md`,
-    indexContent,
-  );
+  await updateFile(indexFileName, indexContent);
 }
