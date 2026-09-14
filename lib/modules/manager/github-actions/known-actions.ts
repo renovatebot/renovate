@@ -860,6 +860,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     // pin/bump
     withSchema: valSchemaSkippingLiterals('version', new Set(['lts', 'pre'])),
   },
+  // https://github.com/jwlawson/actions-setup-cmake
+  'jwlawson/actions-setup-cmake': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'cmake',
+    packageName: 'Kitware/CMake',
+    withSchema: valSchema('cmake-version'),
+  },
   // https://github.com/moonrepo/setup-rust
   'moonrepo/setup-rust': {
     datasource: RustVersionDatasource.id,

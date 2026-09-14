@@ -4573,6 +4573,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'jwlawson/actions-setup-cmake@v2',
+        with: { 'cmake-version': '4.3.5' },
+      },
+      expected: [
+        {
+          currentValue: '4.3.5',
+          datasource: 'github-releases',
+          depName: 'cmake',
+          depType: 'uses-with',
+          packageName: 'Kitware/CMake',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jwlawson/actions-setup-cmake@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'cmake',
+          depType: 'uses-with',
+          packageName: 'Kitware/CMake',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
