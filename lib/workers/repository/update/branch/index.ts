@@ -28,6 +28,7 @@ import { setArtifactErrorStatus } from './artifacts.ts';
 import { tryBranchAutomerge } from './automerge.ts';
 import { bumpVersions } from './bump-versions.ts';
 import {
+  findClosedPrForModifiedBranch,
   prAlreadyExisted,
   rebaseCheck,
   userChangedTargetBranch,
@@ -38,7 +39,11 @@ import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
 import { handleClosedPr, handleModifiedPr } from './handle-existing.ts';
 import { prBlockedByToResult } from './pr-blocked-by.ts';
-import { decideBranchReuse, shouldReuseExistingBranch } from './reuse.ts';
+import {
+  decideBranchReuse,
+  hasKeepUpdatedLabel,
+  shouldReuseExistingBranch,
+} from './reuse.ts';
 import { isScheduledNow } from './schedule.ts';
 import {
   computeInternalChecksStatus,
@@ -116,7 +121,6 @@ export async function processBranch(
     config.rebaseRequested = await rebaseCheck(config, branchPr);
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
-  const keepUpdatedLabel = config.keepUpdatedLabel;
   const pendingRebaseTopic = emojify(':warning: Rebase not applied');
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
   const artifactNoticeTopic = emojify(
@@ -276,7 +280,7 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(
+      config.isModified = await scm.isBranchModified(
         config.branchName,
         config.baseBranch,
       );
@@ -288,7 +292,7 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        if (branchIsModified || userChangedTargetBranch(branchPr)) {
+        if (config.isModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
           if (!(!!dependencyDashboardCheck || config.rebaseRequested)) {
@@ -299,36 +303,15 @@ export async function processBranch(
             };
           }
         }
-      } else if (branchIsModified && !dependencyDashboardCheck) {
-        const oldPr = await platform.findPr({
-          branchName: config.branchName,
-          state: '!open',
-          targetBranch: config.baseBranch,
-        });
-        if (!oldPr) {
-          logger.debug('Branch has been edited but found no PR - skipping');
-          return {
-            branchExists,
-            result: 'pr-edited',
-          };
-        }
-        const branchSha = await scm.getBranchCommit(config.branchName);
-        const oldPrSha = oldPr?.sha;
-        if (!oldPrSha || oldPrSha === branchSha) {
-          logger.debug(
-            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
-            'Found old PR matching this branch - will override it',
-          );
-        } else {
-          logger.debug(
-            { oldPrNumber: oldPr.number, oldPrSha, branchSha },
-            'Found old PR but the SHA is different',
-          );
-          return {
-            branchExists,
-            result: 'pr-edited',
-          };
-        }
+      } else if (
+        config.isModified &&
+        !dependencyDashboardCheck &&
+        !(await findClosedPrForModifiedBranch(config))
+      ) {
+        return {
+          branchExists,
+          result: 'pr-edited',
+        };
       }
     }
 
@@ -405,7 +388,7 @@ export async function processBranch(
     if (reuseDecision.action === 'no-reuse') {
       config.reuseExistingBranch = false;
     } else if (reuseDecision.action === 'check-reuse') {
-      config = await shouldReuseExistingBranch(config);
+      config = await shouldReuseExistingBranch(config, branchPr);
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
@@ -657,7 +640,7 @@ export async function processBranch(
     // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
-      const mergeStatus = await tryBranchAutomerge(config);
+      const mergeStatus = await tryBranchAutomerge(config, branchPr);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
@@ -686,7 +669,7 @@ export async function processBranch(
         mergeStatus === 'stale' &&
         ['conflicted', 'never'].includes(config.rebaseWhen!) &&
         /* v8 ignore next -- needs test */
-        !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
+        !hasKeepUpdatedLabel(config, branchPr)
       ) {
         logger.warn(
           'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead',
