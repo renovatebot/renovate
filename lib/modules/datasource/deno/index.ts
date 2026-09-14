@@ -126,6 +126,7 @@ export class DenoDatasource extends Datasource {
       { concurrency: 5 },
     );
 
+    // v8 ignore else -- needs every release already present in the cache
     if (cacheModified) {
       // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
       await packageCache.set(

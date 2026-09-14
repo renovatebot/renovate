@@ -157,6 +157,8 @@ export function setNpmrc(input?: string): void {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
     packageRules = npmrcRules.packageRules;
+    // NOTE: `npmrc` is an object, so it is never falsy. A coverage-ignore hint
+    // cannot suppress the implicit else on an `else if`.
   } else if (npmrc) {
     logger.debug('Resetting npmrc');
     npmrc = {};
