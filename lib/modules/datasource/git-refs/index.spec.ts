@@ -2,6 +2,7 @@ import type { SimpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { clearEnv } from '~test/util.ts';
 import * as git from '../../../util/git/index.ts';
 import { getPkgReleases } from '../index.ts';
@@ -162,6 +163,40 @@ describe('modules/datasource/git-refs/index', () => {
       expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
         authentication: { hostTypes: ['git-refs'] },
       });
+    });
+
+    it('falls back to a write GitHub token for git-refs lookups', async () => {
+      hostRules.add({
+        matchHost: 'https://github.com/',
+        token: 'write-token',
+      });
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      await new GitRefsDatasource().getDigest({ packageName }, undefined);
+
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
+        'https://x-access-token:write-token@github.com/example/example.git',
+      ]);
+    });
+
+    it('prefers a readonly GitHub token for git-refs lookups', async () => {
+      hostRules.add({
+        matchHost: 'https://github.com/',
+        token: 'write-token',
+      });
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'https://github.com/',
+        token: 'readonly-token',
+        readOnly: true,
+      });
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      await new GitRefsDatasource().getDigest({ packageName }, undefined);
+
+      expect(gitMock.listRemote).toHaveBeenCalledExactlyOnceWith([
+        'https://x-access-token:readonly-token@github.com/example/example.git',
+      ]);
     });
   });
 });

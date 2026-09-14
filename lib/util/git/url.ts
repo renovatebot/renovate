@@ -59,7 +59,11 @@ export function getHttpUrl(url: string, token?: string): string {
   return httpUrl.href;
 }
 
-export function getRemoteUrlWithToken(url: string, hostType?: string): string {
+export function getRemoteUrlWithToken(
+  url: string,
+  hostType?: string,
+  readOnly?: boolean,
+): string {
   let coercedUrl: string;
 
   try {
@@ -70,7 +74,7 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
     coercedUrl = url;
   }
 
-  const hostRule = hostRules.find({ url: coercedUrl, hostType });
+  const hostRule = hostRules.find({ url: coercedUrl, hostType, readOnly });
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);

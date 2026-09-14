@@ -216,5 +216,37 @@ describe('util/git/url', () => {
         'https://x-access-token:token@github.com/some/repo.git',
       );
     });
+
+    it('falls back to a write token when readOnly is requested', () => {
+      hostRules.add({ token: 'write-token' });
+      expect(
+        getRemoteUrlWithToken(
+          'ssh://github.com/some/repo.git',
+          'git-refs',
+          true,
+        ),
+      ).toBe('https://x-access-token:write-token@github.com/some/repo.git');
+    });
+
+    it('prefers a readonly token when readOnly is requested', () => {
+      hostRules.add({
+        matchHost: 'https://github.com/',
+        token: 'write-token',
+      });
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'https://github.com/',
+        token: 'readonly-token',
+        readOnly: true,
+      });
+
+      expect(
+        getRemoteUrlWithToken(
+          'https://github.com/some/repo.git',
+          'git-refs',
+          true,
+        ),
+      ).toBe('https://x-access-token:readonly-token@github.com/some/repo.git');
+    });
   });
 });
