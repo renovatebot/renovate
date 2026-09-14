@@ -342,6 +342,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     packageName: 'kubernetes/kubernetes',
     withSchema: SetupKubectlWith,
   },
+  // https://github.com/cloudflare/wrangler-action
+  'cloudflare/wrangler-action': {
+    datasource: NpmDatasource.id,
+    packageName: 'wrangler',
+    withSchema: valSchema('wranglerVersion'),
+  },
   // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
     datasource: NpmDatasource.id,
