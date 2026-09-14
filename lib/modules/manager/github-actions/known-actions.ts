@@ -496,6 +496,12 @@ export const knownActions: Record<string, KnownActionConfig> = {
     datasource: NpmDatasource.id,
     packageName: '@biomejs/biome',
   },
+  // https://github.com/bufbuild/buf-setup-action
+  'bufbuild/buf-setup-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'buf',
+    packageName: 'bufbuild/buf',
+  },
   'cloudflare/wrangler-action': {
     datasource: NpmDatasource.id,
     packageName: 'wrangler',
