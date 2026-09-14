@@ -11,6 +11,34 @@ describe('util/jsonata', () => {
       expect(getExpression('foo[')).toBeInstanceOf(Error);
     });
 
+    describe('$detectPlatform', () => {
+      it('should return platform for known URL', async () => {
+        const expression = getExpression(
+          '$detectPlatform("https://github.com/foo/bar")',
+        );
+        expect(expression).not.toBeInstanceOf(Error);
+        // make typescript happy
+        if (expression instanceof Error) {
+          throw expression;
+        }
+        const result = await expression.evaluate({});
+        expect(result).toBe('github');
+      });
+
+      it('should return null for unknown URL', async () => {
+        const expression = getExpression(
+          '$detectPlatform("https://unknown.example.com")',
+        );
+        expect(expression).not.toBeInstanceOf(Error);
+        // make typescript happy
+        if (expression instanceof Error) {
+          throw expression;
+        }
+        const result = await expression.evaluate({});
+        expect(result).toBeNull();
+      });
+    });
+
     describe('concurrent evaluation', () => {
       beforeEach(() => {
         memCache.init();

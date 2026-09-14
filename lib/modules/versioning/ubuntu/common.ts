@@ -20,7 +20,7 @@ function getDatedContainerImageVersion(version: string): null | number {
     return null;
   }
 
-  return parseInt(groups.groups.date);
+  return parseInt(groups.groups.date, 10);
 }
 
 function getDatedContainerImageSuffix(version: string): null | string {
@@ -33,8 +33,8 @@ function getDatedContainerImageSuffix(version: string): null | string {
 }
 
 export {
-  isDatedCodeName,
   getDatedContainerImageCodename,
-  getDatedContainerImageVersion,
   getDatedContainerImageSuffix,
+  getDatedContainerImageVersion,
+  isDatedCodeName,
 };

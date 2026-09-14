@@ -2,12 +2,16 @@ import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { setUserConfigFileNames } from '../../../config/app-strings.ts';
 import { decryptConfig } from '../../../config/decrypt.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config/index.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type {
+  RenovateConfig,
+  ValidationMessage,
+} from '../../../config/types.ts';
 import { validateConfig } from '../../../config/validation.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
@@ -16,10 +20,41 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
-import * as queue from '../../../util/http/queue.ts';
-import * as throttle from '../../../util/http/throttle.ts';
+import type { AddHostRuleOptions } from '../../../util/host-rules.ts';
+import { coerceObject } from '../../../util/object.ts';
 import * as template from '../../../util/template/index.ts';
+import { applyHostRules } from './merge.ts';
+
+const inheritedConfigValidationError =
+  'The inherited config contains some invalid settings';
+
+/**
+ * Report an inherited config validation failure against the inherited config, rather than the repository being processed.
+ *
+ * The inherited config repository is managed by the organization's administrators, so a fault there is not one the repository's owners have introduced - and they may not even be able to read the file to see it.
+ */
+function throwInheritedConfigValidationError(
+  validationSource: string,
+  errors: ValidationMessage[],
+): never {
+  const error = new Error(CONFIG_VALIDATION);
+  error.validationSource = validationSource;
+  error.validationError = inheritedConfigValidationError;
+  error.validationMessage = errors.map((err) => err.message).join(', ');
+  throw error;
+}
+
+/**
+ * How the inherited config's `hostRules` are registered.
+ *
+ * The inherited config repository is controlled by the organization's administrators rather than by the self-hosted administrator, so its rules are untrusted unless the administrator has opted into trusting them.
+ */
+function inheritedHostRuleOptions(): AddHostRuleOptions | undefined {
+  if (!GlobalConfig.get('inheritConfigTrusted')) {
+    return undefined;
+  }
+  return { inherited: true };
+}
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
@@ -84,6 +119,7 @@ export async function mergeInheritedConfig(
     logger.debug({ parseResult }, 'Error parsing inherited config.');
     throw new Error(CONFIG_INHERIT_PARSE_ERROR);
   }
+  const inheritedConfigSource = `Inherited config (\`${config.inheritConfigFileName}\` in \`${inheritConfigRepoName}\`)`;
   const inheritedConfig = parseResult.parsedContents as RenovateConfig;
   logger.debug({ config: inheritedConfig }, `Inherited config`);
   const res = await validateConfig('inherit', inheritedConfig);
@@ -92,7 +128,7 @@ export async function mergeInheritedConfig(
       { errors: res.errors },
       'Found errors in inherited configuration.',
     );
-    throw new Error(CONFIG_VALIDATION);
+    throwInheritedConfigValidationError(inheritedConfigSource, res.errors);
   }
   if (res.warnings.length) {
     logger.warn(
@@ -124,10 +160,10 @@ export async function mergeInheritedConfig(
   if (isNullOrUndefined(filteredConfig.extends)) {
     filteredConfig = applySecretsAndVariablesToConfig({
       config: filteredConfig,
-      secrets: config.secrets ?? {},
-      variables: config.variables ?? {},
+      secrets: coerceObject(config.secrets),
+      variables: coerceObject(config.variables),
     });
-    setInheritedHostRules(filteredConfig);
+    applyHostRules(filteredConfig, inheritedHostRuleOptions());
     filteredConfig = InheritConfig.set(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
@@ -146,7 +182,10 @@ export async function mergeInheritedConfig(
       { errors: validationRes.errors },
       'Found errors in presets inside the inherited configuration.',
     );
-    throw new Error(CONFIG_VALIDATION);
+    throwInheritedConfigValidationError(
+      inheritedConfigSource,
+      validationRes.errors,
+    );
   }
   if (validationRes.warnings.length) {
     logger.warn(
@@ -169,31 +208,10 @@ export async function mergeInheritedConfig(
 
   filteredConfig = applySecretsAndVariablesToConfig({
     config: filteredConfig,
-    secrets: config.secrets ?? {},
-    variables: config.variables ?? {},
+    secrets: coerceObject(config.secrets),
+    variables: coerceObject(config.variables),
   });
-  setInheritedHostRules(filteredConfig);
+  applyHostRules(filteredConfig, inheritedHostRuleOptions());
   filteredConfig = InheritConfig.set(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
-}
-
-function setInheritedHostRules(config: RenovateConfig): void {
-  if (config.hostRules) {
-    logger.debug('Setting hostRules from config');
-    for (const rule of config.hostRules) {
-      try {
-        hostRules.add(rule);
-      } catch (err) {
-        // istanbul ignore next
-        logger.warn(
-          { err, config: rule },
-          'Error setting hostRule from config',
-        );
-      }
-    }
-    // host rules can change concurrency
-    queue.clear();
-    throttle.clear();
-    delete config.hostRules;
-  }
 }

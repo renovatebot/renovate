@@ -10,7 +10,11 @@ import {
   storeInTokenMap,
   storeVarToken,
 } from './common.ts';
-import { handleLibraryDep, handlePlugin } from './handlers.ts';
+import {
+  handleCatalogDepString,
+  handleCatalogLongFormDep,
+  handlePlugin,
+} from './handlers.ts';
 
 const qAlias = qStringValue.handler((ctx) => storeInTokenMap(ctx, 'alias'));
 
@@ -35,7 +39,7 @@ const qVersionCatalogVersion = q
   .handler((ctx) => storeInTokenMap(ctx, 'version'));
 
 // library("foo.bar", "foo", "bar")
-const qVersionCatalogDependencies = q
+const qVersionCatalogLongFormDependencies = q
   .sym<Ctx>('library')
   .tree({
     type: 'wrapped-tree',
@@ -52,7 +56,26 @@ const qVersionCatalogDependencies = q
       .end(),
   })
   .opt(qVersionCatalogVersion)
-  .handler(handleLibraryDep)
+  .handler(handleCatalogLongFormDep)
+  .handler(cleanupTempVars);
+
+// library("foo.bar", "foo:bar:1.2.3")
+const qVersionCatalogShortDependencies = q
+  .sym<Ctx>('library')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .join(qAlias)
+      .op(',')
+      .join(qValueMatcher)
+      .handler((ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
+      .end(),
+  })
+  .handler(handleCatalogDepString)
   .handler(cleanupTempVars);
 
 // plugin("foo.bar", "foo:bar")
@@ -96,11 +119,12 @@ const qVersionCatalogAliasDependencies = q
     search: q.begin<Ctx>().join(qGroupId).op(',').join(qArtifactId).end(),
   })
   .opt(qVersionCatalogVersion)
-  .handler(handleLibraryDep)
+  .handler(handleCatalogLongFormDep)
   .handler(cleanupTempVars);
 
 export const qVersionCatalogs = q.alt(
-  qVersionCatalogDependencies,
+  qVersionCatalogLongFormDependencies,
+  qVersionCatalogShortDependencies,
   qVersionCatalogPlugins,
   qVersionCatalogAliasDependencies,
 );

@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import {
   massage as massageToml,
   parse as parseToml,
@@ -44,7 +45,7 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   const pythonConstraint = def.project?.['requires-python'];
-  const extractedConstraints: Record<string, string> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   if (pythonConstraint) {
     extractedConstraints.python = pythonConstraint;
     deps.push({

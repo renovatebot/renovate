@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
-import os from 'os';
+import { setTimeout } from 'node:timers/promises';
 import type { SemVer } from 'semver';
-import { setTimeout } from 'timers/promises';
 import { logger } from '../../lib/logger/index.ts';
 import { toMs } from '../../lib/util/pretty-time.ts';
 import { exec } from './exec.ts';
@@ -66,7 +66,7 @@ export async function bake(
   args.push(target);
 
   for (let tries = opts.tries ?? 0; tries >= 0; tries--) {
-    const result = exec(`docker`, args);
+    const result = await exec(`docker`, args, { reject: false });
     if (result.signal) {
       logger.error(`Signal received: ${result.signal}`);
       process.exit(-1);
@@ -97,15 +97,18 @@ export async function bake(
   return meta;
 }
 
-export function sign(
+export async function sign(
   image: string,
   opts: {
     args?: string[];
     exitOnError?: boolean;
   },
-): void {
+): Promise<void> {
   logger.info(`Signing ${image} ...`);
-  const result = exec('cosign', ['sign', '--yes', image]);
+  const result = await exec('cosign', ['sign', '--yes', image], {
+    reject: false,
+  });
+
   if (result.signal) {
     logger.error(`Signal received: ${result.signal}`);
     process.exit(-1);

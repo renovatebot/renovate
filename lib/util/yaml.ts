@@ -7,7 +7,7 @@ import type {
   ToStringOptions,
 } from 'yaml';
 import { parseAllDocuments, parseDocument, stringify } from 'yaml';
-import type { ZodType } from 'zod/v3';
+import type { ZodType } from 'zod/v4';
 import { logger } from '../logger/index.ts';
 import { stripTemplates } from './string.ts';
 
@@ -96,7 +96,7 @@ export function parseYaml<ResT = unknown>(
     // handle schema validation errors
     if (options?.failureBehaviour === 'filter') {
       logger.trace(
-        { error: result.error, document },
+        { err: result.error, document },
         'Failed to parse schema for YAML',
       );
       continue;

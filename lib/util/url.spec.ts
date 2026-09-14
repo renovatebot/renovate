@@ -10,6 +10,7 @@ import {
   parseUrl,
   replaceUrlPath,
   resolveBaseUrl,
+  resolveSameOriginUrl,
   trimSlashes,
   trimTrailingSlash,
 } from './url.ts';
@@ -91,7 +92,7 @@ describe('util/url', () => {
     ${'http://foo.io'}      | ${'aaa/?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
   `('replaceUrlPath("$baseUrl", "$x") => $result', ({ baseUrl, x, result }) => {
     expect(replaceUrlPath(baseUrl, x)).toBe(result);
-    expect(replaceUrlPath(new URL(baseUrl), x)).toBe(result);
+    expect(replaceUrlPath(parseUrl(baseUrl)!, x)).toBe(result);
   });
 
   it('getQueryString', () => {
@@ -106,7 +107,7 @@ describe('util/url', () => {
     expect(isHttpUrl('ssh://github.com')).toBeFalse();
     expect(isHttpUrl('http://github.com')).toBeTrue();
     expect(isHttpUrl('https://github.com')).toBeTrue();
-    expect(isHttpUrl(new URL('https://github.com'))).toBeTrue();
+    expect(isHttpUrl(parseUrl('https://github.com')!)).toBeTrue();
   });
 
   it('parses URL', () => {
@@ -179,10 +180,10 @@ describe('util/url', () => {
 
   it('createURLFromHostOrURL', () => {
     expect(createURLFromHostOrURL('https://some.test')).toEqual(
-      new URL('https://some.test/'),
+      parseUrl('https://some.test/')!,
     );
     expect(createURLFromHostOrURL('some.test')).toEqual(
-      new URL('https://some.test/'),
+      parseUrl('https://some.test/')!,
     );
   });
 
@@ -225,5 +226,82 @@ describe('util/url', () => {
       'https://domain.com/some/path',
     );
     expect(massageHostUrl('https://domain.com')).toBe('https://domain.com');
+  });
+
+  describe('resolveSameOriginUrl', () => {
+    it('resolves a same-origin absolute URL', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://registry.example.com/v2/foo/tags/list?n=10',
+          'https://registry.example.com/v2/foo/tags/list?n=10&last=z',
+        ),
+      ).toBe('https://registry.example.com/v2/foo/tags/list?n=10&last=z');
+    });
+
+    it('upgrades an HTTP URL to HTTPS when the host is the same', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://community.chocolatey.org/api/v2/FindPackagesById',
+          'http://community.chocolatey.org/api/v2/FindPackagesById?page=2',
+        ),
+      ).toBe('https://community.chocolatey.org/api/v2/FindPackagesById?page=2');
+    });
+
+    it('does not upgrade HTTP to HTTPS when the next URL has a non-standard port', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://community.chocolatey.org/api/v2/FindPackagesById',
+          'http://community.chocolatey.org:8080/api/v2/FindPackagesById?page=2',
+        ),
+      ).toBeNull();
+    });
+
+    it('rejects a different port on the same host', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://registry.example.com:8443/v2/foo',
+          'https://registry.example.com/v2/foo?page=2',
+        ),
+      ).toBeNull();
+    });
+
+    it('resolves a relative next URL against the base', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://registry.example.com/v2/foo/tags/list?n=10',
+          '/v2/foo/tags/list?n=10&last=z',
+        ),
+      ).toBe('https://registry.example.com/v2/foo/tags/list?n=10&last=z');
+    });
+
+    it('rejects a cross-origin next URL', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://registry.example.com/v2/foo/tags/list?n=10',
+          'https://attacker.example.com/v2/steal/tags/list',
+        ),
+      ).toBeNull();
+    });
+
+    it('rejects when the base URL is invalid', () => {
+      expect(
+        resolveSameOriginUrl('not a url', 'https://registry.example.com/next'),
+      ).toBeNull();
+    });
+
+    it('rejects when the next URL is invalid', () => {
+      expect(
+        resolveSameOriginUrl('https://registry.example.com/v2/', 'http://'),
+      ).toBeNull();
+    });
+
+    it('accepts a URL instance as the base', () => {
+      expect(
+        resolveSameOriginUrl(
+          parseUrl('https://registry.example.com/v2/foo?n=10')!,
+          'https://registry.example.com/v2/foo?n=10&page=2',
+        ),
+      ).toBe('https://registry.example.com/v2/foo?n=10&page=2');
+    });
   });
 });

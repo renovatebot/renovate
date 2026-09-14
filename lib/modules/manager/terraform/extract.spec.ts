@@ -3,7 +3,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as hashicorp from '../../versioning/hashicorp/index.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -20,7 +23,7 @@ const lockedVersionLockfile = Fixtures.get('rangeStrategy.hcl');
 const terraformBlock = Fixtures.get('terraformBlock.tf');
 const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -37,7 +40,9 @@ describe('modules/manager/terraform/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', '1.tf', {})).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', '1.tf', {}),
+      ).resolves.toBeNull();
     });
 
     it('returns null for no deps', async () => {
@@ -48,7 +53,7 @@ describe('modules/manager/terraform/extract', () => {
         }
         `;
 
-      expect(await extractPackageFile(src, '1.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '1.tf', {})).resolves.toBeNull();
     });
 
     it('extracts  modules', async () => {
@@ -331,6 +336,131 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'MyOrg/MyProject/MyRepository//some-module/path',
           depType: 'module',
           packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+        },
+      ]);
+    });
+
+    it('resolves OCI registry aliases', async () => {
+      const src = codeBlock`
+        module "aliased_oci" {
+          source = "oci://hub.proxy.test/terraform-modules/vpc?tag=1.0.0"
+        }
+      `;
+      const res = await extractPackageFile(src, 'oci.tf', {
+        registryAliases: { 'hub.proxy.test': 'index.docker.io' },
+      });
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'aliased_oci',
+          depType: 'module',
+          packageName: 'index.docker.io/terraform-modules/vpc',
+        },
+      ]);
+    });
+
+    it('handles invalid OCI source URL', async () => {
+      const src = codeBlock`
+        module "bad_oci" {
+          source = "oci://not a valid url"
+        }
+      `;
+      const res = await extractPackageFile(src, 'oci.tf', {});
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          depName: 'bad_oci',
+          depType: 'module',
+          skipReason: 'invalid-url',
+        },
+      ]);
+    });
+
+    it('extracts OCI modules and providers', async () => {
+      const src = codeBlock`
+        module "vpc_oci" {
+          source = "oci://registry.example.com/terraform-modules/vpc?tag=1.2.3"
+        }
+
+        module "storage_oci_tagged" {
+          source = "oci://ghcr.io/terraform-modules/storage?tag=3.1.0"
+        }
+
+        module "digest_oci" {
+          source = "oci://ghcr.io/terraform-modules/pinned?digest=sha256:abc123"
+        }
+
+        module "no_version_oci" {
+          source = "oci://registry.example.com/terraform-modules/noversion"
+        }
+
+        terraform {
+          required_providers {
+            custom_oci = {
+              source = "oci://registry.example.com/providers/custom?tag=1.0.0"
+            }
+
+            tagged_oci = {
+              source = "oci://ghcr.io/providers/tagged?tag=4.2.0"
+            }
+
+            no_version_oci = {
+              source = "oci://registry.example.com/providers/noversion"
+            }
+          }
+        }
+      `;
+      const res = await extractPackageFile(src, 'oci.tf', {});
+      expect(res?.deps).toHaveLength(7);
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'vpc_oci',
+          depType: 'module',
+          packageName: 'registry.example.com/terraform-modules/vpc',
+        },
+        {
+          currentValue: '3.1.0',
+          datasource: 'docker',
+          depName: 'storage_oci_tagged',
+          depType: 'module',
+          packageName: 'ghcr.io/terraform-modules/storage',
+        },
+        {
+          currentDigest: 'sha256:abc123',
+          datasource: 'docker',
+          depName: 'digest_oci',
+          depType: 'module',
+          packageName: 'ghcr.io/terraform-modules/pinned',
+        },
+        {
+          datasource: 'docker',
+          depName: 'no_version_oci',
+          depType: 'module',
+          packageName: 'registry.example.com/terraform-modules/noversion',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'custom_oci',
+          depType: 'required_provider',
+          packageName: 'registry.example.com/providers/custom',
+        },
+        {
+          currentValue: '4.2.0',
+          datasource: 'docker',
+          depName: 'tagged_oci',
+          depType: 'required_provider',
+          packageName: 'ghcr.io/providers/tagged',
+        },
+        {
+          datasource: 'docker',
+          depName: 'no_version_oci',
+          depType: 'required_provider',
+          packageName: 'registry.example.com/providers/noversion',
+          skipReason: 'unspecified-version',
         },
       ]);
     });
@@ -634,7 +764,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
         deps: [{ skipReason: 'local' }],
       });
     });
@@ -645,7 +775,7 @@ describe('modules/manager/terraform/extract', () => {
           source = "../fe"
         }
       `;
-      expect(await extractPackageFile(src, '2.tf', {})).toBeNull();
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toBeNull();
     });
 
     it('extract helm releases', async () => {
@@ -680,6 +810,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'docker',
           depName: 'public.ecr.aws/karpenter/karpenter',
           depType: 'helm_release',
+          pinDigests: false,
         },
         {
           currentValue: 'v0.22.1',
@@ -687,6 +818,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'karpenter',
           depType: 'helm_release',
           packageName: 'public.ecr.aws/karpenter/karpenter',
+          pinDigests: false,
         },
         {
           datasource: 'helm',
@@ -700,6 +832,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'kube-prometheus',
           depType: 'helm_release',
           packageName: 'index.docker.io/bitnamicharts/kube-prometheus',
+          pinDigests: false,
         },
         {
           currentValue: '1.0.1',
@@ -713,6 +846,28 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'redis',
           depType: 'helm_release',
           registryUrls: ['https://charts.helm.sh/stable'],
+        },
+      ]);
+    });
+
+    it('extracts helm releases from OCI registries with a port', async () => {
+      const src = codeBlock`
+        resource "helm_release" "redis" {
+          name       = "redis"
+          repository = "oci://registry.example.com:5000/charts"
+          chart      = "redis"
+          version    = "1.0.1"
+        }
+      `;
+      const res = await extractPackageFile(src, 'helm.tf', {});
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.1',
+          datasource: 'docker',
+          depName: 'redis',
+          depType: 'helm_release',
+          packageName: 'registry.example.com:5000/charts/redis',
+          pinDigests: false,
         },
       ]);
     });

@@ -147,7 +147,7 @@ export async function updateArtifacts(
       {} as Record<string, string>,
     );
 
-    const bundler = getBundlerConstraint(
+    const bundler = await getBundlerConstraint(
       updateArtifact,
       existingLockFileContent,
     );
@@ -201,7 +201,7 @@ export async function updateArtifacts(
       return [
         {
           artifactError: {
-            lockFile: lockFileName,
+            fileName: lockFileName,
             stderr: output,
           },
         },
@@ -255,7 +255,7 @@ export async function updateArtifacts(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },

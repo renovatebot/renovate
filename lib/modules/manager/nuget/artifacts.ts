@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
@@ -21,8 +22,10 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { createNuGetConfigXml } from './config-formatter.ts';
 import {
+  DIRECTORY_BUILD_PROPS,
   GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
@@ -46,7 +49,7 @@ async function createCachedNuGetConfigFile(
   const updatedDepsRegistries: Registry[] = Array.from(
     new Set(
       updatedDeps
-        .flatMap((dep) => dep.registryUrls ?? [])
+        .flatMap((dep) => coerceArray(dep.registryUrls))
         .filter(isNonEmptyString),
     ),
     (url) => ({ url }),
@@ -77,9 +80,11 @@ async function runDotnetRestore(
     updatedDeps,
   );
 
-  const dotnetVersion =
-    config.constraints?.dotnet ??
-    (await findGlobalJson(packageFileName))?.sdk?.version;
+  const dotnetVersion = await resolveToolConstraint(
+    config,
+    'dotnet',
+    async () => (await findGlobalJson(packageFileName))?.sdk?.version,
+  );
   const execOptions: ExecOptions = {
     docker: {},
     extraEnv: {
@@ -89,14 +94,12 @@ async function runDotnetRestore(
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
   };
 
-  const cmds = [
-    ...dependentPackageFileNames.map(
-      (fileName) =>
-        `dotnet restore ${quote(
-          fileName,
-        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
-    ),
-  ];
+  const cmds = dependentPackageFileNames.map(
+    (fileName) =>
+      `dotnet restore ${quote(
+        fileName,
+      )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
+  );
 
   if (config.postUpdateOptions?.includes('dotnetWorkloadRestore')) {
     cmds.unshift(
@@ -125,9 +128,14 @@ export async function updateArtifacts({
 
   const isGlobalJson = packageFileName === GLOBAL_JSON;
 
+  const isDirectoryBuildProps =
+    packageFileName === DIRECTORY_BUILD_PROPS ||
+    packageFileName.endsWith(`/${DIRECTORY_BUILD_PROPS}`);
+
   if (
     !isCentralManagement &&
     !isGlobalJson &&
+    !isDirectoryBuildProps &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -143,7 +151,7 @@ export async function updateArtifacts({
 
   const deps = await getDependentPackageFiles(
     packageFileName,
-    isCentralManagement,
+    isCentralManagement || isDirectoryBuildProps,
     isGlobalJson,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
@@ -212,7 +220,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileNames.join(', '),
+          fileName: lockFileNames.join(', '),
           // error is written to stdout
           stderr: err.stdout ?? err.message,
         },

@@ -1,5 +1,5 @@
-import * as crypto from 'crypto';
-import { Readable } from 'stream';
+import * as crypto from 'node:crypto';
+import { Readable } from 'node:stream';
 import { hash, hashStream, toSha256 } from './hash.ts';
 
 describe('util/hash', () => {

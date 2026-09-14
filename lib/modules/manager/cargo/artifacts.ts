@@ -2,14 +2,13 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import type {
@@ -17,7 +16,10 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
+
+const gitExec = withGitEnvironment(['cargo']);
 
 async function cargoUpdate(
   manifestPath: string,
@@ -34,11 +36,10 @@ async function cargoUpdate(
   }
 
   const execOptions: ExecOptions = {
-    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
-  await exec(cmd, execOptions);
+  await gitExec(cmd, execOptions);
 }
 
 async function cargoUpdatePrecise(
@@ -51,6 +52,13 @@ async function cargoUpdatePrecise(
   // First update individual dependencies to their `newVersion`. Necessary when
   // using the `update-lockfile` rangeStrategy which doesn't touch Cargo.toml.
   for (const dep of updatedDeps) {
+    // If the range is bumped in Cargo.toml, the old lockedVersion may no longer
+    // exist in Cargo's dependency graph, so let the --workspace update at the
+    // end re-resolve it instead.
+    if (dep.currentValue && dep.newValue && dep.currentValue !== dep.newValue) {
+      continue;
+    }
+
     cmds.push(
       `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
@@ -65,12 +73,11 @@ async function cargoUpdatePrecise(
   );
 
   const execOptions: ExecOptions = {
-    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
 
-  await exec(cmds, execOptions);
+  await gitExec(cmds, execOptions);
 }
 
 export async function updateArtifacts(
@@ -119,12 +126,14 @@ async function updateArtifactsImpl(
     ];
   }
 
+  const rustConstraint = await resolveToolConstraint(config, 'rust');
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    logger.debug('Updating ' + lockFileName);
+    logger.debug(`Updating ${lockFileName}`);
 
     if (isLockFileMaintenance) {
-      await cargoUpdate(packageFileName, true, config.constraints?.rust);
+      await cargoUpdate(packageFileName, true, rustConstraint);
     } else {
       const hasNonCrateDep = updatedDeps.some(
         (dep) => dep.datasource !== CrateDatasource.id,
@@ -143,14 +152,10 @@ async function updateArtifactsImpl(
             'Missing locked version for dependency',
           );
         }
-        await cargoUpdate(packageFileName, false, config.constraints?.rust);
+        await cargoUpdate(packageFileName, false, rustConstraint);
       } else {
         // If all dependencies have locked versions then update them precisely.
-        await cargoUpdatePrecise(
-          packageFileName,
-          updatedDeps,
-          config.constraints?.rust,
-        );
+        await cargoUpdatePrecise(packageFileName, updatedDeps, rustConstraint);
       }
     }
 
@@ -214,7 +219,7 @@ async function updateArtifactsImpl(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

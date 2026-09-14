@@ -17,32 +17,29 @@ export async function generateUpdate(
   currentVersion: string,
   bucket: string,
   release: Release,
+  allVersions: Set<string>,
 ): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {
     bucket,
     newVersion,
     newValue: null!,
+    hasAttestation: release.attestation,
   };
 
-  // istanbul ignore if
   if (release.checksumUrl !== undefined) {
     update.checksumUrl = release.checksumUrl;
   }
-  // istanbul ignore if
   if (release.downloadUrl !== undefined) {
     update.downloadUrl = release.downloadUrl;
   }
-  // istanbul ignore if
   if (release.newDigest !== undefined) {
     update.newDigest = release.newDigest;
   }
-  // istanbul ignore if
   if (release.releaseTimestamp) {
     update.releaseTimestamp = release.releaseTimestamp;
     update.newVersionAgeInDays = getElapsedDays(release.releaseTimestamp);
   }
-  // istanbul ignore if
   if (release.registryUrl !== undefined) {
     /**
      * This means:
@@ -59,8 +56,9 @@ export async function generateUpdate(
         rangeStrategy,
         currentVersion,
         newVersion,
+        allVersions,
       })!;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
         'getNewValue error',
@@ -73,7 +71,6 @@ export async function generateUpdate(
   update.newMajor = versioningApi.getMajor(newVersion)!;
   update.newMinor = versioningApi.getMinor(newVersion)!;
   update.newPatch = versioningApi.getPatch(newVersion)!;
-  // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
     update.newValue = currentValue!;

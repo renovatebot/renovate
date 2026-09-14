@@ -1,10 +1,10 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { partial } from '~test/util.ts';
+import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
-const validFleetYamlWithCustom = Fixtures.get(
-  'valid_fleet_helm_target_customization.yaml',
-);
 const inValidFleetYaml = Fixtures.get('invalid_fleet.yaml');
 
 const validGitRepoYaml = Fixtures.get('valid_gitrepo.yaml');
@@ -19,13 +19,13 @@ describe('modules/manager/fleet/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('should return null if empty content', () => {
-      const result = extractPackageFile('', 'fleet.yaml');
+      const result = extractPackageFile('', 'fleet.yaml', {});
 
       expect(result).toBeNull();
     });
 
     it('should return null if a unknown manifest is supplied', () => {
-      const result = extractPackageFile(configMapYaml, 'fleet.yaml');
+      const result = extractPackageFile(configMapYaml, 'fleet.yaml', {});
 
       expect(result).toBeNull();
     });
@@ -37,13 +37,14 @@ describe('modules/manager/fleet/extract', () => {
 kind: Fleet
 < `,
           'fleet.yaml',
+          {},
         );
 
         expect(result).toBeNull();
       });
 
       it('should parse valid configuration', () => {
-        const result = extractPackageFile(validFleetYaml, 'fleet.yaml');
+        const result = extractPackageFile(validFleetYaml, 'fleet.yaml', {});
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([
@@ -81,10 +82,140 @@ kind: Fleet
         ]);
       });
 
+      it('should support registryAlias configuration', () => {
+        const result = extractPackageFile(
+          codeBlock`
+            defaultNamespace: cert-manager
+            helm:
+              chart: cert-manager
+              repo: https://registry.com/jetstack
+              releaseName: cert-manager
+              version: v1.8.0
+            ---
+            defaultNamespace: external-dns
+            helm:
+              chart: oci://registry.com/docker-io/bitnamicharts/external-dns
+              version: 7.1.2
+            `,
+          'fleet.yaml',
+          partial<ExtractConfig>({
+            registryAliases: {
+              'https://registry.com/jetstack': 'https://charts.jetstack.io',
+              'registry.com/docker-io': 'registry-1.docker.io',
+            },
+          }),
+        );
+
+        expect(result).not.toBeNull();
+        expect(result?.deps).toMatchObject([
+          {
+            currentValue: 'v1.8.0',
+            datasource: 'helm',
+            depName: 'cert-manager',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+          },
+          {
+            currentValue: '7.1.2',
+            datasource: 'docker',
+            depName: 'registry.com/docker-io/bitnamicharts/external-dns',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            pinDigests: false,
+          },
+        ]);
+      });
+      it('should skip OCI charts without version', () => {
+        const result = extractPackageFile(
+          codeBlock`
+            defaultNamespace: external-dns
+            helm:
+              chart: oci://registry-1.docker.io/bitnamicharts/external-dns
+          `,
+          'fleet.yaml',
+          {},
+        );
+
+        expect(result?.deps).toEqual([
+          {
+            datasource: 'docker',
+            depName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            pinDigests: false,
+            skipReason: 'unspecified-version',
+          },
+        ]);
+      });
+
       it('should parse valid configuration with target customization', () => {
+        const validFleetYamlWithCustom = codeBlock`
+          # This should generate two dependencies with different versions
+          # one with v1.8.0 and one with v1.9.2
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - name: rke2
+              helm:
+                version: "v1.9.2"
+          ---
+          # This should generate two dependencies with different repos
+          # one with https://charts.jetstack.io and one with https://charts.example.com
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: custom-cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - name: cluster1
+              helm:
+                version: "v1.8.2"
+                repo: https://charts.example.com
+
+          ---
+          # This should generate one dependency and a skipped dependency, as there is no version
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: custom-cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - name: cluster1
+              values:
+                some: customization
+
+          ---
+          # This is a valid target customization with no name
+          # It should generate one valid dependency, and one skipped dependency, like the one above
+          defaultNamespace: cert-manager
+          helm:
+            chart: cert-manager
+            repo: https://charts.jetstack.io
+            releaseName: custom-cert-manager
+            version: v1.8.0
+            values:
+              installCRDs: true
+          targetCustomizations:
+            - values:
+                some: customization
+        `;
         const result = extractPackageFile(
           validFleetYamlWithCustom,
           'fleet.yaml',
+          {},
         );
 
         expect(result).not.toBeNull();
@@ -157,7 +288,7 @@ kind: Fleet
       });
 
       it('should parse parse invalid configurations', () => {
-        const result = extractPackageFile(inValidFleetYaml, 'fleet.yaml');
+        const result = extractPackageFile(inValidFleetYaml, 'fleet.yaml', {});
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([
@@ -196,13 +327,14 @@ kind: Fleet
  kind: GitRepo
  < `,
           'test.yaml',
+          {},
         );
 
         expect(result).toBeNull();
       });
 
       it('should parse valid configuration', () => {
-        const result = extractPackageFile(validGitRepoYaml, 'test.yaml');
+        const result = extractPackageFile(validGitRepoYaml, 'test.yaml', {});
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([
@@ -224,7 +356,7 @@ kind: Fleet
       });
 
       it('should parse invalid configuration', () => {
-        const result = extractPackageFile(invalidGitRepoYaml, 'test.yaml');
+        const result = extractPackageFile(invalidGitRepoYaml, 'test.yaml', {});
 
         expect(result).not.toBeNull();
         expect(result?.deps).toMatchObject([

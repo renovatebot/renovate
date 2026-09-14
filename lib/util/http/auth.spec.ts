@@ -6,7 +6,6 @@ describe('util/http/auth', () => {
     it('does nothing', () => {
       const opts: GotOptions = {
         headers: { authorization: 'token' },
-        url: 'https://amazon.com',
       };
 
       applyAuthorization(opts);
@@ -16,7 +15,6 @@ describe('util/http/auth', () => {
           "headers": {
             "authorization": "token",
           },
-          "url": "https://amazon.com",
         }
       `);
     });
@@ -96,6 +94,20 @@ describe('util/http/auth', () => {
           "token": "ZZZZ",
         }
       `);
+    });
+
+    it('github app token with hostType not in GITHUB_API_USING_HOST_TYPES', () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: 'x-access-token:ghs_123test',
+        hostType: 'github-digest',
+      };
+
+      expect(applyAuthorization(opts)).toMatchObject({
+        headers: {
+          authorization: 'Bearer ghs_123test',
+        },
+      });
     });
 
     it(`gitlab personal access token`, () => {

@@ -55,7 +55,7 @@ export async function getReleaseNotesMd(
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#raw-blob-content
   const fileRes = await http.getText(`${apiPrefix}blobs/${id}/raw`);
-  const changelogMd = fileRes.body + '\n#\n##';
+  const changelogMd = `${fileRes.body}\n#\n##`;
   return { changelogFile, changelogMd };
 }
 

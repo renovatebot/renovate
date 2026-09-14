@@ -121,6 +121,19 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/replace', () =>
       `);
     });
 
+    it('replaces a non-leading selector', () => {
+      const res = replaceConstraintVersion(
+        yarnLock2,
+        'string-width',
+        '^2.0.0',
+        '2.2.0',
+      );
+
+      expect(res).toContain(
+        '"string-width@^1.0.1 || ^2.0.0", string-width@^2.0.0:\n  version "2.2.0"\n  dependencies:',
+      );
+    });
+
     it('handles quoted', () => {
       const res = replaceConstraintVersion(
         yarnLock2,

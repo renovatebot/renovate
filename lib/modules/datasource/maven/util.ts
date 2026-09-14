@@ -1,31 +1,32 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { getCacheType } from '../../../util/cache/package/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { MAVEN_REPO } from './common.ts';
+import { isMavenCentral } from './common.ts';
+import { CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
   MavenDependency,
   MavenFetchResult,
   MavenFetchSuccess,
 } from './types.ts';
-
-function getHost(url: string): string | undefined {
-  return parseUrl(url)?.host;
-}
 
 function isTemporaryError(err: HttpError): boolean {
   if (err.code === 'ECONNRESET') {
@@ -70,7 +71,39 @@ const cacheProvider = new PackageHttpCacheProvider({
   softTtlMinutes: 15,
   checkAuthorizationHeader: true,
   checkCacheControlHeader: false, // Maven doesn't respond with `cache-control` headers
+  writeSchema: CachedMavenXml,
 });
+
+// Release POMs and timestamped snapshot POMs are immutable once published, so we can cache them much longer than mutable metadata files.
+const pomCacheProvider = new PackageHttpCacheProvider({
+  namespace: 'datasource-maven:pom-cache-provider',
+  softTtlMinutes: 60 * 24 * 28, // 28 days before we'll give it another check, just in case it's updated
+  checkAuthorizationHeader: true,
+  checkCacheControlHeader: false,
+  writeSchema: CachedMavenXml,
+});
+
+function selectCacheProvider(url: string): PackageHttpCacheProvider {
+  // Non-timestamped -SNAPSHOT.pom files are mutable; everything else ending in .pom (release POMs and timestamped snapshot POMs) is immutable.
+  if (url.endsWith('.pom') && !url.endsWith('-SNAPSHOT.pom')) {
+    return pomCacheProvider;
+  }
+  return cacheProvider;
+}
+
+const METADATA_NOT_FOUND_NAMESPACE =
+  'datasource-maven:metadata-not-found' as const;
+const METADATA_NOT_FOUND_TTL_MINUTES = 60 * 12; // 12 hours
+
+/** introduces jitter to make sure that a given repo's cache expiring doesn't lead to many requests leading to high traffic and/or rate limits */
+function getMetadataNotFoundTtl(): number {
+  const jitter = Math.floor(Math.random() * 60 * 2); // 0–120 minutes
+  return METADATA_NOT_FOUND_TTL_MINUTES + jitter;
+}
+
+function isMetadataUrl(url: string): boolean {
+  return url.endsWith('/maven-metadata.xml');
+}
 
 export async function downloadHttpProtocol(
   http: Http,
@@ -78,8 +111,23 @@ export async function downloadHttpProtocol(
   opts: HttpOptions = {},
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
-  const fetchResult = await Result.wrap<HttpResponse, Error>(
-    http.getText(url, { ...opts, cacheProvider }),
+
+  if (isMetadataUrl(url)) {
+    const cacheHasNotFoundResponse = await packageCache.get<true>(
+      METADATA_NOT_FOUND_NAMESPACE,
+      url,
+    );
+    if (cacheHasNotFoundResponse) {
+      logger.trace(
+        { url },
+        'Returning cached 404 response for the metadata-metadata URL request',
+      );
+      return Result.err({ type: 'not-found' });
+    }
+  }
+
+  const fetchResult = await Result.wrap<HttpResponse>(
+    http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = { data: res.body };
@@ -95,20 +143,28 @@ export async function downloadHttpProtocol(
 
       return result;
     })
-    .catch((err): MavenFetchResult => {
+    .catch(async (err): Promise<MavenFetchResult> => {
       /* v8 ignore next: never happens, needs for type narrowing */
       if (!(err instanceof HttpError)) {
         return Result.err({ type: 'unknown', err });
       }
 
       const failedUrl = url;
-      if (err.message === HOST_DISABLED) {
-        logger.trace({ failedUrl }, 'Host disabled');
+      if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+        logger.trace({ failedUrl }, refusedHostMessage(err));
         return Result.err({ type: 'host-disabled' });
       }
 
       if (isNotFoundError(err)) {
         logger.trace({ failedUrl }, `Url not found`);
+        if (isMetadataUrl(failedUrl)) {
+          await packageCache.set(
+            METADATA_NOT_FOUND_NAMESPACE,
+            failedUrl,
+            true,
+            getMetadataNotFoundTtl(),
+          );
+        }
         return Result.err({ type: 'not-found' });
       }
 
@@ -126,10 +182,11 @@ export async function downloadHttpProtocol(
 
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
-        if (getHost(url) === getHost(MAVEN_REPO)) {
+
+        if (isMavenCentral(url)) {
           const statusCode = err?.response?.statusCode;
           if (statusCode === 429) {
-            if (getCacheType() === 'redis') {
+            if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
                 { failedUrl },
                 'Maven Central rate limiting detected despite Redis caching.',
@@ -142,9 +199,8 @@ export async function downloadHttpProtocol(
             }
           }
           return Result.err({ type: 'maven-central-temporary-error', err });
-        } else {
-          return Result.err({ type: 'temporary-error' });
         }
+        return Result.err({ type: 'temporary-error' });
       }
 
       if (isConnectionError(err)) {
@@ -524,7 +580,7 @@ export async function getDependencyInfo(
           'groupId',
           'artifactId',
           'version',
-        ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+        ].map((k) => parent.valueWithPath(k)?.replace(regEx(/\s+/g), ''));
         if (parentGroupId && parentArtifactId && parentVersion) {
           const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
           const parentDependency = getDependencyParts(parentDisplayId);

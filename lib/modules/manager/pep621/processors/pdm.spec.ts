@@ -2,7 +2,10 @@ import upath from 'upath';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as hostRules from '../../../../util/host-rules.ts';
@@ -18,10 +21,11 @@ vi.mock('../../../datasource/index.ts');
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const processor = new PdmProcessor();
@@ -94,18 +98,86 @@ describe('modules/manager/pep621/processors/pdm', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.11.2 ' +
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
             'pdm update --no-sync --update-eager dep1' +
-            '"',
+            "'",
         },
       ]);
+    });
+
+    it('falls back to the extracted python constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // pdm
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          // no `requires-python` in the pyproject, so the extracted one is used
+          config: { extractedConstraints: { python: '==3.11.1' } },
+          updatedDeps: [{ packageName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd).join('\n')).toContain(
+        'install-tool python 3.11.1',
+      );
+    });
+
+    it('falls back to the extracted pdm constraint', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: { constraints: {}, extractedConstraints: { pdm: '2.6.1' } },
+          updatedDeps: [{ packageName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd).join('\n')).toContain(
+        'install-tool pdm 2.6.1',
+      );
     });
 
     it('returns artifact error', async () => {
@@ -127,7 +199,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'pdm.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

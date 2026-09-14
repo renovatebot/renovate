@@ -129,7 +129,7 @@ export function findVariableInKotlinImport(
 ): VariableData | undefined {
   if (ctx.tmpKotlinImportStore.length && name.includes('.')) {
     for (const tokens of ctx.tmpKotlinImportStore) {
-      const lastToken = tokens[tokens.length - 1];
+      const lastToken = tokens.at(-1);
       if (lastToken && name.startsWith(`${lastToken.value}.`)) {
         const prefix = tokens
           .slice(0, -1)
@@ -210,6 +210,22 @@ export const qStringValueAsSymbol = q.str((ctx: Ctx, node: lexer.Token) => {
   return ctx;
 });
 
+// https://docs.gradle.org/current/javadoc/org/gradle/api/provider/Provider.html#get()
+export const qProviderValue = q
+  .tree({
+    maxDepth: 1,
+    type: 'wrapped-tree',
+    startsWith: '(',
+    endsWith: ')',
+    search: q.begin<Ctx>().end(),
+  })
+  .handler((ctx) => {
+    if (ctx.varTokens.length > 1 && ctx.varTokens.at(-1)?.value === 'get') {
+      ctx.varTokens.pop();
+    }
+    return ctx;
+  });
+
 // foo.bar["baz"] = "1.2.3"
 export const qVariableAssignmentIdentifier = q
   .sym(storeVarToken)
@@ -237,6 +253,7 @@ export const qVariableAccessIdentifier = q
     return ctx;
   })
   .join(qVariableAssignmentIdentifier)
+  .opt(qProviderValue)
   .handler(coalesceVariable)
   .handler((ctx) => {
     ctx.varTokens = [
@@ -290,10 +307,11 @@ export const qTemplateString = q
 
 // foo = "bar"
 // foo + foo + "${foo}" + "foo" => "barbarbarfoo"
-export const qConcatExpr = (
+export function qConcatExpr(
   ...matchers: q.QueryBuilder<Ctx, parser.Node>[]
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
+}
 
 export const qValueMatcher = qConcatExpr(
   qTemplateString,
@@ -314,11 +332,11 @@ export const qKotlinImport = q
 
 // foo { bar { baz } }
 // foo.bar { baz }
-export const qDotOrBraceExpr = (
+export function qDotOrBraceExpr(
   symValue: q.SymMatcherValue,
   matcher: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.sym<Ctx>(symValue).alt(
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.sym<Ctx>(symValue).alt(
     q.op<Ctx>('.').join(matcher),
     q.tree({
       type: 'wrapped-tree',
@@ -328,6 +346,7 @@ export const qDotOrBraceExpr = (
       search: matcher,
     }),
   );
+}
 
 export const qGroupId = qValueMatcher.handler((ctx) =>
   storeInTokenMap(ctx, 'groupId'),

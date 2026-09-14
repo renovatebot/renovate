@@ -43,7 +43,10 @@ export function validateInterpolatedValues(
   }
 
   if (validationErrors.length) {
-    logger.error({ validationErrors }, `Invalid ${name}s configured`);
+    logger.error(
+      { name, validationErrors },
+      'Invalid interpolated values configured',
+    );
     throw new Error(
       name === 'secrets' ? CONFIG_SECRETS_INVALID : CONFIG_VARIABLES_INVALID,
     );

@@ -1,3 +1,4 @@
+import { isObject } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { id as dockerVersioning } from '../../versioning/docker/index.ts';
@@ -43,7 +44,7 @@ export function findDependenciesInternal(
   packageDependencies: PackageDependency[],
   registryAliases: Record<string, string> | undefined,
 ): PackageDependency[] {
-  if (!parsedContent || typeof parsedContent !== 'object') {
+  if (!isObject(parsedContent)) {
     return packageDependencies;
   }
 
@@ -87,7 +88,7 @@ export function extractPackageFile(
     return null;
   }
   try {
-    const deps: PackageDependency<Record<string, any>>[] = [];
+    const deps: PackageDependency[] = [];
 
     for (const con of parsedContent) {
       deps.push(...findDependencies(con, config.registryAliases));

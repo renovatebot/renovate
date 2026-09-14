@@ -25,16 +25,17 @@ export const presets: Record<string, Preset> = {
   eslint: {
     description: 'All ESLint packages.',
     matchPackageNames: [
-      '@types/eslint',
-      'babel-eslint',
+      '*/eslint-plugin',
       '@babel/eslint-parser',
       '@eslint/**',
       '@eslint-community/**',
       '@stylistic/eslint-plugin**',
+      '@types/eslint',
       '@types/eslint__**',
       '@typescript-eslint/**',
-      'typescript-eslint',
+      'babel-eslint',
       'eslint**',
+      'typescript-eslint',
     ],
   },
   gatsby: {
@@ -103,7 +104,13 @@ export const presets: Record<string, Preset> = {
       'packages:stylelint',
       'packages:tslint',
     ],
-    matchPackageNames: ['oxlint', 'prettier', 'remark-lint', 'standard'],
+    matchPackageNames: [
+      '@oxlint/**',
+      'oxlint',
+      'prettier',
+      'remark-lint',
+      'standard',
+    ],
   },
   mapbox: {
     description: 'All Mapbox-related packages.',
@@ -161,5 +168,9 @@ export const presets: Record<string, Preset> = {
     description: 'All Vite related packages',
     matchDatasources: ['npm'],
     matchPackageNames: ['vite', '**vite-plugin**', '@vitejs/**'],
+  },
+  vitePlus: {
+    description: 'All Vite+ related packages',
+    extends: ['monorepo:vite-plus', 'monorepo:vitest'],
   },
 };

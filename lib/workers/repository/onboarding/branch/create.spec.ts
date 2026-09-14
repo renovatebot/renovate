@@ -16,7 +16,11 @@ describe('workers/repository/onboarding/branch/create', () => {
 
   beforeEach(() => {
     config = getConfig();
-    GlobalConfig.set({ onboardingBranch: config.onboardingBranch });
+    GlobalConfig.set({
+      onboardingBranch: config.onboardingBranch,
+      onboardingConfigFileName: config.onboardingConfigFileName,
+      onboardingPrTitle: 'Configure Renovate',
+    });
   });
 
   describe('createOnboardingBranch', () => {
@@ -33,8 +37,9 @@ describe('workers/repository/onboarding/branch/create', () => {
         ],
         force: true,
         message: 'Add renovate.json',
+        trailers: [],
         platformCommit: 'auto',
-        labels: [],
+        prTitle: 'Configure Renovate',
       });
     });
 
@@ -42,7 +47,11 @@ describe('workers/repository/onboarding/branch/create', () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
 
-      config.onboardingCommitMessage = message;
+      GlobalConfig.set({
+        onboardingCommitMessage: message,
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate',
+      });
 
       await createOnboardingBranch(config);
 
@@ -57,8 +66,9 @@ describe('workers/repository/onboarding/branch/create', () => {
         ],
         force: true,
         message,
+        trailers: [],
         platformCommit: 'auto',
-        labels: [],
+        prTitle: 'Configure Renovate',
       });
     });
 
@@ -79,8 +89,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message: `Add renovate.json\n\nsome commit body`,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'Configure Renovate',
         });
       });
 
@@ -88,7 +99,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message =
           'We can Renovate if we want to, we can leave PRs in decline';
 
-        config.onboardingCommitMessage = message;
+        GlobalConfig.set({
+          onboardingCommitMessage: message,
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch({
           ...config,
@@ -106,9 +121,53 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: <Bot bot@botland.com>`,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'Configure Renovate',
         });
+      });
+    });
+
+    describe('applies the commitTrailers value', () => {
+      it('compiles gitAuthor and passes trailers', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
+          gitAuthor: 'Bot <bot@botland.com>',
+        });
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: 'Add renovate.json',
+          trailers: ['Signed-off-by: Bot <bot@botland.com>'],
+          platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('drops trailers that are invalid after compilation', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitTrailers: [
+            'Signed-off-by: {{{gitAuthor}}}',
+            'Static-Trailer: kept',
+          ],
+          gitAuthor: '',
+        });
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            trailers: ['Static-Trailer: kept'],
+          }),
+        );
       });
     });
 
@@ -132,8 +191,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'Configure Renovate',
         });
       });
 
@@ -146,7 +206,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         )}`;
 
         config.commitMessagePrefix = prefix;
-        config.onboardingCommitMessage = text;
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch(config);
 
@@ -161,8 +225,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'Configure Renovate',
         });
       });
     });
@@ -187,8 +252,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -201,7 +267,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         )}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingCommitMessage = text;
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch(config);
 
@@ -216,8 +286,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'chore: Configure Renovate',
         });
       });
     });
@@ -228,7 +299,10 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = undefined;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch(config);
 
@@ -243,8 +317,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -253,7 +328,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add renovate.json`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = 'superConfigFile.yaml';
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: 'superConfigFile.yaml',
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch(config);
 
@@ -268,8 +347,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -279,7 +359,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch(config);
 
@@ -294,8 +378,9 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'chore: Configure Renovate',
         });
       });
 
@@ -305,7 +390,11 @@ describe('workers/repository/onboarding/branch/create', () => {
         const message = `${prefix}: add ${path}`;
 
         config.semanticCommits = 'enabled';
-        config.onboardingConfigFileName = path;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+          onboardingPrTitle: 'Configure Renovate',
+        });
 
         await createOnboardingBranch(config);
 
@@ -313,9 +402,10 @@ describe('workers/repository/onboarding/branch/create', () => {
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,
+          trailers: [],
           force: true,
           platformCommit: 'auto',
-          labels: [],
+          prTitle: 'chore: Configure Renovate',
         });
       });
     });

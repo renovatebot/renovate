@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Json } from '../util/schema-utils/index.ts';
 
 export const DecryptedObject = Json.pipe(

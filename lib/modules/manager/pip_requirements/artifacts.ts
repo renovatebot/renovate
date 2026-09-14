@@ -5,8 +5,9 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { ensureCacheDir, readLocalFile } from '../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { extrasPattern } from './extract.ts';
 
 /**
@@ -21,7 +22,7 @@ import { extrasPattern } from './extract.ts';
  * @param depName the name of the dependency
  */
 function dependencyAndHashPattern(depName: string): RegExp {
-  const escapedDepName = escapeRegExp(depName);
+  const escapedDepName = RegExp.escape(depName);
 
   // extrasPattern covers any whitespace between the dep name and the optional extras specifier,
   // but it does not cover any whitespace in front of the equal signs.
@@ -70,8 +71,14 @@ export async function updateArtifacts({
       cwdFile: '.',
       docker: {},
       toolConstraints: [
-        { toolName: 'python', constraint: config.constraints?.python },
-        { toolName: 'hashin', constraint: config.constraints?.hashin },
+        {
+          toolName: 'python',
+          constraint: await resolveToolConstraint(config, 'python'),
+        },
+        {
+          toolName: 'hashin',
+          constraint: await resolveToolConstraint(config, 'hashin'),
+        },
       ],
       extraEnv: {
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
@@ -102,7 +109,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: packageFileName,
+          fileName: packageFileName,
           stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },

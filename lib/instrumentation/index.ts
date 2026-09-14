@@ -1,9 +1,11 @@
-import { ClientRequest } from 'node:http';
+import { ClientRequest, ServerResponse } from 'node:http';
 import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
@@ -17,6 +19,7 @@ import {
   BatchSpanProcessor,
   ConsoleSpanExporter,
   SimpleSpanProcessor,
+  type SpanExporter,
   type SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
@@ -26,10 +29,15 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
+import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import { getResourceDetectors } from './detectors.ts';
+import { FileSpanExporter } from './file-exporter.ts';
 import type { RenovateSpanOptions } from './types.ts';
 import {
+  getFileExporterPath,
+  getOtlpProtocol,
+  isFileExporterEnabled,
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
   isTracingEnabled,
@@ -38,8 +46,28 @@ import {
 
 let instrumentations: Instrumentation[] = [];
 
+function createOtlpExporter(): SpanExporter {
+  const protocol = getOtlpProtocol();
+  if (protocol === 'grpc') {
+    return new OTLPTraceExporterGrpc();
+  }
+  if (protocol === 'http/protobuf') {
+    return new OTLPTraceExporterProto();
+  }
+  return new OTLPTraceExporterHttp();
+}
+
 export function init(): void {
+  const spanProcessors: SpanProcessor[] = [
+    new GitOperationSpanProcessor(),
+    new GetDatasourceReleasesSpanProcessor(),
+  ];
+
   if (!isTracingEnabled()) {
+    const traceProvider = new NodeTracerProvider({ spanProcessors });
+    traceProvider.register({
+      contextManager: new AsyncLocalStorageContextManager(),
+    });
     return;
   }
 
@@ -53,7 +81,6 @@ export function init(): void {
     );
   }
 
-  const spanProcessors: SpanProcessor[] = [];
   // add processors
   if (isTraceDebuggingEnabled()) {
     spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
@@ -61,10 +88,13 @@ export function init(): void {
 
   // OTEL specification environment variable
   if (isTraceSendingEnabled()) {
-    const exporter = new OTLPTraceExporter();
-    spanProcessors.push(new BatchSpanProcessor(exporter));
-    // TODO: fix me, transitive initializes logger
-    spanProcessors.push(new GitOperationSpanProcessor());
+    spanProcessors.push(new BatchSpanProcessor(createOtlpExporter()));
+  }
+
+  if (isFileExporterEnabled()) {
+    spanProcessors.push(
+      new BatchSpanProcessor(new FileSpanExporter(getFileExporterPath())),
+    );
   }
 
   const env = process.env; // don't use getEnv() here to avoid circular dependency with env variables used in the resource detectors
@@ -102,6 +132,18 @@ export function init(): void {
           request.path.endsWith(`/protection`) &&
           response.statusCode === 404
         ) {
+          span.setStatus({ code: SpanStatusCode.OK });
+        } else if (
+          request instanceof ClientRequest &&
+          request.path === '/v2/' &&
+          request.method === 'GET' &&
+          !request.getHeader('authorization') &&
+          response instanceof ServerResponse &&
+          response.getHeader('www-authenticate') &&
+          response.getHeader('docker-distribution-api-version') &&
+          response.statusCode === 401
+        ) {
+          // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },

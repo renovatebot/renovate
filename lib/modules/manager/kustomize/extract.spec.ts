@@ -267,6 +267,11 @@ describe('modules/manager/kustomize/extract', () => {
   });
 
   describe('image extraction', () => {
+    it('should return null for image with name only (no newTag/newName/digest)', () => {
+      const pkg = extractImage({ name: 'foo' });
+      expect(pkg).toBeNull();
+    });
+
     it('should return null on a null input', () => {
       const pkg = extractImage({
         name: '',
@@ -1108,7 +1113,7 @@ describe('modules/manager/kustomize/extract', () => {
         const sample: any = {
           currentValue: version,
         };
-        if (regEx(/(?:github\.com)(:|\/)/).test(url)) {
+        if (regEx(/(?:github\.com)(?::|\/)/).test(url)) {
           sample.depName = project;
           sample.datasource = GithubTagsDatasource.id;
         } else {

@@ -1,8 +1,9 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type { PackageDependency } from '../types.ts';
-import { removeOCIPrefix } from './oci.ts';
+import { getOciChartDep } from './oci.ts';
 import type { ChartDefinition, Repository } from './types.ts';
 
 export function parseRepository(
@@ -11,25 +12,20 @@ export function parseRepository(
 ): PackageDependency {
   const res: PackageDependency = {};
 
-  try {
-    const url = new URL(repositoryURL);
-    switch (url.protocol) {
-      case 'oci:':
-        res.datasource = DockerDatasource.id;
-        res.packageName = `${removeOCIPrefix(repositoryURL)}/${depName}`;
-        // https://github.com/helm/helm/issues/10312
-        // https://github.com/helm/helm/issues/10678
-        res.pinDigests = false;
-        break;
-      case 'file:':
-        res.skipReason = 'local-dependency';
-        break;
-      default:
-        res.registryUrls = [repositoryURL];
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing url');
+  const url = parseUrl(repositoryURL);
+  if (!url) {
+    logger.debug({ repositoryURL }, 'Error parsing url');
     res.skipReason = 'invalid-url';
+    return res;
+  }
+  switch (url.protocol) {
+    case 'oci:':
+      return getOciChartDep(repositoryURL, depName);
+    case 'file:':
+      res.skipReason = 'local-dependency';
+      break;
+    default:
+      res.registryUrls = [repositoryURL];
   }
   return res;
 }
@@ -92,7 +88,7 @@ export function aliasRecordToRepositories(
   registryAliases: Record<string, string>,
 ): Repository[] {
   return Object.entries(registryAliases)
-    .filter(([, url]) => /^(https?|oci):\/\/.+/.exec(url))
+    .filter(([, url]) => regEx(/^(?:https?|oci):\/\/.+/).exec(url))
     .map(([alias, url]) => {
       return {
         name: alias,

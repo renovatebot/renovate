@@ -4,7 +4,11 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
+import {
+  exec,
+  getToolSettingsOptions,
+  gradleJvmArg,
+} from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findUpLocal,
@@ -22,6 +26,7 @@ import {
   prepareGradleCommand,
 } from '../gradle-wrapper/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import {
   isGcvLockFile,
   isGcvPropsFile,
@@ -29,11 +34,12 @@ import {
 import { isGradleBuildFile } from './utils.ts';
 
 export function isGradleExecutionAllowed(command: string): boolean {
-  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', []);
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
 
   if (!allowlist.includes('gradleWrapper')) {
     logger.once.warn(
-      `Gradle wrapper command, \`${command}\`, was requested to run, but \`gradleWrapper\` is not permitted in the allowedUnsafeExecutions`,
+      { command },
+      'Gradle wrapper command was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
     );
     return false;
   }
@@ -208,7 +214,7 @@ export async function updateArtifacts({
     const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
-    const baseCmd = `${gradlewName} --console=plain --dependency-verification lenient -q`;
+    const baseCmd = `${gradlewName}${gradleJvmArg(getToolSettingsOptions(config.toolSettings))} --console=plain --dependency-verification lenient -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
@@ -216,12 +222,9 @@ export async function updateArtifacts({
       toolConstraints: [
         {
           toolName: 'java',
-          constraint:
-            config.constraints?.java ??
-            (await getJavaConstraint(
-              await getGradleVersion(gradlewFile),
-              gradlewFile,
-            )),
+          constraint: await resolveToolConstraint(config, 'java', async () =>
+            getJavaConstraint(await getGradleVersion(gradlewFile), gradlewFile),
+          ),
         },
       ],
     };
@@ -282,7 +285,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: packageFileName,
+          fileName: packageFileName,
           stderr: err.message,
         },
       },

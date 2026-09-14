@@ -9,7 +9,14 @@ export function getRollbackUpdate(
   versions: Release[],
   versioningApi: VersioningApi,
 ): LookupUpdate | null {
-  const { packageFile, versioning, depName, currentValue } = config;
+  const {
+    packageFile,
+    versioning,
+    packageName,
+    depName,
+    currentValue,
+    datasource,
+  } = config;
   // istanbul ignore if
   if (!('isLessThanRange' in versioningApi)) {
     logger.debug(
@@ -59,6 +66,9 @@ export function getRollbackUpdate(
     newVersion = newRelease?.version;
     registryUrl = newRelease?.registryUrl;
   }
+  // A real datasource always yields a release carrying a version here, so this
+  // only guards against malformed release data; `rollback.spec.ts` reaches it
+  // with a hand-built versioning api - see #40625
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');
@@ -78,5 +88,8 @@ export function getRollbackUpdate(
     newVersion,
     registryUrl,
     updateType: 'rollback',
+    prBodyNotes: [
+      `The version of \`${depName ?? packageName}\` in use (\`${currentValue}\`) was not found once Renovate filtered the dependencies. The ${datasource} datasource returned ${versions.length} entries, but when Renovate applied its filtering, none were left, so Renovate will roll back to a supported version`,
+    ],
   };
 }

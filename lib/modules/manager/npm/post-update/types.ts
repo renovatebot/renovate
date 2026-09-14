@@ -1,24 +1,26 @@
+import type { DateTime } from 'luxon';
 import type { FileChange } from '../../../../util/git/types.ts';
-import type { PackageFile } from '../../types.ts';
+import type {
+  ArtifactError,
+  ArtifactNotice,
+  PackageFile,
+} from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
+import type { lazyLoadPackageJson } from './utils.ts';
 
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
   npmLockDirs: string[];
-  pnpmShrinkwrapDirs: string[];
+  pnpmLockFileDirs: string[];
 }
 
 export interface AdditionalPackageFiles {
   npm?: Partial<PackageFile<NpmManagerData>>[];
 }
 
-export interface ArtifactError {
-  lockFile: string;
-  stderr?: string;
-}
-
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
+  artifactNotices?: ArtifactNotice[];
   updatedArtifacts: FileChange[];
 }
 
@@ -27,6 +29,7 @@ export interface GenerateLockFileResult {
   lockFile?: string | null;
   stderr?: string;
   stdout?: string;
+  beforeFallback?: boolean;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions
@@ -52,3 +55,15 @@ export interface YarnRcYmlFile {
   yarnPath?: string | null;
   npmRegistries: Record<string, YarnRcNpmRegistry>;
 }
+
+export interface HostRulesResult {
+  additionalNpmrcContent: string[];
+  additionalYarnRcYml?: any;
+}
+
+export interface NpmrcCooldownResult {
+  date: DateTime<true>;
+  source: 'before' | 'min-release-age';
+}
+
+export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;

@@ -1,15 +1,17 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
+
+const gitExec = withGitEnvironment(['conan']);
 
 async function conanLockUpdate(
   conanFilePath: string,
@@ -17,12 +19,9 @@ async function conanLockUpdate(
   conanConstraint?: string,
   pythonConstraint?: string,
 ): Promise<void> {
-  const command =
-    `conan lock create ${quote(conanFilePath)}` +
-    (isLockFileMaintenance ? ' --lockfile=""' : '');
+  const command = `conan lock create ${quote(conanFilePath)}${isLockFileMaintenance ? ' --lockfile=""' : ''}`;
 
   const execOptions: ExecOptions = {
-    extraEnv: { ...getGitEnvironmentVariables(['conan']) },
     toolConstraints: [
       {
         toolName: 'python',
@@ -36,7 +35,7 @@ async function conanLockUpdate(
     docker: {},
   };
 
-  await exec(command, execOptions);
+  await gitExec(command, execOptions);
 }
 
 export async function updateArtifacts(
@@ -76,8 +75,8 @@ export async function updateArtifacts(
     await conanLockUpdate(
       packageFileName,
       isLockFileMaintenance,
-      config.constraints?.conan,
-      config.constraints?.python,
+      await resolveToolConstraint(config, 'conan'),
+      await resolveToolConstraint(config, 'python'),
     );
 
     const newLockFileContent = await readLocalFile(lockFileName);
@@ -114,7 +113,7 @@ export async function updateArtifacts(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

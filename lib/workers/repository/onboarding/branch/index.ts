@@ -9,6 +9,7 @@ import { scm } from '../../../../modules/platform/scm.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { checkIfConfigured } from '../../configured.ts';
 import { extractAllDependencies } from '../../extract/index.ts';
 import { mergeRenovateConfig } from '../../init/merge.ts';
@@ -107,11 +108,10 @@ export async function checkOnboardingBranch(
 
     if (
       Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
-        .length === 0
+        .length === 0 &&
+      getInheritedOrGlobal('onboardingNoDeps') !== 'enabled'
     ) {
-      if (getInheritedOrGlobal('onboardingNoDeps') !== 'enabled') {
-        throw new Error(REPOSITORY_NO_PACKAGE_FILES);
-      }
+      throw new Error(REPOSITORY_NO_PACKAGE_FILES);
     }
     logger.debug('Need to create onboarding PR');
     if (config.onboardingRebaseCheckbox) {
@@ -126,12 +126,10 @@ export async function checkOnboardingBranch(
       );
     }
   }
-  if (!GlobalConfig.get('dryRun')) {
-    // TODO #22198
-    if (!isConflicted) {
-      logger.debug('Merge onboarding branch in default branch');
-      await scm.mergeToLocal(onboardingBranch!);
-    }
+  // TODO #22198
+  if (!GlobalConfig.get('dryRun') && !isConflicted) {
+    logger.debug('Merge onboarding branch in default branch');
+    await scm.mergeToLocal(onboardingBranch!);
   }
   setOnboardingCache(
     getBranchCommit(config.defaultBranch!)!,
@@ -144,8 +142,8 @@ export async function checkOnboardingBranch(
 }
 
 function handleOnboardingManualRebase(onboardingPr: Pr): void {
-  const pl = GlobalConfig.get('platform')!;
-  const { rebaseRequested } = onboardingPr.bodyStruct ?? {};
+  const pl = GlobalConfig.get('platform');
+  const { rebaseRequested } = coerceObject(onboardingPr.bodyStruct);
   if (!['github', 'gitlab', 'gitea'].includes(pl)) {
     logger.trace(`Platform '${pl}' does not support extended markdown`);
     OnboardingState.prUpdateRequested = true;
@@ -184,7 +182,7 @@ function isOnboardingCacheValid(
 }
 
 function isConfigHashPresent(pr: Pr): boolean {
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   // if platform does not support html comments return true
   if (!['github', 'gitlab', 'gitea'].includes(platform)) {
     return true;

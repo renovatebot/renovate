@@ -130,7 +130,7 @@ function unfoldBaseBranches(
   return [...new Set(unfoldedList)];
 }
 
-function isMultiBaseBranch(config: RenovateConfig): boolean {
+export function isMultiBaseBranch(config: RenovateConfig): boolean {
   if (!config.baseBranchPatterns?.length) {
     return false;
   }
@@ -256,7 +256,7 @@ export async function extractDependencies(
 export function updateRepo(
   config: RenovateConfig,
   branches: BranchConfig[],
-): Promise<WriteUpdateResult | undefined> {
+): Promise<WriteUpdateResult> {
   logger.debug('processRepo()');
 
   return update(config, branches);

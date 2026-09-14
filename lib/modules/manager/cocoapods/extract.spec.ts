@@ -1,12 +1,17 @@
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { extractPackageFile } from './index.ts';
 
 const simplePodfile = Fixtures.get('Podfile.simple');
 const complexPodfile = Fixtures.get('Podfile.complex');
 
-const adminConfig: RepoGlobalConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+};
 
 describe('modules/manager/cocoapods/extract', () => {
   describe('extractPackageFile()', () => {

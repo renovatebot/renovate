@@ -1,5 +1,6 @@
 import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -17,6 +18,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
@@ -67,7 +69,7 @@ export async function updateArtifacts({
 
   if (isLockFileMaintenance && isUmbrella) {
     logger.debug(
-      'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
+      `Cannot use lockFileMaintenance in an umbrella project, see ${GlobalConfig.get('productLinks').documentation}modules/manager/mix/#lockFileMaintenance`,
     );
     return null;
   }
@@ -89,7 +91,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },
@@ -137,12 +139,15 @@ export async function updateArtifacts({
 
     if (token) {
       logger.debug(`Authenticating to hex organization ${organization}`);
-      const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
+      const authCommand = `mix hex.organization auth ${quote(organization)} --key ${quote(token)}`;
       return [...acc, authCommand];
     }
 
     return acc;
   }, [] as string[]);
+
+  // renovate: will update this
+  const erlangVersion = '26';
 
   const execOptions: ExecOptions = {
     extraEnv: {
@@ -150,17 +155,19 @@ export async function updateArtifacts({
       // TODO: should include a version constraint
       MIX_ARCHIVES: await ensureCacheDir('mix_archives'),
     },
-    cwdFile: packageFileName,
+    cwdFile: lockFileName,
     docker: {},
     toolConstraints: [
       {
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: config.constraints?.erlang ?? '^26',
+        constraint:
+          (await resolveToolConstraint(config, 'erlang')) ??
+          `^${erlangVersion}`,
       },
       {
         toolName: 'elixir',
-        constraint: config.constraints?.elixir,
+        constraint: await resolveToolConstraint(config, 'elixir'),
       },
     ],
     preCommands,
@@ -183,7 +190,7 @@ export async function updateArtifacts({
   try {
     await exec(command, execOptions);
   } catch (err) {
-    /* v8 ignore next 3 */
+    /* v8 ignore if -- defensive rethrow of TEMPORARY_ERROR from exec, not reproduced in mix specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -196,7 +203,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },
@@ -227,7 +234,7 @@ async function checkLockFileReadError(
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: `Error reading ${lockFileName}`,
         },
       },

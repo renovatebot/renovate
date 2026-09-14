@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -95,6 +96,17 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
+      it('fetches changelogs for the "pr" stage', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        await ensurePr(config);
+
+        expect(embedChangelogs).toHaveBeenCalledExactlyOnceWith({
+          upgrades: config.upgrades,
+          stage: 'pr',
+        });
+      });
+
       it('aborts PR creation once limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
@@ -108,7 +120,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
-      it('ignores PR limits on vulnerability alert', async () => {
+      it('aborts PR creation once vulnerability alert limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
@@ -116,9 +128,21 @@ describe('workers/repository/update/pr/index', () => {
         delete prConfig.prTitle; // for coverage
         const res = await ensurePr(prConfig);
 
+        expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'RateLimited' });
+        expect(platform.createPr).not.toHaveBeenCalled();
+      });
+
+      it('counts vulnerability alert PRs against their own limit', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, isVulnerabilityAlert: true });
+
         expect(res).toEqual({ type: 'with-pr', pr });
-        expect(platform.createPr).toHaveBeenCalled();
-        expect(prCache.setPrCache).toHaveBeenCalled();
+        expect(limits.incCountValue).toHaveBeenNthCalledWith(
+          1,
+          'VulnerabilityConcurrentPRs',
+        );
+        expect(limits.incCountValue).toHaveBeenNthCalledWith(2, 'HourlyPRs');
       });
 
       it('creates rollback PR', async () => {
@@ -165,6 +189,22 @@ describe('workers/repository/update/pr/index', () => {
           prBlockedBy: 'NeedsApproval',
         });
         expect(prCache.setPrCache).not.toHaveBeenCalled();
+      });
+
+      it('creates PR for unapproved dependencies which have been unpended', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          prCreation: 'approval',
+          dependencyDashboardChecks: {
+            'renovate-branch': 'unpend',
+          },
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('skips PR creation before prNotPendingHours is hit', async () => {
@@ -582,6 +622,23 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
+      it('forces PR on dashboard unpend check', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          reviewers: ['somebody'],
+          dependencyDashboardChecks: {
+            'renovate-branch': 'unpend',
+          },
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
       it('adds assignees for PR automerge with red status', async () => {
         const changedPr: Pr = {
           ...pr,
@@ -630,7 +687,7 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           automerge: true,
           automergeType: 'branch',
-          artifactErrors: [{ lockFile: 'foo', stderr: 'bar' }],
+          artifactErrors: [{ fileName: 'foo', stderr: 'bar' }],
         });
 
         expect(res).toEqual({ type: 'with-pr', pr });
@@ -699,6 +756,32 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(platform.createPr).toHaveBeenCalled();
         expect(platform.massageMarkdown).toHaveBeenCalled();
+        expect(comment.ensureComment).toHaveBeenCalledExactlyOnceWith({
+          content: 'markdown content',
+          number: 123,
+          topic: 'Branch automerge failure',
+        });
+      });
+
+      it('comments on automerge failure due to merge queue', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+        platform.massageMarkdown.mockReturnValueOnce('markdown content');
+
+        await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          branchAutomergeFailureMessage: 'automerge aborted - merge queue',
+          suppressNotifications: [],
+        });
+
+        expect(platform.massageMarkdown).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'The base branch only accepts changes through its merge queue and rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or allow Renovate to bypass the merge queue.',
+          ),
+          undefined,
+        );
         expect(comment.ensureComment).toHaveBeenCalledExactlyOnceWith({
           content: 'markdown content',
           number: 123,
@@ -885,7 +968,14 @@ describe('workers/repository/update/pr/index', () => {
         const {
           upgrades: [{ prBodyNotes }],
         } = prBody.getPrBody.mock.calls[0][0];
-        expect(prBodyNotes).toBeNonEmptyArray();
+        expect(prBodyNotes).toEqual([
+          codeBlock`
+            > ❗ **Important**
+            >
+            > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+          `,
+        ]);
       });
 
       it('removes duplicate changelogs', async () => {
@@ -998,6 +1088,7 @@ describe('workers/repository/update/pr/index', () => {
             [true, true],
             [false, true],
             [false, false],
+            [undefined, undefined],
           ])(
             'current attestation %s, new attestation %s',
             (currentAttestation, newAttestation) => {
@@ -1008,10 +1099,7 @@ describe('workers/repository/update/pr/index', () => {
                 manager: 'npm',
                 currentVersion: '1.2.3',
                 newVersion: '2.3.4',
-                releases: [
-                  { version: '1.2.3', attestation: currentAttestation },
-                  { version: '2.3.4', attestation: newAttestation },
-                ],
+                releases: [{ version: '2.3.4', attestation: newAttestation }],
               });
 
               it('does not warn the user', async () => {
@@ -1019,6 +1107,7 @@ describe('workers/repository/update/pr/index', () => {
 
                 const res = await ensurePr({
                   ...config,
+                  hasAttestation: currentAttestation,
                   upgrades: [dummyUpgrade],
                 });
 
@@ -1038,7 +1127,7 @@ describe('workers/repository/update/pr/index', () => {
             currentVersion: '1.2.3',
             newVersion: '2.3.4',
             releases: [
-              { version: '1.2.3', attestation: true },
+              // but the update we're updating to does not
               { version: '2.3.4', attestation: false },
             ],
           });
@@ -1048,6 +1137,8 @@ describe('workers/repository/update/pr/index', () => {
 
             const res = await ensurePr({
               ...config,
+              // the current release has an attestation
+              hasAttestation: true,
               upgrades: [dummyUpgrade],
             });
 
@@ -1057,16 +1148,51 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [
                 {
                   prBodyNotes: [
-                    `> :stop_sign: **Caution**
->
-> bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
-> Verify that release 2.3.4 was published by the expected author.
-
-`,
+                    codeBlock`
+                      > 🛑 **Caution**
+                      >
+                      > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
+                      > Verify that release 2.3.4 was published by the expected author.
+                    `,
                   ],
                 },
               ],
             });
+          });
+        });
+        // TODO #42312
+        describe('when attestation is removed in an intermediate version', () => {
+          const dummyUpgrade = partial<BranchUpgradeConfig>({
+            branchName: sourceBranch,
+            depType: 'foo',
+            depName: 'bar',
+            manager: 'npm',
+            currentVersion: '1.2.3',
+            newVersion: '2.3.4',
+            releases: [
+              // previous versions between our currentVersion and newVersion have gaps in attestations
+              { version: '1.2.4', attestation: false },
+              { version: '1.3.0', attestation: false },
+              { version: '2.0.0', attestation: false },
+
+              // but the update we're updating to has attestation information
+              { version: '2.3.4', attestation: true },
+            ],
+          });
+
+          it('does not warn the user', async () => {
+            platform.createPr.mockResolvedValueOnce(pr);
+
+            const res = await ensurePr({
+              ...config,
+              // the current release has an attestation
+              hasAttestation: true,
+              upgrades: [dummyUpgrade],
+            });
+
+            expect(res).toEqual({ type: 'with-pr', pr });
+            const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+            expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
           });
         });
       });
@@ -1225,6 +1351,46 @@ describe('workers/repository/update/pr/index', () => {
         await ensurePr(config);
         expect(logger.logger.debug).not.toHaveBeenCalledExactlyOnceWith(
           'PR cache not found',
+        );
+      });
+
+      it('skips cache early return when autoApprove is set', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          bodyFingerprint: fingerprint(generatePrBodyFingerprintConfig(config)),
+          lastEdited: '2020-01-20T00:00:00Z',
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        const res = await ensurePr({ ...config, autoApprove: true });
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: existingPr,
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
+        );
+        // updatePr should be called to re-trigger approval
+        expect(platform.updatePr).toHaveBeenCalled();
+      });
+    });
+
+    describe('autoApprove', () => {
+      it('updates PR when autoApprove is set even if PR does not need updating', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, autoApprove: true });
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, bodyStruct },
+        });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { prTitle },
+          'PR approval required',
         );
       });
     });

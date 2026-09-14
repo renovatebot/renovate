@@ -12,7 +12,7 @@ import {
 } from './utils.ts';
 
 describe('modules/platform/scm-manager/utils', () => {
-  describe(getMergeMethod, () => {
+  describe('getMergeMethod', () => {
     it.each`
       strategy          | method
       ${undefined}      | ${null}
@@ -35,7 +35,7 @@ describe('modules/platform/scm-manager/utils', () => {
     );
   });
 
-  describe(smartLinks, () => {
+  describe('smartLinks', () => {
     it.each`
       body            | result
       ${''}           | ${''}
@@ -48,7 +48,7 @@ describe('modules/platform/scm-manager/utils', () => {
     );
   });
 
-  describe(matchPrState, () => {
+  describe('matchPrState', () => {
     const defaultPr: Pr = {
       sourceBranch: 'feature/test',
       createdAt: '2023-08-02T10:48:24.762Z',
@@ -59,23 +59,19 @@ describe('modules/platform/scm-manager/utils', () => {
     };
 
     it.each`
-      pr                                     | state       | expectedResult
-      ${{ ...defaultPr, state: 'OPEN' }}     | ${'all'}    | ${true}
-      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'all'}    | ${true}
-      ${{ ...defaultPr, state: 'MERGED' }}   | ${'all'}    | ${true}
-      ${{ ...defaultPr, state: 'REJECTED' }} | ${'all'}    | ${true}
-      ${{ ...defaultPr, state: 'OPEN' }}     | ${'open'}   | ${true}
-      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'open'}   | ${true}
-      ${{ ...defaultPr, state: 'MERGED' }}   | ${'open'}   | ${false}
-      ${{ ...defaultPr, state: 'REJECTED' }} | ${'open'}   | ${false}
-      ${{ ...defaultPr, state: 'OPEN' }}     | ${'!open'}  | ${false}
-      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'!open'}  | ${false}
-      ${{ ...defaultPr, state: 'MERGED' }}   | ${'!open'}  | ${true}
-      ${{ ...defaultPr, state: 'REJECTED' }} | ${'!open'}  | ${true}
-      ${{ ...defaultPr, state: 'OPEN' }}     | ${'closed'} | ${false}
-      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'closed'} | ${false}
-      ${{ ...defaultPr, state: 'MERGED' }}   | ${'closed'} | ${true}
-      ${{ ...defaultPr, state: 'REJECTED' }} | ${'closed'} | ${true}
+      pr                                   | state       | expectedResult
+      ${{ ...defaultPr, state: 'open' }}   | ${'all'}    | ${true}
+      ${{ ...defaultPr, state: 'merged' }} | ${'all'}    | ${true}
+      ${{ ...defaultPr, state: 'closed' }} | ${'all'}    | ${true}
+      ${{ ...defaultPr, state: 'open' }}   | ${'open'}   | ${true}
+      ${{ ...defaultPr, state: 'merged' }} | ${'open'}   | ${false}
+      ${{ ...defaultPr, state: 'closed' }} | ${'open'}   | ${false}
+      ${{ ...defaultPr, state: 'open' }}   | ${'!open'}  | ${false}
+      ${{ ...defaultPr, state: 'merged' }} | ${'!open'}  | ${true}
+      ${{ ...defaultPr, state: 'closed' }} | ${'!open'}  | ${true}
+      ${{ ...defaultPr, state: 'open' }}   | ${'closed'} | ${false}
+      ${{ ...defaultPr, state: 'merged' }} | ${'closed'} | ${false}
+      ${{ ...defaultPr, state: 'closed' }} | ${'closed'} | ${true}
     `(
       'match scm pr state $pr.state to renovate pr state $state',
       ({
@@ -94,7 +90,7 @@ describe('modules/platform/scm-manager/utils', () => {
     );
   });
 
-  describe(getRepoUrl, () => {
+  describe('getRepoUrl', () => {
     const repo: Repo = {
       contact: 'test@test.com',
       creationDate: '2023-08-02T10:48:24.762Z',

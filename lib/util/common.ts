@@ -1,6 +1,6 @@
 import { isNumber } from '@sindresorhus/is';
 import JSON5 from 'json5';
-import * as JSONC from 'jsonc-parser';
+import { parse as jsoncWeaverParse } from 'jsonc-weaver';
 import type { JsonValue } from 'type-fest';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig, NOT_PRESENT } from '../config/inherit.ts';
@@ -17,6 +17,7 @@ import {
 import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
 import * as hostRules from './host-rules.ts';
+import { coerceObject } from './object.ts';
 import { parseUrl } from './url.ts';
 
 /**
@@ -36,7 +37,7 @@ export function detectPlatform(
   | 'github'
   | 'gitlab'
   | null {
-  const { hostname } = parseUrl(url) ?? {};
+  const { hostname } = coerceObject(parseUrl(url));
   if (hostname === 'dev.azure.com' || hostname?.endsWith('.visualstudio.com')) {
     return 'azure';
   }
@@ -141,12 +142,7 @@ export function parseJsonWithFallback(
 }
 
 export function parseJsonc(content: string): JsonValue {
-  const errors: JSONC.ParseError[] = [];
-  const value = JSONC.parse(content, errors, { allowTrailingComma: true });
-  if (errors.length === 0) {
-    return value;
-  }
-  throw new Error('Invalid JSONC');
+  return jsoncWeaverParse(content);
 }
 
 /**
@@ -163,11 +159,10 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
     if (
       key === 'onboardingAutoCloseAge' &&
       isNumber(inheritedValue) &&
-      isNumber(globalValue)
+      isNumber(globalValue) &&
+      globalValue < inheritedValue
     ) {
-      if (globalValue < inheritedValue) {
-        return globalValue;
-      }
+      return globalValue;
     }
 
     return inheritedValue;

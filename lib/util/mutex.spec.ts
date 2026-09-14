@@ -1,6 +1,6 @@
 import { acquireLock, getMutex } from './mutex.ts';
 
-vi.unmock('./mutex');
+vi.unmock('./mutex.ts');
 
 describe('util/mutex', () => {
   describe('getMutex', () => {

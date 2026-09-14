@@ -3,6 +3,7 @@ import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
+export { knownDepTypes } from './dep-types.ts';
 export { extractAllPackageFiles, extractPackageFile };
 
 export const displayName = 'GitLab CI/CD';

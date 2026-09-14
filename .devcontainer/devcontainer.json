@@ -13,13 +13,13 @@
     "vscode": {
       "terminal.integrated.defaultProfile.linux": "bash",
       "extensions": [
-        "dbaeumer.vscode-eslint",
         "oxc.oxc-vscode",
         "esbenp.prettier-vscode",
         "vitest.explorer",
         "editorconfig.editorconfig",
         "github.vscode-github-actions",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "TypeScriptTeam.native-preview"
       ]
     }
   },

@@ -5,7 +5,9 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'hex';
 export const displayName = 'Hex';
-export const urls = ['https://hexdocs.pm/elixir/Version.html'];
+export const urls = [
+  '[Elixir Version module](https://hexdocs.pm/elixir/Version.html)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
@@ -16,11 +18,14 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 function hex2npm(input: string): string {
   return input
-    .replace(regEx(/~>\s*(\d+\.\d+)$/), '^$1')
-    .replace(regEx(/~>\s*(\d+\.\d+\.\d+)/), '~$1')
+    .replace(regEx(/~>\s*(?<version>\d+\.\d+)$/), '^$<version>')
+    .replace(regEx(/~>\s*(?<version>\d+\.\d+\.\d+)/), '~$<version>')
     .replace(regEx(/==|and/), '')
     .replace('or', '||')
-    .replace(regEx(/!=\s*(\d+\.\d+(\.\d+.*)?)/), '>$1 <$1')
+    .replace(
+      regEx(/!=\s*(?<version>\d+\.\d+(?:\.\d+.*)?)/),
+      '>$<version> <$<version>',
+    )
     .trim();
 }
 
@@ -37,12 +42,12 @@ function npm2hex(input: string): string {
       break;
     }
     if (i < res.length - 1 && res[i + 1].includes('||')) {
-      output += res[i] + ' or ';
+      output += `${res[i]} or `;
       i += 1;
     } else if (operators.includes(res[i])) {
-      output += res[i] + ' ';
+      output += `${res[i]} `;
     } else {
-      output += res[i] + ' and ';
+      output += `${res[i]} and `;
     }
   }
   return output;
@@ -52,10 +57,25 @@ function isLessThanRange(version: string, range: string): boolean {
   return !!npm.isLessThanRange?.(hex2npm(version), hex2npm(range));
 }
 
-const isValid = (input: string): boolean => !!npm.isValid(hex2npm(input));
+function isValid(input: string): boolean {
+  return !!npm.isValid(hex2npm(input));
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(hex2npm(version), hex2npm(range));
+function isSingleVersion(constraint: string): boolean {
+  return (
+    npm.isVersion(constraint) ||
+    (constraint?.startsWith('==') &&
+      npm.isVersion(constraint.substring(2).trim()))
+  );
+}
+
+function getPinnedValue(newVersion: string): string {
+  return `== ${newVersion}`;
+}
+
+function matches(version: string, range: string): boolean {
+  return npm.matches(hex2npm(version), hex2npm(range));
+}
 
 function getSatisfyingVersion(
   versions: string[],
@@ -86,18 +106,21 @@ function getNewValue({
   if (newSemver) {
     newSemver = npm2hex(newSemver);
 
-    if (regEx(/~>\s*(\d+\.\d+\.\d+)$/).test(currentValue)) {
+    if (regEx(/~>\s*(?:\d+\.\d+\.\d+)$/).test(currentValue)) {
       newSemver = newSemver.replace(
-        regEx(/[\^~]\s*(\d+\.\d+\.\d+)/g),
-        (_str, p1: string) => `~> ${p1}`,
+        regEx(/[\^~]\s*(?<version>\d+\.\d+\.\d+)/g),
+        (_str, version: string) => `~> ${version}`,
       );
-    } else if (regEx(/~>\s*(\d+\.\d+)$/).test(currentValue)) {
+    } else if (regEx(/~>\s*(?:\d+\.\d+)$/).test(currentValue)) {
       newSemver = newSemver.replace(
-        regEx(/\^\s*(\d+\.\d+)(\.\d+)?/g),
-        (_str, p1: string) => `~> ${p1}`,
+        regEx(/\^\s*(?<version>\d+\.\d+)(?:\.\d+)?/g),
+        (_str, version: string) => `~> ${version}`,
       );
     } else {
-      newSemver = newSemver.replace(regEx(/~\s*(\d+\.\d+\.\d)/g), '~> $1');
+      newSemver = newSemver.replace(
+        regEx(/~\s*(?<version>\d+\.\d+\.\d)/g),
+        '~> $<version>',
+      );
     }
     if (npm.isVersion(newSemver)) {
       newSemver = `== ${newSemver}`;
@@ -111,11 +134,13 @@ export { isValid };
 export const api: VersioningApi = {
   ...npm,
   isLessThanRange,
+  isSingleVersion,
   isValid,
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
+  getPinnedValue,
 };
 
 export default api;

@@ -221,7 +221,7 @@ Add a label `auto:retry-latest` to any Discussion where the user should retry th
 
 </details>
 
-Apply the `self-hosted` label when an issue is applicable only to users who self-administer their own bot.
+Apply the `self-hosted` label when an issue is applicable only to users who self-administer their own Renovate instance.
 
 ## Automated check for Issues with missing labels
 
@@ -229,6 +229,12 @@ We have a GitHub Action (`find-issues-with-missing-labels.yml`) to find issues o
 Any Issues with missing labels will be put in a list in a new "error" Issue.
 
 The Action runs each week.
+
+## Checking Module Label Coverage
+
+Run `pnpm labels:check` to check whether all datasource, manager, and platform modules have matching GitHub labels.
+
+Run `pnpm labels:show-commands` to print copy-pasteable `gh label create ...` commands for any missing labels.
 
 ### Apply the correct labels manually
 

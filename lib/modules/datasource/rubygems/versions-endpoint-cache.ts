@@ -1,5 +1,7 @@
-import { z } from 'zod/v3';
+import { DateTime } from 'luxon';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
@@ -9,6 +11,7 @@ import { Result } from '../../../util/result.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { copystr } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
+import type { VersionsResult } from './types.ts';
 
 type PackageVersions = Map<string, string[]>;
 
@@ -41,7 +44,7 @@ function reconcilePackageVersions(
 ): PackageVersions {
   for (const line of versionLines) {
     const packageName = copystr(line.packageName);
-    let versions = packageVersions.get(packageName) ?? [];
+    let versions = coerceArray(packageVersions.get(packageName));
 
     const { deletedVersions, addedVersions } = line;
 
@@ -49,9 +52,11 @@ function reconcilePackageVersions(
       versions = versions.filter((v) => !deletedVersions.has(v));
     }
 
+    // v8 ignore else -- needs a delta that only removes versions
     if (addedVersions.length > 0) {
       const existingVersions = new Set(versions);
       for (const addedVersion of addedVersions) {
+        // v8 ignore else -- needs a delta re-adding a version already present
         if (!existingVersions.has(addedVersion)) {
           const version = copystr(addedVersion);
           versions.push(version);
@@ -70,7 +75,7 @@ function parseFullBody(body: string): VersionsEndpointResult {
     new Map<string, string[]>(),
     VersionLines.parse(body),
   );
-  const syncedAt = new Date();
+  const syncedAt = DateTime.now().toJSDate();
   const contentLength = body.length;
   const contentTail = getContentTail(body);
 
@@ -91,6 +96,7 @@ function cacheResult(
   result: VersionsEndpointResult,
 ): void {
   const registryHostname = parseUrl(registryUrl)?.hostname;
+  // v8 ignore else -- needs a result cached for a non-rubygems.org host
   if (registryHostname === 'rubygems.org') {
     memCache.set(registryUrl, result);
   }
@@ -128,11 +134,6 @@ type VersionLines = z.infer<typeof VersionLines>;
 function isStale(regCache: VersionsEndpointData): boolean {
   return getElapsedMinutes(regCache.syncedAt) >= 15;
 }
-
-export type VersionsResult = Result<
-  string[],
-  'unsupported-api' | 'package-not-found'
->;
 
 export class VersionsEndpointCache {
   private readonly http: Http;
@@ -266,7 +267,7 @@ export class VersionsEndpointCache {
         oldCache.packageVersions,
         VersionLines.parse(delta),
       );
-      const syncedAt = new Date();
+      const syncedAt = DateTime.now().toJSDate();
       const contentLength = oldCache.contentLength + delta.length;
       const contentTail = getContentTail(body);
 
@@ -277,6 +278,7 @@ export class VersionsEndpointCache {
         contentTail,
       });
     } catch (err) {
+      // v8 ignore else -- needs a non-http failure during the sync
       if (err instanceof HttpError) {
         const responseStatus = err.response?.statusCode;
 

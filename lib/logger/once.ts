@@ -1,3 +1,5 @@
+// Do not static import `bunyan` here!
+// Otherwise otel can't instrument it.
 import { createHash } from 'node:crypto';
 import { stringify } from 'safe-stable-stringify';
 
@@ -16,7 +18,7 @@ type OmitFn = (...args: any[]) => any;
 function getCallSite(omitFn: OmitFn): string | null {
   const stackTraceLimitOrig = Error.stackTraceLimit;
   // We don't use `Error.captureStackTrace` directly, we simply restore it later.
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+  // oxlint-disable-next-line typescript/unbound-method
   const prepareStackTraceOrig = Error.prepareStackTrace;
 
   let result: string | null = null;
@@ -32,7 +34,7 @@ function getCallSite(omitFn: OmitFn): string | null {
     if (callsite) {
       result = callsite.toString();
     }
-    /* v8 ignore next 2 -- should not happen */
+    /* v8 ignore next -- should not happen */
   } catch {
     // no-op
   } finally {
@@ -53,7 +55,7 @@ export function once(
 ): void {
   const callsite = getCallSite(omitFn);
 
-  /* v8 ignore next 3 -- should not happen */
+  /* v8 ignore next -- should not happen */
   if (!callsite) {
     return;
   }

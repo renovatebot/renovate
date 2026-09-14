@@ -1,12 +1,47 @@
 import type { SemVer } from 'semver';
 import type { RangeStrategy } from '../../types/index.ts';
 
+export interface GenericVersion {
+  release: number[];
+  /** prereleases are treated in the standard semver manner, if present */
+  prerelease?: string;
+  suffix?: string;
+}
+export type VersionParser = (version: string) => GenericVersion;
+
+export type VersionComparator = (version: string, other: string) => number;
+
+export interface DistroSchedule {
+  codename: string;
+  series: string;
+  created: string;
+  release?: string;
+  eol?: string;
+  eol_server?: string;
+  eol_esm?: string;
+  eol_lts?: string;
+  eol_elts?: string;
+}
+
+export type DistroDataFile =
+  'data/ubuntu-distro-info.json' | 'data/debian-distro-info.json';
+
+export type DistroInfoRecord = Record<string, DistroSchedule>;
+
+export type DistroInfoRecordWithVersion = { version: string } & DistroSchedule;
+
 export interface NewValueConfig {
   currentValue: string;
   rangeStrategy: RangeStrategy;
   currentVersion?: string;
   newVersion: string;
   isReplacement?: boolean;
+  /**
+   * All versions numbers that this given Release has.
+   *
+   * Allows Versioning modules to determine whether the version they're proposing matches a known version.
+   */
+  allVersions?: Set<string>;
 }
 export interface VersioningApi {
   // validation

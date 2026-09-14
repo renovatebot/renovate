@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import * as semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
@@ -10,7 +11,7 @@ export function makeVersion(
   const prerelease = semver.prerelease(version, options);
 
   if (prerelease && !options.includePrerelease) {
-    if (!Number.isNaN(parseInt(prerelease.toString()[0]))) {
+    if (!Number.isNaN(parseInt(prerelease.toString()[0], 10))) {
       const stringVersion = `${splitVersion[0]}.${splitVersion[1]}.${splitVersion[2]}`;
       return semver.valid(stringVersion, options);
     }
@@ -90,19 +91,17 @@ export function findSatisfyingVersion(
 
   for (const v of versions) {
     const versionFromList = makeVersion(v, options);
-    if (typeof versionFromList === 'string') {
+    if (isString(versionFromList)) {
       const cleanedVersion = cleanVersion(versionFromList);
       const options = getOptions(range);
       const cleanRange = cleanVersion(range);
-      if (matchesWithOptions(cleanedVersion, cleanRange, options)) {
-        if (
-          !cur ||
-          semver.compare(curSV, versionFromList, options) === compareRt
-        ) {
-          cur = versionFromList;
-          curIndex = index;
-          curSV = new semver.SemVer(cur, options);
-        }
+      if (
+        matchesWithOptions(cleanedVersion, cleanRange, options) &&
+        (!cur || semver.compare(curSV, versionFromList, options) === compareRt)
+      ) {
+        cur = versionFromList;
+        curIndex = index;
+        curSV = new semver.SemVer(cur, options);
       }
     }
     index += 1;

@@ -11,6 +11,7 @@ export async function detectGlobalConfig(): Promise<GlobalManagerConfig> {
   const npmrcFileName = upath.join(homedir, '.npmrc');
   try {
     const npmrc = await readSystemFile(npmrcFileName, 'utf8');
+    // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyString(npmrc)) {
       res.npmrc = npmrc;
       res.npmrcMerge = true;

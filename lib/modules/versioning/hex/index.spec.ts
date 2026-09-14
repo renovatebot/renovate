@@ -39,6 +39,21 @@ describe('modules/versioning/hex/index', () => {
   });
 
   it.each`
+    version       | expected
+    ${'1.2.3'}    | ${true}
+    ${'== 1.2.3'} | ${true}
+    ${'~> 1.2'}   | ${false}
+    ${'~> 1.2.0'} | ${false}
+    ${'>= 1.0.0'} | ${false}
+  `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+    expect(hexScheme.isSingleVersion(version)).toBe(expected);
+  });
+
+  it('getPinnedValue returns == prefixed version', () => {
+    expect(hexScheme.getPinnedValue!('1.2.3')).toBe('== 1.2.3');
+  });
+
+  it.each`
     version    | range                      | expected
     ${'0.1.0'} | ${'>= 1.0.0 and <= 2.0.0'} | ${true}
     ${'1.9.0'} | ${'>= 1.0.0 and <= 2.0.0'} | ${false}

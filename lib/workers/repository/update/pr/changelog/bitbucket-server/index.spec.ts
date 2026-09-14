@@ -77,11 +77,11 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         .times(4)
         .reply(200, 'text');
 
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl,
@@ -110,11 +110,11 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         .times(4)
         .reply(200, []);
 
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl,
@@ -143,11 +143,11 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         .times(4)
         .reply(200, []);
 
-      expect(
-        await getChangeLogJSON({
+      await expect(
+        getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl,
@@ -184,7 +184,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
       const res = await getReleaseNotesMdFile(bitbucketProject);
       expect(res).toStrictEqual({
         changelogFile: 'src/CHANGELOG.md',
-        changelogMd: changelogMd + '\n#\n##',
+        changelogMd: `${changelogMd}\n#\n##`,
       });
     });
 
@@ -216,7 +216,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
       const res = await getReleaseNotesMdFile(project);
       expect(res).toStrictEqual({
         changelogFile: 'packages/components/src/CHANGELOG.md',
-        changelogMd: changelogMd + '\n#\n##',
+        changelogMd: `${changelogMd}\n#\n##`,
       });
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -232,7 +232,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
           isLastPage: true,
           values: ['.gitignore', 'README.md'],
         });
-      expect(await getReleaseNotesMdFile(bitbucketProject)).toBeNull();
+      await expect(getReleaseNotesMdFile(bitbucketProject)).resolves.toBeNull();
     });
   });
 

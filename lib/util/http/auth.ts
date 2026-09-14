@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import {
   FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
@@ -36,6 +36,10 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       } else {
         options.headers.authorization = `${authType} ${options.token}`;
       }
+    } else if (options.token.startsWith('x-access-token:')) {
+      // GitHub App installation token — prefix is set by the GitHub platform init
+      const appToken = options.token.replace('x-access-token:', '');
+      options.headers.authorization = `Bearer ${appToken}`;
     } else if (
       options.hostType &&
       FORGEJO_API_USING_HOST_TYPES.includes(options.hostType)
@@ -53,17 +57,6 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       GITHUB_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
       options.headers.authorization = `token ${options.token}`;
-      if (options.token.startsWith('x-access-token:')) {
-        const appToken = options.token.replace('x-access-token:', '');
-        options.headers.authorization = `token ${appToken}`;
-        // v8 ignore else -- TODO: add test #40625
-        if (isString(options.headers.accept)) {
-          options.headers.accept = options.headers.accept.replace(
-            'application/vnd.github.v3+json',
-            'application/vnd.github.machine-man-preview+json',
-          );
-        }
-      }
     } else if (
       options.hostType &&
       GITLAB_API_USING_HOST_TYPES.includes(options.hostType)

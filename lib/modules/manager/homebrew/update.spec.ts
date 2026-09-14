@@ -33,6 +33,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: aide,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -69,6 +70,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -114,6 +116,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: oldArchiveFormat,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -152,6 +155,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -176,6 +180,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -200,6 +205,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -224,6 +230,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -263,6 +270,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: invalidUrlFormula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -301,6 +309,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: missingUrlFormula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -340,6 +349,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: invalidSha256Formula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -378,6 +388,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: missingSha256Formula,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -408,6 +419,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: aide,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -430,6 +442,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -453,6 +466,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -476,6 +490,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -496,9 +511,7 @@ describe('modules/manager/homebrew/update', () => {
       createDependency: vi.fn(),
     };
 
-    vi.spyOn(handlers, 'findHandlerByType').mockReturnValue(
-      mockHandler as never,
-    );
+    vi.spyOn(handlers, 'findHandlerByType').mockReturnValue(mockHandler);
 
     const upgrade = {
       currentValue: 'v0.8.2',
@@ -516,6 +529,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: ibazel,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -554,6 +568,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: content,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -597,6 +612,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: content,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 
@@ -640,6 +656,7 @@ describe('modules/manager/homebrew/update', () => {
 
     const newContent = await updateDependency({
       fileContent: content,
+      packageFile: 'Formula/some.rb',
       upgrade,
     });
 

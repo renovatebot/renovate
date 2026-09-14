@@ -45,7 +45,19 @@ export type SkipReason =
   | 'missing-depname'
   | 'recursive-placeholder'
   | 'github-token-required'
-  | 'inherited-dependency';
+  | 'inherited-dependency'
+  /**
+   * The dependency has been detected as explicitly malicious.
+   *
+   * This reason should be removed before the update phase, so updates can be determined.
+   */
+  | 'malicious-version-in-use'
+  /**
+   * The dependency has a new dependency version available which has been marked as malicious.
+   *
+   * Renovate will not propose any updates, and leave you on the version you are currently on, which is currently known as safe.
+   */
+  | 'malicious-update-proposed';
 
 export type StageName =
   | 'current-timestamp'
@@ -57,4 +69,8 @@ export type StageName =
   | 'pre-lookup'
   | 'source-url'
   | 'update-type'
-  | 'update-type-merge';
+  | 'update-type-merge'
+  /**
+   * The update was skipped during one of the Enrichment modules.
+   */
+  | 'enrichment';

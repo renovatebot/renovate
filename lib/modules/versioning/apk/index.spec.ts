@@ -1,0 +1,780 @@
+import apk from './index.ts';
+
+describe('modules/versioning/apk/index', () => {
+  describe('isValid', () => {
+    it.each`
+      version               | expected
+      ${'2.39.0-r0'}        | ${true}
+      ${'2.39.0'}           | ${true}
+      ${'2.39.0_rc1'}       | ${true}
+      ${'foo'}              | ${false}
+      ${'a.39.0-'}          | ${false}
+      ${'6.5_p20250503-r0'} | ${true}
+      ${'~2.39.0'}          | ${true}
+      ${'=~2.39.0'}         | ${true}
+      ${'~=2.39.0'}         | ${true}
+      ${'>~2.39.0'}         | ${true}
+      ${'<~2.39.0'}         | ${true}
+      ${'>=2.39.0'}         | ${true}
+      ${'<=2.39.0'}         | ${true}
+      ${'><2.39.0'}         | ${false}
+      ${'~foo'}             | ${false}
+      ${'~'}                | ${false}
+      ${''}                 | ${false}
+    `('isValid($version) === $expected', ({ version, expected }) => {
+      expect(apk.isValid(version)).toBe(expected);
+    });
+  });
+
+  describe('isStable', () => {
+    it.each`
+      version               | expected
+      ${'2.39.0-r0'}        | ${true}
+      ${'2.39.0_rc1-r0'}    | ${false}
+      ${'2.39.0'}           | ${true}
+      ${'2.39.0-r0'}        | ${true}
+      ${'2.39.0_rc2'}       | ${false}
+      ${'2.39.0_rc10-r0'}   | ${false}
+      ${'2.39.0_rc1'}       | ${false}
+      ${'2.39.0_rc0'}       | ${false}
+      ${'6.5_p20250503-r0'} | ${true}
+      ${'1.0_p1-r0'}        | ${true}
+      ${'2.0_cvs-r0'}       | ${true}
+      ${'3.0_git-r0'}       | ${true}
+      ${'4.0_alpha-r0'}     | ${false}
+      ${'5.0_beta-r0'}      | ${false}
+    `('isStable($version) === $expected', ({ version, expected }) => {
+      expect(apk.isStable(version)).toBe(expected);
+    });
+  });
+
+  describe('getMajor', () => {
+    it.each`
+      version            | expected
+      ${'2.39.0-r0'}     | ${2}
+      ${'2.39.0_rc1-r0'} | ${2}
+    `('getMajor($version) === $expected', ({ version, expected }) => {
+      expect(apk.getMajor(version)).toBe(expected);
+    });
+  });
+
+  describe('getMinor', () => {
+    it.each`
+      version            | expected
+      ${'2.39.0-r0'}     | ${39}
+      ${'2.39.0_rc1-r0'} | ${39}
+    `('getMinor($version) === $expected', ({ version, expected }) => {
+      expect(apk.getMinor(version)).toBe(expected);
+    });
+  });
+
+  describe('getPatch', () => {
+    it.each`
+      version                | expected
+      ${'2.39.0-r0'}         | ${0}
+      ${'2.39.0_rc1-r0'}     | ${0}
+      ${'6.5_p20250503-r0'}  | ${null}
+      ${'3.9_pre20060124'}   | ${null}
+      ${'0.3.4_pre20061029'} | ${4}
+    `('getPatch($version) === $expected', ({ version, expected }) => {
+      expect(apk.getPatch(version)).toBe(expected);
+    });
+  });
+
+  describe('compare', () => {
+    it.each`
+      a                          | b                      | expected
+      ${'2.39.0-r1'}             | ${'2.39.0-r0'}         | ${1}
+      ${'2.39.1-r0'}             | ${'2.39.0-r0'}         | ${1}
+      ${'2.39.0-r0'}             | ${'2.39.1-r0'}         | ${-1}
+      ${'2.39.0-r0'}             | ${'2.39.0-r1'}         | ${-1}
+      ${'2.39.0'}                | ${'2.39.0'}            | ${0}
+      ${'2.39.0'}                | ${'2.39.1'}            | ${-1}
+      ${'2.39.1'}                | ${'2.39.0'}            | ${1}
+      ${'2.39.0-r0'}             | ${'2.39.0'}            | ${1}
+      ${'2.39.0'}                | ${'2.39.0-r0'}         | ${-1}
+      ${'2.39.0_beta'}           | ${'2.39.0'}            | ${1}
+      ${'2.39.0'}                | ${'2.39.0_beta'}       | ${-1}
+      ${'0.3.4_pre20061029'}     | ${'0.3.4_pre20061030'} | ${-1}
+      ${'0.3.4_pre20061029'}     | ${'0.3.4_pre20061028'} | ${1}
+      ${'0.3.4_pre20061029'}     | ${'0.3.4_alpha'}       | ${1}
+      ${'0.3.4_alpha'}           | ${'0.3.4_pre20061029'} | ${-1}
+      ${'0.3.4_pre20061029'}     | ${'0.4.0'}             | ${-1}
+      ${'0.4.0'}                 | ${'0.3.4_pre20061029'} | ${1}
+      ${'2.9.11_pre20061021-r2'} | ${'5.36-r1'}           | ${-1}
+      ${'0.3.4_alpha'}           | ${'0.3.4_beta'}        | ${-1}
+      ${'0.3.4_beta'}            | ${'0.3.4_alpha'}       | ${1}
+    `('compare($a, $b) === $expected', ({ a, b, expected }) => {
+      expect(Math.sign(apk.sortVersions(a, b))).toBe(Math.sign(expected));
+    });
+  });
+
+  describe('isGreaterThan', () => {
+    it('treats an unparseable version as greater', () => {
+      expect(apk.isGreaterThan('invalid', '2.39.0-r0')).toBe(true);
+    });
+
+    it.each`
+      a               | b               | expected
+      ${'2.39.1-r0'}  | ${'2.39.0-r0'}  | ${true}
+      ${'2.39.0-r1'}  | ${'2.39.0-r0'}  | ${true}
+      ${'2.39.0-r0'}  | ${'2.39.1-r0'}  | ${false}
+      ${'2.39.0-r0'}  | ${'2.39.0-r1'}  | ${false}
+      ${'1.4_p12-r5'} | ${'1.4_p12-r2'} | ${true}
+    `('isGreaterThan($a, $b) === $expected', ({ a, b, expected }) => {
+      expect(apk.isGreaterThan(a, b)).toBe(expected);
+    });
+  });
+
+  describe('equals', () => {
+    it.each`
+      a              | b              | expected
+      ${'2.39.0-r0'} | ${'2.39.0-r0'} | ${true}
+      ${'2.39.0'}    | ${'2.39.0'}    | ${true}
+      ${'2.39.0-r0'} | ${'2.39.0-r1'} | ${false}
+      ${'2.39.0'}    | ${'2.39.1'}    | ${false}
+    `('equals($a, $b) === $expected', ({ a, b, expected }) => {
+      expect(apk.equals(a, b)).toBe(expected);
+    });
+  });
+
+  describe('matches', () => {
+    // the examples given for `busybox~1.6` in apk-world(5)
+    it.each`
+      version         | expected
+      ${'1.6'}        | ${true}
+      ${'1.6.0_pre1'} | ${true}
+      ${'1.6.0'}      | ${true}
+      ${'1.6.5'}      | ${true}
+      ${'1.6.9_p1'}   | ${true}
+      ${'1.6.0-r3'}   | ${true}
+      ${'1.60'}       | ${false}
+      ${'1.7.0'}      | ${false}
+      ${'1.5.9'}      | ${false}
+    `('matches($version, ~1.6) === $expected', ({ version, expected }) => {
+      expect(apk.matches(version, '~1.6')).toBe(expected);
+    });
+
+    it.each`
+      version           | range           | expected
+      ${'8.12.1-r0'}    | ${'=~8.12.1'}   | ${true}
+      ${'8.12.1-r5'}    | ${'=~8.12.1'}   | ${true}
+      ${'8.12.2-r0'}    | ${'=~8.12.1'}   | ${false}
+      ${'8.12.10-r0'}   | ${'=~8.12.1'}   | ${false}
+      ${'8.12.1-r0'}    | ${'8.12.1-r0'}  | ${true}
+      ${'8.12.1-r1'}    | ${'8.12.1-r0'}  | ${false}
+      ${'8.12.1-r0'}    | ${'=8.12.1-r0'} | ${true}
+      ${'8.13.0'}       | ${'>8.12.1'}    | ${true}
+      ${'8.12.1'}       | ${'>8.12.1'}    | ${false}
+      ${'8.12.1'}       | ${'>=8.12.1'}   | ${true}
+      ${'8.11.0'}       | ${'<8.12.1'}    | ${true}
+      ${'8.13.0'}       | ${'>~8.12.1'}   | ${true}
+      ${'8.12.1-r2'}    | ${'>~8.12.1'}   | ${true}
+      ${'8.11.0'}       | ${'>~8.12.1'}   | ${false}
+      ${'8.11.0'}       | ${'<~8.12.1'}   | ${true}
+      ${'8.12.1-r2'}    | ${'<~8.12.1'}   | ${true}
+      ${'8.13.0'}       | ${'<~8.12.1'}   | ${false}
+      ${'1.6_rc1'}      | ${'~1.6.0'}     | ${false}
+      ${'8.12.1'}       | ${'~invalid'}   | ${false}
+      ${'invalid'}      | ${'~8.12.1'}    | ${false}
+      ${'8.12.1'}       | ${'><8.12.1'}   | ${false}
+      ${'8.12.1'}       | ${''}           | ${false}
+      ${'1.6'}          | ${'~1.6.0'}     | ${false}
+      ${'1.2.3.4'}      | ${'~1.2.3'}     | ${true}
+      ${'1.2.3.4'}      | ${'~1.2.3.5'}   | ${false}
+      ${'1.2.3a'}       | ${'~1.2.3'}     | ${true}
+      ${'1.2.3b'}       | ${'~1.2.3a'}    | ${false}
+      ${'6.5_p2025-r0'} | ${'~6.5_p2025'} | ${true}
+    `(
+      'matches($version, $range) === $expected',
+      ({ version, range, expected }) => {
+        expect(apk.matches(version, range)).toBe(expected);
+      },
+    );
+  });
+
+  describe('isVersion', () => {
+    it.each`
+      input          | expected
+      ${'2.39.0-r0'} | ${true}
+      ${'2.39.0'}    | ${true}
+      ${'~2.39.0'}   | ${false}
+      ${'=2.39.0'}   | ${false}
+      ${'>=2.39.0'}  | ${false}
+      ${'invalid'}   | ${false}
+    `('isVersion($input) === $expected', ({ input, expected }) => {
+      expect(apk.isVersion(input)).toBe(expected);
+    });
+  });
+
+  describe('minSatisfyingVersion', () => {
+    const versions = ['2.39.0-r0', '2.39.0-r1', '2.39.1-r0', '2.40.0-r0'];
+
+    it.each`
+      range         | expected
+      ${'~2.39.0'}  | ${'2.39.0-r0'}
+      ${'~2.39'}    | ${'2.39.0-r0'}
+      ${'>=2.39.1'} | ${'2.39.1-r0'}
+      ${'~2.41'}    | ${null}
+    `('minSatisfyingVersion($range) === $expected', ({ range, expected }) => {
+      expect(apk.minSatisfyingVersion(versions, range)).toBe(expected);
+    });
+  });
+
+  describe('getSatisfyingVersion', () => {
+    const versions = [
+      '2.39.0-r0',
+      '2.39.0-r1',
+      '2.39.1-r0',
+      '2.40.0-r0',
+      '2.40.0-r1',
+      '3.0.0-r0',
+    ];
+
+    it.each`
+      range            | expected
+      ${'2.39.0-r0'}   | ${'2.39.0-r0'}
+      ${'2.39.0-r1'}   | ${'2.39.0-r1'}
+      ${'2.40.0-r0'}   | ${'2.40.0-r0'}
+      ${'nonexistent'} | ${null}
+    `(
+      'getSatisfyingVersion with exact match ($range) === $expected',
+      ({ range, expected }) => {
+        expect(apk.getSatisfyingVersion(versions, range)).toBe(expected);
+      },
+    );
+
+    it.each`
+      range            | expected
+      ${'>2.39.0-r0'}  | ${'3.0.0-r0'}
+      ${'>=2.39.0-r0'} | ${'3.0.0-r0'}
+      ${'<2.40.0-r0'}  | ${'2.39.1-r0'}
+      ${'<=2.40.0-r0'} | ${'2.40.0-r0'}
+      ${'=2.39.0-r0'}  | ${'2.39.0-r0'}
+      ${'==2.39.0-r0'} | ${'2.39.0-r0'}
+    `(
+      'getSatisfyingVersion with range operator ($range) === $expected',
+      ({ range, expected }) => {
+        expect(apk.getSatisfyingVersion(versions, range)).toBe(expected);
+      },
+    );
+
+    it.each`
+      range           | expected
+      ${'~2.39.0-r0'} | ${'2.39.0-r0'}
+      ${'~2.40.0-r0'} | ${'2.40.0-r0'}
+      ${'~2.39.0'}    | ${'2.39.0-r1'}
+      ${'~2.39'}      | ${'2.39.1-r0'}
+      ${'~2'}         | ${'2.40.0-r1'}
+      ${'=~2.39.0'}   | ${'2.39.0-r1'}
+      ${'~=2.39.0'}   | ${'2.39.0-r1'}
+      ${'~2.41'}      | ${null}
+    `(
+      'getSatisfyingVersion with prefix range ($range) === $expected',
+      ({ range, expected }) => {
+        expect(apk.getSatisfyingVersion(versions, range)).toBe(expected);
+      },
+    );
+
+    it.each`
+      range         | expected
+      ${'>~2.39.0'} | ${'3.0.0-r0'}
+      ${'<~2.39.0'} | ${'2.39.0-r1'}
+    `(
+      'getSatisfyingVersion with combined prefix range ($range) === $expected',
+      ({ range, expected }) => {
+        expect(apk.getSatisfyingVersion(versions, range)).toBe(expected);
+      },
+    );
+
+    it('should return null for invalid range operators', () => {
+      expect(apk.getSatisfyingVersion(versions, 'invalid-range')).toBe(null);
+    });
+
+    it('should return null for empty versions array', () => {
+      expect(apk.getSatisfyingVersion([], '2.39.0-r0')).toBe(null);
+    });
+
+    it('should filter out invalid versions', () => {
+      const mixedVersions = ['2.39.0-r0', 'invalid', '2.40.0-r0'];
+      expect(apk.getSatisfyingVersion(mixedVersions, '>2.39.0-r0')).toBe(
+        '2.40.0-r0',
+      );
+    });
+  });
+
+  describe('isSingleVersion', () => {
+    it.each`
+      version         | expected
+      ${'2.39.0-r0'}  | ${true}
+      ${'2.39.0'}     | ${true}
+      ${'~2.39.0-r0'} | ${false}
+      ${'>2.39.0-r0'} | ${false}
+      ${'=2.39.0-r0'} | ${true}
+      ${'=~2.39.0'}   | ${false}
+      ${'>~2.39.0'}   | ${false}
+      ${'><2.39.0'}   | ${false}
+    `('isSingleVersion($version) === $expected', ({ version, expected }) => {
+      expect(apk.isSingleVersion(version)).toBe(expected);
+    });
+
+    it('should return false for empty versions', () => {
+      expect(apk.isSingleVersion('')).toBe(false);
+      expect(apk.isSingleVersion(null as any)).toBe(false);
+      expect(apk.isSingleVersion(undefined as any)).toBe(false);
+    });
+  });
+
+  describe('isLessThanRange', () => {
+    it.each`
+      version                 | range          | expected
+      ${'2.39.0-r0'}          | ${'2.39.0-r1'} | ${true}
+      ${'2.39.0-r1'}          | ${'2.39.0-r0'} | ${false}
+      ${'2.39.0-r0'}          | ${'2.39.0-r0'} | ${false}
+      ${'2.38.0-r0'}          | ${'2.39.0-r0'} | ${true}
+      ${'2.38.0'}             | ${'~2.39.0'}   | ${true}
+      ${'2.39.0-r0'}          | ${'~2.39.0'}   | ${false}
+      ${'2.40.0'}             | ${'~2.39.0'}   | ${false}
+      ${'2.39.0'}             | ${'>2.39.0'}   | ${true}
+      ${'2.39.0_git20240101'} | ${'~2.39.0'}   | ${false}
+      ${'1.6.9_p1'}           | ${'~1.6.9'}    | ${false}
+      ${'1.2.3a'}             | ${'~1.2.3'}    | ${false}
+      ${'1.2.3a'}             | ${'>~1.2.3'}   | ${false}
+      ${'2.39.0'}             | ${'>=2.39.0'}  | ${false}
+      ${'2.39.0'}             | ${'<2.40.0'}   | ${false}
+      ${'invalid'}            | ${'2.39.0'}    | ${false}
+      ${'2.39.0'}             | ${'><2.39.0'}  | ${false}
+    `(
+      'isLessThanRange($version, $range) === $expected',
+      ({ version, range, expected }) => {
+        expect(apk.isLessThanRange!(version, range)).toBe(expected);
+      },
+    );
+  });
+
+  describe('sortVersions', () => {
+    it('should sort versions correctly', () => {
+      const versions = ['2.40.0-r0', '2.39.0-r1', '2.39.0-r0', '2.39.1-r0'];
+      const sorted = versions.sort((a, b) => apk.sortVersions(a, b));
+      expect(sorted).toEqual([
+        '2.39.0-r0',
+        '2.39.0-r1',
+        '2.39.1-r0',
+        '2.40.0-r0',
+      ]);
+    });
+
+    it('should compare release numbers when version parts are equal', () => {
+      // Both versions have same version and prerelease, different release numbers
+      expect(apk.sortVersions('2.39.0-r1', '2.39.0-r2')).toBeLessThan(0);
+      expect(apk.sortVersions('2.39.0-r2', '2.39.0-r1')).toBeGreaterThan(0);
+      // Both have no release number (should be equal)
+      expect(apk.sortVersions('2.39.0', '2.39.0')).toBe(0);
+    });
+  });
+
+  describe('complex version parsing', () => {
+    it.each`
+      version               | expected
+      ${'v2.39.0-r0'}       | ${true}
+      ${'2.39.0_rc1'}       | ${true}
+      ${'2.39.0_beta'}      | ${true}
+      ${'6.5_p20250503-r0'} | ${true}
+      ${'2.39.0_cvs-r0'}    | ${true}
+      ${'2.39.0_git-r0'}    | ${true}
+    `(
+      'should parse complex versions ($version) === $expected',
+      ({ version, expected }) => {
+        expect(apk.isValid(version)).toBe(expected);
+      },
+    );
+
+    it.each`
+      version               | expected
+      ${'v2.39.0-r0'}       | ${true}
+      ${'2.39.0_rc1'}       | ${false}
+      ${'2.39.0_beta'}      | ${false}
+      ${'6.5_p20250503-r0'} | ${true}
+      ${'2.39.0_cvs-r0'}    | ${true}
+      ${'2.39.0_git-r0'}    | ${true}
+    `(
+      'should identify stable versions ($version) === $expected',
+      ({ version, expected }) => {
+        expect(apk.isStable(version)).toBe(expected);
+      },
+    );
+  });
+
+  describe('version comparison edge cases', () => {
+    it.each`
+      a                    | b                    | expected
+      ${'2.39.0-r0'}       | ${'2.39.0'}          | ${1}
+      ${'2.39.0'}          | ${'2.39.0-r0'}       | ${-1}
+      ${'2.39.0_beta'}     | ${'2.39.0'}          | ${1}
+      ${'2.39.0'}          | ${'2.39.0_beta'}     | ${-1}
+      ${'2.39.0_rc1-r0'}   | ${'2.39.0_alpha-r0'} | ${1}
+      ${'2.39.0_alpha-r0'} | ${'2.39.0_rc1-r0'}   | ${-1}
+    `(
+      'should compare versions with prerelease identifiers ($a, $b) === $expected',
+      ({ a, b, expected }) => {
+        expect(Math.sign(apk.sortVersions(a, b))).toBe(Math.sign(expected));
+      },
+    );
+  });
+
+  describe('error handling', () => {
+    it('should handle invalid version parsing gracefully', () => {
+      expect(apk.isValid('')).toBe(false);
+      expect(apk.isValid('invalid')).toBe(false);
+      expect(apk.isValid('a.39.0-')).toBe(false);
+      expect(apk.getMajor('invalid')).toBe(null);
+      expect(apk.getMinor('invalid')).toBe(null);
+      expect(apk.getPatch('invalid')).toBe(null);
+      expect(apk.isStable('invalid')).toBe(false);
+    });
+
+    it('should handle null/undefined inputs', () => {
+      expect(apk.isValid(null as any)).toBe(false);
+      expect(apk.isValid(undefined as any)).toBe(false);
+      expect(apk.getMajor(null as any)).toBe(null);
+      expect(apk.getMinor(undefined as any)).toBe(null);
+      expect(apk.getPatch(null as any)).toBe(null);
+      expect(apk.getPatch(undefined as any)).toBe(null);
+      expect(apk.getPatch('')).toBe(null);
+    });
+
+    it('should return false for unstable versions with prerelease', () => {
+      expect(apk.isStable('=2.39.0_rc1-r0')).toBe(false);
+      expect(apk.isStable('>2.39.0_beta-r0')).toBe(false);
+      expect(apk.isStable('~2.39.0_alpha-r0')).toBe(false);
+    });
+
+    it('should return false for empty versions in isStable', () => {
+      expect(apk.isStable('')).toBe(false);
+      expect(apk.isStable(null as any)).toBe(false);
+      expect(apk.isStable(undefined as any)).toBe(false);
+    });
+  });
+
+  describe('getSatisfyingVersion edge cases', () => {
+    it('should handle versions with different major versions in tilde range', () => {
+      const versions = ['1.0.0-r0', '2.0.0-r0', '2.1.0-r0'];
+      expect(apk.getSatisfyingVersion(versions, '~1.0.0-r0')).toBe('1.0.0-r0');
+      expect(apk.getSatisfyingVersion(versions, '~2.0.0-r0')).toBe('2.0.0-r0');
+    });
+
+    it('should handle versions with different minor versions in tilde range', () => {
+      const versions = ['2.0.0-r0', '2.1.0-r0', '2.2.0-r0', '3.0.0-r0'];
+      expect(apk.getSatisfyingVersion(versions, '~2.1.0-r0')).toBe('2.1.0-r0');
+    });
+
+    it('should handle invalid target versions in ranges', () => {
+      const versions = ['2.39.0-r0', '2.40.0-r0'];
+      expect(apk.getSatisfyingVersion(versions, '>invalid')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '~invalid')).toBe(null);
+    });
+
+    it('should handle versions with prerelease identifiers in ranges', () => {
+      const versions = ['2.39.0-r0', '2.39.0_rc1-r0', '2.40.0-r0'];
+      expect(apk.getSatisfyingVersion(versions, '>2.39.0-r0')).toBe(
+        '2.40.0-r0',
+      );
+      expect(apk.getSatisfyingVersion(versions, '>=2.39.0_rc1-r0')).toBe(
+        '2.40.0-r0',
+      );
+    });
+  });
+
+  describe('getPatch edge cases', () => {
+    it('should return null for versions with _p package fix suffix', () => {
+      // Versions with _p (package fix) suffix have no patch in release array position [2]
+      expect(apk.getPatch('6.5_p20250503-r0')).toBe(null);
+      expect(apk.getPatch('1.0_p1-r0')).toBe(null);
+    });
+
+    it('should return null for invalid versions', () => {
+      // Invalid versions return null from getPatch
+      expect(apk.getPatch('invalid')).toBe(null);
+      expect(apk.getPatch('2.0_package-r0')).toBe(null); // _package is not a valid suffix
+    });
+
+    it('should return patch version for non-_p patterns', () => {
+      expect(apk.getPatch('2.39.0-r0')).toBe(0);
+      expect(apk.getPatch('2.39.1-r0')).toBe(1);
+      expect(apk.getPatch('2.39.0_rc1-r0')).toBe(0);
+    });
+
+    it('should handle versions with operators', () => {
+      expect(apk.getPatch('=2.39.0-r0')).toBe(0);
+      expect(apk.getPatch('>2.39.1-r0')).toBe(1);
+      expect(apk.getPatch('~2.39.2-r0')).toBe(2);
+    });
+  });
+
+  describe('getNewValue', () => {
+    it('should strip revision from newVersion when currentValue has no revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1-r1',
+        }),
+      ).toBe('2.51.1');
+    });
+
+    it('should keep revision in newVersion when currentValue has revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0-r0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1-r1',
+        }),
+      ).toBe('2.51.1-r1');
+    });
+
+    it('should handle newVersion without revision when currentValue has no revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1',
+        }),
+      ).toBe('2.51.1');
+    });
+
+    it('should handle newVersion without revision when currentValue has revision', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '2.50.0-r0',
+          rangeStrategy: 'replace',
+          newVersion: '2.51.1',
+        }),
+      ).toBe('2.51.1');
+    });
+
+    it.each`
+      currentValue    | newVersion     | expected
+      ${'~8.12.1'}    | ${'8.13.0-r0'} | ${'~8.13.0'}
+      ${'=~8.12.1'}   | ${'8.13.0-r0'} | ${'=~8.13.0'}
+      ${'~=8.12.1'}   | ${'8.13.0-r0'} | ${'~=8.13.0'}
+      ${'~8.12'}      | ${'8.13.0-r0'} | ${'~8.13'}
+      ${'~8'}         | ${'9.1.0-r0'}  | ${'~9'}
+      ${'~8.12.1-r0'} | ${'8.13.0-r2'} | ${'~8.13.0-r2'}
+      ${'=8.12.1'}    | ${'8.13.0-r0'} | ${'=8.13.0'}
+      ${'8.12.1'}     | ${'8.13.0-r0'} | ${'8.13.0'}
+    `(
+      'keeps the constraint precision for $currentValue',
+      ({ currentValue, newVersion, expected }) => {
+        expect(
+          apk.getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            newVersion,
+          }),
+        ).toBe(expected);
+      },
+    );
+
+    it('pins to the exact version when asked to', () => {
+      expect(
+        apk.getNewValue({
+          currentValue: '~8.12.1',
+          rangeStrategy: 'pin',
+          newVersion: '8.13.0-r0',
+        }),
+      ).toBe('8.13.0-r0');
+    });
+
+    it.each`
+      currentValue     | newVersion     | expected
+      ${'>=8.12.1'}    | ${'8.13.0-r0'} | ${'>=8.13.0-r0'}
+      ${'=>8.12.1'}    | ${'8.13.0-r0'} | ${'=>8.13.0-r0'}
+      ${'>=8.12.1-r0'} | ${'8.13.0-r2'} | ${'>=8.13.0-r2'}
+      ${'>=8.12'}      | ${'8.13.0-r0'} | ${'>=8.13.0-r0'}
+      ${'>~8.12'}      | ${'8.13.0-r0'} | ${'>~8.13.0-r0'}
+      ${'>=8.12'}      | ${'8.12.5-r0'} | ${'>=8.12.5-r0'}
+      ${'>=8.12.1'}    | ${'8.12.1-r5'} | ${'>=8.12.1-r5'}
+    `(
+      'bumps the lower bound of $currentValue',
+      ({ currentValue, newVersion, expected }) => {
+        expect(
+          apk.getNewValue({
+            currentValue,
+            rangeStrategy: 'bump',
+            newVersion,
+          }),
+        ).toBe(expected);
+      },
+    );
+
+    it.each`
+      currentValue  | reason
+      ${'>8.12.1'}  | ${'excludes its boundary, so bumping it would exclude the new version'}
+      ${'<8.12.1'}  | ${'is an upper bound'}
+      ${'<=8.12.1'} | ${'is an upper bound'}
+    `('has no bump for a constraint which $reason', ({ currentValue }) => {
+      expect(
+        apk.getNewValue({
+          currentValue,
+          rangeStrategy: 'bump',
+          newVersion: '8.13.0-r0',
+        }),
+      ).toBeNull();
+    });
+
+    it.each`
+      rangeStrategy
+      ${'replace'}
+      ${'pin'}
+      ${'bump'}
+    `(
+      'has no $rangeStrategy for a constraint on an unparseable version',
+      ({ rangeStrategy }) => {
+        expect(
+          apk.getNewValue({
+            currentValue: '~foo',
+            rangeStrategy,
+            newVersion: '8.13.0-r0',
+          }),
+        ).toBeNull();
+      },
+    );
+
+    it.each`
+      currentValue  | reason
+      ${'>8.12.1'}  | ${'greater than'}
+      ${'>=8.12.1'} | ${'greater than or equal'}
+      ${'<8.12.1'}  | ${'less than'}
+      ${'>~8.12.1'} | ${'greater than or prefix'}
+      ${'<~8.12.1'} | ${'less than or prefix'}
+      ${'><8.12.1'} | ${'identity hash'}
+      ${''}         | ${'empty'}
+    `('has no replacement for a $reason constraint', ({ currentValue }) => {
+      expect(
+        apk.getNewValue({
+          currentValue,
+          rangeStrategy: 'replace',
+          newVersion: '8.13.0-r0',
+        }),
+      ).toBeNull();
+    });
+  });
+
+  describe('version comparison with prerelease identifiers', () => {
+    it('should handle complex prerelease identifier comparisons', () => {
+      expect(
+        apk.sortVersions('2.39.0_alpha-r0', '2.39.0_beta-r0'),
+      ).toBeLessThan(0);
+      expect(
+        apk.sortVersions('2.39.0_beta-r0', '2.39.0_alpha-r0'),
+      ).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0_rc1-r0', '2.39.0_rc2-r0')).toBeLessThan(
+        0,
+      );
+    });
+
+    it('should handle versions with different prerelease patterns', () => {
+      expect(apk.sortVersions('2.39.0-r0', '2.39.0_rc1-r0')).toBeLessThan(0);
+      expect(apk.sortVersions('2.39.0_rc1-r0', '2.39.0-r0')).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getSatisfyingVersion edge cases for coverage', () => {
+    it('should handle unknown range operators', () => {
+      const versions = ['2.39.0-r0', '2.40.0-r0'];
+
+      // Test unknown operators that don't match the regex - these go to exact match lookup
+      expect(apk.getSatisfyingVersion(versions, '!2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '?2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '*2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '@2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '#2.39.0-r0')).toBe(null);
+    });
+
+    it('builds the operator from its characters, as apk does', () => {
+      const versions = ['2.39.0-r0', '2.40.0-r0'];
+
+      // apk ORs one flag per operator character, so a repeated character is just another spelling of the same operator
+      expect(apk.getSatisfyingVersion(versions, '>>2.39.0-r0')).toBe(
+        '2.40.0-r0',
+      );
+      expect(apk.getSatisfyingVersion(versions, '~~~2.39.0-r0')).toBe(
+        '2.39.0-r0',
+      );
+    });
+
+    it('does not resolve an identity hash constraint', () => {
+      const versions = ['2.39.0-r0', '2.40.0-r0'];
+
+      // `><` constrains to an identity hash rather than to a version
+      expect(apk.getSatisfyingVersion(versions, '<>2.39.0-r0')).toBe(null);
+      expect(apk.getSatisfyingVersion(versions, '><2.39.0-r0')).toBe(null);
+    });
+
+    it('should handle tilde range with invalid target version', () => {
+      const versions = ['2.39.0-r0', '2.40.0-r0'];
+
+      // This should trigger the null check in tilde range logic when target parsing fails
+      expect(apk.getSatisfyingVersion(versions, '~invalid')).toBe(null);
+    });
+
+    it('should handle tilde range with invalid version in list', () => {
+      const versions = ['2.39.0-r0', 'invalid', '2.40.0-r0'];
+
+      // This should trigger the null check in tilde range logic when version parsing fails
+      expect(apk.getSatisfyingVersion(versions, '~2.39.0-r0')).toBe(
+        '2.39.0-r0',
+      );
+    });
+  });
+
+  describe('version comparison edge cases for coverage', () => {
+    it('should handle major-only versions without minor/patch', () => {
+      // Test versions without minorPatch to cover the false branch of `if (minorPatch)`
+      expect(apk.isValid('1')).toBe(true);
+      expect(apk.isValid('42')).toBe(true);
+      expect(apk.sortVersions('1', '2')).toBeLessThan(0);
+      expect(apk.sortVersions('2', '1')).toBeGreaterThan(0);
+      expect(apk.sortVersions('1', '1')).toBe(0);
+    });
+
+    it('should handle letter vs number at same position in version parts', () => {
+      expect(apk.sortVersions('1a', '1.1')).toBeLessThan(0);
+      expect(apk.sortVersions('1.1', '1a')).toBeGreaterThan(0);
+    });
+
+    it('should handle number vs letter comparison in version parts', () => {
+      expect(apk.sortVersions('2.39.0.1-r0', '2.39.0a-r0')).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0a-r0', '2.39.0.1-r0')).toBeLessThan(0);
+    });
+
+    it('should handle extra numeric parts in remaining segments', () => {
+      expect(apk.sortVersions('2.39.0.1-r0', '2.39.0-r0')).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0-r0', '2.39.0.1-r0')).toBeLessThan(0);
+    });
+
+    it('should handle lexicographic string comparison in version parts', () => {
+      expect(apk.sortVersions('2.39.0a-r0', '2.39.0b-r0')).toBeLessThan(0);
+      expect(apk.sortVersions('2.39.0b-r0', '2.39.0a-r0')).toBeGreaterThan(0);
+    });
+
+    it('should handle equal letter parts continuing to next segment', () => {
+      expect(apk.sortVersions('1.0a_p1-r0', '1.0a_p2-r0')).toBeLessThan(0);
+      expect(apk.sortVersions('1.0a_p2-r0', '1.0a_p1-r0')).toBeGreaterThan(0);
+    });
+
+    it('should handle trailing letter in remaining segments', () => {
+      expect(apk.sortVersions('1', '1a')).toBeGreaterThan(0);
+      expect(apk.sortVersions('1a', '1')).toBeLessThan(0);
+    });
+
+    it('should return 0 for numerically equal but string-different versions', () => {
+      expect(apk.sortVersions('1.0', '1.00')).toBe(0);
+    });
+
+    it('should handle versions with different extra segment lengths', () => {
+      expect(apk.sortVersions('2.39.0.1.2', '2.39.0.1')).toBeGreaterThan(0);
+      expect(apk.sortVersions('2.39.0.1', '2.39.0.1.2')).toBeLessThan(0);
+    });
+  });
+});
