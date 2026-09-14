@@ -225,7 +225,10 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-config';
       return Result.ok(res);
     }
-    let compareValue = config.currentValue;
+    let compareValue =
+      config.isLockfileOnly && config.lockedVersion
+        ? config.lockedVersion
+        : config.currentValue;
     if (
       isString(config.currentValue) &&
       isString(config.versionCompatibility)
@@ -266,6 +269,7 @@ export async function lookupUpdates(
     if (isValid || unconstrainedValue) {
       if (
         !config.updatePinnedDependencies &&
+        !config.isLockfileOnly &&
         // TODO #22198
         versioningApi.isSingleVersion(compareValue!)
       ) {
@@ -566,12 +570,17 @@ export async function lookupUpdates(
         latestVersion!,
         inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
         versioningApi,
-      ).filter(
-        (v) =>
-          // Leave only compatible versions
+      ).filter((v) => {
+        if (config.isLockfileOnly) {
+          return true;
+        }
+
+        // Leave only compatible versions
+        return (
           unconstrainedValue ||
-          versioningApi.isCompatible(v.version, compareValue),
-      );
+          versioningApi.isCompatible(v.version, compareValue)
+        );
+      });
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         if (config.vulnerabilityFixVersion) {
@@ -678,7 +687,7 @@ export async function lookupUpdates(
         const newVersion = release.version;
         const update = await generateUpdate(
           config,
-          compareValue,
+          config.isLockfileOnly ? config.currentValue : compareValue,
           versioningApi,
           // TODO #22198
 
