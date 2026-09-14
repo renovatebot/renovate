@@ -562,6 +562,13 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'jfrog-cli',
     packageName: 'jfrog/jfrog-cli',
   },
+  // https://github.com/opentofu/setup-opentofu
+  'opentofu/setup-opentofu': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'opentofu',
+    packageName: 'opentofu/opentofu',
+    withSchema: valSchema('tofu_version'),
+  },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
     packageName: 'bun',
