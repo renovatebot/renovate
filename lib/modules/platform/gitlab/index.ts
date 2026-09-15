@@ -284,7 +284,7 @@ export async function commitFiles(
   commitConfig: CommitFilesConfig,
 ): Promise<LongCommitSha | null> {
   const { baseBranch, branchName, files, message } = commitConfig;
-  const startBranch = baseBranch ?? git.getCurrentBranch();
+  const startBranch = baseBranch ?? config.defaultBranch;
 
   const commitResult = await git.prepareCommit(commitConfig);
   if (!commitResult) {
