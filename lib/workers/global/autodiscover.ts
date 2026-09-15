@@ -1,16 +1,12 @@
 import { isString } from '@sindresorhus/is';
 import type { AllConfig } from '../../config/types.ts';
+import { getRepositoryName } from '../../config/utils.ts';
 import { logger } from '../../logger/index.ts';
 import {
   type AutodiscoverConfig,
   platform,
 } from '../../modules/platform/index.ts';
 import { matchRegexOrGlobList } from '../../util/string-match.ts';
-
-// istanbul ignore next
-function repoName(value: string | { repository: string }): string {
-  return String(isString(value) ? value : value.repository).toLowerCase();
-}
 
 export async function autodiscoverRepositories(
   config: AllConfig,
@@ -88,10 +84,10 @@ export async function autodiscoverRepositories(
       'Checking autodiscovered repositories against configured repositories',
     );
     for (const configuredRepo of config.repositories) {
-      const repository = repoName(configuredRepo);
+      const repository = getRepositoryName(configuredRepo);
       let found = false;
       for (let i = discovered.length - 1; i > -1; i -= 1) {
-        if (repository === repoName(discovered[i])) {
+        if (repository === getRepositoryName(discovered[i])) {
           found = true;
           logger.debug({ repository }, 'Using configured repository settings');
           // TODO: fix typings
