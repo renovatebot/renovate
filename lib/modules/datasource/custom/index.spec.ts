@@ -120,6 +120,79 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('returns per-release changelog content from a direct custom datasource response', async () => {
+      const changelogContent = codeBlock`
+        ### Catalog upgrade notes
+
+        - Replaces \`example.v1.0.0\`.
+        - This bundle is available on the \`stable\` channel.
+      `;
+      const expected = {
+        releases: [
+          {
+            version: 'v1.0.0',
+          },
+          {
+            changelogContent,
+            changelogUrl: 'https://example.com/foo/releases/v1.1.0',
+            version: 'v1.1.0',
+          },
+        ],
+      };
+      httpMock
+        .scope('https://example.com')
+        .get('/v1/changelog')
+        .reply(200, expected);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1/changelog',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('drops non-string changelog content but keeps the release', async () => {
+      const content = {
+        releases: [
+          {
+            changelogContent: { body: 'Not a string' },
+            changelogUrl: 'https://example.com/foo/releases/v1.0.0',
+            version: 'v1.0.0',
+          },
+        ],
+      };
+      httpMock
+        .scope('https://example.com')
+        .get('/v1/invalid-changelog')
+        .reply(200, content);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate:
+              'https://example.com/v1/invalid-changelog',
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        releases: [
+          {
+            changelogUrl: 'https://example.com/foo/releases/v1.0.0',
+            version: 'v1.0.0',
+          },
+        ],
+      });
+    });
+
     it('return releases with tags and other optional fields for api directly exposing in renovate format', async () => {
       const expected = {
         releases: [
