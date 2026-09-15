@@ -6,6 +6,7 @@ const matrixYAMLwithNodeSyntaxString = Fixtures.get('matrix_jobs.yml');
 const matrixYAMLwithNodeSyntaxArray = Fixtures.get('matrix_jobs_array.yml');
 const matrixYAMLwithNodeSyntaxArray2 = Fixtures.get('matrix_jobs_array2.yml');
 const matrixYAMLwithNodeSyntaxAlias = Fixtures.get('matrix_alias.yml');
+const matrixYAMLwithNodeSyntaxNumber = Fixtures.get('matrix_jobs_number.yml');
 const invalidMatrixYAML = Fixtures.get('matrix_invalid.yml');
 
 describe('modules/manager/travis/extract', () => {
@@ -102,6 +103,11 @@ describe('modules/manager/travis/extract', () => {
 
     it('handles invalid matrix node_js syntax', () => {
       const res = extractPackageFile(invalidMatrixYAML);
+      expect(res).toBeNull();
+    });
+
+    it('ignores a matrix node_js that is neither a string nor an array', () => {
+      const res = extractPackageFile(matrixYAMLwithNodeSyntaxNumber);
       expect(res).toBeNull();
     });
   });
