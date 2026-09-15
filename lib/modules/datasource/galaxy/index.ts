@@ -3,7 +3,11 @@ import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { GalaxyV1 } from './schema.ts';
 
 export class GalaxyDatasource extends Datasource {
@@ -29,7 +33,7 @@ export class GalaxyDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const lookUp = packageName.split('.');
     const userName = lookUp[0];
     const projectName = lookUp[1];
@@ -88,7 +92,9 @@ export class GalaxyDatasource extends Datasource {
     return result;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: 'datasource-galaxy',

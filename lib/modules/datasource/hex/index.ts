@@ -7,7 +7,11 @@ import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-pro
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { HexRelease } from './schema.ts';
 import { Package } from './v2/package.ts';
 import { Signed } from './v2/signed.ts';
@@ -122,12 +126,7 @@ export class HexDatasource extends Datasource {
   private async getReleasesViaJsonApi({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore if -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const { hexPackageName, organizationUrlPrefix } =
       parsePackageName(packageName);
 
@@ -156,12 +155,7 @@ export class HexDatasource extends Datasource {
   private async getReleasesViaV2Protocol({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore if -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const { hexPackageName, organizationName, organizationUrlPrefix } =
       parsePackageName(packageName);
 
@@ -249,7 +243,7 @@ export class HexDatasource extends Datasource {
   }
 
   private async _getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     if (HexDatasource.isDefaultRegistry(config.registryUrl)) {
       return this.getReleasesViaJsonApi(config);
@@ -274,7 +268,9 @@ export class HexDatasource extends Datasource {
     return !registryUrl || registryUrl === defaultRegistryUrl;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const isDefault = HexDatasource.isDefaultRegistry(config.registryUrl);
     const key = isDefault
       ? config.packageName

@@ -5,7 +5,11 @@ import { clone } from '../../../util/clone.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import {
   JenkinsPluginsInfoResponse,
   JenkinsPluginsVersionsResponse,
@@ -37,11 +41,7 @@ export class JenkinsPluginsDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const updateSiteUrl = ensureTrailingSlash(registryUrl);
 
     const plugins = await this.getJenkinsPluginInfo(updateSiteUrl);

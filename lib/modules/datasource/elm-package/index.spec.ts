@@ -117,15 +117,6 @@ describe('modules/datasource/elm-package/index', () => {
       });
     });
 
-    it('returns null when registryUrl is not provided', async () => {
-      const ds = new ElmPackageDatasource();
-      const res = await ds.getReleases({
-        packageName: 'elm/core',
-        registryUrl: undefined,
-      });
-      expect(res).toBeNull();
-    });
-
     it('returns null for invalid schema response', async () => {
       httpMock
         .scope(baseUrl)

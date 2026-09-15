@@ -2,7 +2,7 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as perlVersioning from '../../versioning/perl/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { MetaCpanApiFileSearchResponse } from './schema.ts';
 import type { CpanRelease } from './types.ts';
 
@@ -26,12 +26,7 @@ export class CpanDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     let result: ReleaseResult | null = null;
     const searchUrl = joinUrlParts(registryUrl, 'v1/file/_search');
 
@@ -101,7 +96,7 @@ export class CpanDatasource extends Datasource {
   }
 
   override getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     return withCache(
       {

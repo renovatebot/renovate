@@ -6,8 +6,8 @@ import { ensureTrailingSlash } from '../../../util/url.ts';
 import { RepoInfo } from '../../platform/bitbucket/schema.ts';
 import { Datasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
 import { BitbucketCommits, BitbucketTag, BitbucketTags } from './schema.ts';
@@ -61,7 +61,7 @@ export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
   private async _getReleases({
     registryUrl,
     packageName: repo,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
     const bitbucketTags = (
       await this.http.getJson(url, { paginate: true }, BitbucketTags)
@@ -80,7 +80,9 @@ export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
     return dependency;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: BitbucketTagsDatasource.cacheNamespace,
@@ -152,7 +154,7 @@ export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
   // getDigest fetched the latest commit for repository main branch
   // however, if newValue is provided, then getTagCommit is called
   private async _getDigest(
-    { packageName: repo, registryUrl }: DigestConfig,
+    { packageName: repo, registryUrl }: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     if (newValue?.length) {
@@ -176,7 +178,7 @@ export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
   }
 
   override getDigest(
-    config: DigestConfig,
+    config: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     return withCache(

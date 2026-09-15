@@ -7,7 +7,11 @@ import {
   id as semverVersioningId,
 } from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 
 const lineTerminationRegex = regEx(`\r?\n`);
 const releaseBeginningChar = '\t{';
@@ -44,12 +48,7 @@ export class GolangVersionDatasource extends Datasource {
 
   private async fetchReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
       homepage: 'https://go.dev/',
       sourceUrl: 'https://github.com/golang/go',
@@ -138,7 +137,9 @@ export class GolangVersionDatasource extends Datasource {
     return res;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}`,

@@ -9,7 +9,7 @@ import * as p from '../../../util/promises.ts';
 import { parseUrl, replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
 import * as composerVersioning from '../../versioning/composer/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import type { RegistryFile } from './schema.ts';
 import {
   PackagesResponse,
@@ -243,13 +243,8 @@ export class PackagistDatasource extends Datasource {
   public override async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
-
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
 
     try {
       const meta = await this.getRegistryMeta(registryUrl);

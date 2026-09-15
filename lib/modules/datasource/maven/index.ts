@@ -8,9 +8,9 @@ import { compare } from '../../versioning/maven/compare.ts';
 import mavenVersion, * as mavenVersioning from '../../versioning/maven/index.ts';
 import { Datasource } from '../datasource.ts';
 import type {
-  GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
+  RegistryGetReleasesConfig,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -106,12 +106,7 @@ export class MavenDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
 

@@ -1,7 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import * as nugetVersioning from '../../versioning/nuget/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { isCrossOriginPaginationAllowed } from '../util.ts';
 import { parseRegistryUrl } from './common.ts';
 import { NugetV2Api } from './v2.ts';
@@ -37,12 +37,8 @@ export class NugetDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`nuget.getReleases(${packageName})`);
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
     const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
     if (protocolVersion === 2) {
       return this.v2Api.getReleases(

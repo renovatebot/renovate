@@ -1,7 +1,7 @@
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as Unity3dVersioning from '../../versioning/unity3d/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { UnityReleasesJSON } from './schema.ts';
 
 export class Unity3dDatasource extends Datasource {
@@ -54,10 +54,10 @@ export class Unity3dDatasource extends Datasource {
   }
 
   async getByStream(
-    registryUrl: string | undefined,
+    registryUrl: string,
     withHash: boolean,
   ): Promise<ReleaseResult | null> {
-    const translatedRegistryUrl = this.translateStream(registryUrl!);
+    const translatedRegistryUrl = this.translateStream(registryUrl);
 
     const isStable: boolean =
       translatedRegistryUrl === Unity3dDatasource.streams.lts;
@@ -100,14 +100,16 @@ export class Unity3dDatasource extends Datasource {
   private async fetchReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     return await this.getByStream(
       registryUrl,
       packageName === 'm_EditorVersionWithRevision',
     );
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}:${config.packageName}`,

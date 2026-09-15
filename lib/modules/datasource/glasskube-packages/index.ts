@@ -3,7 +3,7 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as glasskubeVersioning from '../../versioning/glasskube/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   GlasskubePackageManifest,
   GlasskubePackageVersions,
@@ -27,12 +27,12 @@ export class GlasskubePackagesDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const result: ReleaseResult = { releases: [] };
 
     const { val: versions, err: versionsErr } = await this.http
       .getYamlSafe(
-        joinUrlParts(registryUrl!, packageName, 'versions.yaml'),
+        joinUrlParts(registryUrl, packageName, 'versions.yaml'),
         GlasskubePackageVersions,
       )
       .unwrap();
@@ -49,7 +49,7 @@ export class GlasskubePackagesDatasource extends Datasource {
     const { val: latestManifest, err: latestManifestErr } = await this.http
       .getYamlSafe(
         joinUrlParts(
-          registryUrl!,
+          registryUrl,
           packageName,
           versions.latestVersion,
           'package.yaml',
@@ -74,7 +74,7 @@ export class GlasskubePackagesDatasource extends Datasource {
   }
 
   override getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     return withCache(
       {

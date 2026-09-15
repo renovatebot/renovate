@@ -3,7 +3,11 @@ import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as gradleVersioning from '../../versioning/gradle/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { GradleReleases } from './schema.ts';
 
 export class GradleVersionDatasource extends Datasource {
@@ -30,12 +34,7 @@ export class GradleVersionDatasource extends Datasource {
 
   private async _getReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     let releases: Release[];
     try {
       const response = await this.http.getJson(registryUrl, GradleReleases);
@@ -71,11 +70,12 @@ export class GradleVersionDatasource extends Datasource {
     return null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${GradleVersionDatasource.id}`,
-        // TODO: types (#22198)
         key: `${config.registryUrl}`,
         fallback: true,
       },

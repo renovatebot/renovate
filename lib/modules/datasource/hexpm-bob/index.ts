@@ -6,7 +6,7 @@ import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import type { PackageType } from './types.ts';
 
@@ -33,7 +33,7 @@ export class HexpmBobDatasource extends Datasource {
   private async fetchReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const packageType = HexpmBobDatasource.getPackageType(packageName);
 
     if (!packageType) {
@@ -45,7 +45,7 @@ export class HexpmBobDatasource extends Datasource {
       `fetching hex.pm bob ${packageName} release`,
     );
 
-    const url = `${registryUrl!}/builds/${packageName}/builds.txt`;
+    const url = `${registryUrl}/builds/${packageName}/builds.txt`;
 
     const result: ReleaseResult = {
       releases: [],
@@ -77,7 +77,9 @@ export class HexpmBobDatasource extends Datasource {
     return result.releases.length > 0 ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}:${config.packageName}`,

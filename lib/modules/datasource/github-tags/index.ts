@@ -11,8 +11,8 @@ import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-pro
 import { GithubHttp } from '../../../util/http/github.ts';
 import { Datasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types.ts';
@@ -65,16 +65,16 @@ export class GithubTagsDatasource extends Datasource<GithubHttp> {
    * Returns the latest commit hash for the repository.
    */
   override getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     return newValue
-      ? findCommitOfTag(registryUrl, repo!, newValue, this.http)
-      : this.getCommit(registryUrl, repo!);
+      ? findCommitOfTag(registryUrl, repo, newValue, this.http)
+      : this.getCommit(registryUrl, repo);
   }
 
   override async getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult> {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);

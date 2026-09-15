@@ -9,7 +9,7 @@ import { coerceString } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { id } from '../../versioning/hermit/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import type { HermitSearchResult } from './types.ts';
 
 /**
@@ -42,13 +42,8 @@ export class HermitDatasource extends Datasource<GithubHttp> {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`HermitDataSource.getReleases()`);
-
-    if (!registryUrl) {
-      logger.error('registryUrl must be supplied');
-      return null;
-    }
 
     const parsedUrl = parseUrl(registryUrl);
     if (parsedUrl === null) {
@@ -93,11 +88,13 @@ export class HermitDatasource extends Datasource<GithubHttp> {
     };
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
-        key: `getReleases:${config.registryUrl ?? ''}-${config.packageName}`,
+        key: `getReleases:${config.registryUrl}-${config.packageName}`,
         fallback: true,
       },
       () => this._getReleases(config),

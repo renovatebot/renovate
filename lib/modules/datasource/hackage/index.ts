@@ -1,8 +1,11 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as pvpVersioning from '../../versioning/pvp/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { HackagePackageMetadata } from './schema.ts';
 
 export class HackageDatasource extends Datasource {
@@ -16,11 +19,10 @@ export class HackageDatasource extends Datasource {
   override readonly customRegistrySupport = false;
   override readonly defaultRegistryUrls = ['https://hackage.haskell.org/'];
 
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  async getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { registryUrl, packageName } = config;
-    if (!isNonEmptyString(registryUrl)) {
-      return null;
-    }
     const massagedPackageName = encodeURIComponent(packageName);
     const url = joinUrlParts(
       registryUrl,

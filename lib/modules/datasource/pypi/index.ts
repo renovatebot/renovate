@@ -17,7 +17,11 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { isGitHubRepo, normalizePythonDepName } from './common.ts';
 import type { PypiRelease } from './schema.ts';
@@ -53,11 +57,10 @@ export class PypiDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     let dependency: ReleaseResult | null = null;
-    // TODO: null check (#22198)
     const hostUrl = ensureTrailingSlash(
-      registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi'),
+      registryUrl.replace('https://pypi.org/simple', 'https://pypi.org/pypi'),
     );
     const normalizedLookupName = normalizePythonDepName(packageName);
 

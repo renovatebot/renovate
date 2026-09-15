@@ -2,7 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { OrbPackagesResponse } from './schema.ts';
 
 export class OrbDatasource extends Datasource {
@@ -24,11 +24,7 @@ export class OrbDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `${joinUrlParts(
       registryUrl,
       'api/v3/orb/packages',
@@ -59,7 +55,7 @@ export class OrbDatasource extends Datasource {
   }
 
   override getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     return withCache(
       {

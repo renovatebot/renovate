@@ -2,7 +2,7 @@ import readline from 'node:readline';
 import { logger } from '../../../logger/index.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { packageKeys, requiredPackageKeys } from './common.ts';
 import { downloadAndExtractPackage } from './packages.ts';
 import {
@@ -150,12 +150,7 @@ export class DebDatasource extends Datasource {
   private async fetchReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const componentUrls = constructComponentUrls(registryUrl);
     let aggregatedRelease: ReleaseResult | null = null;
 
@@ -190,7 +185,9 @@ export class DebDatasource extends Datasource {
     return aggregatedRelease;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}:${config.packageName}`,

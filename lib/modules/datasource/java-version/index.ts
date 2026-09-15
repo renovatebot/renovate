@@ -1,6 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
 import { datasource, parsePackage } from './common.ts';
 
@@ -17,7 +17,7 @@ export class JavaVersionDatasource extends Datasource {
 
   private async fetchReleases({
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const pkgConfig = parsePackage(packageName);
     logger.trace({ packageName, pkgConfig }, 'fetching java release');
 
@@ -28,7 +28,9 @@ export class JavaVersionDatasource extends Datasource {
     }
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}:${config.packageName}`,

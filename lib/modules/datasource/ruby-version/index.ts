@@ -9,7 +9,7 @@ import {
   id as rubyVersioningId,
 } from '../../versioning/ruby/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class RubyVersionDatasource extends Datasource {
   static readonly id = 'ruby-version';
@@ -33,13 +33,12 @@ export class RubyVersionDatasource extends Datasource {
 
   private async fetchReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
       homepage: 'https://www.ruby-lang.org',
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
-    // TODO: types (#22198)
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
     try {
       const response = await this.http.getText(rubyVersionsUrl);
@@ -74,7 +73,9 @@ export class RubyVersionDatasource extends Datasource {
     return res;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: 'all',
