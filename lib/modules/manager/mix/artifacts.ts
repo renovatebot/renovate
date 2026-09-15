@@ -18,6 +18,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
@@ -154,17 +155,19 @@ export async function updateArtifacts({
       // TODO: should include a version constraint
       MIX_ARCHIVES: await ensureCacheDir('mix_archives'),
     },
-    cwdFile: packageFileName,
+    cwdFile: lockFileName,
     docker: {},
     toolConstraints: [
       {
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: config.constraints?.erlang ?? `^${erlangVersion}`,
+        constraint:
+          (await resolveToolConstraint(config, 'erlang')) ??
+          `^${erlangVersion}`,
       },
       {
         toolName: 'elixir',
-        constraint: config.constraints?.elixir,
+        constraint: await resolveToolConstraint(config, 'elixir'),
       },
     ],
     preCommands,

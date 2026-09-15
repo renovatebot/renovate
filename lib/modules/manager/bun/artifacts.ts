@@ -18,6 +18,7 @@ import {
   updateNpmrcContent,
 } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -84,7 +85,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'bun',
-          constraint: updateArtifact?.config?.constraints?.bun,
+          constraint: await resolveToolConstraint(config, 'bun'),
         },
       ],
     };

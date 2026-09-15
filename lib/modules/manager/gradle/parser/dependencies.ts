@@ -252,6 +252,13 @@ const qIgnoreSubstitutedDependencies = q.sym<Ctx>('substitute').alt(
   }),
 );
 
+// buildConfigField("type", "name", "value")
+// resValue("type", "name", "value")
+const qIgnoreAndroidBuildValues = q.alt(
+  q.sym<Ctx>('buildConfigField').tree(),
+  q.sym<Ctx>('resValue').tree(),
+);
+
 export const qDependencies = q.alt(
   qDependencyStrings,
   qDependencySet,
@@ -264,4 +271,6 @@ export const qDependencies = q.alt(
   qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
   // avoid matching substituted dependency modules
   qIgnoreSubstitutedDependencies,
+  // avoid heuristic matching of Android build values
+  qIgnoreAndroidBuildValues,
 );

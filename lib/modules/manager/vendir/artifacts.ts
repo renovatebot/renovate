@@ -1,5 +1,6 @@
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   getParentDir,
@@ -10,6 +11,7 @@ import {
 import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const gitExec = withGitEnvironment();
 
@@ -38,8 +40,14 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [
-        { toolName: 'vendir', constraint: config.constraints?.vendir },
-        { toolName: 'helm', constraint: config.constraints?.helm },
+        {
+          toolName: 'vendir',
+          constraint: await resolveToolConstraint(config, 'vendir'),
+        },
+        {
+          toolName: 'helm',
+          constraint: await resolveToolConstraint(config, 'helm'),
+        },
       ],
     };
 
@@ -67,9 +75,9 @@ export async function updateArtifacts({
     const vendorDir = getParentDir(packageFileName);
     const status = await getRepoStatus();
     if (status) {
-      const modifiedFiles = status.modified ?? [];
+      const modifiedFiles = coerceArray(status.modified);
       const notAddedFiles = status.not_added;
-      const deletedFiles = status.deleted ?? [];
+      const deletedFiles = coerceArray(status.deleted);
 
       for (const f of modifiedFiles.concat(notAddedFiles)) {
         const isFileInVendorDir = f.startsWith(vendorDir);

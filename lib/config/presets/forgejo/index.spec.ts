@@ -282,9 +282,9 @@ describe('config/presets/forgejo/index', () => {
           path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await forgejo.getPresetFromEndpoint('some/repo', 'default', undefined),
-      ).toEqual({ from: 'api' });
+      await expect(
+        forgejo.getPresetFromEndpoint('some/repo', 'default', undefined),
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint', async () => {
@@ -297,8 +297,8 @@ describe('config/presets/forgejo/index', () => {
           path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await forgejo
+      await expect(
+        forgejo
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -306,7 +306,7 @@ describe('config/presets/forgejo/index', () => {
             'https://api.forgejo.example.org',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses default endpoint with a tag', async () => {
@@ -319,15 +319,15 @@ describe('config/presets/forgejo/index', () => {
           path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await forgejo.getPresetFromEndpoint(
+      await expect(
+        forgejo.getPresetFromEndpoint(
           'some/repo',
           'default',
           undefined,
           forgejoApiHost,
           'someTag',
         ),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
 
     it('uses custom endpoint with a tag', async () => {
@@ -340,8 +340,8 @@ describe('config/presets/forgejo/index', () => {
           path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
-      expect(
-        await forgejo
+      await expect(
+        forgejo
           .getPresetFromEndpoint(
             'some/repo',
             'default',
@@ -350,7 +350,7 @@ describe('config/presets/forgejo/index', () => {
             'someTag',
           )
           .catch(() => ({ from: 'api' })),
-      ).toEqual({ from: 'api' });
+      ).resolves.toEqual({ from: 'api' });
     });
   });
 });

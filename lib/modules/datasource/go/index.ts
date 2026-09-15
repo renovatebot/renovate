@@ -19,6 +19,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
+import { isPublicGoPackage } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { GoProxyDatasource } from './releases-goproxy.ts';
@@ -40,7 +41,7 @@ export class GoDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead.';
+    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead. For modules hosted on GitHub, a later GitHub Release publication time takes precedence over both.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';
@@ -69,6 +70,7 @@ export class GoDatasource extends Datasource {
         namespace: `datasource-${GoDatasource.id}`,
         // TODO: types (#22198)
         key: `getReleases:${config.packageName}@@${constraintsFilteringKey}`,
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -129,7 +131,7 @@ export class GoDatasource extends Datasource {
       case GitlabTagsDatasource.id: {
         return this.direct.gitlab.getDigest(source, tag);
       }
-      /* v8 ignore next 3: can never happen, makes lint happy */
+      /* v8 ignore next: can never happen, makes lint happy */
       default: {
         return null;
       }
@@ -144,6 +146,7 @@ export class GoDatasource extends Datasource {
       {
         namespace: `datasource-${GoDatasource.id}`,
         key: `getDigest:${config.packageName}:${newValue}`,
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getDigest(config, newValue),

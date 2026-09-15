@@ -13,6 +13,19 @@ describe('modules/manager/docker-compose/extract', () => {
       expect(extractPackageFile('', '', {})).toBeNull();
     });
 
+    it('ignores an x- extension that carries no image', () => {
+      expect(
+        extractPackageFile(
+          codeBlock`
+            x-no-image:
+              command: echo hello
+          `,
+          'docker-compose.yml',
+          {},
+        )?.deps,
+      ).toBeEmpty();
+    });
+
     it('returns null for non-object YAML', () => {
       expect(extractPackageFile('nothing here', '', {})).toBeNull();
     });
@@ -21,21 +34,41 @@ describe('modules/manager/docker-compose/extract', () => {
       expect(extractPackageFile('nothing here\n:::::::', '', {})).toBeNull();
     });
 
+    const expectedDeps = [
+      { depName: 'quay.io/something/redis', currentValue: 'alpine' },
+      { depName: 'node', currentValue: '10.0.0' },
+      { depName: 'postgres', currentValue: '9.4.0' },
+      {
+        depName: 'dockersamples/examplevotingapp_vote',
+        currentValue: 'before',
+      },
+      {
+        depName: 'dockersamples/examplevotingapp_result',
+        currentValue: 'before',
+      },
+      { depName: 'dockersamples/examplevotingapp_worker' },
+      { depName: 'dockersamples/visualizer', currentValue: 'stable' },
+      {
+        replaceString: '${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}',
+        skipReason: 'contains-variable',
+      },
+    ];
+
     it('extracts multiple image lines for version 1', () => {
       const res = extractPackageFile(yamlFile1, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(expectedDeps);
       expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3', () => {
       const res = extractPackageFile(yamlFile3, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(expectedDeps);
       expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3 without set version key', () => {
       const res = extractPackageFile(yamlFile3NoVersion, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(expectedDeps);
       expect(res?.deps).toHaveLength(8);
     });
 
@@ -164,6 +197,34 @@ describe('modules/manager/docker-compose/extract', () => {
             depName: 'quay.io/nginx',
             packageName: 'my-quay-mirror.registry.com/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extracts image with variable default registry alias', () => {
+      const compose = codeBlock`
+        version: "3"
+        services:
+          nginx:
+            image: \${CI_REGISTRY:-}nginx:0.0.1
+      `;
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          '${CI_REGISTRY:-}': 'my-registry.io',
+        },
+      });
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '${CI_REGISTRY:-}nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '0.0.1',
+            datasource: 'docker',
+            depName: '${CI_REGISTRY:-}nginx',
+            packageName: 'my-registry.io/nginx',
+            replaceString: '${CI_REGISTRY:-}nginx:0.0.1',
           },
         ],
       });

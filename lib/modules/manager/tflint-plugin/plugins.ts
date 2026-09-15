@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -31,8 +32,8 @@ export function extractTFLintPlugin(
     if (isString(line)) {
       // `{` will be counted with +1 and `}` with -1.
       // Therefore if we reach braceCounter == 0 then we found the end of the tflint configuration block.
-      const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
-      const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
+      const openBrackets = coerceArray(line.match(regEx(/\{/g))).length;
+      const closedBrackets = coerceArray(line.match(regEx(/\}/g))).length;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block
@@ -41,6 +42,9 @@ export function extractTFLintPlugin(
         if (kvMatch?.groups) {
           if (kvMatch.groups.key === 'version') {
             currentVersion = kvMatch.groups.value;
+            // NOTE: the key regex only matches these two, so the implicit else
+            // never runs. A coverage-ignore hint cannot suppress it on an
+            // `else if`.
           } else if (kvMatch.groups.key === 'source') {
             pluginSource = kvMatch.groups.value;
           }

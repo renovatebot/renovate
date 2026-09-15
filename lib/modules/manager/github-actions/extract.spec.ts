@@ -8,53 +8,6 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const runnerTestWorkflowMacos = codeBlock`
-jobs:
-  test1:
-     runs-on: \${{ env.RUNNER }}
-  test2:
-      runs-on: abc-123
-  test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-      runs-on: macos-15-intel
-  test6:
-      runs-on: macos-26-intel
-`;
-
-const runnerTestWorkflowUbuntu = codeBlock`
-jobs:
-  test1:
-    runs-on: ubuntu-latest
-  test2:
-    runs-on:
-      ubuntu-22.04
-  test3:
-     runs-on:
-       group: ubuntu-runners
-       labels: ubuntu-20.04-16core
-  test4:
-      runs-on: ubuntu-22.04-arm
-`;
-
-const runnerTestWorkflowWindows = codeBlock`
-jobs:
-  test1:
-    runs-on: |
-      windows-2019
-  test2:
-    runs-on: >
-      windows-2022
-  test3:
-    runs-on: [windows-2022, selfhosted]
-  test4:
-      runs-on: windows-11-arm
-  test5:
-      runs-on: windows-2025
-`;
-
 describe('modules/manager/github-actions/extract', () => {
   beforeEach(() => {
     GlobalConfig.reset();
@@ -62,15 +15,15 @@ describe('modules/manager/github-actions/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(
-        await extractPackageFile('nothing here', 'empty-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'empty-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid yaml', async () => {
-      expect(
-        await extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
-      ).toBeNull();
+      await expect(
+        extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts multiple docker image lines from yaml configuration file', async () => {
@@ -78,10 +31,99 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_1.yml'),
         'workflow_1.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
-        6,
-      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'replicated/dockerfilelint',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'actions/docker',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          currentValue: '6',
+          currentDigest:
+            'sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'redis',
+          currentValue: '5',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'postgres',
+          currentValue: '10',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
     });
 
     it('extracts multiple action tag lines from yaml configuration file', async () => {
@@ -89,13 +131,90 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-tags'),
-      ).toHaveLength(7);
-      expect(
-        res?.deps.filter((d) => d.datasource === 'github-digest'),
-      ).toHaveLength(1);
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentValue: 'v1.1.0',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: '1.0.0',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          enabled: false,
+          skipReason: 'unversioned-reference',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145',
+        },
+        {
+          depName: 'docker/build-push-action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: 'v2.4.0',
+          currentDigest: 'ec3a7ce113134d7a93b817d10a8272cb61118579',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0',
+        },
+        {
+          depName: 'actions-rs/toolchain',
+          currentValue: 'v1.0.7',
+          currentDigest: '16499b5e05bf2e26879000db0c1d13f7e13fa3af',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7',
+        },
+        {
+          depName: 'actions-rs/cargo',
+          currentValue: 'v1.0.3',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
     });
 
     it('use github.com as registry when no settings provided', async () => {
@@ -579,6 +698,58 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('extracts a reusable workflow call as a workflow', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+        jobs:
+          release:
+            uses: some-org/some-repo/.github/workflows/release.yml@v1.2.3
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'some-org/some-repo',
+          currentValue: 'v1.2.3',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+          depType: 'workflow',
+          replaceString:
+            'some-org/some-repo/.github/workflows/release.yml@v1.2.3',
+          autoReplaceStringTemplate:
+            '{{depName}}/.github/workflows/release.yml@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        },
+      ]);
+    });
+
+    it.each`
+      uses                                                            | depType
+      ${'some-org/some-repo/.github/workflows/release.yml@v1'}        | ${'workflow'}
+      ${'some-org/some-repo/.github/workflows/release.yaml@v1'}       | ${'workflow'}
+      ${'actions/checkout@v4'}                                        | ${'action'}
+      ${'github/codeql-action/init@v3'}                               | ${'action'}
+      ${'some-org/some-repo/.github/workflows/sub/release.yml@v1'}    | ${'action'}
+      ${'some-org/some-repo/.github/workflows@v1'}                    | ${'action'}
+      ${'some-org/some-repo/.github/workflows/release.json@v1'}       | ${'action'}
+      ${'some-org/some-repo/nested/.github/workflows/release.yml@v1'} | ${'action'}
+    `(
+      'gives $uses the depType $depType',
+      async ({ uses, depType }: { uses: string; depType: string }) => {
+        const res = await extractPackageFile(
+          codeBlock`
+          jobs:
+            build:
+              steps:
+                - uses: ${uses}
+          `,
+          '.github/workflows/ci.yml',
+        );
+
+        expect(res?.deps[0]).toMatchObject({ depType });
+      },
+    );
+
     it('disables naked SHA pins without version comment', async () => {
       const res = await extractPackageFile(
         codeBlock`
@@ -726,6 +897,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple macos action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowMacos = codeBlock`
+      jobs:
+        test1:
+           runs-on: \${{ env.RUNNER }}
+        test2:
+            runs-on: abc-123
+        test3:
+          runs-on: "macos-12-large"
+        test4:
+          runs-on: 'macos-latest'
+        test5:
+            runs-on: macos-15-intel
+        test6:
+            runs-on: macos-26-intel
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowMacos,
         'workflow.yml',
@@ -772,6 +958,20 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowUbuntu = codeBlock`
+      jobs:
+        test1:
+          runs-on: ubuntu-latest
+        test2:
+          runs-on:
+            ubuntu-22.04
+        test3:
+           runs-on:
+             group: ubuntu-runners
+             labels: ubuntu-20.04-16core
+        test4:
+            runs-on: ubuntu-22.04-arm
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowUbuntu,
         'workflow.yml',
@@ -810,6 +1010,21 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts multiple windows action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowWindows = codeBlock`
+      jobs:
+        test1:
+          runs-on: |
+            windows-2019
+        test2:
+          runs-on: >
+            windows-2022
+        test3:
+          runs-on: [windows-2022, selfhosted]
+        test4:
+            runs-on: windows-11-arm
+        test5:
+            runs-on: windows-2025
+      `;
       const res = await extractPackageFile(
         runnerTestWorkflowWindows,
         'workflow.yml',
@@ -994,6 +1209,38 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
+    it('extracts x-version from actions/setup-x referenced by an https:// URL', async () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: https://github.com/actions/setup-node@v4.4.0
+                with:
+                  node-version: '23.7.0'
+        `;
+
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'https://github.com/actions/setup-node',
+          packageName: 'actions/setup-node',
+          currentValue: 'v4.4.0',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '23.7.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+      ]);
+    });
+
     it('handles actions/setup-x without x-version field', async () => {
       const yamlContent = codeBlock`
         jobs:
@@ -1005,11 +1252,18 @@ describe('modules/manager/github-actions/extract', () => {
                   registry-url: 'https://npm.pkg.github.com'
         `;
       const res = await extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'actions/setup-node',
-        depType: 'action',
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/setup-node',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ]);
     });
 
     it('extracts x-version from actions/setup-x in composite action', async () => {
@@ -1150,7 +1404,9 @@ describe('modules/manager/github-actions/extract', () => {
           using: 'node20'
           main: 'index.js'
         `;
-      expect(await extractPackageFile(yamlContent, 'action.yml')).toBeNull();
+      await expect(
+        extractPackageFile(yamlContent, 'action.yml'),
+      ).resolves.toBeNull();
     });
 
     it('extracts actions and with-version inputs nested in a parallel block', async () => {
@@ -1275,6 +1531,154 @@ describe('modules/manager/github-actions/extract', () => {
   it.each([
     {
       step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0.404' },
+      },
+      expected: [
+        {
+          currentValue: '8.0.404',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      // multiple SDKs, one per line, aren't a single version we can update
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '3.1.x\n5.0.x' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          currentValue: '3.1.x\n5.0.x',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'adopt', 'java-version': '11' },
+      },
+      expected: [
+        {
+          currentValue: '11',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: {
+          distribution: 'temurin',
+          'java-version': '21',
+          'java-package': 'jre',
+        },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jre',
+          depType: 'uses-with',
+          packageName: 'java-jre',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // we can't reliably track version updates for distributions other
+      // than Temurin/Adopt
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'zulu', 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'aquasecurity/setup-trivy@v0.2.6',
         with: {},
       },
@@ -1425,6 +1829,94 @@ describe('modules/manager/github-actions/extract', () => {
           skipReason: 'unspecified-version',
           packageName: 'astral-sh/uv',
           versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: 'amazon/amazon-ecs-sample:latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:v1.2.3',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.2.3',
+          datasource: 'docker',
+          depName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+          depType: 'uses-with',
+          packageName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image:
+            'amazon/amazon-ecs-sample@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      // the image is templated, so we can't reliably determine what to update
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '${{ steps.build-image.outputs.image }}',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'contains-variable',
         },
       ],
     },
@@ -1823,6 +2315,37 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'deno',
           depType: 'uses-with',
           packageName: 'deno',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'expo/expo-github-action@v8',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'expo/expo-github-action@v8',
+        with: { 'eas-version': '23.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '23.2.0',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
         },
       ],
     },
@@ -2253,6 +2776,678 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43.100.0' },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: '43'`, quoted, matching the action's own default
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43' },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: 43`, unquoted, parses as a YAML number rather than a string
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': 43 },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-version': '43.100.0',
+          'renovate-image': 'ghcr.io/my-org/renovate',
+        },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/my-org/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/my-org/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: {
+          'otp-version': '27.1.2',
+          'elixir-version': '1.17.3',
+          'gleam-version': '1.5.1',
+          'rebar3-version': '3.24.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: '27.1.2',
+          datasource: 'github-releases',
+          depName: 'erlang/otp',
+          depType: 'uses-with',
+          packageName: 'erlang/otp',
+        },
+        {
+          currentValue: '1.17.3',
+          datasource: 'github-releases',
+          depName: 'elixir-lang/elixir',
+          depType: 'uses-with',
+          packageName: 'elixir-lang/elixir',
+        },
+        {
+          currentValue: '1.5.1',
+          datasource: 'github-releases',
+          depName: 'gleam-lang/gleam',
+          depType: 'uses-with',
+          packageName: 'gleam-lang/gleam',
+        },
+        {
+          currentValue: '3.24.0',
+          datasource: 'github-releases',
+          depName: 'erlang/rebar3',
+          depType: 'uses-with',
+          packageName: 'erlang/rebar3',
+        },
+      ],
+    },
+    {
+      // most workflows only set a subset of the 4 possible inputs
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'otp-version': '27.1.2' },
+      },
+      expected: [
+        {
+          currentValue: '27.1.2',
+          datasource: 'github-releases',
+          depName: 'erlang/otp',
+          depType: 'uses-with',
+          packageName: 'erlang/otp',
+        },
+      ],
+    },
+    {
+      // none of the inputs are set, so no deps should be extracted at all
+      // (rather than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: {},
+      },
+      expected: [],
+    },
+    {
+      // `'nightly'` is a valid, documented value for rebar3-version, but not
+      // one we can pin/bump — the value is passed through as-is, and the
+      // versioning layer skips proposing an update since it isn't a real
+      // version
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'rebar3-version': 'nightly' },
+      },
+      expected: [
+        {
+          currentValue: 'nightly',
+          datasource: 'github-releases',
+          depName: 'erlang/rebar3',
+          depType: 'uses-with',
+          packageName: 'erlang/rebar3',
+        },
+      ],
+    },
+    {
+      // `false` is a valid, documented value for otp-version (skip
+      // installing OTP for Gleam-only workflows), but not one we can
+      // pin/bump — same pass-through treatment as rebar3-version's
+      // `nightly` above
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'otp-version': 'false', 'gleam-version': '1.5.0' },
+      },
+      expected: [
+        {
+          currentValue: 'false',
+          datasource: 'github-releases',
+          depName: 'erlang/otp',
+          depType: 'uses-with',
+          packageName: 'erlang/otp',
+        },
+        {
+          currentValue: '1.5.0',
+          datasource: 'github-releases',
+          depName: 'gleam-lang/gleam',
+          depType: 'uses-with',
+          packageName: 'gleam-lang/gleam',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/kind-action@v1',
+        with: {
+          version: 'v0.33.0',
+          node_image: 'kindest/node:v1.31.0',
+          kubectl_version: 'v1.31.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.33.0',
+          datasource: 'github-releases',
+          depName: 'kubernetes-sigs/kind',
+          depType: 'uses-with',
+          packageName: 'kubernetes-sigs/kind',
+        },
+        {
+          currentValue: 'v1.31.0',
+          datasource: 'docker',
+          depName: 'kindest/node',
+          depType: 'uses-with',
+          packageName: 'kindest/node',
+        },
+        {
+          currentValue: 'v1.31.0',
+          datasource: 'github-releases',
+          depName: 'kubernetes/kubernetes',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 3 possible inputs
+      step: {
+        uses: 'helm/kind-action@v1',
+        with: { version: 'v0.33.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.33.0',
+          datasource: 'github-releases',
+          depName: 'kubernetes-sigs/kind',
+          depType: 'uses-with',
+          packageName: 'kubernetes-sigs/kind',
+        },
+      ],
+    },
+    {
+      // none of the inputs are set, so no deps should be extracted at all
+      // (rather than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'helm/kind-action@v1',
+        with: {},
+      },
+      expected: [],
+    },
+    {
+      // `node_image` may be pinned by digest instead of (or alongside) a tag
+      step: {
+        uses: 'helm/kind-action@v1',
+        with: {
+          node_image:
+            'kindest/node:v1.31.0@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.31.0',
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'kindest/node',
+          depType: 'uses-with',
+          packageName: 'kindest/node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'GitTools/actions/gitversion/setup@v3',
+        with: { versionSpec: '6.8.2' },
+      },
+      expected: [
+        {
+          currentValue: '6.8.2',
+          datasource: 'github-releases',
+          depName: 'gitversion',
+          depType: 'uses-with',
+          packageName: 'GitTools/GitVersion',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'GitTools/actions/gitversion/setup@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'gitversion',
+          depType: 'uses-with',
+          packageName: 'GitTools/GitVersion',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'subosito/flutter-action@v2',
+        with: { 'flutter-version': '3.24.3' },
+      },
+      expected: [
+        {
+          currentValue: '3.24.3',
+          datasource: 'github-releases',
+          depName: 'flutter',
+          depType: 'uses-with',
+          packageName: 'flutter/flutter',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'subosito/flutter-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'flutter',
+          depType: 'uses-with',
+          packageName: 'flutter/flutter',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquaproj/aqua-installer@v3',
+        with: { aqua_version: 'v2.62.3' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.62.3',
+          datasource: 'github-releases',
+          depName: 'aqua',
+          depType: 'uses-with',
+          packageName: 'aquaproj/aqua',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquaproj/aqua-installer@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'aqua',
+          depType: 'uses-with',
+          packageName: 'aquaproj/aqua',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cycjimmy/semantic-release-action@v4',
+        with: { semantic_version: '^24.0.0' },
+      },
+      expected: [
+        {
+          currentValue: '^24.0.0',
+          datasource: 'npm',
+          depName: 'semantic-release',
+          depType: 'uses-with',
+          packageName: 'semantic-release',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cycjimmy/semantic-release-action@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'semantic-release',
+          depType: 'uses-with',
+          packageName: 'semantic-release',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cloudflare/wrangler-action@v3',
+        with: { wranglerVersion: '3.78.0' },
+      },
+      expected: [
+        {
+          currentValue: '3.78.0',
+          datasource: 'npm',
+          depName: 'wrangler',
+          depType: 'uses-with',
+          packageName: 'wrangler',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cloudflare/wrangler-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'wrangler',
+          depType: 'uses-with',
+          packageName: 'wrangler',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'peaceiris/actions-hugo@v3',
+        with: { 'hugo-version': '0.166.0' },
+      },
+      expected: [
+        {
+          currentValue: '0.166.0',
+          datasource: 'github-releases',
+          depName: 'hugo',
+          depType: 'uses-with',
+          packageName: 'gohugoio/hugo',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'peaceiris/actions-hugo@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'hugo',
+          depType: 'uses-with',
+          packageName: 'gohugoio/hugo',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jfrog/setup-jfrog-cli@v4',
+        with: { version: '2.91.0' },
+      },
+      expected: [
+        {
+          currentValue: '2.91.0',
+          datasource: 'github-releases',
+          depName: 'jfrog-cli',
+          depType: 'uses-with',
+          packageName: 'jfrog/jfrog-cli',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jfrog/setup-jfrog-cli@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'jfrog-cli',
+          depType: 'uses-with',
+          packageName: 'jfrog/jfrog-cli',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-releaser-action@v1',
+        with: { version: 'v1.7.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.7.0',
+          datasource: 'github-releases',
+          depName: 'chart-releaser',
+          depType: 'uses-with',
+          packageName: 'helm/chart-releaser',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-releaser-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'chart-releaser',
+          depType: 'uses-with',
+          packageName: 'helm/chart-releaser',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-kubectl@v4',
+        with: { version: 'v1.31.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.31.0',
+          datasource: 'github-releases',
+          depName: 'kubectl',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-kubectl@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'kubectl',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      // `'latest'` is a valid, documented value (and the action's own
+      // default), but not one we can pin/bump — the value is passed
+      // through as-is, and the versioning layer skips proposing an update
+      // since it isn't a real version
+      step: {
+        uses: 'azure/setup-kubectl@v4',
+        with: { version: 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'kubectl',
+          depType: 'uses-with',
+          packageName: 'kubernetes/kubernetes',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'snok/install-poetry@v1',
+        with: { version: '1.8.3' },
+      },
+      expected: [
+        {
+          currentValue: '1.8.3',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'snok/install-poetry@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'terraform-linters/setup-tflint@v4',
+        with: { tflint_version: 'v0.64.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.64.0',
+          datasource: 'github-releases',
+          depName: 'tflint',
+          depType: 'uses-with',
+          packageName: 'terraform-linters/tflint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'terraform-linters/setup-tflint@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'tflint',
+          depType: 'uses-with',
+          packageName: 'terraform-linters/tflint',
+        },
+      ],
+    },
+    {
+      // `'latest'` is a valid, documented value, but not one we can pin/bump
+      step: {
+        uses: 'terraform-linters/setup-tflint@v4',
+        with: { tflint_version: 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+          datasource: 'github-releases',
+          depName: 'tflint',
+          depType: 'uses-with',
+          packageName: 'terraform-linters/tflint',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'UpCloudLtd/upcloud-cli-action@main',
         with: { version: 'v3.35.0' },
       },
@@ -2265,6 +3460,1261 @@ describe('modules/manager/github-actions/extract', () => {
           packageName: 'UpCloudLtd/upcloud-cli',
         },
       ],
+    },
+    {
+      step: {
+        uses: 'extractions/setup-just@v3',
+        with: { 'just-version': '1.58.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.58.0',
+          datasource: 'github-releases',
+          depName: 'just',
+          depType: 'uses-with',
+          packageName: 'casey/just',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'extractions/setup-just@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'just',
+          depType: 'uses-with',
+          packageName: 'casey/just',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'gradle/actions/setup-gradle@v4',
+        with: { 'gradle-version': '8.10' },
+      },
+      expected: [
+        {
+          currentValue: '8.10',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          depType: 'uses-with',
+          packageName: 'gradle/gradle',
+          versioning: 'gradle',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'gradle/actions/setup-gradle@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          depType: 'uses-with',
+          packageName: 'gradle/gradle',
+          versioning: 'gradle',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'hashicorp/setup-terraform@v3',
+        with: { terraform_version: '1.13.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.13.0',
+          datasource: 'github-releases',
+          depName: 'terraform',
+          depType: 'uses-with',
+          packageName: 'hashicorp/terraform',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'hashicorp/setup-terraform@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'terraform',
+          depType: 'uses-with',
+          packageName: 'hashicorp/terraform',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'goreleaser/goreleaser-action@v6',
+        with: { version: 'v2.4.4' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.4.4',
+          datasource: 'github-releases',
+          depName: 'goreleaser/goreleaser',
+          depType: 'uses-with',
+          packageName: 'goreleaser/goreleaser',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'goreleaser/goreleaser-action@v6',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'goreleaser/goreleaser',
+          depType: 'uses-with',
+          packageName: 'goreleaser/goreleaser',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'opentofu/setup-opentofu@v1',
+        with: { tofu_version: '1.8.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.8.0',
+          datasource: 'github-releases',
+          depName: 'opentofu',
+          depType: 'uses-with',
+          packageName: 'opentofu/opentofu',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'opentofu/setup-opentofu@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'opentofu',
+          depType: 'uses-with',
+          packageName: 'opentofu/opentofu',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'abatilo/actions-poetry@v3',
+        with: { 'poetry-version': '1.8.3' },
+      },
+      expected: [
+        {
+          currentValue: '1.8.3',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'abatilo/actions-poetry@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'uses-with',
+          packageName: 'poetry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'biomejs/setup-biome@v2',
+        with: { version: '1.9.4' },
+      },
+      expected: [
+        {
+          currentValue: '1.9.4',
+          datasource: 'npm',
+          depName: '@biomejs/biome',
+          depType: 'uses-with',
+          packageName: '@biomejs/biome',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'biomejs/setup-biome@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: '@biomejs/biome',
+          depType: 'uses-with',
+          packageName: '@biomejs/biome',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'astral-sh/ruff-action@v3',
+        with: { version: '0.16.7' },
+      },
+      expected: [
+        {
+          currentValue: '0.16.7',
+          datasource: 'github-releases',
+          depName: 'ruff',
+          depType: 'uses-with',
+          packageName: 'astral-sh/ruff',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'astral-sh/ruff-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'ruff',
+          depType: 'uses-with',
+          packageName: 'astral-sh/ruff',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'reviewdog/action-setup@v1',
+        with: { reviewdog_version: 'v0.21.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.21.1',
+          datasource: 'github-releases',
+          depName: 'reviewdog',
+          depType: 'uses-with',
+          packageName: 'reviewdog/reviewdog',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'reviewdog/action-setup@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'reviewdog',
+          depType: 'uses-with',
+          packageName: 'reviewdog/reviewdog',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'j178/prek-action@v1',
+        with: { 'prek-version': '0.3.x' },
+      },
+      expected: [
+        {
+          currentValue: '0.3.x',
+          datasource: 'github-releases',
+          depName: 'prek',
+          depType: 'uses-with',
+          packageName: 'j178/prek',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'j178/prek-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'prek',
+          depType: 'uses-with',
+          packageName: 'j178/prek',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions-rust-lang/setup-rust-toolchain@v1',
+        with: { toolchain: 'stable, nightly' },
+      },
+      expected: [
+        {
+          currentValue: 'nightly',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions-rust-lang/setup-rust-toolchain@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'raven-actions/actionlint@v2',
+        with: { version: 'v1.7.12' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.7.12',
+          datasource: 'github-releases',
+          depName: 'actionlint',
+          depType: 'uses-with',
+          packageName: 'rhysd/actionlint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'raven-actions/actionlint@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'actionlint',
+          depType: 'uses-with',
+          packageName: 'rhysd/actionlint',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'bufbuild/buf-setup-action@v1',
+        with: { version: '1.50.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.50.0',
+          datasource: 'github-releases',
+          depName: 'buf',
+          depType: 'uses-with',
+          packageName: 'bufbuild/buf',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'bufbuild/buf-setup-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'buf',
+          depType: 'uses-with',
+          packageName: 'bufbuild/buf',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'stCarolas/setup-maven@v4.5',
+        with: { 'maven-version': '3.9.9' },
+      },
+      expected: [
+        {
+          currentValue: '3.9.9',
+          datasource: 'github-releases',
+          depName: 'maven',
+          depType: 'uses-with',
+          packageName: 'apache/maven',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'stCarolas/setup-maven@v4.5',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'maven',
+          depType: 'uses-with',
+          packageName: 'apache/maven',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pulumi/actions@v6',
+        with: { 'pulumi-version': '3.262.0' },
+      },
+      expected: [
+        {
+          currentValue: '3.262.0',
+          datasource: 'github-releases',
+          depName: 'pulumi',
+          depType: 'uses-with',
+          packageName: 'pulumi/pulumi',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pulumi/actions@v6',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'pulumi',
+          depType: 'uses-with',
+          packageName: 'pulumi/pulumi',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'supabase/setup-cli@v1',
+        with: { version: '1.200.3' },
+      },
+      expected: [
+        {
+          currentValue: '1.200.3',
+          datasource: 'npm',
+          depName: 'supabase',
+          depType: 'uses-with',
+          packageName: 'supabase',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'supabase/setup-cli@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'supabase',
+          depType: 'uses-with',
+          packageName: 'supabase',
+        },
+      ],
+    },
+    {
+      // `'latest'`/`'beta'` are valid, documented values, but not ones we
+      // can pin/bump — the value is passed through as-is, and the
+      // versioning layer skips proposing an update since it isn't a real
+      // version
+      step: {
+        uses: 'supabase/setup-cli@v1',
+        with: { version: 'beta' },
+      },
+      expected: [
+        {
+          currentValue: 'beta',
+          datasource: 'npm',
+          depName: 'supabase',
+          depType: 'uses-with',
+          packageName: 'supabase',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'mozilla-actions/sccache-action@v0.0.9',
+        with: { version: 'v0.18.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.18.0',
+          datasource: 'github-releases',
+          depName: 'sccache',
+          depType: 'uses-with',
+          packageName: 'mozilla/sccache',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'mozilla-actions/sccache-action@v0.0.9',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'sccache',
+          depType: 'uses-with',
+          packageName: 'mozilla/sccache',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'hashicorp/setup-packer@v3',
+        with: { version: 'v1.16.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.16.0',
+          datasource: 'github-releases',
+          depName: 'packer',
+          depType: 'uses-with',
+          packageName: 'hashicorp/packer',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'hashicorp/setup-packer@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'packer',
+          depType: 'uses-with',
+          packageName: 'hashicorp/packer',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dagger/dagger-for-github@v8',
+        with: { version: 'v0.21.9' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.21.9',
+          datasource: 'github-releases',
+          depName: 'dagger',
+          depType: 'uses-with',
+          packageName: 'dagger/dagger',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dagger/dagger-for-github@v8',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'dagger',
+          depType: 'uses-with',
+          packageName: 'dagger/dagger',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'foundry-rs/foundry-toolchain@v1',
+        with: { version: 'v1.8.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.8.1',
+          datasource: 'github-releases',
+          depName: 'foundry',
+          depType: 'uses-with',
+          packageName: 'foundry-rs/foundry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'foundry-rs/foundry-toolchain@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'foundry',
+          depType: 'uses-with',
+          packageName: 'foundry-rs/foundry',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: { sdk: '3.5.3' },
+      },
+      expected: [
+        {
+          currentValue: '3.5.3',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+        },
+      ],
+    },
+    {
+      // `'stable'` is a valid, documented channel name (and the action's
+      // own default), but not one we can pin/bump — the value is passed
+      // through as-is, and the versioning layer skips proposing an update
+      // since it isn't a real version
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: { sdk: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'julia-actions/setup-julia@v2',
+        with: { version: '1.10' },
+      },
+      expected: [
+        {
+          currentValue: '1.10',
+          datasource: 'github-releases',
+          depName: 'julia',
+          depType: 'uses-with',
+          packageName: 'JuliaLang/julia',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'julia-actions/setup-julia@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'julia',
+          depType: 'uses-with',
+          packageName: 'JuliaLang/julia',
+        },
+      ],
+    },
+    {
+      // `'lts'`/`'pre'` are valid, documented values, but not ones we can
+      // pin/bump — the value is passed through as-is, and the versioning
+      // layer skips proposing an update since it isn't a real version
+      step: {
+        uses: 'julia-actions/setup-julia@v2',
+        with: { version: 'lts' },
+      },
+      expected: [
+        {
+          currentValue: 'lts',
+          datasource: 'github-releases',
+          depName: 'julia',
+          depType: 'uses-with',
+          packageName: 'JuliaLang/julia',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cargo-bins/cargo-binstall@v1',
+        with: { version: 'v1.23.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.23.0',
+          datasource: 'github-releases',
+          depName: 'cargo-bins/cargo-binstall',
+          depType: 'uses-with',
+          packageName: 'cargo-bins/cargo-binstall',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cargo-bins/cargo-binstall@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'cargo-bins/cargo-binstall',
+          depType: 'uses-with',
+          packageName: 'cargo-bins/cargo-binstall',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'PyO3/maturin-action@v1',
+        with: { 'maturin-version': 'v1.7.4' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.7.4',
+          datasource: 'pypi',
+          depName: 'maturin',
+          depType: 'uses-with',
+          packageName: 'maturin',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'PyO3/maturin-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'pypi',
+          depName: 'maturin',
+          depType: 'uses-with',
+          packageName: 'maturin',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cue-lang/setup-cue@v1',
+        with: { version: 'v0.11.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.11.0',
+          datasource: 'github-releases',
+          depName: 'cue',
+          depType: 'uses-with',
+          packageName: 'cue-lang/cue',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'cue-lang/setup-cue@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'cue',
+          depType: 'uses-with',
+          packageName: 'cue-lang/cue',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'superfly/flyctl-actions/setup-flyctl@master',
+        with: { version: '0.4.102' },
+      },
+      expected: [
+        {
+          currentValue: '0.4.102',
+          datasource: 'github-releases',
+          depName: 'flyctl',
+          depType: 'uses-with',
+          packageName: 'superfly/flyctl',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'superfly/flyctl-actions/setup-flyctl@master',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'flyctl',
+          depType: 'uses-with',
+          packageName: 'superfly/flyctl',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': '21', version: '21.0.1' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+        {
+          currentValue: '21.0.1',
+          datasource: 'github-releases',
+          depName: 'graalvm/graalvm-ce-builds',
+          depType: 'uses-with',
+          extractVersion: '^(?:jdk|graal)-(?<version>.+)$',
+          packageName: 'graalvm/graalvm-ce-builds',
+        },
+      ],
+    },
+    {
+      // the repo alternates between `jdk-` and `graal-` tag prefixes for
+      // current-era releases, so both must be matched
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { version: '25.3.4.1' },
+      },
+      expected: [
+        {
+          currentValue: '25.3.4.1',
+          datasource: 'github-releases',
+          depName: 'graalvm/graalvm-ce-builds',
+          depType: 'uses-with',
+          extractVersion: '^(?:jdk|graal)-(?<version>.+)$',
+          packageName: 'graalvm/graalvm-ce-builds',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 possible inputs
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': '21' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // neither input is set, so no deps should be extracted at all (rather
+      // than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: {},
+      },
+      expected: [],
+    },
+    {
+      step: {
+        uses: 'moonrepo/setup-toolchain@v1',
+        with: { 'moon-version': '1.35.0', 'proto-version': '0.51.4' },
+      },
+      expected: [
+        {
+          currentValue: '1.35.0',
+          datasource: 'github-releases',
+          depName: 'moonrepo/moon',
+          depType: 'uses-with',
+          packageName: 'moonrepo/moon',
+        },
+        {
+          currentValue: '0.51.4',
+          datasource: 'github-releases',
+          depName: 'moonrepo/proto',
+          depType: 'uses-with',
+          packageName: 'moonrepo/proto',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 possible inputs
+      step: {
+        uses: 'moonrepo/setup-toolchain@v1',
+        with: { 'moon-version': '1.35.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.35.0',
+          datasource: 'github-releases',
+          depName: 'moonrepo/moon',
+          depType: 'uses-with',
+          packageName: 'moonrepo/moon',
+        },
+      ],
+    },
+    {
+      // neither input is set, so no deps should be extracted at all (rather
+      // than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'moonrepo/setup-toolchain@v1',
+        with: {},
+      },
+      expected: [],
+    },
+    {
+      step: {
+        uses: 'moonrepo/setup-rust@v1',
+        with: { channel: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'moonrepo/setup-rust@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: { crystal: '1.21.0', shards: 'v0.20.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.21.0',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/crystal',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/crystal',
+        },
+        {
+          currentValue: 'v0.20.0',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/shards',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/shards',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 possible inputs
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: { crystal: '1.21.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.21.0',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/crystal',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/crystal',
+        },
+      ],
+    },
+    {
+      // neither input is set, so no deps should be extracted at all (rather
+      // than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: {},
+      },
+      expected: [],
+    },
+    {
+      step: {
+        uses: 'baptiste0928/cargo-install@v3',
+        with: { crate: 'cargo-hack', version: '0.6.14' },
+      },
+      expected: [
+        {
+          currentValue: '0.6.14',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'baptiste0928/cargo-install@v3',
+        with: { crate: 'cargo-hack', version: '' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+        },
+      ],
+    },
+    {
+      // `version` has a default (`'latest'`), so real workflows commonly
+      // omit it from `with:` entirely rather than passing an empty string
+      step: {
+        uses: 'baptiste0928/cargo-install@v3',
+        with: { crate: 'cargo-hack' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jwlawson/actions-setup-cmake@v2',
+        with: { 'cmake-version': '4.3.5' },
+      },
+      expected: [
+        {
+          currentValue: '4.3.5',
+          datasource: 'github-releases',
+          depName: 'cmake',
+          depType: 'uses-with',
+          packageName: 'Kitware/CMake',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jwlawson/actions-setup-cmake@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'cmake',
+          depType: 'uses-with',
+          packageName: 'Kitware/CMake',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'swift-actions/setup-swift@v2',
+        with: { 'swift-version': '6.3.3' },
+      },
+      expected: [
+        {
+          currentValue: '6.3.3',
+          datasource: 'github-releases',
+          depName: 'swift',
+          depType: 'uses-with',
+          packageName: 'swiftlang/swift',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'swift-actions/setup-swift@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'swift',
+          depType: 'uses-with',
+          packageName: 'swiftlang/swift',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'WillAbides/setup-go-faster@v1',
+        with: { 'go-version': '1.23.4' },
+      },
+      expected: [
+        {
+          currentValue: '1.23.4',
+          datasource: 'github-releases',
+          depName: 'go',
+          depType: 'uses-with',
+          packageName: 'actions/go-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'WillAbides/setup-go-faster@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'go',
+          depType: 'uses-with',
+          packageName: 'actions/go-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'conda-incubator/setup-miniconda@v3',
+        with: { 'miniforge-version': '26.7.2-0', 'python-version': '3.12' },
+      },
+      expected: [
+        {
+          currentValue: '26.7.2-0',
+          datasource: 'github-releases',
+          depName: 'miniforge',
+          depType: 'uses-with',
+          packageName: 'conda-forge/miniforge',
+        },
+        {
+          currentValue: '3.12',
+          datasource: 'github-releases',
+          depName: 'python',
+          depType: 'uses-with',
+          packageName: 'actions/python-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // most workflows only pin one of the 2 supported inputs (of the 6
+      // this action exposes overall)
+      step: {
+        uses: 'conda-incubator/setup-miniconda@v3',
+        with: { 'python-version': '3.12' },
+      },
+      expected: [
+        {
+          currentValue: '3.12',
+          datasource: 'github-releases',
+          depName: 'python',
+          depType: 'uses-with',
+          packageName: 'actions/python-versions',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // neither supported input is set, so no deps should be extracted at
+      // all (rather than emitting skipped deps for inputs no one set)
+      step: {
+        uses: 'conda-incubator/setup-miniconda@v3',
+        with: {},
+      },
+      expected: [],
     },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
@@ -2311,6 +4761,23 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
       // the lockfile only records `OWNER/REPO@REF` pins, so a `docker://` image is still ours to pin
       expect(res?.deps[1]).not.toHaveProperty('digestManagedExternally');
+    });
+
+    it('marks a reusable workflow call, which the lockfile records too', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          jobs:
+            release:
+              uses: some-org/some-repo/.github/workflows/release.yml@v1
+        `,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        { depType: 'workflow', digestManagedExternally: true },
+      ]);
     });
 
     it('leaves a workflow which is not onboarded alone', async () => {

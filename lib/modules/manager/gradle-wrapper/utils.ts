@@ -111,6 +111,7 @@ export async function getJvmConfiguration(
       'm',
     );
     const toolChainMatch = TOOLCHAIN_VERSION_REGEX.exec(daemonJvm);
+    // v8 ignore else -- needs a daemon-jvm file without a toolchain version
     if (toolChainMatch?.groups) {
       return toolChainMatch.groups.version;
     }

@@ -26,16 +26,17 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { getExtraDepsNotice } from './artifacts-extra.ts';
 import { getGoModulesInTidyOrder } from './package-tree.ts';
 
 const { major, valid } = semver;
 const gitExec = withGitEnvironment(['go']);
 
-function getUpdateImportPathCmds(
+async function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints }: UpdateArtifactsConfig,
-): string[] {
+  config: UpdateArtifactsConfig,
+): Promise<string[]> {
   // Check if we fail to parse any major versions and log that they're skipped
   const invalidMajorDeps = updatedDeps.filter(
     ({ newVersion }) => !valid(newVersion),
@@ -72,7 +73,10 @@ function getUpdateImportPathCmds(
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
       'install github.com/marwan-at-work/mod/cmd/mod@latest';
-    const gomodModCompatibility = constraints?.gomodMod;
+    const gomodModCompatibility = await resolveToolConstraint(
+      config,
+      'gomodMod',
+    );
     if (gomodModCompatibility) {
       if (
         gomodModCompatibility.startsWith('v') &&
@@ -160,19 +164,19 @@ export async function updateArtifacts({
       .join('\n');
 
     const inlineReplaceRegEx = regEx(
-      /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
+      /(?<newline>\r?\n)(?<directive>replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
     );
 
-    // $1 will be matched with the (\r?n) group
-    // $2 will be matched with the inline replace match, example
+    // $<newline> will be matched with the (\r?\n) group
+    // $<directive> will be matched with the inline replace match, example
     // "// renovate-replace replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5"
-    const inlineCommentOut = '$1// renovate-replace $2';
+    const inlineCommentOut = '$<newline>// renovate-replace $<directive>';
 
     // Regex match replace directive block, example:
     // replace (
     //     golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // )
-    const blockReplaceRegEx = regEx(/(\r?\n)replace\s*\([^)]+\s*\)/g);
+    const blockReplaceRegEx = regEx(/(?:\r?\n)replace\s*\([^)]+\s*\)/g);
 
     /**
      * replacerFunction for commenting out replace blocks
@@ -180,7 +184,10 @@ export async function updateArtifacts({
      * @returns A commented out block with // renovate-replace
      */
     function blockCommentOut(match: string): string {
-      return match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+      return match.replace(
+        regEx(/(?<newline>\r?\n)/g),
+        '$<newline>// renovate-replace ',
+      );
     }
 
     // Comment out golang replace directives
@@ -188,13 +195,17 @@ export async function updateArtifacts({
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
+    // v8 ignore else -- needs a go.mod the replace massaging leaves unchanged
     if (massagedGoMod !== newGoModContent) {
       logger.debug(
         'Removed some relative replace statements and comments from go.mod',
       );
     }
   }
-  const goConstraints = deriveGoToolchainConstraints(config, newGoModContent);
+  const goConstraints = await deriveGoToolchainConstraints(
+    config,
+    newGoModContent,
+  );
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -262,7 +273,10 @@ export async function updateArtifacts({
       config.updateType === 'major';
 
     if (isImportPathUpdateRequired) {
-      const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
+      const updateImportCmds = await getUpdateImportPathCmds(
+        updatedDeps,
+        config,
+      );
       if (updateImportCmds.length > 0) {
         logger.debug(updateImportCmds, 'update import path commands included');
         // The updates
@@ -482,6 +496,7 @@ export async function updateArtifacts({
         newGoModContent,
         finalGoModContent,
         updatedDepNames,
+        config,
       );
 
       if (extraDepsNotice) {
@@ -588,12 +603,15 @@ function getGoConstraints(content: string): string | undefined {
  * 1. config: \`constraints.go\`
  * 1. \`go.mod\`: \`toolchain\` directive
  * 1. \`go.mod\`: \`go\` directive
+ * 1. the \`go\` constraint collected during extraction
  *
  * NOTE that the \`constraints.golang\` is not used (TODO #42601)
  */
-export function deriveGoToolchainConstraints(
+export async function deriveGoToolchainConstraints(
   config: UpdateArtifactsConfig,
   newGoModContent: string,
-): string | undefined {
-  return config.constraints?.go ?? getGoConstraints(newGoModContent);
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, 'go', () =>
+    getGoConstraints(newGoModContent),
+  );
 }

@@ -2,6 +2,7 @@
  * @fileoverview Contains classes that represent a Bazel module version.
  */
 import { isString } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
 
 /**
  * Represents a single value in a VersionPart. For example, the version string
@@ -28,7 +29,7 @@ export class Identifier {
    * Regular expression used to identify whether an identifier value only
    * contains digits.
    */
-  static readonly digitsOnlyMatcher = /^[0-9]+$/;
+  static readonly digitsOnlyMatcher = regEx(/^[0-9]+$/);
 
   /**
    * @param value The value that is parsed for the Bazel module version parts.
@@ -208,8 +209,9 @@ export class BzlmodVersion {
   /**
    * The regular expression that identifies a valid Bazel module version.
    */
-  static readonly versionMatcher =
-    /^(?<release>[a-zA-Z0-9.]+)(?:-(?<prerelease>[a-zA-Z0-9.-]+))?(?:\+(?<build>[a-zA-Z0-9.-]+))?$/;
+  static readonly versionMatcher = regEx(
+    /^(?<release>[a-zA-Z0-9.]+)(?:-(?<prerelease>[a-zA-Z0-9.-]+))?(?:\+(?<build>[a-zA-Z0-9.-]+))?$/,
+  );
 
   /**
    * @param version The string that is parsed for the Bazel module version
