@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
@@ -18,7 +17,7 @@ export class JavaVersionDatasource extends Datasource {
 
   override readonly caching = true;
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const pkgConfig = parsePackage(packageName);
@@ -32,13 +31,12 @@ export class JavaVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }
