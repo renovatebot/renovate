@@ -8,6 +8,11 @@ import {
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {
+    beforeEach(() => {
+      // the shared platform default
+      platform.labelCharLimit.mockReturnValue(50);
+    });
+
     it('returns empty array if no labels are configured', () => {
       const result = prepareLabels({});
       expect(result).toBeArrayOfSize(0);
@@ -100,10 +105,8 @@ describe('workers/repository/update/pr/labels', () => {
       });
 
       it('gitlab', () => {
-        vi.spyOn(platform, 'labelCharLimit').mockImplementationOnce(() => {
-          return 255;
-        });
-        // platform.labelCharLimit.mockReturnValueOnce(255);
+        platform.labelCharLimit.mockReturnValue(255);
+
         expect(prepareLabels({ labels })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping dog', // len: 51

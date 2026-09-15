@@ -229,7 +229,13 @@ export interface FileOwnerRule {
   match: (path: string) => boolean;
 }
 
-export interface Platform {
+/**
+ * The interface a platform module implements and `api.ts` registers.
+ *
+ * Members which the shared defaults in `defaults.ts` cover are optional here:
+ * consumers see them as required via {@link Platform}.
+ */
+export interface PlatformModule {
   /**
    * Whether this is an experimental Platform.
    *
@@ -332,6 +338,30 @@ export interface Platform {
   maxBodyLength(): number;
   labelCharLimit?(): number;
 }
+
+/**
+ * The {@link PlatformModule} members which `setPlatformApi` fills in from
+ * `platformDefaults` when the selected platform does not implement them.
+ *
+ * The remaining optional members stay optional because consumers use their
+ * absence as a capability flag rather than as "do nothing".
+ */
+export type PlatformDefaultedMethod =
+  | 'getIssue'
+  | 'getVulnerabilityAlerts'
+  | 'getBranchForceRebase'
+  | 'refreshPr'
+  | 'expandGroupMembers'
+  | 'filterUnavailableUsers'
+  | 'labelCharLimit'
+  | 'extractRulesFromCodeOwnersLines';
+
+/**
+ * The platform as consumers see it: the selected module with the defaults
+ * applied, so the defaulted members can be called unconditionally.
+ */
+export type Platform = PlatformModule &
+  Required<Pick<PlatformModule, PlatformDefaultedMethod>>;
 
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;

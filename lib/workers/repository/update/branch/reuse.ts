@@ -137,7 +137,7 @@ async function determineRebaseWhenValue(
     } else if (result.rebaseWhen === 'automerging') {
       newValue = 'never';
       reason = 'no keep-updated label and automerging is set';
-    } else if (await platform.getBranchForceRebase?.(result.baseBranch)) {
+    } else if (await platform.getBranchForceRebase(result.baseBranch)) {
       reason = 'platform is configured to require up-to-date branches';
     } else {
       newValue = 'conflicted';

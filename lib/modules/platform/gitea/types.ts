@@ -1,5 +1,10 @@
 import type { GiteaHttp } from '../../../util/http/gitea.ts';
-import type { Platform, Pr, RepoSortMethod, SortMethod } from '../types.ts';
+import type {
+  PlatformModule,
+  Pr,
+  RepoSortMethod,
+  SortMethod,
+} from '../types.ts';
 import type {
   CommitStatus,
   CommitStatusType,
@@ -51,7 +56,7 @@ export interface GiteaPlatformOptions {
 }
 
 export interface GiteaPlatform {
-  platform: Platform;
+  platform: PlatformModule;
   resetPlatform: () => void;
 }
 

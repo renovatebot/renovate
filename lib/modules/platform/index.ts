@@ -12,8 +12,9 @@ import {
 import * as hostRules from '../../util/host-rules.ts';
 import { parseUrl } from '../../util/url.ts';
 import platforms from './api.ts';
+import { platformDefaults } from './defaults.ts';
 import { setPlatformScmApi } from './scm.ts';
-import type { Platform } from './types.ts';
+import type { Platform, PlatformDefaultedMethod } from './types.ts';
 
 export type * from './types.ts';
 
@@ -35,15 +36,25 @@ const handler: ProxyHandler<Platform> = {
 export const platform = new Proxy<Platform>({} as any, handler);
 
 export function setPlatformApi(name: PlatformId): void {
-  if (!platforms.has(name)) {
+  const platformModule = platforms.get(name);
+  if (!platformModule) {
     throw new Error(
       `Init: Platform "${name}" not found. Must be one of: ${getPlatformList().join(
         ', ',
       )}`,
     );
   }
-  _platform = platforms.get(name);
+  _platform = { ...platformDefaults, ...platformModule };
   setPlatformScmApi(name);
+}
+
+/**
+ * Whether the selected platform implements `member` itself, rather than getting
+ * the shared default. Use it to report an unsupported configuration option, not
+ * to decide whether the member can be called.
+ */
+export function platformSupports(member: PlatformDefaultedMethod): boolean {
+  return platform[member] !== platformDefaults[member];
 }
 
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
