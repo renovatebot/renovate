@@ -198,6 +198,7 @@ export interface GlobalOnlyConfigLegacy {
   endpoint?: string;
   exitCodeForErrors?: boolean;
   forceCli?: boolean;
+  forgejoOidcAudience?: string;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   gitPrivateKeyPassphrase?: string;
