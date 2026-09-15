@@ -1,3 +1,4 @@
+import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 
@@ -47,15 +48,30 @@ export async function generateLoginCmd(
   return null;
 }
 
-export function generateHelmEnvs(): ExtraEnv {
-  return {
-    HELM_EXPERIMENTAL_OCI: '1',
-    // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-    HELM_REGISTRY_CONFIG: `${upath.join(privateCacheDir(), 'registry.json')}`,
-    HELM_REPOSITORY_CONFIG: `${upath.join(
-      privateCacheDir(),
-      'repositories.yaml',
-    )}`,
-    HELM_REPOSITORY_CACHE: `${upath.join(privateCacheDir(), 'repositories')}`,
-  };
+export function generateHelmEnvs(helmConstraint?: string): ExtraEnv {
+  const envs: ExtraEnv = {};
+
+  // Helm >= 3.8 ignores HELM_EXPERIMENTAL_OCI, so it's harmless to set it
+  // when the constraint is unknown. Dropping it for an unconstrained helm
+  // could break helm < 3.8 users, so only omit it once the constraint
+  // proves helm >= 3.8.
+  if (!helmConstraint || !semver.intersects(helmConstraint, '>=3.8.0')) {
+    envs.HELM_EXPERIMENTAL_OCI = '1';
+  }
+
+  // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
+  envs.HELM_REGISTRY_CONFIG = `${upath.join(
+    privateCacheDir(),
+    'registry.json',
+  )}`;
+  envs.HELM_REPOSITORY_CONFIG = `${upath.join(
+    privateCacheDir(),
+    'repositories.yaml',
+  )}`;
+  envs.HELM_REPOSITORY_CACHE = `${upath.join(
+    privateCacheDir(),
+    'repositories',
+  )}`;
+
+  return envs;
 }
