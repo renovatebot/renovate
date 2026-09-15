@@ -15,6 +15,10 @@ export class TypstDatasource extends Datasource {
 
   override defaultVersioning = semver;
 
+  // `getReleases` always reads from `defaultRegistryUrls`, so a custom registry
+  // URL would be silently ignored.
+  override readonly customRegistrySupport = false;
+
   constructor() {
     super(TypstDatasource.id);
   }

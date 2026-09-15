@@ -21,8 +21,6 @@ export class RustVersionDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
 
-  override readonly caching = true;
-
   constructor() {
     super(RustVersionDatasource.id);
   }

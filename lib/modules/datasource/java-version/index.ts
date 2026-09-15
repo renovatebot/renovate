@@ -15,8 +15,6 @@ export class JavaVersionDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = [adoptiumRegistryUrl];
 
-  override readonly caching = true;
-
   private async fetchReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
