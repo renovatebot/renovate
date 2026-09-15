@@ -288,10 +288,7 @@ export async function lookupUpdates(
         versioningApi,
         rangeStrategy,
         latestVersion,
-        allVersions.map((v) => v.version),
-        dependency.releases
-          .filter((release) => !release.isDeprecated)
-          .map((release) => release.version),
+        allVersions,
       );
 
       if (!currentVersion) {

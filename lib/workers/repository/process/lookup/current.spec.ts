@@ -13,10 +13,6 @@ const releases: Release[] = [
   { version: '1.1.0' },
   { version: '1.2.0', isDeprecated: true },
 ];
-const allVersions = releases.map((r) => r.version);
-const nonDeprecatedVersions = releases
-  .filter((r) => !r.isDeprecated)
-  .map((r) => r.version);
 
 describe('workers/repository/process/lookup/current', () => {
   describe('getCurrentVersion()', () => {
@@ -44,8 +40,7 @@ describe('workers/repository/process/lookup/current', () => {
           versioningApi,
           'update-lockfile',
           '1.1.0',
-          allVersions,
-          nonDeprecatedVersions,
+          releases,
         ),
       ).toBe('1.1.0');
     });
@@ -58,8 +53,7 @@ describe('workers/repository/process/lookup/current', () => {
           versioningApi,
           'update-lockfile',
           '1.1.0',
-          allVersions,
-          nonDeprecatedVersions,
+          releases,
         ),
       ).toBe('1.1.0');
     });
@@ -72,8 +66,7 @@ describe('workers/repository/process/lookup/current', () => {
           versioningApi,
           'replace',
           '1.1.0',
-          allVersions,
-          nonDeprecatedVersions,
+          releases,
         ),
       ).toBe('1.0.0');
     });
@@ -86,10 +79,22 @@ describe('workers/repository/process/lookup/current', () => {
           versioningApi,
           'replace',
           '1.2.0',
-          allVersions,
-          nonDeprecatedVersions,
+          releases,
         ),
       ).toBe('1.1.0');
+    });
+
+    it('falls back to deprecated versions', () => {
+      expect(
+        resolveCurrentVersion(
+          '^1.2.0',
+          undefined,
+          versioningApi,
+          'replace',
+          '1.2.0',
+          releases,
+        ),
+      ).toBe('1.2.0');
     });
 
     it('returns undefined if no version could be resolved', () => {
@@ -100,8 +105,7 @@ describe('workers/repository/process/lookup/current', () => {
           versioningApi,
           'replace',
           '1.1.0',
-          allVersions,
-          nonDeprecatedVersions,
+          releases,
         ),
       ).toBeUndefined();
     });
