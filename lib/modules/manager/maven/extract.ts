@@ -333,10 +333,7 @@ function applyPropsInternal(
       if (propValue) {
         sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource =
-          propValue.packageFile ??
-          // istanbul ignore next
-          undefined;
+        propSource = propValue.packageFile;
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
           fatal = true;
