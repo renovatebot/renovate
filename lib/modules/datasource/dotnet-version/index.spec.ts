@@ -204,5 +204,28 @@ describe('modules/datasource/dotnet-version/index', () => {
         },
       ]);
     });
+
+    it('fetches the index from a configured registry', async () => {
+      const mirror = 'https://dotnet.example.com/release-metadata';
+      httpMock
+        .scope(mirror)
+        .get('/releases-index.json')
+        .reply(200, {
+          'releases-index': [
+            { 'releases.json': `${mirror}/7.0/releases.json` },
+          ],
+        })
+        .get('/7.0/releases.json')
+        .reply(200, releases7_0);
+
+      const res = await getPkgReleases({
+        datasource: DotnetVersionDatasource.id,
+        packageName: 'dotnet-sdk',
+        registryUrls: [`${mirror}/releases-index.json`],
+      });
+
+      expect(res?.sourceUrl).toBe('https://github.com/dotnet/sdk');
+      expect(res?.releases).not.toHaveLength(0);
+    });
   });
 });

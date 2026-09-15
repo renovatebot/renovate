@@ -17,7 +17,7 @@ export class DotnetVersionDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [
     'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
@@ -32,13 +32,18 @@ export class DotnetVersionDatasource extends Datasource {
 
   private async _getReleases({
     packageName,
+    registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (!(packageName === 'dotnet-sdk' || packageName === 'dotnet-runtime')) {
       return null;
     }
 
+    /* v8 ignore next -- should never happen */
+    if (!registryUrl) {
+      return null;
+    }
+
     try {
-      const registryUrl = this.defaultRegistryUrls[0];
       const { body: urls } = await this.http.getJson(
         registryUrl,
         ReleasesIndex,
@@ -66,7 +71,7 @@ export class DotnetVersionDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${DotnetVersionDatasource.id}`,
-        key: config.packageName,
+        key: `${config.registryUrl}:${config.packageName}`,
         ttlMinutes: 1440,
         fallback: true,
       },
