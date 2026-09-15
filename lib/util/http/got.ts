@@ -54,7 +54,12 @@ export async function fetch(
       const method = options.method.toUpperCase();
       const code = coerceString(error.code, 'UNKNOWN');
       const retryCount = coerceNumber(error.request?.retryCount, -1);
+      // not truly "canonical" form for the headers, but close enough for this purpose
+      const requestHeaderNames = Object.keys(options.headers ?? {}).map((h) =>
+        h.toLowerCase(),
+      );
       logger.debug(
+        { requestHeaderNames },
         `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`,
       );
     }
