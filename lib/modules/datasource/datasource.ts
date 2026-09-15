@@ -174,22 +174,40 @@ export abstract class Datasource<
   }
 
   protected handleGenericErrors(err: Error): never {
-    if (err instanceof ExternalHostError) {
-      throw err;
-    }
+    return handleGenericErrors(err, (httpErr) =>
+      this.handleHttpErrors(httpErr),
+    );
+  }
+}
 
-    if (err instanceof HttpError) {
-      this.handleHttpErrors(err);
-
-      const statusCode = err.response?.statusCode;
-      if (
-        statusCode &&
-        (statusCode === 429 || (statusCode >= 500 && statusCode < 600))
-      ) {
-        throw new ExternalHostError(err);
-      }
-    }
-
+/**
+ * Rethrows `err`, turning a rate limit or server error into an
+ * `ExternalHostError` so that it is reported against the host instead of the
+ * package.
+ *
+ * Datasource classes call {@link Datasource.handleGenericErrors}, which also
+ * runs their own `handleHttpErrors()` hook; this is the entry point for the
+ * lookup code which has no datasource instance at hand.
+ */
+export function handleGenericErrors(
+  err: Error,
+  handleHttpErrors?: (err: HttpError) => void,
+): never {
+  if (err instanceof ExternalHostError) {
     throw err;
   }
+
+  if (err instanceof HttpError) {
+    handleHttpErrors?.(err);
+
+    const statusCode = err.response?.statusCode;
+    if (
+      statusCode &&
+      (statusCode === 429 || (statusCode >= 500 && statusCode < 600))
+    ) {
+      throw new ExternalHostError(err);
+    }
+  }
+
+  throw err;
 }

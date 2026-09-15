@@ -1,14 +1,19 @@
-import { getSourceUrl as githubSourceUrl } from '../../../util/github/url.ts';
-import { getSourceUrl as gitlabSourceUrl } from '../../../util/gitlab/url.ts';
+import { regEx } from '../../../util/regex.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
-import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
-import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
-import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
+import { getGoTagDatasource } from './tag-datasources.ts';
 import type { DataSource, GoproxyItem } from './types.ts';
+
+/**
+ * A version which a Go proxy derives from an untagged commit, of the shape
+ * `vX.Y.Z-<timestamp>-<digest>`.
+ *
+ * @see https://go.dev/ref/mod#pseudo-versions
+ */
+export const pseudoVersionRegex = regEx(
+  /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?(?<timestamp>\d{14})-(?<digest>[a-f0-9]{12})/i,
+);
 
 /**
  * The Go module proxy which serves public modules only, and which the Go toolchain uses by default.
@@ -50,22 +55,13 @@ export function isPublicGoPackage(packageName: string): boolean {
 export function getSourceUrl(
   dataSource?: DataSource | null,
 ): string | undefined {
-  if (dataSource) {
-    const { datasource, registryUrl, packageName } = dataSource;
-
-    switch (datasource) {
-      case ForgejoTagsDatasource.id:
-        return ForgejoTagsDatasource.getSourceUrl(packageName, registryUrl);
-      case GiteaTagsDatasource.id:
-        return GiteaTagsDatasource.getSourceUrl(packageName, registryUrl);
-      case GithubTagsDatasource.id:
-        return githubSourceUrl(packageName, registryUrl);
-      case GitlabTagsDatasource.id:
-        return gitlabSourceUrl(packageName, registryUrl);
-      case BitbucketTagsDatasource.id:
-        return BitbucketTagsDatasource.getSourceUrl(packageName, registryUrl);
-    }
+  if (!dataSource) {
+    return undefined;
   }
 
-  return undefined;
+  const { datasource, registryUrl, packageName } = dataSource;
+  return getGoTagDatasource(datasource)?.getSourceUrl?.(
+    packageName,
+    registryUrl,
+  );
 }
