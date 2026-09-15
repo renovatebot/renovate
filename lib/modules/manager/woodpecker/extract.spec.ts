@@ -31,6 +31,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'quay.io/something/redis',
@@ -41,6 +42,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'node',
@@ -51,6 +53,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'postgres',
@@ -61,6 +64,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'dockersamples/examplevotingapp_vote',
@@ -71,6 +75,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'dockersamples/examplevotingapp_result',
@@ -81,6 +86,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'dockersamples/examplevotingapp_worker',
@@ -91,6 +97,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'dockersamples/visualizer',
@@ -101,6 +108,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'app-local-debug',
@@ -111,6 +119,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'postgres',
@@ -121,6 +130,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
         ],
       });
@@ -148,6 +158,7 @@ describe('modules/manager/woodpecker/extract', () => {
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
+            depType: 'docker',
             depName: 'quay.io/nginx',
             packageName: 'my-quay-mirror.registry.com/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
@@ -178,6 +189,7 @@ describe('modules/manager/woodpecker/extract', () => {
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
+            depType: 'docker',
             depName: 'quay.io/nginx',
             packageName: 'quay.io/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
@@ -209,6 +221,7 @@ describe('modules/manager/woodpecker/extract', () => {
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
+            depType: 'docker',
             depName: 'quay.io/nginx',
             packageName: 'my-quay-mirror.registry.com/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
@@ -238,6 +251,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
         ],
       });
@@ -268,6 +282,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
           {
             depName: 'quay.io/something/redis',
@@ -278,6 +293,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
         ],
       });
@@ -305,6 +321,7 @@ describe('modules/manager/woodpecker/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
+            depType: 'docker',
           },
         ],
       });
