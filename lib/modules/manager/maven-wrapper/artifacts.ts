@@ -20,6 +20,7 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import mavenVersioning from '../../versioning/maven/index.ts';
 import type {
   PackageDependency,
@@ -32,10 +33,28 @@ import { resolveToolConstraint } from '../util.ts';
 const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
 
+function isPublicArtifactUrl(url: string): boolean {
+  const parsed = parseUrl(url);
+  if (!parsed) {
+    return false;
+  }
+
+  return (
+    (parsed.origin === 'https://repo.maven.apache.org' ||
+      parsed.origin === 'https://repo1.maven.org') &&
+    parsed.pathname.startsWith('/maven2/') &&
+    !parsed.username &&
+    !parsed.password &&
+    !parsed.href.includes('?') &&
+    !parsed.href.includes('#')
+  );
+}
+
 function getChecksumFromUrl(url: string): Promise<string> {
   return withCache(
     {
       namespace: 'url-sha256',
+      cacheable: isPublicArtifactUrl(url),
       key: url,
       ttlMinutes: 3 * 24 * 60, // 3 days
     },
