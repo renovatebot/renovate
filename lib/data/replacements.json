@@ -31,6 +31,7 @@
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
       "replacements:k8s-registry-move",
+      "replacements:kaniko-to-community-fork",
       "replacements:kotlin-logging-to-oshai",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
@@ -896,6 +897,53 @@
         "matchDatasources": ["docker"],
         "matchPackageNames": ["/^k8s\\.gcr\\.io/.+$/"],
         "replacementNameTemplate": "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}"
+      }
+    ]
+  },
+  "kaniko-to-community-fork": {
+    "description": "replaces the archived `GoogleContainerTools/kaniko` images with the `osscontainertools/kaniko` community fork",
+    "packageRules": [
+      {
+        "matchCurrentValue": "/^v\\d[^-]*$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/kaniko-project/executor"],
+        "replacementName": "ghcr.io/osscontainertools/kaniko",
+        "replacementVersion": "v1.24.1"
+      },
+      {
+        "matchCurrentValue": "/^v\\d[^-]*-debug$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/kaniko-project/executor"],
+        "replacementName": "ghcr.io/osscontainertools/kaniko",
+        "replacementVersion": "v1.24.1-debug"
+      },
+      {
+        "matchCurrentValue": "/^v\\d[^-]*-slim$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/kaniko-project/executor"],
+        "replacementName": "ghcr.io/osscontainertools/kaniko",
+        "replacementVersion": "v1.24.1-slim"
+      },
+      {
+        "matchCurrentValue": "/^v\\d[^-]*$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/kaniko-project/warmer"],
+        "replacementName": "ghcr.io/osscontainertools/kaniko",
+        "replacementVersion": "v1.24.1-warmer"
+      },
+      {
+        "matchCurrentValue": "/^(latest|debug|slim)$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/kaniko-project/executor"],
+        "replacementName": "ghcr.io/osscontainertools/kaniko",
+        "replacementVersionTemplate": "{{{currentValue}}}"
+      },
+      {
+        "matchCurrentValue": "/^latest$/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": ["gcr.io/kaniko-project/warmer"],
+        "replacementName": "ghcr.io/osscontainertools/kaniko",
+        "replacementVersion": "warmer"
       }
     ]
   },
