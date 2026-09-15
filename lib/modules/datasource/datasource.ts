@@ -87,6 +87,11 @@ export abstract class Datasource<
    * parameter as `RegistryDigestConfig`: TypeScript's method parameter
    * bivariance allows the narrower override, and the datasource index
    * guarantees the value.
+   *
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
    */
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
