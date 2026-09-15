@@ -172,7 +172,8 @@ describe('modules/manager/renovate-config/extract', () => {
               "extends": [
                 "github>abc/foo",
                 "gitlab>abc/bar:xyz",
-                "gitea>cde/foo//path/xyz"
+                "gitea>cde/foo//path/xyz",
+                "forgejo>cde/bar//path/xyz"
               ]
             }
           `,
@@ -190,6 +191,10 @@ describe('modules/manager/renovate-config/extract', () => {
             },
             {
               depName: 'cde/foo',
+              skipReason: 'unspecified-version',
+            },
+            {
+              depName: 'cde/bar',
               skipReason: 'unspecified-version',
             },
           ],
@@ -312,6 +317,47 @@ describe('modules/manager/renovate-config/extract', () => {
             },
             {
               datasource: 'gitea-tags',
+              depName: 'cde/bar',
+              currentValue: '1.2.3',
+            },
+          ],
+        });
+      });
+
+      it('extracts from a config file with Forgejo hosted presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": [
+                "forgejo>abc/foo#1.2.3",
+                "forgejo>abc/bar:xyz#1.2.3",
+                "forgejo>cde/foo//path/xyz#1.2.3",
+                "forgejo>cde/bar:xyz/sub#1.2.3"
+              ]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              datasource: 'forgejo-tags',
+              depName: 'abc/foo',
+              currentValue: '1.2.3',
+            },
+            {
+              datasource: 'forgejo-tags',
+              depName: 'abc/bar',
+              currentValue: '1.2.3',
+            },
+            {
+              datasource: 'forgejo-tags',
+              depName: 'cde/foo',
+              currentValue: '1.2.3',
+            },
+            {
+              datasource: 'forgejo-tags',
               depName: 'cde/bar',
               currentValue: '1.2.3',
             },
