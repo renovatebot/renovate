@@ -77,6 +77,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
+  npmrc?: string;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
