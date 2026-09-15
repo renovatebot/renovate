@@ -2387,7 +2387,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('returns the PR with delay', async () => {
-      process.env.RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY = '10';
+      vi.stubEnv('RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY', '10');
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
@@ -2418,7 +2418,6 @@ describe('modules/platform/gitlab/index', () => {
         targetBranch: 'master',
       });
       expect(timers.setTimeout.mock.calls).toMatchObject([[10000]]);
-      delete process.env.RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY;
     });
 
     it('uses default branch', async () => {
