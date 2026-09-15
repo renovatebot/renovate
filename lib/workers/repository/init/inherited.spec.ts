@@ -5,6 +5,7 @@ import {
   setUserConfigFileNames,
 } from '../../../config/app-strings.ts';
 import * as decrypt from '../../../config/decrypt.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import * as presets_ from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
@@ -34,6 +35,7 @@ describe('workers/repository/init/inherited', () => {
     };
     hostRules.clear();
     InheritConfig.reset();
+    GlobalConfig.reset();
   });
 
   it('should return the same config if repository or inheritConfig is not defined', async () => {
@@ -71,9 +73,14 @@ describe('workers/repository/init/inherited', () => {
 
   it('should throw an error if config includes an invalid option', async () => {
     platform.getRawFile.mockResolvedValue('{"something": "invalid"}');
-    await expect(mergeInheritedConfig(config)).rejects.toThrow(
-      CONFIG_VALIDATION,
-    );
+
+    // the detail names the inherited config, which the repository's owners may be unable to see, let alone fix
+    await expect(mergeInheritedConfig(config)).rejects.toMatchObject({
+      message: CONFIG_VALIDATION,
+      validationSource: 'Inherited config (`config.json` in `inherit/repo`)',
+      validationError: 'The inherited config contains some invalid settings',
+      validationMessage: 'Invalid configuration option: something',
+    });
   });
 
   it('should throw an error if config includes an invalid value', async () => {
@@ -186,6 +193,120 @@ describe('workers/repository/init/inherited', () => {
     expect(res.hostRules).toBeUndefined();
   });
 
+  describe('hostRules trust tier', () => {
+    const credentialedRule = codeBlock`
+      {
+        "hostRules": [
+          {
+            "matchHost": "https://internal.example.com/",
+            "token": "some-token"
+          }
+        ]
+      }
+    `;
+
+    const grantingRule = codeBlock`
+      {
+        "hostRules": [
+          {
+            "matchHost": "https://internal.example.com/",
+            "allowInternal": true
+          }
+        ]
+      }
+    `;
+
+    it('registers inherited hostRules as untrusted by default', async () => {
+      platform.getRawFile.mockResolvedValue(credentialedRule);
+
+      await mergeInheritedConfig(config);
+
+      expect(hostRules.getAll()).toEqual([
+        {
+          matchHost: 'https://internal.example.com/',
+          resolvedHost: 'internal.example.com',
+          token: 'some-token',
+          trustTier: 'untrusted',
+        },
+      ]);
+      expect(
+        hostRules.find({ url: 'https://internal.example.com/api' }),
+      ).toEqual({ token: 'some-token' });
+    });
+
+    it('refuses allowInternal in inherited config, saying how to permit it', async () => {
+      platform.getRawFile.mockResolvedValue(grantingRule);
+
+      await expect(mergeInheritedConfig(config)).rejects.toMatchObject({
+        message: CONFIG_VALIDATION,
+        validationSource: 'Inherited config (`config.json` in `inherit/repo`)',
+        validationError: 'The inherited config contains some invalid settings',
+        validationMessage:
+          'hostRules `allowInternal` is not allowed in inherited config, as this Renovate instance has not set `inheritConfigTrusted=true`. The administrator can either set it, or move the rule to their global config or a `repositories[]` entry.',
+      });
+    });
+
+    it('registers inherited hostRules in the inherit tier when trusted', async () => {
+      GlobalConfig.set({ inheritConfigTrusted: true });
+      platform.getRawFile.mockResolvedValue(credentialedRule);
+
+      await mergeInheritedConfig(config);
+
+      expect(hostRules.getAll()).toEqual([
+        {
+          matchHost: 'https://internal.example.com/',
+          resolvedHost: 'internal.example.com',
+          token: 'some-token',
+          trustTier: 'inherit',
+        },
+      ]);
+      // the credentialed rule now implicitly permits the internal host it names
+      expect(
+        hostRules.find({ url: 'https://internal.example.com/api' }),
+      ).toEqual({
+        token: 'some-token',
+        internalHostGrant: { implicit: true },
+      });
+    });
+
+    it('accepts allowInternal in inherited config when trusted', async () => {
+      GlobalConfig.set({ inheritConfigTrusted: true });
+      platform.getRawFile.mockResolvedValue(grantingRule);
+
+      await mergeInheritedConfig(config);
+
+      expect(
+        hostRules.find({ url: 'https://internal.example.com/api' })
+          .internalHostGrant,
+      ).toEqual({ explicit: true, scoped: true, implicit: true });
+    });
+
+    it('registers hostRules from inherited presets in the inherit tier when trusted', async () => {
+      GlobalConfig.set({ inheritConfigTrusted: true });
+      platform.getRawFile.mockResolvedValue(
+        '{"extends":["local>org/renovate-config"]}',
+      );
+      presets.resolveConfigPresets.mockResolvedValue({
+        config: {
+          hostRules: [
+            { matchHost: 'https://internal.example.com/', allowInternal: true },
+          ],
+        },
+        visitedPresets: {
+          merged: [],
+          unmerged: [],
+        },
+      });
+
+      await mergeInheritedConfig(config);
+
+      expect(
+        hostRules.find({ url: 'https://internal.example.com/api' })
+          .internalHostGrant,
+      ).toEqual({ explicit: true, scoped: true, implicit: true });
+    });
+  });
+
   it('should resolve presets found in inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
@@ -284,9 +405,12 @@ describe('workers/repository/init/inherited', () => {
         unmerged: [],
       },
     });
-    await expect(mergeInheritedConfig(config)).rejects.toThrow(
-      CONFIG_VALIDATION,
-    );
+    await expect(mergeInheritedConfig(config)).rejects.toMatchObject({
+      message: CONFIG_VALIDATION,
+      validationSource: 'Inherited config (`config.json` in `inherit/repo`)',
+      validationError: 'The inherited config contains some invalid settings',
+      validationMessage: 'some error',
+    });
 
     expect(logger.warn).toHaveBeenCalledWith(
       {

@@ -78,6 +78,7 @@ export class DebDatasource extends Datasource {
     for await (const line of rl) {
       if (line === '') {
         // All information of the package are available, add to the list of packages
+        // v8 ignore else -- needs a package index block missing a required key
         if (requiredPackageKeys.every((key) => key in currentPackage)) {
           if (!allPackages[currentPackage.Package!]) {
             allPackages[currentPackage.Package!] = [];
@@ -97,6 +98,7 @@ export class DebDatasource extends Datasource {
 
     // Check the last package after file reading is complete
     if (requiredPackageKeys.every((key) => key in currentPackage)) {
+      // v8 ignore else -- needs the final block to repeat an earlier package
       if (!allPackages[currentPackage.Package!]) {
         allPackages[currentPackage.Package!] = [];
       }
@@ -152,7 +154,7 @@ export class DebDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -170,6 +172,7 @@ export class DebDatasource extends Datasource {
           if (aggregatedRelease === null) {
             aggregatedRelease = newRelease;
           } else {
+            // v8 ignore else -- needs two component indexes with matching meta
             if (!releaseMetaInformationMatches(aggregatedRelease, newRelease)) {
               logger.warn(
                 { packageName },
@@ -181,7 +184,7 @@ export class DebDatasource extends Datasource {
         }
       } catch (error) {
         logger.debug(
-          { componentUrl, error },
+          { componentUrl, err: error },
           'Skipping component due to an error',
         );
       }

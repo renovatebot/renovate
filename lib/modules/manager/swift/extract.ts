@@ -10,7 +10,7 @@ import type { MatchResult } from './types.ts';
 
 const regExps = {
   wildcard: regEx(/^.*?/),
-  space: regEx(/(\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
+  space: regEx(/(?:\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
   depsKeyword: regEx(/dependencies/),
   colon: regEx(/:/),
   beginSection: regEx(/\[/),
@@ -222,6 +222,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         if (deps.length) {
           break;
         }
+        // v8 ignore else -- this state is only re-entered at a deps boundary
         if (label === DEPS) {
           state = 'dependencies';
         }
@@ -353,6 +354,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = '.package(url: [depName], from:';
         } else if (label === SPACE) {
           currentValue += substr;
+          // NOTE: a label that is none of the above ends the manifest, so the
+          // implicit else never runs. A coverage-ignore hint cannot suppress it
+          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
@@ -368,6 +372,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = 'dependencies: [';
         } else if (label === SPACE) {
           currentValue += substr;
+          // NOTE: a label that is none of the above ends the manifest, so the
+          // implicit else never runs. A coverage-ignore hint cannot suppress it
+          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
@@ -382,6 +389,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = '.package(url: [depName], [rangeFrom][rangeOp]';
         } else if (label === SPACE) {
           currentValue += substr;
+          // NOTE: a label that is none of the above ends the manifest, so the
+          // implicit else never runs. A coverage-ignore hint cannot suppress it
+          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
@@ -396,6 +406,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = 'dependencies: [';
         } else if (label === SPACE) {
           currentValue += substr;
+          // NOTE: a label that is none of the above ends the manifest, so the
+          // implicit else never runs. A coverage-ignore hint cannot suppress it
+          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';

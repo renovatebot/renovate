@@ -33,10 +33,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   } catch (err) {
     if (err instanceof SyntaxError || err instanceof TypeError) {
       // Unsure what behavior is expected here
-      logger.fatal(
-        { error: err.stack },
-        'Could not parse additional config file',
-      );
+      logger.fatal({ err }, 'Could not parse additional config file');
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       // Unsure what behavior is expected here

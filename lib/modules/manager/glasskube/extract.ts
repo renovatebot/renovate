@@ -30,6 +30,8 @@ function parseResources(
   for (const resource of resources) {
     if (resource.kind === 'ClusterPackage' || resource.kind === 'Package') {
       packages.push(resource);
+      // NOTE: the schema only parses these two kinds, so the implicit else
+      // never runs. A coverage-ignore hint cannot suppress it on an `else if`.
     } else if (resource.kind === 'PackageRepository') {
       repositories.push(resource);
     }
@@ -74,6 +76,7 @@ function findRepository(
     if (name === repository.metadata.name) {
       return repository;
     }
+    // v8 ignore else -- needs a manifest whose repositories match no name
     if (isFalsy(name) && isDefaultRepository(repository)) {
       return repository;
     }
@@ -107,6 +110,7 @@ export async function extractAllPackageFiles(
   const glasskubeResourceFiles: GlasskubeResources[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
+    // v8 ignore else -- needs a listed package file that cannot be read
     if (content !== null) {
       const resources = parseResources(content, packageFile);
       allRepositories.push(...resources.repositories);

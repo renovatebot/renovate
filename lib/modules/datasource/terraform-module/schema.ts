@@ -22,14 +22,12 @@ export const TerraformModuleResponse = z
   })
   .transform((resource) => ({
     source: resource.source,
-    versions: resource.versions.map(
-      (version): Release => ({
-        version,
-        ...(version === resource.version && {
-          releaseTimestamp: resource.published_at,
-        }),
+    versions: resource.versions.map((version): Release => ({
+      version,
+      ...(version === resource.version && {
+        releaseTimestamp: resource.published_at,
       }),
-    ),
+    })),
   }));
 
 export type TerraformModuleResponse = z.infer<typeof TerraformModuleResponse>;
@@ -46,12 +44,10 @@ const ModuleVersion = z
       'published-at': MaybeTimestamp,
     }),
   })
-  .transform(
-    (resource): Release => ({
-      version: resource.attributes.version,
-      releaseTimestamp: resource.attributes['published-at'],
-    }),
-  );
+  .transform((resource): Release => ({
+    version: resource.attributes.version,
+    releaseTimestamp: resource.attributes['published-at'],
+  }));
 
 export const TerraformModuleV2Response = z
   .object({
@@ -60,12 +56,10 @@ export const TerraformModuleV2Response = z
     }),
     included: LooseArray(ModuleVersion).catch([]),
   })
-  .transform(
-    (response): ReleaseResult => ({
-      sourceUrl: response.data.attributes.source,
-      releases: response.included,
-    }),
-  );
+  .transform((response): ReleaseResult => ({
+    sourceUrl: response.data.attributes.source,
+    releases: response.included,
+  }));
 
 export type TerraformModuleV2Response = z.infer<
   typeof TerraformModuleV2Response
@@ -76,22 +70,18 @@ const OpenTofuModuleVersion = z
     id: z.string(),
     published: MaybeTimestamp,
   })
-  .transform(
-    (version): Release => ({
-      version: version.id.replace(regEx(/^v/), ''),
-      releaseTimestamp: version.published,
-    }),
-  );
+  .transform((version): Release => ({
+    version: version.id.replace(regEx(/^v/), ''),
+    releaseTimestamp: version.published,
+  }));
 
 export const OpenTofuModuleDocsResponse = z
   .object({
     versions: LooseArray(OpenTofuModuleVersion).catch([]),
   })
-  .transform(
-    (response): ReleaseResult => ({
-      releases: response.versions,
-    }),
-  );
+  .transform((response): ReleaseResult => ({
+    releases: response.versions,
+  }));
 
 export type OpenTofuModuleDocsResponse = z.infer<
   typeof OpenTofuModuleDocsResponse

@@ -15,6 +15,8 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -73,6 +75,7 @@ interface User {
 
 let config: Config = {} as any;
 let issueService: IssueService;
+let renovateUserId: string | undefined;
 
 const defaults: {
   endpoint?: string;
@@ -103,10 +106,13 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-  };
-  return Promise.resolve(platformConfig);
+  const credentials = token
+    ? { token }
+    : { username: username!, password: password! };
+  return azureApi.getAuthenticatedUserId(credentials).then((userId) => {
+    renovateUserId = userId;
+    return res;
+  });
 }
 
 export async function getRepos(): Promise<string[]> {
@@ -201,9 +207,13 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
+  azureWorkItemType,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
-  config = { repository } as Config;
+  config = {
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
+    repository,
+  } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const repo = getRepoByName(repository, repos);
@@ -226,6 +236,7 @@ export async function initRepo({
 
   config.project = repo.project!.name!;
   config.projectId = repo.project!.id!;
+  config.workItemType = azureWorkItemType ?? getConfig().azureWorkItemType!;
   issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
@@ -264,6 +275,7 @@ export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {
     const azureApiGit = await azureApi.gitApi();
+
     let prs: GitPullRequest[] = [];
     let fetchedPrs: GitPullRequest[];
     let skip = 0;
@@ -271,9 +283,11 @@ export async function getPrList(): Promise<AzurePr[]> {
       fetchedPrs = await azureApiGit.getPullRequests(
         config.repoId,
         {
-          status: 4,
+          status: PullRequestStatus.All,
           // fetch only prs directly created on the repo and not by forks
-          sourceRepositoryId: config.project,
+          sourceRepositoryId: config.repoId,
+          ...(!config.ignorePrAuthor &&
+            renovateUserId && { creatorId: renovateUserId }),
         },
         config.project,
         0,
@@ -321,9 +335,30 @@ export async function findPr({
   prTitle,
   state = 'all',
   targetBranch,
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
+    if (includeOtherAuthors) {
+      const azureApiGit = await azureApi.gitApi();
+      const [pr] = await azureApiGit.getPullRequests(
+        config.repoId,
+        {
+          sourceRefName: getNewBranchName(branchName),
+          sourceRepositoryId: config.repoId,
+          status: PullRequestStatus.Active,
+          ...(targetBranch && {
+            targetRefName: getNewBranchName(targetBranch),
+          }),
+        },
+        config.project,
+        0,
+        0,
+        1,
+      );
+      return pr ? getRenovatePRFormat(pr) : null;
+    }
+
     const prs = await getPrList();
 
     prsFiltered = prs.filter(
@@ -936,7 +971,7 @@ export function massageMarkdown(input: string): string {
       // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR.
       // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
       // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
-      .replace(regEx(/(^|[\s(])#(\d+)/g), '$1!$2')
+      .replace(regEx(/(?<lead>^|[\s(])#(?<num>\d+)/g), '$<lead>!$<num>')
   );
 }
 
