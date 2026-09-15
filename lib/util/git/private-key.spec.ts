@@ -5,6 +5,8 @@ import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger, mockedExtended } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
+import type { PlatformId } from '../../constants/index.ts';
 import * as exec_ from '../exec/index.ts';
 import * as sanitize_ from '../sanitize.ts';
 import { toBase64 } from '../string.ts';
@@ -103,24 +105,24 @@ describe('util/git/private-key', () => {
           stdout: '',
         });
       setPrivateKey(
-        `\
------BEGIN OPENSSH PRIVATE KEY-----
-some-private-key with-passphrase
-some-private-key with-passphrase
------END OPENSSH PRIVATE KEY-----
-`,
+        codeBlock`
+          -----BEGIN OPENSSH PRIVATE KEY-----
+          some-private-key with-passphrase
+          some-private-key with-passphrase
+          -----END OPENSSH PRIVATE KEY-----
+        `,
         passphrase,
       );
       await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports SSH key with passphrase successfully', async () => {
-      const privateKey = `\
------BEGIN OPENSSH PRIVATE KEY-----
-some-private-key with-passphrase
-some-private-key with-passphrase
------END OPENSSH PRIVATE KEY-----
-`;
+      const privateKey = codeBlock`
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        some-private-key with-passphrase
+        some-private-key with-passphrase
+        -----END OPENSSH PRIVATE KEY-----
+      `;
       const privateKeyFile = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
       const publicKey = 'some-public-key';
       const passphrase = 'test-passphrase';
@@ -162,24 +164,24 @@ some-private-key with-passphrase
     });
 
     it('accepts SSH key constructor with passphrase', () => {
-      const privateKey = `\
------BEGIN OPENSSH PRIVATE KEY-----
-some-private-key with-passphrase
-some-private-key with-passphrase
------END OPENSSH PRIVATE KEY-----
-`;
+      const privateKey = codeBlock`
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        some-private-key with-passphrase
+        some-private-key with-passphrase
+        -----END OPENSSH PRIVATE KEY-----
+      `;
       const passphrase = 'test-passphrase';
 
       expect(() => setPrivateKey(privateKey, passphrase)).not.toThrow();
     });
 
     it('imports the private SSH key without passphrase', async () => {
-      const privateKey = `\
------BEGIN OPENSSH PRIVATE KEY-----
-some-private-key
-some-private-key
------END OPENSSH PRIVATE KEY-----
-`;
+      const privateKey = codeBlock`
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        some-private-key
+        some-private-key
+        -----END OPENSSH PRIVATE KEY-----
+      `;
       const privateKeyFile = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
       const publicKeyFile = `${privateKeyFile}.pub`;
       const publicKey = 'some-public-key';
@@ -202,7 +204,7 @@ some-private-key
       const privateKeyFileMode = (await fs.stat(privateKeyFile)).mode;
       expect((privateKeyFileMode & 0o777).toString(8)).toBe('600');
       expect((await fs.readFile(privateKeyFile)).toString()).toEqual(
-        privateKey,
+        `${privateKey}\n`,
       );
       expect((await fs.readFile(publicKeyFile)).toString()).toEqual(publicKey);
 
@@ -221,12 +223,12 @@ some-private-key
     });
 
     it('handles SSH key with process.exit spy', async () => {
-      const privateKey = `\
------BEGIN OPENSSH PRIVATE KEY-----
-some-private-key
-some-private-key
------END OPENSSH PRIVATE KEY-----
-`;
+      const privateKey = codeBlock`
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        some-private-key
+        some-private-key
+        -----END OPENSSH PRIVATE KEY-----
+      `;
       const privateKeyFile = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
       const publicKey = 'some-public-key';
 
@@ -484,6 +486,80 @@ some-private-key
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         passphrase,
         'global',
+      );
+    });
+  });
+
+  describe('push signing', () => {
+    beforeEach(() => {
+      Fixtures.reset();
+      GlobalConfig.reset();
+    });
+
+    async function setupGpgKeyAndConfigSigning(
+      platform: PlatformId,
+      repoDir: string,
+    ): Promise<void> {
+      GlobalConfig.set({ platform });
+
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(
+          `gpg --batch --no-tty --import ${upath.join(`${os.tmpdir()}/git-private-gpg.key`)}`,
+        )
+        .mockResolvedValueOnce({
+          stderr: 'gpg: key BADC0FFEE: secret key imported\nfoo\n',
+          stdout: '',
+        });
+
+      setPrivateKey('some-key', undefined);
+      await writePrivateKey();
+      await configSigningKey(repoDir);
+    }
+
+    it('sets push.gpgSign if-asked for gerrit', async () => {
+      const repoDir = '/tmp/some-repo';
+      await setupGpgKeyAndConfigSigning('gerrit', repoDir);
+
+      expect(exec.exec).toHaveBeenCalledWith(
+        'git config push.gpgSign if-asked',
+        { cwd: repoDir },
+      );
+    });
+
+    it('does not set push.gpgSign for github', async () => {
+      const repoDir = '/tmp/some-repo';
+      await setupGpgKeyAndConfigSigning('github', repoDir);
+
+      expect(exec.exec).not.toHaveBeenCalledWith(
+        'git config push.gpgSign if-asked',
+        { cwd: repoDir },
+      );
+    });
+
+    it('does not set push.gpgSign for SSH key on gerrit', async () => {
+      const sshKey = codeBlock`
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        some-private-key
+        some-private-key
+        -----END OPENSSH PRIVATE KEY-----
+      `;
+      const privateKeyFile = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
+      const repoDir = '/tmp/some-repo';
+      GlobalConfig.set({ platform: 'gerrit' });
+
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`ssh-keygen -y -f ${privateKeyFile}`)
+        .mockResolvedValue({ stderr: '', stdout: 'some-public-key' });
+
+      setPrivateKey(sshKey, undefined);
+      await writePrivateKey();
+      await configSigningKey(repoDir);
+
+      expect(exec.exec).not.toHaveBeenCalledWith(
+        'git config push.gpgSign if-asked',
+        { cwd: repoDir },
       );
     });
   });
