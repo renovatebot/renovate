@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import type {
   BranchSummary,
   CommitResult,
@@ -113,7 +114,7 @@ export class InstrumentedSimpleGit {
     return await instrument(
       spanName,
       async () => {
-        if (typeof whatOrOptions === 'string') {
+        if (isString(whatOrOptions)) {
           return await this.git.checkout(whatOrOptions);
         }
         return await this.git.checkout(whatOrOptions);
@@ -221,7 +222,7 @@ export class InstrumentedSimpleGit {
     return await instrument(
       spanName,
       async () => {
-        if (typeof optionOrOptions === 'string') {
+        if (isString(optionOrOptions)) {
           return await this.git.revparse(optionOrOptions);
         }
         return await this.git.revparse(optionOrOptions);

@@ -246,7 +246,7 @@ export class PackagistDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
 
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

@@ -31,7 +31,7 @@ If you use the "Code-Review" label and want to get `automerge` working then you 
 Renovate will now add the _Code-Review_ label with the value "+2" to each of its "pull requests" (Gerrit-Change).
 
 !!! note
-  The bot's user account must have permission to give +2 for the Code-Review label.
+  The Renovate user account must have permission to give +2 for the Code-Review label.
 
 The Renovate option `automergeType: "branch"` makes no sense for Gerrit, because there are no branches used to create pull requests.
 It works similar to the default option `"pr"`.

@@ -1,7 +1,7 @@
 [tools]
-node = "24.18.1"
-pnpm = "11.16.0"
-uv   = "0.12.0"
+node = "24.21.0"
+pnpm = "11.26.0"
+uv   = "0.12.13"
 
 [hooks]
 postinstall = '''

@@ -999,12 +999,12 @@ describe('modules/manager/maven/extract', () => {
       fs.readLocalFile
         .mockResolvedValueOnce('')
         .mockResolvedValueOnce('invalid xml content');
-      expect(
-        await extractAllPackageFiles({}, [
+      await expect(
+        extractAllPackageFiles({}, [
           '.mvn/extensions.xml',
           'grp/.mvn/extensions.xml',
         ]),
-      ).toBeEmptyArray();
+      ).resolves.toBeEmptyArray();
     });
 
     describe('root pom handling', () => {

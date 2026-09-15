@@ -6,29 +6,25 @@ import {
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export const delimiters = ['"', "'"];
 
 export function extractRubyVersion(txt: string): string | null {
-  const rubyMatch = regEx(/^ruby\s+("[^"]+"|'[^']+')\s*$/gm).exec(txt);
-  if (rubyMatch?.length !== 2) {
+  const rubyMatch = regEx(/^ruby\s+(?<version>"[^"]+"|'[^']+')\s*$/gm).exec(
+    txt,
+  );
+  if (!rubyMatch?.groups) {
     return null;
   }
-  const quotedVersion = rubyMatch[1];
+  const quotedVersion = rubyMatch.groups.version;
   return quotedVersion.substring(1, quotedVersion.length - 1);
 }
 
-export async function getRubyConstraint(
-  updateArtifact: UpdateArtifact,
+async function getRubyConstraintFromFiles(
+  packageFileName: string,
+  newPackageFileContent: string,
 ): Promise<string | null> {
-  const { packageFileName, config, newPackageFileContent } = updateArtifact;
-  const { constraints = {} } = config;
-  const { ruby } = constraints;
-
-  if (ruby) {
-    logger.debug('Using ruby constraint from config');
-    return ruby;
-  }
   const rubyMatch = extractRubyVersion(newPackageFileContent);
   if (rubyMatch) {
     logger.debug('Using ruby version from gemfile');
@@ -37,7 +33,8 @@ export async function getRubyConstraint(
   for (const file of ['.ruby-version', '.tool-versions']) {
     const rubyVersion = (
       await readLocalFile(getSiblingFileName(packageFileName, file), 'utf8')
-    )?.match(regEx(/^(?:ruby(?:-|\s+))?(\d[\d.]*)/m))?.[1];
+    )?.match(regEx(/^(?:ruby(?:-|\s+))?(?<version>\d[\d.]*)/m))?.groups
+      ?.version;
     if (rubyVersion) {
       logger.debug(`Using ruby version specified in ${file}`);
       return rubyVersion;
@@ -46,8 +43,8 @@ export async function getRubyConstraint(
   const lockFile = await getLockFilePath(packageFileName);
   if (lockFile) {
     const rubyVersion = (await readLocalFile(lockFile, 'utf8'))?.match(
-      regEx(/^ {3}ruby (\d[\d.]*)(?:[a-z]|\s|$)/m),
-    )?.[1];
+      regEx(/^ {3}ruby (?<version>\d[\d.]*)(?:[a-z]|\s|$)/m),
+    )?.groups?.version;
     if (rubyVersion) {
       logger.debug(`Using ruby version specified in lock file`);
       return rubyVersion;
@@ -57,27 +54,37 @@ export async function getRubyConstraint(
   return null;
 }
 
-export function getBundlerConstraint(
-  updateArtifact: Pick<UpdateArtifact, 'config'>,
+export async function getRubyConstraint(
+  updateArtifact: UpdateArtifact,
+): Promise<string | undefined> {
+  const { packageFileName, config, newPackageFileContent } = updateArtifact;
+  return await resolveToolConstraint(config, 'ruby', () =>
+    getRubyConstraintFromFiles(packageFileName, newPackageFileContent),
+  );
+}
+
+function getBundlerConstraintFromLockFile(
   existingLockFileContent: string,
 ): string | null {
-  const { config } = updateArtifact;
-  const { constraints = {} } = config;
-  const { bundler } = constraints;
-
-  if (bundler) {
-    logger.debug('Using bundler constraint from config');
-    return bundler;
-  }
-  const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(
+  const bundledWith = regEx(/\nBUNDLED WITH\n\s+(?<version>.*?)(?:\n|$)/).exec(
     existingLockFileContent,
   );
   if (bundledWith) {
     logger.debug('Using bundler version specified in lockfile');
-    return bundledWith[1];
+    return bundledWith.groups!.version;
   }
 
   return null;
+}
+
+export async function getBundlerConstraint(
+  updateArtifact: Pick<UpdateArtifact, 'config'>,
+  existingLockFileContent: string,
+): Promise<string | undefined> {
+  const { config } = updateArtifact;
+  return await resolveToolConstraint(config, 'bundler', () =>
+    getBundlerConstraintFromLockFile(existingLockFileContent),
+  );
 }
 
 export async function getLockFilePath(
