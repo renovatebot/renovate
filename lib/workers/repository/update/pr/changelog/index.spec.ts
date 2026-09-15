@@ -217,6 +217,28 @@ describe('workers/repository/update/pr/changelog/index', () => {
       );
     });
 
+    it('keeps the precise tag when a floating tag appears later in the list', async () => {
+      httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
+      githubTagsMock.mockResolvedValue([
+        { version: 'v6.0.0' },
+        { version: 'v7.0.0' },
+        { version: 'v7' },
+      ] as never);
+      githubReleasesMock.mockResolvedValue([]);
+      const res = await getChangeLogJSON({
+        ...upgrade,
+        packageName: 'actions/upload-artifact',
+        versioning: githubActionsVersioning.id,
+        currentVersion: '6.0.0',
+        newVersion: '7.0.0',
+        sourceUrl: 'https://github.com/actions/upload-artifact',
+        releases: [{ version: '6.0.0' }, { version: '7.0.0' }],
+      });
+      expect(res?.versions?.[0].compare.url).toBe(
+        'https://github.com/actions/upload-artifact/compare/v6.0.0...v7.0.0',
+      );
+    });
+
     it('falls back to a floating tag when no precise tag exists', async () => {
       httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
       githubTagsMock.mockResolvedValue([
