@@ -18,12 +18,6 @@ import { newlineRegex, regEx } from '../../../../../util/regex.ts';
 import { coerceString } from '../../../../../util/string.ts';
 import { isHttpUrl } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
-import * as bitbucket from './bitbucket/index.ts';
-import * as bitbucketServer from './bitbucket-server/index.ts';
-import * as forgejo from './forgejo/index.ts';
-import * as gitea from './gitea/index.ts';
-import * as github from './github/index.ts';
-import * as gitlab from './gitlab/index.ts';
 import type { ChangeLogSource } from './source.ts';
 import type {
   ChangeLogFile,
@@ -50,30 +44,12 @@ const hostQualifiedNameRegex = regEx(
 export async function getReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease,
+  source: ChangeLogSource,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   const { apiBaseUrl, repository, type } = project;
   try {
-    switch (type) {
-      case 'bitbucket':
-        return bitbucket.getReleaseList(project, release);
-      case 'bitbucket-server':
-        logger.trace(
-          'Unsupported Bitbucket Server feature. Skipping release fetching.',
-        );
-        return [];
-      case 'forgejo':
-        return await forgejo.getReleaseList(project, release);
-      case 'gitea':
-        return await gitea.getReleaseList(project, release);
-      case 'github':
-        return await github.getReleaseList(project, release);
-      case 'gitlab':
-        return await gitlab.getReleaseList(project, release);
-      default:
-        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-        return [];
-    }
+    return await source.getReleaseList(project, release);
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug({ repository, type, apiBaseUrl }, 'getReleaseList 404');
@@ -90,6 +66,7 @@ export async function getReleaseList(
 export function getCachedReleaseList(
   project: ChangeLogProject,
   release: ChangeLogRelease,
+  source: ChangeLogSource,
 ): Promise<ChangeLogNotes[]> {
   const { repository, apiBaseUrl } = project;
   // TODO: types (#22198)
@@ -99,7 +76,7 @@ export function getCachedReleaseList(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseList(project, release);
+  const promisedRes = getReleaseList(project, release, source);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -164,6 +141,7 @@ export async function getReleaseNotes(
   project: ChangeLogProject,
   release: ChangeLogRelease,
   config: BranchUpgradeConfig,
+  source: ChangeLogSource,
 ): Promise<ChangeLogNotes | null> {
   return await instrument('getReleaseNotes', async () => {
     const { packageName, depName, repository } = project;
@@ -172,7 +150,7 @@ export async function getReleaseNotes(
     logger.trace(
       `getReleaseNotes(${repository}, ${version}, ${packageName!}, ${depName!})`,
     );
-    const releases = await getCachedReleaseList(project, release);
+    const releases = await getCachedReleaseList(project, release, source);
     logger.trace({ releases }, 'Release list from getReleaseList');
     let releaseNotes: ChangeLogNotes | null = null;
 
@@ -324,52 +302,15 @@ function sectionize(text: string, level: number): string[] {
 
 export async function getReleaseNotesMdFileInner(
   project: ChangeLogProject,
+  source: ChangeLogSource,
 ): Promise<ChangeLogFile | null> {
-  const { repository, type } = project;
-  const apiBaseUrl = project.apiBaseUrl;
-  const sourceDirectory = project.sourceDirectory!;
+  const { repository, type, apiBaseUrl, sourceDirectory } = project;
   try {
-    switch (type) {
-      case 'bitbucket':
-        return await bitbucket.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'bitbucket-server':
-        return await bitbucketServer.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'forgejo':
-        return await forgejo.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'gitea':
-        return await gitea.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'github':
-        return await github.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'gitlab':
-        return await gitlab.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      default:
-        logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
-        return null;
-    }
+    return await source.getReleaseNotesMd(
+      repository,
+      apiBaseUrl,
+      sourceDirectory,
+    );
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug(
@@ -388,6 +329,7 @@ export async function getReleaseNotesMdFileInner(
 
 export function getReleaseNotesMdFile(
   project: ChangeLogProject,
+  source: ChangeLogSource,
 ): Promise<ChangeLogFile | null> {
   const { sourceDirectory, repository, apiBaseUrl } = project;
   // TODO: types (#22198)
@@ -399,7 +341,7 @@ export function getReleaseNotesMdFile(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getReleaseNotesMdFileInner(project);
+  const promisedRes = getReleaseNotesMdFileInner(project, source);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -417,7 +359,7 @@ export async function getReleaseNotesMd(
     return null;
   }
 
-  const changelog = await getReleaseNotesMdFile(project);
+  const changelog = await getReleaseNotesMdFile(project, source);
   if (!changelog) {
     return null;
   }
@@ -566,7 +508,12 @@ export async function addReleaseNotes(
         const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
         releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
         releaseNotes ??= await getReleaseNotesMd(input.project, v, source);
-        releaseNotes ??= await getReleaseNotes(input.project, v, config);
+        releaseNotes ??= await getReleaseNotes(
+          input.project,
+          v,
+          config,
+          source,
+        );
 
         // If there is no release notes, at least try to show the compare URL
         if (!releaseNotes && v.compare.url) {

@@ -5,9 +5,8 @@ import * as hostRules from '../../../../../../util/host-rules.ts';
 import { toBase64 } from '../../../../../../util/string.ts';
 import type { Timestamp } from '../../../../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
-import { ForgejoChangeLogSource } from '../forgejo/source.ts';
 import { getChangeLogJSON } from '../index.ts';
-import { getReleaseNotesMd } from './index.ts';
+import { ForgejoChangeLogSource } from './source.ts';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -37,7 +36,7 @@ const matchHost = 'https://code.forgejo.org/';
 
 const changelogSource = new ForgejoChangeLogSource();
 
-describe('workers/repository/update/pr/changelog/forgejo/index', () => {
+describe('workers/repository/update/pr/changelog/forgejo/source', () => {
   beforeAll(() => {
     // TODO: why?
     vi.stubEnv('GITHUB_ENDPOINT', undefined);
@@ -423,7 +422,7 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
           content: toBase64('some content'),
         });
       await expect(
-        getReleaseNotesMd(
+        changelogSource.getReleaseNotesMd(
           'some/repo',
           'https://git.test.com/api/v1/',
           'charts/some',
@@ -466,7 +465,7 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
           content: toBase64('some content'),
         });
       await expect(
-        getReleaseNotesMd(
+        changelogSource.getReleaseNotesMd(
           'some/repo',
           'https://git.test.com/api/v1/',
           'charts/some',
