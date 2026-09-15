@@ -211,6 +211,86 @@ describe('modules/manager/apm/extract', () => {
       ).toBeUndefined();
     });
 
+    it('treats _git as the Azure DevOps repository boundary', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - dev.azure.com/org/project/_git/repo#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'dev.azure.com/org/project/_git/repo',
+          packageName: 'https://dev.azure.com/org/project/_git/repo',
+          datasource: GitTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+      ]);
+    });
+
+    it('drops an Azure DevOps virtual-package subpath after _git', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - dev.azure.com/org/project/_git/monorepo/packages/ui#v1.2.3
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'dev.azure.com/org/project/_git/monorepo/packages/ui',
+          packageName: 'https://dev.azure.com/org/project/_git/monorepo',
+          datasource: GitTagsDatasource.id,
+          currentValue: 'v1.2.3',
+        },
+      ]);
+    });
+
+    it('falls back to the primitive-directory boundary for Azure pins without _git', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - dev.azure.com/org/project/repo/instructions/security#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'dev.azure.com/org/project/repo/instructions/security',
+          packageName: 'https://dev.azure.com/org/project/repo',
+          datasource: GitTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+      ]);
+    });
+
+    it('ignores a trailing _git with no repository after it', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - dev.azure.com/org/project/_git#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'dev.azure.com/org/project/_git',
+          packageName: 'https://dev.azure.com/org/project/_git',
+          datasource: GitTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+      ]);
+    });
+
+    it('leaves a _git segment alone on non-Azure hosts', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - example.com/org/_git/repo#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'example.com/org/_git/repo',
+          packageName: 'https://example.com/org/_git/repo',
+          datasource: GitTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+      ]);
+    });
+
     it('supports GitLab nested groups (project slug spans 3+ segments)', () => {
       const content = codeBlock`
         dependencies:
