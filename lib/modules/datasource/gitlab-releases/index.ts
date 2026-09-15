@@ -5,7 +5,7 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { GitlabReleases } from './schema.ts';
 
-export class GitlabReleasesDatasource extends Datasource {
+export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-releases';
 
   override readonly defaultRegistryUrls = ['https://gitlab.com'];
@@ -18,8 +18,10 @@ export class GitlabReleasesDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(GitlabReleasesDatasource.id);
-    this.http = new GitlabHttp(GitlabReleasesDatasource.id);
+    super(
+      GitlabReleasesDatasource.id,
+      new GitlabHttp(GitlabReleasesDatasource.id),
+    );
   }
 
   private async _getReleases({
