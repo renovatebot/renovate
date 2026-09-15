@@ -1,5 +1,7 @@
+import { AzureTagsDatasource } from '../modules/datasource/azure-tags/index.ts';
 import { BitbucketServerTagsDatasource } from '../modules/datasource/bitbucket-server-tags/index.ts';
 import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags/index.ts';
+import { ForgejoTagsDatasource } from '../modules/datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../modules/datasource/gitea-tags/index.ts';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
@@ -8,8 +10,7 @@ import { GitlabReleasesDatasource } from '../modules/datasource/gitlab-releases/
 import { GitlabTagsDatasource } from '../modules/datasource/gitlab-tags/index.ts';
 import { HermitDatasource } from '../modules/datasource/hermit/index.ts';
 import { PodDatasource } from '../modules/datasource/pod/index.ts';
-import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/github/index.ts';
-import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab/index.ts';
+import type { GitHostFamilyId } from './platforms.ts';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
@@ -17,7 +18,13 @@ import {
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
+  GIT_HOST_FAMILIES,
 } from './platforms.ts';
+
+// `id` of the changelog modules, which cannot be imported here without
+// importing their http clients as well.
+const GITHUB_CHANGELOG_ID = 'github-changelog';
+const GITLAB_CHANGELOG_ID = 'gitlab-changelog';
 
 describe('constants/platform', () => {
   it('should be part of the GITEA_API_USING_HOST_TYPES', () => {
@@ -96,5 +103,87 @@ describe('constants/platform', () => {
     expect(
       BITBUCKET_SERVER_API_USING_HOST_TYPES.includes('bitbucket-server'),
     ).toBeTrue();
+  });
+
+  describe('GIT_HOST_FAMILIES', () => {
+    // The values every consumer of `detectPlatform` used to hard-code for
+    // itself. Keeping them here pins the table to that behaviour.
+    it.each`
+      family                | tagsDatasource                      | knownHosts                            | webDirPath
+      ${'azure'}            | ${AzureTagsDatasource.id}           | ${['dev.azure.com']}                  | ${'tree/HEAD'}
+      ${'bitbucket'}        | ${BitbucketTagsDatasource.id}       | ${['bitbucket.org', 'bitbucket.com']} | ${'src/HEAD'}
+      ${'bitbucket-server'} | ${BitbucketServerTagsDatasource.id} | ${[]}                                 | ${'browse'}
+      ${'forgejo'}          | ${ForgejoTagsDatasource.id}         | ${['codeberg.org', 'codefloe.com']}   | ${'tree/HEAD'}
+      ${'gitea'}            | ${GiteaTagsDatasource.id}           | ${['gitea.com']}                      | ${'tree/HEAD'}
+      ${'github'}           | ${GithubTagsDatasource.id}          | ${['github.com']}                     | ${'tree/HEAD'}
+      ${'gitlab'}           | ${GitlabTagsDatasource.id}          | ${['gitlab.com']}                     | ${'tree/HEAD'}
+    `(
+      'describes $family',
+      ({
+        family,
+        tagsDatasource,
+        knownHosts,
+        webDirPath,
+      }: {
+        family: GitHostFamilyId;
+        tagsDatasource: string;
+        knownHosts: string[];
+        webDirPath: string;
+      }) => {
+        expect(GIT_HOST_FAMILIES[family]).toMatchObject({
+          tagsDatasource,
+          knownHosts,
+          webDirPath,
+        });
+      },
+    );
+
+    it.each`
+      family                | baseUrl                          | apiBaseUrl
+      ${'azure'}            | ${'https://dev.azure.com/'}      | ${null}
+      ${'bitbucket'}        | ${'https://bitbucket.org/'}      | ${'https://api.bitbucket.org/'}
+      ${'bitbucket'}        | ${'https://bitbucket.com/'}      | ${'https://api.bitbucket.org/'}
+      ${'bitbucket-server'} | ${'https://stash.example.com/'}  | ${'https://stash.example.com/rest/api/1.0/'}
+      ${'forgejo'}          | ${'https://codeberg.org/'}       | ${'https://codeberg.org/api/v1/'}
+      ${'gitea'}            | ${'https://gitea.com/'}          | ${'https://gitea.com/api/v1/'}
+      ${'github'}           | ${'https://github.com/'}         | ${'https://api.github.com/'}
+      ${'github'}           | ${'https://github.example.com/'} | ${'https://github.example.com/api/v3/'}
+      ${'gitlab'}           | ${'https://gitlab.com/'}         | ${'https://gitlab.com/api/v4/'}
+    `(
+      'derives the $family api base url from $baseUrl',
+      ({
+        family,
+        baseUrl,
+        apiBaseUrl,
+      }: {
+        family: GitHostFamilyId;
+        baseUrl: string;
+        apiBaseUrl: string | null;
+      }) => {
+        expect(GIT_HOST_FAMILIES[family].apiBaseUrl?.(baseUrl) ?? null).toBe(
+          apiBaseUrl,
+        );
+      },
+    );
+
+    it('has pairwise disjoint host types', () => {
+      const seen = new Set<string>();
+      for (const { apiUsingHostTypes } of Object.values(GIT_HOST_FAMILIES)) {
+        for (const hostType of apiUsingHostTypes) {
+          expect(seen.has(hostType)).toBeFalse();
+          seen.add(hostType);
+        }
+      }
+    });
+
+    it('has pairwise disjoint known hosts', () => {
+      const seen = new Set<string>();
+      for (const { knownHosts } of Object.values(GIT_HOST_FAMILIES)) {
+        for (const host of knownHosts) {
+          expect(seen.has(host)).toBeFalse();
+          seen.add(host);
+        }
+      }
+    });
   });
 });
