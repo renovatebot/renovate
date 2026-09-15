@@ -1,4 +1,3 @@
-import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -72,39 +71,26 @@ export class BitbucketServerTagsDatasource extends Datasource<BitbucketServerHtt
 
     const url = `${BitbucketServerTagsDatasource.getApiUrl(registryUrl)}projects/${projectKey}/repos/${repositorySlug}/tags`;
 
-    const result = this.http
-      .getJsonSafe(url, { paginate: true }, BitbucketServerTags)
-      .transform((tags) =>
-        tags.map(({ displayId, hash }) => ({
-          version: displayId,
-          gitRef: displayId,
-          newDigest: hash ?? undefined,
-        })),
-      )
-      .transform((versions): ReleaseResult => {
-        return {
-          sourceUrl: BitbucketServerTagsDatasource.getSourceUrl(
-            projectKey,
-            repositorySlug,
-            registryUrl,
-          ),
-          registryUrl:
-            BitbucketServerTagsDatasource.getRegistryURL(registryUrl),
-          releases: versions,
-        };
-      });
-    const { val, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'bitbucket-server-tags: validation error');
+    const tags = await this.fetchJsonOrNull(url, BitbucketServerTags, {
+      paginate: true,
+    });
+    if (!tags) {
       return null;
     }
 
-    if (err) {
-      this.handleGenericErrors(err);
-    }
-
-    return val;
+    return {
+      sourceUrl: BitbucketServerTagsDatasource.getSourceUrl(
+        projectKey,
+        repositorySlug,
+        registryUrl,
+      ),
+      registryUrl: BitbucketServerTagsDatasource.getRegistryURL(registryUrl),
+      releases: tags.map(({ displayId, hash }) => ({
+        version: displayId,
+        gitRef: displayId,
+        newDigest: hash ?? undefined,
+      })),
+    };
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -173,32 +159,13 @@ export class BitbucketServerTagsDatasource extends Datasource<BitbucketServerHtt
 
     const url = `${baseUrl}/commits?ignoreMissing=true`;
 
-    const result = this.http
-      .getJsonSafe(
-        url,
-        {
-          paginate: true,
-          limit: 1,
-          maxPages: 1,
-        },
-        BitbucketServerCommits,
-      )
-      .transform((commits) => {
-        return commits[0]?.id;
-      });
+    const commits = await this.fetchJsonOrNull(url, BitbucketServerCommits, {
+      paginate: true,
+      limit: 1,
+      maxPages: 1,
+    });
 
-    const { val = null, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'bitbucket-server-tags: validation error');
-      return null;
-    }
-
-    if (err) {
-      this.handleGenericErrors(err);
-    }
-
-    return val;
+    return commits?.[0]?.id ?? null;
   }
 
   override getDigest(
