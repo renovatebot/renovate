@@ -310,10 +310,6 @@ export function massageMarkdown(prBody: string): string {
   return smartTruncate(smartLinks(prBody), maxBodyLength());
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(false);
-}
-
 export function getRawFile(
   _fileName: string,
   _repoName?: string,
