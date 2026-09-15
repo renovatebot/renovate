@@ -13,6 +13,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types.ts';
 import {
+  artifactErrorResult,
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
@@ -74,13 +75,6 @@ export async function updateArtifacts(
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.stderr,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }
