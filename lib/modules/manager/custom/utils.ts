@@ -1,5 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import type { PackageDependency } from '../types.ts';
 
 export const validMatchFields = [
@@ -23,7 +24,9 @@ export function substituteRegistryAliases(
   // because registryUrls will be used instead of dep/packageName
   if (dep.registryUrls) {
     dep.registryUrls = dep.registryUrls.map((s) => {
-      for (const [original, replace] of Object.entries(registryAliases ?? {})) {
+      for (const [original, replace] of Object.entries(
+        coerceObject(registryAliases),
+      )) {
         if (s.startsWith(original)) {
           return replace + s.slice(original.length);
         }
@@ -31,14 +34,18 @@ export function substituteRegistryAliases(
       return s;
     });
   } else if (dep.packageName) {
-    for (const [original, replace] of Object.entries(registryAliases ?? {})) {
+    for (const [original, replace] of Object.entries(
+      coerceObject(registryAliases),
+    )) {
       if (dep.packageName.startsWith(original)) {
         dep.packageName = replace + dep.packageName.slice(original.length);
         break;
       }
     }
   } else if (dep.depName) {
-    for (const [original, replace] of Object.entries(registryAliases ?? {})) {
+    for (const [original, replace] of Object.entries(
+      coerceObject(registryAliases),
+    )) {
       if (dep.depName.startsWith(original)) {
         dep.packageName = replace + dep.depName.slice(original.length);
         break;
