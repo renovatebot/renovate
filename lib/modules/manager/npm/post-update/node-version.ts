@@ -5,6 +5,7 @@ import type { ToolConstraint } from '../../../../util/exec/types.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import type { LazyPackageJson } from './types.ts';
 
 async function getNodeFile(filename: string): Promise<string | null> {
@@ -59,10 +60,15 @@ export async function getNodeConstraint(
 ): Promise<string | null> {
   const constraint =
     getNodeUpdate(upgrades) ??
-    config.constraints?.node ??
-    (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
-    (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
-    (await getPackageJsonConstraint(pkg));
+    (await resolveToolConstraint(
+      config,
+      'node',
+      async () =>
+        (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
+        (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
+        (await getPackageJsonConstraint(pkg)),
+    )) ??
+    null;
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
   }

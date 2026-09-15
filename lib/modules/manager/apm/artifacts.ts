@@ -11,6 +11,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export async function updateArtifacts({
   packageFileName,
@@ -43,7 +44,10 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [
-        { toolName: 'apm', constraint: config.constraints?.apm },
+        {
+          toolName: 'apm',
+          constraint: await resolveToolConstraint(config, 'apm'),
+        },
       ],
     };
     await exec('apm install', execOptions);

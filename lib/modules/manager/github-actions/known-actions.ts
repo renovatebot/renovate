@@ -2,21 +2,25 @@ import { z } from 'zod/v4';
 
 import { regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
+import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
+import { splitImageParts } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
-import type { ActionSchema, CommunityActionConfig } from './types.ts';
+import type { ActionSchema, KnownActionConfig } from './types.ts';
 
 export function actionSchema(
   name: string,
-  { withSchema, ...cfg }: CommunityActionConfig,
+  { withSchema, ...cfg }: KnownActionConfig,
 ): ActionSchema {
   return z
     .object({
@@ -76,9 +80,36 @@ function valSchema(
 
 const VersionVal = valSchema('version');
 
+// Shared by the `actions/setup-{go,node,python}` entries below, whose
+// releases are published as `actions/{go,node,python}-versions` GitHub
+// releases, tagged like `20.11.0` or `20.11.0-1` (a build number suffix).
+const actionsVersionsExtractVersion =
+  '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$';
+
 const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => [{ packageName: repo, ...parseValue(tag) }]);
+
+function parseImageValue(image: string | undefined): PackageDependency {
+  if (!image) {
+    return {
+      depType: 'uses-with',
+      skipStage: 'extract',
+      skipReason: 'unspecified-version',
+    };
+  }
+
+  const dep = splitImageParts(image);
+  return {
+    depType: 'uses-with',
+    ...dep,
+    ...(dep.skipReason ? { skipStage: 'extract' } : {}),
+  };
+}
+
+const EcsRenderTaskDefinitionWith: ActionSchema = z
+  .object({ image: z.string().optional() })
+  .transform(({ image }) => [parseImageValue(image)]);
 
 const sha256Regex = regEx(/^[a-f0-9]{64}$/);
 const MiseWith: ActionSchema = z
@@ -134,10 +165,109 @@ const PnpmSetupWith: ActionSchema = z
     ...parsePnpmRuntime(runtime),
   ]);
 
+// Distributions whose version numbering we can reliably track via the
+// java-version datasource (which sources releases from Adoptium/Eclipse
+// Temurin). Other distributions may not follow the same release cadence
+// or versioning, so we don't attempt to track them.
+const supportedJavaDistributions = new Set(['temurin', 'adopt']);
+
+const SetupJavaWith: ActionSchema = z
+  .object({
+    distribution: z.string().optional(),
+    'java-version': z.string().optional(),
+    'java-package': z.string().optional(),
+  })
+  .transform(
+    ({
+      distribution,
+      'java-version': version,
+      'java-package': javaPackage,
+    }) => {
+      const packageName = javaPackage?.startsWith('jre')
+        ? 'java-jre'
+        : 'java-jdk';
+
+      if (
+        !distribution ||
+        !supportedJavaDistributions.has(distribution.toLowerCase())
+      ) {
+        return [
+          {
+            packageName,
+            depType: 'uses-with',
+            skipStage: 'extract',
+            skipReason: 'unsupported',
+          },
+        ];
+      }
+
+      return [{ packageName, ...parseValue(version) }];
+    },
+  );
+
+const renovateGithubActionDefaultImage = 'ghcr.io/renovatebot/renovate';
+const RenovateGithubActionWith: ActionSchema = z
+  .object({
+    'renovate-version': z.string().optional(),
+    'renovate-image': z.string().optional(),
+  })
+  .transform(({ 'renovate-version': version, 'renovate-image': image }) => {
+    const [packageName, currentDigest] = (
+      image ?? renovateGithubActionDefaultImage
+    ).split('@');
+    return [
+      {
+        packageName,
+        ...(currentDigest ? { currentDigest } : {}),
+        ...parseValue(version),
+      },
+    ];
+  });
+
 /**
- * Community contributed actions with known version input schemas.
+ * Community-maintained and first-party (GitHub's own `actions/*`) Actions
+ * with known version input schemas.
  */
-export const communityActions: Record<string, CommunityActionConfig> = {
+export const knownActions: Record<string, KnownActionConfig> = {
+  // https://github.com/actions/setup-dotnet
+  'actions/setup-dotnet': {
+    datasource: DotnetVersionDatasource.id,
+    packageName: 'dotnet-sdk',
+    withSchema: valSchema('dotnet-version', (val) => val.includes('\n')),
+  },
+  // https://github.com/actions/setup-go
+  'actions/setup-go': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'go',
+    packageName: 'actions/go-versions',
+    versioning: npmVersioning.id,
+    extractVersion: actionsVersionsExtractVersion,
+    withSchema: valSchema('go-version'),
+  },
+  // https://github.com/actions/setup-java
+  'actions/setup-java': {
+    datasource: JavaVersionDatasource.id,
+    packageName: '', // determined from `distribution`/`java-package` inputs
+    withSchema: SetupJavaWith,
+  },
+  // https://github.com/actions/setup-node
+  'actions/setup-node': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'node',
+    packageName: 'actions/node-versions',
+    versioning: nodeVersioning.id,
+    extractVersion: actionsVersionsExtractVersion,
+    withSchema: valSchema('node-version'),
+  },
+  // https://github.com/actions/setup-python
+  'actions/setup-python': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'python',
+    packageName: 'actions/python-versions',
+    versioning: npmVersioning.id,
+    extractVersion: actionsVersionsExtractVersion,
+    withSchema: valSchema('python-version'),
+  },
   // https://github.com/aquasecurity/setup-trivy
   'aquasecurity/setup-trivy': {
     datasource: GithubReleasesDatasource.id,
@@ -153,6 +283,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     versioning: npmVersioning.id,
     packageName: 'astral-sh/uv',
+  },
+  // https://github.com/aws-actions/amazon-ecs-render-task-definition
+  'aws-actions/amazon-ecs-render-task-definition': {
+    datasource: DockerDatasource.id,
+    packageName: '', // determined from `image` input
+    withSchema: EcsRenderTaskDefinitionWith,
   },
   'azure/setup-helm': {
     datasource: GithubReleasesDatasource.id,
@@ -188,6 +324,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     datasource: RustVersionDatasource.id,
     packageName: 'rust',
     withSchema: valSchema('toolchain'),
+  },
+  // https://github.com/expo/expo-github-action
+  'expo/expo-github-action': {
+    datasource: NpmDatasource.id,
+    packageName: 'eas-cli',
+    withSchema: valSchema('eas-version'),
   },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
@@ -244,6 +386,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: 'pypa/hatch',
     // Strip hatch- prefix from release tags
     extractVersion: '^hatch-(?<version>.+)$',
+  },
+  // https://github.com/renovatebot/github-action
+  'renovatebot/github-action': {
+    datasource: DockerDatasource.id,
+    packageName: '', // determined from `renovate-image` input, if set
+    withSchema: RenovateGithubActionWith,
   },
   'ruby/setup-ruby': {
     datasource: RubyVersionDatasource.id,

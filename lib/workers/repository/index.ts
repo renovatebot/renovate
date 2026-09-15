@@ -193,7 +193,7 @@ export async function renovateRepository(
     }
   } else {
     logger.debug(
-      { error },
+      { err: error },
       'Skipping the rest to the Renovate run due to error in `init` phase',
     );
   }
@@ -231,6 +231,7 @@ export async function renovateRepository(
       status: repoResult?.status,
       enabled: repoResult?.enabled,
       onboarded: repoResult?.onboarded,
+      exitCode: repoResult?.exitCode,
     },
     'Repository finished',
   );

@@ -276,7 +276,7 @@ export function extractPackageFile(
 
   const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
-  for (let lineNumber = 0; lineNumber < lines.length; ) {
+  for (let lineNumber = 0; lineNumber < lines.length;) {
     const lineNumberInstrStart = lineNumber;
     let instruction = lines[lineNumber];
 
@@ -476,6 +476,10 @@ export function extractPackageFile(
   for (const d of deps) {
     d.depType ??= 'stage';
   }
-  deps.at(-1)!.depType = 'final';
+  // find the last `stage`, and treat it as the `final` stage
+  const lastStage = deps.filter((d) => d.depType === 'stage').at(-1);
+  if (lastStage) {
+    lastStage.depType = 'final';
+  }
   return { deps };
 }

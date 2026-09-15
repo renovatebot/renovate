@@ -270,6 +270,34 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted helm constraint', async () => {
+    vi.stubEnv('CONTAINERBASE', 'true');
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1);
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    await expect(
+      helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: chartFile,
+        config: { ...config, extractedConstraints: { helm: '3.7.2' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool helm 3.7.2' },
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+      },
+      { cmd: "helm dependency update ''" },
+    ]);
+  });
+
   it('catches errors', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1);

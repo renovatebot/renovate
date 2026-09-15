@@ -47,6 +47,21 @@ describe('util/s3', () => {
     expect(client1.config.forcePathStyle).toBeTrue();
   });
 
+  it('returns an uncached client when credentials are provided', async () => {
+    const credentials = {
+      accessKeyId: 'some-access-key',
+      secretAccessKey: 'some-secret-key',
+      sessionToken: 'some-session-token',
+    };
+    const client1 = getS3Client(undefined, undefined, credentials);
+    const client2 = getS3Client(undefined, undefined, credentials);
+    expect(client1).not.toBe(client2);
+    expect(client1).not.toBe(getS3Client());
+    await expect(client1.config.credentials()).resolves.toMatchObject(
+      credentials,
+    );
+  });
+
   it('uses s3 values from globalConfig instead of GlobalConfig class', async () => {
     const s3 = await import('./s3.ts');
     const client1 = s3.getS3Client('https://minio.domain.test', true);

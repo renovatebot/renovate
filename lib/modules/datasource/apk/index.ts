@@ -9,7 +9,7 @@ import * as fs from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { id as looseVersioning } from '../../versioning/loose/index.ts';
+import { id as apkVersioning } from '../../versioning/apk/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { parseApkIndexFile } from './parser.ts';
@@ -46,7 +46,7 @@ function groupPackagesByName(
 export class ApkDatasource extends Datasource {
   static readonly id = apkDatasourceId;
 
-  override readonly defaultVersioning = looseVersioning;
+  override readonly defaultVersioning = apkVersioning;
 
   /**
    * Alpine APK repositories are laid out as

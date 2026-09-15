@@ -281,4 +281,26 @@ describe('modules/manager/pip_requirements/artifacts', () => {
       },
     ]);
   });
+
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('new content');
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'requirements.txt',
+      updatedDeps: [{ depName: 'atomicwrites' }],
+      newPackageFileContent,
+      config: {
+        constraints: {},
+        extractedConstraints: { python: '3.10.2', hashin: '0.17.0' },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.10.2' },
+      { cmd: 'install-tool hashin 0.17.0' },
+      { cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt' },
+    ]);
+  });
 });

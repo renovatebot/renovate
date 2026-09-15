@@ -7,16 +7,20 @@ import { logger } from '../../../logger/index.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type {
-  ConstraintName,
   ExecOptions,
   ExtraEnv,
   ToolConstraint,
 } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type {
+  ToolConstraintsConfig,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+} from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
 
 /**
@@ -81,23 +85,37 @@ function versionSupportsSafeFeatures(version: string | null): boolean {
  * @see https://mise.jdx.dev/dev-tools/backends/go.html
  * @see https://mise.jdx.dev/dev-tools/backends/gem.html
  */
-function getMiseLockToolConstraints(
-  constraints?: Partial<Record<ConstraintName, string>> | null,
+async function getMiseLockToolConstraints(
+  config: ToolConstraintsConfig,
+  miseConstraint: string | undefined,
   safeMode = false,
-): ToolConstraint[] {
-  const miseConstraint: ToolConstraint = {
+): Promise<ToolConstraint[]> {
+  const miseToolConstraint: ToolConstraint = {
     toolName: 'mise',
-    constraint: constraints?.mise,
+    constraint: miseConstraint,
   };
   if (safeMode) {
-    return [miseConstraint];
+    return [miseToolConstraint];
   }
   return [
-    miseConstraint,
-    { toolName: 'node', constraint: constraints?.node },
-    { toolName: 'npm', constraint: constraints?.npm },
-    { toolName: 'golang', constraint: constraints?.go },
-    { toolName: 'ruby', constraint: constraints?.ruby },
+    miseToolConstraint,
+    {
+      toolName: 'node',
+      constraint: await resolveToolConstraint(config, 'node'),
+    },
+    {
+      toolName: 'npm',
+      constraint: await resolveToolConstraint(config, 'npm'),
+    },
+    {
+      // the golang tool is constrained by the `go` constraint
+      toolName: 'golang',
+      constraint: await resolveToolConstraint(config, 'go'),
+    },
+    {
+      toolName: 'ruby',
+      constraint: await resolveToolConstraint(config, 'ruby'),
+    },
   ];
 }
 
@@ -108,11 +126,14 @@ function getMiseLockToolConstraints(
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
+  newPackageFileContent,
+  newLockFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const lockFileName = getLockFileName(packageFileName);
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
+  const originalLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const currentLockFileContent = newLockFileContent ?? originalLockFileContent;
+  if (!currentLockFileContent) {
     logger.debug({ lockFileName }, 'No mise lock file found');
     return null;
   }
@@ -129,13 +150,12 @@ export async function updateArtifacts({
   // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
   // change the outcome: an allowlisted, non-maintenance run behaves the same
   // regardless of version.
+  const miseConstraint = await resolveToolConstraint(config, 'mise');
   let miseSupportsSafeFeatures = false;
   if (!miseAllowlisted || config.isLockFileMaintenance) {
     const miseVersion = await detectMiseVersion({
       cwdFile: packageFileName,
-      toolConstraints: [
-        { toolName: 'mise', constraint: config.constraints?.mise },
-      ],
+      toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
       docker: {},
     });
     miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
@@ -193,7 +213,11 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv,
-    toolConstraints: getMiseLockToolConstraints(config.constraints, safeMode),
+    toolConstraints: await getMiseLockToolConstraints(
+      config,
+      miseConstraint,
+      safeMode,
+    ),
     docker: {},
   };
 
@@ -206,9 +230,16 @@ export async function updateArtifacts({
     : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
+    await writeLocalFile(packageFileName, newPackageFileContent);
+    if (newLockFileContent) {
+      await writeLocalFile(lockFileName, newLockFileContent);
+    }
     await exec(commands, execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (!newLockFileContent || existingLockFileContent === newLockFileContent) {
+    const refreshedLockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (
+      !refreshedLockFileContent ||
+      originalLockFileContent === refreshedLockFileContent
+    ) {
       return null;
     }
 
@@ -218,7 +249,7 @@ export async function updateArtifacts({
         file: {
           type: 'addition',
           path: lockFileName,
-          contents: newLockFileContent,
+          contents: refreshedLockFileContent,
         },
       },
     ];

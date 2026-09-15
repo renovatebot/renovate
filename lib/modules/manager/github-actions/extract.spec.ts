@@ -1209,6 +1209,38 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
+    it('extracts x-version from actions/setup-x referenced by an https:// URL', async () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: https://github.com/actions/setup-node@v4.4.0
+                with:
+                  node-version: '23.7.0'
+        `;
+
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'https://github.com/actions/setup-node',
+          packageName: 'actions/setup-node',
+          currentValue: 'v4.4.0',
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '23.7.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+      ]);
+    });
+
     it('handles actions/setup-x without x-version field', async () => {
       const yamlContent = codeBlock`
         jobs:
@@ -1220,11 +1252,18 @@ describe('modules/manager/github-actions/extract', () => {
                   registry-url: 'https://npm.pkg.github.com'
         `;
       const res = await extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'actions/setup-node',
-        depType: 'action',
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/setup-node',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ]);
     });
 
     it('extracts x-version from actions/setup-x in composite action', async () => {
@@ -1492,6 +1531,154 @@ describe('modules/manager/github-actions/extract', () => {
   it.each([
     {
       step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0.404' },
+      },
+      expected: [
+        {
+          currentValue: '8.0.404',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      // multiple SDKs, one per line, aren't a single version we can update
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '3.1.x\n5.0.x' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          currentValue: '3.1.x\n5.0.x',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21' },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'adopt', 'java-version': '11' },
+      },
+      expected: [
+        {
+          currentValue: '11',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: {
+          distribution: 'temurin',
+          'java-version': '21',
+          'java-package': 'jre',
+        },
+      },
+      expected: [
+        {
+          currentValue: '21',
+          datasource: 'java-version',
+          depName: 'java-jre',
+          depType: 'uses-with',
+          packageName: 'java-jre',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // we can't reliably track version updates for distributions other
+      // than Temurin/Adopt
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'zulu', 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { 'java-version': '21' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unsupported',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'aquasecurity/setup-trivy@v0.2.6',
         with: {},
       },
@@ -1642,6 +1829,94 @@ describe('modules/manager/github-actions/extract', () => {
           skipReason: 'unspecified-version',
           packageName: 'astral-sh/uv',
           versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: 'amazon/amazon-ecs-sample:latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:v1.2.3',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.2.3',
+          datasource: 'docker',
+          depName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+          depType: 'uses-with',
+          packageName: '123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image:
+            'amazon/amazon-ecs-sample@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'amazon/amazon-ecs-sample',
+          depType: 'uses-with',
+          packageName: 'amazon/amazon-ecs-sample',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      // the image is templated, so we can't reliably determine what to update
+      step: {
+        uses: 'aws-actions/amazon-ecs-render-task-definition@v1',
+        with: {
+          'container-name': 'web',
+          image: '${{ steps.build-image.outputs.image }}',
+        },
+      },
+      expected: [
+        {
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'contains-variable',
         },
       ],
     },
@@ -2040,6 +2315,37 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'deno',
           depType: 'uses-with',
           packageName: 'deno',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'expo/expo-github-action@v8',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'expo/expo-github-action@v8',
+        with: { 'eas-version': '23.2.0' },
+      },
+      expected: [
+        {
+          currentValue: '23.2.0',
+          datasource: 'npm',
+          depName: 'eas-cli',
+          depType: 'uses-with',
+          packageName: 'eas-cli',
         },
       ],
     },
@@ -2465,6 +2771,108 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'sigstore/cosign',
           depType: 'uses-with',
           packageName: 'sigstore/cosign',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43.100.0' },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: '43'`, quoted, matching the action's own default
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': '43' },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      // `renovate-version: 43`, unquoted, parses as a YAML number rather than a string
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: { 'renovate-version': 43 },
+      },
+      expected: [
+        {
+          currentValue: '43',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-version': '43.100.0',
+          'renovate-image': 'ghcr.io/my-org/renovate',
+        },
+      },
+      expected: [
+        {
+          currentValue: '43.100.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/my-org/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/my-org/renovate',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
         },
       ],
     },
