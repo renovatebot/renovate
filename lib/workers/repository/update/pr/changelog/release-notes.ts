@@ -8,6 +8,7 @@ import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
+import { extractVersionFromGroups } from '../../../../../modules/datasource/common.ts';
 import { platform } from '../../../../../modules/platform/index.ts';
 import * as memCache from '../../../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
@@ -195,8 +196,10 @@ export async function getReleaseNotes(
     if (isUndefined(matchedRelease) && config.extractVersion) {
       const extractVersionRegEx = regEx(config.extractVersion);
       matchedRelease = releases.find((r) => {
-        const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
-          ?.version;
+        const extractedVersionGroups = extractVersionRegEx.exec(r.tag!)?.groups;
+        const extractedVersion = extractVersionFromGroups(
+          extractedVersionGroups,
+        );
         return version === extractedVersion;
       });
     }
