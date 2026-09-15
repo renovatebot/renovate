@@ -1663,6 +1663,7 @@ None detected
                 deps: [
                   {
                     depName: '@material-ui/core',
+                    packageName: '@material-ui/core',
                     deprecationMessage: 'This package is deprecated',
                     updates: [
                       {
@@ -1674,6 +1675,7 @@ None detected
                   },
                   {
                     depName: '@material-ui/icons',
+                    packageName: '@material-ui/icons',
                     updates: [
                       {
                         updateType: 'replacement',
@@ -1684,6 +1686,7 @@ None detected
                   },
                   {
                     depName: '@mui/material',
+                    packageName: '@mui/material',
                     updates: [
                       {
                         newValue: '^6.2.0',
@@ -1693,6 +1696,7 @@ None detected
                   },
                   {
                     depName: '@mui/icons-material',
+                    packageName: '@mui/icons-material',
                     updates: [
                       {
                         newValue: '^6.2.0',

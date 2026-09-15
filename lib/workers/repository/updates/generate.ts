@@ -52,9 +52,8 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   }
   const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = packageName ?? depName;
-  if (datasource && name && currentVersion && newVersion) {
-    return [datasource, name, currentVersion, newVersion];
+  if (datasource && packageName && currentVersion && newVersion) {
+    return [datasource, packageName, currentVersion, newVersion];
   }
   logger.trace(
     {

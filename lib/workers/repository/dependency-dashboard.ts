@@ -407,7 +407,7 @@ export async function ensureDependencyDashboard(
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
-          const name = dep.packageName ?? dep.depName;
+          const name = dep.packageName;
           const replacementUpdate = dep.updates?.find(
             (update) => update.updateType === 'replacement',
           );
