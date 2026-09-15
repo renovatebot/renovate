@@ -1,8 +1,8 @@
 import { logger } from '../../../logger/index.ts';
-import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper.ts';
-import type { RepoContents } from '../../../modules/platform/gitea/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
+import type { RepoContents } from '../../../util/gitea/contents.ts';
+import { API_BASE_PATH, getRepoFile } from '../../../util/gitea/contents.ts';
 import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import {
@@ -47,7 +47,7 @@ export function createPresetSource(
   ): Promise<Nullish<Preset>> {
     let res: RepoContents;
     try {
-      res = await getRepoContents(http, repo, fileName, tag, {
+      res = await getRepoFile(http, API_BASE_PATH, repo, fileName, tag, {
         baseUrl: endpoint,
       });
     } catch (err) {

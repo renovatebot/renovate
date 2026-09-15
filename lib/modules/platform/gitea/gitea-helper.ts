@@ -14,7 +14,6 @@ import {
   Label,
   PR,
   Repo,
-  RepoContents,
   RepoSearchResults,
   User,
   Version,
@@ -143,22 +142,6 @@ export async function getRepo(
 ): Promise<Repo> {
   const url = `${API_PATH}/repos/${repoPath}`;
   const res = await http.getJson(url, options, Repo);
-  return res.body;
-}
-
-export async function getRepoContents(
-  http: GiteaHttp,
-  repoPath: string,
-  filePath: string,
-  ref?: string | null,
-  options: GiteaHttpOptions = {},
-): Promise<RepoContents> {
-  const query = getQueryString(ref ? { ref } : {});
-  const url = `${API_PATH}/repos/${repoPath}/contents/${urlEscape(
-    filePath,
-  )}?${query}`;
-  const res = await http.getJson(url, options, RepoContents);
-
   return res.body;
 }
 

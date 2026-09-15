@@ -2,9 +2,9 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger/index.ts';
 import { Releases } from '../../../../../../modules/datasource/gitea-releases/schema.ts';
 import {
-  ContentsListResponse,
-  RepoContents,
-} from '../../../../../../modules/platform/gitea/schema.ts';
+  getRepoFile,
+  listRepoDir,
+} from '../../../../../../util/gitea/contents.ts';
 import type { GiteaHttp } from '../../../../../../util/http/gitea.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import type {
@@ -42,18 +42,15 @@ export function createChangelogApi(
     sourceDirectory?: string,
   ): Promise<ChangeLogFile | null> {
     logger.trace({ id }, 'getReleaseNotesMd()');
-    const apiPrefix = `${apiBaseUrl}repos/${repository}/contents`;
-
-    const sourceDir = sourceDirectory ? `/${sourceDirectory}` : '';
-    const tree = (
-      await http.getJson(
-        `${apiPrefix}${sourceDir}`,
-        {
-          paginate: false, // no pagination yet
-        },
-        ContentsListResponse,
-      )
-    ).body;
+    const tree = await listRepoDir(
+      http,
+      apiBaseUrl,
+      repository,
+      sourceDirectory,
+      {
+        paginate: false, // no pagination yet
+      },
+    );
     const files = tree.filter(
       (f) => f.type === 'file' && changelogFilenameRegex.test(f.name),
     );
@@ -72,18 +69,20 @@ export function createChangelogApi(
       );
     }
 
-    const fileRes = await http.getJson(
-      `${apiPrefix}/${changelogFile}`,
-      RepoContents,
+    const fileRes = await getRepoFile(
+      http,
+      apiBaseUrl,
+      repository,
+      changelogFile,
     );
     // istanbul ignore if: should never happen
-    if (fileRes.body.type !== 'file' || !fileRes.body.content) {
+    if (fileRes.type !== 'file' || !fileRes.content) {
       logger.debug(
         `Missing content for changelog file, using ${changelogFile}`,
       );
       return null;
     }
-    const changelogMd = `${fileRes.body.contentString}\n#\n##`;
+    const changelogMd = `${fileRes.contentString}\n#\n##`;
 
     return { changelogFile, changelogMd };
   }
