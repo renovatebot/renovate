@@ -10,6 +10,7 @@ import { getEnv } from '../../../util/env.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   findLocalSiblingOrParent,
   isValidLocalPath,
@@ -32,6 +33,7 @@ import { getGoModulesInTidyOrder } from './package-tree.ts';
 
 const { major, valid } = semver;
 const gitExec = withGitEnvironment(['go']);
+const maxTidyAllPasses = 3;
 
 async function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -315,6 +317,15 @@ export async function updateArtifacts({
     }
 
     let goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
+    const postTidyCommands: string[] = [];
+    function addPostTidyCommand(command: string): void {
+      if (isGoModTidyAllRequired) {
+        postTidyCommands.push(command);
+        return;
+      }
+      execCommands.push(command);
+    }
+
     if (useVendor) {
       // If we find a go.work, then use go workspace vendoring.
       const goWorkFile = await findLocalSiblingOrParent(
@@ -330,7 +341,7 @@ export async function updateArtifacts({
 
         args = 'work vendor';
         logger.debug('using go work vendor');
-        execCommands.push(`${cmd} ${args}`);
+        addPostTidyCommand(`${cmd} ${args}`);
 
         args = 'work sync';
         logger.debug('using go work sync');
@@ -338,7 +349,7 @@ export async function updateArtifacts({
       } else {
         args = `mod vendor${modFileFlag}`;
         logger.debug('using go mod vendor');
-        execCommands.push(`${cmd} ${args}`);
+        addPostTidyCommand(`${cmd} ${args}`);
       }
 
       if (isGoModTidyRequired) {
@@ -356,12 +367,33 @@ export async function updateArtifacts({
     }
 
     let dependentModules: string[] = [];
+    let tidyAllCommands: string[] = [];
+    let tidyAllFiles: string[] = [];
+    let initialTidyAllContents: (string | null)[] = [];
+    let firstPassTidyAllContents: (string | null)[] = [];
+    let previousTidyAllContents: (string | null)[] = [];
+    let tidyAllArtifactError: string | undefined;
     if (isGoModTidyAllRequired) {
       try {
         dependentModules = await getGoModulesInTidyOrder(goModFileName);
-        for (const dependent of dependentModules) {
+        const dependentTidyCommands = dependentModules.map((dependent) => {
           const dir = upath.relative(goModDir, upath.dirname(dependent));
-          execCommands.push(`${cmd} -C ${quote(dir)} mod tidy${tidyOpts}`);
+          return `${cmd} -C ${quote(dir)} mod tidy${tidyOpts}`;
+        });
+        execCommands.push(...dependentTidyCommands);
+        if (dependentModules.length > 0) {
+          tidyAllCommands = [
+            `${cmd} mod tidy${modFileFlag}${tidyOpts}`,
+            ...dependentTidyCommands,
+          ];
+          tidyAllFiles = [goModFileName, ...dependentModules].flatMap((f) => [
+            f,
+            f.replace(regEx(/\.mod$/), '.sum'),
+          ]);
+          initialTidyAllContents = await Promise.all(
+            tidyAllFiles.map((f) => readLocalFile(f, 'utf8')),
+          );
+          previousTidyAllContents = initialTidyAllContents;
         }
         logger.debug({ dependentModules }, 'go mod tidy commands included');
       } catch (err) {
@@ -372,7 +404,7 @@ export async function updateArtifacts({
     if (useGoGenerate) {
       if (goGenerateAllowed) {
         logger.debug('go generate command included');
-        execCommands.push(`${cmd} generate ./...`);
+        addPostTidyCommand(`${cmd} generate ./...`);
       } else {
         logger.once.warn(
           `go generate command requested as a post update action, but goGenerate is not permitted in the allowedUnsafeExecutions`,
@@ -381,6 +413,48 @@ export async function updateArtifacts({
     }
 
     await gitExec(execCommands, execOptions);
+
+    if (tidyAllCommands.length > 0) {
+      for (let pass = 1; pass <= maxTidyAllPasses; pass += 1) {
+        const currentTidyAllContents = await Promise.all(
+          tidyAllFiles.map((f) => readLocalFile(f, 'utf8')),
+        );
+        if (pass === 1) {
+          firstPassTidyAllContents = currentTidyAllContents;
+        }
+        if (
+          currentTidyAllContents.every(
+            (content, index) => content === previousTidyAllContents[index],
+          )
+        ) {
+          break;
+        }
+        if (pass === maxTidyAllPasses) {
+          for (const [index, fileName] of tidyAllFiles.entries()) {
+            const restoredContent =
+              index < 2
+                ? firstPassTidyAllContents[index]
+                : initialTidyAllContents[index];
+            if (restoredContent === null) {
+              await deleteLocalFile(fileName);
+            } else {
+              await writeLocalFile(fileName, restoredContent);
+            }
+          }
+          tidyAllArtifactError = `go mod tidy did not stabilize after ${maxTidyAllPasses} passes`;
+          dependentModules = [];
+          break;
+        }
+
+        logger.debug(`go mod tidy files changed, running pass ${pass + 1}`);
+        previousTidyAllContents = currentTidyAllContents;
+        await gitExec(tidyAllCommands, execOptions);
+      }
+    }
+
+    if (!tidyAllArtifactError && postTidyCommands.length > 0) {
+      await gitExec(postTidyCommands, execOptions);
+    }
 
     const status = await getRepoStatus();
     const dependentFiles = dependentModules.flatMap((f) => [
@@ -394,6 +468,16 @@ export async function updateArtifacts({
       !status.modified.includes(goWorkSumFileName) &&
       !dependentFiles.some((f) => status.modified.includes(f))
     ) {
+      if (tidyAllArtifactError) {
+        return [
+          {
+            artifactError: {
+              fileName: sumFileName,
+              stderr: tidyAllArtifactError,
+            },
+          },
+        ];
+      }
       return null;
     }
 
@@ -539,6 +623,14 @@ export async function updateArtifacts({
           });
         }
       }
+    }
+    if (tidyAllArtifactError) {
+      res.push({
+        artifactError: {
+          fileName: sumFileName,
+          stderr: tidyAllArtifactError,
+        },
+      });
     }
     return res;
   } catch (err) {
