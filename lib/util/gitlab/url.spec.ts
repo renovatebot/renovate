@@ -1,6 +1,6 @@
-import { getDepHost, getSourceUrl } from './util.ts';
+import { getApiBaseUrl, getDepHost, getSourceUrl } from './url.ts';
 
-describe('modules/datasource/gitlab-tags/util', () => {
+describe('util/gitlab/url', () => {
   describe('getDepHost', () => {
     it('works', () => {
       expect(getDepHost()).toBe('https://gitlab.com');
@@ -9,6 +9,21 @@ describe('modules/datasource/gitlab-tags/util', () => {
       );
       expect(getDepHost('https://domain.test/gitlab/api/v4')).toBe(
         'https://domain.test/gitlab',
+      );
+    });
+  });
+
+  describe('getApiBaseUrl', () => {
+    it('works', () => {
+      expect(getApiBaseUrl()).toBe('https://gitlab.com/api/v4');
+      expect(getApiBaseUrl('https://gitlab.domain.test')).toBe(
+        'https://gitlab.domain.test/api/v4',
+      );
+      expect(getApiBaseUrl('https://gitlab.domain.test/api/v4')).toBe(
+        'https://gitlab.domain.test/api/v4',
+      );
+      expect(getApiBaseUrl('https://domain.test/gitlab')).toBe(
+        'https://domain.test/gitlab/api/v4',
       );
     });
   });

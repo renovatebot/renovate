@@ -1,4 +1,10 @@
 import { logger } from '../../../logger/index.ts';
+import {
+  defaultRegistryUrl,
+  getApiBaseUrl,
+  getDepHost,
+  getSourceUrl,
+} from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -9,7 +15,6 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
-import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util.ts';
 
 export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
@@ -31,14 +36,14 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
     registryUrl,
     packageName: repo,
   }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
-    const depHost = getDepHost(registryUrl);
+    const apiBaseUrl = getApiBaseUrl(registryUrl);
 
     const urlEncodedRepo = encodeURIComponent(repo);
 
     // tag
     const url = joinUrlParts(
-      depHost,
-      `api/v4/projects`,
+      apiBaseUrl,
+      `projects`,
       urlEncodedRepo,
       `repository/tags?per_page=100`,
     );
@@ -81,7 +86,7 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
     { packageName: repo, registryUrl }: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const depHost = getDepHost(registryUrl);
+    const apiBaseUrl = getApiBaseUrl(registryUrl);
 
     const urlEncodedRepo = encodeURIComponent(repo);
     let digest: string | null = null;
@@ -89,8 +94,8 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
     try {
       if (newValue) {
         const url = joinUrlParts(
-          depHost,
-          `api/v4/projects`,
+          apiBaseUrl,
+          `projects`,
           urlEncodedRepo,
           `repository/commits/`,
           newValue,
@@ -99,8 +104,8 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
         digest = gitlabCommit.body.id;
       } else {
         const url = joinUrlParts(
-          depHost,
-          `api/v4/projects`,
+          apiBaseUrl,
+          `projects`,
           urlEncodedRepo,
           `repository/commits?per_page=1`,
         );
@@ -112,10 +117,6 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
         { gitlabRepo: repo, err, registryUrl },
         'Error getting latest commit from Gitlab repo',
       );
-    }
-
-    if (!digest) {
-      return null;
     }
 
     return digest;
