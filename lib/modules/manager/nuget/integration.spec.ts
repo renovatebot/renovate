@@ -47,11 +47,12 @@ describe('modules/manager/nuget/integration', () => {
     const managerConfig = getManagerConfig(baseConfig, 'nuget');
     let depConfig = mergeChildConfig(managerConfig, dep);
     depConfig = await applyPackageRules(depConfig, 'pre-lookup');
-    return {
+    return partial<LookupUpdateConfig>({
       ...depConfig,
       currentValue: dep.currentValue ?? undefined,
       packageName: dep.packageName ?? dep.depName!,
-    } as LookupUpdateConfig;
+      abandonmentThreshold: depConfig.abandonmentThreshold ?? undefined,
+    });
   }
 
   it('proposes updates for Sdk elements in sqlproj files', async () => {

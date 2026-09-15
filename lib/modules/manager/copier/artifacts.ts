@@ -2,22 +2,41 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
-import { getRepoStatus } from '../../../util/git/index.ts';
+import { readLocalFile, statLocalFile } from '../../../util/fs/index.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { getRepoStatus, isFileModeEnabled } from '../../../util/git/index.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
-import {
-  getCopierVersionConstraint,
-  getPythonVersionConstraint,
-} from './utils.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
+const ownerExecutePermission = 0o100;
+const gitExec = withGitEnvironment(['git-tags']);
+
+async function detectExecutable(
+  path: string,
+  canReadFileMode: boolean,
+): Promise<true | undefined> {
+  if (!canReadFileMode) {
+    return undefined;
+  }
+
+  const fileStats = await statLocalFile(path);
+  if (!fileStats?.isFile()) {
+    return undefined;
+  }
+
+  if ((fileStats.mode & ownerExecutePermission) === 0) {
+    return undefined;
+  }
+
+  // Git derives its executable flag from the owner's execute permission.
+  return true;
+}
 
 function buildCommand(
   config: UpdateArtifactsConfig,
@@ -73,24 +92,22 @@ export async function updateArtifacts({
   }
 
   const command = buildCommand(config, packageFileName, newValue);
-  const gitEnv = getGitEnvironmentVariables(['git-tags']);
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {},
-    extraEnv: gitEnv,
     toolConstraints: [
       {
         toolName: 'python',
-        constraint: getPythonVersionConstraint(config),
+        constraint: await resolveToolConstraint(config, 'python'),
       },
       {
         toolName: 'copier',
-        constraint: getCopierVersionConstraint(config),
+        constraint: await resolveToolConstraint(config, 'copier'),
       },
     ],
   };
   try {
-    await exec(command, execOptions);
+    await gitExec(command, execOptions);
   } catch (err) {
     logger.debug({ err }, `Failed to update copier template: ${err.message}`);
     return artifactError(packageFileName, err.message);
@@ -102,13 +119,16 @@ export async function updateArtifacts({
     return null;
   }
 
+  const res: UpdateArtifactsResult[] = [];
+
   if (status.conflicted.length > 0) {
     // Sometimes, Copier erroneously reports conflicts.
     const msg = `Updating the Copier template yielded ${status.conflicted.length} merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * ${status.conflicted.join('\n  * ')}`;
     logger.debug({ packageFileName, depName: updatedDeps[0]?.depName }, msg);
+    res.push(...artifactError(packageFileName, msg));
   }
 
-  const res: UpdateArtifactsResult[] = [];
+  const canReadFileMode = await isFileModeEnabled();
 
   for (const f of [
     ...status.modified,
@@ -120,6 +140,7 @@ export async function updateArtifacts({
         type: 'addition',
         path: f,
         contents: await readLocalFile(f),
+        isExecutable: await detectExecutable(f, canReadFileMode),
       },
     };
     if (status.conflicted.includes(f)) {
@@ -155,6 +176,7 @@ export async function updateArtifacts({
         type: 'addition',
         path: f.to,
         contents: await readLocalFile(f.to),
+        isExecutable: await detectExecutable(f.to, canReadFileMode),
       },
     });
   }

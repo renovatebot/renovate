@@ -15,8 +15,6 @@ export const validMatchFields = [
   'indentation',
 ] as const;
 
-export type ValidMatchFields = (typeof validMatchFields)[number];
-
 export function substituteRegistryAliases(
   dep: PackageDependency,
   registryAliases: Record<string, string> | undefined,

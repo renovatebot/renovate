@@ -1,6 +1,7 @@
 import { isString } from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { logger } from '../../../../../logger/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
 import type { ConstraintName } from '../../../../../util/exec/types.ts';
 import { isConstraintName } from '../../../../../util/exec/types.ts';
 import { regEx } from '../../../../../util/regex.ts';
@@ -16,7 +17,7 @@ import {
 import type { PackageDependency } from '../../../types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
-  /(?:git@)github.com:([^/]+)\/([^/]+?)(?:\.git)?$/,
+  /(?:git@)github.com:(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
 );
 
 export function parseDepName(depType: string, key: string): string {
@@ -42,8 +43,9 @@ export function parseDepName(depType: string, key: string): string {
   }
 
   const lastSegment = segments.at(-1);
-  const [, depName] =
-    regEx(/^((?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? '') ?? [];
+  const [, depName] = coerceArray(
+    regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? ''),
+  );
   return depName;
 }
 
@@ -57,7 +59,7 @@ export function extractDependency(
     dep.skipReason = 'invalid-name';
     return dep;
   }
-  if (typeof input !== 'string') {
+  if (!isString(input)) {
     dep.skipReason = 'invalid-value';
     return dep;
   }
@@ -83,6 +85,9 @@ export function extractDependency(
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
       dep.versioning = npmVersioningId;
+    } else if (depName === 'bun') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Bun';
     } else {
       dep.skipReason = 'unknown-engines';
     }
@@ -172,13 +177,16 @@ export function extractDependency(
     }
     [githubOwner, githubRepo] = githubRepoSplit;
   } else {
-    githubOwner = matchUrlSshFormat[1];
-    githubRepo = matchUrlSshFormat[2];
+    githubOwner = matchUrlSshFormat.groups!.owner;
+    githubRepo = matchUrlSshFormat.groups!.repo;
     githubOwnerRepo = `${githubOwner}/${githubRepo}`;
   }
-  const githubOwnerRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
+  // combined with the length check below, this is equivalent to
+  // /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i without the lookahead
+  const githubOwnerRegex = regEx(/^[a-z\d](?:-?[a-z\d]){0,38}$/i);
   const githubRepoRegex = regEx(/^[a-zA-Z0-9._-]{1,100}$/);
   if (
+    githubOwner.length > 39 ||
     !githubOwnerRegex.test(githubOwner) ||
     !githubRepoRegex.test(githubRepo)
   ) {
@@ -230,6 +238,7 @@ export function getExtractedConstraints(
 ): Partial<Record<ConstraintName, string>> {
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   const constraints: ConstraintName[] = [
+    'bun',
     'node',
     'yarn',
     'npm',

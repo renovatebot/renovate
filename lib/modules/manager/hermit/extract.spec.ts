@@ -76,7 +76,7 @@ describe('modules/manager/hermit/extract', () => {
       const msg = 'error reading directory';
       readdirMock.mockRejectedValue(new Error(msg));
 
-      expect(await extractPackageFile('', 'bin/hermit')).toBeNull();
+      await expect(extractPackageFile('', 'bin/hermit')).resolves.toBeNull();
     });
   });
 });

@@ -11,23 +11,10 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import type { PackageDependency, UpdateArtifactsResult } from '../types.ts';
+import type { UpdateArtifactsResult } from '../types.ts';
+import type { UpdatePixiLockfile } from './types.ts';
 
 export const commandLock = 'pixi lock --no-progress --color=never --quiet';
-
-export interface UpdatePixiLockfile {
-  packageFileName: string;
-  updatedDeps: PackageDependency[] | undefined;
-  isLockFileMaintenance: boolean | undefined;
-  /** `pixi` version constraint passed to the tool installer. */
-  constraint: string | undefined;
-  /**
-   * When set, the content is written to `packageFileName` before running
-   * `pixi lock`. Callers that have already written the package file to disk
-   * (e.g. the `pep621` manager) should leave this `undefined`.
-   */
-  newPackageFileContent?: string;
-}
 
 /**
  * Regenerate the sibling `pixi.lock` of a package file by running `pixi lock`.
