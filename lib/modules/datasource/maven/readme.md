@@ -1,3 +1,7 @@
+#### Registry URLs are order-dependent
+
+As of Renovate 44, the default `registryStrategy` ...
+
 #### Maven Central rate limiting and caching
 
 Maven Central, hosted by Sonatype, receives a very large number of requests and has implemented rate limiting measures to manage organizational overconsumption.
