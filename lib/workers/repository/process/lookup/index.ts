@@ -37,7 +37,11 @@ import { calculateAbandonment } from './abandonment.ts';
 import { getBucket } from './bucket.ts';
 import { getCurrentVersion } from './current.ts';
 import { filterVersions } from './filter.ts';
-import { filterInternalChecks } from './filter-checks.ts';
+import {
+  filterInternalChecks,
+  missingReleaseTimestampWarning,
+  resolveUpdateTypeConfig,
+} from './filter-checks.ts';
 import { generateUpdate } from './generate.ts';
 import { getRollbackUpdate } from './rollback.ts';
 import { calculateMostRecentTimestamp } from './timestamps.ts';
@@ -101,8 +105,6 @@ function couldApplyMinimumReleaseAgeToDigest(
 
 /**
  * Ensure `minimumReleaseAge`/`internalChecksFilter` applies to digest/pinDigest updates, as they don't currently get run through `filterInternalChecks()`.
- *
- * NOTE that this should be kept in sync with `filterInternalChecks`()
  */
 async function applyMinimumReleaseAgeToDigestUpdate(
   update: DigestLikeUpdate,
@@ -128,15 +130,10 @@ async function applyMinimumReleaseAgeToDigestUpdate(
     return;
   }
 
-  let releaseConfig: LookupUpdateConfig = {
-    ...mergeChildConfig(config, res),
-    updateType: update.updateType,
-  };
-  releaseConfig = mergeChildConfig(
-    releaseConfig,
-    releaseConfig[update.updateType]!,
+  const releaseConfig = await resolveUpdateTypeConfig(
+    mergeChildConfig(config, res),
+    update.updateType,
   );
-  releaseConfig = await applyPackageRules(releaseConfig, 'update-type');
 
   // Not update.releaseTimestamp - that field means "age of the new release" elsewhere (generate.ts, libyear.ts).
   // Not res.currentVersionTimestamp either - that tracks whatever rangeStrategy resolves currentVersion to (e.g.
@@ -150,9 +147,7 @@ async function applyMinimumReleaseAgeToDigestUpdate(
   // Mirror filterInternalChecks()'s logging so a held/passed digest update is diagnosable.
   if (ageCheck.minimumReleaseAgeMs && !ageCheck.hasTimestamp) {
     if (releaseConfig.minimumReleaseAgeBehaviour === 'timestamp-optional') {
-      logger.once.warn(
-        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
-      );
+      logger.once.warn(missingReleaseTimestampWarning);
     }
 
     logger.once.debug(
