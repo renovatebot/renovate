@@ -12,13 +12,9 @@ import {
 } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from '../npm/utils.ts';
+import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import { readUpdatedBinaryLockFile, resolveToolConstraint } from '../util.ts';
 import type { DenoManagerData } from './types.ts';
 
 export async function updateArtifacts(
@@ -27,7 +23,7 @@ export async function updateArtifacts(
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
   logger.debug(`deno.updateArtifacts(${packageFileName})`);
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
 
   if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated deno deps - returning null');
@@ -81,85 +77,76 @@ export async function updateArtifacts(
 
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
+    return await withNpmrcHostRules(
+      pkgFileDir,
+      additionalNpmrcContent,
+      async () => {
+        await writeLocalFile(packageFileName, newPackageFileContent);
 
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
+        if (isLockFileMaintenance) {
+          await deleteLocalFile(lockFileName);
+        }
 
-    // run from its referred deno.json/deno.jsonc location if import map is used
-    const importMapReferrerDep = updatedDeps.find(
-      (dep) => dep.managerData?.importMapReferrer,
-    );
-    const cwdFile =
-      importMapReferrerDep?.managerData?.importMapReferrer ?? packageFileName;
+        // run from its referred deno.json/deno.jsonc location if import map is used
+        const importMapReferrerDep = updatedDeps.find(
+          (dep) => dep.managerData?.importMapReferrer,
+        );
+        const cwdFile =
+          importMapReferrerDep?.managerData?.importMapReferrer ??
+          packageFileName;
 
-    const execOptions: ExecOptions = {
-      cwdFile,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'deno',
-          constraint: await resolveToolConstraint(config, 'deno'),
-        },
-      ],
-    };
+        const execOptions: ExecOptions = {
+          cwdFile,
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'deno',
+              constraint: await resolveToolConstraint(config, 'deno'),
+            },
+          ],
+        };
 
-    // "deno install" don't execute lifecycle scripts of package.json by default
-    // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
-    // deno.json(c) could have the `lock.frozen` field
-    // we should always override the `frozen` flag due to if it would be specified true
-    let command = 'deno install --frozen=false';
+        // "deno install" don't execute lifecycle scripts of package.json by default
+        // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
+        // deno.json(c) could have the `lock.frozen` field
+        // we should always override the `frozen` flag due to if it would be specified true
+        let command = 'deno install --frozen=false';
 
-    // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web
-    const defaultImportHosts = [
-      'deno.land:443',
-      'esm.sh:443',
-      'jsr.io:443',
-      'cdn.jsdelivr.net:443',
-      'raw.githubusercontent.com:443',
-      'gist.githubusercontent.com:443',
-    ];
-    const additionalImportHosts = hostRules
-      .findAll({ hostType: 'npm' })
-      .filter((rule) => rule.resolvedHost)
-      .map((rule) => rule.resolvedHost);
+        // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web
+        const defaultImportHosts = [
+          'deno.land:443',
+          'esm.sh:443',
+          'jsr.io:443',
+          'cdn.jsdelivr.net:443',
+          'raw.githubusercontent.com:443',
+          'gist.githubusercontent.com:443',
+        ];
+        const additionalImportHosts = hostRules
+          .findAll({ hostType: 'npm' })
+          .filter((rule) => rule.resolvedHost)
+          .map((rule) => rule.resolvedHost);
 
-    if (additionalImportHosts.length > 0) {
-      // combine default and additional import hosts, removing duplicates
-      const importHosts = [
-        ...new Set([...defaultImportHosts, ...additionalImportHosts]),
-      ].join(',');
+        if (additionalImportHosts.length > 0) {
+          // combine default and additional import hosts, removing duplicates
+          const importHosts = [
+            ...new Set([...defaultImportHosts, ...additionalImportHosts]),
+          ].join(',');
 
-      command += ` --allow-import=${quote(importHosts)}`;
-    }
+          command += ` --allow-import=${quote(importHosts)}`;
+        }
 
-    // TODO: appending `--lockfile-only` is better to reduce disk usage
-    // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
-    await exec(command, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
+        // TODO: appending `--lockfile-only` is better to reduce disk usage
+        // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
+        await exec(command, execOptions);
 
-    const newLockFileContent = await readLocalFile(lockFileName);
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
+        return await readUpdatedBinaryLockFile(
+          lockFileName,
+          oldLockFileContent,
+        );
       },
-    ];
+    );
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
