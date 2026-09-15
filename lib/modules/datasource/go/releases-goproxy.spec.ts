@@ -1,10 +1,12 @@
 import { codeBlock } from 'common-tags';
+import { dir as tmpDir } from 'tmp-promise';
 import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
@@ -1605,6 +1607,79 @@ describe('modules/datasource/go/releases-goproxy', () => {
         });
 
         expect(setCache).toHaveBeenCalledOnce();
+      });
+    });
+
+    describe('version timestamps', () => {
+      let dirResult: Awaited<ReturnType<typeof tmpDir>>;
+
+      beforeEach(async () => {
+        memCache.init();
+        dirResult = await tmpDir({ unsafeCleanup: true });
+        await packageCache.init({ cacheDir: dirResult.path });
+      });
+
+      afterEach(async () => {
+        GlobalConfig.reset();
+        await packageCache.cleanup({});
+        await dirResult.cleanup();
+        memCache.reset();
+      });
+
+      function setHttpMock(): void {
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\n')
+          .get('/@v/v1.0.0.info')
+          .optionally()
+          .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' })
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+      }
+
+      // As a version's publication time should never change (as the Go proxy treats this as immutable data), we SHOULD be only calling the `.info` API once
+      //
+      // Currently, this does not work, as we do not cache it sufficiently, so re-query the API each time
+      //
+      // This test simulates i.e.
+      //
+      // - 2026-01-01T00:00Z: Renovate runs
+      // - 2026-01-01T00:30Z: Renovate finishes
+      // - 2026-01-01T01:00Z: Renovate's caches expire
+      // - 2026-01-02T00:00Z: Renovate runs
+      //
+      // But without needing to actually wait that long
+      it.fails('reuses timestamps fetched by an earlier run', async () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-go-proxy':
+              // 0 means "expired as soon as it's written to cache", and allows us to show what happens if the cache has expired between the runs, as if the default `cacheTtl` has passed on `datasource-go-proxy`
+              0,
+          },
+        });
+
+        vi.stubEnv('GOPROXY', baseUrl);
+
+        setHttpMock();
+        const first = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        // a new run, against the same persistent cache
+        memCache.init();
+
+        setHttpMock();
+        const second = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(second).toEqual(first);
+        expect(
+          httpMock.getTrace().filter(({ url }) => url.endsWith('.info')),
+        ).toHaveLength(1);
       });
     });
   });
