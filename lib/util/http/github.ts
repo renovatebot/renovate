@@ -584,7 +584,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     const body = variables ? { query, variables } : { query };
 
     const opts: GithubBaseHttpOptions = {
-      baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
+      baseUrl: baseUrl.replace('/v3/', '/'), // GHES uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
       readOnly: options.readOnly,

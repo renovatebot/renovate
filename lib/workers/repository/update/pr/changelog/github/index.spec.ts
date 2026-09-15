@@ -249,7 +249,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       });
     });
 
-    it('supports github enterprise and github.com changelog', async () => {
+    it('supports GHES and github.com changelog', async () => {
       hostRules.add({
         hostType: 'github',
         token: 'super_secret',
@@ -262,7 +262,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       ).resolves.toMatchObject(expectedChangeLog());
     });
 
-    it('supports github enterprise and github enterprise changelog', async () => {
+    it('supports GHES and GHES changelog', async () => {
       hostRules.add({
         hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
