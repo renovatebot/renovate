@@ -203,7 +203,7 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
       currentDigest,
       registryUrl,
     }: RegistryDigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
     logger.debug(
       { repo, currentValue, currentDigest, registryUrl, newValue },
@@ -214,6 +214,9 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     }
     if (!currentValue) {
       return currentDigest;
+    }
+    if (!newValue) {
+      return null;
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
