@@ -27,6 +27,7 @@ import {
 } from './common.ts';
 import type { PipCompileArgs } from './types.ts';
 import { inferCommandExecDir } from './utils.ts';
+import { execUv } from './uv.ts';
 
 function haveCredentialsInPipEnvironmentVariables(): boolean {
   const env = getEnv();
@@ -142,12 +143,25 @@ export async function updateArtifacts({
         config,
         compileArgs.commandType,
         cwd,
-        getRegistryCredVarsFromPackageFiles(packageFiles),
+        compileArgs.commandType === 'uv'
+          ? {}
+          : getRegistryCredVarsFromPackageFiles(packageFiles),
         pythonVersion,
       );
       logger.trace({ cwd, cmd }, 'pip-compile command');
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
-      await exec(cmd, execOptions);
+      if (compileArgs.commandType === 'uv') {
+        await execUv(cmd, execOptions, [
+          ...packageFiles,
+          {
+            deps: [],
+            registryUrls: compileArgs.indexUrl ? [compileArgs.indexUrl] : [],
+            additionalRegistryUrls: compileArgs.extraIndexUrl,
+          },
+        ]);
+      } else {
+        await exec(cmd, execOptions);
+      }
       const status = await getRepoStatus();
       if (status?.modified.includes(outputFileName)) {
         result.push({

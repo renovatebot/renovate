@@ -2,6 +2,11 @@ The `pip-compile` manager does not support all use cases for `pip-compile`, so i
 
 The `uv pip compile` command is also supported through this manager in the same fashion as `pip-compile`.
 
+For private registries, `uv pip compile` uses credentials from `hostRules` matching index URLs in the source requirements files or the generated command header.
+Renovate supplies these credentials through a temporary `.netrc` file outside the repository, with owner-only permissions, and removes it after the command finishes, including on failure.
+Credentials are not added to index URLs or generated requirements files.
+Because `.netrc` identifies registries by hostname, different credentials for multiple indexes on the same hostname are not supported.
+
 The current implementation has some limitations.
 Read the full document before you start using the `pip-compile` manager.
 

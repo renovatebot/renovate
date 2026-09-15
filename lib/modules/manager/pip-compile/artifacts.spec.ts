@@ -17,6 +17,7 @@ import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { constructPipCompileCmd } from './artifacts.ts';
 import { extractHeaderCommand } from './common.ts';
 import { updateArtifacts } from './index.ts';
+import * as uv from './uv.ts';
 
 const datasource = vi.mocked(_datasource);
 
@@ -341,6 +342,33 @@ describe('modules/manager/pip-compile/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
+  });
+
+  it('passes source and command-header indexes to uv authentication', async () => {
+    const execUv = vi.spyOn(uv, 'execUv').mockResolvedValueOnce();
+    const cmd =
+      'uv pip compile --index-url=https://primary.example.com/simple --extra-index-url=https://extra.example.com/simple requirements.in';
+    fs.readLocalFile.mockResolvedValueOnce(getCommandInUvHeader(cmd));
+    fs.readLocalFile.mockResolvedValueOnce(
+      '--index-url https://source.example.com/simple\n',
+    );
+
+    await updateArtifacts({
+      packageFileName: 'requirements.in',
+      newPackageFileContent: '--index-url https://source.example.com/simple\n',
+      updatedDeps: [],
+      config: { lockFiles: ['requirements.txt'] },
+    });
+
+    expect(execUv).toHaveBeenCalledWith(cmd, expect.any(Object), [
+      { deps: [], registryUrls: ['https://source.example.com/simple'] },
+      {
+        deps: [],
+        registryUrls: ['https://primary.example.com/simple'],
+        additionalRegistryUrls: ['https://extra.example.com/simple'],
+      },
+    ]);
+    execUv.mockRestore();
   });
 
   it('install uv tools without constraints', async () => {
