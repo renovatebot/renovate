@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { acquireLock } from '../../../util/mutex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { parseUrl, trimTrailingSlash } from '../../../util/url.ts';
 import { isPublicGoPackage } from './common.ts';
@@ -54,15 +55,20 @@ export class GoVersionTimestampCache {
       return;
     }
 
-    // `foo` and `foo/v2` are separate lookups which both walk the `v2` module, so another one of them may have written its own timestamps while we were fetching ours
-    const current = await read(this.cacheKey);
+    // `foo` and `foo/v2` are separate lookups which both walk the `v2` module, so another one of them may have written its own timestamps while we were fetching ours. The lock only protects against concurrent writes within this process, not across separate Renovate processes/machines sharing the same cache backend.
+    const releaseLock = await acquireLock(this.cacheKey, cacheNamespace);
+    try {
+      const current = await read(this.cacheKey);
 
-    await packageCache.set(
-      cacheNamespace,
-      this.cacheKey,
-      { ...current, ...this.timestamps },
-      ttlMinutes,
-    );
+      await packageCache.set(
+        cacheNamespace,
+        this.cacheKey,
+        { ...current, ...this.timestamps },
+        ttlMinutes,
+      );
+    } finally {
+      releaseLock();
+    }
   }
 }
 
