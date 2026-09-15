@@ -60,6 +60,8 @@ describe('util/common', () => {
       ${'https://github-enterprise.example.com/chalk/chalk'}                 | ${'github'}
       ${'https://gitlab.com/chalk/chalk'}                                    | ${'gitlab'}
       ${'https://gitlab-enterprise.example.com/chalk/chalk'}                 | ${'gitlab'}
+      ${'https://review.gerrithub.io/some/project'}                          | ${'gerrit'}
+      ${'https://gerrit.example.com/a/some/project'}                         | ${'gerrit'}
     `('("$url") === $hostType', ({ url, hostType }) => {
       expect(detectPlatform(url)).toBe(hostType);
     });
@@ -90,6 +92,10 @@ describe('util/common', () => {
         matchHost: 'gl.example.com',
       });
       hostRules.add({
+        hostType: 'gerrit',
+        matchHost: 'review.example.com',
+      });
+      hostRules.add({
         hostType: 'unknown',
         matchHost: 'f.example.com',
       });
@@ -110,6 +116,9 @@ describe('util/common', () => {
       );
       expect(detectPlatform('https://gl.example.com/chalk/chalk')).toBe(
         'gitlab',
+      );
+      expect(detectPlatform('https://review.example.com/a/proj')).toBe(
+        'gerrit',
       );
       expect(detectPlatform('https://f.example.com/chalk/chalk')).toBeNull();
     });

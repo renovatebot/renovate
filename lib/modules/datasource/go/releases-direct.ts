@@ -4,6 +4,7 @@ import { regEx } from '../../../util/regex.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { Datasource } from '../datasource.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
+import { GerritTagsDatasource } from '../gerrit-tags/index.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
@@ -62,6 +63,7 @@ export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
   readonly forgejo = new ForgejoTagsDatasource();
+  readonly gerrit = new GerritTagsDatasource();
   git: GitTagsDatasource;
   readonly gitea = new GiteaTagsDatasource();
   github: GithubTagsDatasource;
@@ -108,6 +110,10 @@ export class GoDirectDatasource extends Datasource {
     switch (source.datasource) {
       case ForgejoTagsDatasource.id: {
         res = await this.forgejo.getReleases(source);
+        break;
+      }
+      case GerritTagsDatasource.id: {
+        res = await this.gerrit.getReleases(source);
         break;
       }
       case GitTagsDatasource.id: {
