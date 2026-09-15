@@ -1,6 +1,7 @@
 import {
   isArray,
   isNumber,
+  isObject,
   isPlainObject,
   isPrimitive,
   isString,
@@ -271,6 +272,39 @@ const allowedTemplateFields = new Set([
   ...Object.keys(allowedFields),
   ...exposedConfigOptions,
 ]);
+
+/**
+ * Handlebars invokes the `helperMissing` hook for a mustache like `{{someVar}}`
+ * which matches neither a helper nor a field of the input, and renders an empty
+ * string by default. That destroys data values which themselves contain
+ * handlebars-like syntax, e.g. a directory literally named `{{some_dir}}`
+ * inserted into the output by an earlier pass of nested template compilation.
+ * Keep such unknown references as literal text instead, so that compiling a
+ * template repeatedly is idempotent. References to allowed fields which are
+ * unset, or to fields filtered out by the compile proxy, still render an empty
+ * string, and calling an unknown helper with arguments still throws.
+ */
+handlebars.registerHelper(
+  'helperMissing',
+  // eslint-disable-next-line prefer-arrow-callback
+  function (this: unknown, ...args: unknown[]): unknown {
+    if (args.length !== 1) {
+      // Attempt to call an unknown helper: keep the default behavior
+      throw new Error(
+        `Missing helper: "${(args.at(-1) as { name: string }).name}"`,
+      );
+    }
+    const options = args[0] as HelperOptions & { name: string };
+    if (
+      !options.fn && // block helpers keep rendering the inverse block
+      !allowedTemplateFields.has(options.name) &&
+      !(isObject(this) && Object.hasOwn(this, options.name))
+    ) {
+      return `{{${options.name}}}`;
+    }
+    return undefined;
+  },
+);
 
 class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
   private warnVariables: Set<string>;
