@@ -1,11 +1,15 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import { getRemoteUrlWithToken } from '../../../util/git/url.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig } from '../types.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import type { RawRefs } from './types.ts';
 
 const refMatch = regEx(/(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/);
@@ -16,6 +20,12 @@ const gitId = 'git';
 // TODO: extract to a separate directory structure (#10532)
 export abstract class GitDatasource extends Datasource {
   static id = gitId;
+
+  /**
+   * The `refs/<type>/` kinds this datasource exposes as releases, and the only
+   * ones a `newValue` is matched against by {@link GitDatasource.getDigest}.
+   */
+  protected abstract readonly refTypes: readonly string[];
 
   constructor(id: string) {
     super(id);
@@ -92,12 +102,72 @@ export abstract class GitDatasource extends Datasource {
   }
 
   getRawRefs(config: GetReleasesConfig): Promise<RawRefs[] | null> {
-    return withCache(
+    return this.cached(
       {
         namespace: `datasource-${gitId}`,
         key: config.packageName,
       },
       () => this._getRawRefs(config),
     );
+  }
+
+  /**
+   * The repository URL, without the `.git` suffix and the trailing slash that
+   * a `packageName` may carry.
+   */
+  protected getSourceUrl(packageName: string): string {
+    return packageName.replace(regEx(/\.git$/), '').replace(regEx(/\/$/), '');
+  }
+
+  /**
+   * One release per distinct ref value of the datasource's
+   * {@link GitDatasource.refTypes}, in the order `git ls-remote` returned
+   * them. A value carried by several ref types, such as a branch and a tag of
+   * the same name, keeps the hash of the first ref that has it.
+   */
+  protected async getRefReleases({
+    packageName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const rawRefs = await this.getRawRefs({ packageName });
+    if (!rawRefs) {
+      return null;
+    }
+
+    const releases = new Map<string, Release>();
+    for (const ref of rawRefs) {
+      if (!this.refTypes.includes(ref.type) || releases.has(ref.value)) {
+        continue;
+      }
+
+      releases.set(ref.value, {
+        version: ref.value,
+        gitRef: ref.value,
+        newDigest: ref.hash,
+      });
+    }
+
+    return {
+      sourceUrl: this.getSourceUrl(packageName),
+      releases: [...releases.values()],
+    };
+  }
+
+  override async getDigest(
+    { packageName }: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    const rawRefs = await this.getRawRefs({ packageName });
+    if (!rawRefs) {
+      return null;
+    }
+
+    const ref = newValue
+      ? rawRefs.find(
+          (rawRef) =>
+            this.refTypes.includes(rawRef.type) && rawRef.value === newValue,
+        )
+      : rawRefs.find((rawRef) => rawRef.type === '' && rawRef.value === 'HEAD');
+
+    return ref?.hash ?? null;
   }
 }
