@@ -27,7 +27,6 @@ export function extractMsbuildGlobalManifest(
     return null;
   }
 
-  // v8 ignore else -- a global.json without an sdk version is rejected above
   if (manifest.sdk?.version) {
     deps.push({
       depType: 'dotnet-sdk',
