@@ -46,15 +46,15 @@ function generateToolingTable(): string {
     const withFields = getWithSchemaFields(cfg.withSchema);
     const versioning = cfg.versioning
       ? `[\`${cfg.versioning}\`](../../versioning/${cfg.versioning}/index.md)`
-      : '<sup>1</sup>';
+      : '<em>(Default)</em><sup>1</sup>';
 
     table += `| [\`${name}\`](https://github.com/${name}) | \`${withFields.join('`, `')}\` | ${determineDependencyToUpdate(cfg)} | ${versioning} |\n`;
   }
 
-  return table;
+  return `The following ${Object.keys(knownActions).length} Actions have support for their \`with\`: blocks:\n\n${table}`;
 }
 
-export async function generateManagerGithubActionsCommunity(
+export async function generateManagerKnownGithubActions(
   dist: string,
 ): Promise<void> {
   const indexFileName = `${dist}/modules/manager/github-actions/index.md`;

@@ -431,7 +431,7 @@ In this example:
 - `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
 - `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
 
-Namespaces of special interest follow the pattern `datasource-releases-{datasource}`.
+Namespaces of special interest follow the pattern `datasource-{datasource}`.
 When releases for a datasource are fetched, they are stored in this namespace.
 Whether caching is enabled for a particular datasource depends on whether it's private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
 

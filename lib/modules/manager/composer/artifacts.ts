@@ -28,6 +28,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { Lazy } from '../../../util/lazy.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
@@ -35,13 +36,13 @@ import { coerceString } from '../../../util/string.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { Lockfile, PackageFile } from './schema.ts';
 import type { AuthJson } from './types.ts';
 import {
   extractConstraints,
   getComposerArguments,
   getComposerUpdateArguments,
-  getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
 } from './utils.ts';
@@ -79,6 +80,7 @@ function getAuthJson(): string | null {
       continue;
     }
 
+    // v8 ignore else -- a rule without a token does not pass the check above
     if (gitlabHostRule?.token) {
       const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
       authJson['gitlab-token'] = coerceObject(authJson['gitlab-token']);
@@ -141,19 +143,27 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const constraints = {
-      ...extractConstraints(file, lockfile),
-      ...config.constraints,
-    };
+    // `extractConstraints()` re-reads the updated package file, so its values win
+    // over what extraction saw on the base branch. It only runs when a user
+    // constraint is missing for at least one of the tools.
+    const fileConstraints = new Lazy(() => extractConstraints(file, lockfile));
 
     const composerToolConstraint: ToolConstraint = {
       toolName: 'composer',
-      constraint: constraints.composer,
+      constraint: await resolveToolConstraint(
+        config,
+        'composer',
+        () => fileConstraints.getValue().composer,
+      ),
     };
 
     const phpToolConstraint: ToolConstraint = {
       toolName: 'php',
-      constraint: getPhpConstraint(constraints),
+      constraint: await resolveToolConstraint(
+        config,
+        'php',
+        () => fileConstraints.getValue().php,
+      ),
     };
 
     const execOptions: ExecOptions = {

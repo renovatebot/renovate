@@ -140,6 +140,28 @@ describe('modules/manager/deno/artifacts', () => {
       ]);
     });
 
+    it('falls back to the extracted deno constraint', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      GlobalConfig.set({ localDir, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(Buffer.from('new') as never);
+
+      await updateArtifacts({
+        ...updateArtifact,
+        config: { extractedConstraints: { deno: '2.4.5' } },
+        updatedDeps: [{ lockFiles: ['deno.lock'] }],
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool deno 2.4.5' },
+        { cmd: 'deno install --frozen=false' },
+      ]);
+    });
+
     it('handles temporary error', async () => {
       const execError = new ExecError(TEMPORARY_ERROR, {
         cmd: '',

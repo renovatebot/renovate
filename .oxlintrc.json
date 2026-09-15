@@ -245,10 +245,99 @@
       }
     },
     {
+      "files": ["lib/modules/manager/**"],
+      "excludeFiles": ["**/*.spec.ts", "lib/modules/manager/util.ts"],
+      "rules": {
+        "renovate/prefer-resolve-tool-constraint": "error"
+      }
+    },
+    {
       "files": ["lib/modules/datasource/**"],
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
         "renovate/no-unvalidated-pagination-url": "error"
+      }
+    },
+    {
+      "files": ["lib/**"],
+      "excludeFiles": ["**/*.spec.ts"],
+      "rules": {
+        "renovate/require-cacheable": "error"
+      }
+    },
+    {
+      "files": [
+        "lib/modules/datasource/apk/index.ts",
+        "lib/modules/datasource/artifactory/index.ts",
+        "lib/modules/datasource/aws-eks-addon/index.ts",
+        "lib/modules/datasource/aws-machine-image/index.ts",
+        "lib/modules/datasource/aws-rds/index.ts",
+        "lib/modules/datasource/azure-bicep-resource/index.ts",
+        "lib/modules/datasource/azure-pipelines-tasks/index.ts",
+        "lib/modules/datasource/azure-tags/index.ts",
+        "lib/modules/datasource/bazel/index.ts",
+        "lib/modules/datasource/bitbucket-server-tags/index.ts",
+        "lib/modules/datasource/bitbucket-tags/index.ts",
+        "lib/modules/datasource/bitrise/index.ts",
+        "lib/modules/datasource/buildpacks-registry/index.ts",
+        "lib/modules/datasource/conan/index.ts",
+        "lib/modules/datasource/conda/index.ts",
+        "lib/modules/datasource/cpan/index.ts",
+        "lib/modules/datasource/deb/index.ts",
+        "lib/modules/datasource/deno/index.ts",
+        "lib/modules/datasource/docker/index.ts",
+        "lib/modules/datasource/dotnet-version/index.ts",
+        "lib/modules/datasource/elm-package/index.ts",
+        "lib/modules/datasource/endoflife-date/index.ts",
+        "lib/modules/datasource/forgejo-releases/index.ts",
+        "lib/modules/datasource/forgejo-tags/index.ts",
+        "lib/modules/datasource/galaxy-collection/index.ts",
+        "lib/modules/datasource/galaxy/index.ts",
+        "lib/modules/datasource/git-refs/base.ts",
+        "lib/modules/datasource/git-refs/index.ts",
+        "lib/modules/datasource/git-tags/index.ts",
+        "lib/modules/datasource/gitea-releases/index.ts",
+        "lib/modules/datasource/gitea-tags/index.ts",
+        "lib/modules/datasource/github-digest/index.ts",
+        "lib/modules/datasource/github-release-attachments/index.ts",
+        "lib/modules/datasource/gitlab-packages/index.ts",
+        "lib/modules/datasource/gitlab-releases/index.ts",
+        "lib/modules/datasource/gitlab-tags/index.ts",
+        "lib/modules/datasource/glasskube-packages/index.ts",
+        "lib/modules/datasource/go/index.ts",
+        "lib/modules/datasource/go/releases-direct.ts",
+        "lib/modules/datasource/go/releases-goproxy.ts",
+        "lib/modules/datasource/golang-version/index.ts",
+        "lib/modules/datasource/gradle-version/index.ts",
+        "lib/modules/datasource/helm/index.ts",
+        "lib/modules/datasource/hermit/index.ts",
+        "lib/modules/datasource/hexpm-bob/index.ts",
+        "lib/modules/datasource/java-version/index.ts",
+        "lib/modules/datasource/jenkins-plugins/index.ts",
+        "lib/modules/datasource/jsr/index.ts",
+        "lib/modules/datasource/nextcloud/index.ts",
+        "lib/modules/datasource/node-version/index.ts",
+        "lib/modules/datasource/nuget/v3.ts",
+        "lib/modules/datasource/orb/index.ts",
+        "lib/modules/datasource/packagist/index.ts",
+        "lib/modules/datasource/pod/index.ts",
+        "lib/modules/datasource/python-version/index.ts",
+        "lib/modules/datasource/repology/index.ts",
+        "lib/modules/datasource/rpm/index.ts",
+        "lib/modules/datasource/ruby-version/index.ts",
+        "lib/modules/datasource/rust-version/index.ts",
+        "lib/modules/datasource/sbt-package/index.ts",
+        "lib/modules/datasource/terraform-module/base.ts",
+        "lib/modules/datasource/terraform-module/index.ts",
+        "lib/modules/datasource/terraform-provider/index.ts",
+        "lib/modules/datasource/typst/index.ts",
+        "lib/modules/datasource/unity3d-packages/index.ts",
+        "lib/modules/datasource/unity3d/index.ts",
+        "lib/modules/manager/maven-wrapper/artifacts.ts",
+        "lib/modules/manager/terraform/lockfile/hash.ts"
+      ],
+      "rules": {
+        "renovate/require-cacheable": "warn"
       }
     },
     {

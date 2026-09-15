@@ -115,6 +115,8 @@ export class ModuleExtractor extends DependencyExtractor {
       const moduleParts = source.split('//')[0].split('/');
       if (moduleParts[0] === '.' || moduleParts[0] === '..') {
         dep.skipReason = 'local';
+        // NOTE: a shorter path is not a registry module, so the implicit else
+        // never runs. A coverage-ignore hint cannot suppress it on an `else if`.
       } else if (moduleParts.length >= 3) {
         const hostnameMatch = hostnameMatchRegex.exec(source);
         if (hostnameMatch?.groups) {

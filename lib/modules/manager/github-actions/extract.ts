@@ -184,6 +184,7 @@ function extractWithRegex(
       continue;
     }
 
+    // v8 ignore else -- the parsed ref is either a docker or a repository ref
     if (actionRef.kind === 'repository') {
       deps.push(
         extractRepositoryAction(
@@ -291,6 +292,7 @@ function extractWithYAMLParser(
   for (const job of Object.values(obj.jobs)) {
     if (job.container) {
       const dep = getDep(job.container, true, config.registryAliases);
+      // v8 ignore else -- `getDep()` always returns a dep
       if (dep) {
         dep.depType = 'container';
         deps.push(dep);
@@ -299,6 +301,7 @@ function extractWithYAMLParser(
 
     for (const service of job.services) {
       const dep = getDep(service, true, config.registryAliases);
+      // v8 ignore else -- `getDep()` always returns a dep
       if (dep) {
         dep.depType = 'service';
         deps.push(dep);

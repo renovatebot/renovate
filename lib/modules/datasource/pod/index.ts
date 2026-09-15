@@ -130,6 +130,7 @@ export class PodDatasource extends Datasource {
   ): Promise<T | null> {
     try {
       const resp = await this.githubHttp.getJsonUnchecked<T>(url);
+      // v8 ignore else -- an empty json body throws before it gets here
       if (resp?.body) {
         return resp.body;
       }
