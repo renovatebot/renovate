@@ -18,8 +18,6 @@ export class DevboxDatasource extends Datasource {
   override readonly customRegistrySupport = true;
   override readonly releaseTimestampSupport = true;
 
-  override readonly registryStrategy = 'first';
-
   override readonly defaultVersioning = devboxVersioning.id;
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];

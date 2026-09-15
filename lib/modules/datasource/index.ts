@@ -406,7 +406,7 @@ async function fetchReleases(
   );
   let dep: ReleaseResult | null = null;
   const registryStrategy =
-    config.registryStrategy ?? datasource.registryStrategy ?? 'hunt';
+    config.registryStrategy ?? datasource.registryStrategy;
   try {
     if (isNonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
