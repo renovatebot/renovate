@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -6,7 +7,6 @@ const matrixYAMLwithNodeSyntaxString = Fixtures.get('matrix_jobs.yml');
 const matrixYAMLwithNodeSyntaxArray = Fixtures.get('matrix_jobs_array.yml');
 const matrixYAMLwithNodeSyntaxArray2 = Fixtures.get('matrix_jobs_array2.yml');
 const matrixYAMLwithNodeSyntaxAlias = Fixtures.get('matrix_alias.yml');
-const matrixYAMLwithNodeSyntaxNumber = Fixtures.get('matrix_jobs_number.yml');
 const invalidMatrixYAML = Fixtures.get('matrix_invalid.yml');
 
 describe('modules/manager/travis/extract', () => {
@@ -107,7 +107,12 @@ describe('modules/manager/travis/extract', () => {
     });
 
     it('ignores a matrix node_js that is neither a string nor an array', () => {
-      const res = extractPackageFile(matrixYAMLwithNodeSyntaxNumber);
+      const content = codeBlock`
+        jobs:
+          include:
+            - node_js: 18
+      `;
+      const res = extractPackageFile(content);
       expect(res).toBeNull();
     });
   });
