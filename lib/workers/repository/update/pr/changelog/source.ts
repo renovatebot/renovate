@@ -26,10 +26,15 @@ import { addReleaseNotes } from './release-notes.ts';
 import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
+  ChangeLogFile,
+  ChangeLogNotes,
   ChangeLogPlatform,
+  ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
+
+type ChangeLogDatasource = `${ChangeLogPlatform}-tags`;
 
 // Number of dot-separated segments, used as a proxy for how precise a tag is,
 // e.g. `v7` (0) < `v7.0` (1) < `v7.0.0` (2).
@@ -39,25 +44,10 @@ function tagPrecision(tag: string): number {
 
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
-  private readonly platform: ChangeLogPlatform;
-  private readonly datasource:
-    | 'bitbucket-tags'
-    | 'bitbucket-server-tags'
-    | 'forgejo-tags'
-    | 'gitea-tags'
-    | 'github-tags'
-    | 'gitlab-tags';
+  protected readonly platform: ChangeLogPlatform;
+  private readonly datasource: ChangeLogDatasource;
 
-  constructor(
-    platform: ChangeLogPlatform,
-    datasource:
-      | 'bitbucket-tags'
-      | 'bitbucket-server-tags'
-      | 'forgejo-tags'
-      | 'gitea-tags'
-      | 'github-tags'
-      | 'gitlab-tags',
-  ) {
+  constructor(platform: ChangeLogPlatform, datasource: ChangeLogDatasource) {
     this.platform = platform;
     this.datasource = datasource;
     this.cacheNamespace = `changelog-${platform}-release`;
@@ -71,6 +61,27 @@ export abstract class ChangeLogSource {
   ): string;
 
   abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
+
+  /**
+   * Fetch the repository's changelog markdown file, if it has one.
+   */
+  abstract getReleaseNotesMd(
+    repository: string,
+    apiBaseUrl: string,
+    sourceDirectory?: string,
+  ): Promise<ChangeLogFile | null>;
+
+  /**
+   * Fetch the platform's list of releases for the project. Platforms without a
+   * releases API keep this default.
+   */
+  getReleaseList(
+    _project: ChangeLogProject,
+    _release: ChangeLogRelease,
+  ): Promise<ChangeLogNotes[]> {
+    logger.trace(`${this.platform}: release lists are not supported`);
+    return Promise.resolve([]);
+  }
 
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
     const tags = (
