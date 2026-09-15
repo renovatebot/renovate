@@ -4,6 +4,7 @@ import { getCache } from '../../../util/cache/repository/index.ts';
 import type { Pr } from '../types.ts';
 import { client } from './client.ts';
 import type { GerritChange } from './schema.ts';
+import type { GerritPrCacheData } from './types.ts';
 import {
   REQUEST_DETAILS_FOR_PRS,
   convertGerritDateToISO,
@@ -19,10 +20,6 @@ const INITIAL_SYNC_PAGE_SIZE = 100;
  * Page size for incremental cache updates (when cache exists).
  */
 const INCREMENTAL_PAGE_SIZE = 20;
-
-export interface GerritPrCacheData {
-  items: Record<number, Pr>;
-}
 
 interface GerritPlatformCache {
   gerrit?: {

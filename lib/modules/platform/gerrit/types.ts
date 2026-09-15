@@ -1,4 +1,4 @@
-import type { FindPRConfig } from '../types.ts';
+import type { FindPRConfig, Pr } from '../types.ts';
 import type { GerritChange } from './schema.ts';
 
 export interface GerritFindPRConfig extends FindPRConfig {
@@ -39,4 +39,8 @@ export type GerritRequestDetail =
 export interface GerritHashtagsInput {
   add?: string[] | null;
   remove?: string[] | null;
+}
+
+export interface GerritPrCacheData {
+  items: Record<number, Pr>;
 }
