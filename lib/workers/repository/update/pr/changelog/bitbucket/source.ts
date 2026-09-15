@@ -6,7 +6,6 @@ import { getRepoFile } from '../../../../../../modules/platform/bitbucket/files.
 import { PagedSourceResults } from '../../../../../../modules/platform/bitbucket/schema.ts';
 import { BitbucketHttp } from '../../../../../../util/http/bitbucket.ts';
 import { joinUrlParts } from '../../../../../../util/url.ts';
-import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import { ChangeLogSource } from '../source.ts';
 import type { ChangeLogFile } from '../types.ts';
@@ -17,11 +16,7 @@ export class BitbucketChangeLogSource extends ChangeLogSource {
   private readonly http = new BitbucketHttp(id);
 
   constructor() {
-    super('bitbucket', 'bitbucket-tags');
-  }
-
-  getAPIBaseUrl(_config: BranchUpgradeConfig): string {
-    return 'https://api.bitbucket.org/';
+    super('bitbucket');
   }
 
   getCompareURL(

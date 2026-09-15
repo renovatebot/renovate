@@ -33,14 +33,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
   private readonly http = new GithubHttp(id);
 
   constructor() {
-    super('github', 'github-tags');
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    const baseUrl = this.getBaseUrl(config);
-    return baseUrl.startsWith('https://github.com/')
-      ? 'https://api.github.com/'
-      : `${baseUrl}api/v3/`;
+    super('github');
   }
 
   getCompareURL(
@@ -72,8 +65,10 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     const manager = config.manager;
     const packageName = config.packageName;
 
+    // Tokens for github.com are configured against the API host, so look the
+    // token up there rather than under the source URL.
     const url = sourceUrl.startsWith('https://github.com/')
-      ? 'https://api.github.com/'
+      ? this.getAPIBaseUrl(config)
       : sourceUrl;
     const { token } = hostRules.find({
       hostType: 'github',
