@@ -131,6 +131,12 @@ The `lowercase` helper converts a given string to lower case.
 
 `{{{ lowercase depName }}}`
 
+### uppercase
+
+The `uppercase` helper converts a given string to upper case.
+
+`{{{ uppercase depName }}}`
+
 ### or
 
 Returns `true` if at least one expression is `true`.
