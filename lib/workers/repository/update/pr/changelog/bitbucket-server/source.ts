@@ -24,7 +24,7 @@ export class BitbucketServerChangeLogSource extends ChangeLogSource {
   private readonly http = new BitbucketServerHttp(id);
 
   constructor() {
-    super('bitbucket-server', 'bitbucket-server-tags');
+    super('bitbucket-server');
   }
 
   override getBaseUrl(config: BranchUpgradeConfig): string {
@@ -38,10 +38,6 @@ export class BitbucketServerChangeLogSource extends ChangeLogSource {
     }
 
     return '';
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return `${this.getBaseUrl(config)}rest/api/1.0/`;
   }
 
   getCompareURL(

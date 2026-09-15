@@ -5,6 +5,7 @@ import {
   isNullOrUndefined,
   isTruthy,
 } from '@sindresorhus/is';
+import { GIT_HOST_FAMILIES } from '../../../../../constants/index.ts';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
@@ -34,16 +35,14 @@ import type {
   ChangeLogResult,
 } from './types.ts';
 
-type ChangeLogDatasource = `${ChangeLogPlatform}-tags`;
-
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
   protected readonly platform: ChangeLogPlatform;
-  private readonly datasource: ChangeLogDatasource;
+  private readonly family: (typeof GIT_HOST_FAMILIES)[ChangeLogPlatform];
 
-  constructor(platform: ChangeLogPlatform, datasource: ChangeLogDatasource) {
+  constructor(platform: ChangeLogPlatform) {
     this.platform = platform;
-    this.datasource = datasource;
+    this.family = GIT_HOST_FAMILIES[platform];
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -54,7 +53,9 @@ export abstract class ChangeLogSource {
     nextHead: string,
   ): string;
 
-  abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return this.family.apiBaseUrl(this.getBaseUrl(config));
+  }
 
   /**
    * Fetch the repository's changelog markdown file, if it has one.
@@ -81,7 +82,7 @@ export abstract class ChangeLogSource {
     const tags = (
       await getPkgReleases({
         registryUrls: [endpoint],
-        datasource: this.datasource,
+        datasource: this.family.tagsDatasource,
         packageName: repository,
         versioning:
           'regex:(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?',
@@ -90,7 +91,7 @@ export abstract class ChangeLogSource {
 
     if (isNullOrUndefined(tags) || isEmptyArray(tags)) {
       logger.debug(
-        `No ${this.datasource} tags found for repository: ${repository}`,
+        `No ${this.family.tagsDatasource} tags found for repository: ${repository}`,
       );
 
       return [];

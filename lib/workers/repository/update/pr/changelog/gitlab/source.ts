@@ -3,7 +3,6 @@ import { logger } from '../../../../../../logger/index.ts';
 import type { GitlabRelease } from '../../../../../../modules/datasource/gitlab-releases/types.ts';
 import type { GitlabTreeNode } from '../../../../../../types/platform/gitlab/index.ts';
 import { GitlabHttp } from '../../../../../../util/http/gitlab.ts';
-import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import { ChangeLogSource } from '../source.ts';
 import type {
@@ -19,11 +18,7 @@ export class GitLabChangeLogSource extends ChangeLogSource {
   private readonly http = new GitlabHttp(id);
 
   constructor() {
-    super('gitlab', 'gitlab-tags');
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return `${this.getBaseUrl(config)}api/v4/`;
+    super('gitlab');
   }
 
   getCompareURL(
