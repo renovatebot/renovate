@@ -308,7 +308,6 @@
         "lib/modules/datasource/go/releases-direct.ts",
         "lib/modules/datasource/go/releases-goproxy.ts",
         "lib/modules/datasource/golang-version/index.ts",
-        "lib/modules/datasource/gradle-version/index.ts",
         "lib/modules/datasource/helm/index.ts",
         "lib/modules/datasource/hermit/index.ts",
         "lib/modules/datasource/hexpm-bob/index.ts",
