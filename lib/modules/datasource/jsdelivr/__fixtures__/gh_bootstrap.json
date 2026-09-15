@@ -1,0 +1,38 @@
+{
+  "type": "gh",
+  "name": "twbs/bootstrap",
+  "tags": {},
+  "versions": [
+    {
+      "version": "5.3.8",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/gh/twbs/bootstrap@5.3.8",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/gh/twbs/bootstrap@5.3.8"
+      }
+    },
+    {
+      "version": "5.3.7",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/gh/twbs/bootstrap@5.3.7",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/gh/twbs/bootstrap@5.3.7"
+      }
+    },
+    {
+      "version": "5.3.6",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/gh/twbs/bootstrap@5.3.6",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/gh/twbs/bootstrap@5.3.6"
+      }
+    },
+    {
+      "version": "5.3.5",
+      "links": {
+        "self": "https://data.jsdelivr.com/v1/packages/gh/twbs/bootstrap@5.3.5",
+        "stats": "https://data.jsdelivr.com/v1/stats/packages/gh/twbs/bootstrap@5.3.5"
+      }
+    }
+  ],
+  "links": {
+    "stats": "https://data.jsdelivr.com/v1/stats/packages/gh/twbs/bootstrap"
+  }
+}

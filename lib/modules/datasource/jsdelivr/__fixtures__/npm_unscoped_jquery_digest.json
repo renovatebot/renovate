@@ -1,0 +1,32 @@
+{
+  "type": "npm",
+  "name": "jquery",
+  "version": "4.0.0",
+  "default": "/dist/jquery.min.js",
+  "files": [
+    {
+      "name": "/dist/jquery.js",
+      "hash": "9fsHeVnKBvqh3FB2HYu7g2xseAZ5MlN6Kz/qnkASV8U=",
+      "size": 255967
+    },
+    {
+      "name": "/dist/jquery.min.js",
+      "hash": "OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=",
+      "size": 78748
+    },
+    {
+      "name": "/dist/jquery.min.map",
+      "hash": "f9f4MsEN/Ali3KG6AVze+mmjEHQe34nSiRQYS9W6HOs=",
+      "size": 163588
+    },
+    {
+      "name": "/dist/jquery.slim.js",
+      "hash": "M+GjhMBfXikM1izMplICCTscIj5hzPCp6uDzaypxtgg=",
+      "size": 182511
+    }
+  ],
+  "links": {
+    "stats": "https://data.jsdelivr.com/v1/stats/packages/npm/jquery@4.0.0",
+    "entrypoints": "https://data.jsdelivr.com/v1/packages/npm/jquery@4.0.0/entrypoints"
+  }
+}
