@@ -55,4 +55,26 @@ describe('modules/versioning/pep440/range', () => {
     });
     expect(res).toBe('1.2.3');
   });
+
+  it('drops a local version segment from a compatible release specifier', () => {
+    // A local segment is not valid in `~=`, so keeping it would build a range
+    // that matches nothing and the update would be abandoned.
+    expect(
+      getNewValue({
+        currentValue: '~=38.0.0',
+        rangeStrategy: 'replace',
+        currentVersion: '38.0.0',
+        newVersion: '38.3.3.post1+git.5af13757',
+      }),
+    ).toBe('~=38.3.3.post1');
+
+    expect(
+      getNewValue({
+        currentValue: '~=38.0.0',
+        rangeStrategy: 'bump',
+        currentVersion: '38.0.0',
+        newVersion: '38.3.3+local.1',
+      }),
+    ).toBe('~=38.3.3');
+  });
 });
