@@ -331,7 +331,6 @@
         "lib/modules/datasource/terraform-module/base.ts",
         "lib/modules/datasource/terraform-module/index.ts",
         "lib/modules/datasource/terraform-provider/index.ts",
-        "lib/modules/datasource/typst/index.ts",
         "lib/modules/datasource/unity3d-packages/index.ts",
         "lib/modules/datasource/unity3d/index.ts",
         "lib/modules/manager/maven-wrapper/artifacts.ts",
