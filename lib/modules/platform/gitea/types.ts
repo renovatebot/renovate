@@ -1,153 +1,71 @@
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
-import type { EmailAddress } from '../../../util/schema-utils/index.ts';
-import type { Pr, RepoSortMethod, SortMethod } from '../types.ts';
+import type { GiteaHttp } from '../../../util/http/gitea.ts';
+import type { Platform, Pr, RepoSortMethod, SortMethod } from '../types.ts';
+import type {
+  CommitStatus,
+  CommitStatusType,
+  IssueState,
+  Label,
+  PRMergeMethod,
+  PRState,
+} from './schema.ts';
+
+/**
+ * Id of a platform that speaks the Gitea API. Doubles as the key both platforms
+ * use for their repository cache and memory cache entries.
+ */
+export type GiteaPlatformKey = 'gitea' | 'forgejo';
+
+/**
+ * Http client of a platform which speaks the Gitea API. `ForgejoHttp` extends
+ * `GiteaHttp`, so both are accepted.
+ */
+export type GiteaLikeHttp = GiteaHttp;
+
+export interface GiteaPlatformOptions {
+  /** Platform id, also used as `hostType` and as cache key. */
+  id: GiteaPlatformKey;
+
+  /** Endpoint used when the user did not configure one. */
+  defaultEndpoint: string;
+
+  /** Http client bound to this platform's `hostType`. */
+  http: GiteaLikeHttp;
+
+  /** Sets the base url of the module-level http client. */
+  setBaseUrl: (baseUrl: string) => void;
+
+  /** Logs the instance version detected during `initPlatform()`. */
+  logDetectedVersion: (version: string) => void;
+
+  /**
+   * Returns `null` when the instance supports native automerge, otherwise the
+   * message explaining why it does not.
+   */
+  checkNativeAutomerge: (version: string) => string | null;
+
+  /**
+   * Lowest instance version which supports requesting reviewers.
+   * Leave unset when every supported version does.
+   */
+  minReviewerVersion?: string;
+}
+
+export interface GiteaPlatform {
+  platform: Platform;
+  resetPlatform: () => void;
+}
+
+/** Repository details needed to fetch and cache its labels. */
+export interface LabelListRepo {
+  repository: string;
+  isOrgRepo: boolean;
+  orgName: string;
+  labelList: Promise<Label[]> | null;
+}
 
 export interface PrReviewersParams {
   reviewers?: string[];
   team_reviewers?: string[];
-}
-
-export type PRState = 'open' | 'closed' | 'all';
-export type IssueState = 'open' | 'closed' | 'all';
-export type CommitStatusType =
-  | 'pending'
-  | 'success'
-  | 'error'
-  | 'failure'
-  | 'warning'
-  | 'unknown';
-export type PRMergeMethod =
-  | 'fast-forward-only'
-  | 'merge'
-  | 'rebase'
-  | 'rebase-merge'
-  | 'squash';
-
-export interface GiteaLabel {
-  id: number;
-  name: string;
-}
-export interface PR {
-  number: number;
-  state: PRState;
-  title: string;
-  body: string;
-  mergeable: boolean;
-  merged?: boolean;
-  created_at: string;
-  updated_at: string;
-  closed_at: string | null;
-  diff_url: string;
-  base?: {
-    ref: string;
-  };
-  head?: {
-    label: string;
-    sha: LongCommitSha;
-    repo?: Repo;
-  };
-  assignee?: {
-    login?: string;
-  };
-  assignees?: any[];
-  user?: { login?: string };
-
-  // labels returned from the Gitea API are represented as an array of objects
-  // ref: https://docs.gitea.com/api/1.20/#tag/repository/operation/repoGetPullRequest
-  labels?: GiteaLabel[];
-}
-
-export interface Issue {
-  number: number;
-  state: IssueState;
-  title: string;
-  body: string;
-  assignees: User[];
-  labels: Label[];
-}
-
-export interface User {
-  id: number;
-  email: EmailAddress;
-  full_name?: string;
-  login: string;
-}
-
-export interface Repo {
-  id: number;
-  allow_fast_forward_only_merge: boolean;
-  allow_merge_commits: boolean;
-  allow_rebase: boolean;
-  allow_rebase_explicit: boolean;
-  allow_squash_merge: boolean;
-  archived: boolean;
-  clone_url?: string;
-  default_merge_style: PRMergeMethod;
-  external_tracker?: unknown;
-  has_issues: boolean;
-  has_pull_requests: boolean;
-  ssh_url?: string;
-  default_branch: string;
-  empty: boolean;
-  fork: boolean;
-  full_name: string;
-  mirror: boolean;
-  owner: User;
-  permissions: RepoPermission;
-}
-
-export interface RepoPermission {
-  admin: boolean;
-  pull: boolean;
-  push: boolean;
-}
-
-export interface RepoSearchResults {
-  ok: boolean;
-  data: Repo[];
-}
-
-export interface RepoContents {
-  path: string;
-  content?: string;
-  contentString?: string;
-}
-
-export interface Comment {
-  id: number;
-  body: string;
-}
-
-export interface Label {
-  id: number;
-  name: string;
-  description: string;
-  color: string;
-}
-
-export interface Branch {
-  name: string;
-  commit: Commit;
-}
-
-export interface Commit {
-  id: string;
-  author: CommitUser;
-}
-
-export interface CommitUser {
-  name: string;
-  email: EmailAddress;
-  login: string;
-}
-
-export interface CommitStatus {
-  id: number;
-  status: CommitStatusType;
-  context: string;
-  description?: string;
-  target_url?: string;
-  created_at: string;
 }
 
 export interface CombinedCommitStatus {
@@ -222,7 +140,7 @@ export interface CommitStatusCreateParams {
   target_url?: string;
 }
 
-export interface GiteaPrCacheData {
+export interface PrCacheData {
   items: Record<number, Pr>;
   updated_at: string | null;
   author: string | null;

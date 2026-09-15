@@ -136,13 +136,13 @@ describe('config/presets/gitlab/index', () => {
         })
         .get(`${basePath}/files/some.json/raw?ref=devel`)
         .reply(200, { preset: { file: {} } });
-      expect(
-        await gitlab.getPresetFromEndpoint(
+      await expect(
+        gitlab.getPresetFromEndpoint(
           'some/repo',
           'some/preset/file',
           undefined,
         ),
-      ).toEqual({});
+      ).resolves.toEqual({});
     });
 
     it('uses custom endpoint', async () => {
@@ -169,15 +169,15 @@ describe('config/presets/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get(`${basePath}/files/some.json/raw?ref=someTag`)
         .reply(200, { preset: { file: {} } });
-      expect(
-        await gitlab.getPresetFromEndpoint(
+      await expect(
+        gitlab.getPresetFromEndpoint(
           'some/repo',
           'some/preset/file',
           undefined,
           'https://gitlab.com/api/v4',
           'someTag',
         ),
-      ).toEqual({});
+      ).resolves.toEqual({});
     });
 
     it('uses custom endpoint with a tag', async () => {
@@ -185,15 +185,15 @@ describe('config/presets/gitlab/index', () => {
         .scope('https://gitlab.example.org')
         .get(`${basePath}/files/some.json/raw?ref=someTag`)
         .reply(200, { preset: { file: {} } });
-      expect(
-        await gitlab.getPresetFromEndpoint(
+      await expect(
+        gitlab.getPresetFromEndpoint(
           'some/repo',
           'some/preset/file',
           undefined,
           'https://gitlab.example.org/api/v4',
           'someTag',
         ),
-      ).toEqual({});
+      ).resolves.toEqual({});
     });
   });
 });

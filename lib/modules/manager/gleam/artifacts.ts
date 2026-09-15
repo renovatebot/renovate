@@ -11,6 +11,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -45,7 +46,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'gleam',
-          constraint: config.constraints?.gleam,
+          constraint: await resolveToolConstraint(config, 'gleam'),
         },
       ],
     };

@@ -60,12 +60,24 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
             nextUrl.host = defaultEndpoint.host;
           }
 
-          opts.url = nextUrl;
+          // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
+          if (nextUrl.origin === resolvedUrl.origin) {
+            opts.url = nextUrl;
 
-          const nextResult = await this.requestJsonUnsafe<T>(method, opts);
-          // v8 ignore else -- TODO: add test #40625
-          if (isArray(nextResult.body)) {
-            result.body.push(...nextResult.body);
+            const nextResult = await this.requestJsonUnsafe<T>(method, opts);
+            // v8 ignore else -- TODO: add test #40625
+            if (isArray(nextResult.body)) {
+              result.body.push(...nextResult.body);
+            }
+          } else {
+            // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+            logger.once.warn(
+              {
+                requestOrigin: resolvedUrl.origin,
+                paginationOrigin: nextUrl.origin,
+              },
+              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
+            );
           }
         }
       } catch (err) {
@@ -141,11 +153,11 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 function isRetryablePostError(error: RequestError): boolean {
   const { response } = error;
   if (response?.statusCode === 409) {
-    return response.rawBody.toString().includes('Resource lock');
+    return Buffer.from(response.rawBody).toString().includes('Resource lock');
   }
 
   if (response?.statusCode === 400) {
-    const rawBody = response.rawBody.toString();
+    const rawBody = Buffer.from(response.rawBody).toString();
     return (
       rawBody.includes('source_branch') && rawBody.includes('does not exist')
     );

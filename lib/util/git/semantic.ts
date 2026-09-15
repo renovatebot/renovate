@@ -37,7 +37,7 @@ export async function detectSemanticCommits(): Promise<DetectedSemanticCommit> {
  * @returns A number greater than zero if more semantic commits than non-semantic commits, less than zero if more non-semantic commits than semantic commits, or zero if equal number of semantic and non-semantic commits
  */
 function detectSemanticCommitScore(commitMessages: string[]): number {
-  const angular = regEx(/^(\w*)(?:\((.*)\))?!?: (.*)$/);
+  const angular = regEx(/^(?:\w*)(?:\((?:.*)\))?!?: (?:.*)$/);
 
   return commitMessages.reduce((count, message) => {
     if (angular.test(message)) {

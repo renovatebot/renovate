@@ -1,6 +1,8 @@
+import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import {
   filterValidCommitTrailers,
+  formatCommitMessage,
   isValidCommitTrailer,
 } from './commit-trailers.ts';
 
@@ -61,6 +63,56 @@ describe('util/git/commit-trailers', () => {
         filterValidCommitTrailers(['Signed-off-by: ', 'no colon']),
       ).toEqual([]);
       expect(logger.logger.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe('formatCommitMessage', () => {
+    it('returns string message unchanged when there are no trailers', () => {
+      expect(formatCommitMessage('Update something')).toBe('Update something');
+    });
+
+    it('joins array message parts with blank lines', () => {
+      expect(formatCommitMessage(['Update something', 'Some commit body']))
+        .toBe(codeBlock`
+        Update something
+
+        Some commit body
+      `);
+    });
+
+    it('appends trailers as the final block for a string message', () => {
+      expect(
+        formatCommitMessage('Update something', [
+          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+          'Co-authored-by: First Contributor <first@example.com>',
+        ]),
+      ).toBe(codeBlock`
+        Update something
+
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+        Co-authored-by: First Contributor <first@example.com>
+      `);
+    });
+
+    it('appends trailers as the final block for an array message', () => {
+      expect(
+        formatCommitMessage(
+          ['Update something', 'Some commit body'],
+          ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        ),
+      ).toBe(codeBlock`
+        Update something
+
+        Some commit body
+
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+      `);
+    });
+
+    it('ignores empty trailer lists', () => {
+      expect(formatCommitMessage('Update something', [])).toBe(
+        'Update something',
+      );
     });
   });
 });

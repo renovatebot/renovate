@@ -44,6 +44,8 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
+    'inheritConfigTrusted',
+    'internalHostAccess',
     /** NOTE that this is not a config option, but an internal variable **/
     'localDir',
     'migratePresets',
@@ -67,8 +69,7 @@ export class GlobalConfig {
     'toolSettings',
     'userAgent',
   ] as const satisfies readonly (
-    | keyof RepoGlobalConfig
-    | keyof InternalGlobalConfigOptions
+    keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions
   )[];
 
   private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};

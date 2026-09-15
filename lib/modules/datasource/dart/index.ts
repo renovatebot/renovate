@@ -30,7 +30,7 @@ export class DartDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -47,6 +47,9 @@ export class DartDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
+    // `body` is only still null if the request above threw, and
+    // `handleGenericErrors()` always rethrows
+    // v8 ignore else -- unreachable
     if (body) {
       const { versions, latest } = body;
       const releases = versions

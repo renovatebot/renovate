@@ -11,7 +11,7 @@ export const MiseRegistryJson = z.object({
 const MiseToolOptions = z.object({
   // ubi backend only
   tag_regex: z.string().optional(),
-  // github backend only
+  // github and gitlab backends
   version_prefix: z.string().optional(),
 });
 export type MiseToolOptions = z.infer<typeof MiseToolOptions>;
@@ -55,6 +55,7 @@ const MiseLockTool = z.object({
     )
     .optional(),
 });
+export type MiseLockTool = z.infer<typeof MiseLockTool>;
 
 export const MiseLockFile = Toml.pipe(
   z.object({

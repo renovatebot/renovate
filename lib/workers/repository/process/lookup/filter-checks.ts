@@ -33,8 +33,6 @@ export function isMinimumReleaseAgeApplicable(
     updateType !== 'rollback' &&
     // Not yet supported: TODO #40288
     updateType !== 'pin' &&
-    // Not yet supported: TODO #44820
-    updateType !== 'pinDigest' &&
     // Not yet supported: TODO #39400
     updateType !== 'replacement' &&
     // Not possible, as we delegate to the package manager to perform the required changes to update package(s).
@@ -95,6 +93,9 @@ export async function checkMinimumConfidence(
   };
 }
 
+/*
+ * NOTE that this should be kept in sync with `applyMinimumReleaseAgeToDigestUpdate`()
+ */
 export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
   versioningApi: VersioningApi,
