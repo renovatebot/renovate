@@ -1,5 +1,8 @@
 import { fakeSha, partial } from '~test/util.ts';
-import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
+import {
+  init as memCacheInit,
+  reset as memCacheReset,
+} from '../../../util/cache/memory/index.ts';
 import {
   getCache,
   resetCache as repoCacheReset,
@@ -47,6 +50,7 @@ function makeChange(overrides?: Partial<GerritChange>): GerritChange {
 describe('modules/platform/gerrit/pr-cache', () => {
   beforeEach(() => {
     memCacheReset();
+    memCacheInit();
     repoCacheReset();
   });
 
@@ -74,12 +78,20 @@ describe('modules/platform/gerrit/pr-cache', () => {
 
       const prs1 = await GerritPrCache.getPrs('test/repo');
 
-      // Second call also sets up mock, but it should not be consumed
-      mockFindChanges([]);
       const prs2 = await GerritPrCache.getPrs('test/repo');
 
       // Same results returned from cache
       expect(prs2).toEqual(prs1);
+      // Only the first call should have triggered a client request
+      expect(clientMock.findChanges).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({
+          branchName: '',
+          state: 'all',
+          pageLimit: 100,
+          requestDetails: REQUEST_DETAILS_FOR_PRS,
+        }),
+      );
     });
 
     it('uses incremental page size when cache exists', async () => {
