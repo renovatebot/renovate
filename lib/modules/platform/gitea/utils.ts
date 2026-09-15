@@ -70,7 +70,7 @@ export function getRepoUrl(
 
 export function getMergeMethod(
   strategy: MergeStrategy | undefined,
-  allowedMergeMethods?: AllowedMergeMethods,
+  allowedMergeMethods: AllowedMergeMethods,
 ): PRMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':
