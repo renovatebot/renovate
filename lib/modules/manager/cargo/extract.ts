@@ -249,6 +249,9 @@ export async function extractPackageFile(
   if (packageSection) {
     if (isString(packageSection.version)) {
       version = packageSection.version;
+      // NOTE: a version that is neither a string nor a workspace reference
+      // leaves it unset. A coverage-ignore hint cannot suppress the implicit
+      // else on an `else if`.
     } else if (
       isObject(packageSection.version) &&
       cargoManifest.workspace?.package?.version

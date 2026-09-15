@@ -6,6 +6,10 @@ describe('modules/manager/composer/schema', () => {
       expect(ReposRecord.parse({})).toEqual([]);
     });
 
+    it('ignores a disabled repository that is not packagist', () => {
+      expect(ReposRecord.parse({ 'some-other-repo': false })).toEqual([]);
+    });
+
     it('parses repositories', () => {
       expect(
         ReposRecord.parse({

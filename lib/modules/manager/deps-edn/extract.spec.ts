@@ -7,6 +7,11 @@ describe('modules/manager/deps-edn/extract', () => {
       expect(extractPackageFile('123')).toBeNull();
     });
 
+    it('skips an alias whose value is not a map', () => {
+      const res = extractPackageFile('{:aliases {:not-a-map "just a string"}}');
+      expect(res?.deps).toBeEmpty();
+    });
+
     it('extractPackageFile', () => {
       const res = extractPackageFile(Fixtures.get('deps.edn'));
       const deps = res?.deps;
