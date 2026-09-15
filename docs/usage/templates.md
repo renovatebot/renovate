@@ -131,12 +131,6 @@ The `lowercase` helper converts a given string to lower case.
 
 `{{{ lowercase depName }}}`
 
-### uppercase
-
-The `uppercase` helper converts a given string to upper case.
-
-`{{{ uppercase depName }}}`
-
 ### or
 
 Returns `true` if at least one expression is `true`.
@@ -187,6 +181,12 @@ If you want to convert an object to a JSON string, you can use the built-in func
 If you want to convert key-value pairs to an object, use `toObject`, e.g.,
 
 `{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
+
+### uppercase
+
+The `uppercase` helper converts a given string to upper case.
+
+`{{{ uppercase depName }}}`
 
 ## Environment variables
 
