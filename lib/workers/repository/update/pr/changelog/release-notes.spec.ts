@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
@@ -2451,6 +2452,51 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         );
 
         expect(res).toBeNull();
+      });
+
+      it('does not match a predecessor version named only in a stub release compare link', async () => {
+        httpMock
+          .scope('https://api.github.com')
+          .get('/repos/laravel/horizon')
+          .reply(200, { default_branch: 'main' })
+          .get('/repos/laravel/horizon/git/trees/main')
+          .reply(200, githubTreeResponse)
+          .get('/repos/laravel/horizon/git/blobs/abcd')
+          .reply(200, {
+            content: toBase64(codeBlock`
+              # Release Notes
+
+              ## [v5.48.1](https://github.com/laravel/horizon/compare/v5.48.0...v5.48.1) - 2026-07-20
+
+              **Full Changelog**: https://github.com/laravel/horizon/compare/v5.48.0...v5.48.1
+
+              ## [v5.48.0](https://github.com/laravel/horizon/compare/v5.47.2...v5.48.0) - 2026-07-17
+
+              - Add option to set a CSP nonce for use with style and script tags
+
+              ## [v5.47.2](https://github.com/laravel/horizon/compare/v5.47.1...v5.47.2) - 2026-06-03
+
+              - Fix metric clearing with PhpRedis scan prefix
+            `),
+          });
+        const res = await getReleaseNotesMd(
+          {
+            ...githubProject,
+            repository: 'laravel/horizon',
+            packageName: 'laravel/horizon',
+          },
+          partial<ChangeLogRelease>({
+            version: '5.48.0',
+            gitRef: '5.48.0',
+          }),
+        );
+
+        // Must resolve to the real v5.48.0 section, not the v5.48.1 stub whose
+        // "Full Changelog" compare link embeds "v5.48.0".
+        expect(res?.url).toBe(
+          'https://github.com/laravel/horizon/blob/HEAD/CHANGELOG.md#v5480---2026-07-17',
+        );
+        expect(res?.body).toContain('CSP nonce');
       });
 
       it('handles gitlab sourceDirectory', async () => {
