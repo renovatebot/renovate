@@ -55,6 +55,7 @@ export function massageGitlabUrl(url: string): string {
 
   return massagedUrl
     .replace('http:', 'https:')
+    .replace('ssh://git@', 'https://')
     .replace(gitPrefix, 'https://')
     .replace(regEx(/\/tree\/.*$/i), '')
     .replace(regEx(/\/$/i), '')

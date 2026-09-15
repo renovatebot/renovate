@@ -138,6 +138,7 @@ describe('modules/datasource/metadata', () => {
     ${'git@gitlab.com:group/sub-group/repo.git'}         | ${'https://gitlab.com/group/sub-group/repo'}
     ${'git@somehost.com:group/sub-group/repo.git'}       | ${'https://somehost.com/group/sub-group/repo'}
     ${'git+https://gitlab.com/group/sub-group/repo.git'} | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git+ssh://git@gitlab.com/group/sub/repo.git'}     | ${'https://gitlab.com/group/sub/repo'}
   `(
     'Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl',
     ({ sourceUrl, expectedSourceUrl }) => {
