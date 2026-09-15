@@ -89,8 +89,12 @@ export function extractRepository(
 
 export function extractContainer(
   container: Container,
+  config: ExtractConfig,
 ): PackageDependency | null {
-  const dep = getDep(container.image);
+  const dep = getDep(container.image, {
+    registryAliases: config.registryAliases,
+    depType: 'docker',
+  });
   logger.debug(
     {
       depName: dep.depName,
@@ -99,7 +103,6 @@ export function extractContainer(
     },
     'Azure pipelines docker image',
   );
-  dep.depType = 'docker';
 
   return dep;
 }
@@ -197,7 +200,7 @@ export function extractPackageFile(
   }
 
   for (const container of coerceArray(pkg.resources?.containers)) {
-    const dep = extractContainer(container);
+    const dep = extractContainer(container, config);
     if (dep) {
       deps.push(dep);
     }
