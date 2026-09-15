@@ -1120,6 +1120,33 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('handles FROM with multiple ARG values and a digest', () => {
+      const digest = `sha256:${'a'.repeat(64)}`;
+      const res = extractPackageFile(
+        `ARG CUDA=9.2\nARG LINUX_VERSION ubuntu16.04\nFROM nvidia/cuda:\${CUDA}-devel-\${LINUX_VERSION}@${digest}\n`,
+        '',
+        {},
+      )?.deps;
+      // The resolved tag is composed from two args, so it is not present verbatim in
+      // the file and its version cannot be rewritten; it is marked skipReason so the
+      // version update is skipped instead of failing, while the FROM-line replaceString
+      // is kept for updateArtifacts to re-pin the digest of the composed tag.
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            'FROM nvidia/cuda:${CUDA}-devel-${LINUX_VERSION}@{{#if newDigest}}{{newDigest}}{{/if}}',
+          currentDigest: digest,
+          currentValue: '9.2-devel-ubuntu16.04',
+          datasource: 'docker',
+          depName: 'nvidia/cuda',
+          packageName: 'nvidia/cuda',
+          depType: 'final',
+          replaceString: `FROM nvidia/cuda:\${CUDA}-devel-\${LINUX_VERSION}@${digest}`,
+          skipReason: 'contains-variable',
+        },
+      ]);
+    });
+
     it('skips scratch if provided in ARG value', () => {
       const res = extractPackageFile(
         'ARG img="scratch"\nFROM $img as base\n',
