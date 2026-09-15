@@ -138,14 +138,15 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Helm artifacts');
+    const helmConstraint = await resolveToolConstraint(config, 'helm');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',
-      constraint: await resolveToolConstraint(config, 'helm'),
+      constraint: helmConstraint,
     };
 
     const execOptions: ExecOptions = {
       docker: {},
-      extraEnv: generateHelmEnvs(),
+      extraEnv: generateHelmEnvs(helmConstraint),
       toolConstraints: [helmToolConstraint],
     };
     await helmCommands(execOptions, packageFileName, repositories);
