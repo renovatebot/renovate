@@ -7,18 +7,22 @@ import { PackageCacheRedis } from './impl/redis.ts';
 import { PackageCacheSqlite } from './impl/sqlite.ts';
 import type { PackageCacheNamespace } from './types.ts';
 
-let cacheProxy: PackageCacheBase | undefined;
+let cacheBackend: PackageCacheBase | undefined;
 let cacheType: 'redis' | 'sqlite' | 'file' | undefined;
 
 export function getCacheType(): typeof cacheType {
   return cacheType;
 }
 
+export function getBackend(): PackageCacheBase | undefined {
+  return cacheBackend;
+}
+
 export async function init(config: AllConfig): Promise<void> {
   await destroy();
   await instrument('init PackageCache', async () => {
     if (config.redisUrl) {
-      cacheProxy = await PackageCacheRedis.create(
+      cacheBackend = await PackageCacheRedis.create(
         config.redisUrl,
         config.redisPrefix,
       );
@@ -27,13 +31,13 @@ export async function init(config: AllConfig): Promise<void> {
     }
 
     if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE && config.cacheDir) {
-      cacheProxy = await PackageCacheSqlite.create(config.cacheDir);
+      cacheBackend = await PackageCacheSqlite.create(config.cacheDir);
       cacheType = 'sqlite';
       return;
     }
 
     if (config.cacheDir) {
-      cacheProxy = PackageCacheFile.create(config.cacheDir);
+      cacheBackend = PackageCacheFile.create(config.cacheDir);
       cacheType = 'file';
       return;
     }
@@ -44,7 +48,7 @@ export async function get<T = unknown>(
   namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
-  return await cacheProxy?.get<T>(namespace, key);
+  return await cacheBackend?.get<T>(namespace, key);
 }
 
 export async function set(
@@ -53,16 +57,16 @@ export async function set(
   value: unknown,
   hardTtlMinutes: number,
 ): Promise<void> {
-  await cacheProxy?.set(namespace, key, value, hardTtlMinutes);
+  await cacheBackend?.set(namespace, key, value, hardTtlMinutes);
 }
 
 export async function destroy(): Promise<void> {
   await instrument('destroy PackageCache', async () => {
     cacheType = undefined;
     try {
-      await cacheProxy?.destroy();
+      await cacheBackend?.destroy();
     } finally {
-      cacheProxy = undefined;
+      cacheBackend = undefined;
     }
   });
 }
