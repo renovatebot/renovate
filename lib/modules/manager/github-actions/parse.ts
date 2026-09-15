@@ -133,7 +133,7 @@ const pinTokenRe = regEx(
   /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+(?:\/[.\w-]+)*))?@?(?<version>(?:[\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?(?:-[a-zA-Z0-9.]+)?)/,
 );
 
-export const versionLikeRe = regEx(/^v?\d+/);
+export const versionLikeRe = regEx(/^(?:[\w-]*[-/])?v?\d+/);
 
 const bareTokenRe = regEx(/^\s*(?<token>\S+)\s*$/);
 
