@@ -802,7 +802,7 @@ describe('modules/platform/bitbucket/index', () => {
               source: { branch: { name: 'branch' } },
               destination: { branch: { name: 'master' } },
               title: 'title',
-              state: 'closed',
+              state: 'DECLINED',
             },
           ],
         })
@@ -839,7 +839,7 @@ describe('modules/platform/bitbucket/index', () => {
               source: { branch: { name: 'branch' } },
               destination: { branch: { name: 'master' } },
               title: 'title',
-              state: 'closed',
+              state: 'DECLINED',
             },
           ],
         })
@@ -878,7 +878,7 @@ describe('modules/platform/bitbucket/index', () => {
               source: { branch: { name: 'branch' } },
               destination: { branch: { name: 'master' } },
               title: 'title',
-              state: 'closed',
+              state: 'DECLINED',
             },
           ],
         })
@@ -921,7 +921,7 @@ describe('modules/platform/bitbucket/index', () => {
               source: { branch: { name: 'branch' } },
               destination: { branch: { name: 'master' } },
               title: 'title',
-              state: 'closed',
+              state: 'DECLINED',
             },
           ],
         })

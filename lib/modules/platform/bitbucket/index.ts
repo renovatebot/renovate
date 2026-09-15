@@ -1100,7 +1100,10 @@ export async function updatePr({
     bitbucketHttp,
     config.repository,
     renovateUserUuid,
-    utils.prInfo({ ...updatedPrRes, ...(state && { state }) }),
+    utils.prInfo({
+      ...updatedPrRes,
+      ...(state && { state: utils.bitbucketPrStateMapping[state] }),
+    }),
   );
 }
 

@@ -61,7 +61,11 @@ export interface GhRestPr {
   title: string;
   body?: string;
   bodyStruct?: PrBodyStruct;
-  state: string;
+  /**
+   * The REST API only ever reports `open` or `closed`; `merged` is derived from
+   * `merged_at` in `coerceRestPr`.
+   */
+  state: 'open' | 'closed';
   merged_at?: string;
   created_at: string;
   closed_at?: string;

@@ -1,6 +1,11 @@
 import type { DateTime } from 'luxon';
 import type { MergeStrategy } from '../../config/types.ts';
-import type { BranchStatus, HostRule } from '../../types/index.ts';
+import type {
+  BranchStatus,
+  HostRule,
+  PrFilterState,
+  PrState,
+} from '../../types/index.ts';
 import type { CommitFilesConfig } from '../../util/git/types.ts';
 import type { LongCommitSha } from '../../util/schema-utils/git.ts';
 import type { GithubVulnerabilityAlert } from './github/schema.ts';
@@ -77,19 +82,16 @@ export interface Pr {
   reviewers?: string[];
   sha?: LongCommitSha;
   sourceRepo?: string;
-  state: string;
+  state: PrState;
   targetBranch?: string;
   title: string;
   isDraft?: boolean;
 }
 
-/**
- * TODO: Proper typing
- */
 export interface Issue {
   body?: string;
-  number?: number;
-  state?: string;
+  number: number;
+  state?: 'open' | 'closed';
   title?: string;
   createdAt?: string;
   lastModified?: string;
@@ -171,7 +173,7 @@ export interface BranchStatusConfig extends StatusCheckConfig {
 export interface FindPRConfig {
   branchName: string;
   prTitle?: string | null;
-  state?: 'open' | 'closed' | '!open' | 'all';
+  state?: PrFilterState;
   refreshCache?: boolean;
   targetBranch?: string | null;
   includeOtherAuthors?: boolean;

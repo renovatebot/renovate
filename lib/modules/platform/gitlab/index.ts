@@ -1141,7 +1141,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       return [];
     }
     config.issueList = res.body.map((i) => ({
-      iid: i.iid,
+      number: i.iid,
       title: i.title,
       labels: i.labels,
     }));
@@ -1185,7 +1185,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     if (!issue) {
       return null;
     }
-    return await getIssue(issue.iid);
+    return await getIssue(issue.number);
   } catch /* v8 ignore next -- defensive: getIssueList/getIssue failures are swallowed, not simulated in specs */ {
     logger.warn('Error finding issue');
     return null;
@@ -1208,13 +1208,13 @@ export async function ensureIssue({
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJsonUnchecked<{ description: string }>(
-          `projects/${config.repository}/issues/${issue.iid}`,
+          `projects/${config.repository}/issues/${issue.number}`,
         )
       ).body.description;
       if (issue.title !== title || existingDescription !== description) {
         logger.debug('Updating issue');
         await gitlabApi.putJson(
-          `projects/${config.repository}/issues/${issue.iid}`,
+          `projects/${config.repository}/issues/${issue.number}`,
           {
             body: {
               title,
@@ -1257,7 +1257,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     if (issue.title === title) {
       logger.debug({ issue }, 'Closing issue');
       await gitlabApi.putJson(
-        `projects/${config.repository}/issues/${issue.iid}`,
+        `projects/${config.repository}/issues/${issue.number}`,
         {
           body: { state_event: 'close' },
         },

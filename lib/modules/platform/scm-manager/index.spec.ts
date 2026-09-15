@@ -1,13 +1,13 @@
 import { git } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { PrFilterState } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Pr } from '../types.ts';
 import * as util from '../util.ts';
 import * as scmPlatform from './index.ts';
 import { mapPrFromScmToRenovate } from './mapper.ts';
 import type { PullRequest, Repo, User } from './schema.ts';
-import type { PrFilterByState } from './types.ts';
 
 // only `repoFingerprint` needs mocking
 vi.mock('../util.ts', async (importOriginal) => ({
@@ -305,7 +305,7 @@ describe('modules/platform/scm-manager/index', () => {
           scmPlatform.findPr({
             branchName,
             prTitle,
-            state: state as PrFilterByState,
+            state: state as PrFilterState,
           }),
         ).resolves.toEqual(result);
       },

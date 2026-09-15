@@ -148,7 +148,7 @@ describe('workers/repository/update/branch/index', () => {
           bodyStruct: { hash: '' },
           title: '',
           sourceBranch: '',
-          state: '',
+          state: 'open',
           number: 5,
         }),
       });

@@ -49,7 +49,13 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
-import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
+import type {
+  Comment,
+  Issue as GiteaIssue,
+  Label,
+  PRMergeMethod,
+  Repo,
+} from './schema.ts';
 import type {
   CombinedCommitStatus,
   GiteaPlatform,
@@ -91,10 +97,11 @@ export const capabilities = {
 
 export const giteaHttp = new GiteaHttp();
 
-function toRenovateIssue(data: Issue): Issue {
+function toRenovateIssue(data: GiteaIssue): Issue {
   return {
     number: data.number,
-    state: data.state,
+    // `all` only exists as a search filter, the API never reports it as a state
+    state: data.state as 'open' | 'closed' | undefined,
     title: data.title,
     body: data.body,
   };
@@ -772,10 +779,8 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       if (!issue) {
         return null;
       }
-      // TODO: types (#22198)
-      logger.debug(`Found Issue #${issue.number!}`);
-      // TODO #22198
-      return platform.getIssue!(issue.number!);
+      logger.debug(`Found Issue #${issue.number}`);
+      return platform.getIssue!(issue.number);
     },
 
     async ensureIssue({
@@ -831,13 +836,8 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           // Close any duplicate issues
           for (const issue of issues) {
             if (issue.state === 'open' && issue.number !== activeIssue.number) {
-              // TODO: types (#22198)
-              logger.warn(
-                { issueNo: issue.number! },
-                'Closing duplicate issue',
-              );
-              // TODO #22198
-              await helper.closeIssue(http, config.repository, issue.number!);
+              logger.warn({ issueNo: issue.number }, 'Closing duplicate issue');
+              await helper.closeIssue(http, config.repository, issue.number);
             }
           }
 
@@ -848,8 +848,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
             activeIssue.state === 'open'
           ) {
             logger.debug(
-              // TODO: types (#22198)
-              `Issue #${activeIssue.number!} is open and up to date - nothing to do`,
+              `Issue #${activeIssue.number} is open and up to date - nothing to do`,
             );
             return null;
           }
@@ -860,8 +859,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
             const existingIssue = await helper.updateIssue(
               http,
               config.repository,
-              // TODO #22198
-              activeIssue.number!,
+              activeIssue.number,
               {
                 body,
                 title,
@@ -882,8 +880,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
               await helper.updateIssueLabels(
                 http,
                 config.repository,
-                // TODO #22198
-                activeIssue.number!,
+                activeIssue.number,
                 {
                   labels,
                 },
@@ -919,9 +916,8 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       const issueList = await platform.getIssueList();
       for (const issue of issueList) {
         if (issue.state === 'open' && issue.title === title) {
-          logger.debug(`Closing issue...issueNo: ${issue.number!}`);
-          // TODO #22198
-          await helper.closeIssue(http, config.repository, issue.number!);
+          logger.debug(`Closing issue...issueNo: ${issue.number}`);
+          await helper.closeIssue(http, config.repository, issue.number);
         }
       }
     },

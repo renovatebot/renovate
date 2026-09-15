@@ -1,10 +1,11 @@
 import type { MergeStrategy } from '../../../config/types.ts';
-import type { BranchStatus } from '../../../types/index.ts';
+import type { BranchStatus, PrState } from '../../../types/index.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { Pr } from '../types.ts';
 import type {
   BitbucketBranchState,
   BitbucketMergeStrategy,
+  BitbucketPrState,
   MergeRequestBody,
   PrResponse,
 } from './types.ts';
@@ -38,6 +39,22 @@ export const prStates = {
   merged: ['MERGED'],
   closed: ['DECLINED', 'SUPERSEDED'],
   all: ['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED'],
+} satisfies Record<string, BitbucketPrState[]>;
+
+const prStateMapping: Record<BitbucketPrState, PrState> = {
+  OPEN: 'open',
+  MERGED: 'merged',
+  DECLINED: 'closed',
+  SUPERSEDED: 'closed',
+};
+
+/** Inverse of {@link prStateMapping} for the states Renovate can request. */
+export const bitbucketPrStateMapping: Record<
+  'open' | 'closed',
+  BitbucketPrState
+> = {
+  open: 'OPEN',
+  closed: 'DECLINED',
 };
 
 export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
@@ -53,11 +70,7 @@ export function prInfo(pr: PrResponse): Pr {
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
-    // v8 ignore start -- TODO: add test #40625
-    state: prStates.closed?.includes(pr.state)
-      ? 'closed'
-      : pr.state?.toLowerCase(),
-    // v8 ignore stop
+    state: prStateMapping[pr.state],
     createdAt: pr.created_on,
   };
 }

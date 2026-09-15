@@ -11,5 +11,3 @@ export interface PullRequestUpdateParams {
   status?: PrState;
   target?: string;
 }
-
-export type PrFilterByState = 'open' | 'closed' | '!open' | 'all';

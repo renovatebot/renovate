@@ -1,8 +1,6 @@
-import type { Pr } from '../types.ts';
+import type { Issue, Pr } from '../types.ts';
 
-export interface GitlabIssue {
-  iid: number;
-
+export interface GitlabIssue extends Issue {
   labels?: string[];
 
   title: string;

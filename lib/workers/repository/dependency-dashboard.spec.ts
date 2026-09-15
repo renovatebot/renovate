@@ -1280,6 +1280,7 @@ describe('workers/repository/dependency-dashboard', () => {
       };
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
+        number: 1,
         title: 'Dependency Dashboard',
         body: codeBlock`
           This issue contains a list of Renovate updates and their statuses.
@@ -1330,6 +1331,7 @@ describe('workers/repository/dependency-dashboard', () => {
       };
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
+        number: 1,
         title: 'Dependency Dashboard',
         body: codeBlock`
           This issue contains a list of Renovate updates and their statuses.
@@ -1381,10 +1383,12 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
       vi.mocked(platform.getIssue).mockResolvedValueOnce({
+        number: 1,
         title: 'Dependency Dashboard',
         body: '',
       });
       vi.mocked(platform.getIssue).mockResolvedValueOnce({
+        number: 1,
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -1429,6 +1433,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboardChecks = {};
       config.dependencyDashboardIssue = 1;
       vi.mocked(platform.getIssue).mockResolvedValueOnce({
+        number: 1,
         title: 'Dependency Dashboard',
         body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
@@ -1441,6 +1446,7 @@ None detected
 `,
       });
       vi.mocked(platform.getIssue).mockResolvedValueOnce({
+        number: 1,
         title: 'Dependency Dashboard',
         body: '',
       });
