@@ -1,48 +1,35 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
-import * as memCache from '../../../util/cache/memory/index.ts';
-import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
 import type { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import type { Pr } from '../types.ts';
+import { PlatformPrCache } from '../utils/pr-cache.ts';
 import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types.ts';
 import { prFieldsFilter, prInfo, prStates } from './utils.ts';
 
-export class BitbucketPrCache {
-  private items: Pr[] = [];
-  private cache: BitbucketPrCacheData;
+export class BitbucketPrCache extends PlatformPrCache<
+  Pr,
+  BitbucketPrCacheData
+> {
+  private http: BitbucketHttp;
   private repo: string;
   private author: string | null;
 
-  private constructor(repo: string, author: string | null) {
+  private constructor(
+    http: BitbucketHttp,
+    repo: string,
+    author: string | null,
+  ) {
+    super({
+      platform: 'bitbucket',
+      author,
+      createCache: () => ({ items: {}, updated_on: null, author }),
+    });
+    this.http = http;
     this.repo = repo;
     this.author = author;
-    const repoCache = getCache();
-    repoCache.platform ??= {};
-    repoCache.platform.bitbucket ??= {};
-
-    let pullRequestCache = repoCache.platform.bitbucket.pullRequestsCache as
-      BitbucketPrCacheData | undefined;
-    if (!pullRequestCache) {
-      logger.debug('Initializing new PR cache at repository cache');
-      pullRequestCache = {
-        items: {},
-        updated_on: null,
-        author,
-      };
-    } else if (pullRequestCache.author !== author) {
-      logger.debug('Resetting PR cache because authors do not match');
-      pullRequestCache = {
-        items: {},
-        updated_on: null,
-        author,
-      };
-    }
-    repoCache.platform.bitbucket.pullRequestsCache = pullRequestCache;
-    this.cache = pullRequestCache;
-    this.updateItems();
   }
 
   private static async init(
@@ -50,21 +37,9 @@ export class BitbucketPrCache {
     repo: string,
     author: string | null,
   ): Promise<BitbucketPrCache> {
-    const res = new BitbucketPrCache(repo, author);
-    const isSynced = memCache.get<true | undefined>(
-      'bitbucket-pr-cache-synced',
-    );
-
-    if (!isSynced) {
-      await res.sync(http);
-      memCache.set('bitbucket-pr-cache-synced', true);
-    }
-
+    const res = new BitbucketPrCache(http, repo, author);
+    await res.ensureSynced();
     return res;
-  }
-
-  private getPrs(): Pr[] {
-    return this.items;
   }
 
   static async getPrs(
@@ -74,12 +49,6 @@ export class BitbucketPrCache {
   ): Promise<Pr[]> {
     const prCache = await BitbucketPrCache.init(http, repo, author);
     return prCache.getPrs();
-  }
-
-  private setPr(pr: Pr): void {
-    logger.debug(`Adding PR #${pr.number} to the PR cache`);
-    this.cache.items[pr.number] = pr;
-    this.updateItems();
   }
 
   static async setPr(
@@ -140,7 +109,7 @@ export class BitbucketPrCache {
     return `/2.0/repositories/${this.repo}/pullrequests?${query}`;
   }
 
-  private async sync(http: BitbucketHttp): Promise<BitbucketPrCache> {
+  protected override async sync(): Promise<void> {
     logger.debug('Syncing PR list');
     const url = this.getUrl();
     const opts = {
@@ -148,7 +117,10 @@ export class BitbucketPrCache {
       pagelen: 50,
       cacheProvider: repoCacheProvider,
     };
-    const res = await http.getJsonUnchecked<PagedResult<PrResponse>>(url, opts);
+    const res = await this.http.getJsonUnchecked<PagedResult<PrResponse>>(
+      url,
+      opts,
+    );
 
     const items = res.body.values;
     logger.debug(`Fetched ${items.length} PRs to sync with cache`);
@@ -167,14 +139,5 @@ export class BitbucketPrCache {
     );
 
     this.updateItems();
-    return this;
-  }
-
-  /**
-   * Ensure the pr cache starts with the most recent PRs.
-   * JavaScript ensures that the cache is sorted by PR number.
-   */
-  private updateItems(): void {
-    this.items = Object.values(this.cache.items).reverse();
   }
 }

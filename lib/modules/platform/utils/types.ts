@@ -1,3 +1,5 @@
+import type { PlatformId } from '../../../constants/platforms.ts';
+
 /**
  * Reads the raw markdown body out of a platform-specific comment object.
  */
@@ -30,4 +32,22 @@ export interface EnsureCommentRemovalOps<T> {
   getComments(): Promise<T[]>;
   getBody: CommentBodyAccessor<T>;
   deleteComment(comment: T): Promise<void>;
+}
+
+/**
+ * The part of the persisted PR cache which is the same for every platform. Platforms add their own timestamp field on top, because its name and format differ per API.
+ */
+export interface BasePrCacheData<TPr> {
+  items: Record<number, TPr>;
+  author: string | null;
+}
+
+export interface PrCacheOptions<TData> {
+  /** Key of the platform within the repository cache. */
+  platform: PlatformId;
+  author: string | null;
+  /** Creates the empty cache which is used when nothing can be reused. */
+  createCache: () => TData;
+  /** Discards an otherwise reusable cache, for example when it uses an outdated format. */
+  isOutdated?: (cache: TData) => boolean;
 }
