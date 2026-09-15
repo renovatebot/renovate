@@ -21,12 +21,15 @@ describe('util/template/index', () => {
 
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
-    const missingOptions = template.exposedConfigOptions.filter((option) => !allOptions.includes(option));
+    const missingOptions = template.exposedConfigOptions.filter(
+      (option) => !allOptions.includes(option),
+    );
     expect(missingOptions).toEqual([]);
   });
 
   it('filters out disallowed fields', () => {
-    const userTemplate = '{{#if isFoo}}foo{{/if}}{{platform}} token = "{{token}}"';
+    const userTemplate =
+      '{{#if isFoo}}foo{{/if}}{{platform}} token = "{{token}}"';
     const input = {
       isFoo: true,
       platform: 'github',
@@ -44,7 +47,8 @@ describe('util/template/index', () => {
   });
 
   it('containsString', () => {
-    const userTemplate = "{{#if (containsString platform 'git')}}True{{else}}False{{/if}}";
+    const userTemplate =
+      "{{#if (containsString platform 'git')}}True{{else}}False{{/if}}";
     const input = { platform: 'github' };
     const output = template.compile(userTemplate, input, false);
     expect(output).toContain('True');
@@ -75,42 +79,48 @@ describe('util/template/index', () => {
   });
 
   it('not containsString', () => {
-    const userTemplate = "{{#if (containsString platform 'hub')}}True{{else}}False{{/if}}";
+    const userTemplate =
+      "{{#if (containsString platform 'hub')}}True{{else}}False{{/if}}";
     const input = { platform: 'gitlab' };
     const output = template.compile(userTemplate, input);
     expect(output).toContain('False');
   });
 
   it('and returns true when all parameters are true', () => {
-    const userTemplate = '{{#if (and isMajor isSingleVersion isReplacement)}}True{{else}}False{{/if}}';
+    const userTemplate =
+      '{{#if (and isMajor isSingleVersion isReplacement)}}True{{else}}False{{/if}}';
     const input = { isMajor: true, isSingleVersion: true, isReplacement: true };
     const output = template.compile(userTemplate, input);
     expect(output).toContain('True');
   });
 
   it('and returns false when at least one parameter is false', () => {
-    const userTemplate = '{{#if (and isMajor isPatch isGithub)}}True{{else}}False{{/if}}';
+    const userTemplate =
+      '{{#if (and isMajor isPatch isGithub)}}True{{else}}False{{/if}}';
     const input = { isMajor: true, isPatch: false, isReplacement: true };
     const output = template.compile(userTemplate, input);
     expect(output).toContain('False');
   });
 
   it('or returns true when at least one is true', () => {
-    const userTemplate = '{{#if (or isMajor isPatch isReplacement)}}True{{else}}False{{/if}}';
+    const userTemplate =
+      '{{#if (or isMajor isPatch isReplacement)}}True{{else}}False{{/if}}';
     const input = { isMajor: false, isPatch: true, isReplacement: false };
     const output = template.compile(userTemplate, input);
     expect(output).toContain('True');
   });
 
   it('or returns false when all are false', () => {
-    const userTemplate = '{{#if (or isMajor isPatch isReplacement)}}True{{else}}False{{/if}}';
+    const userTemplate =
+      '{{#if (or isMajor isPatch isReplacement)}}True{{else}}False{{/if}}';
     const input = { isMajor: false, isPatch: false, isReplacement: false };
     const output = template.compile(userTemplate, input);
     expect(output).toContain('False');
   });
 
   it('string to pretty JSON', () => {
-    const userTemplate = '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
+    const userTemplate =
+      '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
     const output = template.compile(userTemplate, {});
     expect(output).toBe('{\n  "some": {\n    "fancy": "json"\n  }\n}');
   });
@@ -151,7 +161,8 @@ describe('util/template/index', () => {
   });
 
   it('build complex json', () => {
-    const userTemplate = "{{{ toJSON (toObject 'upgrades' upgrades 'array' (toArray platform isMajor 'foo')) }}}";
+    const userTemplate =
+      "{{{ toJSON (toObject 'upgrades' upgrades 'array' (toArray platform isMajor 'foo')) }}}";
     const input = {
       platform: 'github',
       isMajor: true,
@@ -176,9 +187,14 @@ describe('util/template/index', () => {
     ${'<= {{ newVersion }}'}   | ${'<= 1.6.0'}
     ${'<= {{{ newVersion }}}'} | ${'<= 1.6.0'}
     ${'& {{ newValue}}'}       | ${'& >= 1.6.0'}
-  `('do not escape common range symbols: $input -> $output', ({ input, expected }) => {
-    expect(template.compile(input, { newVersion: '1.6.0', newValue: '>= 1.6.0' })).toBe(expected);
-  });
+  `(
+    'do not escape common range symbols: $input -> $output',
+    ({ input, expected }) => {
+      expect(
+        template.compile(input, { newVersion: '1.6.0', newValue: '>= 1.6.0' }),
+      ).toBe(expected);
+    },
+  );
 
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
@@ -205,7 +221,8 @@ describe('util/template/index', () => {
   });
 
   it('and has access to prBodyDefinitions', () => {
-    const userTemplate = 'Issues: {{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}';
+    const userTemplate =
+      'Issues: {{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}';
     const config = {
       upgrades: [
         {
@@ -220,7 +237,8 @@ describe('util/template/index', () => {
   });
 
   it('replace', () => {
-    const userTemplate = "{{ replace '[a-z]+\\.github\\.com' 'ghc' depName }}{{ replace 'some' 'other' depType }}";
+    const userTemplate =
+      "{{ replace '[a-z]+\\.github\\.com' 'ghc' depName }}{{ replace 'some' 'other' depType }}";
     const output = template.compile(userTemplate, {
       depName: 'some.github.com/dep',
     });
@@ -235,7 +253,9 @@ describe('util/template/index', () => {
 
   it('add - throws if inputs are invalid', () => {
     const userTemplate = '{{add undefined null}}';
-    expect(() => template.compile(userTemplate, {})).toThrow('add: inputs are not valid');
+    expect(() => template.compile(userTemplate, {})).toThrow(
+      'add: inputs are not valid',
+    );
   });
 
   describe('proxyCompileInput', () => {
@@ -243,7 +263,10 @@ describe('util/template/index', () => {
     const allowedArrayField = 'prBodyNotes';
     const forbiddenField = 'foobar';
 
-    type TestCompileInput = Record<typeof allowedField | typeof allowedArrayField | typeof forbiddenField, unknown>;
+    type TestCompileInput = Record<
+      typeof allowedField | typeof allowedArrayField | typeof forbiddenField,
+      unknown
+    >;
 
     const compileInput: TestCompileInput = {
       [allowedField]: 'allowed',
@@ -299,19 +322,28 @@ describe('util/template/index', () => {
 
   describe('percent encoding', () => {
     it('encodes values', () => {
-      const output = template.compile('{{{encodeURIComponent "@fsouza/prettierd"}}}', {});
+      const output = template.compile(
+        '{{{encodeURIComponent "@fsouza/prettierd"}}}',
+        {},
+      );
       expect(output).toBe('%40fsouza%2Fprettierd');
     });
 
     it('decodes values', () => {
-      const output = template.compile('{{{decodeURIComponent "%40fsouza/prettierd"}}}', {});
+      const output = template.compile(
+        '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
+        {},
+      );
       expect(output).toBe('@fsouza/prettierd');
     });
   });
 
   describe('base64 encoding', () => {
     it('encodes values', () => {
-      const output = template.compile('{{{encodeBase64 "@fsouza/prettierd"}}}', {});
+      const output = template.compile(
+        '{{{encodeBase64 "@fsouza/prettierd"}}}',
+        {},
+      );
       expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
     });
 
@@ -332,7 +364,10 @@ describe('util/template/index', () => {
 
   describe('base64 decoding', () => {
     it('decode values', () => {
-      const output = template.compile('{{{decodeBase64 "QGZzb3V6YS9wcmV0dGllcmQ="}}}', {});
+      const output = template.compile(
+        '{{{decodeBase64 "QGZzb3V6YS9wcmV0dGllcmQ="}}}',
+        {},
+      );
       expect(output).toBe('@fsouza/prettierd');
     });
 
@@ -375,42 +410,57 @@ describe('util/template/index', () => {
     });
 
     it('not strict equals', () => {
-      const output = template.compile('{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}', {
+      const output = template.compile(
+        '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
+        {
         newMajor: 3,
-      });
+        },
+      );
       expect(output).toBe('not equals');
     });
   });
 
   describe('includes', () => {
     it('includes is true', () => {
-      const output = template.compile('{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}', {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
         labels: ['dependencies'],
-      });
+        },
+      );
 
       expect(output).toBe('production');
     });
 
     it('includes is false', () => {
-      const output = template.compile('{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}', {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
         labels: ['devDependencies'],
-      });
+        },
+      );
 
       expect(output).toBe('notProduction');
     });
 
     it('includes with incorrect type first argument', () => {
-      const output = template.compile('{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}', {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
         labels: 'devDependencies',
-      });
+        },
+      );
 
       expect(output).toBe('notProduction');
     });
 
     it('includes with incorrect type second argument', () => {
-      const output = template.compile('{{#if (includes labels 555)}}production{{else}}notProduction{{/if}}', {
+      const output = template.compile(
+        '{{#if (includes labels 555)}}production{{else}}notProduction{{/if}}',
+        {
         labels: ['devDependencies'],
-      });
+        },
+      );
 
       expect(output).toBe('notProduction');
     });
@@ -439,16 +489,21 @@ describe('util/template/index', () => {
     });
 
     it('should return array element', () => {
-      const output = template.compile("{{ lookup (split packageName '-') 1 }}", {
+      const output = template.compile(
+        "{{ lookup (split packageName '-') 1 }}",
+        {
         packageName: 'foo-bar-test',
-      });
+        },
+      );
       expect(output).toBe('bar');
     });
   });
 
   describe('lookupArray', () => {
     it('performs lookup for every array element', () => {
-      const output = template.compile('{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}', {
+      const output = template.compile(
+        '{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}',
+        {
         upgrades: [
           {
             prBodyDefinitions: {
@@ -464,7 +519,8 @@ describe('util/template/index', () => {
           null,
           undefined,
         ],
-      });
+        },
+      );
 
       expect(output).toBe(' ABC-123 DEF-456');
     });
