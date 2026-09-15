@@ -398,6 +398,15 @@ describe('modules/manager/bazel/rules/index', () => {
   });
 
   describe('maven', () => {
+    it('skips artifact coordinates that are not group:artifact:version', () => {
+      expect(
+        extractDepsFromFragmentData({
+          rule: 'maven_install',
+          artifacts: ['com.example1:foo', 'com.example2:bar:2.2.2'],
+        }),
+      ).toMatchObject([{ depName: 'com.example2:bar', currentValue: '2.2.2' }]);
+    });
+
     it('extracts maven dependencies', () => {
       expect(
         extractDepsFromFragmentData({
