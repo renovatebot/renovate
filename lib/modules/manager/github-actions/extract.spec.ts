@@ -2891,6 +2891,37 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'hashicorp/setup-terraform@v3',
+        with: { terraform_version: '1.13.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.13.0',
+          datasource: 'github-releases',
+          depName: 'terraform',
+          depType: 'uses-with',
+          packageName: 'hashicorp/terraform',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'hashicorp/setup-terraform@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'terraform',
+          depType: 'uses-with',
+          packageName: 'hashicorp/terraform',
+        },
+      ],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
