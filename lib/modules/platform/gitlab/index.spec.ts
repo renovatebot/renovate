@@ -699,15 +699,14 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toBe(fetchedSha);
     });
 
-    it('falls back to current branch when baseBranch is undefined', async () => {
-      git.getCurrentBranch.mockReturnValue('release/1.x');
+    it('falls back to the default branch when baseBranch is undefined', async () => {
       git.getFile.mockResolvedValueOnce(null);
 
       const scope = httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/some%2Frepo/repository/commits', {
           branch: 'some-branch',
-          start_branch: 'release/1.x',
+          start_branch: 'master',
           commit_message: 'msg',
           actions: [
             {
@@ -735,7 +734,7 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       expect(scope.isDone()).toBeTrue();
-      expect(git.getFile).toHaveBeenCalledWith('new.txt', 'release/1.x');
+      expect(git.getFile).toHaveBeenCalledWith('new.txt', 'master');
       expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
       expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
       expect(res).toBe(fetchedSha);
