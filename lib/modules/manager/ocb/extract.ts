@@ -21,7 +21,7 @@ export function extractPackageFile(
     const parsed = OCBConfig.safeParse(yaml);
     if (!parsed.success) {
       logger.trace(
-        { packageFile, error: parsed.error },
+        { packageFile, err: parsed.error },
         'Failed to parse OCB schema',
       );
       return null;
@@ -30,7 +30,7 @@ export function extractPackageFile(
     definition = parsed.data;
   } catch (error) {
     logger.debug(
-      { packageFile, error },
+      { packageFile, err: error },
       'OCB manager failed to parse file as YAML',
     );
     return null;

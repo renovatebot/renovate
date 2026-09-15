@@ -1,6 +1,6 @@
 import { isString, isTruthy } from '@sindresorhus/is';
 import { z } from 'zod/v4';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
@@ -36,7 +36,7 @@ const archives = [
 ];
 
 const archiveSuffixRegex = regEx(
-  `(?:${archives.map(escapeRegExp).join('|')})$`,
+  `(?:${archives.map((archive) => RegExp.escape(archive)).join('|')})$`,
 );
 
 function stripArchiveSuffix(value: string): string {
@@ -158,6 +158,8 @@ export const HttpTarget = z
     // Hence, `if-else-if` is being used here.
     if (parsedUrl.currentValue) {
       dep.currentValue = parsedUrl.currentValue;
+      // NOTE: a url with neither a value nor a digest never gets this far. A
+      // coverage-ignore hint cannot suppress the implicit else on an `else if`.
     } else if (parsedUrl.currentDigest) {
       dep.currentDigest = parsedUrl.currentDigest;
     }

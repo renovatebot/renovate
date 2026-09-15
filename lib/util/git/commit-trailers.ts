@@ -33,3 +33,19 @@ export function filterValidCommitTrailers(trailers: string[]): string[] {
   }
   return valid;
 }
+
+/**
+ * Build the full commit message with trailers as the final block.
+ * Paragraphs (message parts and the trailer block) are separated by blank
+ * lines, matching `git commit -m ... -m ...` behavior.
+ */
+export function formatCommitMessage(
+  message: string | string[],
+  trailers?: string[],
+): string {
+  const parts = isString(message) ? [message] : [...message];
+  if (isNonEmptyArray(trailers)) {
+    parts.push(trailers.join('\n'));
+  }
+  return parts.join('\n\n');
+}

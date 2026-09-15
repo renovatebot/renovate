@@ -1,13 +1,12 @@
 import { logger } from '../../../../logger/index.ts';
 import { getDatasourceList } from '../../../../modules/datasource/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
+import { regEx } from '../../../../util/regex.ts';
 
 type AuthField = 'token' | 'username' | 'password';
 
 type HttpsAuthField =
-  | 'httpscertificate'
-  | 'httpsprivatekey'
-  | 'httpscertificateauthority';
+  'httpscertificate' | 'httpsprivatekey' | 'httpscertificateauthority';
 
 function isAuthField(x: unknown): x is AuthField {
   return x === 'token' || x === 'username' || x === 'password';
@@ -70,9 +69,9 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
     }
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName
-      .replace(/^RENOVATE_/, '')
+      .replace(regEx(/^RENOVATE_/), '')
       .toLowerCase()
-      .replace(/__/g, '-')
+      .replace(regEx(/__/g), '-')
       .split('_');
     const hostType = splitEnv.shift()!;
     if (

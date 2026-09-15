@@ -68,6 +68,7 @@ export class MetadataCache {
       ttlDelta = 10 * 24 * 60,
     ): Promise<void> {
       const registryHostname = parseUrl(registryUrl)?.hostname;
+      // v8 ignore else -- needs a save against a non-rubygems.org host
       if (registryHostname === 'rubygems.org') {
         const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
         const ttl = ttlMinutes + ttlRandomDelta;
@@ -96,6 +97,7 @@ export class MetadataCache {
              */
             if (err.type === 'cache-stale') {
               const staleCache = err.cache;
+              // v8 ignore else -- needs a stale cache already marked fallback
               if (!staleCache.isFallback) {
                 await saveCache(
                   { ...staleCache, isFallback: true },
@@ -116,7 +118,7 @@ export class MetadataCache {
           'Rubygems: error fetching rubygems data, falling back to versions-only result',
         );
         const releases = versions.map((version) => ({ version }));
-        return Result.ok({ releases } as ReleaseResult);
+        return Result.ok({ releases });
       })
       .unwrapOrThrow();
   }

@@ -1,10 +1,13 @@
 import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { Result } from '../../../util/result.ts';
 import { fetchUpdates } from './fetch.ts';
 import * as lookup from './lookup/index.ts';
+import type { UpdateResult } from './lookup/types.ts';
 
 const lookupUpdates = vi.mocked(lookup).lookupUpdates;
 
@@ -95,7 +98,9 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toEqual({
         maven: [
@@ -130,7 +135,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
 
         await fetchUpdates(config, packageFiles);
 
@@ -154,7 +161,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
 
         await fetchUpdates(config, packageFiles);
 
@@ -175,7 +184,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
 
         await fetchUpdates(config, packageFiles);
 
@@ -198,7 +209,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
         await fetchUpdates(config, packageFiles);
         expect(lookupUpdates).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -206,6 +219,45 @@ describe('workers/repository/process/fetch', () => {
           }),
         );
       });
+    });
+
+    it('prefers configured constraints over extracted constraints', async () => {
+      config.rangeStrategy = 'auto';
+      config.constraints = { python: '>=3.9' };
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            extractedConstraints: { python: '>=3.8' },
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                extractedConstraints: { python: '<3.12' },
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          constraints: { python: '>=3.9' },
+          datasource: 'maven',
+          depName: 'bbb',
+        }),
+      );
+      expect(packageFiles.maven[0].deps[0]).toEqual(
+        expect.objectContaining({
+          extractedConstraints: { python: '<3.12' },
+          updates: ['a', 'b'],
+        }),
+      );
     });
 
     it('skips deps with empty names', async () => {
@@ -220,6 +272,7 @@ describe('workers/repository/process/fetch', () => {
               { depName: ' ' },
               {},
               { depName: undefined },
+              // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid depName type to test invalid-name skip handling
               { depName: { oh: 'no' } as unknown as string },
             ],
           },
@@ -275,7 +328,9 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
       await fetchUpdates(config, packageFiles);
       expect(packageFiles.maven[0].deps[0].updates).toHaveLength(2);
     });

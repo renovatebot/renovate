@@ -1,7 +1,8 @@
+import { isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
+import { regEx } from '../regex.ts';
 
 export const basicEnvVars = [
-  'CI',
   'HTTP_PROXY',
   'HTTPS_PROXY',
   'NO_PROXY',
@@ -48,25 +49,34 @@ export const basicEnvVars = [
   'PNPM_MAX_WORKERS',
 ] as const;
 
+export const hardcodedProcessEnv: Readonly<NodeJS.ProcessEnv> = {
+  CI: 'true',
+} as const;
+
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {
-    return { ...process.env };
+    return { ...process.env, ...hardcodedProcessEnv };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];
   envVars.forEach((envVar) => {
-    if (typeof process.env[envVar] !== 'undefined') {
+    if (!isUndefined(process.env[envVar])) {
       env[envVar] = process.env[envVar];
     }
   });
 
   // Copy containerbase url replacements
   for (const key of Object.keys(process.env)) {
-    if (/^URL_REPLACE_\d+_(?:FROM|TO)$/.test(key)) {
+    if (regEx(/^URL_REPLACE_\d+_(?:FROM|TO)$/).test(key)) {
       env[key] = process.env[key];
     }
   }
+
+  for (const [key, value] of Object.entries(hardcodedProcessEnv)) {
+    env[key] = value;
+  }
+
   return env;
 }

@@ -90,7 +90,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
       );
-      await this.persist(method, url, newHttpCache as HttpCache);
+      await this.persist(method, url, newHttpCache);
       return resp;
     }
 

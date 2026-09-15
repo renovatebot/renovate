@@ -66,7 +66,7 @@ export function extractPackageJson(
           const match = regEx('^(?<name>.+)@(?<range>.+)$').exec(
             dependencies as string,
           );
-          /* v8 ignore next 3 -- needs test */
+          /* v8 ignore next -- needs test */
           if (!match?.groups) {
             break;
           }
@@ -115,10 +115,7 @@ export function extractPackageJson(
               } else if (isObject(overridesVal)) {
                 // Older nested object syntax: `parent: { parent: { child: version } }`
                 deps.push(
-                  ...extractOverrideDepsRec(
-                    [overridesKey],
-                    overridesVal as unknown as NpmManagerData,
-                  ),
+                  ...extractOverrideDepsRec([overridesKey], overridesVal),
                 );
               }
             }

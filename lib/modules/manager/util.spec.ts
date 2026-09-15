@@ -4,7 +4,11 @@ import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
 import { type PackageDependency } from './types.ts';
-import { applyGitSource } from './util.ts';
+import {
+  applyGitSource,
+  artifactErrorMessageFromExecError,
+  resolveToolConstraint,
+} from './util.ts';
 
 describe('modules/manager/util', () => {
   beforeEach(() => {
@@ -168,6 +172,131 @@ describe('modules/manager/util', () => {
       packageName: git,
       currentValue: undefined,
       skipReason: 'unspecified-version',
+    });
+  });
+});
+
+describe('modules/manager/util', () => {
+  it('returns stderr when present', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: 'some error', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some error');
+  });
+
+  it('returns stdout when stderr is empty', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns stdout when stderr is only whitespace', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '   ', stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns stdout when stderr is undefined', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stdout: 'some output' },
+      'fallback message',
+    );
+
+    expect(message).toBe('some output');
+  });
+
+  it('returns fallback message when neither stderr nor stdout are present', () => {
+    const message = artifactErrorMessageFromExecError({}, 'fallback message');
+
+    expect(message).toBe('fallback message');
+  });
+
+  it('returns fallback message when stderr and stdout are only whitespace', () => {
+    const message = artifactErrorMessageFromExecError(
+      { stderr: '  ', stdout: '  ' },
+      'fallback message',
+    );
+
+    expect(message).toBe('fallback message');
+  });
+
+  describe('resolveToolConstraint()', () => {
+    it('prefers the user configured constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '==3.12' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '==3.11',
+      );
+
+      expect(constraint).toBe('==3.12');
+    });
+
+    it('prefers the derived constraint over the extracted one', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => Promise.resolve('==3.11'),
+      );
+
+      expect(constraint).toBe('==3.11');
+    });
+
+    it('falls back to the extracted constraint', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+        () => null,
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns the extracted constraint when nothing can be derived', async () => {
+      const constraint = await resolveToolConstraint(
+        { extractedConstraints: { python: '==3.10' } },
+        'python',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('returns undefined when no constraint is known', async () => {
+      const constraint = await resolveToolConstraint({}, 'python', () => null);
+
+      expect(constraint).toBeUndefined();
+    });
+
+    it('treats an empty string as not set', async () => {
+      const constraint = await resolveToolConstraint(
+        {
+          constraints: { python: '' },
+          extractedConstraints: { python: '==3.10' },
+        },
+        'python',
+        () => '',
+      );
+
+      expect(constraint).toBe('==3.10');
+    });
+
+    it('accepts the null constraints of a post-update config', async () => {
+      const constraint = await resolveToolConstraint(
+        { constraints: null, extractedConstraints: null },
+        'node',
+      );
+
+      expect(constraint).toBeUndefined();
     });
   });
 });
