@@ -18,6 +18,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
@@ -138,7 +139,7 @@ export async function updateArtifacts({
 
     if (token) {
       logger.debug(`Authenticating to hex organization ${organization}`);
-      const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
+      const authCommand = `mix hex.organization auth ${quote(organization)} --key ${quote(token)}`;
       return [...acc, authCommand];
     }
 
@@ -154,17 +155,19 @@ export async function updateArtifacts({
       // TODO: should include a version constraint
       MIX_ARCHIVES: await ensureCacheDir('mix_archives'),
     },
-    cwdFile: packageFileName,
+    cwdFile: lockFileName,
     docker: {},
     toolConstraints: [
       {
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: config.constraints?.erlang ?? `^${erlangVersion}`,
+        constraint:
+          (await resolveToolConstraint(config, 'erlang')) ??
+          `^${erlangVersion}`,
       },
       {
         toolName: 'elixir',
-        constraint: config.constraints?.elixir,
+        constraint: await resolveToolConstraint(config, 'elixir'),
       },
     ],
     preCommands,
@@ -187,7 +190,7 @@ export async function updateArtifacts({
   try {
     await exec(command, execOptions);
   } catch (err) {
-    /* v8 ignore next 3 */
+    /* v8 ignore if -- defensive rethrow of TEMPORARY_ERROR from exec, not reproduced in mix specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

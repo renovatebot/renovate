@@ -101,6 +101,8 @@ export interface CommitFilesConfig {
   branchName: string;
   files: FileChange[];
   message: string | string[];
+  /** Structured git trailers (`Key: value` lines) to add in the final block of the commit message */
+  trailers?: string[];
   force?: boolean;
   platformCommit?: PlatformCommitOptions;
   /** Only needed by Gerrit platform */

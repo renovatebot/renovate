@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -12,18 +13,20 @@ const mise1toml = Fixtures.get('Mise.1.toml');
 describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('', miseFilename)).toBeNull();
+      await expect(extractPackageFile('', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for invalid TOML', async () => {
-      expect(await extractPackageFile('foo', miseFilename)).toBeNull();
+      await expect(extractPackageFile('foo', miseFilename)).resolves.toBeNull();
     });
 
     it('returns null for empty tools section', async () => {
       const content = codeBlock`
       [tools]
     `;
-      expect(await extractPackageFile(content, miseFilename)).toBeNull();
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
     });
 
     it('extracts tools - mise core plugins', async () => {
@@ -37,11 +40,13 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'erlang',
+            depType: 'tools',
             currentValue: '23.3',
             datasource: 'github-tags',
           },
           {
             depName: 'node',
+            depType: 'tools',
             currentValue: '16',
             datasource: 'node-version',
           },
@@ -466,8 +471,8 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'asdf:rust',
             currentValue: '1.82.0',
-            packageName: 'rust-lang/rust',
-            datasource: 'github-tags',
+            packageName: 'rust',
+            datasource: 'rust-version',
           },
           {
             depName: 'vfox:scala',
@@ -528,6 +533,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.18.21',
             packageName: 'eza',
             datasource: 'crate',
+            versioning: 'semver',
           },
           {
             depName: 'cargo:https://github.com/username/demo1',
@@ -766,14 +772,48 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '1.0.0',
             packageName: 'some/repo',
             datasource: 'github-releases',
-            extractVersion: '^release\\-(?<version>.+)',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
           },
           {
             depName: 'github:other/repo',
             currentValue: '2.0.0',
             packageName: 'other/repo',
             datasource: 'github-releases',
-            extractVersion: '^v(?<version>.+)',
+            extractVersion: '^\\x76(?<version>.+)',
+          },
+        ],
+      });
+    });
+
+    it('extracts gitlab backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "gitlab:gitlab-org/cli" = "v1.54.0"
+      "gitlab:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "gitlab:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'gitlab:gitlab-org/cli',
+            currentValue: 'v1.54.0',
+            packageName: 'gitlab-org/cli',
+            datasource: 'gitlab-releases',
+          },
+          {
+            depName: 'gitlab:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+          },
+          {
+            depName: 'gitlab:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x76(?<version>.+)',
           },
         ],
       });
@@ -1102,24 +1142,6 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
-    it('resolves tools from the mise registry data file via cargo backend', async () => {
-      const content = codeBlock`
-      [tools]
-      magika = "0.3.1"
-    `;
-      const result = await extractPackageFile(content, miseFilename);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'magika',
-            currentValue: '0.3.1',
-            datasource: 'crate',
-            packageName: 'magika-cli',
-          },
-        ],
-      });
-    });
-
     it('resolves tools from the mise registry data file via github backend', async () => {
       const content = codeBlock`
       [tools]
@@ -1257,6 +1279,50 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('uses the normalized tool name for lockfile lookup', async () => {
+      const ubiLockFileContent = codeBlock`
+        [[tools."ubi:cli/cli"]]
+        version = "2.63.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(ubiLockFileContent);
+      const content = codeBlock`
+        [tools]
+        " ubi:cli/cli[exe=gh] " = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'ubi:cli/cli',
+        currentValue: '2',
+        lockedVersion: '2.63.0',
+        isLockfileOnly: true,
+        rangeStrategy: 'update-lockfile',
+      });
+    });
+
+    it('uses a tooling depName override for lockfile lookup', async () => {
+      const asdfLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+        backend = "asdf:nodejs"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(asdfLockFileContent);
+      const content = codeBlock`
+        [tools]
+        "asdf:nodejs" = "22"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '22',
+        lockedVersion: '22.14.0',
+        isLockfileOnly: true,
+      });
+    });
+
     it('skips lockedVersion when tool not in lock file', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
       const content = codeBlock`
@@ -1294,6 +1360,285 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('treats fuzzy selectors as lockfile-only dependencies', async () => {
+      const fuzzyLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+
+        [[tools.java]]
+        version = "temurin-25.0.3+9.0.LTS"
+
+        [[tools.protoc]]
+        version = "30.2"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(fuzzyLockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "lts"
+        java = "temurin-25"
+        protoc = "latest"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'node',
+          currentValue: 'lts',
+          lockedVersion: '22.14.0',
+          ignoreUnstable: true,
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+        {
+          depName: 'java',
+          currentValue: 'temurin-25',
+          lockedVersion: '25.0.3+9.0.LTS',
+          allowedVersions: '/^(?:\\x74emurin\\x2d)?25(?:\\.|-|\\+|$)/',
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+        {
+          depName: 'protoc',
+          currentValue: 'latest',
+          lockedVersion: '30.2',
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+      ]);
+    });
+
+    it('treats a golangci-lint major selector as lockfile-only', async () => {
+      const lockFileContent = codeBlock`
+        [[tools.golangci-lint]]
+        version = "2.12.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        golangci-lint = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'golangci-lint',
+        currentValue: '2',
+        lockedVersion: '2.12.0',
+        allowedVersions: '/^2(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+        rangeStrategy: 'update-lockfile',
+      });
+    });
+
+    it('allows the node datasource v prefix for a bare locked version', async () => {
+      const lockFileContent = codeBlock`
+        [[tools.node]]
+        version = "20.11.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20',
+        lockedVersion: '20.11.0',
+        allowedVersions: '/^(?:\\x76)?20(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+      });
+    });
+
+    it('allows a datasource prefix from the locked version', async () => {
+      const lockFileContent = codeBlock`
+        [[tools."github:cli/cli"]]
+        version = "v2.64.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "github:cli/cli" = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'github:cli/cli',
+        currentValue: '2',
+        lockedVersion: 'v2.64.0',
+        allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+      });
+    });
+
+    it('allows the default v prefix for GitHub release selectors', async () => {
+      const lockFileContent = codeBlock`
+        [[tools."github:cli/cli"]]
+        version = "2.64.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "github:cli/cli" = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
+        currentValue: '2',
+        lockedVersion: '2.64.0',
+      });
+    });
+
+    it('supports Java LTS selectors and leaves unsupported LTS tools unchanged', async () => {
+      const ltsLockFileContent = codeBlock`
+        [[tools.java]]
+        version = "25.0.3+9.0.LTS"
+
+        [[tools.erlang]]
+        version = "27.0.0"
+
+        [[tools.unknown]]
+        version = "1.0.0"
+
+        [[tools."vfox:unknown"]]
+        version = "1.0.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(ltsLockFileContent);
+      const content = codeBlock`
+        [tools]
+        java = "lts"
+        erlang = "lts"
+        "core:unknown" = "lts"
+        "vfox:unknown" = "lts"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'java',
+          currentValue: 'lts',
+          lockedVersion: '25.0.3+9.0.LTS',
+          allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|\\+|$)/',
+          ignoreUnstable: true,
+          isLockfileOnly: true,
+        },
+        {
+          depName: 'erlang',
+          currentValue: 'lts',
+          lockedVersion: '27.0.0',
+        },
+        {
+          depName: 'core:unknown',
+          lockedVersion: '1.0.0',
+        },
+        {
+          depName: 'vfox:unknown',
+          lockedVersion: '1.0.0',
+        },
+      ]);
+      expect(result?.deps[1]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[2]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[3]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('leaves a selector unchanged when the locked version is unsupported', async () => {
+      const lockFile = codeBlock`
+        [[tools.java]]
+        version = "not-a-version"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        java = "lts"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'java',
+        lockedVersion: 'not-a-version',
+        skipReason: 'unsupported-datasource',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('does not treat mise non-version selectors as partial versions', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+
+        [[tools.python]]
+        version = "3.13.0"
+
+        [[tools.ruby]]
+        version = "3.4.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "ref:main2"
+        python = "path:/opt/tools/1.2"
+        ruby = "sub-1"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      for (const dep of coerceArray(result?.deps)) {
+        expect(dep).not.toHaveProperty('isLockfileOnly');
+        expect(dep).not.toHaveProperty('allowedVersions');
+      }
+    });
+
+    it('does not reinterpret a value that is exact in the lockfile', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "20.11"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "20.11"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20.11',
+        lockedVersion: '20.11',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('keeps concrete versions on the normal update path', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "20.11.1"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "20.11.0"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20.11.0',
+        lockedVersion: '20.11.1',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[0]).not.toHaveProperty('currentRawValue');
+    });
+
     it('skips kafka tool when version has no apache- prefix', async () => {
       const content = codeBlock`
         [tools]
@@ -1322,7 +1667,7 @@ describe('modules/manager/mise/extract', () => {
           run = "cargo build"
           tools = {rust = "1.97.0"}
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'dotted key tools under [tasks.build]',
@@ -1330,7 +1675,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks.build]
           tools.rust = "1.97.0"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'subtable [tasks.<name>.tools]',
@@ -1339,7 +1684,10 @@ describe('modules/manager/mise/extract', () => {
           rust = "1.97.0"
           "cargo:zoxide" = "0.9.6"
         `,
-        expectedDeps: [RUST_197, ZOXIDE],
+        expectedDeps: [
+          { ...RUST_197, depType: 'task-build-tools' },
+          { ...ZOXIDE, depType: 'task-build-tools' },
+        ],
       },
       {
         description: 'top level and task tools',
@@ -1350,7 +1698,10 @@ describe('modules/manager/mise/extract', () => {
           [tasks.lint.tools]
           rust = "1.80.0"
         `,
-        expectedDeps: [RUST_197, { ...RUST_197, currentValue: '1.80.0' }],
+        expectedDeps: [
+          { ...RUST_197, depType: 'tools' },
+          { ...RUST_197, depType: 'task-lint-tools', currentValue: '1.80.0' },
+        ],
       },
       {
         description: 'inline table task with top level tools',
@@ -1361,7 +1712,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = { run = "cargo build" }
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
       {
         description: 'string shorthand task with top level tools',
@@ -1372,7 +1723,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = "echo 'rust is a must'"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
       {
         description: 'array shorthand task with top level tools',
@@ -1383,7 +1734,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           test = ["echo '🦀🦀🦀'"]
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
     ])(
       'extracts task tools - $description',

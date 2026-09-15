@@ -39,7 +39,6 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as comments from './comments.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import {
@@ -188,7 +187,7 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
     }
 
     return repos.map(({ owner, name }) => `${owner}/${name}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: repo listing failures are logged and rethrown, not simulated in specs */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
   }
@@ -253,15 +252,20 @@ export async function initRepo({
     mainBranch = info.mainbranch;
 
     if (getInheritedOrGlobal('bbUseDevelopmentBranch')) {
-      // Fetch Bitbucket development branch
+      logger.debug(
+        "bbUseDevelopmentBranch is true - Checking BitBucket's development branch",
+      );
       const developmentBranch = (
         await bitbucketHttp.getJsonUnchecked<RepoBranchingModel>(
-          `/2.0/repositories/${repository}/branching-model`,
+          `/2.0/repositories/${repository}/effective-branching-model`,
         )
-      ).body.development?.branch?.name;
+      ).body.development?.name;
 
       if (developmentBranch) {
         mainBranch = developmentBranch;
+        logger.debug(
+          `${developmentBranch} is BitBucket's development branch - using it as default branch`,
+        );
       }
     }
 
@@ -271,12 +275,11 @@ export async function initRepo({
       ...config,
       owner: info.owner,
       mergeMethod: info.mergeMethod,
-      has_issues: info.has_issues,
       is_private: info.is_private,
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping (404 to not-found) is not mocked in specs */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -295,7 +298,8 @@ export async function initRepo({
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
   // TODO #22198
-  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)?.[1];
+  const hostnameWithoutApiPrefix =
+    regEx(/api[.|-](?<host>.+)/).exec(hostname)?.groups?.host;
 
   let auth = '';
   if (opts.token) {
@@ -327,7 +331,7 @@ export async function initRepo({
   return repoConfig;
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- covered only through findPr callers, never invoked directly in specs */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
@@ -424,7 +428,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     )
   ).body;
 
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: the PR endpoint returns a body or throws, never an empty body */
   if (!pr) {
     return null;
   }
@@ -442,8 +446,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   return res;
 }
 
-const escapeHash = (input: string): string =>
-  input?.replace(regEx(/#/g), '%23');
+function escapeHash(input: string): string {
+  return input?.replace(regEx(/#/g), '%23');
+}
 
 // Return the commit SHA for a branch
 async function getBranchCommit(
@@ -459,7 +464,7 @@ async function getBranchCommit(
       )
     ).body;
     return branch.target.hash;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: missing branch is logged and mapped to undefined, not mocked in specs */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
     return undefined;
   }
@@ -560,7 +565,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  /* v8 ignore next */
+  /* v8 ignore next -- specs always pass a targetUrl, fallback exists for direct API constraints */
   const url = targetUrl ?? 'https://bitbucket.org';
 
   const body = {
@@ -583,71 +588,6 @@ export async function setBranchStatus({
   aggressiveRepoCacheProvider.markSynced('get', branchStatusesUrl, false);
 }
 
-interface BbIssue {
-  id: number;
-  title: string;
-  kind: string;
-  content?: { raw: string };
-}
-
-async function findOpenIssues(title: string): Promise<BbIssue[]> {
-  try {
-    const filters = [
-      `title=${JSON.stringify(title)}`,
-      '(state = "new" OR state = "open")',
-    ];
-    if (renovateUserUuid) {
-      filters.push(`reporter.uuid="${renovateUserUuid}"`);
-    }
-    const filter = encodeURIComponent(filters.join(' AND '));
-    // v8 ignore next -- TODO: add test #40625
-    return (
-      (
-        await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
-          `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-          { cacheProvider: aggressiveRepoCacheProvider },
-        )
-      ).body.values || []
-    );
-  } catch (err) /* v8 ignore next */ {
-    logger.warn({ err }, 'Error finding issues');
-    return [];
-  }
-}
-
-export async function findIssue(title: string): Promise<Issue | null> {
-  logger.debug(`findIssue(${title})`);
-
-  /* v8 ignore next */
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot findIssue');
-    return null;
-  }
-  const issues = await findOpenIssues(title);
-  if (!issues.length) {
-    return null;
-  }
-  const [issue] = issues;
-  return {
-    number: issue.id,
-    body: issue.content?.raw,
-  };
-}
-
-async function closeIssue(issueNumber: number): Promise<void> {
-  await bitbucketHttp.putJson(
-    `/2.0/repositories/${config.repository}/issues/${issueNumber}`,
-    {
-      body: { state: 'closed' },
-    },
-  );
-}
-
-/**
- * Remove or transform markdown into Bitbucket supported syntax.
- *
- * See https://bitbucket.org/tutorials/markdowndemo/src for supported markdown syntax
- */
 /**
  * Remove or transform markdown into Bitbucket supported syntax.
  *
@@ -665,9 +605,9 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /<details>\n(<summary>View abandoned dependencies.*<\/summary>\n\n)([\s\S]*?)<\/details>/,
+        /<details>\n(?:<summary>View abandoned dependencies.*<\/summary>\n\n)(?<body>[\s\S]*?)<\/details>/,
       ),
-      '$2',
+      '$<body>',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/issues\//g), '](../../issues/')
@@ -743,8 +683,8 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
 
       if (partDepth > 1) {
         t = t.replace(
-          regEx(/^([ \t]*- [`[])/gm),
-          `${nestedListItemIndentation}$1`,
+          regEx(/^(?<prefix>[ \t]*- [`[])/gm),
+          `${nestedListItemIndentation}$<prefix>`,
         );
       }
 
@@ -757,122 +697,43 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
       return result;
     })
     .join('')
-    .replace(/<\/?(summary|details|blockquote)>/g, '');
+    .replace(regEx(/<\/?(?:summary|details|blockquote)>/g), '');
 }
 
 export function maxBodyLength(): number {
   return 250000;
 }
 
-export async function ensureIssue({
+function logIssuesRemoved(): void {
+  logger.once.debug(
+    'Bitbucket Cloud has removed its issue tracker, so Renovate features which rely on issues, like the Dependency Dashboard, do not work. See https://developer.atlassian.com/cloud/bitbucket/changelog/#CHANGE-3071',
+  );
+}
+
+export function findIssue(title: string): Promise<Issue | null> {
+  logger.debug(`findIssue(${title})`);
+  logIssuesRemoved();
+  return Promise.resolve(null);
+}
+
+export function ensureIssue({
   title,
-  reuseTitle,
-  body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
-  logger.debug(`ensureIssue()`);
-  /* v8 ignore next */
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot ensureIssue');
-    logger.debug(`Failed to ensure Issue with title:${title}`);
-    return null;
-  }
-  try {
-    let issues = await findOpenIssues(title);
-    const description = massageMarkdown(sanitize(body));
-    const issueKind = 'task';
-
-    if (!issues.length && reuseTitle) {
-      issues = await findOpenIssues(reuseTitle);
-    }
-    if (issues.length) {
-      // Close any duplicates
-      for (const issue of issues.slice(1)) {
-        await closeIssue(issue.id);
-      }
-      const [issue] = issues;
-
-      if (
-        issue.title !== title ||
-        String(issue.content?.raw).trim() !== description.trim() ||
-        issue.kind !== issueKind
-      ) {
-        logger.debug('Issue updated');
-        await bitbucketHttp.putJson(
-          `/2.0/repositories/${config.repository}/issues/${issue.id}`,
-          {
-            body: {
-              kind: issueKind,
-              content: {
-                raw: readOnlyIssueBody(description),
-                markup: 'markdown',
-              },
-            },
-          },
-        );
-        return 'updated';
-      }
-    } else {
-      logger.info('Issue created');
-      await bitbucketHttp.postJson(
-        `/2.0/repositories/${config.repository}/issues`,
-        {
-          body: {
-            title,
-            kind: issueKind,
-            content: {
-              raw: readOnlyIssueBody(description),
-              markup: 'markdown',
-            },
-          },
-        },
-      );
-      return 'created';
-    }
-  } catch (err) /* v8 ignore next */ {
-    if (err.message.startsWith('Repository has no issue tracker.')) {
-      logger.debug(`Issues are disabled, so could not create issue: ${title}`);
-    } else {
-      logger.warn({ err }, 'Could not ensure issue');
-    }
-  }
-  return null;
+  logger.once.warn({ title }, 'Cannot ensure issue');
+  logIssuesRemoved();
+  return Promise.resolve(null);
 }
 
-/* v8 ignore next */
-export async function getIssueList(): Promise<Issue[]> {
+export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
-
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot getIssueList');
-    return [];
-  }
-  try {
-    const filters = ['(state = "new" OR state = "open")'];
-    if (renovateUserUuid) {
-      filters.push(`reporter.uuid="${renovateUserUuid}"`);
-    }
-    const filter = encodeURIComponent(filters.join(' AND '));
-    const url = `/2.0/repositories/${config.repository}/issues?q=${filter}`;
-    const res = await bitbucketHttp.getJsonUnchecked<{ values: Issue[] }>(url, {
-      cacheProvider: repoCacheProvider,
-    });
-    return res.body.values || [];
-  } catch (err) {
-    logger.warn({ err }, 'Error finding issues');
-    return [];
-  }
+  logIssuesRemoved();
+  return Promise.resolve([]);
 }
 
-export async function ensureIssueClosing(title: string): Promise<void> {
-  /* v8 ignore next */
-  if (!config.has_issues) {
-    logger.debug('Issues are disabled - cannot ensureIssueClosing');
-    return;
-  }
-  const issues = await findOpenIssues(title);
-  for (const issue of issues) {
-    await closeIssue(issue.id);
-  }
+export function ensureIssueClosing(title: string): Promise<void> {
+  logger.debug(`ensureIssueClosing(${title})`);
+  logIssuesRemoved();
+  return Promise.resolve();
 }
 
 export function addAssignees(
@@ -915,7 +776,7 @@ export async function addReviewers(
   );
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- stub: Bitbucket Cloud has no PR labels, callers never reach this */
 export function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
@@ -1111,7 +972,7 @@ export async function createPr({
       await autoResolvePrTasks(pr);
     }
     return pr;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- reviewer-sanitizing retry path depends on API error shapes not mocked in specs */ {
     // Try sanitizing reviewers
     const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
 
@@ -1283,7 +1144,7 @@ export async function mergePr({
       },
     );
     logger.debug('Automerging succeeded');
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: merge failures are logged and mapped to false, not simulated in specs */ {
     logger.debug({ err }, `PR merge error`);
     logger.info({ pr: prNo }, 'PR automerge failed');
     return false;

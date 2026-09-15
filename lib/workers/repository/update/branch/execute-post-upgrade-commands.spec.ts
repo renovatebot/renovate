@@ -29,6 +29,9 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
     beforeEach(async () => {
       GlobalConfig.reset();
+      gitAuth.getGitEnvironmentVariables.mockImplementation((env) => ({
+        ...env,
+      }));
 
       tmpDir = await dir({ unsafeCleanup: true });
     });
@@ -539,7 +542,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           postUpgradeTasks: {
             executionMode: 'branch',
             commands: ['post-upgrade-command'],
-            fileFilters: ['*.txt'],
+            fileFilters: ['*'],
           },
         },
       ]);
@@ -595,7 +598,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ created: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: ownerExecutableMode }),
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask();
@@ -614,7 +620,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ modified: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: ownerExecutableMode }),
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask([
@@ -635,11 +644,36 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         ]);
       });
 
+      it('does not mark a submodule directory executable', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['submodule'] });
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => false,
+          }),
+        );
+
+        const result = await runPostUpgradeTask();
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'submodule',
+            contents: null,
+          },
+        ]);
+      });
+
       it('does not infer executability from group or other execute bits', async () => {
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ created: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: groupAndOtherExecutableMode }),
+          partial<Stats>({
+            mode: groupAndOtherExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask();
@@ -657,7 +691,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ modified: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: nonExecutableMode }),
+          partial<Stats>({
+            mode: nonExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask([
@@ -1019,7 +1056,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         'some-command',
         expect.objectContaining({
           cwd: localDir,
-          extraEnv: gitEnvVars,
+          env: gitEnvVars,
         }),
       );
       expect(res.artifactErrors).toHaveLength(0);
@@ -1173,6 +1210,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
             jenkins: '2.541.3',
           },
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally uses `jenkins`, which is not a valid ToolName, to test that invalid tools are ignored
           installTools: {
             jenkins: {},
           } as never, // TODO can't tighten the type constraints, as the arguments to the test function don't match
@@ -1245,7 +1283,6 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
 
       it(`logs when skipping a constraint that isn't a known tool`, async () => {
-        // @ts-expect-error -- installTools.jenkins is not valid
         const commands = partial<BranchUpgradeConfig>([
           {
             constraints: {
@@ -1257,6 +1294,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               commands: ['some-command'],
               executionMode: 'update',
               installTools: {
+                // @ts-expect-error -- installTools.jenkins is not valid
                 jenkins: {},
               },
             },
@@ -1318,10 +1356,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
 
       it(`logs when skipping a value that isn't a known constraint`, async () => {
-        // @ts-expect-error -- not using a valid constraints or installTools value
         const commands = partial<BranchUpgradeConfig>([
           {
             constraints: {
+              // @ts-expect-error -- not a valid constraint
               'not-valid': '1.2.3',
             },
             manager: 'some-manager',
@@ -1330,6 +1368,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               commands: ['some-command'],
               executionMode: 'update',
               installTools: {
+                // @ts-expect-error -- not a valid installTools value
                 'not-valid': {},
               },
             },

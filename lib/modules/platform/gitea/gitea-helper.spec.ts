@@ -1,7 +1,6 @@
 import * as httpMock from '~test/http-mock.ts';
-import { logger, partial } from '~test/util.ts';
-import { setBaseUrl } from '../../../util/http/gitea.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { fakeSha, logger, partial } from '~test/util.ts';
+import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,
@@ -23,6 +22,7 @@ import {
   getRepoContents,
   getRepoLabels,
   getVersion,
+  isOrg,
   mergePR,
   orgListRepos,
   requestPrReviewers,
@@ -46,14 +46,15 @@ import type {
   Repo,
   RepoContents,
   User,
-} from './types.ts';
+} from './schema.ts';
 
 describe('modules/platform/gitea/gitea-helper', () => {
-  const giteaApiHost = 'https://gitea.renovatebot.com/';
-  const baseUrl = `${giteaApiHost}api/v1`;
+  const giteaHttp = new GiteaHttp();
 
-  const mockCommitHash =
-    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
+  const apiHost = 'https://gitea.renovatebot.com/';
+  const baseUrl = `${apiHost}api/v1`;
+
+  const mockCommitHash = fakeSha('gitea-helper');
 
   const mockUser: User = {
     id: 1,
@@ -124,7 +125,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     head: {
       label: 'pull-req-13',
       sha: mockCommitHash,
-      repo: mockRepo,
+      repo: { full_name: mockRepo.full_name },
     },
     created_at: '2018-08-13T20:45:37Z',
     closed_at: '2020-04-01T19:19:22Z',
@@ -163,11 +164,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   const mockCommit: Commit = {
     id: mockCommitHash,
-    author: {
-      name: otherMockUser.full_name,
-      email: otherMockUser.email,
-      login: otherMockUser.login,
-    },
   };
 
   const mockBranch: Branch = {
@@ -181,6 +177,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   };
 
   const mockContents: RepoContents = {
+    type: 'file',
+    name: 'dummy.txt',
     path: 'dummy.txt',
     content: toBase64('top secret'),
     contentString: 'top secret',
@@ -192,14 +190,14 @@ describe('modules/platform/gitea/gitea-helper', () => {
   };
 
   beforeEach(() => {
-    setBaseUrl(giteaApiHost);
+    setBaseUrl(apiHost);
   });
 
   describe('getCurrentUser', () => {
     it('should call /api/v1/user endpoint', async () => {
       httpMock.scope(baseUrl).get('/user').reply(200, mockUser);
 
-      const res = await getCurrentUser();
+      const res = await getCurrentUser(giteaHttp);
       expect(res).toEqual(mockUser);
     });
   });
@@ -209,9 +207,33 @@ describe('modules/platform/gitea/gitea-helper', () => {
       const version = '1.13.01.14.0+dev-754-g5d2b7ba63';
       httpMock.scope(baseUrl).get('/version').reply(200, { version });
 
-      const res = await getVersion();
+      const res = await getVersion(giteaHttp);
 
       expect(res).toEqual(version);
+    });
+  });
+
+  describe('isOrg', () => {
+    it('should call /api/v1/orgs/[org] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`/orgs/${mockRepo.owner.login}`)
+        .reply(200, {})
+        .get(`/orgs/user`)
+        .reply(404)
+        .get(`/orgs/error`)
+        .reply(503);
+      await expect(
+        isOrg(giteaHttp, 'gitea', mockRepo.owner.login),
+      ).resolves.toEqual(true);
+      // uses cached result
+      await expect(
+        isOrg(giteaHttp, 'gitea', mockRepo.owner.login),
+      ).resolves.toEqual(true);
+      await expect(isOrg(giteaHttp, 'gitea', 'user')).resolves.toEqual(false);
+      await expect(isOrg(giteaHttp, 'gitea', 'error')).rejects.toThrow(
+        'Request failed with status code 503 (Service Unavailable)',
+      );
     });
   });
 
@@ -225,7 +247,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
           data: [mockRepo, otherMockRepo],
         });
 
-      const res = await searchRepos({});
+      const res = await searchRepos(giteaHttp, {});
       expect(res).toEqual([mockRepo, otherMockRepo]);
     });
 
@@ -238,7 +260,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
           data: [otherMockRepo],
         });
 
-      const res = await searchRepos({
+      const res = await searchRepos(giteaHttp, {
         uid: 13,
         archived: false,
       });
@@ -251,7 +273,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         data: [],
       });
 
-      await expect(searchRepos({})).rejects.toThrow(
+      await expect(searchRepos(giteaHttp, {})).rejects.toThrow(
         'Unable to search for repositories, ok flag has not been set',
       );
     });
@@ -259,10 +281,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   describe('orgListRepos', () => {
     it('should call /api/v1/orgs/[organization]/repos endpoint', async () => {
-      httpMock.scope(baseUrl).get('/orgs/some/repos').reply(200, mockRepo);
+      httpMock.scope(baseUrl).get('/orgs/some/repos').reply(200, [mockRepo]);
 
-      const res = await orgListRepos('some');
-      expect(res).toEqual(mockRepo);
+      const res = await orgListRepos(giteaHttp, 'some');
+      expect(res).toEqual([mockRepo]);
     });
   });
 
@@ -273,7 +295,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}`)
         .reply(200, mockRepo);
 
-      const res = await getRepo(mockRepo.full_name);
+      const res = await getRepo(giteaHttp, mockRepo.full_name);
       expect(res).toEqual(mockRepo);
     });
   });
@@ -287,7 +309,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
         .reply(200, { ...mockContents, contentString: undefined });
 
-      const res = await getRepoContents(mockRepo.full_name, mockContents.path);
+      const res = await getRepoContents(
+        giteaHttp,
+        mockRepo.full_name,
+        mockContents.path,
+      );
       expect(res).toEqual(mockContents);
     });
 
@@ -300,6 +326,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, { ...mockContents, contentString: undefined });
 
       const res = await getRepoContents(
+        giteaHttp,
         mockRepo.full_name,
         mockContents.path,
         mockCommitHash,
@@ -316,28 +343,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, otherMockContents);
 
       const res = await getRepoContents(
+        giteaHttp,
         mockRepo.full_name,
         otherMockContents.path,
       );
       expect(res).toEqual(otherMockContents);
-    });
-
-    it('should not fail if no content is returned', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
-        .reply(200, {
-          ...mockContents,
-          content: undefined,
-          contentString: undefined,
-        });
-
-      const res = await getRepoContents(mockRepo.full_name, mockContents.path);
-      expect(res).toEqual({
-        ...mockContents,
-        content: undefined,
-        contentString: undefined,
-      });
     });
   });
 
@@ -348,7 +358,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .post(`/repos/${mockRepo.full_name}/pulls`)
         .reply(200, mockPR);
 
-      const res = await createPR(mockRepo.full_name, {
+      const res = await createPR(giteaHttp, mockRepo.full_name, {
         state: mockPR.state,
         title: mockPR.title,
         body: mockPR.body,
@@ -375,7 +385,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .patch(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
         .reply(200, updatedMockPR);
 
-      const res = await updatePR(mockRepo.full_name, mockPR.number, {
+      const res = await updatePR(giteaHttp, mockRepo.full_name, mockPR.number, {
         state: 'closed',
         title: 'new-title',
         body: 'new-body',
@@ -391,9 +401,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
       httpMock
         .scope(baseUrl)
         .patch(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
-        .reply(200);
+        .reply(200, mockPR);
 
-      await expect(closePR(mockRepo.full_name, mockPR.number)).toResolve();
+      await expect(
+        closePR(giteaHttp, mockRepo.full_name, mockPR.number),
+      ).toResolve();
     });
   });
 
@@ -405,7 +417,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200);
 
       await expect(
-        mergePR(mockRepo.full_name, mockPR.number, {
+        mergePR(giteaHttp, mockRepo.full_name, mockPR.number, {
           Do: 'rebase',
         }),
       ).toResolve();
@@ -419,7 +431,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
         .reply(200, mockPR);
 
-      const res = await getPR(mockRepo.full_name, mockPR.number);
+      const res = await getPR(giteaHttp, mockRepo.full_name, mockPR.number);
       expect(res).toEqual(mockPR);
     });
   });
@@ -434,11 +446,12 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, mockPR);
 
       const res = await getPRByBranch(
+        giteaHttp,
         mockRepo.full_name,
         mockPR.base!.ref,
         mockPR.head!.label,
       );
-      expect(res).toEqual(mockPR);
+      expect(res?.number).toEqual(mockPR.number);
     });
 
     it('should return null if pr not found', async () => {
@@ -450,6 +463,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(404);
 
       const res = await getPRByBranch(
+        giteaHttp,
         mockRepo.full_name,
         mockPR.base!.ref,
         mockPR.head!.label,
@@ -466,6 +480,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(410);
 
       const res = await getPRByBranch(
+        giteaHttp,
         mockRepo.full_name,
         mockPR.base!.ref,
         mockPR.head!.label,
@@ -491,7 +506,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200);
 
       await expect(
-        requestPrReviewers(mockRepo.full_name, mockPR.number, {}),
+        requestPrReviewers(giteaHttp, mockRepo.full_name, mockPR.number, {}),
       ).toResolve();
     });
   });
@@ -503,7 +518,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .post(`/repos/${mockRepo.full_name}/issues`)
         .reply(200, mockIssue);
 
-      const res = await createIssue(mockRepo.full_name, {
+      const res = await createIssue(giteaHttp, mockRepo.full_name, {
         state: mockIssue.state,
         title: mockIssue.title,
         body: mockIssue.body,
@@ -528,12 +543,17 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .patch(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
         .reply(200, updatedMockIssue);
 
-      const res = await updateIssue(mockRepo.full_name, mockIssue.number, {
-        state: 'closed',
-        title: 'new-title',
-        body: 'new-body',
-        assignees: [otherMockUser.login],
-      });
+      const res = await updateIssue(
+        giteaHttp,
+        mockRepo.full_name,
+        mockIssue.number,
+        {
+          state: 'closed',
+          title: 'new-title',
+          body: 'new-body',
+          assignees: [otherMockUser.login],
+        },
+      );
       expect(res).toEqual(updatedMockIssue);
     });
   });
@@ -551,6 +571,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, updatedMockLabels);
 
       const res = await updateIssueLabels(
+        giteaHttp,
         mockRepo.full_name,
         mockIssue.number,
         {
@@ -566,9 +587,13 @@ describe('modules/platform/gitea/gitea-helper', () => {
       httpMock
         .scope(baseUrl)
         .patch(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
-        .reply(200);
+        .reply(200, mockIssue);
 
-      const res = await closeIssue(mockRepo.full_name, mockIssue.number);
+      const res = await closeIssue(
+        giteaHttp,
+        mockRepo.full_name,
+        mockIssue.number,
+      );
       expect(res).toBeUndefined();
     });
   });
@@ -580,7 +605,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/issues?type=issues`)
         .reply(200, [mockIssue]);
 
-      const res = await searchIssues(mockRepo.full_name, {});
+      const res = await searchIssues(giteaHttp, mockRepo.full_name, {});
       expect(res).toEqual([mockIssue]);
     });
 
@@ -590,7 +615,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/issues?state=open&type=issues`)
         .reply(200, [mockIssue]);
 
-      const res = await searchIssues(mockRepo.full_name, {
+      const res = await searchIssues(giteaHttp, mockRepo.full_name, {
         state: 'open',
       });
       expect(res).toEqual([mockIssue]);
@@ -604,7 +629,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
         .reply(200, mockIssue);
 
-      const res = await getIssue(mockRepo.full_name, mockIssue.number);
+      const res = await getIssue(
+        giteaHttp,
+        mockRepo.full_name,
+        mockIssue.number,
+      );
       expect(res).toEqual(mockIssue);
     });
   });
@@ -616,7 +645,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/labels`)
         .reply(200, [mockLabel, otherMockLabel]);
 
-      const res = await getRepoLabels(mockRepo.full_name);
+      const res = await getRepoLabels(giteaHttp, mockRepo.full_name);
       expect(res).toEqual([mockLabel, otherMockLabel]);
     });
   });
@@ -628,7 +657,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/orgs/${mockRepo.owner.login}/labels`)
         .reply(200, [mockLabel, otherMockLabel]);
 
-      const res = await getOrgLabels(mockRepo.owner.login);
+      const res = await getOrgLabels(giteaHttp, mockRepo.owner.login);
       expect(res).toEqual([mockLabel, otherMockLabel]);
     });
   });
@@ -643,7 +672,12 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200);
 
       await expect(
-        unassignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
+        unassignLabel(
+          giteaHttp,
+          mockRepo.full_name,
+          mockIssue.number,
+          mockLabel.id,
+        ),
       ).toResolve();
     });
   });
@@ -658,6 +692,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, mockComment);
 
       const res = await createComment(
+        giteaHttp,
         mockRepo.full_name,
         mockIssue.number,
         mockComment.body,
@@ -679,6 +714,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, updatedMockComment);
 
       const res = await updateComment(
+        giteaHttp,
         mockRepo.full_name,
         mockComment.id,
         'new-body',
@@ -696,7 +732,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         )
         .reply(200);
 
-      const res = await deleteComment(mockRepo.full_name, mockComment.id);
+      const res = await deleteComment(
+        giteaHttp,
+        mockRepo.full_name,
+        mockComment.id,
+      );
       expect(res).toBeUndefined();
     });
   });
@@ -708,7 +748,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}/comments`)
         .reply(200, [mockComment]);
 
-      const res = await getComments(mockRepo.full_name, mockIssue.number);
+      const res = await getComments(
+        giteaHttp,
+        mockRepo.full_name,
+        mockIssue.number,
+      );
       expect(res).toEqual([mockComment]);
     });
   });
@@ -720,12 +764,17 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .post(`/repos/${mockRepo.full_name}/statuses/${mockCommitHash}`)
         .reply(200, mockCommitStatus);
 
-      const res = await createCommitStatus(mockRepo.full_name, mockCommitHash, {
-        state: mockCommitStatus.status,
-        context: mockCommitStatus.context,
-        description: mockCommitStatus.description,
-        target_url: mockCommitStatus.target_url,
-      });
+      const res = await createCommitStatus(
+        giteaHttp,
+        mockRepo.full_name,
+        mockCommitHash,
+        {
+          state: mockCommitStatus.status,
+          context: mockCommitStatus.context,
+          description: mockCommitStatus.description,
+          target_url: mockCommitStatus.target_url,
+        },
+      );
       expect(res).toEqual(mockCommitStatus);
     });
   });
@@ -738,6 +787,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, [mockCommitStatus, otherMockCommitStatus]);
 
       const res = await getCombinedCommitStatus(
+        giteaHttp,
         mockRepo.full_name,
         mockBranch.name,
       );
@@ -809,6 +859,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         // Expect to get the current state back as the worst status, as all previous commit statuses
         // should be less important than the one which just got added
         const res = await getCombinedCommitStatus(
+          giteaHttp,
           mockRepo.full_name,
           mockBranch.name,
         );
@@ -824,7 +875,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/branches/${mockBranch.name}`)
         .reply(200, mockBranch);
 
-      const res = await getBranch(mockRepo.full_name, mockBranch.name);
+      const res = await getBranch(
+        giteaHttp,
+        mockRepo.full_name,
+        mockBranch.name,
+      );
       expect(res).toEqual(mockBranch);
     });
 
@@ -836,7 +891,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .get(`/repos/${mockRepo.full_name}/branches/${escapedBranchName}`)
         .reply(200, otherMockBranch);
 
-      const res = await getBranch(mockRepo.full_name, otherMockBranch.name);
+      const res = await getBranch(
+        giteaHttp,
+        mockRepo.full_name,
+        otherMockBranch.name,
+      );
       expect(res).toEqual(otherMockBranch);
     });
   });

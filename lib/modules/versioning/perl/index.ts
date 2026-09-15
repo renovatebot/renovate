@@ -1,7 +1,7 @@
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'perl';
 export const displayName = 'Perl';
@@ -9,9 +9,13 @@ export const urls = ['[Perl version module](https://metacpan.org/pod/version)'];
 export const supportsRanges = false;
 
 // https://metacpan.org/pod/version#Decimal-Versions
-const decimalVersionPattern = regEx(/^(\d+)\.(\d+(?:_\d+)?)$/);
+const decimalVersionPattern = regEx(
+  /^(?<intPart>\d+)\.(?<decimalPart>\d+(?:_\d+)?)$/,
+);
 // https://metacpan.org/pod/version#Dotted-Decimal-Versions
-const dottedDecimalVersionPattern = regEx(/^v?(\d+(?:\.\d+)*(?:_\d+)?)$/);
+const dottedDecimalVersionPattern = regEx(
+  /^v?(?<versionValue>\d+(?:\.\d+)*(?:_\d+)?)$/,
+);
 
 class PerlVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
@@ -26,20 +30,21 @@ class PerlVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, intPart, decimalPart] = matches;
+    const { intPart, decimalPart } = matches.groups!;
     const prerelease = decimalPart.includes('_') ? 'alpha' : '';
 
-    const decimalComponents =
+    const decimalComponents = coerceArray(
       decimalPart
-        .replace(/_/g, '')
-        .match(/.{1,3}/g)
+        .replace(regEx(/_/g), '')
+        .match(regEx(/.{1,3}/g))
         ?.map((value) => {
           let component = value;
           while (component.length < 3) {
             component += '0';
           }
           return Number.parseInt(component, 10);
-        }) ?? /* istanbul ignore next */ [];
+        }),
+    );
     const release = [Number.parseInt(intPart, 10), ...decimalComponents];
     return { release, prerelease };
   }
@@ -49,7 +54,7 @@ class PerlVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, versionValue] = matches;
+    const { versionValue } = matches.groups!;
     const prerelease = versionValue.includes('_') ? 'alpha' : '';
     const release = versionValue.split(regEx(/[._]/)).map(Number);
     return { release, prerelease };

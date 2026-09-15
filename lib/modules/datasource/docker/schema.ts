@@ -25,6 +25,7 @@ export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
   size: Nullish(z.number().int().gte(0)),
+  annotations: Nullish(z.record(z.string(), z.string())),
 });
 /**
  * OCI platform properties
@@ -193,7 +194,7 @@ export const DockerHubTagsPage = z.object({
     /* v8 ignore next -- TODO: add test */
     onError: ({ error }) => {
       logger.debug(
-        { error },
+        { err: error },
         'Docker: Failed to parse some tags from Docker Hub',
       );
     },

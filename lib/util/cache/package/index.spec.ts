@@ -21,11 +21,13 @@ describe('util/cache/package/index', () => {
   });
 
   it('returns undefined if not initialized', async () => {
-    expect(await get('_test-namespace', 'missing-key')).toBeUndefined();
+    await expect(
+      get('_test-namespace', 'missing-key'),
+    ).resolves.toBeUndefined();
 
-    expect(
-      await set('_test-namespace', 'some-key', 'some-value', 5),
-    ).toBeUndefined();
+    await expect(
+      set('_test-namespace', 'some-key', 'some-value', 5),
+    ).resolves.toBeUndefined();
 
     await expect(cleanup({})).resolves.toBeUndefined();
   });

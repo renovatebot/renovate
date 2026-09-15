@@ -16,6 +16,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_PENDING_DELETION,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -62,14 +63,16 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
+  getProjectMembersByRole,
   getUserID,
   gitlabApi,
   isUserBusy,
 } from './http.ts';
 import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
+import { getRoleAccessLevel } from './roles.ts';
 import type { GitLabMergeRequest } from './schema.ts';
-import { LastPipelineId } from './schema.ts';
+import { LastPipelineId, MergeTrainCarStatus } from './schema.ts';
 import type {
   GitlabComment,
   GitlabIssue,
@@ -232,6 +235,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug(`Discovered ${repos.length} project(s)`);
     return repos
       .filter((repo) => !repo.mirror || config?.includeMirrors)
+      .filter((repo) => !repo.marked_for_deletion_at)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
@@ -295,6 +299,13 @@ export async function initRepo({
       throw new Error(REPOSITORY_ARCHIVED);
     }
 
+    if (res.body.marked_for_deletion_at) {
+      logger.debug(
+        'Repository is marked for deletion - throwing error to abort renovation',
+      );
+      throw new Error(REPOSITORY_PENDING_DELETION);
+    }
+
     if (res.body.mirror && GlobalConfig.get('includeMirrors') !== true) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation',
@@ -317,7 +328,7 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    /* v8 ignore next */
+    /* v8 ignore next -- unreachable: null/empty default_branch already threw REPOSITORY_EMPTY above */
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
@@ -336,12 +347,18 @@ export async function initRepo({
       ...config,
       url,
     });
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping needs git-level failures not mocked in specs */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
+    if (
+      [
+        REPOSITORY_ARCHIVED,
+        REPOSITORY_EMPTY,
+        REPOSITORY_PENDING_DELETION,
+      ].includes(err.message)
+    ) {
       throw err;
     }
     if (err.statusCode === 403) {
@@ -365,14 +382,48 @@ export async function initRepo({
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
-  const forceRebase =
-    config?.mergeMethod !== 'merge' && !config.mergeTrainsEnabled;
+  const forceRebase = config?.mergeMethod !== 'merge';
   if (forceRebase) {
     logger.once.debug(
       `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
     );
   }
   return Promise.resolve(forceRebase);
+}
+
+/**
+ * Merge trains are GitLab's equivalent of a merge queue. They are enabled per
+ * project, so the branch name is not needed.
+ * https://docs.gitlab.com/ci/pipelines/merge_trains/
+ */
+export function isBranchMergeQueueEnabled(
+  _branchName: string,
+): Promise<boolean> {
+  return Promise.resolve(config.mergeTrainsEnabled);
+}
+
+/**
+ * GitLab answers with 404 if the MR is not on a merge train. A car that has
+ * already been merged is not waiting any more.
+ * https://docs.gitlab.com/api/merge_trains/#get-the-status-of-a-merge-request-on-a-merge-train
+ */
+export async function isPrInMergeQueue(id: number): Promise<boolean> {
+  if (!config.mergeTrainsEnabled) {
+    return false;
+  }
+  try {
+    const { body: status } = await gitlabApi.getJson(
+      `projects/${config.repository}/merge_trains/merge_requests/${id}`,
+      { memCache: false },
+      MergeTrainCarStatus,
+    );
+    return status !== 'merged';
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      logger.debug({ err }, 'Failed to fetch merge train status');
+    }
+    return false;
+  }
 }
 
 type BranchState =
@@ -413,7 +464,7 @@ async function getStatus(
 
     return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
       .body;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- commit status fetch failures map 404 to REPOSITORY_CHANGED, not mocked in specs */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
@@ -447,7 +498,7 @@ export async function getBranchStatus(
   }
 
   const branchStatuses = await getStatus(branchName);
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: getStatus always resolves to an array in specs */
   if (!isArray(branchStatuses)) {
     logger.warn(
       { branchName, branchStatuses },
@@ -695,7 +746,7 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: retry loop already swallows errors, outer catch is a last resort */ {
     logger.debug({ err }, 'Automerge on PR creation failed');
   }
 }
@@ -741,7 +792,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: (labels ?? []).join(','),
+        labels: coerceArray(labels).join(','),
         squash: config.squash,
       },
     },
@@ -840,7 +891,27 @@ export async function reattemptPlatformAutomerge({
   logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }
 
+async function tryAddPrToMergeTrain(id: number): Promise<boolean> {
+  try {
+    // Without `auto_merge` the MR is added to the train immediately. The
+    // train merges it and removes the source branch on its own.
+    // https://docs.gitlab.com/api/merge_trains/#add-a-merge-request-to-a-merge-train
+    await gitlabApi.postJson(
+      `projects/${config.repository}/merge_trains/merge_requests/${id}`,
+    );
+    logger.debug(`MR !${id} added to the merge train`);
+    return true;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to add MR to the merge train');
+    return false;
+  }
+}
+
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
+  if (config.mergeTrainsEnabled) {
+    return tryAddPrToMergeTrain(id);
+  }
+
   try {
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${id}/merge`,
@@ -851,7 +922,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
       },
     );
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- merge rejection statuses (401/406) are mapped to false, not mocked in specs */ {
     if (err.statusCode === 401) {
       logger.debug('No permissions to merge PR');
       return false;
@@ -1081,7 +1152,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       memCache: false,
       paginate: true,
     });
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: paginated issues endpoint always yields an array in specs */
     if (!isArray(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
@@ -1117,7 +1188,7 @@ export async function getIssue(
       number,
       body: issueBody,
     };
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: issue fetch failures are logged and swallowed, not simulated in specs */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
   }
@@ -1132,7 +1203,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     return await getIssue(issue.iid);
-  } catch /* v8 ignore next */ {
+  } catch /* v8 ignore next -- defensive: getIssueList/getIssue failures are swallowed, not simulated in specs */ {
     logger.warn('Error finding issue');
     return null;
   }
@@ -1165,7 +1236,7 @@ export async function ensureIssue({
             body: {
               title,
               description,
-              labels: (labels ?? issue.labels ?? []).join(','),
+              labels: coerceArray(labels ?? issue.labels).join(','),
               confidential: confidential ?? false,
             },
           },
@@ -1177,7 +1248,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: (labels ?? []).join(','),
+          labels: coerceArray(labels).join(','),
           confidential: confidential ?? false,
         },
       });
@@ -1186,7 +1257,7 @@ export async function ensureIssue({
       delete config.issueList;
       return 'created';
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- issue API failures (e.g. issues disabled) are swallowed, not simulated in specs */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
@@ -1318,7 +1389,7 @@ export async function deleteLabel(
         body: { labels },
       },
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }
@@ -1429,6 +1500,14 @@ export async function ensureComment({
   return true;
 }
 
+function byTopic(comment: GitlabComment, topic: string): boolean {
+  return comment.body.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: GitlabComment, content: string): boolean {
+  return comment.body.trim() === content;
+}
+
 export async function ensureCommentRemoval(
   deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
@@ -1444,13 +1523,11 @@ export async function ensureCommentRemoval(
 
   // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
-    const byTopic = (comment: GitlabComment): boolean =>
-      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
-    commentId = comments.find(byTopic)?.id;
+    const topic = deleteConfig.topic;
+    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
   } else if (deleteConfig.type === 'by-content') {
-    const byContent = (comment: GitlabComment): boolean =>
-      comment.body.trim() === deleteConfig.content;
-    commentId = comments.find(byContent)?.id;
+    const content = deleteConfig.content;
+    commentId = comments.find((comment) => byContent(comment, content))?.id;
   }
 
   // v8 ignore else -- TODO: add test #40625
@@ -1479,6 +1556,25 @@ export async function expandGroupMembers(
 
   // Skip passing user emails to Gitlab API, but include them in the final result
   for (const reviewerOrAssignee of reviewersOrAssignees) {
+    // Resolve GitLab CODEOWNERS role handles (@@developer, @@maintainer,
+    // @@owner) to project members instead of treating them as groups
+    const roleAccessLevel = getRoleAccessLevel(reviewerOrAssignee);
+    if (roleAccessLevel !== null) {
+      try {
+        const members = await getProjectMembersByRole(
+          config.repository,
+          roleAccessLevel,
+        );
+        expandedReviewersOrAssignees.push(...members.map((u) => u.username));
+      } catch (err) {
+        logger.debug(
+          { err, reviewerOrAssignee },
+          'Unable to fetch role members',
+        );
+      }
+      continue;
+    }
+
     if (reviewerOrAssignee.indexOf('@') > 0) {
       expandedReviewersOrAssignees.push(reviewerOrAssignee);
       continue;

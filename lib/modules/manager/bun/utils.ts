@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { minimatch } from '../../../util/minimatch.ts';
+import { regEx } from '../../../util/regex.ts';
 
 export function fileMatchesWorkspaces(
   pwd: string,
@@ -11,7 +12,7 @@ export function fileMatchesWorkspaces(
   }
   const relativeFile = upath
     .relative(pwd, fileName)
-    .replace(/\/package\.json$/, '');
+    .replace(regEx(/\/package\.json$/), '');
   return workspaces.some((pattern) =>
     // minimatch will also return true for an exact match
     minimatch(pattern, { dot: true }).match(relativeFile),

@@ -13,6 +13,7 @@ import type {
   CommandWithOptions,
   DataListener,
   ExecResult,
+  OutputWriter,
   RawExecOptions,
 } from './types.ts';
 import { asRawCommand, isCommandWithOptions } from './utils.ts';
@@ -34,8 +35,8 @@ const NONTERM = [
 
 const encoding = 'utf8';
 
-function stringify(list: Buffer[]): string {
-  return Buffer.concat(list).toString(encoding);
+function stringify(list: Buffer[], writer: OutputWriter | undefined): string {
+  return writer?.toString() ?? Buffer.concat(list).toString(encoding);
 }
 
 function initStreamListeners(
@@ -52,6 +53,11 @@ function initStreamListeners(
 
   cp.stdout?.on('data', (chunk: Buffer) => {
     // process.stdout.write(data.toString());
+    if (opts.outputWriters?.stdout) {
+      opts.outputWriters.stdout.write(chunk);
+      return;
+    }
+
     const len = Buffer.byteLength(chunk, encoding);
     stdoutLen += len;
     if (stdoutLen > opts.maxBuffer) {
@@ -63,6 +69,11 @@ function initStreamListeners(
 
   cp.stderr?.on('data', (chunk: Buffer) => {
     // process.stderr.write(data.toString());
+    if (opts.outputWriters?.stderr) {
+      opts.outputWriters.stderr.write(chunk);
+      return;
+    }
+
     const len = Buffer.byteLength(chunk, encoding);
     stderrLen += len;
     if (stderrLen > opts.maxBuffer) {
@@ -131,6 +142,11 @@ export function exec(
       detached: process.platform !== 'win32',
       shell,
       extendEnv: false,
+      // Suppress execa's internal promise rejection (e.g., from timeout).
+      // We handle all exit scenarios via 'exit' and 'error' event listeners below,
+      // so the promise rejection would otherwise surface as an unhandledRejection.
+      // TODO: Refactor to await execa result (#45650)
+      reject: false,
     });
 
     // handle streams
@@ -167,7 +183,7 @@ export function exec(
         if (ignoreFailure === undefined || ignoreFailure === false) {
           reject(
             new ExecError(
-              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr)}`,
+              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`,
               {
                 ...rejectInfo(),
                 exitCode: code,
@@ -180,23 +196,23 @@ export function exec(
         logger.once.debug(
           {
             command: cp.spawnargs.join(' '),
-            stdout: stringify(stdout),
-            stderr: stringify(stderr),
+            stdout: stringify(stdout, opts.outputWriters?.stdout),
+            stderr: stringify(stderr, opts.outputWriters?.stderr),
             exitCode: code,
           },
           `Ignoring failure to execute comamnd \`${cp.spawnargs.join(' ')}\`, as ignoreFailure=true is set`,
         );
 
         resolve({
-          stderr: stringify(stderr),
-          stdout: stringify(stdout),
+          stderr: stringify(stderr, opts.outputWriters?.stderr),
+          stdout: stringify(stdout, opts.outputWriters?.stdout),
           exitCode: code,
         });
         return;
       }
       resolve({
-        stderr: stringify(stderr),
-        stdout: stringify(stdout),
+        stderr: stringify(stderr, opts.outputWriters?.stderr),
+        stdout: stringify(stdout, opts.outputWriters?.stdout),
       });
     });
 
@@ -204,8 +220,8 @@ export function exec(
       return {
         cmd: cp.spawnargs.join(' '),
         options: opts,
-        stdout: stringify(stdout),
-        stderr: stringify(stderr),
+        stdout: stringify(stdout, opts.outputWriters?.stdout),
+        stderr: stringify(stderr, opts.outputWriters?.stderr),
       };
     }
   });
@@ -235,11 +251,11 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   }
 }
 
-export const rawExec: (
+export function rawExec(
   cmd: string | CommandWithOptions,
   opts: RawExecOptions,
-) => Promise<ExecResult> = (
-  cmd: string | CommandWithOptions,
-  opts: RawExecOptions,
-) =>
-  instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () => exec(cmd, opts));
+): Promise<ExecResult> {
+  return instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () =>
+    exec(cmd, opts),
+  );
+}

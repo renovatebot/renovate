@@ -5,6 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
 import type { BranchConfig } from '../../types.ts';
@@ -82,7 +83,17 @@ export async function getCommitsHourlyCount(
       );
 
       const cache = getCache();
-      const cachedBranches = cache.branches ?? [];
+      const cachedBranches = coerceArray(cache.branches);
+
+      // if we don't have all of our branches in our cache (for instance, if we're not using the Repository Cache, or this is the first run against a repo), we need to fall back to the SCM
+      const needsScmFallback = branches.some(
+        (branch) =>
+          !cachedBranches.find((b) => b.branchName === branch.branchName)
+            ?.commitTimestamp,
+      );
+      const fallbackUpdateDates = needsScmFallback
+        ? await scm.getAllBranchUpdateDates()
+        : {};
 
       let soFarThisHour = 0;
       for (const branch of branches) {
@@ -99,8 +110,8 @@ export async function getCommitsHourlyCount(
             soFarThisHour++;
           }
         } else {
-          // Fallback to SCM if not in cache (shouldn't happen often after initial run)
-          const updateDate = await scm.getBranchUpdateDate(branch.branchName);
+          // Fallback to SCM if not in cache
+          const updateDate = fallbackUpdateDates[branch.branchName];
           if (updateDate && updateDate > currentHourStart) {
             soFarThisHour++;
           }

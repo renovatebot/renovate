@@ -9,6 +9,7 @@ import { logger } from '../../../logger/index.ts';
 import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import { get } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { detectSemanticCommits } from '../../../util/git/semantic.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -18,11 +19,14 @@ import type { BranchUpgradeConfig } from '../../types.ts';
 import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
 
-const upper = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.substring(1);
+function upper(str: string): string {
+  return str.charAt(0).toUpperCase() + str.substring(1);
+}
 
 export function sanitizeDepName(depName: string): string {
   return depName
+    .replace(regEx(/\$\{[^}]+\}\/?/g), '')
+    .replace(regEx(/[${}]/g), '')
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
@@ -208,7 +212,7 @@ export async function flattenUpdates(
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles ?? []) {
+        for (const lockFile of coerceArray(packageFileConfig.lockFiles)) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]
