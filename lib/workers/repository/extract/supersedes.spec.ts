@@ -49,6 +49,65 @@ describe('workers/repository/extract/supersedes', () => {
       ]);
     });
 
+    it('keeps the secondary when the primary says it cannot update the file', () => {
+      // The primary states this rather than it being inferred from its
+      // dependencies: a manager whose extractors disagree about one dependency
+      // can report an entry whose every dependency is skipped and mean the
+      // opposite -- do not update this.
+      const extractResults: ExtractResults[] = [
+        {
+          manager: 'bun',
+          packageFiles: [
+            {
+              packageFile: 'package.json',
+              cannotUpdate: true,
+              deps: [{ depName: 'lodash', skipReason: 'unsupported' }],
+            },
+          ],
+        },
+        {
+          manager: 'npm',
+          packageFiles: [
+            { packageFile: 'package.json', deps: [{ depName: 'lodash' }] },
+          ],
+        },
+      ];
+      processSupersedesManagers(extractResults);
+      expect(extractResults[1].packageFiles).toEqual([
+        { packageFile: 'package.json', deps: [{ depName: 'lodash' }] },
+      ]);
+      // The primary keeps its own entry too. Asserting only the secondary lets
+      // an implementation pass that drops the primary instead -- the file would
+      // still be maintained by one manager, but by neither the one that claimed
+      // it nor for the reason this test is about.
+      expect(extractResults[0].packageFiles).toHaveLength(1);
+    });
+
+    it('still supersedes an entry whose dependencies are skipped but says nothing', () => {
+      // Skipped dependencies alone change nothing: a manager may skip a
+      // dependency because it must not be updated, which is the opposite of
+      // being unable to update it.
+      const extractResults: ExtractResults[] = [
+        {
+          manager: 'bun',
+          packageFiles: [
+            {
+              packageFile: 'package.json',
+              deps: [{ depName: 'lodash', skipReason: 'unsupported' }],
+            },
+          ],
+        },
+        {
+          manager: 'npm',
+          packageFiles: [
+            { packageFile: 'package.json', deps: [{ depName: 'lodash' }] },
+          ],
+        },
+      ];
+      processSupersedesManagers(extractResults);
+      expect(extractResults[1].packageFiles).toEqual([]);
+    });
+
     it('keeps superseded package files with lock files', () => {
       const extractResults: ExtractResults[] = [
         {
