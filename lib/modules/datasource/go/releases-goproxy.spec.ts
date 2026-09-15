@@ -1614,6 +1614,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       let dirResult: Awaited<ReturnType<typeof tmpDir>>;
 
       beforeEach(async () => {
+        vi.useRealTimers();
         memCache.init();
         dirResult = await tmpDir({ unsafeCleanup: true });
         await packageCache.init({ cacheDir: dirResult.path });
@@ -1651,13 +1652,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       //
       // But without needing to actually wait that long
       it('reuses timestamps fetched by an earlier run', async () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-go-proxy':
-              // 0 means "expired as soon as it's written to cache", and allows us to show what happens if the cache has expired between the runs, as if the default `cacheTtl` has passed on `datasource-go-proxy`
-              0,
-          },
-        });
+        vi.useFakeTimers({ shouldAdvanceTime: true });
 
         vi.stubEnv('GOPROXY', baseUrl);
 
@@ -1666,8 +1661,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
           packageName: 'github.com/google/btree',
         });
 
-        // a new run, against the same persistent cache
+        // a new run, against the same persistent cache, once the `datasource-go-proxy` cache has expired
         memCache.init();
+        vi.advanceTimersByTime(31 * 60 * 1000);
 
         setHttpMock();
         const second = await datasource.getReleases({
