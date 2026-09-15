@@ -54,7 +54,7 @@ function generateToolingTable(): string {
   return table;
 }
 
-export async function generateManagerGithubActionsCommunity(
+export async function generateManagerKnownGithubActions(
   dist: string,
 ): Promise<void> {
   const indexFileName = `${dist}/modules/manager/github-actions/index.md`;
