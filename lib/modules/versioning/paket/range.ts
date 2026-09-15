@@ -3,20 +3,13 @@ import { regEx } from '../../../util/regex.ts';
 import { parseVersion } from '../nuget/parser.ts';
 import type { NugetVersion } from '../nuget/types.ts';
 import { versionToString } from '../nuget/version.ts';
+import type {
+  PaketConstraint,
+  PaketInterval,
+  PaketOperator,
+  PaketRange,
+} from './types.ts';
 import { compare, sameReleaseParts } from './version.ts';
-
-export type PaketOperator = '' | '=' | '==' | '>' | '>=' | '<' | '<=' | '~>';
-
-export interface PaketConstraint {
-  operator: PaketOperator;
-  version: NugetVersion;
-}
-
-export interface PaketRange {
-  strategy: '!' | '@' | null;
-  constraints: PaketConstraint[];
-  prereleaseTags: string[];
-}
 
 const constraintOperators: readonly string[] = [
   '=',
@@ -166,25 +159,6 @@ export function twiddle(version: NugetVersion): NugetVersion {
   const precision = Math.max(releaseParts(version).length - 1, 1);
   return bumpAtPrecision(version, precision);
 }
-
-export type PaketInterval =
-  | {
-      kind:
-        | 'specific'
-        | 'override'
-        | 'minimum'
-        | 'greater-than'
-        | 'maximum'
-        | 'less-than';
-      version: NugetVersion;
-    }
-  | {
-      kind: 'range';
-      from: NugetVersion;
-      fromInclusive: boolean;
-      to: NugetVersion;
-      toInclusive: boolean;
-    };
 
 function intervalOfPair(
   first: PaketConstraint,

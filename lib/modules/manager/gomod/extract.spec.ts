@@ -16,21 +16,168 @@ describe('modules/manager/gomod/extract', () => {
     });
 
     it('extracts single-line requires', () => {
-      const res = extractPackageFile(gomod1)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(12);
-      expect(res?.filter((e) => e.depType === 'require')).toHaveLength(9);
-      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
-      expect(res?.filter((e) => e.skipReason)).toHaveLength(2);
-      expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(2);
+      const res = extractPackageFile(gomod1);
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/pkg/errors',
+            currentValue: 'v0.7.0',
+            managerData: { lineNumber: 2 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/aws/aws-sdk-go',
+            currentValue: 'v1.15.21',
+            managerData: { lineNumber: 3 },
+          },
+          {
+            datasource: 'go',
+            depType: 'indirect',
+            depName: 'github.com/davecgh/go-spew',
+            currentValue: 'v1.0.0',
+            enabled: false,
+            managerData: { lineNumber: 4 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'golang.org/x/foo',
+            currentValue: 'v1.0.0',
+            managerData: { lineNumber: 5 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/rarkins/foo',
+            currentValue: 'abcdef1',
+            skipReason: 'invalid-version',
+            managerData: { lineNumber: 6 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'gopkg.in/russross/blackfriday.v1',
+            currentValue: 'v1.0.0',
+            managerData: { lineNumber: 7 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/Azure/azure-sdk-for-go',
+            currentValue: 'v25.1.0+incompatible',
+            managerData: { lineNumber: 8 },
+          },
+          {
+            datasource: 'go',
+            depType: 'replace',
+            depName: '../errors',
+            skipReason: 'local-dependency',
+            managerData: { lineNumber: 10 },
+          },
+          {
+            datasource: 'go',
+            depType: 'replace',
+            depName: 'github.com/pravesht/gocql',
+            currentValue: 'v0.0.0',
+            managerData: { lineNumber: 11 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/caarlos0/env',
+            currentValue: 'v3.5.0+incompatible',
+            managerData: { lineNumber: 13 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'sigs.k8s.io/structured-merge-diff/v4',
+            currentValue: 'v4.7.0',
+            managerData: { lineNumber: 15 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/cucumber/common/messages/go/v18',
+            currentValue: 'v18.0.0',
+            managerData: { lineNumber: 16 },
+          },
+        ],
+      });
     });
 
     it('extracts multi-line requires', () => {
-      const res = extractPackageFile(gomod2)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(59);
-      expect(res?.filter((e) => e.skipReason)).toHaveLength(0);
-      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
+      const res = extractPackageFile(gomod2);
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/davecgh/go-spew',
+            currentValue: 'v1.1.0',
+            managerData: { multiLine: true, lineNumber: 3 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/emirpasic/gods',
+            currentValue: 'v1.9.0',
+            managerData: { multiLine: true, lineNumber: 4 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/fatih/color',
+            currentValue: 'v1.7.0',
+            managerData: { multiLine: true, lineNumber: 5 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/spf13/jwalterweatherman',
+            currentValue: 'v0.0.0-20180814060501-14d3d4c51834',
+            currentDigest: '14d3d4c51834',
+            digestOneAndOnly: true,
+            versioning: 'loose',
+            managerData: { multiLine: true, lineNumber: 6 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'github.com/src-d/gcfg/v2',
+            currentValue: 'v2.3.0',
+            managerData: { multiLine: true, lineNumber: 7 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'golang.org/x/text',
+            currentValue: 'v0.3.0',
+            managerData: { multiLine: true, lineNumber: 8 },
+          },
+          {
+            datasource: 'go',
+            depType: 'require',
+            depName: 'gopkg.in/src-d/go-billy.v4',
+            currentValue: 'v4.2.0',
+            managerData: { multiLine: true, lineNumber: 9 },
+          },
+          {
+            datasource: 'go',
+            depType: 'indirect',
+            depName: 'golang.org/x/net',
+            currentValue: 'v0.0.0-20191003171128-d98b1b443823',
+            currentDigest: 'd98b1b443823',
+            digestOneAndOnly: true,
+            versioning: 'loose',
+            enabled: false,
+            managerData: { multiLine: true, lineNumber: 10 },
+          },
+        ],
+      });
     });
 
     it('ignores empty spaces in multi-line requires', () => {

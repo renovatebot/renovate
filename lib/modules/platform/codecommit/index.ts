@@ -28,7 +28,6 @@ import type {
   MergePRConfig,
   PlatformParams,
   PlatformResult,
-  Pr,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -36,12 +35,7 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as client from './codecommit-client.ts';
-
-export interface CodeCommitPr extends Pr {
-  body: string;
-  destinationCommit: string;
-  sourceCommit: string;
-}
+import type { CodeCommitPr } from './types.ts';
 
 interface Config {
   repository?: string;
@@ -57,7 +51,7 @@ const platformConfig = {
   endpoint: 'https://git-codecommit.us-east-1.amazonaws.com',
 };
 
-let config: Config = {} as any;
+let config: Config = {};
 
 export async function initPlatform({
   endpoint,
@@ -111,7 +105,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
 
-  config = { repository } as Config;
+  config = { repository };
 
   let repo;
   try {
@@ -416,7 +410,7 @@ export async function updatePr({
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
   let cachedPr: CodeCommitPr | undefined = undefined;
-  const cachedPrs = config.prList ?? [];
+  const cachedPrs = coerceArray(config.prList);
   for (const p of cachedPrs) {
     // v8 ignore else -- TODO: add test #40625
     if (p.number === prNo) {

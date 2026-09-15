@@ -4,7 +4,7 @@ import ms from 'ms';
 import { logger } from '../logger/index.ts';
 import { regEx } from './regex.ts';
 
-const splitRegex = regEx(/(.*?[a-z]+)/);
+const splitRegex = regEx(/(?<part>.*?[a-z]+)/);
 
 function split(time: string): string[] {
   return time
@@ -14,7 +14,7 @@ function split(time: string): string[] {
 }
 
 function applyCustomFormat(spec: string): ms.StringValue {
-  const monthRegex = regEx(/^(\d+)\s*(?:months?|M)$/);
+  const monthRegex = regEx(/^(?<months>\d+)\s*(?:months?|M)$/);
   return spec.replace(
     monthRegex,
     (_, months) => `${months * 30} days`,
@@ -45,7 +45,7 @@ export function toMs(time: string): number | null {
   }
 }
 
-const rangeRegex = regEx(/^(?<operator>(>=|<=|<|>))\s*(?<age>.*)$/);
+const rangeRegex = regEx(/^(?<operator>>=|<=|<|>)\s*(?<age>.*)$/);
 
 export function satisfiesDateRange(
   date: string,

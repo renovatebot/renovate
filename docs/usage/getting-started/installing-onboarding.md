@@ -18,7 +18,7 @@ If the administrator has configured a fixed list of repositories then the only w
 
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
-- Most commonly, you run Renovate as a dedicated "bot user" with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
+- Most commonly, you run Renovate as a dedicated account with global config option `autodiscover` set to `true`, meaning that it will run on every repository which it's been granted access to
 - If using a GitHub App (including the Mend Renovate App) then you can install the app into a user or organization account and select either "All repositories", or "Select repositories" and pick them manually
 
 ### Hosted GitHub.com App
@@ -45,8 +45,12 @@ Once you're done selecting repositories for Renovate to run on, select the green
 
 ### Hosted GitLab.com App
 
-Unfortunately Mend's hosted GitLab app needed to be taken offline indefinitely until a viable security model for bots on GitLab.com is available.
-For more details on GitLab security for bots, please see the [GitLab Bot Security](../gitlab-bot-security.md) doc.
+Mend relaunched its hosted Renovate app for GitLab.com in July 2026, using a more secure architecture than the original version.
+
+You can set it up [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
+
+We currently only support installing the app on a Group on GitLab.com.
+We do have plans to support User installations, but we do not have any planned timelines.
 
 ### Self-hosting on Windows
 
@@ -57,7 +61,7 @@ You can do this by running this Git command:
 git config --global core.autocrlf input
 ```
 
-This prevents the carriage return `\r\n` which may confuse Renovate bot.
+This prevents the carriage return `\r\n` which may confuse Renovate.
 You can also set the line endings in your repository by adding `* text=auto eol=lf` to your `.gitattributes` file.
 
 ## Repository onboarding
@@ -100,7 +104,7 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `package.json` (deprecated)
 
 Or in a custom file present within the [`configFileNames`](../self-hosted-configuration.md#configfilenames).
-The bot first checks all the files in the `configFileNames` array before checking from the above file list.
+Renovate first checks all the files in the `configFileNames` array before checking from the above file list.
 
 #### package.json
 
@@ -152,7 +156,7 @@ If you want to make config edits directly, follow these steps:
 1. Create a pull request from the `renovate/reconfigure` branch
 1. Run renovate on your repository(if self-hosted), or wait for the hosted app to process the changes
 1. Renovate will comment on your PR, outlining the expected changes from your modified configuration
-1. You can continue to edit the configuration file in the same PR, and the bot will update its comment accordingly
+1. You can continue to edit the configuration file in the same PR, and Renovate will update its comment accordingly
 1. If you only want to validate your configuration changes, check out: [Validate your config](../config-validation.md)
 
 ### Nuke config and re-onboard

@@ -1,4 +1,5 @@
 import { fakeSha, git } from '~test/util.ts';
+import { PR_ALREADY_IN_MERGE_QUEUE } from '../../../constants/error-messages.ts';
 import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import * as _github from './index.ts';
 import { GithubScm } from './scm.ts';
@@ -72,5 +73,27 @@ describe('modules/platform/github/scm', () => {
       ...commitObj,
       platformCommit: 'auto',
     });
+  });
+
+  it('checks the merge queue before committing', async () => {
+    await githubScm.commitAndPush(commitObj);
+
+    expect(github.assertPrNotInMergeQueue).toHaveBeenCalledExactlyOnceWith(
+      'branch',
+      'main',
+    );
+  });
+
+  it('does not commit if the branch PR is in the merge queue', async () => {
+    github.assertPrNotInMergeQueue.mockRejectedValueOnce(
+      new Error(PR_ALREADY_IN_MERGE_QUEUE),
+    );
+
+    await expect(githubScm.commitAndPush(commitObj)).rejects.toThrow(
+      PR_ALREADY_IN_MERGE_QUEUE,
+    );
+
+    expect(git.commitFiles).not.toHaveBeenCalled();
+    expect(github.commitFiles).not.toHaveBeenCalled();
   });
 });

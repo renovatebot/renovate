@@ -1,7 +1,0 @@
-resources:
-  pipelines:
-    - pipeline: MyAppA
-      source: MyCIPipelineA
-    - pipeline: MyAppB
-      source: MyCIPipelineB
-      trigger: true

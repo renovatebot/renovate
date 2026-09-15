@@ -54,6 +54,8 @@ Let's suppose we perform fetching for the first time.
 For simplicity, this example assumes that we are retrieving items in small batches of 5 at a time.
 The cache TTL is assumed to be 30 days.
 
+<!-- doc-fence-check-disable-next-block -->
+
 ```js
 // Page 1
 [
@@ -81,6 +83,8 @@ The cache TTL is assumed to be 30 days.
 ```
 
 As we retrieve items during the fetch process, we gradually construct a data structure in the following form:
+
+<!-- schema-validation-disable-next-block -->
 
 ```js
 {
@@ -113,6 +117,8 @@ Suppose we have a new release that changes the pagination of our items.
 Also note that versions `3.0.1` and `3.0.2` are deleted since last fetch.
 The resulting pagination would look like this:
 
+<!-- doc-fence-check-disable-next-block -->
+
 ```js
 // Page 1                                                   --- FETCHED AND RECONCILED ---
 [
@@ -141,6 +147,8 @@ The resulting pagination would look like this:
 ```
 
 Given we performed fetch at the day of latest release, new cache looks like:
+
+<!-- schema-validation-disable-next-block -->
 
 ```js
 {

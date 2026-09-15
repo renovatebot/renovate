@@ -119,16 +119,17 @@ requires-python = "<3.9"
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.8.1 ' +
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
             'pdm update --no-sync --update-eager dep1' +
-            '"',
+            "'",
           options: {
             cwd: '/tmp/github/some/repo',
             env: {
