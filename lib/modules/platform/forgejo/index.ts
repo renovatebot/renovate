@@ -2,6 +2,8 @@ import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
 import { createPlatform } from '../gitea/index.ts';
+import type { PlatformParams, PlatformResult } from '../types.ts';
+import { getActionsIdToken } from './oidc.ts';
 
 export const id = 'forgejo';
 
@@ -31,6 +33,22 @@ const { platform, resetPlatform } = createPlatform({
 
 export { resetPlatform };
 
+export async function initPlatform(
+  params: PlatformParams,
+): Promise<PlatformResult> {
+  if (params.token || !params.forgejoOidcAudience) {
+    return platform.initPlatform(params);
+  }
+
+  logger.debug(
+    'No token configured, using a Forgejo Actions OIDC ID token as platform token',
+  );
+  const token = await getActionsIdToken(params.forgejoOidcAudience);
+  const result = await platform.initPlatform({ ...params, token });
+  // Return the token so that it gets added to the platform host rule
+  return { ...result, token };
+}
+
 /* oxlint-disable typescript/unbound-method */
 export const {
   addAssignees,
@@ -55,7 +73,6 @@ export const {
   maxBodyLength,
   getPrList,
   getRepos,
-  initPlatform,
   initRepo,
   mergePr,
   setBranchStatus,

@@ -349,6 +349,56 @@ describe('modules/platform/forgejo/index', () => {
       });
     });
 
+    it('should use an OIDC ID token if no token is configured', async () => {
+      vi.stubEnv(
+        'ACTIONS_ID_TOKEN_REQUEST_URL',
+        'https://forgejo.renovatebot.com/api/actions_pipeline/id_token?api-version=2.0',
+      );
+      vi.stubEnv('ACTIONS_ID_TOKEN_REQUEST_TOKEN', 'some-request-token');
+      httpMock
+        .scope('https://forgejo.renovatebot.com')
+        .get('/api/actions_pipeline/id_token')
+        .query({ 'api-version': '2.0', audience: 'some-audience' })
+        .reply(200, { value: 'some-id-token' });
+      const scope = httpMock.scope('https://code.forgejo.org/api/v1', {
+        reqheaders: { authorization: 'Bearer some-id-token' },
+      });
+      scope
+        .get('/user')
+        .reply(200, mockUser)
+        .get('/version')
+        .reply(200, { version: FORGEJO_VERSION });
+
+      await expect(
+        forgejo.initPlatform({ forgejoOidcAudience: 'some-audience' }),
+      ).resolves.toEqual({
+        endpoint: 'https://code.forgejo.org/',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        token: 'some-id-token',
+      });
+    });
+
+    it('should prefer a configured token over an OIDC ID token', async () => {
+      const scope = httpMock.scope('https://code.forgejo.org/api/v1', {
+        reqheaders: { authorization: 'Bearer some-token' },
+      });
+      scope
+        .get('/user')
+        .reply(200, mockUser)
+        .get('/version')
+        .reply(200, { version: FORGEJO_VERSION });
+
+      await expect(
+        forgejo.initPlatform({
+          token: 'some-token',
+          forgejoOidcAudience: 'some-audience',
+        }),
+      ).resolves.toEqual({
+        endpoint: 'https://code.forgejo.org/',
+        gitAuthor: 'Renovate Bot <renovate@example.com>',
+      });
+    });
+
     it('should use login as author name if full name is missing', async () => {
       const scope = httpMock.scope('https://code.forgejo.org/api/v1');
       scope

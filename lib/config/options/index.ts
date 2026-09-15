@@ -1138,6 +1138,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'forgejoOidcAudience',
+    description:
+      'If set, Renovate will request a Forgejo Actions OIDC ID token with this audience and use it as the platform token.',
+    type: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['forgejo'],
+    default: null,
+  },
+  {
     name: 'username',
     description: 'Username for authentication.',
     stage: 'repository',

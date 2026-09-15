@@ -9,6 +9,7 @@ export type VulnerabilityAlert = GithubVulnerabilityAlert;
 export interface PlatformParams {
   dryRun?: string;
   endpoint?: string;
+  forgejoOidcAudience?: string;
   token?: string;
   username?: string;
   password?: string;

@@ -773,6 +773,19 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
+## `forgejoOidcAudience`
+
+If set, and no `token` is configured, Renovate will request a short-lived OIDC ID token with this audience from the Forgejo Actions runtime, and use it as the platform token.
+This allows Renovate to authenticate as a [Forgejo Authorized Integration](https://forgejo.org/docs/latest/user/authorized-integrations/) without any static credentials.
+
+Set this option to the audience value which Forgejo generated when the Authorized Integration was created.
+
+This option only works when Renovate runs in a Forgejo Actions workflow which sets `enable-openid-connect: true`, because Renovate reads the `ACTIONS_ID_TOKEN_REQUEST_URL` and `ACTIONS_ID_TOKEN_REQUEST_TOKEN` environment variables which the Actions runtime provides.
+
+If a `token` is configured then it takes precedence and this option is ignored.
+
+Read the [Forgejo platform documentation](modules/platform/forgejo/index.md) for more details.
+
 ## `forkCreation`
 
 This configuration lets you disable the runtime forking of repositories when running in "fork mode".

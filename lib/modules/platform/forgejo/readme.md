@@ -27,6 +27,23 @@ The PAT should have these permissions:
 
 If you use Forgejo packages, add the `read:packages` scope.
 
+### Authorized Integrations (OIDC)
+
+Instead of a static PAT, Renovate can authenticate with a short-lived OIDC ID token as a [Forgejo Authorized Integration](https://forgejo.org/docs/latest/user/authorized-integrations/).
+This needs Renovate to run in a Forgejo Actions workflow, so that the Actions runtime can issue the ID token.
+
+To use an Authorized Integration:
+
+1. Create an Authorized Integration of type "Forgejo Actions (Local)" for the Renovate account, and note the generated audience value
+1. Set `enable-openid-connect: true` in the Forgejo Actions workflow that runs Renovate
+1. Set the [`forgejoOidcAudience`](../../../self-hosted-configuration.md#forgejooidcaudience) config option (or the `RENOVATE_FORGEJO_OIDC_AUDIENCE` environment variable) to the generated audience value
+1. Do _not_ configure a `token`
+
+Renovate then requests an ID token from the Actions runtime at startup and uses it as the platform token.
+
+Alternatively, you can retrieve a JWT yourself (for example for a "Generic JWT" Authorized Integration) and pass it to Renovate as the `token`, because Renovate authenticates against the Forgejo API with an `Authorization: Bearer` header.
+Keep in mind that these tokens are short-lived: the token must stay valid for the whole Renovate run.
+
 ## Unsupported platform features/concepts
 
 - **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
