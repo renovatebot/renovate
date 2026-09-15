@@ -1,13 +1,12 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
+import { GIT_HOST_FAMILIES } from '../../../constants/index.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -204,16 +203,14 @@ function detectDatasource(registryUrl: string): PackageDependency {
 
   switch (platform) {
     case 'forgejo':
-      return {
-        registryUrls: [registryUrl],
-        datasource: ForgejoTagsDatasource.id,
-      };
     case 'gitea':
       return {
         registryUrls: [registryUrl],
-        datasource: GiteaTagsDatasource.id,
+        datasource: GIT_HOST_FAMILIES[platform].tagsDatasource,
       };
     case 'github':
+      // GitHub is left without a datasource on purpose: `extractRepositoryAction`
+      // then picks `github-digest` or `github-tags` from the ref it parsed.
       return { registryUrls: [registryUrl] };
   }
 
