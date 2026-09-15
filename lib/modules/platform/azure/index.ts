@@ -574,6 +574,12 @@ export async function createPr({
         mergeStrategy,
         deleteSourceBranch: true,
         mergeCommitMessage: title,
+        ...(GlobalConfig.get('azureBypassPolicy')
+          ? {
+              bypassPolicy: true,
+              bypassReason: GlobalConfig.get('azureBypassPolicyReason'),
+            }
+          : {}),
       },
     };
 

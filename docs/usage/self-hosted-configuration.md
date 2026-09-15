@@ -295,6 +295,43 @@ For example:
 }
 ```
 
+## `azureBypassPolicy`
+
+[`platformAutomerge`](./configuration-options.md#platformautomerge) controls whether Renovate delegates merging to Azure DevOps.
+Azure DevOps normally waits for all blocking branch policies to pass before completing a Pull Request.
+
+Set `azureBypassPolicy` to `true` to explicitly override those policies.
+When both options are enabled, Renovate sends these [Azure DevOps Pull Request completion options](https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-requests/update#gitpullrequestcompletionoptions):
+
+```json {configType=none}
+{
+  "bypassPolicy": true,
+  "bypassReason": "Auto-merge by Renovate"
+}
+```
+
+This option has no effect unless platform automerge is active for the PR.
+
+<!-- prettier-ignore -->
+!!! warning
+  Azure DevOps bypasses all policies when this option is enabled; it cannot bypass selected policies.
+  Only enable this option when you are confident Renovate may skip every policy on the target repositories.
+  The Renovate account needs the `Bypass policies when completing pull requests` permission on the repository for this to work.
+
+For example:
+
+```js title="config.js"
+module.exports = {
+  platformAutomerge: true,
+  azureBypassPolicy: true,
+};
+```
+
+## `azureBypassPolicyReason`
+
+The string Renovate sends as `bypassReason` and Azure DevOps records on the Pull Request when [`azureBypassPolicy`](#azurebypasspolicy) is enabled.
+The default is `"Auto-merge by Renovate"`.
+
 ## `baseDir`
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
