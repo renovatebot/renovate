@@ -2329,7 +2329,7 @@ export function massageMarkdown(input: string): string {
   if (platformConfig.host.type !== 'github') {
     return smartTruncate(input, maxBodyLength());
   }
-  const massagedInput = massageMarkdownLinks(input)
+  const linkifiedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with redirect.github.com
     .replace(
       regEx(/href="https?:\/\/github.com\//g),
@@ -2342,14 +2342,15 @@ export function massageMarkdown(input: string): string {
     .replace(
       regEx(/]: https:\/\/github\.com\//g),
       ']: https://redirect.github.com/',
-    )
-    .replaceAll('> ℹ **Note**\n> \n', '> [!NOTE]\n')
-    .replaceAll('> ℹ️ **Note**\n> \n', '> [!NOTE]\n')
-    .replaceAll('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
-    .replaceAll('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
-    .replaceAll('> ❗ **Caution**\n> \n', '> [!CAUTION]\n')
-    .replaceAll('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
-  return smartTruncate(massagedInput, maxBodyLength());
+    );
+  // Run after truncation so any Note added by smartTruncate() is also converted
+  return smartTruncate(linkifiedInput, maxBodyLength())
+    .replaceAll(regEx(/> ℹ \*\*Note\*\*\n> ?\n/g), '> [!NOTE]\n')
+    .replaceAll(regEx(/> ℹ️ \*\*Note\*\*\n> ?\n/g), '> [!NOTE]\n')
+    .replaceAll(regEx(/> ⚠ \*\*Warning\*\*\n> ?\n/g), '> [!WARNING]\n')
+    .replaceAll(regEx(/> ⚠️ \*\*Warning\*\*\n> ?\n/g), '> [!WARNING]\n')
+    .replaceAll(regEx(/> 🛑 \*\*Caution\*\*\n> ?\n/g), '> [!CAUTION]\n')
+    .replaceAll(regEx(/> ❗ \*\*Important\*\*\n> ?\n/g), '> [!IMPORTANT]\n');
 }
 
 export function maxBodyLength(): number {
