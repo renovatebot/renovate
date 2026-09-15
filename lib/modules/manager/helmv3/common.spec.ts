@@ -4,7 +4,12 @@ import type {
   InternalGlobalConfigOptions,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
-import { generateHelmEnvs, generateLoginCmd } from './common.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import {
+  generateHelmEnvs,
+  generateLoginCmd,
+  generateRegistryLoginCmd,
+} from './common.ts';
 import type { RepositoryRule } from './types.ts';
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
@@ -15,19 +20,96 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 };
 
 describe('modules/manager/helmv3/common', () => {
-  it('should generate a login command with username and password', async () => {
-    const repositoryRule: RepositoryRule = {
-      name: 'test-repo',
-      repository: 'example.com/repo',
-      hostRule: {
+  describe('generateLoginCmd', () => {
+    it('should generate a login command with username and password', async () => {
+      const repositoryRule: RepositoryRule = {
+        name: 'test-repo',
+        repository: 'example.com/repo',
+        hostRule: {
+          hostType: 'docker',
+          username: 'testuser',
+          password: 'testpass',
+        },
+      };
+      await expect(generateLoginCmd(repositoryRule)).resolves.toEqual(
+        'helm registry login --username testuser --password testpass example.com',
+      );
+    });
+  });
+
+  describe('generateRegistryLoginCmd', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it('generates a login command when a matching host rule exists', async () => {
+      hostRules.add({
         hostType: 'docker',
+        matchHost: 'registry.example.com',
         username: 'testuser',
         password: 'testpass',
-      },
-    };
-    await expect(generateLoginCmd(repositoryRule)).resolves.toEqual(
-      'helm registry login --username testuser --password testpass example.com',
-    );
+      });
+
+      await expect(
+        generateRegistryLoginCmd('test-repo', 'registry.example.com'),
+      ).resolves.toBe(
+        'helm registry login --username testuser --password testpass registry.example.com',
+      );
+    });
+
+    it('returns null when no matching host rule exists', async () => {
+      await expect(
+        generateRegistryLoginCmd('test-repo', 'registry.example.com'),
+      ).resolves.toBeNull();
+    });
+
+    it('strips a leading oci:// prefix', async () => {
+      hostRules.add({
+        hostType: 'docker',
+        matchHost: 'registry.example.com',
+        username: 'testuser',
+        password: 'testpass',
+      });
+
+      await expect(
+        generateRegistryLoginCmd('test-repo', 'oci://registry.example.com'),
+      ).resolves.toBe(
+        'helm registry login --username testuser --password testpass registry.example.com',
+      );
+    });
+
+    it('matches the host rule when the registry includes a path', async () => {
+      hostRules.add({
+        hostType: 'docker',
+        matchHost: 'registry.example.com',
+        username: 'testuser',
+        password: 'testpass',
+      });
+
+      await expect(
+        generateRegistryLoginCmd('test-repo', 'registry.example.com/charts'),
+      ).resolves.toBe(
+        'helm registry login --username testuser --password testpass registry.example.com',
+      );
+    });
+
+    it('matches a host rule scoped to the registry path', async () => {
+      hostRules.add({
+        hostType: 'docker',
+        matchHost: 'https://registry.example.com/charts',
+        username: 'testuser',
+        password: 'testpass',
+      });
+
+      await expect(
+        generateRegistryLoginCmd('test-repo', 'registry.example.com/charts'),
+      ).resolves.toBe(
+        'helm registry login --username testuser --password testpass registry.example.com',
+      );
+      await expect(
+        generateRegistryLoginCmd('test-repo', 'registry.example.com/other'),
+      ).resolves.toBeNull();
+    });
   });
 
   describe('generateHelmEnvs', () => {
