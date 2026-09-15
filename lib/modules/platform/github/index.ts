@@ -65,6 +65,7 @@ import type {
   EnsureIssueResult,
   FindPRConfig,
   MergePRConfig,
+  PlatformCapabilities,
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
@@ -125,6 +126,10 @@ import {
 } from './utils.ts';
 
 export const id = 'github';
+
+export const capabilities = {
+  htmlComments: true,
+} satisfies PlatformCapabilities;
 
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;

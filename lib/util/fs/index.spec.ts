@@ -5,6 +5,7 @@ import tmp from 'tmp-promise';
 import upath from 'upath';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import { setPlatformCapabilities } from '../../modules/platform/capabilities.ts';
 import {
   cachePathExists,
   cachePathIsFile,
@@ -211,10 +212,10 @@ describe('util/fs/index', () => {
   });
 
   describe('deleteLocalFile', () => {
-    it('throws if platform is local', async () => {
-      GlobalConfig.set({ platform: 'local' });
+    it('throws if the platform has no git remote', async () => {
+      setPlatformCapabilities({ git: false });
       await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow(
-        'Cannot delete file when platform=local',
+        'Cannot delete file when the platform has no git remote',
       );
     });
 

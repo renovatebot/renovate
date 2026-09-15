@@ -230,6 +230,41 @@ export interface FileOwnerRule {
 }
 
 /**
+ * Optional feature flags a platform declares about itself, so that generic code does not have to
+ * test for platform ids.
+ *
+ * Every flag is optional and falls back to the default documented on it, so a platform only
+ * declares the flags where it differs from the norm. Read the active platform's flags through the
+ * helpers in `lib/modules/platform/capabilities.ts` rather than through `platform.capabilities`:
+ * they apply the defaults, and they are importable from `lib/util/*`, which cannot import the
+ * platform API without creating an import cycle.
+ */
+export interface PlatformCapabilities {
+  /**
+   * Whether Renovate owns the checkout it works in, meaning it clones the repository, creates and
+   * pushes branches, and opens pull requests against a remote.
+   *
+   * `false` for `local`, which runs against a working directory the user already has on disk: there
+   * is nothing to clone, no branch to push and no pull request to open, and Renovate must not
+   * delete files it did not create.
+   *
+   * @defaultValue `true`
+   */
+  git?: boolean;
+
+  /**
+   * Whether the platform renders extended markdown in issue and pull request bodies, in particular
+   * HTML comments and task list checkboxes.
+   *
+   * Renovate hides state such as the onboarding config hash in an HTML comment, and offers the
+   * rebase checkbox, only when this is `true`.
+   *
+   * @defaultValue `false`
+   */
+  htmlComments?: boolean;
+}
+
+/**
  * The interface a platform module implements and `api.ts` registers.
  *
  * Members which the shared defaults in `defaults.ts` cover are optional here:
@@ -242,6 +277,12 @@ export interface PlatformModule {
    * Experimental features might be changed or even removed at any time.
    */
   experimental?: true;
+
+  /**
+   * Feature flags describing what this platform supports, for the flags where it differs from the
+   * defaults documented on {@link PlatformCapabilities}.
+   */
+  capabilities?: PlatformCapabilities;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;

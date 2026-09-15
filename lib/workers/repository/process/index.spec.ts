@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { addMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { setPlatformCapabilities } from '../../../modules/platform/capabilities.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import * as _extractUpdate from './extract-update.ts';
 import { lookup } from './extract-update.ts';
@@ -45,6 +46,18 @@ describe('workers/repository/process/index', () => {
         branches: [undefined],
         packageFiles: undefined,
       });
+    });
+
+    it('ignores baseBranchPatterns when the platform has no git remote', async () => {
+      setPlatformCapabilities({ git: false });
+      extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
+      config.baseBranchPatterns = ['branch1', 'branch2'];
+
+      const res = await extractDependencies(config);
+
+      expect(config.baseBranches).toBeUndefined();
+      expect(scm.branchExists).not.toHaveBeenCalled();
+      expect(res).toBeUndefined();
     });
 
     it('reads config from default branch if useBaseBranchConfig not specified', async () => {

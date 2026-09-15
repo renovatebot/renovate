@@ -9,6 +9,7 @@ import { instrument } from '../../../instrumentation/index.ts';
 import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types.ts';
 import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { supportsGit } from '../../../modules/platform/capabilities.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
@@ -151,10 +152,7 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: {},
   };
-  if (
-    GlobalConfig.get('platform') !== 'local' &&
-    config.baseBranchPatterns?.length
-  ) {
+  if (supportsGit() && config.baseBranchPatterns?.length) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,
       config.baseBranchPatterns,

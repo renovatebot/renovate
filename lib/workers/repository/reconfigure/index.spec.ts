@@ -2,6 +2,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { fakeSha, git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { type AllConfig } from '../../../config/types.ts';
+import { setPlatformCapabilities } from '../../../modules/platform/capabilities.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
 import * as _cache from '../../../util/cache/repository/index.ts';
 import type { BranchConfig } from '../../types.ts';
@@ -63,12 +64,12 @@ describe('workers/repository/reconfigure/index', () => {
     cache.getCache.mockReturnValue({});
   });
 
-  it('no effect when running with platform=local', async () => {
-    GlobalConfig.set({ platform: 'local' });
+  it('no effect when the platform has no git remote', async () => {
+    setPlatformCapabilities({ git: false });
     await checkReconfigureBranch(config, repoConfig);
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
-      'Not attempting to reconfigure when running with local platform',
+      'Not attempting to reconfigure when the platform has no git remote',
     );
   });
 

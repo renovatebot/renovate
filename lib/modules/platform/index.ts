@@ -12,6 +12,7 @@ import {
 import * as hostRules from '../../util/host-rules.ts';
 import { parseUrl } from '../../util/url.ts';
 import platforms from './api.ts';
+import { setPlatformCapabilities } from './capabilities.ts';
 import { platformDefaults } from './defaults.ts';
 import { setPlatformScmApi } from './scm.ts';
 import type { Platform, PlatformDefaultedMethod } from './types.ts';
@@ -45,6 +46,7 @@ export function setPlatformApi(name: PlatformId): void {
     );
   }
   _platform = { ...platformDefaults, ...platformModule };
+  setPlatformCapabilities(platformModule.capabilities);
   setPlatformScmApi(name);
 }
 

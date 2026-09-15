@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
 import type { AllConfig, RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
+import { supportsGit } from '../../../modules/platform/capabilities.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
@@ -27,9 +28,9 @@ export async function checkReconfigureBranch(
   repoConfig: AllConfig,
 ): Promise<void> {
   logger.debug('checkReconfigureBranch()');
-  if (GlobalConfig.get('platform') === 'local') {
+  if (!supportsGit()) {
     logger.debug(
-      'Not attempting to reconfigure when running with local platform',
+      'Not attempting to reconfigure when the platform has no git remote',
     );
     return;
   }

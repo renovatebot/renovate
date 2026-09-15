@@ -34,6 +34,7 @@ import {
 import { instrument } from '../../instrumentation/index.ts';
 import { withInstrumenting } from '../../instrumentation/with-instrumenting.ts';
 import { logger } from '../../logger/index.ts';
+import { supportsGit } from '../../modules/platform/capabilities.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
@@ -495,8 +496,8 @@ export const syncGit = withInstrumenting(
       return;
     }
     /* v8 ignore if -- TODO: add test #40625 */
-    if (GlobalConfig.get('platform') === 'local') {
-      throw new Error('Cannot sync git when platform=local');
+    if (!supportsGit()) {
+      throw new Error('Cannot sync git when the platform has no git remote');
     }
     gitInitialized = true;
     const localDir = GlobalConfig.get('localDir');
@@ -732,7 +733,7 @@ export async function getAllBranchUpdateDates(): Promise<
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   // v8 ignore else -- TODO: add test #40625
-  if (GlobalConfig.get('platform') !== 'local') {
+  if (supportsGit()) {
     await syncGit();
   }
   try {

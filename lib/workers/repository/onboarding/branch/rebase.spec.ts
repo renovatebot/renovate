@@ -2,6 +2,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
+import { setPlatformCapabilities } from '../../../../modules/platform/capabilities.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import { toSha256 } from '../../../../util/hash.ts';
 import * as _config from './config.ts';
@@ -23,6 +24,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         onboardingPrTitle: 'Configure Renovate',
         platform: 'github',
       });
+      setPlatformCapabilities({ htmlComments: true });
       memCache.init();
 
       // using default options
@@ -145,6 +147,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       ${'codecommit'}
     `('returns null for $platform', async ({ platform }) => {
       GlobalConfig.set({ platform, localDir: '' });
+      setPlatformCapabilities(undefined);
       const res = await rebaseOnboardingBranch(config, hash);
       expect(res).toBeNull();
       expect(scm.commitAndPush).not.toHaveBeenCalled();

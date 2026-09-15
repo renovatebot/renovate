@@ -4,6 +4,7 @@ import { mergeChildConfig } from '../../../../config/index.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import { supportsHtmlComments } from '../../../../modules/platform/capabilities.ts';
 import { type Pr, platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
@@ -139,10 +140,11 @@ export async function checkOnboardingBranch(
 }
 
 function handleOnboardingManualRebase(onboardingPr: Pr): void {
-  const pl = GlobalConfig.get('platform');
   const { rebaseRequested } = coerceObject(onboardingPr.bodyStruct);
-  if (!['github', 'gitlab', 'gitea'].includes(pl)) {
-    logger.trace(`Platform '${pl}' does not support extended markdown`);
+  if (!supportsHtmlComments()) {
+    logger.trace(
+      `Platform '${GlobalConfig.get('platform')}' does not support extended markdown`,
+    );
     OnboardingState.prUpdateRequested = true;
   } else if (isNullOrUndefined(rebaseRequested)) {
     logger.debug('No rebase checkbox was found in the onboarding PR');
@@ -179,9 +181,8 @@ function isOnboardingCacheValid(
 }
 
 function isConfigHashPresent(pr: Pr): boolean {
-  const platform = GlobalConfig.get('platform');
   // if platform does not support html comments return true
-  if (!['github', 'gitlab', 'gitea'].includes(platform)) {
+  if (!supportsHtmlComments()) {
     return true;
   }
 
