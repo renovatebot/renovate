@@ -53,7 +53,7 @@ export class JsDelivrDatasource extends Datasource {
         const { type, package: parsedPackageName } =
           parseJsDelivrPackageName(packageName);
         const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}`;
-        return this.http.getJsonSafe(
+        return this.http.getJson(
           url,
           { cacheProvider: memCacheProvider },
           JsDelivrPackageResponse,
@@ -118,7 +118,7 @@ export class JsDelivrDatasource extends Datasource {
     const result = Result.parse(config, DigestsConfig).transform(
       ({ registryUrl }) => {
         const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}@${newValue}?structure=flat`;
-        return this.http.getJsonSafe(url, JsDelivrDigestResponse);
+        return this.http.getJson(url, JsDelivrDigestResponse);
       },
     );
 
