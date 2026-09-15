@@ -1,16 +1,9 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
-import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
-import { Datasource } from '../datasource.ts';
-import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
-import { GitTagsDatasource } from '../git-tags/index.ts';
-import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
-import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import { getSourceUrl, isPublicGoPackage } from './common.ts';
+import { getSourceUrl } from './common.ts';
+import { getGoTagDatasource } from './tag-datasources.ts';
 
 /**
  * This function tries to select tags with longest prefix could be constructed from `packageName`.
@@ -58,111 +51,51 @@ function filterByPrefix(packageName: string, releases: Release[]): Release[] {
   return releases.filter((release) => release.version.startsWith('v'));
 }
 
-export class GoDirectDatasource extends Datasource {
-  static readonly id = 'go-direct';
+/**
+ * go.getReleases, resolved from the module's source repository.
+ *
+ * This function will:
+ *  - Determine the source URL for the module
+ *  - Call the respective getReleases of the git host to retrieve the tags
+ *  - Filter module tags according to the module path
+ */
+export async function getDirectReleases(
+  config: GetReleasesConfig,
+): Promise<ReleaseResult | null> {
+  const { packageName } = config;
 
-  readonly forgejo = new ForgejoTagsDatasource();
-  git: GitTagsDatasource;
-  readonly gitea = new GiteaTagsDatasource();
-  github: GithubTagsDatasource;
-  gitlab: GitlabTagsDatasource;
-  bitbucket: BitbucketTagsDatasource;
+  logger.trace(`go.getReleases(${packageName})`);
+  const source = await BaseGoDatasource.getDatasource(packageName);
 
-  constructor() {
-    super(GoDirectDatasource.id);
-    this.git = new GitTagsDatasource();
-    this.github = new GithubTagsDatasource();
-    this.gitlab = new GitlabTagsDatasource();
-    this.bitbucket = new BitbucketTagsDatasource();
-  }
-
-  /**
-   * go.getReleases
-   *
-   * This datasource resolves a go module URL into its source repository
-   *  and then fetch it if it is on GitHub.
-   *
-   * This function will:
-   *  - Determine the source URL for the module
-   *  - Call the respective getReleases in github/gitlab to retrieve the tags
-   *  - Filter module tags according to the module path
-   */
-  private async _getReleases(
-    config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    const { packageName } = config;
-
-    let res: ReleaseResult | null = null;
-
-    logger.trace(`go.getReleases(${packageName})`);
-    const source = await BaseGoDatasource.getDatasource(packageName);
-
-    if (!source) {
-      logger.info(
-        { packageName },
-        'Unsupported go host - cannot look up versions',
-      );
-      return null;
-    }
-
-    // `getDatasource()` resolves a registry URL for every datasource except
-    // `git-tags`, which ignores it.
-    const sourceConfig = { ...source, registryUrl: source.registryUrl! };
-
-    switch (source.datasource) {
-      case ForgejoTagsDatasource.id: {
-        res = await this.forgejo.getReleases(sourceConfig);
-        break;
-      }
-      case GitTagsDatasource.id: {
-        res = await this.git.getReleases(sourceConfig);
-        break;
-      }
-      case GiteaTagsDatasource.id: {
-        res = await this.gitea.getReleases(sourceConfig);
-        break;
-      }
-      case GithubTagsDatasource.id: {
-        res = await this.github.getReleases(sourceConfig);
-        break;
-      }
-      case GitlabTagsDatasource.id: {
-        res = await this.gitlab.getReleases(sourceConfig);
-        break;
-      }
-      case BitbucketTagsDatasource.id: {
-        res = await this.bitbucket.getReleases(sourceConfig);
-        break;
-      }
-      /* v8 ignore next -- should never happen */
-      default: {
-        return null;
-      }
-    }
-
-    /* v8 ignore next -- TODO: add test */
-    if (!res) {
-      return null;
-    }
-
-    const sourceUrl = res.sourceUrl ?? getSourceUrl(source) ?? null;
-
-    return {
-      ...res,
-      releases: filterByPrefix(packageName, res.releases),
-      sourceUrl,
-    };
-  }
-
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
-      {
-        namespace: `datasource-${GoDirectDatasource.id}`,
-        key: config.packageName,
-        cacheable: isPublicGoPackage(config.packageName),
-        fallback: true,
-      },
-      () => this._getReleases(config),
+  if (!source) {
+    logger.info(
+      { packageName },
+      'Unsupported go host - cannot look up versions',
     );
+    return null;
   }
+
+  const tagDatasource = getGoTagDatasource(source.datasource);
+  /* v8 ignore next -- should never happen */
+  if (!tagDatasource) {
+    return null;
+  }
+
+  // `getDatasource()` resolves a registry URL for every datasource except
+  // `git-tags`, which ignores it.
+  const sourceConfig = { ...source, registryUrl: source.registryUrl! };
+
+  const res = await tagDatasource.api.getReleases(sourceConfig);
+  /* v8 ignore next -- TODO: add test */
+  if (!res) {
+    return null;
+  }
+
+  const sourceUrl = res.sourceUrl ?? getSourceUrl(source) ?? null;
+
+  return {
+    ...res,
+    releases: filterByPrefix(packageName, res.releases),
+    sourceUrl,
+  };
 }
