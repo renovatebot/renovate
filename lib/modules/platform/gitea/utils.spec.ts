@@ -59,7 +59,7 @@ describe('modules/platform/gitea/utils', () => {
     ${'rebase'}       | ${'rebase-merge'}
     ${'squash'}       | ${'squash'}
   `('getMergeMethod("$value") == "$expected"', ({ value, expected }) => {
-    expect(getMergeMethod(value)).toBe(expected);
+    expect(getMergeMethod(value, new Set())).toBe(expected);
   });
 
   describe('getMergeMethod("fast-forward") with allowedMergeMethods', () => {
@@ -85,10 +85,6 @@ describe('modules/platform/gitea/utils', () => {
       expect(getMergeMethod('fast-forward', allowedMergeMethods)).toBe(
         'fast-forward-only',
       );
-    });
-
-    it('returns "rebase" when allowedMergeMethods is not provided', () => {
-      expect(getMergeMethod('fast-forward')).toBe('rebase');
     });
 
     it('returns "rebase" when allowedMergeMethods is empty', () => {
