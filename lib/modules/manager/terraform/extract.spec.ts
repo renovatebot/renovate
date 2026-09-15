@@ -850,6 +850,27 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
+    it('does not treat a repository qualified chart name as a local chart', async () => {
+      const src = codeBlock`
+        resource "helm_release" "nginx" {
+          name    = "nginx"
+          chart   = "bitnami/nginx"
+          version = "15.0.0"
+        }
+      `;
+
+      const res = await extractPackageFile(src, 'helm.tf', {});
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '15.0.0',
+          datasource: 'helm',
+          depName: 'bitnami/nginx',
+          depType: 'helm_release',
+        },
+      ]);
+    });
+
     it('extracts helm releases from OCI registries with a port', async () => {
       const src = codeBlock`
         resource "helm_release" "redis" {
