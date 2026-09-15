@@ -12,7 +12,7 @@ import {
 } from '../../../helmv3/oci.ts';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
-import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { TerraformDefinitionFile } from '../../hcl/schema.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 import { checkIfStringIsPath } from '../../util.ts';
 

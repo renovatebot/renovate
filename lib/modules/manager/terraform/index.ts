@@ -21,7 +21,12 @@ export const categories: Category[] = ['iac', 'terraform'];
 
 export const defaultConfig = {
   commitMessageTopic: 'Terraform {{depName}}',
-  managerFilePatterns: ['**/*.tf', '**/*.tofu'],
+  managerFilePatterns: [
+    '**/*.tf',
+    '**/*.tf.json',
+    '**/*.tofu',
+    '**/*.tofu.json',
+  ],
   pinDigests: false,
 };
 
