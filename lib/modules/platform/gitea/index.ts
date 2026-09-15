@@ -12,7 +12,6 @@ import {
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { coerceArray, deduplicateArray } from '../../../util/array.ts';
-import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
@@ -247,16 +246,6 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         return null;
       }
       return contents.contentString;
-    },
-
-    async getJsonFile(
-      fileName: string,
-      repoName?: string,
-      branchOrTag?: string,
-    ): Promise<any> {
-      // TODO #22198
-      const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
-      return parseJson(raw, fileName);
     },
 
     async initRepo({
@@ -1122,7 +1111,6 @@ export const {
   getBranchStatusCheck,
   getIssue,
   getRawFile,
-  getJsonFile,
   getIssueList,
   getPr,
   massageMarkdown,

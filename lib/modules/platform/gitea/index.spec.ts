@@ -3066,9 +3066,8 @@ describe('modules/platform/gitea/index', () => {
     expect(gitea.maxBodyLength()).toBe(1000000);
   });
 
-  describe('getJsonFile()', () => {
+  describe('getRawFile()', () => {
     it('returns file content', async () => {
-      const data = { foo: 'bar' };
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json')
@@ -3076,18 +3075,17 @@ describe('modules/platform/gitea/index', () => {
           type: 'file',
           name: 'file.json',
           path: 'file.json',
-          content: toBase64(JSON.stringify(data)),
+          content: toBase64('{"foo":"bar"}'),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      const res = await gitea.getJsonFile('file.json');
+      const res = await gitea.getRawFile('file.json');
 
-      expect(res).toEqual(data);
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('returns file content from given repo', async () => {
-      const data = { foo: 'bar' };
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/different/repo/contents/file.json')
@@ -3095,18 +3093,17 @@ describe('modules/platform/gitea/index', () => {
           type: 'file',
           name: 'file.json',
           path: 'file.json',
-          content: toBase64(JSON.stringify(data)),
+          content: toBase64('{"foo":"bar"}'),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope, { full_name: 'different/repo' });
 
-      const res = await gitea.getJsonFile('file.json', 'different/repo');
+      const res = await gitea.getRawFile('file.json', 'different/repo');
 
-      expect(res).toEqual(data);
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('returns file content from branch or tag', async () => {
-      const data = { foo: 'bar' };
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json?ref=dev')
@@ -3114,55 +3111,14 @@ describe('modules/platform/gitea/index', () => {
           type: 'file',
           name: 'file.json',
           path: 'file.json',
-          content: toBase64(JSON.stringify(data)),
+          content: toBase64('{"foo":"bar"}'),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      const res = await gitea.getJsonFile('file.json', 'some/repo', 'dev');
+      const res = await gitea.getRawFile('file.json', 'some/repo', 'dev');
 
-      expect(res).toEqual(data);
-    });
-
-    it('returns file content in json5 format', async () => {
-      const json5Data = `
-        {
-          // json5 comment
-          foo: 'bar'
-        }
-      `;
-      const scope = httpMock
-        .scope('https://gitea.com/api/v1')
-        .get('/repos/some/repo/contents/file.json5')
-        .reply(200, {
-          type: 'file',
-          name: 'file.json5',
-          path: 'file.json5',
-          content: toBase64(json5Data),
-        });
-      await initFakePlatform(scope);
-      await initFakeRepo(scope);
-
-      const res = await gitea.getJsonFile('file.json5');
-
-      expect(res).toEqual({ foo: 'bar' });
-    });
-
-    it('throws on malformed JSON', async () => {
-      const scope = httpMock
-        .scope('https://gitea.com/api/v1')
-        .get('/repos/some/repo/contents/file.json')
-        .reply(200, {
-          type: 'file',
-          name: 'file.json',
-          path: 'file.json',
-          content: toBase64('!@#'),
-        });
-      await initFakePlatform(scope);
-      await initFakeRepo(scope);
-      await expect(gitea.getJsonFile('file.json')).rejects.toThrow(
-        "JSON5: invalid character '!' at 1:1",
-      );
+      expect(res).toBe('{"foo":"bar"}');
     });
 
     it('throws when file content is missing', async () => {
@@ -3172,7 +3128,7 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, { type: 'file', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(gitea.getJsonFile('file.json')).rejects.toThrow(
+      await expect(gitea.getRawFile('file.json')).rejects.toThrow(
         'Invalid input: expected string, received undefined',
       );
     });
@@ -3184,7 +3140,7 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, { type: 'dir', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(gitea.getJsonFile('file.json')).resolves.toBeNull();
+      await expect(gitea.getRawFile('file.json')).resolves.toBeNull();
     });
 
     it('throws on errors', async () => {
@@ -3194,7 +3150,7 @@ describe('modules/platform/gitea/index', () => {
         .replyWithError('unknown');
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(gitea.getJsonFile('file.json')).rejects.toThrow('unknown');
+      await expect(gitea.getRawFile('file.json')).rejects.toThrow('unknown');
     });
   });
 });

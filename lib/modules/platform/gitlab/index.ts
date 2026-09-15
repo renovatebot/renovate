@@ -22,7 +22,7 @@ import {
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
+import { noLeadingAtSymbol } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -272,15 +272,6 @@ export async function getRawFile(
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
   return str;
-}
-
-export async function getJsonFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
-): Promise<any> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return parseJson(raw, fileName);
 }
 
 // Initialize GitLab by getting base branch

@@ -1,6 +1,6 @@
 import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
-import { fakeSha, fs, git, platform, scm } from '~test/util.ts';
+import { fakeSha, fs, getJsonFile, git, platform, scm } from '~test/util.ts';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -232,7 +232,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles cached file name', async () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
-      platform.getJsonFile.mockResolvedValueOnce({});
+      getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -255,7 +255,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles cached package.json', async () => {
       cache.getCache.mockReturnValue({ configFileName: 'package.json' });
-      platform.getJsonFile.mockResolvedValueOnce({ renovate: {} });
+      getJsonFile.mockResolvedValueOnce({ renovate: {} });
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
 

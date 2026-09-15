@@ -1,6 +1,13 @@
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '~test/util.ts';
-import { fakeSha, git, partial, platform, scm } from '~test/util.ts';
+import {
+  fakeSha,
+  getJsonFile,
+  git,
+  partial,
+  platform,
+  scm,
+} from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { InheritConfig } from '../../../../config/inherit.ts';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
@@ -232,7 +239,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     cache.getCache.mockReturnValue({ configFileName: 'renovate.json' });
     scm.getFileList.mockResolvedValue([]);
     await isOnboarded(config);
-    expect(platform.getJsonFile).not.toHaveBeenCalled();
+    expect(getJsonFile).not.toHaveBeenCalled();
     expect(scm.getFileList).toHaveBeenCalled();
   });
 });

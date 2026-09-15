@@ -27,7 +27,6 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
-import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
@@ -443,15 +442,6 @@ export async function getRawFile(
   const buf = res.body.content;
   const str = fromBase64(buf);
   return str;
-}
-
-export async function getJsonFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
-): Promise<any> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return parseJson(raw, fileName);
 }
 
 export async function listForks(

@@ -637,41 +637,6 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
-  describe('getJsonFile()', () => {
-    it('returns file content', async () => {
-      const data = { foo: 'bar' };
-      const uint8arrData = new Uint8Array(Buffer.from(JSON.stringify(data)));
-      codeCommitClient
-        .on(GetFileCommand)
-        .resolvesOnce({ fileContent: uint8arrData });
-      const res = await codeCommit.getJsonFile('file.json');
-      expect(res).toEqual(data);
-    });
-
-    it('returns file content in json5 format', async () => {
-      const json5Data = `
-        {
-          // json5 comment
-          foo: 'bar'
-        }
-      `;
-      const uint8arrData = new Uint8Array(Buffer.from(json5Data));
-      codeCommitClient
-        .on(GetFileCommand)
-        .resolvesOnce({ fileContent: uint8arrData });
-      const res = await codeCommit.getJsonFile('file.json');
-      expect(res).toEqual({ foo: 'bar' });
-    });
-
-    it('returns null', async () => {
-      codeCommitClient
-        .on(GetFileCommand)
-        .resolvesOnce({ fileContent: undefined });
-      const res = await codeCommit.getJsonFile('file.json');
-      expect(res).toBeNull();
-    });
-  });
-
   describe('getRawFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };

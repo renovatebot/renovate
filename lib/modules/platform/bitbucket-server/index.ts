@@ -12,7 +12,6 @@ import {
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import type { FileData } from '../../../types/platform/bitbucket-server/index.ts';
-import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import { deleteBranch } from '../../../util/git/index.ts';
@@ -245,16 +244,6 @@ export async function getRawFile(
   }
   logger.warn({ size }, 'The file is too big');
   throw new Error(`The file is too big (${size}B)`);
-}
-
-export async function getJsonFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
-): Promise<any> {
-  // TODO #22198
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return parseJson(raw, fileName);
 }
 
 // Initialize Bitbucket Server by getting base branch

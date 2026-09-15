@@ -71,10 +71,6 @@ describe('modules/platform/local/index', () => {
       await expect(platform.getRawFile()).resolves.toBeNull();
     });
 
-    it('getJsonFile', async () => {
-      await expect(platform.getJsonFile()).resolves.toBeNull();
-    });
-
     it('getPrList', async () => {
       await expect(platform.getPrList()).resolves.toEqual([]);
     });

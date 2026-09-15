@@ -14,7 +14,6 @@ import {
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
 import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
-import { parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -335,15 +334,6 @@ export function massageMarkdown(input: string): string {
  */
 export function maxBodyLength(): number {
   return Infinity;
-}
-
-export async function getJsonFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
-): Promise<any> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return parseJson(raw, fileName);
 }
 
 export async function getRawFile(

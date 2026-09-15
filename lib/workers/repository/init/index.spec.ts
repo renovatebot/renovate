@@ -19,6 +19,7 @@ vi.mock('../../../modules/platform/index.ts', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
   platformSupports: vi.fn(),
+  getJsonFile: vi.fn(),
 }));
 vi.unmock('../../../util/mutex.ts');
 

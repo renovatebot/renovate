@@ -24,7 +24,6 @@ import {
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { BranchStatus } from '../../../types/index.ts';
-import { parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -201,15 +200,6 @@ export async function getRawFile(
     }
     throw err;
   }
-}
-
-export async function getJsonFile(
-  fileName: string,
-  repoName?: string,
-  branchOrTag?: string,
-): Promise<any> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return parseJson(raw, fileName);
 }
 
 export async function initRepo({

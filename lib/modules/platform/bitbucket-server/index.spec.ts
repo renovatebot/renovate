@@ -2936,9 +2936,8 @@ describe('modules/platform/bitbucket-server/index', () => {
       });
     });
 
-    describe('getJsonFile()', () => {
+    describe('getRawFile()', () => {
       it('returns file content', async () => {
-        const data = { foo: 'bar' };
         const scope = await initRepo();
         scope
           .get(
@@ -2946,34 +2945,27 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, {
             isLastPage: true,
-            lines: [{ text: JSON.stringify(data) }],
+            lines: [{ text: '{"foo":"bar"}' }],
           });
-        const res = await bitbucket.getJsonFile('file.json');
-        expect(res).toEqual(data);
+        const res = await bitbucket.getRawFile('file.json');
+        expect(res).toBe('{"foo":"bar"}');
       });
 
-      it('returns file content in json5 format', async () => {
-        const lines = [
-          { text: '{' },
-          { text: '  // json5 comment' },
-          { text: '  foo: "bar"' },
-          { text: '}' },
-        ];
+      it('joins the returned lines', async () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000`,
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
           )
           .reply(200, {
             isLastPage: true,
-            lines,
+            lines: [{ text: '{' }, { text: '  "foo": "bar"' }, { text: '}' }],
           });
-        const res = await bitbucket.getJsonFile('file.json5');
-        expect(res).toEqual({ foo: 'bar' });
+        const res = await bitbucket.getRawFile('file.json');
+        expect(res).toBe('{\n  "foo": "bar"\n}');
       });
 
       it('returns file content from given repo', async () => {
-        const data = { foo: 'bar' };
         const scope = await initRepo();
         scope
           .get(
@@ -2981,14 +2973,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, {
             isLastPage: true,
-            lines: [{ text: JSON.stringify(data) }],
+            lines: [{ text: '{"foo":"bar"}' }],
           });
-        const res = await bitbucket.getJsonFile('file.json', 'DIFFERENT/repo');
-        expect(res).toEqual(data);
+        const res = await bitbucket.getRawFile('file.json', 'DIFFERENT/repo');
+        expect(res).toBe('{"foo":"bar"}');
       });
 
       it('returns file content from branch or tag', async () => {
-        const data = { foo: 'bar' };
         const scope = await initRepo();
         scope
           .get(
@@ -2996,29 +2987,10 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, {
             isLastPage: true,
-            lines: [{ text: JSON.stringify(data) }],
+            lines: [{ text: '{"foo":"bar"}' }],
           });
-        const res = await bitbucket.getJsonFile(
-          'file.json',
-          'SOME/repo',
-          'dev',
-        );
-        expect(res).toEqual(data);
-      });
-
-      it('throws on malformed JSON', async () => {
-        const scope = await initRepo();
-        scope
-          .get(
-            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
-          )
-          .reply(200, {
-            isLastPage: true,
-            lines: [{ text: '!@#' }],
-          });
-        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
-          "JSON5: invalid character '!' at 1:1",
-        );
+        const res = await bitbucket.getRawFile('file.json', 'SOME/repo', 'dev');
+        expect(res).toBe('{"foo":"bar"}');
       });
 
       it('throws on long content', async () => {
@@ -3031,7 +3003,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             isLastPage: false,
             lines: [{ text: '{' }],
           });
-        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        await expect(bitbucket.getRawFile('file.json')).rejects.toThrow(
           'The file is too big (undefinedB)',
         );
       });
@@ -3043,11 +3015,12 @@ describe('modules/platform/bitbucket-server/index', () => {
             `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
           )
           .replyWithError('some error');
-        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        await expect(bitbucket.getRawFile('file.json')).rejects.toThrow(
           'some error',
         );
       });
     });
+
     describe('modules/platform/bitbucket-server/code-owners', () => {
       it('ignores comments and empty lines', () => {
         const lines = ['# This is a comment', '', 'docs/** @dev@example.com'];

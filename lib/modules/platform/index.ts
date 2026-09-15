@@ -4,6 +4,7 @@ import type { PlatformId } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
 import { coerceArray } from '../../util/array.ts';
+import { parseJson } from '../../util/common.ts';
 import {
   setGitAuthor,
   setNoVerify,
@@ -35,6 +36,24 @@ const handler: ProxyHandler<Platform> = {
 };
 
 export const platform = new Proxy<Platform>({} as any, handler);
+
+/**
+ * Fetches a file from the platform and parses it as JSON, JSONC or JSON5,
+ * depending on the file extension.
+ *
+ * Returns `null` when the file does not exist, and throws when it cannot be
+ * parsed.
+ *
+ * TODO: fix types (#22198)
+ */
+export async function getJsonFile(
+  fileName: string,
+  repoName?: string,
+  branchOrTag?: string,
+): Promise<any> {
+  const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
+  return parseJson(raw, fileName);
+}
 
 export function setPlatformApi(name: PlatformId): void {
   const platformModule = platforms.get(name);
