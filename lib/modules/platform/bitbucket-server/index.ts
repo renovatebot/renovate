@@ -54,7 +54,12 @@ import {
   ensureCommentRemovalWith,
   ensureCommentWith,
 } from '../utils/comments.ts';
-import { smartTruncate } from '../utils/pr-body.ts';
+import {
+  flattenDetailsSummary,
+  replaceRebaseCheckboxHints,
+  smartTruncate,
+  stripRebaseCheckSection,
+} from '../utils/pr-body.ts';
 import { BbsPrCache } from './pr-cache.ts';
 import type {
   Comment,
@@ -1334,18 +1339,10 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
 export function massageMarkdown(input: string): string {
   logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
-  return smartTruncate(input, maxBodyLength())
-    .replace(
-      'you tick the rebase/retry checkbox',
-      'PR is renamed to start with "rebase!"',
-    )
-    .replace(
-      'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"',
-    )
-    .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?details>/g), '')
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
+  let body = replaceRebaseCheckboxHints(smartTruncate(input, maxBodyLength()));
+  body = flattenDetailsSummary(body);
+  body = stripRebaseCheckSection(body);
+  return body
     .replace(regEx(/<!--.*?-->/gs), '')
     .replace(
       regEx(
