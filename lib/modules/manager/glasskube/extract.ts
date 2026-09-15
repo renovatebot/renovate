@@ -28,12 +28,11 @@ function parseResources(
   const repositories: PackageRepository[] = [];
 
   for (const resource of resources) {
-    if (resource.kind === 'ClusterPackage' || resource.kind === 'Package') {
-      packages.push(resource);
-      // NOTE: the schema only parses these two kinds, so the implicit else
-      // never runs. A coverage-ignore hint cannot suppress it on an `else if`.
-    } else if (resource.kind === 'PackageRepository') {
+    if (resource.kind === 'PackageRepository') {
       repositories.push(resource);
+    } else {
+      // the schema parses no kind other than `Package` and `ClusterPackage`
+      packages.push(resource);
     }
   }
 
