@@ -1,6 +1,10 @@
 import * as _template from '../../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../../types.ts';
-import { getChangelogs } from './changelogs.ts';
+import {
+  getChangelogs,
+  getChangelogsCommentContent,
+  getChangelogsCommentNotice,
+} from './changelogs.ts';
 
 vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
@@ -78,5 +82,71 @@ describe('workers/repository/update/pr/body/changelogs', () => {
 
       "
     `);
+  });
+
+  describe('getChangelogsCommentNotice', () => {
+    it('returns empty string when there is no release notes', () => {
+      const res = getChangelogsCommentNotice({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [],
+        hasReleaseNotes: false,
+      });
+
+      expect(res).toBe('');
+    });
+
+    it('returns a notice pointing to the comment', () => {
+      const res = getChangelogsCommentNotice({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [],
+        hasReleaseNotes: true,
+      });
+
+      expect(res).toBe(
+        '\n\n---\n\nRelease notes for this update are in a comment on this PR.\n\n',
+      );
+    });
+  });
+  describe('getChangelogsCommentContent', () => {
+    it('returns empty string when there is no release notes', () => {
+      const res = getChangelogsCommentContent({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [],
+        hasReleaseNotes: false,
+      });
+
+      expect(res).toBe('');
+      expect(template.compile).not.toHaveBeenCalled();
+    });
+
+    it('drops the heading which the comment topic already provides', () => {
+      template.compile.mockImplementationOnce(
+        (): string => '### Release Notes\n\nsome/repo (dep-1)',
+      );
+
+      const res = getChangelogsCommentContent({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [
+          {
+            manager: 'some-manager',
+            depName: 'dep-1',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+        ],
+        hasReleaseNotes: true,
+      });
+
+      expect(res).toBe('some/repo (dep-1)');
+    });
   });
 });

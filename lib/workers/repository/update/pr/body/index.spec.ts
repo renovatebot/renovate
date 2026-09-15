@@ -378,5 +378,37 @@ describe('workers/repository/update/pr/body/index', () => {
         'Please check the Dependency Dashboard for more information\n\n---';
       expect(res).toBe(expected);
     });
+
+    it('replaces changelogs with a notice when they are commented', () => {
+      changelogs.getChangelogsCommentNotice.mockReturnValueOnce(
+        'getChangelogsCommentNotice',
+      );
+      platform.massageMarkdown.mockImplementation((x) => x);
+      template.compile.mockImplementation(
+        (_, config) => (config as { changelogs: string }).changelogs,
+      );
+
+      const res = getPrBody(
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          baseBranch: 'base',
+          upgrades: [],
+          changelogsLocation: 'comment',
+          prBodyTemplate: '{{{changelogs}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(res).toContain('getChangelogsCommentNotice');
+      expect(changelogs.getChangelogs).not.toHaveBeenCalled();
+    });
   });
 });
