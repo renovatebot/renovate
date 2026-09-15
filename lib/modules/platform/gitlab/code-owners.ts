@@ -44,9 +44,16 @@ function extractOwnersFromLine(
   defaultUsernames: string[],
 ): FileOwnerRule {
   const [pattern, ...usernames] = line.split(regEx(/\s+/));
-  const matchPattern = ignore().add(pattern);
+  const isExclusion = pattern.startsWith('!');
+  const matchPattern = ignore().add(
+    isExclusion ? pattern.substring(1) : pattern,
+  );
   return {
-    usernames: usernames.length > 0 ? usernames : defaultUsernames,
+    usernames: isExclusion
+      ? []
+      : usernames.length > 0
+        ? usernames
+        : defaultUsernames,
     pattern,
     score: pattern.length,
     match: (path: string) => matchPattern.ignores(path),
