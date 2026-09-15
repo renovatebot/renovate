@@ -7,6 +7,7 @@ import { type PackageDependency } from './types.ts';
 import {
   applyGitSource,
   artifactErrorMessageFromExecError,
+  fileChangesToArtifactResults,
   resolveToolConstraint,
 } from './util.ts';
 
@@ -226,6 +227,18 @@ describe('modules/manager/util', () => {
     );
 
     expect(message).toBe('fallback message');
+  });
+
+  it('wraps file changes into artifact results', () => {
+    expect(
+      fileChangesToArtifactResults([
+        { type: 'addition', path: 'foo', contents: 'bar' },
+        { type: 'deletion', path: 'baz' },
+      ]),
+    ).toEqual([
+      { file: { type: 'addition', path: 'foo', contents: 'bar' } },
+      { file: { type: 'deletion', path: 'baz' } },
+    ]);
   });
 
   describe('resolveToolConstraint()', () => {
