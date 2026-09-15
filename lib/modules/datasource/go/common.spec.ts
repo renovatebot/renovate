@@ -1,4 +1,4 @@
-import { getSourceUrl, isPublicGoPackage } from './common.ts';
+import { getSourceUrl, isPseudoVersion, isPublicGoPackage } from './common.ts';
 
 describe('modules/datasource/go/common', () => {
   describe('isPublicGoPackage', () => {
@@ -33,6 +33,19 @@ describe('modules/datasource/go/common', () => {
 
       expect(isPublicGoPackage('github.com/foo/bar')).toBe(true);
       expect(isPublicGoPackage('github.com/other/bar')).toBe(false);
+    });
+  });
+
+  describe('isPseudoVersion', () => {
+    it.each`
+      version                                         | expected
+      ${'v0.0.0-20240506185236-b8a5c65736ae'}         | ${true}
+      ${'v0.0.0-alpha.0.20240506185236-b8a5c65736ae'} | ${true}
+      ${'v1.2.3-0.20240506185236-b8a5c65736ae'}       | ${false}
+      ${'v0.0.0'}                                     | ${false}
+      ${'v1.2.3'}                                     | ${false}
+    `('$version => $expected', ({ version, expected }) => {
+      expect(isPseudoVersion(version)).toBe(expected);
     });
   });
 
