@@ -3,7 +3,11 @@ import { GithubReleasesDatasource } from '../../../datasource/github-releases/in
 import * as npmVersioning from '../../../versioning/npm/index.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { ActionSchema, KnownActionConfig } from '../types.ts';
-import { actionsVersionsExtractVersion, parseValue } from './utils.ts';
+import {
+  actionsVersionsExtractVersion,
+  parsePartialValue,
+  parseValue,
+} from './utils.ts';
 
 const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
@@ -96,6 +100,10 @@ const MoonrepoSetupToolchainWith: ActionSchema = z
 // single step: the Crystal compiler itself, and the shards package manager.
 // Both inputs are optional, so only emit a dependency for the ones a
 // workflow actually sets.
+//
+// Both install "a particular release (if the full version is specified), or
+// the latest patch version of a release series", so a partial version such as
+// `1.2` needs to keep its precision.
 const InstallCrystalWith: ActionSchema = z
   .object({
     crystal: z.string().optional(),
@@ -107,14 +115,14 @@ const InstallCrystalWith: ActionSchema = z
     if (crystal) {
       deps.push({
         packageName: 'crystal-lang/crystal',
-        ...parseValue(crystal),
+        ...parsePartialValue(crystal),
       });
     }
 
     if (shards) {
       deps.push({
         packageName: 'crystal-lang/shards',
-        ...parseValue(shards),
+        ...parsePartialValue(shards),
       });
     }
 

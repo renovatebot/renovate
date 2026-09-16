@@ -4899,6 +4899,32 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // a partial version installs the latest patch of that release series,
+      // so it must keep its precision
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: { crystal: '1.21', shards: '0.20' },
+      },
+      expected: [
+        {
+          currentValue: '1.21',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/crystal',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/crystal',
+          versioning: 'semver-partial',
+        },
+        {
+          currentValue: '0.20',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/shards',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/shards',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
       // neither input is set, so no deps should be extracted at all (rather
       // than emitting skipped deps for inputs no one set)
       step: {
