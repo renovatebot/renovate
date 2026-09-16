@@ -21,7 +21,10 @@ export class RpmDatasource extends Datasource {
    * But according to this post, it's not something we can really look into or reference.
    * @see{https://lists.rpm.org/pipermail/rpm-ecosystem/2015-October/000283.html}
    */
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   /**
    * Users can specify multiple repositories and the datasource will aggregate the releases

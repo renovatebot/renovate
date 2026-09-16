@@ -22,9 +22,15 @@ export class CdnjsDatasource extends Datasource {
     super(CdnjsDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://api.cdnjs.com/'];
+  }
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

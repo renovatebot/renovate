@@ -1,10 +1,5 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import {
-  isFunction,
-  isNonEmptyArray,
-  isString,
-  isTruthy,
-} from '@sindresorhus/is';
+import { isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_BLOCKED, HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -325,14 +320,9 @@ function resolveRegistryUrls(
   registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined,
 ): string[] {
-  const customRegistrySupport =
-    datasource.supportsCustomRegistry?.(packageName) ??
-    datasource.customRegistrySupport;
+  const customRegistrySupport = datasource.supportsCustomRegistry(packageName);
   const datasourceDefaultRegistryUrls =
-    datasource.getDefaultRegistryUrls?.(packageName) ??
-    (isFunction(datasource.defaultRegistryUrls)
-      ? datasource.defaultRegistryUrls()
-      : datasource.defaultRegistryUrls);
+    datasource.getDefaultRegistryUrls(packageName);
 
   if (!customRegistrySupport) {
     if (

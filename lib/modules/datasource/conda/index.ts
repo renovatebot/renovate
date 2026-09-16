@@ -18,11 +18,17 @@ export class CondaDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'hunt';
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly caching = true;
 

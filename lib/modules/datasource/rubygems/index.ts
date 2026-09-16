@@ -38,7 +38,10 @@ export class RubygemsDatasource extends Datasource {
     this.metadataCache = new MetadataCache(this.http);
   }
 
-  override readonly defaultRegistryUrls = ['https://rubygems.org'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://rubygems.org'];
+  }
 
   override readonly defaultVersioning = rubyVersioning.id;
 

@@ -39,7 +39,7 @@ export function getLockedVersion(
 ): string | undefined {
   const depRegistryUrl = dep.registryUrls
     ? dep.registryUrls[0]
-    : TerraformProviderDatasource.defaultRegistryUrls[0];
+    : TerraformProviderDatasource.getDefaultRegistryUrls()[0];
   const foundLock = locks.find(
     (lock) =>
       lock.packageName === dep.packageName &&

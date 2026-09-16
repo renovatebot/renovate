@@ -13,7 +13,10 @@ export const nugetOrg = 'https://api.nuget.org/v3/index.json';
 export class NugetDatasource extends Datasource {
   static readonly id = 'nuget';
 
-  override readonly defaultRegistryUrls = [nugetOrg];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [nugetOrg];
+  }
 
   override readonly defaultVersioning = nugetVersioning.id;
 

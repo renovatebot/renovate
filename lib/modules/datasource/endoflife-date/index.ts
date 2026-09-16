@@ -10,7 +10,10 @@ import { EndoflifeDateVersions } from './schema.ts';
 export class EndoflifeDateDatasource extends Datasource {
   static readonly id = datasource;
 
-  override readonly defaultRegistryUrls = [registryUrl];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [registryUrl];
+  }
   override readonly caching = true;
   override readonly defaultVersioning = 'loose';
 

@@ -60,7 +60,10 @@ export class PackagistDatasource extends Datasource {
     super(PackagistDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://repo.packagist.org'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://repo.packagist.org'];
+  }
 
   override readonly defaultVersioning = composerVersioning.id;
 

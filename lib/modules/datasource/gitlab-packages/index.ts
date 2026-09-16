@@ -16,9 +16,15 @@ export class GitlabPackagesDatasource extends Datasource {
 
   override caching = true;
 
-  override customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override defaultRegistryUrls = ['https://gitlab.com'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://gitlab.com'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

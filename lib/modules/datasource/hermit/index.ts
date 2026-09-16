@@ -20,15 +20,19 @@ import type { HermitSearchResult } from './types.ts';
 export class HermitDatasource extends Datasource {
   static readonly id = 'hermit';
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = id;
 
-  override readonly defaultRegistryUrls = [
-    'https://github.com/cashapp/hermit-packages',
-  ];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com/cashapp/hermit-packages'];
+  }
 
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =

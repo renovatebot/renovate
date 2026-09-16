@@ -13,9 +13,10 @@ export class GradleVersionDatasource extends Datasource {
     super(GradleVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
-    'https://services.gradle.org/versions/all',
-  ];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://services.gradle.org/versions/all'];
+  }
 
   override readonly defaultVersioning = gradleVersioning.id;
 

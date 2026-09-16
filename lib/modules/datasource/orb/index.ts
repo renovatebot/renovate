@@ -12,9 +12,15 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = ['https://circleci.com/'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://circleci.com/'];
+  }
   override readonly registryStrategy = 'hunt';
 
   override readonly releaseTimestampSupport = true;

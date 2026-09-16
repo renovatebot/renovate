@@ -27,7 +27,7 @@ describe('modules/datasource/jsr/index', () => {
   it('should return null for invalid package name', async () => {
     const res = await jsr.getReleases({
       packageName: 'invalid',
-      registryUrl: jsr.defaultRegistryUrls[0],
+      registryUrl: jsr.getDefaultRegistryUrls('')[0],
     });
     expect(res).toBeNull();
   });
@@ -36,26 +36,26 @@ describe('modules/datasource/jsr/index', () => {
     const missingVersions = { ...jsrPackageMetadataResponse };
     missingVersions.versions = {};
     httpMock
-      .scope(jsr.defaultRegistryUrls[0])
+      .scope(jsr.getDefaultRegistryUrls('')[0])
       .get('/@scope/package-name/meta.json')
       .reply(200, missingVersions);
     const res = await jsr.getReleases({
       packageName: '@scope/package-name',
-      registryUrl: jsr.defaultRegistryUrls[0],
+      registryUrl: jsr.getDefaultRegistryUrls('')[0],
     });
     expect(res).toBeNull();
   });
 
   it('should fetch package info from jsr', async () => {
     httpMock
-      .scope(jsr.defaultRegistryUrls[0])
+      .scope(jsr.getDefaultRegistryUrls('')[0])
       .get('/@scope/package-name/meta.json')
       .reply(200, jsrPackageMetadataResponse, {
         'Cache-control': 'public, expires=300',
       });
     const res = await jsr.getReleases({
       packageName: '@scope/package-name',
-      registryUrl: jsr.defaultRegistryUrls[0],
+      registryUrl: jsr.getDefaultRegistryUrls('')[0],
     });
     expect(res).toMatchObject({
       homepage: 'https://jsr.io/@scope/package-name',
@@ -77,12 +77,12 @@ describe('modules/datasource/jsr/index', () => {
   it('contains yanked versions', async () => {
     jsrPackageMetadataResponse.versions['0.0.1'].yanked = true;
     httpMock
-      .scope(jsr.defaultRegistryUrls[0])
+      .scope(jsr.getDefaultRegistryUrls('')[0])
       .get('/@scope/package-name/meta.json')
       .reply(200, jsrPackageMetadataResponse);
     const res = await jsr.getReleases({
       packageName: '@scope/package-name',
-      registryUrl: jsr.defaultRegistryUrls[0],
+      registryUrl: jsr.getDefaultRegistryUrls('')[0],
     });
     expect(res).toMatchObject({
       homepage: 'https://jsr.io/@scope/package-name',
@@ -104,26 +104,26 @@ describe('modules/datasource/jsr/index', () => {
 
   it('should return null if lookup fails', async () => {
     httpMock
-      .scope(jsr.defaultRegistryUrls[0])
+      .scope(jsr.getDefaultRegistryUrls('')[0])
       .get('/@scope/package-name/meta.json')
       .reply(404);
     await expect(
       jsr.getReleases({
         packageName: '@scope/package-name',
-        registryUrl: jsr.defaultRegistryUrls[0],
+        registryUrl: jsr.getDefaultRegistryUrls('')[0],
       }),
     ).rejects.toThrow('Request failed with status code 404 (Not Found)');
   });
 
   it('should throw error for unparseable', async () => {
     httpMock
-      .scope(jsr.defaultRegistryUrls[0])
+      .scope(jsr.getDefaultRegistryUrls('')[0])
       .get('/@scope/package-name/meta.json')
       .reply(200, 'oops');
     await expect(
       jsr.getReleases({
         packageName: '@scope/package-name',
-        registryUrl: jsr.defaultRegistryUrls[0],
+        registryUrl: jsr.getDefaultRegistryUrls('')[0],
       }),
     ).rejects.toThrow('Unexpected token \'o\', "oops" is not valid JSON');
   });

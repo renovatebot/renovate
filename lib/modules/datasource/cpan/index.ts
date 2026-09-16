@@ -13,9 +13,15 @@ export class CpanDatasource extends Datasource {
     super(CpanDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://fastapi.metacpan.org/'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://fastapi.metacpan.org/'];
+  }
 
   override readonly defaultVersioning = perlVersioning.id;
 

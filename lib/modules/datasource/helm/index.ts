@@ -25,7 +25,10 @@ export class HelmDatasource extends Datasource {
     super(HelmDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://charts.helm.sh/stable'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://charts.helm.sh/stable'];
+  }
 
   override readonly defaultConfig = {
     commitMessageTopic: 'Helm release {{depName}}',

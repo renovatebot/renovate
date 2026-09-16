@@ -42,7 +42,9 @@ const defaultRegistriesMock: RegistriesMock = {
 
 class DummyDatasource extends Datasource {
   override defaultVersioning = 'python';
-  override defaultRegistryUrls = ['https://reg1.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] | undefined {
+    return ['https://reg1.com'];
+  }
   private registriesMock: RegistriesMock;
 
   constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -62,9 +64,9 @@ class DummyDatasource extends Datasource {
 }
 
 class DummyDatasource2 extends Datasource {
-  override defaultRegistryUrls = function () {
+  override getDefaultRegistryUrls(_packageName: string) {
     return ['https://reg1.com'];
-  };
+  }
   private registriesMock: RegistriesMock;
 
   constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -84,10 +86,12 @@ class DummyDatasource2 extends Datasource {
 }
 
 class DummyDatasource3 extends Datasource {
-  override customRegistrySupport = false;
-  override defaultRegistryUrls = function () {
+  override supportsCustomRegistry(_packageName: string) {
+    return false;
+  }
+  override getDefaultRegistryUrls(_packageName: string): string[] | undefined {
     return ['https://reg1.com'];
-  };
+  }
   private registriesMock: RegistriesMock;
 
   constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -107,7 +111,9 @@ class DummyDatasource3 extends Datasource {
 }
 
 class DummyDatasource4 extends DummyDatasource3 {
-  override defaultRegistryUrls = undefined as never;
+  override getDefaultRegistryUrls(_packageName: string): string[] | undefined {
+    return undefined;
+  }
 }
 
 class DummyDatasource5 extends Datasource {
@@ -238,7 +244,9 @@ describe('modules/datasource/index', () => {
 
     it('ignores and warns for disabled custom registryUrls', async () => {
       class TestDatasource extends DummyDatasource {
-        override readonly customRegistrySupport = false;
+        override supportsCustomRegistry(_packageName: string) {
+          return false;
+        }
       }
       datasources.set(datasource, new TestDatasource());
       const registryUrls = ['https://foo.bar'];
@@ -409,13 +417,13 @@ describe('modules/datasource/index', () => {
       });
     });
 
-    it('supports legacy datasource objects with a default registry function', async () => {
+    it('supports datasource objects with function-only registry accessors', async () => {
       datasources.set(datasource, {
         id: datasource,
-        customRegistrySupport: true,
+        supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
-        defaultRegistryUrls: () => ['https://function-registry.com'],
+        getDefaultRegistryUrls: () => ['https://function-registry.com'],
         getReleases: ({ registryUrl }) =>
           Promise.resolve(
             registryUrl === 'https://function-registry.com'
@@ -428,13 +436,13 @@ describe('modules/datasource/index', () => {
       expect(res).toMatchObject({ releases: [{ version: '2.0.0' }] });
     });
 
-    it('handles legacy datasource objects without default registries', async () => {
+    it('handles datasource objects without default registries', async () => {
       datasources.set(datasource, {
         id: datasource,
-        customRegistrySupport: true,
+        supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
-        defaultRegistryUrls: undefined,
+        getDefaultRegistryUrls: () => undefined,
         getReleases: vi.fn(),
         postprocessRelease: (_config, release) => Promise.resolve(release),
       });
@@ -597,10 +605,9 @@ describe('modules/datasource/index', () => {
         class MergeRegistriesDatasource extends DummyDatasource {
           override readonly registryStrategy = 'merge';
           override caching = true;
-          override readonly defaultRegistryUrls = [
-            'https://reg1.com',
-            'https://reg2.com',
-          ];
+          override getDefaultRegistryUrls(_packageName: string) {
+            return ['https://reg1.com', 'https://reg2.com'];
+          }
         }
 
         const registries: RegistriesMock = {

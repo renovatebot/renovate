@@ -161,11 +161,10 @@ export interface DatasourceApi extends ModuleApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  defaultRegistryUrls?: string[] | (() => string[]);
   /** Return registry URLs for package-specific datasource defaults. */
-  getDefaultRegistryUrls?(packageName: string): string[] | undefined;
+  getDefaultRegistryUrls(packageName: string): string[] | undefined;
   /** Return whether custom registry URLs are supported for this package. */
-  supportsCustomRegistry?(packageName: string): boolean;
+  supportsCustomRegistry(packageName: string): boolean;
   defaultVersioning?: string | undefined;
   defaultConfig?: Record<string, unknown> | undefined;
 
@@ -175,11 +174,6 @@ export interface DatasourceApi extends ModuleApi {
    * @see RegistryStrategy
    */
   registryStrategy?: RegistryStrategy | undefined;
-
-  /**
-   * Whether custom registryUrls are allowed.
-   */
-  customRegistrySupport: boolean;
 
   /**
    * Whether release timestamp can be returned.

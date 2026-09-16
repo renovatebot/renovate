@@ -26,11 +26,17 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'hunt';
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/api/'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://galaxy.ansible.com/api/'];
+  }
 
   override readonly defaultVersioning = pep440Versioning.id;
 

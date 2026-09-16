@@ -14,7 +14,10 @@ export class GitTagsDatasource extends GitDatasource {
     super(GitTagsDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';

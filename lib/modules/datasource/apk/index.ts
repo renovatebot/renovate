@@ -64,13 +64,19 @@ export class ApkDatasource extends Datasource {
    * - branch: latest-stable, v3.19, edge or any other Alpine branch
    * - components: comma separated list of components, e.g. main,community,testing
    */
-  override readonly defaultRegistryUrls = [
-    'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
-  ];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [
+      'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
+    ];
+  }
 
   override readonly defaultConfig = defaultConfig;
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'merge';
 

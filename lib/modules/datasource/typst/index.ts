@@ -9,9 +9,10 @@ import { Registry } from './schema.ts';
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
-  override readonly defaultRegistryUrls = [
-    'https://packages.typst.org/preview/index.json',
-  ];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://packages.typst.org/preview/index.json'];
+  }
 
   override defaultVersioning = semver;
 
@@ -28,7 +29,7 @@ export class TypstDatasource extends Datasource {
       return null;
     }
 
-    const [registryUrl] = this.defaultRegistryUrls;
+    const [registryUrl] = this.getDefaultRegistryUrls('');
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: 'datasource-typst:cache-provider',

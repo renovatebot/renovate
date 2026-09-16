@@ -14,14 +14,20 @@ export class JsrDatasource extends Datasource {
 
   // custom registry support is not yet supported
   // https://github.com/jsr-io/jsr/issues/203
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly registryStrategy = 'first';
   // https://jsr.io/docs/using-packages#semver-resolution
   override readonly defaultVersioning = semverId;
 
   // use npm compatible registry api url due to returns
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

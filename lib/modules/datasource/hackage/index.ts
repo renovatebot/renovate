@@ -13,8 +13,14 @@ export class HackageDatasource extends Datasource {
   }
 
   override readonly defaultVersioning = pvpVersioning.id;
-  override readonly customRegistrySupport = false;
-  override readonly defaultRegistryUrls = ['https://hackage.haskell.org/'];
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://hackage.haskell.org/'];
+  }
 
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryUrl, packageName } = config;

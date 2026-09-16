@@ -16,7 +16,10 @@ export class GitRefsDatasource extends GitDatasource {
     super(GitRefsDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

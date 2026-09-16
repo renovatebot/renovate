@@ -22,9 +22,15 @@ export class PythonVersionDatasource extends Datasource {
     this.pythonEolDatasource = new EndoflifeDateDatasource();
   }
 
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = versioning;
 

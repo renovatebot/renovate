@@ -19,9 +19,15 @@ export class RubyVersionDatasource extends Datasource {
     super(RubyVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://www.ruby-lang.org/'];
+  }
 
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly defaultVersioning = rubyVersioningId;
 

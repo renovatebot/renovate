@@ -15,14 +15,20 @@ export class DevboxDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
   override readonly releaseTimestampSupport = true;
 
   override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = devboxVersioning.id;
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   async getReleases({
     registryUrl,

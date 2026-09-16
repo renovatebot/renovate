@@ -28,11 +28,15 @@ export class GolangVersionDatasource extends Datasource {
     super(GolangVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
-    'https://raw.githubusercontent.com/golang/website',
-  ];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://raw.githubusercontent.com/golang/website'];
+  }
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly defaultVersioning = semverVersioningId;
 

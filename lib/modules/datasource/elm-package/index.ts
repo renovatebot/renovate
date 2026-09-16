@@ -14,9 +14,15 @@ export class ElmPackageDatasource extends Datasource {
     super(ElmPackageDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://package.elm-lang.org'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://package.elm-lang.org'];
+  }
 
   override readonly defaultVersioning = elmVersioning.id;
 

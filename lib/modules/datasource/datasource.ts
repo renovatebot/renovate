@@ -1,4 +1,3 @@
-import { isFunction } from '@sindresorhus/is';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { Http, HttpError } from '../../util/http/index.ts';
 import type {
@@ -23,20 +22,14 @@ export abstract class Datasource implements DatasourceApi {
 
   caching: boolean | undefined;
 
-  customRegistrySupport = true;
-
   defaultConfig: Record<string, unknown> | undefined;
 
-  defaultRegistryUrls?: string[] | (() => string[]);
-
   getDefaultRegistryUrls(_packageName: string): string[] | undefined {
-    return isFunction(this.defaultRegistryUrls)
-      ? this.defaultRegistryUrls()
-      : this.defaultRegistryUrls;
+    return undefined;
   }
 
   supportsCustomRegistry(_packageName: string): boolean {
-    return this.customRegistrySupport;
+    return true;
   }
 
   defaultVersioning?: string | undefined;

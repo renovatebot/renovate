@@ -18,13 +18,19 @@ import {
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = semanticVersioning.id;
 
-  override readonly defaultRegistryUrls = ['https://apiland.deno.dev'];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://apiland.deno.dev'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

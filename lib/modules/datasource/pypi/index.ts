@@ -33,11 +33,17 @@ export class PypiDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly customRegistrySupport = true;
+  /* istanbul ignore next */
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   static readonly defaultURL =
     getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
-  override readonly defaultRegistryUrls = [PypiDatasource.defaultURL];
+  /* istanbul ignore next */
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [PypiDatasource.defaultURL];
+  }
 
   override readonly defaultVersioning = pep440.id;
 
