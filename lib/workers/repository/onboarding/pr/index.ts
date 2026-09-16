@@ -1,4 +1,4 @@
-import { isNumber, isString } from '@sindresorhus/is';
+import { isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages.ts';
@@ -7,14 +7,11 @@ import type { PackageFile } from '../../../../modules/manager/types.ts';
 import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
-import { hashBody } from '../../../../modules/platform/pr-body.ts';
-import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
 import { getFile } from '../../../../util/git/index.ts';
 import { toSha256 } from '../../../../util/hash.ts';
-import * as template from '../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import {
   getDepWarningsOnboardingPR,
@@ -22,9 +19,10 @@ import {
   getWarnings,
 } from '../../errors-warnings.ts';
 import type { RepositoryResult } from '../../result.ts';
-import { getPlatformPrOptions } from '../../update/pr/index.ts';
-import { prepareLabels } from '../../update/pr/labels.ts';
-import { addParticipants } from '../../update/pr/participants.ts';
+import { getRebaseCheckbox } from '../../update/pr/body/controls.ts';
+import { getPrFooter } from '../../update/pr/body/footer.ts';
+import { getPrHeader } from '../../update/pr/body/header.ts';
+import { ensureSimplePr } from '../../update/pr/ensure-simple-pr.ts';
 import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.ts';
 import {
   OnboardingState,
@@ -186,14 +184,7 @@ function finalizeOnboardingPrBody(
   config: RenovateConfig,
   onboardingConfigHashComment: string,
 ): string {
-  let finalPrBody = prBody;
-  if (isString(config.prHeader)) {
-    finalPrBody = `${template.compile(config.prHeader, config)}\n\n${finalPrBody}`;
-  }
-  if (isString(config.prFooter)) {
-    finalPrBody = `${finalPrBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
-  }
-  return finalPrBody + onboardingConfigHashComment;
+  return `${getPrHeader(config)}${prBody}${getPrFooter(config)}${onboardingConfigHashComment}`;
 }
 
 export async function ensureOnboardingPr(
@@ -320,86 +311,28 @@ export async function ensureOnboardingPr(
     }
   }
 
-  logger.trace(`prBody:\n${prBody}`);
-
-  prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
-
-  if (existingPr) {
-    logger.debug('Found open onboarding PR');
-    // Check if existing PR needs updating
-    const prBodyHash = hashBody(prBody);
-    if (existingPr.bodyStruct?.hash === prBodyHash) {
-      logger.debug(`Pull Request #${existingPr.number} does not need updating`);
-      return 'onboarding';
-    }
-    // PR must need updating
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would update onboarding PR');
-    } else {
-      await platform.updatePr({
-        number: existingPr.number,
-        prTitle: existingPr.title,
-        prBody,
-      });
-      logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
-    }
-    return 'onboarding';
-  }
-  logger.debug('Creating onboarding PR');
-  const labels: string[] = prepareLabels(config);
-  try {
-    if (GlobalConfig.get('dryRun')) {
-      logger.info('DRY-RUN: Would create onboarding PR');
-    } else {
-      // TODO #22198
-      const prTitle =
-        config.semanticCommits === 'enabled'
-          ? getSemanticCommitPrTitle(config)
-          : getInheritedOrGlobal('onboardingPrTitle')!;
-      const pr = await platform.createPr({
-        sourceBranch: onboardingBranch,
-        targetBranch: config.defaultBranch!,
-        prTitle,
-        prBody,
-        labels,
-        platformPrOptions: getPlatformPrOptions({
-          ...config,
-          automerge: false,
-        }),
-      });
-      logger.info(
-        { pr: `Pull Request #${pr!.number}` },
-        'Onboarding PR created',
-      );
-      await addParticipants(config, pr!);
-    }
-  } catch (err) {
-    if (
-      err.response?.statusCode === 422 &&
-      err.response?.body?.errors?.[0]?.message?.startsWith(
-        'A pull request already exists',
-      )
-    ) {
-      logger.warn(
-        'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
-      );
-      await scm.deleteBranch(onboardingBranch);
-      return 'onboarding';
-    }
-    throw err;
-  }
+  await ensureSimplePr({
+    branchName: onboardingBranch,
+    // TODO #22198
+    targetBranch: config.defaultBranch!,
+    // Keep the title of an existing onboarding PR, because renaming it is the
+    // documented way to request a fresh onboarding PR.
+    prTitle: existingPr?.title ?? getOnboardingPrTitle(config),
+    prBody,
+    config,
+    existingPr,
+    logName: 'onboarding',
+  });
 
   return 'onboarding';
 }
 
-function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
-  let rebaseCheckBox = '';
-  if (onboardingRebaseCheckbox) {
-    // Create markdown checkbox
-    rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
+function getOnboardingPrTitle(config: RenovateConfig): string {
+  if (config.semanticCommits === 'enabled') {
+    return getSemanticCommitPrTitle(config);
   }
-
-  return rebaseCheckBox;
+  // TODO #22198
+  return getInheritedOrGlobal('onboardingPrTitle')!;
 }
 
 async function getOnboardingConfigHashComment(): Promise<string> {
