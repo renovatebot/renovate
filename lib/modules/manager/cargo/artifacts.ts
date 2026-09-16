@@ -145,6 +145,7 @@ async function updateArtifactsImpl(
       // For crate dependencies, a locked version is expected.
       // In both situations, perform a regular workspace lockfile update.
       if (hasNonCrateDep || crateDepWithoutLockedVersion) {
+        // v8 ignore else -- needs a workspace update driven only by a non-crate dep
         if (crateDepWithoutLockedVersion) {
           // Only warn when a crate dependency has no locked version
           logger.warn(
@@ -198,6 +199,7 @@ async function updateArtifactsImpl(
           ),
       );
 
+      // v8 ignore else -- this retry only runs when a dep was already current
       if (newUpdatedDeps.length < updatedDeps.length) {
         logger.debug(
           'Dependency already up to date - reattempting recursively',

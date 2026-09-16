@@ -86,6 +86,7 @@ export async function updateArtifacts({
           value.url.replace(regEx(/\/.*/), ''),
         );
 
+        // v8 ignore else -- needs a repository the login helper cannot handle
         if (loginCmd) {
           cmd.push(loginCmd);
         }

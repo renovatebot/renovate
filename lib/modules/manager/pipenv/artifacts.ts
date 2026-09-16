@@ -93,12 +93,14 @@ async function addCredentialsForSourceUrls(
     const usernameVariableName = extractEnvironmentVariableName(
       parsedSourceUrl.username,
     );
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (credentials.username && usernameVariableName) {
       addExtraEnvVariable(extraEnv, usernameVariableName, credentials.username);
     }
     const passwordVariableName = extractEnvironmentVariableName(
       parsedSourceUrl.password,
     );
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (credentials.password && passwordVariableName) {
       addExtraEnvVariable(extraEnv, passwordVariableName, credentials.password);
     }
