@@ -1541,6 +1541,42 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'dotnet-sdk',
           depType: 'uses-with',
           packageName: 'dotnet-sdk',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a channel installs the latest patch release on it, rather than
+      // pinning a version
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0' },
+      },
+      expected: [
+        {
+          currentValue: '8.0',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // the idiomatic x-range form is a range too
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0.x' },
+      },
+      expected: [
+        {
+          currentValue: '8.0.x',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+          versioning: 'npm',
         },
       ],
     },
@@ -1557,6 +1593,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'dotnet-sdk',
           depType: 'uses-with',
           packageName: 'dotnet-sdk',
+          versioning: 'npm',
         },
       ],
     },
@@ -1575,6 +1612,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'dotnet-sdk',
           depType: 'uses-with',
           packageName: 'dotnet-sdk',
+          versioning: 'npm',
         },
       ],
     },
