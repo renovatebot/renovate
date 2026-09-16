@@ -394,8 +394,9 @@ export async function getUpdatedPackageFiles(
       }
       if (
         newContent === packageFileContent &&
-        upgrade.manager === 'git-submodules'
+        get(manager, 'updatesFilesOutOfBand')
       ) {
+        // The manager applied the update outside the package file, so treat the unchanged package file as updated to make `updateArtifacts()` run for it.
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
