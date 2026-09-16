@@ -1,5 +1,5 @@
 // TODO #22198
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
@@ -59,12 +59,6 @@ async function lookup(
 
   dep.updates = [];
 
-  if (isString(dep.depName)) {
-    dep.depName = dep.depName.trim();
-  }
-
-  dep.packageName ??= dep.depName;
-
   if (dep.skipReason) {
     return Result.ok(dep);
   }
@@ -86,7 +80,6 @@ async function lookup(
   depConfig = await applyDatasourceDefaultConfig(depConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
-  depConfig.packageName ??= depConfig.depName;
 
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#22198)

@@ -44,9 +44,13 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'package.json',
             deps: [
-              { depName: 'abcd' },
-              { depName: 'foo' },
-              { depName: 'skipped', skipReason: 'some-reason' as never },
+              { depName: 'abcd', packageName: 'abcd' },
+              { depName: 'foo', packageName: 'foo' },
+              {
+                depName: 'skipped',
+                packageName: 'skipped',
+                skipReason: 'some-reason' as never,
+              },
             ],
           },
         ],
@@ -94,7 +98,13 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'pom.xml',
             extractedConstraints: { some: 'constraint', other: 'constraint' },
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -131,7 +141,13 @@ describe('workers/repository/process/fetch', () => {
                 gomodMod: 'pfile-version',
                 go: 'go-version',
               },
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -157,7 +173,13 @@ describe('workers/repository/process/fetch', () => {
             {
               packageFile: 'pom.xml',
               constraintsVersioning: { go: 'go-version' },
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -180,7 +202,13 @@ describe('workers/repository/process/fetch', () => {
             {
               packageFile: 'pom.xml',
               // no constraintsVersioning on pFile
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -205,7 +233,13 @@ describe('workers/repository/process/fetch', () => {
             {
               packageFile: 'pom.xml',
               // no constraintsVersioning on pFile
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -234,6 +268,7 @@ describe('workers/repository/process/fetch', () => {
                 {
                   datasource: MavenDatasource.id,
                   depName: 'bbb',
+                  packageName: 'bbb',
                   constraintsVersioning: {
                     '%goMod': 'dep-version',
                     perl: 'dep-perl-version',
@@ -270,6 +305,7 @@ describe('workers/repository/process/fetch', () => {
                 {
                   datasource: MavenDatasource.id,
                   depName: 'bbb',
+                  packageName: 'bbb',
                   constraintsVersioning: { perl: 'dep-perl-version' },
                 },
               ],
@@ -302,6 +338,7 @@ describe('workers/repository/process/fetch', () => {
               {
                 datasource: MavenDatasource.id,
                 depName: 'bbb',
+                packageName: 'bbb',
                 extractedConstraints: { python: '<3.12' },
               },
             ],
@@ -335,10 +372,16 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'values.yaml',
             deps: [
-              { depName: '', currentValue: '2.8.11', datasource: 'docker' },
-              { depName: 'abcd' },
+              {
+                depName: '',
+                packageName: '',
+                currentValue: '2.8.11',
+                datasource: 'docker',
+              },
+              { depName: 'abcd', packageName: 'abcd' },
               { currentValue: '2.8.11', datasource: 'docker' },
-              { depName: ' ' },
+              // a whitespace-only name is trimmed away during extraction
+              { depName: '', packageName: '' },
               {},
               { depName: undefined },
               // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid depName type to test invalid-name skip handling
@@ -365,6 +408,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'dep-name',
+                packageName: 'dep-name',
                 currentValue: '2.8.11',
                 datasource: 'docker',
                 isInternal: true,
@@ -391,6 +435,7 @@ describe('workers/repository/process/fetch', () => {
               {
                 datasource: MavenDatasource.id,
                 depName: 'bbb',
+                packageName: 'bbb',
                 isInternal: true,
               },
             ],
@@ -410,7 +455,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -427,7 +478,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -444,7 +501,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
