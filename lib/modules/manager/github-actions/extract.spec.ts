@@ -2690,6 +2690,24 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // a partial `version` resolves to the latest matching release, so it
+      // must keep both its precision and its `v` prefix
+      step: {
+        uses: 'golangci/golangci-lint-action@v9',
+        with: { version: 'v2.5' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.5',
+          datasource: 'github-releases',
+          depName: 'golangci/golangci-lint',
+          depType: 'uses-with',
+          packageName: 'golangci/golangci-lint',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
       step: {
         uses: 'golangci/golangci-lint-action@v9',
         with: {},

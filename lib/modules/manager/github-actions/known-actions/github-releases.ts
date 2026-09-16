@@ -151,9 +151,13 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     versioning: npmVersioning.id,
     withSchema: valSchema('versionSpec'),
   },
+  // https://github.com/golangci/golangci-lint-action
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
+    // in the default `binary` install mode, `version` may be a partial
+    // version such as `v2.3` rather than a pinned version
+    withSchema: partialValSchema('version'),
   },
   // https://github.com/goreleaser/goreleaser-action
   'goreleaser/goreleaser-action': {
