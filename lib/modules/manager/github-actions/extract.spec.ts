@@ -2257,6 +2257,25 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // `'latest'` is the default `pixi-version`, and is a valid version according to Conda versioning, but not one that can be used to bump the verson
+      step: {
+        uses: 'prefix-dev/setup-pixi@v0.8.3',
+        with: {
+          'pixi-version': 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'prefix-dev/pixi',
+          depType: 'uses-with',
+          packageName: 'prefix-dev/pixi',
+          versioning: 'conda',
+        },
+      ],
+    },
+    {
       step: {
         uses: 'oven-sh/setup-bun@v2',
         with: {},
