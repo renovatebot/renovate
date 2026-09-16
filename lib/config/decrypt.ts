@@ -33,10 +33,12 @@ export async function tryDecrypt(
   repository: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
-  const decryptedObjStr =
-    getEnv().RENOVATE_X_USE_OPENPGP === 'true'
-      ? await tryDecryptOpenPgp(key, encryptedStr)
-      : await tryDecryptBcPgp(key, encryptedStr);
+  let decryptedObjStr: string | null;
+  if (getEnv().RENOVATE_X_USE_OPENPGP === 'true') {
+    decryptedObjStr = await tryDecryptOpenPgp(key, encryptedStr);
+  } else {
+    decryptedObjStr = await tryDecryptBcPgp(key, encryptedStr);
+  }
   if (decryptedObjStr) {
     decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
   }
