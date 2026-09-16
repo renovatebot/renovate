@@ -84,6 +84,17 @@ function valSchema(
 
 const VersionVal = valSchema('version');
 
+/**
+ * `gradle/actions/setup-gradle` has a few `gradle-version`s that are strings used to denote another source than a specific version number, which shouldn't have an update proposed for.
+ */
+const GradleVersionAliases = new Set([
+  'wrapper',
+  'current',
+  'release-candidate',
+  'nightly',
+  'release-nightly',
+]);
+
 // Shared by the `actions/setup-{go,node,python}` entries below, whose
 // releases are published as `actions/{go,node,python}-versions` GitHub
 // releases, tagged like `20.11.0` or `20.11.0-1` (a build number suffix).
@@ -768,7 +779,9 @@ export const knownActions: Record<string, KnownActionConfig> = {
     depName: 'gradle',
     packageName: 'gradle/gradle',
     versioning: gradleVersioning.id,
-    withSchema: valSchema('gradle-version'),
+    withSchema: valSchema('gradle-version', (val) =>
+      GradleVersionAliases.has(val),
+    ),
   },
   // https://github.com/hashicorp/setup-packer
   'hashicorp/setup-packer': {
