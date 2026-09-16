@@ -1195,7 +1195,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      } as BranchConfig;
+      };
 
       const res = await postUpgradeCommands.default(config);
 
@@ -1259,7 +1259,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ],
-      } as BranchConfig;
+      };
 
       const res = await postUpgradeCommands.default(config);
 
@@ -1324,7 +1324,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ],
-      } as BranchConfig;
+      };
 
       const res = await postUpgradeCommands.default(config);
 
@@ -1394,7 +1394,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ],
-      } as BranchConfig;
+      };
 
       const res = await postUpgradeCommands.default(config);
 
@@ -1476,7 +1476,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ],
-      } as BranchConfig;
+      };
 
       const res = await postUpgradeCommands.default(config);
 
@@ -1549,7 +1549,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ],
-      } as BranchConfig;
+      };
 
       const res = await postUpgradeCommands.default(config);
 
