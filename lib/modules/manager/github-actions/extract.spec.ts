@@ -3527,6 +3527,42 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'gradle/actions/setup-gradle@v4',
+        with: { 'gradle-version': 'wrapper' },
+      },
+      expected: [
+        {
+          currentValue: 'wrapper',
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          depType: 'uses-with',
+          packageName: 'gradle/gradle',
+          versioning: 'gradle',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'gradle/actions/setup-gradle@v4',
+        with: { 'gradle-version': 'release-candidate' },
+      },
+      expected: [
+        {
+          currentValue: 'release-candidate',
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          depType: 'uses-with',
+          packageName: 'gradle/gradle',
+          versioning: 'gradle',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'hashicorp/setup-terraform@v3',
         with: { terraform_version: '1.13.0' },
       },
