@@ -214,6 +214,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'cmake',
     packageName: 'Kitware/CMake',
+    // `cmake-version` may be partly specified (e.g. `3.2`) or a wildcard
+    // (e.g. `3.2.x`) rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('cmake-version'),
   },
   // https://github.com/mozilla-actions/sccache-action

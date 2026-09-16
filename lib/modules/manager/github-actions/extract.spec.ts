@@ -4930,6 +4930,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'cmake',
           depType: 'uses-with',
           packageName: 'Kitware/CMake',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a wildcard version is a range, not a pinned version
+      step: {
+        uses: 'jwlawson/actions-setup-cmake@v2',
+        with: { 'cmake-version': '4.3.x' },
+      },
+      expected: [
+        {
+          currentValue: '4.3.x',
+          datasource: 'github-releases',
+          depName: 'cmake',
+          depType: 'uses-with',
+          packageName: 'Kitware/CMake',
+          versioning: 'npm',
         },
       ],
     },
@@ -4946,6 +4964,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'cmake',
           depType: 'uses-with',
           packageName: 'Kitware/CMake',
+          versioning: 'npm',
         },
       ],
     },
