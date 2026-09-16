@@ -281,7 +281,6 @@
         "lib/modules/datasource/buildpacks-registry/index.ts",
         "lib/modules/datasource/conan/index.ts",
         "lib/modules/datasource/conda/index.ts",
-        "lib/modules/datasource/cpan/index.ts",
         "lib/modules/datasource/deb/index.ts",
         "lib/modules/datasource/deno/index.ts",
         "lib/modules/datasource/docker/index.ts",
