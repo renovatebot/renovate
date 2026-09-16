@@ -120,9 +120,8 @@ export function matchesContentDescriptor(
       if (isMatch) {
         matchesInclude = true;
       }
-      // NOTE: the mode is either include or exclude, so the implicit else never
-      // runs. A coverage-ignore hint cannot suppress it on an `else if`.
-    } else if (mode === 'exclude') {
+    } else {
+      // the only other mode is `exclude`
       hasExcludes = true;
       if (isMatch) {
         matchesExclude = true;
