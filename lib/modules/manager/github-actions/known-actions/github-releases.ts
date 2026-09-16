@@ -166,6 +166,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'terraform',
     packageName: 'hashicorp/terraform',
+    // `terraform_version` may be a constraint string (e.g. `<1.2.0`,
+    // `~1.1.0`) rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('terraform_version'),
   },
   // https://github.com/helm/chart-releaser-action
@@ -224,6 +227,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'opentofu',
     packageName: 'opentofu/opentofu',
+    // as with `hashicorp/setup-terraform` above, `tofu_version` may be a
+    // constraint string rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('tofu_version'),
   },
   // https://github.com/peaceiris/actions-hugo
