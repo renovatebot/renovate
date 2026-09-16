@@ -1412,7 +1412,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(exec.exec).toHaveBeenCalledTimes(2);
     });
 
-    it('executes branch-mode commands from all upgrades that define them', async () => {
+    it('executes each distinct branch-mode task once', async () => {
       GlobalConfig.set({
         localDir: '/localDir',
         allowedCommands: ['^echo'],
@@ -1426,8 +1426,6 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
       fs.localPathIsFile.mockResolvedValue(true);
 
-      // Two upgrades both have executionMode: 'branch' but with different commands.
-      // Both sets of commands should execute.
       const config: BranchConfig = {
         manager: 'some-manager',
         branchName: 'renovate/some-branch',
@@ -1467,6 +1465,16 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               fileFilters: ['**/*'],
             },
           },
+          {
+            depName: 'some-dep-name-3',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo branch-task-1'],
+              fileFilters: ['**/*'],
+            },
+          },
         ],
       } as BranchConfig;
 
@@ -1481,6 +1489,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         'echo branch-task-2',
         expect.anything(),
       );
+      expect(exec.exec).toHaveBeenCalledTimes(2);
     });
 
     it('executes branch-mode task when upgrades have mixed execution modes', async () => {
