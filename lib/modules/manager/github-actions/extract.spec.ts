@@ -3788,6 +3788,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'terraform',
           depType: 'uses-with',
           packageName: 'hashicorp/terraform',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a constraint string is a range, not a pinned version
+      step: {
+        uses: 'hashicorp/setup-terraform@v3',
+        with: { terraform_version: '~1.13.0' },
+      },
+      expected: [
+        {
+          currentValue: '~1.13.0',
+          datasource: 'github-releases',
+          depName: 'terraform',
+          depType: 'uses-with',
+          packageName: 'hashicorp/terraform',
+          versioning: 'npm',
         },
       ],
     },
@@ -3804,6 +3822,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'terraform',
           depType: 'uses-with',
           packageName: 'hashicorp/terraform',
+          versioning: 'npm',
         },
       ],
     },
@@ -3852,6 +3871,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'opentofu',
           depType: 'uses-with',
           packageName: 'opentofu/opentofu',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a constraint string is a range, not a pinned version
+      step: {
+        uses: 'opentofu/setup-opentofu@v1',
+        with: { tofu_version: '<1.9.0' },
+      },
+      expected: [
+        {
+          currentValue: '<1.9.0',
+          datasource: 'github-releases',
+          depName: 'opentofu',
+          depType: 'uses-with',
+          packageName: 'opentofu/opentofu',
+          versioning: 'npm',
         },
       ],
     },
@@ -3868,6 +3905,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'opentofu',
           depType: 'uses-with',
           packageName: 'opentofu/opentofu',
+          versioning: 'npm',
         },
       ],
     },
