@@ -1193,6 +1193,15 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('keeps the default escape character for an unknown escape directive', () => {
+      const res = extractPackageFile(
+        '# escape = /\nFROM nginx:1.20',
+        '',
+        {},
+      )?.deps;
+      expect(res).toMatchObject([{ depName: 'nginx', currentValue: '1.20' }]);
+    });
+
     it('handles an alternative escape character', () => {
       const res = extractPackageFile(d4, '', {})?.deps;
       expect(res).toEqual([
