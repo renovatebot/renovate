@@ -469,7 +469,7 @@ export function extractPackageFile(
     }
 
     for (const dep of extractApkDeps(instruction, escapeChar)) {
-      dep.depType = 'apk';
+      dep.depType = 'install';
       logger.debug(
         { depName: dep.depName, currentValue: dep.currentValue },
         'Dockerfile RUN apk add',

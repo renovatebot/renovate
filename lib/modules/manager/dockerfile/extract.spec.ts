@@ -49,7 +49,7 @@ describe('modules/manager/dockerfile/extract', () => {
           currentValue: '5.2.37-r2',
           datasource: 'apk',
           depName: 'bash',
-          depType: 'apk',
+          depType: 'install',
           replaceString: 'bash=5.2.37-r2',
         },
       ]);
@@ -81,7 +81,7 @@ describe('modules/manager/dockerfile/extract', () => {
           currentValue: '5.2.37-r2',
           datasource: 'apk',
           depName: 'bash',
-          depType: 'apk',
+          depType: 'install',
           replaceString: 'bash=5.2.37-r2',
         },
       ]);
@@ -117,7 +117,7 @@ describe('modules/manager/dockerfile/extract', () => {
         {
           depName: 'curl-dev',
           currentValue: '8.9.1-r4',
-          depType: 'apk',
+          depType: 'install',
         },
         {
           depName: 'cgr.dev/chainguard/wolfi-base',
@@ -127,7 +127,7 @@ describe('modules/manager/dockerfile/extract', () => {
         {
           depName: 'curl',
           currentValue: '8.9.1-r4',
-          depType: 'apk',
+          depType: 'install',
         },
       ]);
     });
@@ -705,7 +705,7 @@ describe('modules/manager/dockerfile/extract', () => {
         {
           datasource: 'apk',
           depName: 'ca-certificates',
-          depType: 'apk',
+          depType: 'install',
           skipReason: 'unspecified-version',
         },
       ]);
@@ -747,19 +747,19 @@ describe('modules/manager/dockerfile/extract', () => {
         {
           datasource: 'apk',
           depName: 'python',
-          depType: 'apk',
+          depType: 'install',
           skipReason: 'unspecified-version',
         },
         {
           datasource: 'apk',
           depName: 'make',
-          depType: 'apk',
+          depType: 'install',
           skipReason: 'unspecified-version',
         },
         {
           datasource: 'apk',
           depName: 'g++',
-          depType: 'apk',
+          depType: 'install',
           skipReason: 'unspecified-version',
         },
       ]);

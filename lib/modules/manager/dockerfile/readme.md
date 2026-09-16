@@ -119,14 +119,15 @@ Renovate skips packages which it cannot update, and says why in its logs:
 
 Local or remote `.apk` files, virtual packages (`--virtual .build-deps`) and provider dependencies (`so:`, `cmd:`, `pc:`) are ignored.
 
-To match only these dependencies in a `packageRules` entry, use `matchDepTypes`:
+Packages installed by a system package manager use the `install` `depType`, so you can match them in a `packageRules` entry with `matchDepTypes`:
 
 ```json
 {
   "packageRules": [
     {
       "description": "Disable APK package updates",
-      "matchDepTypes": ["apk"],
+      "matchDepTypes": ["install"],
+      "matchDatasources": ["apk"],
       "enabled": false
     }
   ]
