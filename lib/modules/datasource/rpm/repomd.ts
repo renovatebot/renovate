@@ -4,12 +4,7 @@ import type { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { datasource, repomdXmlFileName } from './common.ts';
-
-export interface RpmRepositoryMetadata {
-  repomdUrl: string;
-  primaryDbUrl?: string;
-  primaryGzipUrl?: string;
-}
+import type { RpmRepositoryMetadata } from './types.ts';
 
 function getRepodataUrl(
   xml: XmlDocument,
