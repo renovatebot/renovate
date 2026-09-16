@@ -2,6 +2,7 @@ import { satisfies } from '@renovatebot/pep440';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
@@ -243,6 +244,12 @@ describe('modules/datasource/python-version/index', () => {
       });
 
       expect(res).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        {
+          registryUrl: 'this/is-an;invalid$url',
+        },
+        'python-version datasource: Invalid registryUrl',
+      );
     });
   });
 });
