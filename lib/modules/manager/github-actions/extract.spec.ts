@@ -3293,6 +3293,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gitversion',
           depType: 'uses-with',
           packageName: 'GitTools/GitVersion',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // the documented `versionSpec` form is a range, not a pinned version
+      step: {
+        uses: 'GitTools/actions/gitversion/setup@v3',
+        with: { versionSpec: '6.8.x' },
+      },
+      expected: [
+        {
+          currentValue: '6.8.x',
+          datasource: 'github-releases',
+          depName: 'gitversion',
+          depType: 'uses-with',
+          packageName: 'GitTools/GitVersion',
+          versioning: 'npm',
         },
       ],
     },
@@ -3309,6 +3327,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gitversion',
           depType: 'uses-with',
           packageName: 'GitTools/GitVersion',
+          versioning: 'npm',
         },
       ],
     },

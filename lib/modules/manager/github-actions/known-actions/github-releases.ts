@@ -142,6 +142,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'gitversion',
     packageName: 'GitTools/GitVersion',
+    // `versionSpec` is documented as "the form of 6.8.x or exact version
+    // like 6.0.0", so it may be a range
+    versioning: npmVersioning.id,
     withSchema: valSchema('versionSpec'),
   },
   'golangci/golangci-lint-action': {
