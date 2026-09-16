@@ -233,6 +233,10 @@ describe('modules/versioning/gradle/index', () => {
         expect(api.getPatch(input)).toBe(patch);
       },
     );
+
+    it('has no major when the leading token is not a number', () => {
+      expect(api.getMajor('foo')).toBeNull();
+    });
   });
 
   describe('matches', () => {
@@ -278,8 +282,9 @@ describe('modules/versioning/gradle/index', () => {
 
   describe('minSatisfyingVersion', () => {
     it.each`
-      versions                  | range    | expected
-      ${['0', '1.5', '1', '2']} | ${'1.+'} | ${'1'}
+      versions                         | range    | expected
+      ${['0', '1.5', '1', '2']}        | ${'1.+'} | ${'1'}
+      ${['0', '1.5', '1', '1.9', '2']} | ${'1.+'} | ${'1'}
     `(
       'minSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {
@@ -290,8 +295,9 @@ describe('modules/versioning/gradle/index', () => {
 
   describe('getSatisfyingVersion', () => {
     it.each`
-      versions                  | range    | expected
-      ${['0', '1', '1.5', '2']} | ${'1.+'} | ${'1.5'}
+      versions                         | range    | expected
+      ${['0', '1', '1.5', '2']}        | ${'1.+'} | ${'1.5'}
+      ${['0', '1', '1.5', '1.2', '2']} | ${'1.+'} | ${'1.5'}
     `(
       'getSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {
