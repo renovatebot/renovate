@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -29,5 +30,6 @@ export const supportedDatasources = [
   GitlabTagsDatasource.id,
   BitbucketTagsDatasource.id,
   GiteaTagsDatasource.id,
+  ForgejoTagsDatasource.id,
   TerraformModuleDatasource.id,
 ];
