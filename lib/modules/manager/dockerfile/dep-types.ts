@@ -16,7 +16,8 @@ export const knownDepTypes = [
       'The last `FROM` instruction in the Dockerfile (the final build stage)',
   },
   {
-    depType: 'apk',
-    description: 'An APK package pinned by an `apk add` in a `RUN` instruction',
+    depType: 'install',
+    description:
+      'A system package manager was used to install a package, for instance via `RUN apk add ...`',
   },
 ] as const satisfies readonly DepTypeMetadata[];
