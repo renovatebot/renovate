@@ -65,7 +65,10 @@ export async function getAuthHeaders(
       noAuth: true,
       cacheProvider: memCacheProvider,
     };
-    let apiCheckResponse;
+    // Written as an if/else rather than a ternary on purpose: v8 gives the
+    // branch that follows an `await` inside a ternary a negative hit count,
+    // which the coverage reporters then read as uncovered.
+    let apiCheckResponse: HttpResponse<unknown>;
     if (apiCheckUrl.endsWith('/v2/')) {
       apiCheckResponse = await http.get(apiCheckUrl, options);
     } else {

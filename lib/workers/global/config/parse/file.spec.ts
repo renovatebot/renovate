@@ -182,7 +182,7 @@ describe('workers/global/config/parse/file', () => {
     });
 
     it('skips an unreadable default config file', async () => {
-      fsPathExistsSpy.mockResolvedValueOnce(true);
+      fsPathExistsSpy.mockResolvedValueOnce(true as never);
 
       const res = await file.getConfig({});
 
