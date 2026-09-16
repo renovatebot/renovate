@@ -20,7 +20,6 @@ import type {
 export class GithubTagsDatasource extends Datasource {
   static readonly id = 'github-tags';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://github.com'];
   }

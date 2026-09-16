@@ -26,7 +26,6 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     super(AzurePipelinesTasksDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }

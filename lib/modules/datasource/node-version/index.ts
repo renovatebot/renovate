@@ -14,7 +14,6 @@ export class NodeVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }

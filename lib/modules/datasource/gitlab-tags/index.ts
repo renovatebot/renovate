@@ -29,7 +29,6 @@ export class GitlabTagsDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }

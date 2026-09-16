@@ -34,7 +34,6 @@ function inferHashAlg(digest: string): string {
 export class GithubReleaseAttachmentsDatasource extends Datasource {
   static readonly id = 'github-release-attachments';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://github.com'];
   }

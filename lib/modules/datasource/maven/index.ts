@@ -69,7 +69,6 @@ export class MavenDatasource extends Datasource {
 
   override readonly caching = true;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return defaultRegistryUrls;
   }

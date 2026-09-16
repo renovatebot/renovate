@@ -90,7 +90,6 @@ export class DockerDatasource extends Datasource {
 
   override readonly defaultVersioning = dockerVersioningId;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [DOCKER_HUB];
   }
@@ -425,7 +424,6 @@ export class DockerDatasource extends Datasource {
           return null;
         }
 
-        /* istanbul ignore next */
         throw _err;
       }
 

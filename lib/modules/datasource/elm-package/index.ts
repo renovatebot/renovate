@@ -14,12 +14,10 @@ export class ElmPackageDatasource extends Datasource {
     super(ElmPackageDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://package.elm-lang.org'];
   }

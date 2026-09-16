@@ -15,14 +15,12 @@ export class JavaVersionDatasource extends Datasource {
 
   override readonly caching = true;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(packageName: string): string[] {
     return packageName.includes('oracle-graalvm')
       ? [graalvmRegistryUrl]
       : [adoptiumRegistryUrl];
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(packageName: string): boolean {
     return packageName.includes('oracle-graalvm');
   }

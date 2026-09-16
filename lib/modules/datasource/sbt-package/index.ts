@@ -42,7 +42,6 @@ interface PomInfo {
 export class SbtPackageDatasource extends MavenDatasource {
   static override readonly id = 'sbt-package';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [MAVEN_REPO];
   }

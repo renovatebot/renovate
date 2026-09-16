@@ -153,6 +153,46 @@ vi.mock('../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/index', () => {
+  it('preserves representative function-only registry defaults', () => {
+    const expected = {
+      docker: ['https://index.docker.io'],
+      maven: ['https://repo.maven.apache.org/maven2'],
+      'dotnet-version': [
+        'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
+      ],
+      'python-version': ['https://www.python.org/api/v2/downloads/release'],
+      'terraform-provider': [
+        'https://registry.terraform.io',
+        'https://releases.hashicorp.com',
+      ],
+    };
+    for (const [id, urls] of Object.entries(expected)) {
+      const definition = getDatasources().get(id);
+      expect(definition).toBeDefined();
+      expect(definition!.getDefaultRegistryUrls('example')).toEqual(urls);
+    }
+  });
+
+  it('selects Java registry defaults and custom support by package', () => {
+    const java = getDatasources().get('java-version')!;
+    expect(java.getDefaultRegistryUrls('java-jdk')).toEqual([
+      'https://api.adoptium.net/',
+    ]);
+    expect(java.supportsCustomRegistry('java-jdk')).toBe(false);
+    expect(java.getDefaultRegistryUrls('oracle-graalvm-jdk')).toEqual([
+      'https://mise-java.jdx.dev/',
+    ]);
+    expect(java.supportsCustomRegistry('oracle-graalvm-jdk')).toBe(true);
+  });
+
+  it('invokes accessors for every registered datasource', () => {
+    for (const [id, definition] of getDatasources()) {
+      const urls = definition.getDefaultRegistryUrls(id);
+      expect(urls === undefined || Array.isArray(urls)).toBe(true);
+      expect(typeof definition.supportsCustomRegistry(id)).toBe('boolean');
+    }
+  });
+
   afterEach(() => {
     datasources.delete(datasource);
   });

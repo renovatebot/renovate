@@ -20,7 +20,6 @@ export class GithubDigestDatasource extends Datasource {
 
   private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${GithubDigestDatasource.id}`;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://github.com'];
   }

@@ -9,7 +9,6 @@ export { setNpmrc } from './npmrc.ts';
 export class NpmDatasource extends Datasource {
   static readonly id = 'npm';
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
@@ -18,7 +17,6 @@ export class NpmDatasource extends Datasource {
 
   override readonly defaultVersioning = npmVersioning.id;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }

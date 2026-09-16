@@ -60,7 +60,6 @@ export class PackagistDatasource extends Datasource {
     super(PackagistDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://repo.packagist.org'];
   }

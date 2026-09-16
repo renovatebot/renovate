@@ -10,7 +10,6 @@ export class PuppetForgeDatasource extends Datasource {
     super(PuppetForgeDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [PUPPET_FORGE];
   }

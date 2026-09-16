@@ -15,7 +15,6 @@ export class DevboxDatasource extends Datasource {
     super(datasource);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
@@ -25,7 +24,6 @@ export class DevboxDatasource extends Datasource {
 
   override readonly defaultVersioning = devboxVersioning.id;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }

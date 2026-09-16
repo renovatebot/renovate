@@ -18,7 +18,6 @@ import {
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
@@ -27,7 +26,6 @@ export class DenoDatasource extends Datasource {
 
   override readonly defaultVersioning = semanticVersioning.id;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://apiland.deno.dev'];
   }

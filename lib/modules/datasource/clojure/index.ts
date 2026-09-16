@@ -11,7 +11,6 @@ export class ClojureDatasource extends MavenDatasource {
 
   override readonly registryStrategy = 'merge';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [CLOJARS_REPO, MAVEN_REPO];
   }

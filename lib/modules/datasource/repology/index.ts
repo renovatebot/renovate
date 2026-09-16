@@ -51,7 +51,6 @@ function findPackageInResponse(
 export class RepologyDatasource extends Datasource {
   static readonly id = 'repology';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://repology.org/'];
   }

@@ -25,7 +25,6 @@ export class DebDatasource extends Datasource {
    * the Debian package repository format as specified here
    * @see{https://wiki.debian.org/DebianRepository/Format}
    */
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
@@ -50,7 +49,6 @@ export class DebDatasource extends Datasource {
    * - suite: stable, oldstable or other alias for a release, either this or release must be given like buster
    * - binaryArch: e.g. amd64 resolves to http://deb.debian.org/debian/dists/stable/non-free/binary-amd64/
    */
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [
       'https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',

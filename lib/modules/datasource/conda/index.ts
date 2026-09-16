@@ -18,14 +18,12 @@ export class CondaDatasource extends Datasource {
     super(datasource);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
 
   override readonly registryStrategy = 'hunt';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }

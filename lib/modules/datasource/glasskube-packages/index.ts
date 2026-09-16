@@ -13,13 +13,11 @@ export class GlasskubePackagesDatasource extends Datasource {
   static readonly id = 'glasskube-packages';
   static readonly defaultRegistryUrl =
     'https://packages.dl.glasskube.dev/packages';
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
   override defaultVersioning = glasskubeVersioning.id;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [GlasskubePackagesDatasource.defaultRegistryUrl];
   }

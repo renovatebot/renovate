@@ -24,7 +24,6 @@ export class Unity3dDatasource extends Datasource {
 
   static readonly id = 'unity3d';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [Unity3dDatasource.streams.lts];
   }

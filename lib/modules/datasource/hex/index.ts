@@ -108,7 +108,6 @@ export class HexDatasource extends Datasource {
     super(HexDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }

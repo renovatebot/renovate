@@ -12,12 +12,10 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://circleci.com/'];
   }

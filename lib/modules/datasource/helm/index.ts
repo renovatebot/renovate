@@ -25,7 +25,6 @@ export class HelmDatasource extends Datasource {
     super(HelmDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://charts.helm.sh/stable'];
   }

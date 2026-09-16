@@ -97,7 +97,6 @@ function releasesCDNUrl(packageName: string, registryUrl: string): string {
 export class PodDatasource extends Datasource {
   static readonly id = 'pod';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://cdn.cocoapods.org'];
   }

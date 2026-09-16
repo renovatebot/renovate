@@ -28,12 +28,10 @@ export class GolangVersionDatasource extends Datasource {
     super(GolangVersionDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://raw.githubusercontent.com/golang/website'];
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }

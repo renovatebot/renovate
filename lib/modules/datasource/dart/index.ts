@@ -14,12 +14,10 @@ export class DartDatasource extends Datasource {
     super(DartDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://pub.dartlang.org/'];
   }

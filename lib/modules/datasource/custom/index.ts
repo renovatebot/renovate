@@ -14,7 +14,6 @@ import { getCustomConfig } from './utils.ts';
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }

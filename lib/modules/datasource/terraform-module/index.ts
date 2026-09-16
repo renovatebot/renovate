@@ -25,7 +25,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     super(TerraformModuleDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return TerraformModuleDatasource.defaultRegistryUrls;
   }

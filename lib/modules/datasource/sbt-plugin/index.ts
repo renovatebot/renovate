@@ -21,7 +21,6 @@ export const SBT_PLUGINS_REPO =
 export class SbtPluginDatasource extends Datasource {
   static readonly id = 'sbt-plugin';
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [SBT_PLUGINS_REPO, MAVEN_REPO];
   }

@@ -23,12 +23,10 @@ export class BitriseDatasource extends Datasource {
     this.http = new GithubHttp(this.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://github.com/bitrise-io/bitrise-steplib.git'];
   }

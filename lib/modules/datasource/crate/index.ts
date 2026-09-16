@@ -46,7 +46,6 @@ export class CrateDatasource extends Datasource {
     super(CrateDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['sparse+https://index.crates.io/'];
   }

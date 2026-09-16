@@ -16,7 +16,6 @@ export class ArtifactoryDatasource extends Datasource {
     super(datasource);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }

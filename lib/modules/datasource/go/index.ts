@@ -37,7 +37,6 @@ export class GoDatasource extends Datasource {
     commitMessageTopic: 'module {{depName}}',
   };
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }

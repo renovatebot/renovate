@@ -15,12 +15,10 @@ export class BuildpacksRegistryDatasource extends Datasource {
     super(BuildpacksRegistryDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://registry.buildpacks.io'];
   }

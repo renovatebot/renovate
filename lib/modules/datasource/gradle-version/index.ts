@@ -13,7 +13,6 @@ export class GradleVersionDatasource extends Datasource {
     super(GradleVersionDatasource.id);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://services.gradle.org/versions/all'];
   }

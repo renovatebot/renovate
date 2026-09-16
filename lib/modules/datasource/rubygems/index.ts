@@ -38,7 +38,6 @@ export class RubygemsDatasource extends Datasource {
     this.metadataCache = new MetadataCache(this.http);
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://rubygems.org'];
   }

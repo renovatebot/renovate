@@ -14,7 +14,6 @@ export class GitTagsDatasource extends GitDatasource {
     super(GitTagsDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }

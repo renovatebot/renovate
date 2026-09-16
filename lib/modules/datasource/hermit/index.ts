@@ -20,7 +20,6 @@ import type { HermitSearchResult } from './types.ts';
 export class HermitDatasource extends Datasource {
   static readonly id = 'hermit';
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
@@ -29,7 +28,6 @@ export class HermitDatasource extends Datasource {
 
   override readonly defaultVersioning = id;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://github.com/cashapp/hermit-packages'];
   }

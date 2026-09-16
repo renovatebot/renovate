@@ -25,7 +25,6 @@ import {
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }

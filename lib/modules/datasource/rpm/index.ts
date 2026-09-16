@@ -21,7 +21,6 @@ export class RpmDatasource extends Datasource {
    * But according to this post, it's not something we can really look into or reference.
    * @see{https://lists.rpm.org/pipermail/rpm-ecosystem/2015-October/000283.html}
    */
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }

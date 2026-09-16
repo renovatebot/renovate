@@ -13,12 +13,10 @@ export class CpanDatasource extends Datasource {
     super(CpanDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://fastapi.metacpan.org/'];
   }

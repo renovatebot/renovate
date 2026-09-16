@@ -13,12 +13,10 @@ export class GalaxyDatasource extends Datasource {
     super(GalaxyDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }
 
-  /* istanbul ignore next */
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://galaxy.ansible.com/'];
   }

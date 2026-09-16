@@ -16,7 +16,6 @@ export class GitRefsDatasource extends GitDatasource {
     super(GitRefsDatasource.id);
   }
 
-  /* istanbul ignore next */
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }
