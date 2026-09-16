@@ -279,7 +279,7 @@ function handleLowerBound(range: Range, newVersion: string): string {
     return `>=${newVersion}`;
   }
   // otherwise, treat it same as exclude
-  return range.operator + range.version;
+  return `${range.operator}${range.version}`;
 }
 
 function handleUpperBound(range: Range, newVersion: string): string | null {
