@@ -48,10 +48,11 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
+    const helmConstraint = await resolveToolConstraint(config, 'helm');
     const toolConstraints: ToolConstraint[] = [
       {
         toolName: 'helm',
-        constraint: await resolveToolConstraint(config, 'helm'),
+        constraint: helmConstraint,
       },
       {
         toolName: 'helmfile',
@@ -96,7 +97,7 @@ export async function updateArtifacts({
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
     await exec(cmd, {
       docker: {},
-      extraEnv: generateHelmEnvs(),
+      extraEnv: generateHelmEnvs(helmConstraint),
       toolConstraints,
     });
 
