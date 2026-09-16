@@ -36,6 +36,7 @@ export class JavaVersionDatasource extends Datasource {
       {
         namespace: `datasource-${datasource}`,
         key: `${config.registryUrl}:${config.packageName}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

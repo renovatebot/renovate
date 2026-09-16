@@ -145,6 +145,7 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
     return {};
   }
 
+  // v8 ignore else -- needs a non artifact-registry source url
   if (parsedUrl.hostname.endsWith('.pkg.dev')) {
     const hostRule = await getGoogleAuthHostRule();
     if (hostRule && Object.keys(hostRule).length !== 0) {
