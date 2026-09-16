@@ -107,6 +107,7 @@ export class CpanDatasource extends Datasource {
       {
         namespace: `datasource-${CpanDatasource.id}`,
         key: `${config.packageName}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

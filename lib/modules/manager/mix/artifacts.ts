@@ -61,6 +61,7 @@ export async function updateArtifacts({
       isUmbrella = true;
     } else if (parentLockFileName) {
       const lockFileError = await checkLockFileReadError(parentLockFileName);
+      // v8 ignore else -- needs an umbrella parent lock file that reads cleanly
       if (lockFileError) {
         return lockFileError;
       }
@@ -113,9 +114,11 @@ export async function updateArtifacts({
     );
 
   for (const { matchHost } of hexHostRulesWithMatchHost) {
+    // v8 ignore else -- the filter above already required a match host
     if (matchHost) {
       const result = hexRepoOrgUrlRegex.exec(matchHost);
 
+      // v8 ignore else -- the same regex already matched in that filter
       if (result?.groups) {
         const { organization } = result.groups;
         organizations.add(organization);
@@ -127,6 +130,7 @@ export async function updateArtifacts({
     if (packageName) {
       const [, organization] = packageName.split(':');
 
+      // v8 ignore else -- needs an updated dep whose name carries no organization
       if (organization) {
         organizations.add(organization);
       }

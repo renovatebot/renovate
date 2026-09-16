@@ -81,6 +81,7 @@ export async function updateArtifacts({
 
       for (const f of modifiedFiles.concat(notAddedFiles)) {
         const isFileInVendorDir = f.startsWith(vendorDir);
+        // v8 ignore else -- the vendor dir is always set, so this is never false
         if (vendorDir || isFileInVendorDir) {
           fileChanges.push({
             file: {

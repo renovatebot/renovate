@@ -168,15 +168,16 @@ function tokenCmp(left: Token | null, right: Token | null): number {
     if (left.val > right.val) {
       return 1;
     }
-  } else if (isString(left.val) && isString(right.val)) {
-    return stringTokenCmp(left.val, right.val);
-  } else if (right.type === TokenType.Number) {
-    return -1;
-  } else if (left.type === TokenType.Number) {
-    return 1;
+    return 0;
   }
 
-  return 0;
+  if (isString(left.val) && isString(right.val)) {
+    return stringTokenCmp(left.val, right.val);
+  }
+
+  // `Number` and `String` are the only token types, so exactly one side is a
+  // number here, and a number sorts above a string
+  return right.type === TokenType.Number ? -1 : 1;
 }
 
 export function compare(left: string, right: string): number {

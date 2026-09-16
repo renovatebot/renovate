@@ -91,7 +91,7 @@ function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
   dep.currentValue = dep.managerData.version;
 }
 
-function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
+function finalize(dependency: AnsibleGalaxyPackageDependency): void {
   const dep = dependency;
   dep.depName = dep.managerData.name;
 
@@ -124,13 +124,12 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
       break;
     default:
       dep.skipReason = 'unsupported';
-      return true;
+      return;
   }
 
   if (!dependency.currentValue && !dep.skipReason) {
     dep.skipReason = 'unspecified-version';
   }
-  return true;
 }
 
 export function extractCollections(lines: string[]): PackageDependency[] {
@@ -160,10 +159,9 @@ export function extractCollections(lines: string[]): PackageDependency[] {
           lineNumber += 1;
         }
       } while (lineMatch);
-      if (finalize(dep)) {
-        delete (dep as PackageDependency).managerData;
-        deps.push(dep);
-      }
+      finalize(dep);
+      delete (dep as PackageDependency).managerData;
+      deps.push(dep);
     }
   }
   return deps;
