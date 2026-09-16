@@ -5,6 +5,7 @@ import { REPOSITORY_CHANGED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
 import type { BranchConfig } from '../../../types.ts';
 
 export async function prAlreadyExisted(
@@ -52,6 +53,39 @@ export async function prAlreadyExisted(
     return pr;
   }
   logger.debug('prAlreadyExisted=false');
+  return null;
+}
+
+/**
+ * Finds the closed PR which a modified branch without an open PR may still be
+ * overridden from. Returns `null` if the branch must be left alone, either
+ * because no closed PR matches it or because that PR points at another commit.
+ */
+export async function findClosedPrForModifiedBranch(
+  config: BranchConfig,
+): Promise<Pr | null> {
+  const oldPr = await platform.findPr({
+    branchName: config.branchName,
+    state: '!open',
+    targetBranch: config.baseBranch,
+  });
+  if (!oldPr) {
+    logger.debug('Branch has been edited but found no PR - skipping');
+    return null;
+  }
+  const branchSha = await scm.getBranchCommit(config.branchName);
+  const oldPrSha = oldPr.sha;
+  if (!oldPrSha || oldPrSha === branchSha) {
+    logger.debug(
+      { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+      'Found old PR matching this branch - will override it',
+    );
+    return oldPr;
+  }
+  logger.debug(
+    { oldPrNumber: oldPr.number, oldPrSha, branchSha },
+    'Found old PR but the SHA is different',
+  );
   return null;
 }
 
