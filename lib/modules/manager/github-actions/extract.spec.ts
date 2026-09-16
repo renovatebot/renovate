@@ -4337,6 +4337,24 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // an SDK release version installs the latest patch release of that
+      // version, so it must keep its precision
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: { sdk: '3.5' },
+      },
+      expected: [
+        {
+          currentValue: '3.5',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
       step: {
         uses: 'dart-lang/setup-dart@v1',
         with: {},
