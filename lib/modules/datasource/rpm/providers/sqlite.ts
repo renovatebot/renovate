@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import type { Http } from '../../../../util/http/index.ts';
 import type { ReleaseResult } from '../../types.ts';
@@ -12,7 +13,7 @@ function getRpmSqliteValue(
   column: 'version' | 'release',
 ): string | null {
   const value = row[column];
-  if (value === null || typeof value === 'string') {
+  if (value === null || isString(value)) {
     return value;
   }
 
