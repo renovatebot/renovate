@@ -246,11 +246,9 @@ export function isLessThanRange(input: string, range: string): boolean {
         if (['~=', '==', '>=', '==='].includes(op)) {
           return lt(input, version);
         }
-        if (op === '>') {
-          return lte(input, version);
-        }
-        // istanbul ignore next
-        return false;
+        // the split regex only yields pep440 operators, and `>` is the one
+        // left unhandled above
+        return lte(input, version);
       });
 
     const result = results.every((res) => res === true);
@@ -273,19 +271,15 @@ function parseCurrentRange(currentValue: string): Range[] {
   return ranges;
 }
 
-function handleLowerBound(range: Range, newVersion: string): string | null {
+function handleLowerBound(range: Range, newVersion: string): string {
   // used to mark minimum supported version
   // lower the bound if the new version is lower than current range
-  if (['>', '>='].includes(range.operator)) {
-    if (lte(newVersion, range.version)) {
-      // this looks like a rollback
-      return `>=${newVersion}`;
-    }
-    // otherwise, treat it same as exclude
-    return range.operator + range.version;
+  if (lte(newVersion, range.version)) {
+    // this looks like a rollback
+    return `>=${newVersion}`;
   }
-  // istanbul ignore next
-  return null;
+  // otherwise, treat it same as exclude
+  return range.operator + range.version;
 }
 
 function handleUpperBound(range: Range, newVersion: string): string | null {
@@ -356,25 +350,16 @@ function updateRangeValue(
     return range.operator + newVersion;
   }
 
-  let output = handleUpperBound(range, newVersion);
+  const output = handleUpperBound(range, newVersion);
   if (output) {
     // manged to update upperbound
     // no need to try anything else
     return output;
   }
-  output = handleLowerBound(range, newVersion);
-  if (output) {
-    return output;
-  }
 
-  // unless PEP440 changes, this won't happen
-  // istanbul ignore next
-  logger.error(
-    { newVersion, currentValue, range },
-    'pep440: failed to process range',
-  );
-  // istanbul ignore next
-  return null;
+  // `!=`, a `.*` prefix, `~=`, `==`, `<=` and `<` are all handled above, and
+  // `===` is rejected when the range is parsed, so only `>` and `>=` are left
+  return handleLowerBound(range, newVersion);
 }
 
 /**
@@ -403,9 +388,9 @@ function divideCompatibleReleaseRange(currentRange: Range): Range[] {
   const currentVersionUpperBound = currentRange.version
     .split('.')
     .map((num) => parseInt(num, 10));
-  if (currentVersionUpperBound.length > 1) {
-    currentVersionUpperBound.splice(-1);
-  }
+  // pep440 requires at least two release components after `~=`, so there is
+  // always one to drop here
+  currentVersionUpperBound.splice(-1);
   currentVersionUpperBound[currentVersionUpperBound.length - 1] += 1;
   return [
     { operator: '>=', version: currentRange.version },
