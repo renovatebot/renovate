@@ -11,14 +11,16 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { getFile } from '../../../util/git/index.ts';
-import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { parseYaml } from '../../../util/yaml.ts';
-import { generateHelmEnvs } from '../helmv3/common.ts';
+import {
+  generateHelmEnvs,
+  generateRegistryLoginCmd,
+} from '../helmv3/common.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 import { Doc, LockVersion } from './schema.ts';
-import { generateRegistryLoginCmd, isOCIRegistry } from './utils.ts';
+import { isOciRepositoryFlagSet } from './utils.ts';
 
 export async function updateArtifacts({
   packageFileName,
@@ -79,13 +81,10 @@ export async function updateArtifacts({
     });
 
     for (const doc of docs) {
-      for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
-        const loginCmd = await generateRegistryLoginCmd(
-          value.name,
-          `https://${value.url}`,
-          // this extracts the hostname from url like format ghcr.ip/helm-charts
-          value.url.replace(regEx(/\/.*/), ''),
-        );
+      for (const value of coerceArray(doc.repositories).filter(
+        isOciRepositoryFlagSet,
+      )) {
+        const loginCmd = await generateRegistryLoginCmd(value.name, value.url);
 
         // v8 ignore else -- needs a repository the login helper cannot handle
         if (loginCmd) {
