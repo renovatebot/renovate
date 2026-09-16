@@ -1572,15 +1572,16 @@ Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-fo
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
-### Authentication
+If the default AWS credentials are already used for another purpose, like AWS ECR lookups, you can give the S3 client its own credentials with these environment variables:
 
-- In cases where the default AWS credentials are already used for another purpose (such as AWS ECR lookups), you may need to specify separate credentials for S3 repository, Renovate supports the following S3-specific environment variables for this purpose:
-  - `RENOVATE_S3_AWS_ACCESS_KEY_ID`
-  - `RENOVATE_S3_AWS_SECRET_ACCESS_KEY`
-  - `RENOVATE_S3_AWS_REGION`
-- These variables are only supported as environment variables, not as CLI arguments or config file options. This is intentional for security and to avoid conflicts with other AWS services.
-- If these variables are not set, Renovate will fall back to the AWS SDK's default credential provider chain as mentioned above (which may use global AWS environment variables, shared credentials files, or cloud instance metadata).
-- Credentials coming from `hostRules` take precedence over these environment variables.
+- `RENOVATE_S3_AWS_ACCESS_KEY_ID`
+- `RENOVATE_S3_AWS_SECRET_ACCESS_KEY`
+- `RENOVATE_S3_AWS_REGION`
+
+These are only supported as environment variables, and not as CLI arguments or config file options.
+This is intentional, for security and to avoid conflicts with other AWS services.
+If they are not set, Renovate falls back to the default credential provider chain described above, which may use the global AWS environment variables, shared credentials files, or cloud instance metadata.
+Credentials from `hostRules` take precedence over these environment variables.
 
 !!! tip
   If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
