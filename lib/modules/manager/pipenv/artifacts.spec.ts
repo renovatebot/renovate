@@ -1,4 +1,5 @@
 import type { Stats } from 'node:fs';
+import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
@@ -1213,7 +1214,15 @@ describe('modules/manager/pipenv/artifacts', () => {
       updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: Fixtures.get('Pipfile8'),
+        newPackageFileContent: codeBlock`
+          [[source]]
+          url = "https://$GAR_USERNAME:\${GAR_PASSWORD}@someregion-python.pkg.dev/some-project/some-repo/simple"
+          verify_ssl = true
+          name = "gar"
+
+          [packages]
+          requests = {version = "==0.21.0", index = "gar"}
+        `,
         config: { ...config, constraints: { python: '== 3.8.*' } },
       }),
     ).resolves.toEqual([
