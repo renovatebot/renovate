@@ -1,17 +1,19 @@
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
-  getParentDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 
 const gitExec = withGitEnvironment();
 
@@ -71,36 +73,11 @@ export async function updateArtifacts({
 
     // add modified vendir archives to artifacts
     logger.debug("Adding Sync'd files to git");
-    // Files must be in the vendor path to get added
-    const vendorDir = getParentDir(packageFileName);
     const status = await getRepoStatus();
     if (status) {
-      const modifiedFiles = coerceArray(status.modified);
-      const notAddedFiles = status.not_added;
-      const deletedFiles = coerceArray(status.deleted);
-
-      for (const f of modifiedFiles.concat(notAddedFiles)) {
-        const isFileInVendorDir = f.startsWith(vendorDir);
-        // v8 ignore else -- the vendor dir is always set, so this is never false
-        if (vendorDir || isFileInVendorDir) {
-          fileChanges.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
-        }
-      }
-
-      for (const f of deletedFiles) {
-        fileChanges.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
-      }
+      fileChanges.push(
+        ...fileChangesToArtifactResults(await collectFileChanges(status)),
+      );
     } else {
       logger.error('Failed to get git status');
     }
