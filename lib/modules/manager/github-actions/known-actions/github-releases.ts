@@ -297,6 +297,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'flutter',
     packageName: 'flutter/flutter',
+    // `flutter-version` may be an x-range (e.g. `3.x`, `1.22.x`) used to
+    // pick the latest release of that line, rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('flutter-version'),
   },
   // https://github.com/superfly/flyctl-actions (there is no root-level
