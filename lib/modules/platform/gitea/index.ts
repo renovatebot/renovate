@@ -45,8 +45,10 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
-import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
+import type { Comment, Label, Repo } from './schema.ts';
+import { PRMergeMethod } from './schema.ts';
 import type {
+  AllowedMergeMethods,
   CombinedCommitStatus,
   GiteaPlatform,
   GiteaPlatformOptions,
@@ -68,6 +70,9 @@ interface GiteaRepoConfig {
   ignorePrAuthor: boolean;
   repository: string;
   mergeMethod: PRMergeMethod;
+  /** The set of merge styles allowed by the repository, used to pick the
+   * best matching Gitea/Forgejo merge style for a given `MergeStrategy`. */
+  allowedMergeMethods: AllowedMergeMethods;
 
   issueList: Promise<Issue[]> | null;
   labelList: Promise<Label[]> | null;
@@ -334,6 +339,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
 
       if (mergeStyle) {
         config.mergeMethod = mergeStyle;
+        config.allowedMergeMethods = new Set(
+          PRMergeMethod.options.filter((style) => isAllowed(style, repo)),
+        );
       } else {
         logger.debug(
           'Repository has no allowed merge methods - aborting renovation',
@@ -618,8 +626,10 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
             try {
               await helper.mergePR(http, config.repository, gpr.number, {
                 Do:
-                  getMergeMethod(platformPrOptions?.automergeStrategy) ??
-                  config.mergeMethod,
+                  getMergeMethod(
+                    platformPrOptions?.automergeStrategy,
+                    config.allowedMergeMethods,
+                  ) ?? config.mergeMethod,
                 merge_when_checks_succeed: true,
                 delete_branch_after_merge: true,
               });
@@ -749,7 +759,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     async mergePr({ id: prNumber, strategy }: MergePRConfig): Promise<boolean> {
       try {
         await helper.mergePR(http, config.repository, prNumber, {
-          Do: getMergeMethod(strategy) ?? config.mergeMethod,
+          Do:
+            getMergeMethod(strategy, config.allowedMergeMethods) ??
+            config.mergeMethod,
         });
         return true;
       } catch (err) {

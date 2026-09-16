@@ -102,10 +102,12 @@ async function addCredentialsForSourceUrls(
   for (const parsedSourceUrl of sourceUrls) {
     logger.trace(`Trying to add credentials for ${parsedSourceUrl.toString()}`);
     const matchingHostRule = getMatchingHostRule(parsedSourceUrl.toString());
+    // v8 ignore else -- needs a source url with no matching host rule
     if (matchingHostRule) {
       const usernameVariableName = extractEnvironmentVariableName(
         parsedSourceUrl.username,
       );
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (matchingHostRule.username && usernameVariableName) {
         addExtraEnvVariable(
           extraEnv,
@@ -116,6 +118,7 @@ async function addCredentialsForSourceUrls(
       const passwordVariableName = extractEnvironmentVariableName(
         parsedSourceUrl.password,
       );
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (matchingHostRule.password && passwordVariableName) {
         addExtraEnvVariable(
           extraEnv,

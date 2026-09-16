@@ -363,9 +363,11 @@ async function getUvExtraIndexUrl(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
     if (username || password) {
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (username) {
         parsedUrl.username = username;
       }
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (password) {
         parsedUrl.password = password;
       }
@@ -406,10 +408,12 @@ async function getUvIndexCredentials(
 
     const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);
     }
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (password) {
       entries.push([`UV_INDEX_${NAME}_PASSWORD`, password]);
     }

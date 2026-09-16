@@ -163,6 +163,29 @@ describe('modules/manager/gomod/artifacts-extra', () => {
       );
     });
 
+    it('omits the count line when only `go` was updated', () => {
+      const excludeDeps = ['github.com/foo/foo', 'github.com/bar/bar'];
+
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps, {});
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- The `go` directive was updated for compatibility reasons',
+          '',
+          '',
+          'Details:',
+          '',
+          '',
+          '| **Package** | **Change**           |',
+          '| :---------- | :------------------- |',
+          '| `go`        | `1.22.0` -> `1.22.2` |',
+        ].join('\n'),
+      );
+    });
+
     it('correctly identifies toolchain updates vs go version updates', () => {
       const toolChainUpdategoModBefore = codeBlock`
     go 1.22.0

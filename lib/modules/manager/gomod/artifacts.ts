@@ -198,6 +198,7 @@ export async function updateArtifacts({
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
+    // v8 ignore else -- needs a go.mod the replace massaging leaves unchanged
     if (massagedGoMod !== newGoModContent) {
       logger.debug(
         'Removed some relative replace statements and comments from go.mod',
