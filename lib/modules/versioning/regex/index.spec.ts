@@ -419,6 +419,36 @@ describe('modules/versioning/regex/index', () => {
     });
   });
 
+  describe('ordered by version precedence, not capture-group position', () => {
+    // Calendar versioning `YYYY.DD.MM` (the day is positionally before the
+    // month): naming the month `minor` and the day `patch` makes comparison
+    // follow year, then month, then day. Versions compare by the
+    // `major`/`minor`/`patch` names in that order of precedence, never by the
+    // left-to-right position of the capture groups, so a larger day (the middle
+    // field here) never outranks a later month.
+    const re = get(
+      'regex:^(?<major>\\d{4})\\.(?<patch>\\d{2})\\.(?<minor>\\d{2})$',
+    );
+
+    it.each`
+      a               | b               | expected
+      ${'2024.05.10'} | ${'2024.10.05'} | ${true}
+      ${'2024.10.05'} | ${'2024.05.10'} | ${false}
+      ${'2024.01.06'} | ${'2024.31.05'} | ${true}
+      ${'2024.10.02'} | ${'2023.10.12'} | ${true}
+    `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(re.isGreaterThan(a, b)).toBe(expected);
+    });
+
+    it('sortVersions orders by year, then month, then day', () => {
+      expect(
+        ['2024.10.05', '2024.05.10', '2023.31.12'].sort(
+          re.sortVersions.bind(re),
+        ),
+      ).toEqual(['2023.31.12', '2024.10.05', '2024.05.10']);
+    });
+  });
+
   describe('comparator ranges', () => {
     // `-ee.N` is captured as an ordered `build` component (with `-ee` a
     // literal), so ranges resolve through the inherited `_compare` without any

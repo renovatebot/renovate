@@ -84,7 +84,7 @@ Here is another example, this time for handling `ghcr.io/linuxserver/openssh-ser
 }
 ```
 
-The `regex` scheme also accepts a comparator range wherever a version is matched against a constraint, such as `allowedVersions` and `matchCurrentVersion`, evaluated through the same capture-group ordering.
+The `regex` scheme also accepts a comparator range wherever a version is matched against a constraint, such as `allowedVersions` and `matchCurrentVersion`, evaluated with the scheme's own version comparison: the `major`, `minor`, and `patch` capture groups are compared in that order of precedence, regardless of where they appear in the pattern. For example, calendar versioning `YYYY.DD.MM` (day before month) sorts correctly by capturing the month as `minor` and the day as `patch`, so comparison follows year, then month, then day.
 The supported operators are `<`, `<=`, `>`, `>=`, `=` and `==`, and several comparators separated by whitespace or a comma are combined with logical AND.
 Because the comparison uses the scheme's own ordering rather than npm `semver`, a numeric suffix captured as `build` is ordered correctly, where `semver` would treat it as a prerelease and reject the range.
 
