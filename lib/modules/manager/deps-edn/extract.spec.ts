@@ -7,6 +7,11 @@ describe('modules/manager/deps-edn/extract', () => {
       expect(extractPackageFile('123')).toBeNull();
     });
 
+    it('skips an aliases section that is not a map', () => {
+      const res = extractPackageFile('{:aliases "just a string"}');
+      expect(res?.deps).toBeEmpty();
+    });
+
     it('skips an alias whose value is not a map', () => {
       const res = extractPackageFile('{:aliases {:not-a-map "just a string"}}');
       expect(res?.deps).toBeEmpty();
