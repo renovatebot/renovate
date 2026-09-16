@@ -16,6 +16,11 @@ const InstallBinaryWith: ActionSchema = z
 // `erlef/setup-beam` can yield up to 4 dependencies from a single step: OTP,
 // Elixir, Gleam, and rebar3. All inputs are optional, so only emit a
 // dependency for the ones a workflow actually sets.
+//
+// All 4 inputs accept "values like `22.x`, or even `>22`", so they need a
+// versioning which understands ranges. OTP is the exception: it releases
+// 4-component versions (e.g. `26.2.5.3`) which aren't valid semver, so it
+// keeps the default versioning and stays unfixed for now.
 const ErlefSetupBeamWith: ActionSchema = z
   .object({
     'otp-version': z.string().optional(),
@@ -44,6 +49,7 @@ const ErlefSetupBeamWith: ActionSchema = z
       if (elixirVersion) {
         deps.push({
           packageName: 'elixir-lang/elixir',
+          versioning: npmVersioning.id,
           ...parseValue(elixirVersion),
         });
       }
@@ -51,6 +57,7 @@ const ErlefSetupBeamWith: ActionSchema = z
       if (gleamVersion) {
         deps.push({
           packageName: 'gleam-lang/gleam',
+          versioning: npmVersioning.id,
           ...parseValue(gleamVersion),
         });
       }
@@ -58,6 +65,7 @@ const ErlefSetupBeamWith: ActionSchema = z
       if (rebar3Version) {
         deps.push({
           packageName: 'erlang/rebar3',
+          versioning: npmVersioning.id,
           ...parseValue(rebar3Version),
         });
       }
