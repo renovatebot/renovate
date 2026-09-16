@@ -9,16 +9,6 @@ import type { PackageDependency } from '../types.ts';
 const commandSeparators = ['&&', '||', ';', '|', '&', '(', ')', '{', '}'];
 
 /**
- * Tokens which may precede the command in a shell command, e.g. the `do` of
- * `for i in 1 2 3; do apk add ...; done`.
- *
- * Variable assignments such as `DEBUG=1 apk add ...` are skipped separately.
- */
-const commandPrefixes = ['do', 'then', 'else', 'elif', '!', 'time', 'command'];
-
-const assignmentRegex = regEx(/^[a-zA-Z_]\w*=/);
-
-/**
  * `apk` options which consume the following argument, so that the argument is
  * not mistaken for a package name.
  *
@@ -230,19 +220,18 @@ export function extractApkDeps(
   return deps;
 }
 
+/**
+ * Finds the `apk` invocation in the tokens of a shell command, wherever it
+ * sits - so it's found whether it's prefixed by a shell keyword
+ * (`do`/`then`/...), a variable assignment (`DEBUG=1 apk add ...`), or a
+ * wrapper program (`sudo`/`chroot /mnt`/`timeout 30`/...).
+ */
 function extractApkCommand(tokens: string[]): PackageDependency[] {
-  let start = 0;
-  while (
-    start < tokens.length &&
-    (commandPrefixes.includes(tokens[start]) ||
-      assignmentRegex.test(tokens[start]))
-  ) {
-    start += 1;
-  }
-
-  const command = tokens[start];
-  if (command !== 'apk' && !command?.endsWith('/apk')) {
+  const index = tokens.findIndex(
+    (token) => token === 'apk' || token.endsWith('/apk'),
+  );
+  if (index === -1) {
     return [];
   }
-  return extractApkAddArgs(tokens.slice(start + 1));
+  return extractApkAddArgs(tokens.slice(index + 1));
 }
