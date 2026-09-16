@@ -51,10 +51,11 @@ export function parseValue(
   return { currentValue, depType: 'uses-with' };
 }
 
-const partialVersionRegex = regEx(/^\d+(?:\.\d+)?$/);
+const partialVersionRegex = regEx(/^v?\d+(?:\.\d+)?$/);
 
 /**
- * Whether the value is a whole major (`21`) or major.minor (`3.3`) version.
+ * Whether the value is a whole major (`21`) or major.minor (`3.3`) version,
+ * optionally `v`-prefixed (`v2.5`).
  */
 export function isPartialVersion(value: string): boolean {
   return partialVersionRegex.test(value);
