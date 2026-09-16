@@ -3324,6 +3324,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'flutter',
           depType: 'uses-with',
           packageName: 'flutter/flutter',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // an x-range is a range, not a pinned version
+      step: {
+        uses: 'subosito/flutter-action@v2',
+        with: { 'flutter-version': '3.24.x' },
+      },
+      expected: [
+        {
+          currentValue: '3.24.x',
+          datasource: 'github-releases',
+          depName: 'flutter',
+          depType: 'uses-with',
+          packageName: 'flutter/flutter',
+          versioning: 'npm',
         },
       ],
     },
@@ -3340,6 +3358,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'flutter',
           depType: 'uses-with',
           packageName: 'flutter/flutter',
+          versioning: 'npm',
         },
       ],
     },
