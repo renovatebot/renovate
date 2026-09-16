@@ -769,6 +769,17 @@ describe('modules/manager/terraform/extract', () => {
       });
     });
 
+    it('leaves a source too short to be a registry module alone', async () => {
+      const src = codeBlock`
+        module "short" {
+          source = "hashicorp/consul"
+        }
+      `;
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
+        deps: [{ depType: 'module' }],
+      });
+    });
+
     it('returns null with only not added resources', async () => {
       const src = codeBlock`
         resource "test_resource" "relative" {
