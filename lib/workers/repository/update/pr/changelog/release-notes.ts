@@ -127,18 +127,18 @@ export function massageBody(
   // linking to the wrong project when release notes are embedded in a target repo
   if (type === 'gitlab') {
     body = body
-      .split(regEx(/(```[\s\S]*?```)/g))
+      .split(regEx(/(?<code_block>```[\s\S]*?```)/g))
       .map((part) =>
         part.startsWith('```')
           ? part
           : part
               .replace(
-                regEx(/(^|\s)!([0-9]+)/gm),
-                `$1[!$2](${baseUrl}${repository}/-/merge_requests/$2)`,
+                regEx(/(?<prefix>^|\s)!(?<merge_request_id>[0-9]+)/gm),
+                `$<prefix>[!$<merge_request_id>](${baseUrl}${repository}/-/merge_requests/$<merge_request_id>)`,
               )
               .replace(
-                regEx(/(^|\s)#([0-9]+)/gm),
-                `$1[#$2](${baseUrl}${repository}/-/work_items/$2)`,
+                regEx(/(?<prefix>^|\s)#(?<work_item_id>[0-9]+)/gm),
+                `$<prefix>[#$<work_item_id>](${baseUrl}${repository}/-/work_items/$<work_item_id>)`,
               ),
       )
       .join('');
