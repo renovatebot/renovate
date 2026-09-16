@@ -7,6 +7,7 @@ This manager extracts image references in a `Dockerfile` and/or `Containerfile` 
 - [`RUN --mount`](https://docs.docker.com/reference/dockerfile/#run---mount) images
 - [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) images
 - APK packages pinned by `apk add` in [`RUN`](https://docs.docker.com/reference/dockerfile/#run) instructions
+- Debian packages pinned by `apt install` or `apt-get install` in [`RUN`](https://docs.docker.com/reference/dockerfile/#run) instructions
 
 #### `FROM` support
 
@@ -138,6 +139,65 @@ Packages installed by a system package manager use the `install` `depType`, so y
       "description": "Disable APK package updates",
       "matchDepTypes": ["install"],
       "matchDatasources": ["apk"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+#### `RUN apt install` support
+
+Renovate extracts Debian packages installed via `apt install` or `apt-get install`, using the [`deb` datasource](../../datasource/deb/index.md).
+
+```dockerfile
+FROM debian:trixie
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+       curl=8.14.1-2 \
+       git=1:2.47.3-0+deb13u1 \
+  && rm -rf /var/lib/apt/lists/*
+```
+
+The `deb` datasource needs a `registryUrl` which says which suite, components and architecture to look in, and Renovate does _not_ work that out from your base image.
+Until you set one, the `deb` datasource falls back to the Debian `stable` suite for `amd64`, which may not match your base image.
+Set the `registryUrls` which match your base image with a `packageRules` entry:
+
+<!-- TODO: #45706 auto-detect `registryUrl` -->
+
+```json title="Point deb lookups at the Debian trixie repositories"
+{
+  "packageRules": [
+    {
+      "matchFileNames": ["Dockerfile"],
+      "matchDatasources": ["deb"],
+      "registryUrls": [
+        "https://deb.debian.org/debian?suite=trixie&components=main,contrib,non-free&binaryArch=amd64"
+      ]
+    }
+  ]
+}
+```
+
+Renovate skips packages which it cannot update, and says why in its logs:
+
+- packages without a version, e.g. `apt-get install -y curl`
+- packages pinned to a suite instead of a version, e.g. `apt-get install -y curl/trixie-backports`
+- packages whose version comes from a variable, e.g. `apt-get install -y "curl=$CURL_VERSION"`
+  This can be handled with a Custom Manager, instead.
+- packages given a wildcard version, e.g. `apt-get install -y 'curl=8.14.*'`
+
+Local or remote `.deb` files, removal markers like `vim-` and pattern matches like `^gnome` are ignored.
+`dpkg -i` is not supported, because it installs a local file rather than a package from a repository.
+
+Packages installed by a system package manager use the `install` `depType`, so you can match them in a `packageRules` entry with `matchDepTypes`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Disable Debian package updates",
+      "matchDepTypes": ["install"],
+      "matchDatasources": ["deb"],
       "enabled": false
     }
   ]

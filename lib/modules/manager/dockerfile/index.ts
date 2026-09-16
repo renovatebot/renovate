@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { ApkDatasource } from '../../datasource/apk/index.ts';
+import { DebDatasource } from '../../datasource/deb/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -16,4 +17,8 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [ApkDatasource.id, DockerDatasource.id];
+export const supportedDatasources = [
+  ApkDatasource.id,
+  DebDatasource.id,
+  DockerDatasource.id,
+];
