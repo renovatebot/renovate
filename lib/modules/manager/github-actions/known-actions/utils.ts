@@ -94,6 +94,18 @@ export function valSchema(
     .transform((val) => [parseValue(val[key], isInvalid)]);
 }
 
+/**
+ * As `valSchema`, for inputs which accept a partial version.
+ */
+export function partialValSchema(
+  key: string,
+  isInvalid?: (val: string) => boolean,
+): ActionSchema {
+  return z
+    .object({ [key]: z.string().optional() })
+    .transform((val) => [parsePartialValue(val[key], isInvalid)]);
+}
+
 export const VersionVal = valSchema('version');
 
 export function parseImageValue(image: string | undefined): PackageDependency {

@@ -2525,6 +2525,8 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // a short `ruby-version` is the latest release matching it, so it must
+      // keep its precision rather than gain a patch component
       step: {
         uses: 'ruby/setup-ruby@v1',
         with: { 'ruby-version': '3.4' },
@@ -2532,6 +2534,22 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '3.4',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: { 'ruby-version': '3.4.7' },
+      },
+      expected: [
+        {
+          currentValue: '3.4.7',
           datasource: 'ruby-version',
           depName: 'ruby',
           depType: 'uses-with',
