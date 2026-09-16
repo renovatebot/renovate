@@ -6,8 +6,8 @@ import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
 import { RpmSqliteMetadataProvider } from './providers/sqlite.ts';
 import { RpmXmlMetadataProvider } from './providers/xml.ts';
-import type { RpmRepositoryMetadata } from './repomd.ts';
 import { fetchRepositoryMetadata } from './repomd.ts';
+import type { RpmRepositoryMetadata } from './types.ts';
 
 type RpmMetadataSource = 'primary' | 'primary_db';
 type ResolvedRpmMetadataSource = 'auto' | RpmMetadataSource;
@@ -104,6 +104,7 @@ export class RpmDatasource extends Datasource {
           ),
           ttlMinutes: 1440,
           fallback: true,
+          cacheable: true,
         },
         () => this.fetchReleases(parsedRegistryUrl, packageName),
       );
@@ -205,6 +206,7 @@ export class RpmDatasource extends Datasource {
       {
         key: buildCacheKey('repomd', registryUrl, metadataSource),
         ttlMinutes: 1440,
+        cacheable: true,
       },
       () => fetchRepositoryMetadata(this.http, registryUrl, metadataSource),
     );
