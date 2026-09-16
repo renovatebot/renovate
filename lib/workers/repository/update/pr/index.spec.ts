@@ -20,7 +20,7 @@ import { embedChangelogs } from '../../changelog/index.ts';
 import * as _statusChecks from '../branch/status-checks.ts';
 import * as _prBody from './body/index.ts';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types.ts';
-import { ensurePr } from './index.ts';
+import { ensurePr, updatePrDebugData } from './index.ts';
 import * as _participants from './participants.ts';
 import * as _prCache from './pr-cache.ts';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
@@ -46,6 +46,25 @@ vi.mock('./pr-cache.ts');
 const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
+  describe('updatePrDebugData', () => {
+    it('records labels for a new pr', () => {
+      const res = updatePrDebugData('base', ['dep'], undefined);
+
+      expect(res).toMatchObject({ targetBranch: 'base', labels: ['dep'] });
+    });
+
+    it('leaves labels out when the existing debug data has none', () => {
+      const res = updatePrDebugData('base', ['dep'], {
+        createdInVer: '1.0.0',
+        updatedInVer: '1.0.0',
+        targetBranch: 'base',
+      });
+
+      expect(res.labels).toBeUndefined();
+      expect(res).toMatchObject({ createdInVer: '1.0.0' });
+    });
+  });
+
   describe('ensurePr', () => {
     const number = 123;
     const sourceBranch = 'renovate-branch';
@@ -227,6 +246,37 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
+      it('skips assignees and reviewers when the platform returns no PR', async () => {
+        platform.createPr.mockResolvedValueOnce(null);
+
+        const res = await ensurePr(config);
+
+        expect(res).toMatchObject({ type: 'without-pr' });
+        expect(participants.addParticipants).not.toHaveBeenCalled();
+      });
+
+      it('creates a PR when a not-pending branch is no longer yellow', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, prCreation: 'not-pending' });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+      });
+
+      it('creates a PR despite a pending branch when forcePr is set', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          prCreation: 'not-pending',
+          forcePr: true,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+      });
+
       it('skips PR creation due to stabilityStatus', async () => {
         const now = DateTime.now();
         const then = now.minus({ hours: 1 });
@@ -311,6 +361,19 @@ describe('workers/repository/update/pr/index', () => {
     });
 
     describe('Update', () => {
+      it('updates a PR whose rebase was requested', async () => {
+        const existingPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct('Some other body'),
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+
+        const res = await ensurePr({ ...config, rebaseRequested: true });
+
+        expect(res).toMatchObject({ type: 'with-pr', pr: { number } });
+        expect(platform.updatePr).toHaveBeenCalled();
+      });
+
       it('updates PR if labels have changed in config', async () => {
         const prDebugData = {
           createdInVer: '1.0.0',
@@ -947,6 +1010,26 @@ describe('workers/repository/update/pr/index', () => {
             },
           ],
         });
+      });
+
+      it('ignores a changelog error other than a missing token', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            partial<BranchUpgradeConfig>({
+              branchName: sourceBranch,
+              depName: 'bar',
+              manager: 'npm',
+              logJSON: { error: 'MissingGitlabToken' },
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
       });
 
       it('processes a changelog with no project and no versions', async () => {
