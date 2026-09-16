@@ -141,6 +141,7 @@ export class BaseGoDatasource {
     }
 
     logger.trace({ goModule }, 'No go-source or go-import header found');
+    /* istanbul ignore next */
     return null;
   }
 

@@ -424,6 +424,7 @@ export class DockerDatasource extends Datasource {
           return null;
         }
 
+        /* istanbul ignore next */
         throw _err;
       }
 
