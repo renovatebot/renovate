@@ -169,6 +169,7 @@ export function extractHeaderCommand(
   } else {
     commandType = 'custom';
   }
+  // v8 ignore else -- a compile command always records its arguments
   if (compileCommand.groups.arguments) {
     argv.push(...split(compileCommand.groups.arguments));
   }
