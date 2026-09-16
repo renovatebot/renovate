@@ -4428,6 +4428,8 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // the action resolves `version` with node's semver package, so a
+      // partial version is a range rather than a pinned version
       step: {
         uses: 'julia-actions/setup-julia@v2',
         with: { version: '1.10' },
@@ -4439,6 +4441,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'julia',
           depType: 'uses-with',
           packageName: 'JuliaLang/julia',
+          versioning: 'npm',
         },
       ],
     },

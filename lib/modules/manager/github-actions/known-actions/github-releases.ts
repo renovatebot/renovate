@@ -201,6 +201,10 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'julia',
     packageName: 'JuliaLang/julia',
+    // the action resolves `version` with node's semver package, so the value
+    // may be a partial version (e.g. `1.10`) or a range (e.g. `^1.6`) rather
+    // than a pinned version
+    versioning: npmVersioning.id,
   },
   // https://github.com/jwlawson/actions-setup-cmake
   'jwlawson/actions-setup-cmake': {
