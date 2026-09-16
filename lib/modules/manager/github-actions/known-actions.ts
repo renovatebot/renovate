@@ -20,7 +20,11 @@ import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import { splitImageParts } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
-import type { ActionSchema, KnownActionConfig } from './types.ts';
+import {
+  type ActionSchema,
+  DATASOURCE_DETERMINED_DYNAMICALLY,
+  type KnownActionConfig,
+} from './types.ts';
 
 export function actionSchema(
   name: string,
@@ -768,7 +772,7 @@ export const knownActions: Record<string, KnownActionConfig> = {
   },
   // https://github.com/graalvm/setup-graalvm
   'graalvm/setup-graalvm': {
-    datasource: GithubReleasesDatasource.id,
+    datasource: DATASOURCE_DETERMINED_DYNAMICALLY,
     packageName: '', // determined per dependency: java-version, version
     withSchema: GraalvmSetupWith,
   },
