@@ -263,6 +263,7 @@ describe('modules/versioning/gradle/index', () => {
       ${'99999999999'} | ${'+'}       | ${true}
       ${'1.2.3'}       | ${'[1.2.3]'} | ${true}
       ${'1.2.3'}       | ${'[1.2.4]'} | ${false}
+      ${'1'}           | ${'1..2-+'}  | ${false}
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
