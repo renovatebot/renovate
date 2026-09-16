@@ -10,6 +10,7 @@ import {
   DATASOURCE_DETERMINED_DYNAMICALLY,
   type KnownActionConfig,
 } from '../types.ts';
+import { parseJavaVersion } from './java-version-dynamic.ts';
 import { parseImageValue, parseValue } from './utils.ts';
 
 // `helm/kind-action` can yield up to 3 dependencies from a single step: the
@@ -75,7 +76,7 @@ const GraalvmSetupWith: ActionSchema = z
       deps.push({
         datasource: JavaVersionDatasource.id,
         packageName: 'java-jdk',
-        ...parseValue(javaVersion),
+        ...parseJavaVersion(javaVersion),
       });
     }
 

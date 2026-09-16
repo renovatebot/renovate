@@ -1590,6 +1590,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -1605,6 +1606,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -1624,6 +1626,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jre',
           depType: 'uses-with',
           packageName: 'java-jre',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -1674,6 +1677,143 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // a major.minor `java-version` is a range too, so it must keep its
+      // precision rather than gain a patch/build component
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0' },
+      },
+      expected: [
+        {
+          currentValue: '21.0',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      // a fully-qualified `java-version` is pinned, not a range, so it's
+      // looked up with the default Java versioning
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0.9+11.0.LTS' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.9+11.0.LTS',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0.9' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.9',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0.9-ea' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.9-ea',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // `latest` isn't a version we can pin or bump
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
+    },
+    {
+      // an `x`-range has no single version to bump it to
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.x' },
+      },
+      expected: [
+        {
+          currentValue: '21.x',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
+    },
+    {
+      // a comparator range has no single version to bump it to
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '>=21' },
+      },
+      expected: [
+        {
+          currentValue: '>=21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
+    },
+    {
+      // early-access releases aren't published by the java-version datasource
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21-ea' },
+      },
+      expected: [
+        {
+          currentValue: '21-ea',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
         },
       ],
     },
@@ -4398,6 +4538,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
         {
           currentValue: '21.0.1',
@@ -4440,6 +4581,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -4451,6 +4593,41 @@ describe('modules/manager/github-actions/extract', () => {
         with: {},
       },
       expected: [],
+    },
+    {
+      // `java-version` is a range here too, so it must keep its precision
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': '21.0.2' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.2',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // `dev` and `latest-ea` are documented `java-version`s that we have no
+      // version to bump them to
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': 'latest-ea' },
+      },
+      expected: [
+        {
+          currentValue: 'latest-ea',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
     },
     {
       step: {
