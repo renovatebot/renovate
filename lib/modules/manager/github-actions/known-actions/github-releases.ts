@@ -3,7 +3,11 @@ import * as condaVersioning from '../../../versioning/conda/index.ts';
 import * as nodeVersioning from '../../../versioning/node/index.ts';
 import * as npmVersioning from '../../../versioning/npm/index.ts';
 import type { KnownActionConfig } from '../types.ts';
-import { actionsVersionsExtractVersion, valSchema } from './utils.ts';
+import {
+  actionsVersionsExtractVersion,
+  partialValSchema,
+  valSchema,
+} from './utils.ts';
 
 export const githubReleasesActions: Record<string, KnownActionConfig> = {
   // https://github.com/actions/setup-go
@@ -320,7 +324,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'swiftlang/swift',
     // swiftlang/swift tags releases like `swift-6.3.3-RELEASE`
     extractVersion: '^swift-(?<version>.+)-RELEASE$',
-    withSchema: valSchema('swift-version'),
+    // a partial `swift-version` such as `5.0` resolves to the latest
+    // matching release, rather than a pinned version
+    withSchema: partialValSchema('swift-version'),
   },
   'UpCloudLtd/upcloud-cli-action': {
     datasource: GithubReleasesDatasource.id,

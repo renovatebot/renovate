@@ -5022,6 +5022,24 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // a partial `swift-version` resolves to the latest matching release,
+      // so it must keep its precision
+      step: {
+        uses: 'swift-actions/setup-swift@v2',
+        with: { 'swift-version': '6.3' },
+      },
+      expected: [
+        {
+          currentValue: '6.3',
+          datasource: 'github-releases',
+          depName: 'swift',
+          depType: 'uses-with',
+          packageName: 'swiftlang/swift',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
       step: {
         uses: 'swift-actions/setup-swift@v2',
         with: {},
