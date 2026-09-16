@@ -47,6 +47,7 @@ function matchPinForDep(
   let depUrl: string;
 
   if (dep.datasource === GitTagsDatasource.id) {
+    /* v8 ignore next -- extract always sets depName for a git-tags dep */
     depUrl = dep.depName ?? '';
   } else {
     const registryUrl = dep.registryUrls?.[0] ?? 'https://github.com';
@@ -141,13 +142,13 @@ function updatePinInJson(
   let pinBlock = updated.slice(blockStart, blockEnd);
 
   // Replace version within the pin block
-  const versionPattern = regEx(/("version"\s*:\s*)"[^"]*"/);
-  pinBlock = pinBlock.replace(versionPattern, `$1"${newVersion}"`);
+  const versionPattern = regEx(/(?<prefix>"version"\s*:\s*)"[^"]*"/);
+  pinBlock = pinBlock.replace(versionPattern, `$<prefix>"${newVersion}"`);
 
   // Replace revision within the pin block if we have a new one
   if (newRevision) {
-    const revisionPattern = regEx(/("revision"\s*:\s*)"[^"]*"/);
-    pinBlock = pinBlock.replace(revisionPattern, `$1"${newRevision}"`);
+    const revisionPattern = regEx(/(?<prefix>"revision"\s*:\s*)"[^"]*"/);
+    pinBlock = pinBlock.replace(revisionPattern, `$<prefix>"${newRevision}"`);
   }
 
   updated = updated.slice(0, blockStart) + pinBlock + updated.slice(blockEnd);
@@ -186,7 +187,7 @@ export async function updateArtifacts({
     const parseResult = PackageResolvedJson.safeParse(content);
     if (!parseResult.success) {
       logger.debug(
-        { resolvedFile, error: parseResult.error },
+        { resolvedFile, err: parseResult.error },
         'swift: could not parse Package.resolved',
       );
       continue;

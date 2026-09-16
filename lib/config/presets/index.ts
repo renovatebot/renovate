@@ -6,10 +6,12 @@ import {
 } from '@sindresorhus/is';
 import {
   CONFIG_VALIDATION,
+  HOST_BLOCKED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
 } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import { clone } from '../../util/clone.ts';
 import { regEx } from '../../util/regex.ts';
@@ -44,7 +46,7 @@ interface PresetSource {
   repoHosted: boolean;
 }
 
-const presetSources: Record<string, PresetSource> = {
+export const presetSources: Record<string, PresetSource> = {
   forgejo: { load: () => import('./forgejo/index.ts'), repoHosted: true },
   gitea: { load: () => import('./gitea/index.ts'), repoHosted: true },
   github: { load: () => import('./github/index.ts'), repoHosted: true },
@@ -242,7 +244,7 @@ export async function resolveConfigPresets(
 
   let ignorePresets = clone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
-    ignorePresets = inputConfig.ignorePresets ?? [];
+    ignorePresets = coerceArray(inputConfig.ignorePresets);
   }
   logger.trace(
     { config: inputConfig, existingPresets, mergeInternalPresets },
@@ -284,10 +286,6 @@ export async function resolveConfigPresets(
             existingPresets.concat([preset]),
             mergeInternalPresets,
           );
-        if (inputConfig?.ignoreDeps?.length === 0) {
-          delete presetConfig.description;
-        }
-
         config = mergeChildConfig(config, presetConfig);
         allVisitedPresets.merged.add(preset);
 
@@ -307,6 +305,12 @@ export async function resolveConfigPresets(
   config = mergeChildConfig(config, inputConfig);
   delete config.extends;
   delete config.ignorePresets;
+  // Any description of this config replaces the ones collated from its presets.
+  // Check the length, because array options default to an empty array.
+  if (config.overrideDescription?.length) {
+    config.description = config.overrideDescription;
+  }
+  delete config.overrideDescription;
   logger.trace({ config }, `Post-merge resolve config`);
   for (const [key, val] of Object.entries(config) as [
     keyof AllConfig,
@@ -395,7 +399,17 @@ async function fetchPreset(
       throw err;
     }
     const error = new Error(CONFIG_VALIDATION);
-    if (err.message === PRESET_DEP_NOT_FOUND) {
+    if (err.message === HOST_BLOCKED) {
+      logger.warn(
+        {
+          preset,
+          documentationUrl: `${GlobalConfig.get('productLinks').documentation}self-hosted-configuration/#hostrulesallowinternal`,
+        },
+        'Preset host is blocked by this Renovate instance',
+      );
+      // a preset's response becomes configuration, so a plain hostname grant is not enough - say what the administrator actually has to configure
+      error.validationError = `Preset host is blocked by this Renovate instance (${preset}). If this is intended, ask your Renovate administrator to permit it with a \`hostRules\` entry setting \`allowInternal=true\`, scoped either by \`hostType\` (for example \`preset\` or \`npm\`) or by a URL-prefix \`matchHost\``;
+    } else if (err.message === PRESET_DEP_NOT_FOUND) {
       error.validationError = `Cannot find preset's package (${preset})`;
     } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
       error.validationError = `Preset package is missing a renovate-config entry (${preset})`;

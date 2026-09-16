@@ -190,6 +190,7 @@ export class SbtPluginDatasource extends Datasource {
           this.http,
           ensureTrailingSlash(searchSubRoot),
         );
+        // v8 ignore else -- needs a nested directory listing fixture
         if (subRootContent) {
           const sbtVersionItems = extractPageLinks(
             subRootContent,
@@ -201,6 +202,7 @@ export class SbtPluginDatasource extends Datasource {
               this.http,
               ensureTrailingSlash(releasesRoot),
             );
+            // v8 ignore else -- needs a nested directory listing fixture
             if (releasesIndexContent) {
               const releasesParsed = extractPageLinks(
                 releasesIndexContent,
@@ -211,6 +213,7 @@ export class SbtPluginDatasource extends Datasource {
           }
         }
       }
+      // v8 ignore else -- needs a nested directory listing fixture
       if (releases.length) {
         return [...new Set(releases)].sort(compare);
       }

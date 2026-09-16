@@ -1,9 +1,5 @@
 import { regEx } from '../../../util/regex.ts';
-
-export interface ParsedManifestUrl {
-  date: string;
-  version: string;
-}
+import type { ParsedManifestUrl } from './types.ts';
 
 /**
  * Parse a Rust manifest URL to extract the release date and version identifier.

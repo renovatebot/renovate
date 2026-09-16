@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { HexDatasource } from '../../datasource/hex/index.ts';
 import { api as versioning } from '../../versioning/hex/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -44,7 +45,7 @@ function toPackageDeps({
   deps?: Record<string, string>;
   sectionKey: string;
 }): PackageDependency[] {
-  return Object.entries(deps ?? {}).map(([name, version]) =>
+  return Object.entries(coerceObject(deps)).map(([name, version]) =>
     toPackageDep({ name, sectionKey, version }),
   );
 }

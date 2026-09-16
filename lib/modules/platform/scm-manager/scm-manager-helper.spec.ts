@@ -72,7 +72,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
 
       httpMock.scope(endpoint).get('/me').reply(200, expectedUser);
 
-      expect(await getCurrentUser(token)).toEqual(expectedUser);
+      await expect(getCurrentUser(token)).resolves.toEqual(expectedUser);
     });
 
     it.each`
@@ -97,7 +97,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
         .get(`/repositories/${repo.namespace}/${repo.name}`)
         .reply(200, repo);
 
-      expect(await getRepo(`${repo.namespace}/${repo.name}`)).toEqual(repo);
+      await expect(getRepo(`${repo.namespace}/${repo.name}`)).resolves.toEqual(
+        repo,
+      );
     });
 
     it.each`
@@ -132,7 +134,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           _embedded: { repositories: [repo] },
         });
 
-      expect(await getAllRepos()).toEqual([repo]);
+      await expect(getAllRepos()).resolves.toEqual([repo]);
     });
 
     it.each`
@@ -164,7 +166,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           defaultBranch: 'develop',
         });
 
-      expect(await getDefaultBranch(repo)).toBe('develop');
+      await expect(getDefaultBranch(repo)).resolves.toBe('develop');
     });
 
     it.each`
@@ -203,9 +205,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           },
         });
 
-      expect(
-        await getAllRepoPrs(`${repo.namespace}/${repo.name}`, true),
-      ).toEqual([pullRequest]);
+      await expect(
+        getAllRepoPrs(`${repo.namespace}/${repo.name}`, true),
+      ).resolves.toEqual([pullRequest]);
     });
 
     it('should return all of my PRs', async () => {
@@ -222,9 +224,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           },
         });
 
-      expect(
-        await getAllRepoPrs(`${repo.namespace}/${repo.name}`, false),
-      ).toEqual([pullRequest]);
+      await expect(
+        getAllRepoPrs(`${repo.namespace}/${repo.name}`, false),
+      ).resolves.toEqual([pullRequest]);
     });
 
     it.each`
@@ -257,9 +259,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
         .reply(200, pullRequest);
 
-      expect(await getRepoPr(`${repo.namespace}/${repo.name}`, 1337)).toEqual(
-        pullRequest,
-      );
+      await expect(
+        getRepoPr(`${repo.namespace}/${repo.name}`, 1337),
+      ).resolves.toEqual(pullRequest);
     });
 
     it.each`
@@ -309,12 +311,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
         .reply(200, pullRequest);
 
-      expect(
-        await createScmPr(
-          `${repo.namespace}/${repo.name}`,
-          expectedCreateParams,
-        ),
-      ).toEqual(pullRequest);
+      await expect(
+        createScmPr(`${repo.namespace}/${repo.name}`, expectedCreateParams),
+      ).resolves.toEqual(pullRequest);
     });
 
     it.each`

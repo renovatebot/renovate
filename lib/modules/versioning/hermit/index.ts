@@ -1,6 +1,7 @@
+import { isUndefined } from '@sindresorhus/is';
 import { satisfies } from 'semver';
-import type { RegExpVersion } from '../regex/index.ts';
 import { RegExpVersioningApi } from '../regex/index.ts';
+import type { RegExpVersion } from '../regex/types.ts';
 import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'hermit';
@@ -41,9 +42,9 @@ export class HermitVersioning extends RegExpVersioningApi {
     } = groups;
     const release = [
       Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
-      typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement, 10),
+      isUndefined(minor) ? 0 : Number.parseInt(minor, 10),
+      isUndefined(patch) ? 0 : Number.parseInt(patch, 10),
+      isUndefined(supplement) ? 0 : Number.parseInt(supplement, 10),
     ];
 
     if (build) {
@@ -79,11 +80,8 @@ export class HermitVersioning extends RegExpVersioningApi {
       prerelease,
       compatibility,
     } = groups;
-    const release = [];
-
-    if (major) {
-      release.push(Number.parseInt(major, 10));
-    }
+    // `major` is the only mandatory group in the version regex
+    const release = [Number.parseInt(major, 10)];
 
     if (minor) {
       release.push(Number.parseInt(minor, 10));

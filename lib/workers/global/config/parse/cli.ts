@@ -11,7 +11,10 @@ export function getCliName(option: ParseConfigOptions): string {
   if (option.cli === false) {
     return '';
   }
-  const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
+  const nameWithHyphens = option.name.replace(
+    regEx(/(?<upper>[A-Z])/g),
+    '-$<upper>',
+  );
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
