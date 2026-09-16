@@ -68,9 +68,7 @@ describe('workers/global/limits', () => {
   });
 
   it('throws when a concurrent limit is asked for without a branch config', () => {
-    expect(() =>
-      (isLimitReached as (limit: string) => boolean)('Branches'),
-    ).toThrow(
+    expect(() => isLimitReached('Branches', undefined!)).toThrow(
       'Config is required for computing limits for Branches and PullRequests',
     );
   });
