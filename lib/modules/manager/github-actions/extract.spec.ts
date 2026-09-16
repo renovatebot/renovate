@@ -3133,6 +3133,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'elixir-lang/elixir',
           depType: 'uses-with',
           packageName: 'elixir-lang/elixir',
+          versioning: 'npm',
         },
         {
           currentValue: '1.5.1',
@@ -3140,6 +3141,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gleam-lang/gleam',
           depType: 'uses-with',
           packageName: 'gleam-lang/gleam',
+          versioning: 'npm',
         },
         {
           currentValue: '3.24.0',
@@ -3147,6 +3149,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'erlang/rebar3',
           depType: 'uses-with',
           packageName: 'erlang/rebar3',
+          versioning: 'npm',
         },
       ],
     },
@@ -3163,6 +3166,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'erlang/otp',
           depType: 'uses-with',
           packageName: 'erlang/otp',
+        },
+      ],
+    },
+    {
+      // the documented version specification form is a range, not a pinned
+      // version
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'elixir-version': '1.17.x' },
+      },
+      expected: [
+        {
+          currentValue: '1.17.x',
+          datasource: 'github-releases',
+          depName: 'elixir-lang/elixir',
+          depType: 'uses-with',
+          packageName: 'elixir-lang/elixir',
+          versioning: 'npm',
         },
       ],
     },
@@ -3191,6 +3212,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'erlang/rebar3',
           depType: 'uses-with',
           packageName: 'erlang/rebar3',
+          versioning: 'npm',
         },
       ],
     },
@@ -3217,6 +3239,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gleam-lang/gleam',
           depType: 'uses-with',
           packageName: 'gleam-lang/gleam',
+          versioning: 'npm',
         },
       ],
     },
