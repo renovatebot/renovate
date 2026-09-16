@@ -18,3 +18,10 @@ export const MiseJavaRelease = z.object({
 });
 
 export type MiseJavaRelease = z.infer<typeof MiseJavaRelease>;
+export const AdoptiumAvailableReleases = z.object({
+  available_lts_releases: z.array(z.number()),
+});
+
+export type AdoptiumAvailableReleases = z.infer<
+  typeof AdoptiumAvailableReleases
+>;

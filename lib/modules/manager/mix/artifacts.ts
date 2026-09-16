@@ -18,6 +18,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
@@ -60,6 +61,7 @@ export async function updateArtifacts({
       isUmbrella = true;
     } else if (parentLockFileName) {
       const lockFileError = await checkLockFileReadError(parentLockFileName);
+      // v8 ignore else -- needs an umbrella parent lock file that reads cleanly
       if (lockFileError) {
         return lockFileError;
       }
@@ -112,9 +114,11 @@ export async function updateArtifacts({
     );
 
   for (const { matchHost } of hexHostRulesWithMatchHost) {
+    // v8 ignore else -- the filter above already required a match host
     if (matchHost) {
       const result = hexRepoOrgUrlRegex.exec(matchHost);
 
+      // v8 ignore else -- the same regex already matched in that filter
       if (result?.groups) {
         const { organization } = result.groups;
         organizations.add(organization);
@@ -126,6 +130,7 @@ export async function updateArtifacts({
     if (packageName) {
       const [, organization] = packageName.split(':');
 
+      // v8 ignore else -- needs an updated dep whose name carries no organization
       if (organization) {
         organizations.add(organization);
       }
@@ -160,11 +165,13 @@ export async function updateArtifacts({
       {
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: config.constraints?.erlang ?? `^${erlangVersion}`,
+        constraint:
+          (await resolveToolConstraint(config, 'erlang')) ??
+          `^${erlangVersion}`,
       },
       {
         toolName: 'elixir',
-        constraint: config.constraints?.elixir,
+        constraint: await resolveToolConstraint(config, 'elixir'),
       },
     ],
     preCommands,

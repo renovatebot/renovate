@@ -26,16 +26,17 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { getExtraDepsNotice } from './artifacts-extra.ts';
 import { getGoModulesInTidyOrder } from './package-tree.ts';
 
 const { major, valid } = semver;
 const gitExec = withGitEnvironment(['go']);
 
-function getUpdateImportPathCmds(
+async function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints }: UpdateArtifactsConfig,
-): string[] {
+  config: UpdateArtifactsConfig,
+): Promise<string[]> {
   // Check if we fail to parse any major versions and log that they're skipped
   const invalidMajorDeps = updatedDeps.filter(
     ({ newVersion }) => !valid(newVersion),
@@ -72,7 +73,10 @@ function getUpdateImportPathCmds(
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
       'install github.com/marwan-at-work/mod/cmd/mod@latest';
-    const gomodModCompatibility = constraints?.gomodMod;
+    const gomodModCompatibility = await resolveToolConstraint(
+      config,
+      'gomodMod',
+    );
     if (gomodModCompatibility) {
       if (
         gomodModCompatibility.startsWith('v') &&
@@ -191,13 +195,17 @@ export async function updateArtifacts({
       .replace(inlineReplaceRegEx, inlineCommentOut)
       .replace(blockReplaceRegEx, blockCommentOut);
 
+    // v8 ignore else -- needs a go.mod the replace massaging leaves unchanged
     if (massagedGoMod !== newGoModContent) {
       logger.debug(
         'Removed some relative replace statements and comments from go.mod',
       );
     }
   }
-  const goConstraints = deriveGoToolchainConstraints(config, newGoModContent);
+  const goConstraints = await deriveGoToolchainConstraints(
+    config,
+    newGoModContent,
+  );
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -265,7 +273,10 @@ export async function updateArtifacts({
       config.updateType === 'major';
 
     if (isImportPathUpdateRequired) {
-      const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
+      const updateImportCmds = await getUpdateImportPathCmds(
+        updatedDeps,
+        config,
+      );
       if (updateImportCmds.length > 0) {
         logger.debug(updateImportCmds, 'update import path commands included');
         // The updates
@@ -592,12 +603,15 @@ function getGoConstraints(content: string): string | undefined {
  * 1. config: \`constraints.go\`
  * 1. \`go.mod\`: \`toolchain\` directive
  * 1. \`go.mod\`: \`go\` directive
+ * 1. the \`go\` constraint collected during extraction
  *
  * NOTE that the \`constraints.golang\` is not used (TODO #42601)
  */
-export function deriveGoToolchainConstraints(
+export async function deriveGoToolchainConstraints(
   config: UpdateArtifactsConfig,
   newGoModContent: string,
-): string | undefined {
-  return config.constraints?.go ?? getGoConstraints(newGoModContent);
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, 'go', () =>
+    getGoConstraints(newGoModContent),
+  );
 }

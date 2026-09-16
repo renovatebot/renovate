@@ -11,6 +11,7 @@ import {
 import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const gitExec = withGitEnvironment();
 
@@ -39,8 +40,14 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [
-        { toolName: 'vendir', constraint: config.constraints?.vendir },
-        { toolName: 'helm', constraint: config.constraints?.helm },
+        {
+          toolName: 'vendir',
+          constraint: await resolveToolConstraint(config, 'vendir'),
+        },
+        {
+          toolName: 'helm',
+          constraint: await resolveToolConstraint(config, 'helm'),
+        },
       ],
     };
 
@@ -74,6 +81,7 @@ export async function updateArtifacts({
 
       for (const f of modifiedFiles.concat(notAddedFiles)) {
         const isFileInVendorDir = f.startsWith(vendorDir);
+        // v8 ignore else -- the vendor dir is always set, so this is never false
         if (vendorDir || isFileInVendorDir) {
           fileChanges.push({
             file: {

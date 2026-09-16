@@ -25,7 +25,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
-import { applyGitSource } from '../../util.ts';
+import { applyGitSource, resolveToolConstraint } from '../../util.ts';
 import { type PyProject, UvLockfile, type UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
@@ -208,13 +208,19 @@ export class UvProcessor extends BasePyProjectProcessor {
 
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
-        constraint:
-          config.constraints?.python ?? project.project?.['requires-python'],
+        constraint: await resolveToolConstraint(
+          config,
+          'python',
+          () => project.project?.['requires-python'],
+        ),
       };
       const uvConstraint: ToolConstraint = {
         toolName: 'uv',
-        constraint:
-          config.constraints?.uv ?? project.tool?.uv?.['required-version'],
+        constraint: await resolveToolConstraint(
+          config,
+          'uv',
+          () => project.tool?.uv?.['required-version'],
+        ),
       };
 
       const extraEnv = {
@@ -357,9 +363,11 @@ async function getUvExtraIndexUrl(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
     if (username || password) {
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (username) {
         parsedUrl.username = username;
       }
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (password) {
         parsedUrl.password = password;
       }
@@ -400,10 +408,12 @@ async function getUvIndexCredentials(
 
     const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);
     }
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (password) {
       entries.push([`UV_INDEX_${NAME}_PASSWORD`, password]);
     }

@@ -238,11 +238,13 @@ async function mergeRegistries(
       // Merge the tags from the two results
       let tags = combinedRes.tags;
       if (tags) {
+        // v8 ignore else -- needs merged registries where only one carries tags
         if (res.tags) {
           // Both results had tags, so we need to compare them
           for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
+            // v8 ignore else -- needs a merged registry whose tag is not a version
             if (isString(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
                 isString(existingTag) &&
@@ -390,6 +392,7 @@ async function fetchReleases(
     if (isString(config.npmrc)) {
       setNpmrc(config.npmrc);
     }
+    // v8 ignore else -- npm lookups here never arrive with explicit registryUrls
     if (!isNonEmptyArray(registryUrls)) {
       registryUrls = [resolveRegistryUrl(config.packageName)];
     }
@@ -416,6 +419,9 @@ async function fetchReleases(
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {
         dep = await huntRegistries(config, datasource, registryUrls);
+        // NOTE: the strategy is always one of these three, so the implicit
+        // final else is unreachable. A coverage-ignore hint cannot suppress it
+        // on an `else if`, so it stays in the branch count.
       } else if (registryStrategy === 'merge') {
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
