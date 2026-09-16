@@ -310,7 +310,6 @@
         "lib/modules/datasource/helm/index.ts",
         "lib/modules/datasource/hermit/index.ts",
         "lib/modules/datasource/hexpm-bob/index.ts",
-        "lib/modules/datasource/java-version/index.ts",
         "lib/modules/datasource/jenkins-plugins/index.ts",
         "lib/modules/datasource/jsr/index.ts",
         "lib/modules/datasource/nextcloud/index.ts",
