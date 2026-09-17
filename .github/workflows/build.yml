@@ -542,7 +542,7 @@ jobs:
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
             --statements 100 \
-            --branches 99.90 \
+            --branches 100 \
             --functions 100 \
             --lines 100 \
 
