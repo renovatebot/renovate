@@ -112,6 +112,7 @@ export async function getAuthHeaders(
       hostType: dockerDatasourceId,
       url: apiCheckUrl,
     });
+    const ruleAuth = hostRules.resolveAuth(rule);
     const opts: HttpOptions = {};
 
     if (ecrRegex.test(registryHost)) {
@@ -145,18 +146,17 @@ export async function getAuthHeaders(
           'Could not get Google access token, using no auth',
         );
       }
-    } else if (rule.username && rule.password) {
+    } else if (ruleAuth?.type === 'basic') {
       logger.once.debug(`hostRules: basic auth for ${registryHost}`);
       logger.trace(
         { registryHost, dockerRepository },
         `Using basic auth for Docker registry`,
       );
-      const auth = Buffer.from(`${rule.username}:${rule.password}`).toString(
-        'base64',
-      );
-      opts.headers = { authorization: `Basic ${auth}` };
-    } else if (rule.token) {
-      const authType = rule.authType ?? 'Bearer';
+      opts.headers = {
+        authorization: hostRules.basicAuthHeaderValue(ruleAuth),
+      };
+    } else if (ruleAuth?.type === 'token') {
+      const authType = ruleAuth.authType ?? 'Bearer';
       logger.once.debug(
         `hostRules: ${authType} token auth for ${registryHost}`,
       );
@@ -164,7 +164,7 @@ export async function getAuthHeaders(
         { registryHost, dockerRepository },
         `Using ${authType} token for Docker registry`,
       );
-      opts.headers = { authorization: `${authType} ${rule.token}` };
+      opts.headers = { authorization: `${authType} ${ruleAuth.token}` };
     }
 
     const challenges = parse(apiCheckResponse.headers['www-authenticate']);

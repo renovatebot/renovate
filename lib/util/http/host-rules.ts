@@ -184,7 +184,7 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     return options;
   }
 
-  const { username, password, token, authType } = hostRule;
+  const auth = hostRules.resolveAuth(hostRule);
   const host = parseUrl(url)?.host;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
@@ -195,16 +195,16 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   ) {
     logger.once.debug(`hostRules: authentication already set for ${host}`);
     logger.trace({ url }, `Authorization already set`);
-  } else if (password !== undefined) {
+  } else if (auth?.type === 'basic') {
     logger.once.debug(`hostRules: applying Basic authentication for ${host}`);
     logger.trace({ url }, `Applying Basic authentication`);
-    options.username = username;
-    options.password = password;
-  } else if (token) {
+    options.username = auth.username;
+    options.password = auth.password;
+  } else if (auth?.type === 'token') {
     logger.once.debug(`hostRules: applying Bearer authentication for ${host}`);
     logger.trace({ url }, `Applying Bearer authentication`);
-    options.token = token;
-    options.context = { ...options.context, authType };
+    options.token = auth.token;
+    options.context = { ...options.context, authType: auth.authType };
   } else {
     logger.once.debug(`hostRules: no authentication for ${host}`);
   }

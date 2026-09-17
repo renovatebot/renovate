@@ -154,6 +154,18 @@ describe('modules/manager/composer/artifacts', () => {
       matchHost: 'https://packages-bearer.example.com/',
       token: 'abcdef0123456789',
     });
+    // a rule carrying no credentials at all contributes nothing
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'https://packages-anonymous.example.com/',
+    });
+    // HTTP Basic permits an empty user, and the lookup already authenticates a
+    // password-only rule that way
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'https://packages-password-only.example.com/',
+      password: 'some-password-only',
+    });
     // a rule without a hostType authenticates packagist lookups, so it must
     // reach COMPOSER_AUTH too
     hostRules.add({
@@ -188,6 +200,7 @@ describe('modules/manager/composer/artifacts', () => {
               '"gitlab-domains":["gitlab.com"],' +
               '"http-basic":{' +
               '"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},' +
+              '"packages-password-only.example.com":{"username":"","password":"some-password-only"},' +
               '"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}' +
               '},' +
               '"bearer":{"packages-bearer.example.com":"abcdef0123456789",' +

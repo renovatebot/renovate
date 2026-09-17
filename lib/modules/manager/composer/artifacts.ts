@@ -104,13 +104,18 @@ function getAuthJson(): string | null {
       continue;
     }
 
-    const { resolvedHost, username, password, token } = packagistHostRule;
-    if (resolvedHost && username && password) {
+    const { resolvedHost } = packagistHostRule;
+    const auth = hostRules.resolveAuth(packagistHostRule);
+    if (resolvedHost && auth?.type === 'basic') {
       authJson['http-basic'] = coerceObject(authJson['http-basic']);
-      authJson['http-basic'][resolvedHost] = { username, password };
-    } else if (resolvedHost && token) {
+      // composer's `http-basic` has no shape for a credential without a user
+      authJson['http-basic'][resolvedHost] = {
+        username: auth.username ?? '',
+        password: auth.password,
+      };
+    } else if (resolvedHost && auth?.type === 'token') {
       authJson.bearer = coerceObject(authJson.bearer);
-      authJson.bearer[resolvedHost] = token;
+      authJson.bearer[resolvedHost] = auth.token;
     }
   }
 

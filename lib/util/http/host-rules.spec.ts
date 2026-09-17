@@ -101,6 +101,30 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('prefers a username and password over a token', () => {
+    // rank merging of a broad and a specific rule is enough to produce a rule carrying both
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'github.com',
+      username: 'some-username',
+      password: 'some-password',
+    });
+
+    const opts = { ...options };
+    const hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      token: 'token',
+      username: 'some-username',
+      password: 'some-password',
+    });
+
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      hostType: 'github',
+      username: 'some-username',
+      password: 'some-password',
+    });
+  });
+
   it('adds custom auth', () => {
     const opts = { hostType: 'npm' };
     const hostRule = findMatchingRule(url, opts);

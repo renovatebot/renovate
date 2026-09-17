@@ -1,5 +1,5 @@
 import type { HostRule } from '../../../types/index.ts';
-import { findAllForHostType } from '../../../util/host-rules.ts';
+import { findAllForHostType, resolveAuth } from '../../../util/host-rules.ts';
 
 function isAuthenticatable(rule: HostRule): boolean {
   return (
@@ -17,12 +17,14 @@ export function findAllAuthenticatable({
 }
 
 export function getAuthenticationHeaderValue(hostRule: HostRule): string {
-  if (hostRule.username) {
-    const username = encodeURIComponent(hostRule.username);
-    // TODO: types (#22198)
-    return `${username}:${hostRule.password!}`;
+  // `isAuthenticatable` has already established that the rule carries one of the two
+  // TODO: types (#22198)
+  const auth = resolveAuth(hostRule)!;
+
+  if (auth.type === 'basic') {
+    // bundler splits the value on the first `:`, so only the user half is percent-encoded and the password is passed through as configured
+    return `${encodeURIComponent(auth.username ?? '')}:${auth.password}`;
   }
 
-  // TODO: types (#22198)
-  return `${hostRule.token!}`;
+  return auth.token;
 }

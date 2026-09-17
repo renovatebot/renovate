@@ -225,9 +225,12 @@ export function add(params: HostRule, options?: AddHostRuleOptions): void {
       sanitize.addSecretForSanitizing(secret);
     }
   });
-  if (rule.username && rule.password) {
+  // the same condition {@link resolveAuth} resolves a Basic credential under, so that one formed without a username is redacted too
+  if (isString(rule.password)) {
     sanitize.addSecretForSanitizing(
-      toBase64(`${rule.username}:${rule.password}`),
+      toBase64(
+        basicUserinfo({ username: rule.username, password: rule.password }),
+      ),
     );
   }
   hostRules.push(rule);
@@ -502,6 +505,96 @@ export function findAllForHostType(hostType: string): HostRule[] {
       !typedRules.some((typed) => typed.matchHost === rule.matchHost),
   );
   return [...typedRules, ...untypedRules];
+}
+
+/**
+ * The credential fields {@link resolveAuth} reads.
+ *
+ * Structural rather than `HostRule`, so that a caller which has already split
+ * the fields off a rule - the HTTP layer's request options, for instance - can
+ * resolve them the same way.
+ */
+export interface AuthFields {
+  username?: string;
+  password?: string;
+  token?: string;
+  authType?: string;
+}
+
+/**
+ * A `username`/`password` credential, to be sent as HTTP Basic auth or written
+ * into a package manager's own credentials file.
+ */
+export interface BasicCredentials {
+  /**
+   * Optional: HTTP Basic permits an empty user name, and registries which take
+   * a token as the `password` rely on that. Formatters which must name a user -
+   * a credentials file's `username` field, say - substitute an empty string.
+   */
+  username?: string;
+  password: string;
+}
+
+export interface BasicAuth extends BasicCredentials {
+  type: 'basic';
+}
+
+export interface TokenAuth {
+  type: 'token';
+  token: string;
+  /** the scheme the token is sent under, e.g. `Basic` or `Token-Only`; only formatters which build an `authorization` header act on it */
+  authType?: string;
+}
+
+export type ResolvedAuth = BasicAuth | TokenAuth;
+
+/**
+ * Which credential a host rule authenticates with, under one precedence for
+ * every caller: a `password` wins over a `token`.
+ *
+ * A rule is not meant to carry both - see {@link find}, which deliberately does
+ * not combine credentials across trust tiers for that reason - but rank merging
+ * of a broad and a specific rule produces one easily enough, and every consumer
+ * has to decide what to do with it. Resolve it here so they all decide the
+ * same, rather than each re-deriving it from the raw fields.
+ *
+ * Basic wins because it is the more specific of the two: a `password` is only
+ * ever set deliberately for the host being authenticated, whereas a `token` is
+ * routinely inherited from a broader rule - a `hostType`-only rule, or a
+ * platform token - which was never meant to authenticate this request.
+ *
+ * @returns the credential to use, or `null` when the rule carries none
+ */
+export function resolveAuth(rule: AuthFields): ResolvedAuth | null {
+  const { username, password, token, authType } = rule;
+
+  if (isString(password)) {
+    return { type: 'basic', username, password };
+  }
+
+  if (isNonEmptyString(token)) {
+    return { type: 'token', token, authType };
+  }
+
+  return null;
+}
+
+/**
+ * The `user:password` userinfo of a Basic credential, as an `authorization`
+ * header value would carry it.
+ */
+export function basicUserinfo({
+  username,
+  password,
+}: BasicCredentials): string {
+  return `${username ?? ''}:${password}`;
+}
+
+/**
+ * The value of an `authorization: Basic ...` header for a Basic credential.
+ */
+export function basicAuthHeaderValue(credentials: BasicCredentials): string {
+  return `Basic ${toBase64(basicUserinfo(credentials))}`;
 }
 
 /**
