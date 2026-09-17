@@ -189,13 +189,18 @@ export async function updateLockFile({
 
   await run();
 
-  const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  // A Buffer as the existing content means the lock file may be binary, so the
+  // new content is read and compared as bytes as well.
+  const newLockFileContent = await readLockFile(
+    lockFileName,
+    Buffer.isBuffer(existingLockFileContent),
+  );
   if (!newLockFileContent) {
     logger.debug(`No ${lockFileName} found`);
     return null;
   }
 
-  if (existingLockFileContent === newLockFileContent) {
+  if (isSameContent(existingLockFileContent, newLockFileContent)) {
     logger.debug(`${lockFileName} is unchanged`);
     return null;
   }
@@ -203,20 +208,21 @@ export async function updateLockFile({
   return [fileAddition(lockFileName, newLockFileContent)];
 }
 
-/**
- * Read a binary lock file back after the package manager has run and turn it
- * into an artifact result.
- *
- * Returns `null` when the file is gone or byte-identical to `oldContent`, which
- * is what `updateArtifacts()` returns for "nothing changed".
- */
-export async function readUpdatedBinaryLockFile(
+function readLockFile(
   lockFileName: string,
-  oldContent: Buffer,
-): Promise<UpdateArtifactsResult[] | null> {
-  const newContent = await readLocalFile(lockFileName);
-  if (!newContent || Buffer.compare(oldContent, newContent) === 0) {
-    return null;
+  asBuffer: boolean,
+): Promise<string | Buffer | null> {
+  return asBuffer
+    ? readLocalFile(lockFileName)
+    : readLocalFile(lockFileName, 'utf8');
+}
+
+function isSameContent(
+  before: string | Buffer | null,
+  after: string | Buffer,
+): boolean {
+  if (Buffer.isBuffer(before) && Buffer.isBuffer(after)) {
+    return before.equals(after);
   }
-  return [fileAddition(lockFileName, newContent)];
+  return before === after;
 }

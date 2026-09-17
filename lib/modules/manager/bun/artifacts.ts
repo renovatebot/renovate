@@ -5,18 +5,14 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  deleteLocalFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
 import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactErrorResult,
-  readUpdatedBinaryLockFile,
   resolveToolConstraint,
+  updateLockFile,
 } from '../util.ts';
 
 export async function updateArtifacts(
@@ -57,11 +53,6 @@ export async function updateArtifacts(
       pkgFileDir,
       additionalNpmrcContent,
       async () => {
-        await writeLocalFile(packageFileName, newPackageFileContent);
-        if (isLockFileMaintenance) {
-          await deleteLocalFile(lockFileName);
-        }
-
         let cmd = 'bun install';
 
         if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
@@ -79,12 +70,16 @@ export async function updateArtifacts(
           ],
         };
 
-        await exec(cmd, execOptions);
-
-        return await readUpdatedBinaryLockFile(
+        return await updateLockFile({
           lockFileName,
-          oldLockFileContent,
-        );
+          existingLockFileContent: oldLockFileContent,
+          packageFile: {
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+          deleteLockFile: isLockFileMaintenance,
+          run: () => exec(cmd, execOptions),
+        });
       },
     );
   } catch (err) {

@@ -5,11 +5,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  deleteLocalFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
 import { withNpmrcHostRules } from '../npm/utils.ts';
@@ -17,8 +13,8 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactError,
   artifactErrorResult,
-  readUpdatedBinaryLockFile,
   resolveToolConstraint,
+  updateLockFile,
 } from '../util.ts';
 import type { DenoManagerData } from './types.ts';
 
@@ -79,12 +75,6 @@ export async function updateArtifacts(
       pkgFileDir,
       additionalNpmrcContent,
       async () => {
-        await writeLocalFile(packageFileName, newPackageFileContent);
-
-        if (isLockFileMaintenance) {
-          await deleteLocalFile(lockFileName);
-        }
-
         // run from its referred deno.json/deno.jsonc location if import map is used
         const importMapReferrerDep = updatedDeps.find(
           (dep) => dep.managerData?.importMapReferrer,
@@ -135,12 +125,16 @@ export async function updateArtifacts(
 
         // TODO: appending `--lockfile-only` is better to reduce disk usage
         // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
-        await exec(command, execOptions);
-
-        return await readUpdatedBinaryLockFile(
+        return await updateLockFile({
           lockFileName,
-          oldLockFileContent,
-        );
+          existingLockFileContent: oldLockFileContent,
+          packageFile: {
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+          deleteLockFile: isLockFileMaintenance,
+          run: () => exec(command, execOptions),
+        });
       },
     );
   } catch (err) {
