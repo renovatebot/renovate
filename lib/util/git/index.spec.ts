@@ -58,11 +58,11 @@ async function disableGitAutoMaintenance(
 }
 
 // One root describe, named after the file as `renovate/test-root-describe`
-// requires. The `base` repository built here is what the two repository-backed
-// describes clone from. Describes run in file order, and some tests in the
-// last one write to `base`, so the shared-clone describe has to stay ahead of
-// it. The three nested describes split the tests by how much git setup they
-// need. (Layout and comments by Claude Fable 5.1.)
+// requires. The `base` repository built here is what the three
+// repository-backed describes clone from. Describes run in file order, and
+// some tests in the last one write to `base`, so the two describes that reuse
+// a clone have to stay ahead of it. The four nested describes split the tests
+// by how much git setup they need. (Layout and comments by Claude Fable 5.1.)
 describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -326,7 +326,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
   // module singleton alone: no `commitFiles`, `checkoutBranch`, `initRepo`,
   // `setUserRepoConfig` or local git config changes. `isBranchModified()` is
   // read-only on disk but caches per-branch results in `config.branchIsModified`,
-  // which only `initRepo()` clears, so it stays in the next describe. The two
+  // which only `initRepo()` clears, so it lives in the next describe. The two
   // mocked result caches are wiped by `mockReset`; their default is restored per
   // test.
   describe('shared clone', () => {
@@ -687,16 +687,21 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  // Tests that write. Every test gets a fresh bare clone of `base` as `origin`,
-  // a fresh local checkout and a fresh `initRepo()`, so it may commit, push,
-  // check out branches, change git config or re-init freely. That setup costs
-  // about 0.7s per test, which is why the read-only tests live above.
-  describe('clone per test', () => {
+  // Local-only writers. One bare clone of `base` and one local checkout for the
+  // whole describe, but `initRepo()` and `syncGit()` run again before every
+  // test. On an existing checkout `syncGit()` takes its fetch path: `fetch
+  // --prune`, `reset --hard`, `checkout` of the default branch, `clean -fd` and
+  // deletion of every other local branch. Together with the fresh `config` from
+  // `initRepo()` that undoes everything a test can do to the local repository
+  // or the module singleton, at a fraction of the cost of a clone. Tests here
+  // may check out, commit or merge locally, change local git config or register
+  // virtual branches; they must not push to `origin`, call `initRepo()` with
+  // options of their own or touch `base`.
+  describe('reused clone', () => {
     let origin: tmp.DirectoryResult;
     let tmpDir: tmp.DirectoryResult;
 
-    beforeEach(async () => {
-      setCustomEnv({});
+    beforeAll(async () => {
       origin = await tmp.dir({ unsafeCleanup: true });
       const repo = simpleGit(origin.path);
       await repo.clone(base.path, '.', ['--bare']);
@@ -704,28 +709,38 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await repo.addConfig('commit.gpgsign', 'false');
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ localDir: tmpDir.path });
-      await git.initRepo({
-        url: origin.path,
-      });
+      await git.initRepo({ url: origin.path });
+      await git.syncGit();
+      const local = simpleGit(tmpDir.path);
+      await local.addConfig('commit.gpgsign', 'false');
+      await disableGitAutoMaintenance(local);
+    });
+
+    beforeEach(async () => {
+      setCustomEnv({});
+      GlobalConfig.set({ localDir: tmpDir.path });
+      await git.initRepo({ url: origin.path });
       git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       git.setGitAuthor('Jest <Jest@example.com>');
       git.setPlatformIgnoredAuthors([]);
       setNoVerify([]);
       await git.syncGit();
-      // override some local git settings for better testing
+      // `syncGit()` leaves local git config alone, and `writeGitAuthor()` may
+      // have changed the author in the previous test
       const local = simpleGit(tmpDir.path);
-      await local.addConfig('commit.gpgsign', 'false');
       await local.addConfig('user.name', 'Jest');
       await local.addConfig('user.email', 'Jest@example.com');
-      await disableGitAutoMaintenance(local);
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
       updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
     });
 
-    afterEach(async () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    afterAll(async () => {
       await tmpDir?.cleanup();
       await origin?.cleanup();
-      vi.restoreAllMocks();
     });
 
     describe('checkoutBranch(branchName)', () => {
@@ -735,93 +750,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       it('sets non-master base branch', async () => {
         await expect(git.checkoutBranch('develop')).resolves.not.toThrow();
-      });
-
-      describe('submodules', () => {
-        beforeEach(async () => {
-          const repo = simpleGit(base.path);
-
-          auth.getGitEnvironmentVariables.mockReturnValue({
-            GIT_ALLOW_PROTOCOL: 'file',
-          });
-
-          const submoduleBasePath = `${base.path}/submodule`;
-          await fs.mkdir(submoduleBasePath);
-          const submodule = simpleGit(submoduleBasePath);
-          await submodule.init();
-          await disableGitAutoMaintenance(submodule);
-          await submodule.addConfig('user.email', 'Jest@example.com');
-          await submodule.addConfig('user.name', 'Jest');
-          await submodule.addConfig('commit.gpgsign', 'false');
-
-          await fs.writeFile(`${submoduleBasePath}/init_file`, 'init');
-          await submodule.add('init_file');
-          await submodule.commit('init submodule');
-
-          await repo.submoduleAdd('./submodule', './submodule');
-          await repo.commit('add submodule');
-          await repo.branch(['stable']);
-
-          await fs.writeFile(`${submoduleBasePath}/current_file`, 'current');
-          await submodule.add('current_file');
-          await submodule.commit('update');
-          await repo.add('submodule');
-          await repo.commit('update submodule');
-        });
-
-        it('verifies that the --recurse-submodule flag is needed', async () => {
-          const repo = simpleGit(base.path);
-          expect((await repo.status()).isClean()).toBeTrue();
-          await repo.checkout('stable');
-          expect((await repo.status()).isClean()).toBeFalse();
-        });
-
-        it('sets non-master base branch with submodule update', async () => {
-          await git.initRepo({
-            cloneSubmodules: true,
-            url: base.path,
-          });
-          expect((await git.getRepoStatus()).isClean()).toBeTrue();
-          await git.checkoutBranch('stable');
-          expect((await git.getRepoStatus()).isClean()).toBeTrue();
-        });
-
-        afterEach(async () => {
-          const repo = simpleGit(base.path);
-          const defaultBranch =
-            (await repo.getConfig('init.defaultbranch')).value ?? 'master';
-          await repo.checkout(defaultBranch);
-          await repo.reset(['--hard', 'HEAD~2']);
-          await repo.branch(['-D', 'stable']);
-          await fs.rm(`${base.path}/submodule`, { recursive: true });
-        });
-      });
-    });
-
-    // The read-only `getFileList()` test is in the shared-clone describe above.
-    describe('getFileList()', () => {
-      it('should exclude submodules', async () => {
-        const repo = simpleGit(base.path);
-        await repo.submoduleAdd(base.path, 'submodule');
-        await repo.submoduleAdd(base.path, 'file');
-        await repo.commit('Add submodules');
-        await git.initRepo({
-          cloneSubmodules: true,
-          cloneSubmodulesFilter: ['file'],
-          url: base.path,
-        });
-        expect(git.isCloned()).toBeFalse();
-        await git.syncGit();
-        await expect(
-          fs.pathExists(`${tmpDir.path}/.gitmodules`),
-        ).resolves.toBeTruthy();
-        await expect(git.getFileList()).resolves.toEqual([
-          '.gitmodules',
-          'file_to_delete',
-          'master_file',
-          'past_file',
-        ]);
-        await repo.reset(['--hard', 'HEAD^']);
       });
     });
 
@@ -981,6 +909,386 @@ describe('util/git/index', { timeout: 30000 }, () => {
           git.isBranchModified('renovate/future_branch', defaultBranch),
         ).resolves.toBeTrue();
       });
+    });
+
+    describe('getBranchUpdateDate(branchName)', () => {
+      it('should return same value for equal refs', async () => {
+        await git.checkoutBranchFromRemote('renovate/equal_branch', 'origin');
+        await git.fetchBranch(defaultBranch);
+        const date = await git.getBranchUpdateDate('renovate/equal_branch');
+        const defaultDate = await git.getBranchUpdateDate(defaultBranch);
+        expect(date!.toISO()).toBe(defaultDate!.toISO());
+        expect(date).toBeInstanceOf(DateTime);
+        expect(updateDateCache.setCachedUpdateDateResult).toHaveBeenCalledWith(
+          'renovate/equal_branch',
+          expect.any(DateTime),
+        );
+      });
+
+      it('returns cached result without syncing git when cache is populated', async () => {
+        const branchName = 'renovate/equal_branch';
+        const cachedDate = DateTime.fromISO('2023-05-20T14:25:30.123Z');
+        updateDateCache.getCachedUpdateDateResult.mockReturnValueOnce(
+          cachedDate,
+        );
+        await git.checkoutBranchFromRemote(branchName, 'origin');
+        const result = await git.getBranchUpdateDate(branchName);
+        expect(result).toBe(cachedDate);
+        expect(
+          updateDateCache.setCachedUpdateDateResult,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('mergeBranch(branchName)', () => {
+      it('should throw if branch merge throws', async () => {
+        await expect(git.mergeBranch('not_found')).rejects.toThrow(
+          "fatal: 'origin/not_found' is not a commit and a branch 'not_found'",
+        );
+      });
+    });
+
+    describe('mergeToLocal(branchName)', () => {
+      it('should perform a branch merge without push', async () => {
+        await expect(
+          fs.pathExists(`${tmpDir.path}/future_file`),
+        ).resolves.toBeFalse();
+        const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+        await git.mergeToLocal('renovate/future_branch');
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/future_file`),
+        ).resolves.toBeTrue();
+        expect(pushSpy).toHaveBeenCalledTimes(0);
+      });
+
+      it('should merge a local-only virtual branch without fetching from origin', async () => {
+        // Create a local-only branch (never pushed to origin)
+        const commit = await git.prepareCommit({
+          branchName: 'renovate/local_only_branch',
+          message: 'local only commit',
+          files: [
+            { type: 'addition', path: 'local_only_file', contents: 'local' },
+          ],
+        });
+        await git.setVirtualBranch(
+          'renovate/local_only_branch',
+          'refs/changes/99/99999/1',
+          commit!.commitSha,
+        );
+        // Reset working tree back to default branch so the file is not present yet
+        const local = simpleGit(tmpDir.path);
+        await local.checkout(defaultBranch);
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/local_only_file`),
+        ).resolves.toBeFalse();
+        const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+        const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+        await git.mergeToLocal('renovate/local_only_branch');
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/local_only_file`),
+        ).resolves.toBeTrue();
+        expect(fetchSpy).not.toHaveBeenCalled();
+        expect(pushSpy).not.toHaveBeenCalled();
+      });
+
+      it('should throw', async () => {
+        await expect(git.mergeToLocal('not_found')).rejects.toThrow(
+          "fatal: couldn't find remote ref not_found",
+        );
+      });
+    });
+
+    describe('deleteBranch(branchName)', () => {
+      it('should only delete local branch for a virtual branch', async () => {
+        const sha = git.getBranchCommit('renovate/past_branch')!;
+        await git.setVirtualBranch(
+          'renovate/past_branch',
+          'refs/changes/99/99999/1',
+          sha,
+        );
+        const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+        await git.deleteBranch('renovate/past_branch');
+        expect(rawSpy).not.toHaveBeenCalledWith(
+          expect.arrayContaining(['push', '--delete']),
+        );
+        expect(rawSpy).toHaveBeenCalledWith([
+          'update-ref',
+          '-d',
+          'refs/remotes/origin/renovate/past_branch',
+        ]);
+      });
+    });
+
+    describe('isFileModeEnabled()', () => {
+      it('defaults to enabled when core.fileMode is unset', async () => {
+        const repo = simpleGit(tmpDir.path);
+        await repo.raw(['config', '--unset', 'core.fileMode']);
+
+        await expect(git.isFileModeEnabled()).resolves.toBeTrue();
+      });
+
+      it.each([
+        { setting: 'true', expected: true },
+        { setting: 'false', expected: false },
+      ])(
+        'returns $expected when core.fileMode is $setting',
+        async ({ setting, expected }) => {
+          const repo = simpleGit(tmpDir.path);
+          await repo.addConfig('core.fileMode', setting);
+
+          await expect(git.isFileModeEnabled()).resolves.toBe(expected);
+        },
+      );
+
+      it('caches a disabled setting for the repository run', async () => {
+        const repo = simpleGit(tmpDir.path);
+        await repo.addConfig('core.fileMode', 'false');
+        await expect(git.isFileModeEnabled()).resolves.toBeFalse();
+
+        await repo.addConfig('core.fileMode', 'true');
+        await expect(git.isFileModeEnabled()).resolves.toBeFalse();
+      });
+    });
+
+    describe('getCommitMessages()', () => {
+      it('returns commit messages without merge commits', async () => {
+        const repo = simpleGit(tmpDir.path);
+        await repo.merge(['--no-ff', 'origin/renovate/future_branch']);
+        expect((await git.getCommitMessages()).sort()).toEqual([
+          'future message',
+          'master message',
+          'past message',
+        ]);
+      });
+    });
+
+    describe('setGitAuthor()', () => {
+      it('throws for invalid', () => {
+        expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
+      });
+
+      it('defaults to "Renovate" when undefined', async () => {
+        git.setGitAuthor(undefined);
+        await git.writeGitAuthor();
+        const local = simpleGit(tmpDir.path);
+        expect((await local.raw(['config', 'user.name'])).trim()).toBe(
+          'Renovate',
+        );
+        expect((await local.raw(['config', 'user.email'])).trim()).toBe(
+          'renovate@whitesourcesoftware.com',
+        );
+      });
+    });
+
+    // The read-only `diffCommitTree` tests are in the shared-clone describe above.
+    describe('diffCommitTree', () => {
+      it('returns renames as deletion and addition entries', async () => {
+        const repo = simpleGit(tmpDir.path);
+        await repo.addConfig('user.email', 'Jest@example.com');
+        await repo.addConfig('user.name', 'Jest');
+        const parentCommit = git.getBranchCommit(defaultBranch)!;
+
+        await repo.raw(['mv', 'master_file', 'renamed_master_file']);
+        await repo.commit('rename master file');
+
+        const commit = toLongCommitSha((await repo.revparse(['HEAD'])).trim());
+        const diff = await git.diffCommitTree(parentCommit, commit);
+
+        expect(diff).toHaveLength(2);
+        expect(diff).toContainEqual({
+          path: 'master_file',
+          mode: '100644',
+          type: 'blob',
+          sha: null,
+        });
+        expect(diff).toContainEqual(
+          expect.objectContaining({
+            path: 'renamed_master_file',
+            mode: '100644',
+            type: 'blob',
+            sha: expect.stringMatching(/^[0-9a-f]{40}$/),
+          }),
+        );
+      });
+    });
+
+    describe('getRepoStatus', () => {
+      it('should pass options into git status', async () => {
+        await git.checkoutBranch('renovate/nested_files');
+
+        await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
+        await fs.writeFile(`${tmpDir.path}/root`, 'new root');
+        const resp = await git.getRepoStatus('bin');
+
+        expect(resp.modified).toStrictEqual(['bin/nested']);
+      });
+
+      it('should reject when trying to access directory out of localDir', async () => {
+        GlobalConfig.set({ localDir: tmpDir.path });
+        await git.checkoutBranch('renovate/nested_files');
+
+        await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
+        await fs.writeFile(`${tmpDir.path}/root`, 'new root');
+
+        await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
+          INVALID_PATH,
+        );
+      });
+    });
+
+    describe('fetchRevSpec()', () => {
+      it('fetchRevSpec()', async () => {
+        await git.fetchRevSpec(
+          `refs/heads/${defaultBranch}:refs/heads/other/${defaultBranch}`,
+        );
+        //checkout this duplicate
+        const sha = await git.checkoutBranch(`other/${defaultBranch}`);
+        expect(sha).toBe(git.getBranchCommit(defaultBranch));
+      });
+    });
+  });
+
+  // Tests that write to `origin` or `base`, or call `initRepo()` with options
+  // of their own. Every test gets a fresh bare clone of `base` as `origin`, a
+  // fresh local checkout and a fresh `initRepo()`. That setup costs about 0.7s
+  // per test, which is why the other three describes exist.
+  describe('clone per test', () => {
+    let origin: tmp.DirectoryResult;
+    let tmpDir: tmp.DirectoryResult;
+
+    beforeEach(async () => {
+      setCustomEnv({});
+      origin = await tmp.dir({ unsafeCleanup: true });
+      const repo = simpleGit(origin.path);
+      await repo.clone(base.path, '.', ['--bare']);
+      await disableGitAutoMaintenance(repo);
+      await repo.addConfig('commit.gpgsign', 'false');
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+      await git.initRepo({
+        url: origin.path,
+      });
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setGitAuthor('Jest <Jest@example.com>');
+      git.setPlatformIgnoredAuthors([]);
+      setNoVerify([]);
+      await git.syncGit();
+      // override some local git settings for better testing
+      const local = simpleGit(tmpDir.path);
+      await local.addConfig('commit.gpgsign', 'false');
+      await local.addConfig('user.name', 'Jest');
+      await local.addConfig('user.email', 'Jest@example.com');
+      await disableGitAutoMaintenance(local);
+      behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
+      updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
+    });
+
+    afterEach(async () => {
+      await tmpDir?.cleanup();
+      await origin?.cleanup();
+      vi.restoreAllMocks();
+    });
+
+    // The local-only `checkoutBranch()` tests are in the reused-clone describe above.
+    describe('checkoutBranch(branchName)', () => {
+      describe('submodules', () => {
+        beforeEach(async () => {
+          const repo = simpleGit(base.path);
+
+          auth.getGitEnvironmentVariables.mockReturnValue({
+            GIT_ALLOW_PROTOCOL: 'file',
+          });
+
+          const submoduleBasePath = `${base.path}/submodule`;
+          await fs.mkdir(submoduleBasePath);
+          const submodule = simpleGit(submoduleBasePath);
+          await submodule.init();
+          await disableGitAutoMaintenance(submodule);
+          await submodule.addConfig('user.email', 'Jest@example.com');
+          await submodule.addConfig('user.name', 'Jest');
+          await submodule.addConfig('commit.gpgsign', 'false');
+
+          await fs.writeFile(`${submoduleBasePath}/init_file`, 'init');
+          await submodule.add('init_file');
+          await submodule.commit('init submodule');
+
+          await repo.submoduleAdd('./submodule', './submodule');
+          await repo.commit('add submodule');
+          await repo.branch(['stable']);
+
+          await fs.writeFile(`${submoduleBasePath}/current_file`, 'current');
+          await submodule.add('current_file');
+          await submodule.commit('update');
+          await repo.add('submodule');
+          await repo.commit('update submodule');
+        });
+
+        it('verifies that the --recurse-submodule flag is needed', async () => {
+          const repo = simpleGit(base.path);
+          expect((await repo.status()).isClean()).toBeTrue();
+          await repo.checkout('stable');
+          expect((await repo.status()).isClean()).toBeFalse();
+        });
+
+        it('sets non-master base branch with submodule update', async () => {
+          await git.initRepo({
+            cloneSubmodules: true,
+            url: base.path,
+          });
+          expect((await git.getRepoStatus()).isClean()).toBeTrue();
+          await git.checkoutBranch('stable');
+          expect((await git.getRepoStatus()).isClean()).toBeTrue();
+        });
+
+        afterEach(async () => {
+          const repo = simpleGit(base.path);
+          const defaultBranch =
+            (await repo.getConfig('init.defaultbranch')).value ?? 'master';
+          await repo.checkout(defaultBranch);
+          await repo.reset(['--hard', 'HEAD~2']);
+          await repo.branch(['-D', 'stable']);
+          await fs.rm(`${base.path}/submodule`, { recursive: true });
+        });
+      });
+    });
+
+    // The read-only `getFileList()` test is in the shared-clone describe above.
+    describe('getFileList()', () => {
+      it('should exclude submodules', async () => {
+        const repo = simpleGit(base.path);
+        await repo.submoduleAdd(base.path, 'submodule');
+        await repo.submoduleAdd(base.path, 'file');
+        await repo.commit('Add submodules');
+        await git.initRepo({
+          cloneSubmodules: true,
+          cloneSubmodulesFilter: ['file'],
+          url: base.path,
+        });
+        expect(git.isCloned()).toBeFalse();
+        await git.syncGit();
+        await expect(
+          fs.pathExists(`${tmpDir.path}/.gitmodules`),
+        ).resolves.toBeTruthy();
+        await expect(git.getFileList()).resolves.toEqual([
+          '.gitmodules',
+          'file_to_delete',
+          'master_file',
+          'past_file',
+        ]);
+        await repo.reset(['--hard', 'HEAD^']);
+      });
+    });
+
+    // The local-only `isBranchModified()` tests are in the reused-clone describe above.
+    describe('isBranchModified()', () => {
+      beforeEach(() => {
+        modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+      });
 
       it('should not be affected by new commits on the base branch', async () => {
         // Add a commit to the base branch from a different author,
@@ -1003,21 +1311,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
-    // The read-only `getBranchUpdateDate()` test is in the shared-clone describe above.
+    // The read-only and local-only `getBranchUpdateDate()` tests are in the
+    // describes above.
     describe('getBranchUpdateDate(branchName)', () => {
-      it('should return same value for equal refs', async () => {
-        await git.checkoutBranchFromRemote('renovate/equal_branch', 'origin');
-        await git.fetchBranch(defaultBranch);
-        const date = await git.getBranchUpdateDate('renovate/equal_branch');
-        const defaultDate = await git.getBranchUpdateDate(defaultBranch);
-        expect(date!.toISO()).toBe(defaultDate!.toISO());
-        expect(date).toBeInstanceOf(DateTime);
-        expect(updateDateCache.setCachedUpdateDateResult).toHaveBeenCalledWith(
-          'renovate/equal_branch',
-          expect.any(DateTime),
-        );
-      });
-
       it('should return null and log error when git show fails', async () => {
         // Create a valid branch first
         const branchName = 'renovate/test_error_branch';
@@ -1047,20 +1343,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
         // Restore original implementation
         fromISOSpy.mockRestore();
-      });
-
-      it('returns cached result without syncing git when cache is populated', async () => {
-        const branchName = 'renovate/equal_branch';
-        const cachedDate = DateTime.fromISO('2023-05-20T14:25:30.123Z');
-        updateDateCache.getCachedUpdateDateResult.mockReturnValueOnce(
-          cachedDate,
-        );
-        await git.checkoutBranchFromRemote(branchName, 'origin');
-        const result = await git.getBranchUpdateDate(branchName);
-        expect(result).toBe(cachedDate);
-        expect(
-          updateDateCache.setCachedUpdateDateResult,
-        ).not.toHaveBeenCalled();
       });
 
       it('works if running with a Repo Cache', async () => {
@@ -1141,6 +1423,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
+    // The local-only `mergeBranch()` tests are in the reused-clone describe above.
     describe('mergeBranch(branchName)', () => {
       it('should perform a branch merge', async () => {
         await git.mergeBranch('renovate/future_branch');
@@ -1151,69 +1434,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         ]);
         expect(merged.all).toContain('renovate/future_branch');
       });
-
-      it('should throw if branch merge throws', async () => {
-        await expect(git.mergeBranch('not_found')).rejects.toThrow(
-          "fatal: 'origin/not_found' is not a commit and a branch 'not_found'",
-        );
-      });
     });
 
-    describe('mergeToLocal(branchName)', () => {
-      it('should perform a branch merge without push', async () => {
-        await expect(
-          fs.pathExists(`${tmpDir.path}/future_file`),
-        ).resolves.toBeFalse();
-        const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
-
-        await git.mergeToLocal('renovate/future_branch');
-
-        await expect(
-          fs.pathExists(`${tmpDir.path}/future_file`),
-        ).resolves.toBeTrue();
-        expect(pushSpy).toHaveBeenCalledTimes(0);
-      });
-
-      it('should merge a local-only virtual branch without fetching from origin', async () => {
-        // Create a local-only branch (never pushed to origin)
-        const commit = await git.prepareCommit({
-          branchName: 'renovate/local_only_branch',
-          message: 'local only commit',
-          files: [
-            { type: 'addition', path: 'local_only_file', contents: 'local' },
-          ],
-        });
-        await git.setVirtualBranch(
-          'renovate/local_only_branch',
-          'refs/changes/99/99999/1',
-          commit!.commitSha,
-        );
-        // Reset working tree back to default branch so the file is not present yet
-        const local = simpleGit(tmpDir.path);
-        await local.checkout(defaultBranch);
-
-        await expect(
-          fs.pathExists(`${tmpDir.path}/local_only_file`),
-        ).resolves.toBeFalse();
-        const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
-        const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
-
-        await git.mergeToLocal('renovate/local_only_branch');
-
-        await expect(
-          fs.pathExists(`${tmpDir.path}/local_only_file`),
-        ).resolves.toBeTrue();
-        expect(fetchSpy).not.toHaveBeenCalled();
-        expect(pushSpy).not.toHaveBeenCalled();
-      });
-
-      it('should throw', async () => {
-        await expect(git.mergeToLocal('not_found')).rejects.toThrow(
-          "fatal: couldn't find remote ref not_found",
-        );
-      });
-    });
-
+    // The local-only `deleteBranch()` tests are in the reused-clone describe above.
     describe('deleteBranch(branchName)', () => {
       it('should send delete', async () => {
         await git.deleteBranch('renovate/past_branch');
@@ -1242,25 +1465,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
           'origin',
           'renovate/something',
           '--no-verify',
-        ]);
-      });
-
-      it('should only delete local branch for a virtual branch', async () => {
-        const sha = git.getBranchCommit('renovate/past_branch')!;
-        await git.setVirtualBranch(
-          'renovate/past_branch',
-          'refs/changes/99/99999/1',
-          sha,
-        );
-        const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
-        await git.deleteBranch('renovate/past_branch');
-        expect(rawSpy).not.toHaveBeenCalledWith(
-          expect.arrayContaining(['push', '--delete']),
-        );
-        expect(rawSpy).toHaveBeenCalledWith([
-          'update-ref',
-          '-d',
-          'refs/remotes/origin/renovate/past_branch',
         ]);
       });
     });
@@ -1633,49 +1837,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
-    describe('isFileModeEnabled()', () => {
-      it('defaults to enabled when core.fileMode is unset', async () => {
-        const repo = simpleGit(tmpDir.path);
-        await repo.raw(['config', '--unset', 'core.fileMode']);
-
-        await expect(git.isFileModeEnabled()).resolves.toBeTrue();
-      });
-
-      it.each([
-        { setting: 'true', expected: true },
-        { setting: 'false', expected: false },
-      ])(
-        'returns $expected when core.fileMode is $setting',
-        async ({ setting, expected }) => {
-          const repo = simpleGit(tmpDir.path);
-          await repo.addConfig('core.fileMode', setting);
-
-          await expect(git.isFileModeEnabled()).resolves.toBe(expected);
-        },
-      );
-
-      it('caches a disabled setting for the repository run', async () => {
-        const repo = simpleGit(tmpDir.path);
-        await repo.addConfig('core.fileMode', 'false');
-        await expect(git.isFileModeEnabled()).resolves.toBeFalse();
-
-        await repo.addConfig('core.fileMode', 'true');
-        await expect(git.isFileModeEnabled()).resolves.toBeFalse();
-      });
-    });
-
-    describe('getCommitMessages()', () => {
-      it('returns commit messages without merge commits', async () => {
-        const repo = simpleGit(tmpDir.path);
-        await repo.merge(['--no-ff', 'origin/renovate/future_branch']);
-        expect((await git.getCommitMessages()).sort()).toEqual([
-          'future message',
-          'master message',
-          'past message',
-        ]);
-      });
-    });
-
     describe('initRepo())', () => {
       it('should fetch latest', async () => {
         const repo = simpleGit(base.path);
@@ -1806,24 +1967,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
           '--heads',
           origin.path,
         ]);
-      });
-    });
-
-    describe('setGitAuthor()', () => {
-      it('throws for invalid', () => {
-        expect(() => git.setGitAuthor('invalid')).toThrow(CONFIG_VALIDATION);
-      });
-
-      it('defaults to "Renovate" when undefined', async () => {
-        git.setGitAuthor(undefined);
-        await git.writeGitAuthor();
-        const local = simpleGit(tmpDir.path);
-        expect((await local.raw(['config', 'user.name'])).trim()).toBe(
-          'Renovate',
-        );
-        expect((await local.raw(['config', 'user.email'])).trim()).toBe(
-          'renovate@whitesourcesoftware.com',
-        );
       });
     });
 
@@ -2066,73 +2209,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await git.clearRenovateRefs();
         await expect(lsRenovateRefs()).resolves.toBeEmpty();
         expect(pushSpy).toHaveBeenCalledTimes(4);
-      });
-    });
-
-    // The read-only `diffCommitTree` tests are in the shared-clone describe above.
-    describe('diffCommitTree', () => {
-      it('returns renames as deletion and addition entries', async () => {
-        const repo = simpleGit(tmpDir.path);
-        await repo.addConfig('user.email', 'Jest@example.com');
-        await repo.addConfig('user.name', 'Jest');
-        const parentCommit = git.getBranchCommit(defaultBranch)!;
-
-        await repo.raw(['mv', 'master_file', 'renamed_master_file']);
-        await repo.commit('rename master file');
-
-        const commit = toLongCommitSha((await repo.revparse(['HEAD'])).trim());
-        const diff = await git.diffCommitTree(parentCommit, commit);
-
-        expect(diff).toHaveLength(2);
-        expect(diff).toContainEqual({
-          path: 'master_file',
-          mode: '100644',
-          type: 'blob',
-          sha: null,
-        });
-        expect(diff).toContainEqual(
-          expect.objectContaining({
-            path: 'renamed_master_file',
-            mode: '100644',
-            type: 'blob',
-            sha: expect.stringMatching(/^[0-9a-f]{40}$/),
-          }),
-        );
-      });
-    });
-
-    describe('getRepoStatus', () => {
-      it('should pass options into git status', async () => {
-        await git.checkoutBranch('renovate/nested_files');
-
-        await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
-        await fs.writeFile(`${tmpDir.path}/root`, 'new root');
-        const resp = await git.getRepoStatus('bin');
-
-        expect(resp.modified).toStrictEqual(['bin/nested']);
-      });
-
-      it('should reject when trying to access directory out of localDir', async () => {
-        GlobalConfig.set({ localDir: tmpDir.path });
-        await git.checkoutBranch('renovate/nested_files');
-
-        await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
-        await fs.writeFile(`${tmpDir.path}/root`, 'new root');
-
-        await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
-          INVALID_PATH,
-        );
-      });
-    });
-
-    describe('fetchRevSpec()', () => {
-      it('fetchRevSpec()', async () => {
-        await git.fetchRevSpec(
-          `refs/heads/${defaultBranch}:refs/heads/other/${defaultBranch}`,
-        );
-        //checkout this duplicate
-        const sha = await git.checkoutBranch(`other/${defaultBranch}`);
-        expect(sha).toBe(git.getBranchCommit(defaultBranch));
       });
     });
 
