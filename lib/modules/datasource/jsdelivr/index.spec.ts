@@ -54,12 +54,12 @@ describe('modules/datasource/jsdelivr/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: JsDelivrDatasource.id,
           packageName: 'gh/foo/bar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -67,12 +67,12 @@ describe('modules/datasource/jsdelivr/index', () => {
         .scope(baseUrl)
         .get(pathFor('gh/doesnotexist/doesnotexist'))
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: JsDelivrDatasource.id,
           packageName: 'gh/doesnotexist/doesnotexist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 401', async () => {
@@ -185,12 +185,12 @@ describe('modules/datasource/jsdelivr/index', () => {
         null,
       );
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: JsDelivrDatasource.id,
           packageName: 'npm/does-not-exist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
   });
 
