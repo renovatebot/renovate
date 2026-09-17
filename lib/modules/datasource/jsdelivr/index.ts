@@ -42,10 +42,9 @@ export class JsDelivrDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+  }: GetReleasesConfig): Promise<ReleaseResult | null | undefined> {
     if (!registryUrl) {
-      return null;
+      return undefined;
     }
 
     const { type, package: parsedPackageName } =
@@ -65,7 +64,7 @@ export class JsDelivrDatasource extends Datasource {
     } catch (err) {
       if (err instanceof ZodError) {
         logger.debug({ err }, 'jsdelivr: validation error');
-        return null;
+        return undefined;
       }
 
       this.handleGenericErrors(err);
@@ -95,18 +94,17 @@ export class JsDelivrDatasource extends Datasource {
         fallback: true,
       },
       () => this._getReleases(config),
-    );
+    ).then((result) => result ?? null);
   }
 
   private async _getDigest(
     config: DigestConfig,
     newValue: string,
-  ): Promise<string | null> {
+  ): Promise<string | null | undefined> {
     const { packageName, registryUrl } = config;
 
-    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
-      return null;
+      return undefined;
     }
 
     const {
@@ -125,7 +123,7 @@ export class JsDelivrDatasource extends Datasource {
     } catch (err) {
       if (err instanceof ZodError) {
         logger.debug({ err }, 'jsdelivr: validation error');
-        return null;
+        return undefined;
       }
 
       this.handleGenericErrors(err);
@@ -147,6 +145,6 @@ export class JsDelivrDatasource extends Datasource {
         fallback: true,
       },
       () => this._getDigest(config, newValue),
-    );
+    ).then((result) => result ?? null);
   }
 }

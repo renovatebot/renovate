@@ -21,6 +21,14 @@ function pathForDigest(packageName: string, version: string): string {
 
 describe('modules/datasource/jsdelivr/index', () => {
   describe('getReleases', () => {
+    it('returns null without a registry URL', async () => {
+      const datasource = new JsDelivrDatasource();
+
+      await expect(
+        datasource.getReleases({ packageName: 'gh/foo/bar' }),
+      ).resolves.toBeNull();
+    });
+
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(200, '}');
       await expect(
@@ -187,6 +195,14 @@ describe('modules/datasource/jsdelivr/index', () => {
   });
 
   describe('getDigest', () => {
+    it('returns null without a registry URL', async () => {
+      const datasource = new JsDelivrDatasource();
+
+      await expect(
+        datasource.getDigest({ packageName: 'npm/foo/bar' }, '1.2.0'),
+      ).resolves.toBeNull();
+    });
+
     it('returns null for an invalid response', async () => {
       httpMock
         .scope(baseUrl)
