@@ -1,29 +1,11 @@
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { parseUrl } from '../../../util/url.ts';
 import * as gradleVersioning from '../../versioning/gradle/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { GradleReleases } from './schema.ts';
-
-const publicRegistryUrl = 'https://services.gradle.org/versions/all';
-
-function isPublicRegistry(registryUrl: string | undefined): boolean {
-  const url = parseUrl(registryUrl);
-  if (!url) {
-    return false;
-  }
-
-  // The original URL is stored in the cache key, so reject fragment contents.
-  return (
-    !url.username &&
-    !url.password &&
-    !url.search &&
-    !url.hash &&
-    `${url.origin}${url.pathname}` === publicRegistryUrl
-  );
-}
+import { isPublicRegistry, publicRegistryUrl } from './url.ts';
 
 export class GradleVersionDatasource extends Datasource {
   static readonly id = 'gradle-version';
