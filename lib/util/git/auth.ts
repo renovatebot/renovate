@@ -5,7 +5,7 @@ import type { HostRule } from '../../types/index.ts';
 import { findGithubComHostRule } from '../check-token.ts';
 import { detectPlatform } from '../common.ts';
 import type { ResolvedChildEnv } from '../exec/utils.ts';
-import { getAll } from '../host-rules.ts';
+import { encodeBasicUserinfo, getAll, resolveAuth } from '../host-rules.ts';
 import { regEx } from '../regex.ts';
 import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
 import { addGitConfigEnvironmentVariables } from './config.ts';
@@ -26,9 +26,11 @@ const githubApiUrls = new Set([
 export function getGitAuthenticatedEnvironmentVariables(
   environmentVariables: Readonly<ResolvedChildEnv>,
   originalGitUrl: string,
-  { token, username, password, hostType, matchHost }: HostRule,
+  hostRule: HostRule,
 ): ResolvedChildEnv {
-  if (!token && !(username && password)) {
+  const { hostType, matchHost } = hostRule;
+  const auth = resolveAuth(hostRule);
+  if (!auth) {
     logger.warn(
       { host: matchHost },
       `Could not create environment variable for host as neither token or username and password was set`,
@@ -37,20 +39,17 @@ export function getGitAuthenticatedEnvironmentVariables(
   }
 
   let authenticationRules: AuthenticationRule[];
-  if (token) {
+  if (auth.type === 'token') {
     authenticationRules = getAuthenticationRulesWithToken(
       originalGitUrl,
       hostType,
-      token,
+      auth.token,
     );
   } else {
-    const encodedUsername = encodeURIComponent(username!);
-    const encodedPassword = encodeURIComponent(password!);
-
     authenticationRules = getAuthenticationRules(
       originalGitUrl,
       hostType,
-      `${encodedUsername}:${encodedPassword}`,
+      encodeBasicUserinfo(auth),
     );
   }
 
@@ -167,9 +166,9 @@ export function getGitEnvironmentVariables(
     ...hostTypes,
   ]);
 
-  // filter rules without `matchHost` and `token` or username and password and github api github rules
+  // filter rules without `matchHost` or credentials, and github api github rules
   const hostRules = getAll()
-    .filter((r) => r.matchHost && (r.token ?? (r.username && r.password)))
+    .filter((r) => r.matchHost && resolveAuth(r))
     .filter((r) => !gitHubHostRule || !githubApiUrls.has(r.matchHost!));
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables

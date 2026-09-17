@@ -2125,6 +2125,9 @@ The lookup keys for `hostRules` are: `hostType` and `matchHost`, both of which a
 
 Supported credential fields are `token`, `username`, `password`, `timeout`, `enabled` and `insecureRegistry`.
 
+Set _either_ a `token`, _or_ a `username` and `password`, never both.
+If a request ends up with both anyway - for example because a broad rule's `token` is combined with a narrower rule's `username` and `password` - Renovate authenticates with the `username` and `password` and ignores the `token`.
+
 Example for configuring `docker` auth:
 
 ```json
@@ -2287,6 +2290,7 @@ For `authType` to work, you must also set your own `token`.
 
 Do not set `authType=Bearer`: it's the default setting for Renovate anyway.
 Do not set a username or password when you're using `authType`, as `authType` doesn't use usernames or passwords.
+If you set a `password` anyway, Renovate authenticates with it and ignores the `token` and the `authType`.
 
 An example for npm basic auth with token:
 
