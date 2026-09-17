@@ -1639,7 +1639,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'The following dependencies are either deprecated or have replacements available.',
+            '> The following dependencies are either deprecated or have replacements available.',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
@@ -2280,6 +2280,9 @@ None detected
         '<summary>View abandoned dependencies (1)</summary>',
       );
       expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain(
+        '> Packages are marked as abandoned when they exceed the [`abandonmentThreshold`]',
+      );
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');

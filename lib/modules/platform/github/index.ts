@@ -130,6 +130,11 @@ const defaultGithubApiUrl = 'https://api.github.com/';
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
 
+const noteAlertRegex = regEx(/> ℹ️? \*\*Note\*\*\n> ?\n/g);
+const warningAlertRegex = regEx(/> ⚠️? \*\*Warning\*\*\n> ?\n/g);
+const cautionAlertRegex = regEx(/> 🛑 \*\*Caution\*\*\n> ?\n/g);
+const importantAlertRegex = regEx(/> ❗ \*\*Important\*\*\n> ?\n/g);
+
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
@@ -2344,12 +2349,10 @@ export function massageMarkdown(input: string): string {
     );
   // Run after truncation so any Note added by smartTruncate() is also converted
   return smartTruncate(linkifiedInput, maxBodyLength())
-    .replaceAll(regEx(/> ℹ \*\*Note\*\*\n> ?\n/g), '> [!NOTE]\n')
-    .replaceAll(regEx(/> ℹ️ \*\*Note\*\*\n> ?\n/g), '> [!NOTE]\n')
-    .replaceAll(regEx(/> ⚠ \*\*Warning\*\*\n> ?\n/g), '> [!WARNING]\n')
-    .replaceAll(regEx(/> ⚠️ \*\*Warning\*\*\n> ?\n/g), '> [!WARNING]\n')
-    .replaceAll(regEx(/> 🛑 \*\*Caution\*\*\n> ?\n/g), '> [!CAUTION]\n')
-    .replaceAll(regEx(/> ❗ \*\*Important\*\*\n> ?\n/g), '> [!IMPORTANT]\n');
+    .replaceAll(noteAlertRegex, '> [!NOTE]\n')
+    .replaceAll(warningAlertRegex, '> [!WARNING]\n')
+    .replaceAll(cautionAlertRegex, '> [!CAUTION]\n')
+    .replaceAll(importantAlertRegex, '> [!IMPORTANT]\n');
 }
 
 export function maxBodyLength(): number {

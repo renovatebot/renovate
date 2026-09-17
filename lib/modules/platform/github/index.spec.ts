@@ -18,7 +18,6 @@ import {
 } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
-import { emojify } from '../../../util/emoji.ts';
 import * as _git from '../../../util/git/index.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
 import { toBase64 } from '../../../util/string.ts';
@@ -5889,36 +5888,16 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('converts note callout to GitHub alert syntax', () => {
-      const input = `${emojify('> :information_source: **Note**\n>\n')}> Some note text\n`;
-      expect(input).toBe('> ℹ️ **Note**\n>\n> Some note text\n');
-      expect(github.massageMarkdown(input)).toBe(
-        '> [!NOTE]\n> Some note text\n',
-      );
-    });
-
-    it('converts warning callout to GitHub alert syntax', () => {
-      const input = `${emojify('> :warning: **Warning**\n>\n')}> Some warning text\n`;
-      expect(input).toBe('> ⚠️ **Warning**\n>\n> Some warning text\n');
-      expect(github.massageMarkdown(input)).toBe(
-        '> [!WARNING]\n> Some warning text\n',
-      );
-    });
-
-    it('converts caution callout to GitHub alert syntax', () => {
-      const input = `${emojify('> :stop_sign: **Caution**\n>\n')}> Some caution text\n`;
-      expect(input).toBe('> 🛑 **Caution**\n>\n> Some caution text\n');
-      expect(github.massageMarkdown(input)).toBe(
-        '> [!CAUTION]\n> Some caution text\n',
-      );
-    });
-
-    it('converts important callout to GitHub alert syntax', () => {
-      const input = `${emojify('> :exclamation: **Important**\n>\n')}> Some important text\n`;
-      expect(input).toBe('> ❗ **Important**\n>\n> Some important text\n');
-      expect(github.massageMarkdown(input)).toBe(
-        '> [!IMPORTANT]\n> Some important text\n',
-      );
+    it.each`
+      input                                                | expected
+      ${'> ℹ **Note**\n>\n> Some note text\n'}             | ${'> [!NOTE]\n> Some note text\n'}
+      ${'> ℹ️ **Note**\n> \n> Some note text\n'}           | ${'> [!NOTE]\n> Some note text\n'}
+      ${'> ⚠ **Warning**\n>\n> Some warning text\n'}       | ${'> [!WARNING]\n> Some warning text\n'}
+      ${'> ⚠️ **Warning**\n> \n> Some warning text\n'}     | ${'> [!WARNING]\n> Some warning text\n'}
+      ${'> 🛑 **Caution**\n>\n> Some caution text\n'}      | ${'> [!CAUTION]\n> Some caution text\n'}
+      ${'> ❗ **Important**\n> \n> Some important text\n'} | ${'> [!IMPORTANT]\n> Some important text\n'}
+    `('converts $input to GitHub alert syntax', ({ input, expected }) => {
+      expect(github.massageMarkdown(input)).toBe(expected);
     });
 
     it('converts the note added by smartTruncate() to GitHub alert syntax', () => {
