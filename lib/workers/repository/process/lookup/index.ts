@@ -698,6 +698,21 @@ export async function lookupUpdates(
           allReleaseVersions,
         );
 
+        // Carry this release's own sourceUrl/sourceDirectory (already
+        // computed per-release by the datasource, e.g. npm's `get.ts`) onto
+        // the update candidate, when it differs from the package-level
+        // value. Without this, `matchSourceUrls`-based grouping (e.g.
+        // `monorepo:*` presets) matches against the package's
+        // `dist-tags.latest` metadata instead of the release actually being
+        // proposed here, which can silently break grouping when the two
+        // diverge (see https://github.com/renovatebot/renovate/discussions/46253).
+        if (release.sourceUrl) {
+          update.sourceUrl = release.sourceUrl;
+        }
+        if (release.sourceDirectory) {
+          update.sourceDirectory = release.sourceDirectory;
+        }
+
         // #29034
         if (
           config.manager === 'gomod' &&

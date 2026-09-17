@@ -5918,6 +5918,31 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('uses a release-specific sourceUrl, when set, over the package-level default', async () => {
+      // vue.json's dist-tags.latest is 2.5.16, whose repository is
+      // vuejs/vue - but early releases (pre-1.0.0) are still under
+      // yyx990803/vue. The package-level sourceUrl always reflects the
+      // `latest`-derived value; here we check that the update candidate
+      // for a release still on the old repo carries that release's own
+      // sourceUrl, not the package-level one.
+      config.currentValue = '0.11.6';
+      config.packageName = 'vue';
+      config.datasource = NpmDatasource.id;
+      config.allowedVersions = '< 1.0.0';
+      httpMock.scope(npmDefaultRegistryUrl).get('/vue').reply(200, vueJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.sourceUrl).toBe('https://github.com/vuejs/vue');
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0]).toMatchObject({
+        newVersion: '0.12.16',
+        sourceUrl: 'git+https://github.com/yyx990803/vue.git',
+      });
+    });
+
     it('handles current age packageRules with version restrictions', async () => {
       config.packageName = 'openjdk';
       config.currentValue = '17.0.0';

@@ -155,6 +155,17 @@ export interface LookupUpdate {
   registryUrl?: string;
   libYears?: number;
 
+  /**
+   * The source repository URL/directory for this specific release, when it
+   * differs from the package-level `sourceUrl`/`sourceDirectory` (see
+   * `Release.sourceUrl` in `lib/modules/datasource/types.ts`). Falls back to
+   * the package-level value when unset. Used so that `matchSourceUrls`-based
+   * grouping (e.g. `monorepo:*` presets) matches against the release
+   * actually being proposed, rather than the package's `dist-tags.latest`.
+   */
+  sourceUrl?: string;
+  sourceDirectory?: string;
+
   version?: string;
   /**
    * Whether the package registry has attestation information for the given update.
