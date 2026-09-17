@@ -1,16 +1,12 @@
 import { ZodError } from 'zod/v4';
-
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { regEx } from '../../../util/regex.ts';
-import { Result } from '../../../util/result.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
-
 import { Datasource } from '../datasource.ts';
 import { defaultRegistryUrl } from '../npm/common.ts';
 import { NpmDatasource } from '../npm/index.ts';
-import { DigestsConfig, ReleasesConfig } from '../schema.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -43,40 +39,37 @@ export class JsDelivrDatasource extends Datasource {
     });
   }
 
-  private async _getReleases(
-    config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    const result = Result.parse(config, ReleasesConfig)
-      .transform(async ({ packageName, registryUrl }) => {
-        const { type, package: parsedPackageName } =
-          parseJsDelivrPackageName(packageName);
-        const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}`;
-
-        const { body } = await this.http.getJson(
-          url,
-          { cacheProvider: memCacheProvider },
-          JsDelivrPackageResponse,
-        );
-
-        return JsDelivrPackageResponse.parse(body);
-      })
-      .transform(({ versions, tags }): ReleaseResult => {
-        const res: ReleaseResult = {
-          releases: versions,
-          tags: tags,
-        };
-        return res;
-      });
-
-    const { val, err } = await result.unwrap();
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'jsdelivr: validation error');
+  private async _getReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    /* v8 ignore next 3 -- should never happen */
+    if (!registryUrl) {
       return null;
     }
-    if (err) {
+
+    const { type, package: parsedPackageName } =
+      parseJsDelivrPackageName(packageName);
+    const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}`;
+
+    try {
+      const { body } = await this.http.getJson(
+        url,
+        { cacheProvider: memCacheProvider },
+        JsDelivrPackageResponse,
+      );
+      return {
+        releases: body.versions,
+        tags: body.tags,
+      };
+    } catch (err) {
+      if (err instanceof ZodError) {
+        logger.debug({ err }, 'jsdelivr: validation error');
+        return null;
+      }
+
       this.handleGenericErrors(err);
     }
-    return val;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -109,35 +102,34 @@ export class JsDelivrDatasource extends Datasource {
     config: DigestConfig,
     newValue: string,
   ): Promise<string | null> {
-    const { packageName } = config;
+    const { packageName, registryUrl } = config;
+
+    /* v8 ignore next 3 -- should never happen */
+    if (!registryUrl) {
+      return null;
+    }
+
     const {
       type,
       package: parsedPackageName,
       asset,
     } = parseJsDelivrPackageName(packageName);
+    const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}@${newValue}?structure=flat`;
 
-    const result = Result.parse(config, DigestsConfig).transform(
-      async ({ registryUrl }) => {
-        const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}@${newValue}?structure=flat`;
+    try {
+      const { body } = await this.http.getJson(url, JsDelivrDigestResponse);
+      const file = body.files.find(
+        (file) => file.name.replace(regEx(/^\/+/), '') === asset,
+      );
+      return file ? `sha256-${file.hash}` : null;
+    } catch (err) {
+      if (err instanceof ZodError) {
+        logger.debug({ err }, 'jsdelivr: validation error');
+        return null;
+      }
 
-        const { body } = await this.http.getJson(url, JsDelivrDigestResponse);
-        return JsDelivrDigestResponse.parse(body);
-      },
-    );
-
-    const { val, err } = await result.unwrap();
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'jsdelivr: validation error');
-      return null;
-    }
-    if (err) {
       this.handleGenericErrors(err);
     }
-
-    const file = val?.files.find(
-      (file) => file.name.replace(regEx(/^\/+/), '') === asset,
-    );
-    return file ? `sha256-${file.hash}` : null;
   }
 
   override getDigest(

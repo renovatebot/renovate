@@ -1,7 +1,6 @@
-import { ZodError } from 'zod/v4';
-
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { NpmDatasource } from '../npm/index.ts';
@@ -79,24 +78,24 @@ describe('modules/datasource/jsdelivr/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('returns null for 429', async () => {
+    it('throws for 429', async () => {
       httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(429);
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
           packageName: 'gh/foo/bar',
         }),
-      ).resolves.toBeNull();
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('returns null for 5xx', async () => {
+    it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get(pathFor('gh/foo/bar')).reply(502);
       await expect(
         getPkgReleases({
           datasource: JsDelivrDatasource.id,
           packageName: 'gh/foo/bar',
         }),
-      ).resolves.toBeNull();
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for unknown error', async () => {
@@ -182,7 +181,7 @@ describe('modules/datasource/jsdelivr/index', () => {
   });
 
   describe('getDigest', () => {
-    it('throws for an invalid response', async () => {
+    it('returns null for an invalid response', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('npm/foo/bar', '1.2.0'))
@@ -196,7 +195,7 @@ describe('modules/datasource/jsdelivr/index', () => {
           },
           '1.2.0',
         ),
-      ).rejects.toThrow(ZodError);
+      ).resolves.toBeNull();
     });
 
     it('returs null for empty "files" array', async () => {
