@@ -7,26 +7,14 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
-import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { type RepologyPackage, RepologyPackages } from './schema.ts';
 import type { RepologyPackageType } from './types.ts';
+import { isPublicRegistry } from './url.ts';
 
 const packageTypes: RepologyPackageType[] = ['binname', 'srcname'];
-
-function isPublicRegistry(registryUrl: string): boolean {
-  // Match the constructed request, since a base query or fragment changes its route.
-  const url = parseUrl(joinUrlParts(registryUrl, 'tools/project-by'));
-  return (
-    url?.origin === 'https://repology.org' &&
-    url.pathname === '/tools/project-by' &&
-    !url.username &&
-    !url.password &&
-    !url.search &&
-    !url.hash
-  );
-}
 
 function findPackageInResponse(
   response: RepologyPackage[],
