@@ -181,7 +181,7 @@
     "@pnpm/parse-overrides": "1001.0.4",
     "@qnighy/marshal": "0.1.3",
     "@redis/client": "6.2.1",
-    "@renovatebot/detect-tools": "4.0.14",
+    "@renovatebot/detect-tools": "4.0.16",
     "@renovatebot/good-enough-parser": "2.0.1",
     "@renovatebot/osv-offline": "3.0.10",
     "@renovatebot/pep440": "5.0.1",
@@ -272,7 +272,7 @@
     "xmldoc": "3.0.0",
     "yaml": "2.9.0",
     "yauzl": "3.4.0",
-    "zod": "4.5.4"
+    "zod": "4.6.1"
   },
   "optionalDependencies": {
     "openpgp": "6.3.1",
@@ -312,7 +312,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "24.13.3",
+    "@types/node": "24.13.4",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
@@ -338,7 +338,7 @@
     "lint-staged": "17.5.0",
     "markdownlint-cli2": "0.23.2",
     "markdownlint-cli2-formatter-template": "0.0.4",
-    "memfs": "4.71.0",
+    "memfs": "4.72.1",
     "nock": "14.0.17",
     "npm-run-all2": "9.0.3",
     "nyc": "18.0.0",

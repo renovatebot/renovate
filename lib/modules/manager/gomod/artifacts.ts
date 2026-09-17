@@ -5,7 +5,6 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
@@ -17,6 +16,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { isValid } from '../../versioning/semver/index.ts';
@@ -26,7 +26,12 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 import { getExtraDepsNotice } from './artifacts-extra.ts';
 import { getGoModulesInTidyOrder } from './package-tree.ts';
 
@@ -401,36 +406,20 @@ export async function updateArtifacts({
     const res: UpdateArtifactsResult[] = [];
     if (status.modified.includes(sumFileName)) {
       logger.debug('Returning updated go.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: sumFileName,
-          contents: await readLocalFile(sumFileName),
-        },
-      });
+      res.push(fileAddition(sumFileName, await readLocalFile(sumFileName)));
     }
 
     if (status.modified.includes(goWorkSumFileName)) {
       logger.debug('Returning updated go.work.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: goWorkSumFileName,
-          contents: await readLocalFile(goWorkSumFileName),
-        },
-      });
+      res.push(
+        fileAddition(goWorkSumFileName, await readLocalFile(goWorkSumFileName)),
+      );
     }
 
     for (const f of dependentFiles) {
       if (status.modified.includes(f)) {
         logger.trace(`Returning updated ${f}`);
-        res.push({
-          file: {
-            type: 'addition',
-            path: f,
-            contents: await readLocalFile(f),
-          },
-        });
+        res.push(fileAddition(f, await readLocalFile(f)));
       }
     }
 
@@ -439,13 +428,7 @@ export async function updateArtifacts({
       logger.debug('Returning updated go source files for import path changes');
       for (const f of status.modified) {
         if (f.endsWith('.go')) {
-          res.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
+          res.push(fileAddition(f, await readLocalFile(f)));
         }
       }
     }
@@ -453,29 +436,17 @@ export async function updateArtifacts({
     const alreadyAdded = new Set<string>();
     const alreadyDeleted = new Set<string>();
     if (useVendor) {
-      for (const f of status.modified.concat(status.not_added)) {
-        if (vendorDir && f.startsWith(vendorDir)) {
-          alreadyAdded.add(f);
-          res.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
+      const vendorChanges = await collectFileChanges(status, {
+        filter: (f) => !!vendorDir && f.startsWith(vendorDir),
+      });
+      for (const change of vendorChanges) {
+        if (change.type === 'addition') {
+          alreadyAdded.add(change.path);
+        } else {
+          alreadyDeleted.add(change.path);
         }
       }
-      for (const f of coerceArray(status.deleted)) {
-        if (vendorDir && f.startsWith(vendorDir)) {
-          alreadyDeleted.add(f);
-          res.push({
-            file: {
-              type: 'deletion',
-              path: f,
-            },
-          });
-        }
-      }
+      res.push(...fileChangesToArtifactResults(vendorChanges));
     }
 
     // TODO: throws in tests (#22198)
@@ -519,27 +490,18 @@ export async function updateArtifacts({
       logger.debug(
         'Updating all modified files since generated files were added',
       );
-      for (const f of status.modified.concat(status.created)) {
-        if (!alreadyAdded.has(f)) {
-          res.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
-        }
-      }
-      for (const f of coerceArray(status.deleted)) {
-        if (!alreadyDeleted.has(f)) {
-          res.push({
-            file: {
-              type: 'deletion',
-              path: f,
-            },
-          });
-        }
-      }
+      res.push(
+        ...fileChangesToArtifactResults([
+          ...(await collectFileChanges(status, {
+            include: ['modified', 'created'],
+            filter: (f) => !alreadyAdded.has(f),
+          })),
+          ...(await collectFileChanges(status, {
+            include: ['deleted'],
+            filter: (f) => !alreadyDeleted.has(f),
+          })),
+        ]),
+      );
     }
     return res;
   } catch (err) {
@@ -547,14 +509,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update go.sum');
-    return [
-      {
-        artifactError: {
-          fileName: sumFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(sumFileName, err);
   }
 }
 
