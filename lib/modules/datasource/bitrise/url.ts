@@ -10,15 +10,22 @@ export function isPublicRegistry(registryUrl: string | undefined): boolean {
     return false;
   }
 
+  let parsedUrl: ReturnType<typeof parseGitUrl>;
+  let decodedUrl: string;
   try {
-    const parsedUrl = parseGitUrl(registryUrl);
-    // The raw URL is part of the cache key, so ignored selectors can leak secrets.
-    return (
-      parsedUrl.resource === 'github.com' &&
-      parsedUrl.full_name.toLowerCase() === 'bitrise-io/bitrise-steplib' &&
-      publicRegistry.test(decodeURIComponent(registryUrl))
-    );
+    parsedUrl = parseGitUrl(registryUrl);
+    decodedUrl = decodeURIComponent(registryUrl);
   } catch {
     return false;
   }
+
+  if (parsedUrl.resource !== 'github.com') {
+    return false;
+  }
+
+  if (parsedUrl.full_name.toLowerCase() !== 'bitrise-io/bitrise-steplib') {
+    return false;
+  }
+
+  return publicRegistry.test(decodedUrl);
 }
