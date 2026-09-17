@@ -1,19 +1,18 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { TerraformProviderDatasource } from './index.ts';
 
-const azurermData = Fixtures.get('azurerm-provider.json');
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
-const hashicorpGoogleBetaReleases = Fixtures.get(
-  'releaseBackendIndexGoogleBeta.json',
-);
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const telmateProxmoxVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json',
 );
 
+const openTofuRegistryUrl = TerraformProviderDatasource.openTofuRegistryUrl;
 const terraformProviderDatasource = new TerraformProviderDatasource();
 const primaryUrl = terraformProviderDatasource.defaultRegistryUrls[0];
 const secondaryUrl = terraformProviderDatasource.defaultRegistryUrls[1];
@@ -23,30 +22,25 @@ type MockVariant = 'empty' | '404' | 'error';
 function mockDefaultRegistryLookup(variant: MockVariant): void {
   const primaryScope = httpMock
     .scope(primaryUrl)
-    .get('/v1/providers/hashicorp/azurerm');
-  const primarySd = httpMock
-    .scope(primaryUrl)
-    .get('/.well-known/terraform.json');
+    .get('/v2/providers/hashicorp/azurerm')
+    .query({ include: 'provider-versions' });
   const secondaryScope = httpMock
     .scope(secondaryUrl)
     .get('/terraform-provider-azurerm/index.json');
 
   if (variant === 'empty') {
     primaryScope.reply(200, {});
-    primarySd.reply(200, serviceDiscoveryResult);
     secondaryScope.reply(200, {});
     return;
   }
 
   if (variant === '404') {
     primaryScope.reply(404);
-    primarySd.reply(200, serviceDiscoveryResult);
     secondaryScope.reply(404);
     return;
   }
 
   primaryScope.replyWithError('');
-  primarySd.reply(200, serviceDiscoveryResult);
   secondaryScope.replyWithError('');
 }
 
@@ -81,22 +75,43 @@ describe('modules/datasource/terraform-provider/index', () => {
       async ({ variant }) => {
         mockDefaultRegistryLookup(variant);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: TerraformProviderDatasource.id,
             packageName: 'azurerm',
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       },
     );
 
     it('processes real data', async () => {
       httpMock
         .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, azurermData)
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
+        .get('/v2/providers/hashicorp/azurerm')
+        .query({ include: 'provider-versions' })
+        .reply(200, {
+          data: {
+            attributes: {
+              source: 'https://github.com/hashicorp/terraform-provider-azurerm',
+            },
+          },
+          included: [
+            {
+              type: 'provider-versions',
+              attributes: {
+                version: '2.52.0',
+                'published-at': '2019-11-19T08:22:56Z',
+              },
+            },
+            {
+              type: 'provider-versions',
+              attributes: {
+                version: '2.53.0',
+                'published-at': '2019-11-26T08:22:56Z',
+              },
+            },
+          ],
+        });
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
         packageName: 'azurerm',
@@ -106,6 +121,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         registryUrl: 'https://registry.terraform.io',
         releases: [
           {
+            releaseTimestamp: '2019-11-19T08:22:56.000Z',
             version: '2.52.0',
           },
           {
@@ -113,31 +129,6 @@ describe('modules/datasource/terraform-provider/index', () => {
             version: '2.53.0',
           },
         ],
-        sourceUrl:
-          'https://github.com/terraform-providers/terraform-provider-azurerm',
-      });
-    });
-
-    it('does not set releaseTimestamp when latest version is not in releases', async () => {
-      httpMock
-        .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, {
-          source: 'https://github.com/hashicorp/terraform-provider-azurerm',
-          versions: ['2.52.0'],
-          version: '9.9.9',
-          published_at: '2019-11-26T08:22:56Z',
-        })
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
-      const res = await getPkgReleases({
-        datasource: TerraformProviderDatasource.id,
-        packageName: 'azurerm',
-      });
-      expect(res).toEqual({
-        homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
-        registryUrl: 'https://registry.terraform.io',
-        releases: [{ version: '2.52.0' }],
         sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
       });
     });
@@ -152,13 +143,13 @@ describe('modules/datasource/terraform-provider/index', () => {
       async ({ variant }) => {
         mockThirdPartyRegistryLookup(variant);
 
-        expect(
-          await getPkgReleases({
+        await expect(
+          getPkgReleases({
             datasource: TerraformProviderDatasource.id,
             packageName: 'azurerm',
             registryUrls: ['https://registry.company.com'],
           }),
-        ).toBeNull();
+        ).resolves.toBeNull();
       },
     );
 
@@ -191,14 +182,126 @@ describe('modules/datasource/terraform-provider/index', () => {
     });
 
     it('processes data with alternative backend', async () => {
+      const hashicorpGoogleBetaReleases = {
+        name: 'terraform-provider-google-beta',
+        versions: {
+          '1.19.0': {
+            name: 'terraform-provider-google-beta',
+            version: '1.19.0',
+            shasums: 'terraform-provider-google-beta_1.19.0_SHA256SUMS',
+            shasums_signature:
+              'terraform-provider-google-beta_1.19.0_SHA256SUMS.sig',
+            builds: [
+              {
+                name: 'terraform-provider-google-beta',
+                version: '1.19.0',
+                os: 'darwin',
+                arch: 'amd64',
+                filename:
+                  'terraform-provider-google-beta_1.19.0_darwin_amd64.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/1.19.0/terraform-provider-google-beta_1.19.0_darwin_amd64.zip',
+              },
+              {
+                name: 'terraform-provider-google-beta',
+                version: '1.19.0',
+                os: 'freebsd',
+                arch: '386',
+                filename:
+                  'terraform-provider-google-beta_1.19.0_freebsd_386.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/1.19.0/terraform-provider-google-beta_1.19.0_freebsd_386.zip',
+              },
+              {
+                name: 'terraform-provider-google-beta',
+                version: '1.19.0',
+                os: 'freebsd',
+                arch: 'amd64',
+                filename:
+                  'terraform-provider-google-beta_1.19.0_freebsd_amd64.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/1.19.0/terraform-provider-google-beta_1.19.0_freebsd_amd64.zip',
+              },
+            ],
+          },
+          '1.20.0': {
+            name: 'terraform-provider-google-beta',
+            version: '1.20.0',
+            shasums: 'terraform-provider-google-beta_1.20.0_SHA256SUMS',
+            shasums_signature:
+              'terraform-provider-google-beta_1.20.0_SHA256SUMS.sig',
+            builds: [
+              {
+                name: 'terraform-provider-google-beta',
+                version: '1.20.0',
+                os: 'darwin',
+                arch: 'amd64',
+                filename:
+                  'terraform-provider-google-beta_1.20.0_darwin_amd64.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/1.20.0/terraform-provider-google-beta_1.20.0_darwin_amd64.zip',
+              },
+              {
+                name: 'terraform-provider-google-beta',
+                version: '1.20.0',
+                os: 'freebsd',
+                arch: '386',
+                filename:
+                  'terraform-provider-google-beta_1.20.0_freebsd_386.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/1.20.0/terraform-provider-google-beta_1.20.0_freebsd_386.zip',
+              },
+              {
+                name: 'terraform-provider-google-beta',
+                version: '1.20.0',
+                os: 'freebsd',
+                arch: 'amd64',
+                filename:
+                  'terraform-provider-google-beta_1.20.0_freebsd_amd64.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/1.20.0/terraform-provider-google-beta_1.20.0_freebsd_amd64.zip',
+              },
+            ],
+          },
+          '2.0.0': {
+            name: 'terraform-provider-google-beta',
+            version: '2.0.0',
+            shasums: 'terraform-provider-google-beta_2.0.0_SHA256SUMS',
+            shasums_signature:
+              'terraform-provider-google-beta_2.0.0_SHA256SUMS.sig',
+            builds: [
+              {
+                name: 'terraform-provider-google-beta',
+                version: '2.0.0',
+                os: 'darwin',
+                arch: 'amd64',
+                filename:
+                  'terraform-provider-google-beta_2.0.0_darwin_amd64.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/2.0.0/terraform-provider-google-beta_2.0.0_darwin_amd64.zip',
+              },
+              {
+                name: 'terraform-provider-google-beta',
+                version: '2.0.0',
+                os: 'freebsd',
+                arch: '386',
+                filename:
+                  'terraform-provider-google-beta_2.0.0_freebsd_386.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/2.0.0/terraform-provider-google-beta_2.0.0_freebsd_386.zip',
+              },
+              {
+                name: 'terraform-provider-google-beta',
+                version: '2.0.0',
+                os: 'freebsd',
+                arch: 'amd64',
+                filename:
+                  'terraform-provider-google-beta_2.0.0_freebsd_amd64.zip',
+                url: 'https://releases.hashicorp.com/terraform-provider-google-beta/2.0.0/terraform-provider-google-beta_2.0.0_freebsd_amd64.zip',
+              },
+            ],
+          },
+        },
+      };
       httpMock
         .scope(primaryUrl)
-        .get('/v1/providers/hashicorp/google-beta')
+        .get('/v2/providers/hashicorp/google-beta')
+        .query({ include: 'provider-versions' })
         .reply(404, {
           errors: ['Not Found'],
-        })
-        .get('/.well-known/terraform.json')
-        .reply(200, serviceDiscoveryResult);
+        });
       httpMock
         .scope(secondaryUrl)
         .get('/terraform-provider-google-beta/index.json')
@@ -223,6 +326,59 @@ describe('modules/datasource/terraform-provider/index', () => {
         ],
         sourceUrl:
           'https://github.com/terraform-providers/terraform-provider-google-beta',
+      });
+    });
+
+    it('processes real data from OpenTofu registry docs API', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/providers/hashicorp/azurerm/index.json')
+        .reply(200, {
+          versions: [
+            { id: 'v2.53.0', published: '2019-11-26T08:22:56Z' },
+            { id: 'v2.52.0', published: '2019-11-19T08:22:56Z' },
+          ],
+        });
+
+      const res = await getPkgReleases({
+        datasource: TerraformProviderDatasource.id,
+        packageName: 'hashicorp/azurerm',
+        registryUrls: ['https://registry.opentofu.org'],
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
+        registryUrl: 'https://registry.opentofu.org',
+        sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
+        releases: [
+          {
+            releaseTimestamp: '2019-11-19T08:22:56.000Z',
+            version: '2.52.0',
+          },
+          {
+            releaseTimestamp: '2019-11-26T08:22:56.000Z',
+            version: '2.53.0',
+          },
+        ],
+      });
+    });
+
+    it('returns an empty release list for OpenTofu registry without versions', async () => {
+      httpMock
+        .scope('https://api.opentofu.org')
+        .get('/registry/docs/providers/hashicorp/azurerm/index.json')
+        .reply(200, {});
+
+      await expect(
+        getPkgReleases({
+          datasource: TerraformProviderDatasource.id,
+          packageName: 'hashicorp/azurerm',
+          registryUrls: ['https://registry.opentofu.org'],
+        }),
+      ).resolves.toEqual({
+        homepage: 'https://search.opentofu.org/provider/hashicorp/azurerm',
+        sourceUrl: 'https://github.com/hashicorp/terraform-provider-azurerm',
+        releases: [],
       });
     });
   });
@@ -437,6 +593,197 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.6.1',
       );
       await expect(res).rejects.toThrow(ExternalHostError);
+    });
+  });
+
+  describe('getProviderPackages', () => {
+    afterEach(() => {
+      hostRules.clear();
+    });
+
+    it('returns flat hash list from the linux/amd64 packages map', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          packages: {
+            linux_amd64: {
+              hashes: [
+                'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+                'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+              ],
+            },
+            darwin_arm64: {
+              hashes: [
+                'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+                'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+              ],
+            },
+          },
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toIncludeAllMembers([
+        'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+        'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+        'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+        'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+      ]);
+    });
+
+    it('falls back to platform discovery when linux/amd64 is unavailable', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, {
+          versions: [
+            { version: '2.5.1', platforms: [{ os: 'darwin', arch: 'arm64' }] },
+          ],
+        })
+        .get('/v1/providers/hashicorp/local/2.5.1/download/darwin/arm64')
+        .reply(200, {
+          packages: {
+            darwin_arm64: {
+              hashes: [
+                'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+                'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+              ],
+            },
+          },
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toIncludeAllMembers([
+        'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+        'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+      ]);
+    });
+
+    it('returns null when the requested version is missing from /versions', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, { versions: [] });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when /versions has no platforms for the version', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, {
+          versions: [{ version: '2.5.1', platforms: [] }],
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when the download response has no packages field', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-local_2.5.1_linux_amd64.zip',
+          download_url: 'https://example.com/terraform-provider-local.zip',
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when packages map is empty', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, { packages: {} });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('throws when the download request errors', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(500);
+
+      const res = terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      await expect(res).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws when platform discovery errors', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(500);
+
+      const res = terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      await expect(res).rejects.toThrow(ExternalHostError);
+    });
+
+    it('does not rewrap an ExternalHostError', async () => {
+      hostRules.add({
+        matchHost: openTofuRegistryUrl,
+        abortOnError: true,
+      });
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(500);
+
+      const res = terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+      const err = await res.catch((err: unknown) => err);
+
+      expect(err).toBeInstanceOf(ExternalHostError);
+      expect(err).toHaveProperty('err', expect.any(HttpError));
     });
   });
 

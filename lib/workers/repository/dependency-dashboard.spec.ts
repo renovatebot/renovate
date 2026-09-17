@@ -8,6 +8,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { logger, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import { pkg } from '../../expose.ts';
 import type {
   PackageDependency,
   PackageFile,
@@ -16,7 +17,6 @@ import { massageMarkdown } from '../../modules/platform/github/index.ts';
 import type { Platform } from '../../modules/platform/index.ts';
 import { clone } from '../../util/clone.ts';
 import { emojify } from '../../util/emoji.ts';
-import { regEx } from '../../util/regex.ts';
 import { asTimestamp } from '../../util/timestamp.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import * as dependencyDashboard from './dependency-dashboard.ts';
@@ -43,6 +43,7 @@ const getIssueSpy = platform.getIssue;
 let config: BranchConfig;
 
 beforeEach(() => {
+  GlobalConfig.reset();
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
   config = getConfig() as BranchConfig;
@@ -95,6 +96,24 @@ async function dryRun(
 
 describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
+    it('leaves the config alone when there is no dashboard issue', async () => {
+      const conf: RenovateConfig = { prCreation: 'approval' };
+      platform.findIssue.mockResolvedValueOnce(null);
+
+      await dependencyDashboard.readDashboardBody(conf);
+
+      expect(conf).toEqual({
+        dependencyDashboardAllAwaitingSchedule: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {},
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+      expect(conf.dependencyDashboardIssue).toBeUndefined();
+    });
+
     it('parses invalid dashboard body without throwing error', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
@@ -124,11 +143,10 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body:
-          Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
-            '- [ ]',
-            '- [x]',
-          ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
+        body: `${Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          '- [ ]',
+          '- [x]',
+        )}\n\n - [x] <!-- rebase-all-open-prs -->`,
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -147,9 +165,9 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body and apply checkedBranches', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
-      conf.checkedBranches = ['branch1', 'branch2'];
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
@@ -157,7 +175,6 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
-        checkedBranches: ['branch1', 'branch2'],
         dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
@@ -300,12 +317,11 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('does not read dashboard body but applies checkedBranches regardless', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
       const conf: RenovateConfig = {};
       conf.dependencyDashboard = false;
-      conf.checkedBranches = ['branch1', 'branch2'];
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
-        checkedBranches: ['branch1', 'branch2'],
         dependencyDashboard: false,
         dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
@@ -315,6 +331,21 @@ describe('workers/repository/dependency-dashboard', () => {
           branch2: 'global-config',
         },
         dependencyDashboardRebaseAllOpen: false,
+      });
+    });
+
+    it('applies rebaseAllOpenBranches without dashboard', async () => {
+      GlobalConfig.set({ rebaseAllOpenBranches: true });
+      const conf: RenovateConfig = {};
+      conf.dependencyDashboard = false;
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboard: false,
+        dependencyDashboardAllAwaitingSchedule: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {},
+        dependencyDashboardRebaseAllOpen: true,
       });
     });
 
@@ -451,6 +482,27 @@ describe('workers/repository/dependency-dashboard', () => {
       await dryRun(branches, platform, 1, 0);
     });
 
+    it('renders no header and no abandonment section when both are off', async () => {
+      const branches: BranchConfig[] = [];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardHeader = '';
+      config.dependencyDashboardReportAbandonment = false;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toStartWith(
+        'This repository currently has no open or pending branches.',
+      );
+      expect(body).not.toContain('Abandoned');
+    });
+
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
@@ -467,7 +519,13 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.dependencyDashboardTitle,
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toStartWith('This is a header\n');
+      expect(body).toContain(
+        'This repository currently has no open or pending branches.',
+      );
+      expect(body).toContain('## Detected Dependencies\n\nNone detected');
+      expect(body).toEndWith('---\nAnd this is a footer\n');
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -497,16 +555,86 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.dependencyDashboardTitle,
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        /platform:github/,
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toStartWith('This is a header for platform:github\n');
+      expect(body).toContain(
+        'This repository currently has no open or pending branches.',
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        /repository:test/,
-      );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(body).toContain('## Detected Dependencies\n\nNone detected');
+      expect(body).toEndWith('---\nAnd this is a footer for repository:test\n');
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
+    });
+
+    it('supports renovateVersion templating in header and footer', async () => {
+      const branches: BranchConfig[] = [];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardHeader =
+        'This is a header for renovateVersion:{{renovateVersion}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for renovateVersion:{{renovateVersion}}';
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        `renovateVersion:${pkg.version}`,
+      );
+    });
+
+    it('does not report schedules by default', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'scheduled update',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'scheduled-dep' }],
+          result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
+          branchName: 'scheduled-branch',
+        },
+      ];
+      config.dependencyDashboard = true;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+
+      expect(platform.ensureIssue.mock.calls[0][0].body).not.toContain(
+        'Schedule (UTC):',
+      );
+    });
+
+    it('reports non-cron schedules with their timezone when enabled', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'scheduled update',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'scheduled-dep' }],
+          result: 'not-scheduled',
+          schedule: ['before 5am on Monday'],
+          timezone: 'Europe/Berlin',
+          branchName: 'scheduled-branch',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardReportSchedules = true;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+
+      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
+        'Schedule (Europe/Berlin): `before 5am on Monday`',
+      );
     });
 
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other', async () => {
@@ -587,6 +715,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       config.dependencyDashboard = true;
+      config.dependencyDashboardReportSchedules = true;
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -696,7 +825,67 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain('## Pending Approval');
+      expect(body).toContain(codeBlock`
+        ### Category #2
+
+         - [ ] <!-- approve-branch=branchName0 -->pr0
+
+        ### Category #10
+
+         - [ ] <!-- approve-branch=branchName2 -->pr2
+
+        ### Others
+
+         - [ ] <!-- approve-branch=branchName1 -->pr1
+
+        ### All
+
+         - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+      `);
+      expect(body).toContain('## Awaiting Schedule');
+      expect(body).toContain(codeBlock`
+        ### Category #1
+
+         - [ ] <!-- unschedule-branch=branchName4 -->pr4
+
+        ### Others
+
+         - [ ] <!-- unschedule-branch=branchName3 -->pr3
+
+        ### All
+
+         - [ ] <!-- create-all-awaiting-schedule-prs -->🔐 **Create all awaiting schedule PRs at once** 🔐
+      `);
+      expect(body).toContain('## Rate-Limited');
+      expect(body).toContain(codeBlock`
+        ### Category #3
+
+         - [ ] <!-- unlimit-branch=branchName5 -->pr5
+         - [ ] <!-- unlimit-branch=branchName6 -->pr6
+
+        ### All
+
+         - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
+      `);
+      // branches without a category are listed directly, with no `###` heading
+      expect(body).toContain(codeBlock`
+        ## Errored
+
+        The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.
+
+         - [ ] <!-- retry-branch=branchName7 -->pr7
+         - [ ] <!-- retry-branch=branchName8 -->pr8
+      `);
+      expect(body).toContain(codeBlock`
+        ## Pending Branch Automerge
+
+        The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.
+
+         - [ ] <!-- approvePr-branch=branchName9 -->pr9
+      `);
+      expect(body).toContain('## Detected Dependencies\n\nNone detected');
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -855,21 +1044,14 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.dependencyDashboardTitle,
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body.trim()).toBe(
-        codeBlock`
-This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain(codeBlock`
+        ## Group Size Not Met
 
-## Group Size Not Met
+        The following branches have not met their minimum group size. To create them, click on a checkbox below.
 
-The following branches have not met their minimum group size. To create them, click on a checkbox below.
-
- - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
-
-## Detected Dependencies
-
-None detected
-`,
-      );
+         - [ ] <!-- approveGroup-branch=groupBranch1 -->undefined
+      `);
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -1105,7 +1287,22 @@ None detected
         { result: 'no-migration' },
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      // duplicates are collapsed, and problems with artifact errors are omitted
+      expect(body).toContain(codeBlock`
+        ## Repository Problems
+
+        Renovate tried to run on this repository, but found these problems.
+
+         - ❌ ERROR: everything is broken
+         - ⚠️ WARN: just a bit
+         - ❌ ERROR: i am a duplicated problem
+         - ❌ ERROR: i am a non-duplicated problem
+         - ⚠️ WARN: i am a non-duplicated problem
+      `);
+      expect(body).not.toContain('i am an artifact error');
+      expect(body).toContain('## Pending Status Checks');
+      expect(body).toContain(' - [ ] <!-- unpend-branch=branchName1 -->pr1');
     });
 
     it('contains logged problems with custom header', async () => {
@@ -1139,10 +1336,20 @@ None detected
       );
 
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
-        'platform is github',
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      // the templated custom header replaces the default problems header
+      expect(body).toContain(codeBlock`
+        ## Repository Problems
+
+        platform is github
+
+         - ❌ ERROR: i am a non-duplicated problem
+      `);
+      expect(body).not.toContain(
+        'Renovate tried to run on this repository, but found these problems.',
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(body).toContain('## Pending Status Checks');
+      expect(body).toContain(' - [ ] <!-- unpend-branch=branchName1 -->pr1');
     });
 
     it('dependency Dashboard All Pending Approval', async () => {
@@ -1170,15 +1377,17 @@ None detected
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
-        body: `This issue contains a list of Renovate updates and their statuses.
+        body: codeBlock`
+          This issue contains a list of Renovate updates and their statuses.
 
-        ## Pending Approval
+                  ## Pending Approval
 
-        These branches will be created by Renovate only once you click their checkbox below.
+                  These branches will be created by Renovate only once you click their checkbox below.
 
-         - [ ] <!-- approve-branch=branchName1 -->pr1
-         - [ ] <!-- approve-branch=branchName2 -->pr2
-         - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐`,
+                   - [ ] <!-- approve-branch=branchName1 -->pr1
+                   - [ ] <!-- approve-branch=branchName2 -->pr2
+                   - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+        `,
       });
       await dependencyDashboard.ensureDependencyDashboard(
         config,
@@ -1186,30 +1395,11 @@ None detected
         {},
         { result: 'no-migration' },
       );
-      const checkApprovePendingSelectAll = regEx(
-        / - \[ ] <!-- approve-all-pending-prs -->/g,
-      );
-      const checkApprovePendingBranch1 = regEx(
-        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g,
-      );
-      const checkApprovePendingBranch2 = regEx(
-        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g,
-      );
-      expect(
-        checkApprovePendingSelectAll.test(
-          platform.ensureIssue.mock.calls[0][0].body,
-        ),
-      ).toBeTrue();
-      expect(
-        checkApprovePendingBranch1.test(
-          platform.ensureIssue.mock.calls[0][0].body,
-        ),
-      ).toBeTrue();
-      expect(
-        checkApprovePendingBranch2.test(
-          platform.ensureIssue.mock.calls[0][0].body,
-        ),
-      ).toBeTrue();
+      // all checkboxes are reset to unchecked once the requested action has run
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain(' - [ ] <!-- approve-all-pending-prs -->');
+      expect(body).toContain(' - [ ] <!-- approve-branch=branchName1 -->pr1');
+      expect(body).toContain(' - [ ] <!-- approve-branch=branchName2 -->pr2');
     });
 
     it('dependency Dashboard Open All rate-limited', async () => {
@@ -1237,12 +1427,14 @@ None detected
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
-        body: `This issue contains a list of Renovate updates and their statuses.
-        ## Rate-limited
-        These updates are currently rate-limited. Click on a checkbox below to force their creation now.
-         - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
-         - [ ] <!-- unlimit-branch=branchName1 -->pr1
-         - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
+        body: codeBlock`
+          This issue contains a list of Renovate updates and their statuses.
+                  ## Rate-limited
+                  These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+                   - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
+                   - [ ] <!-- unlimit-branch=branchName1 -->pr1
+                   - [ ] <!-- unlimit-branch=branchName2 -->pr2
+        `,
       });
       await dependencyDashboard.ensureDependencyDashboard(
         config,
@@ -1250,30 +1442,11 @@ None detected
         {},
         { result: 'no-migration' },
       );
-      const checkRateLimitedSelectAll = regEx(
-        / - \[ ] <!-- create-all-rate-limited-prs -->/g,
-      );
-      const checkRateLimitedBranch1 = regEx(
-        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g,
-      );
-      const checkRateLimitedBranch2 = regEx(
-        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g,
-      );
-      expect(
-        checkRateLimitedSelectAll.test(
-          platform.ensureIssue.mock.calls[0][0].body,
-        ),
-      ).toBeTrue();
-      expect(
-        checkRateLimitedBranch1.test(
-          platform.ensureIssue.mock.calls[0][0].body,
-        ),
-      ).toBeTrue();
-      expect(
-        checkRateLimitedBranch2.test(
-          platform.ensureIssue.mock.calls[0][0].body,
-        ),
-      ).toBeTrue();
+      // all checkboxes are reset to unchecked once the requested action has run
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain(' - [ ] <!-- create-all-rate-limited-prs -->');
+      expect(body).toContain(' - [ ] <!-- unlimit-branch=branchName1 -->pr1');
+      expect(body).toContain(' - [ ] <!-- unlimit-branch=branchName2 -->pr2');
     });
 
     it('rechecks branches', async () => {
@@ -1334,7 +1507,17 @@ None detected
         {},
         { result: 'no-migration' },
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      // the rechecked branch is unchecked again, the others keep their state
+      expect(body).toContain('## Pending Approval');
+      expect(body).toContain(' - [ ] <!-- approve-branch=branchName1 -->pr1');
+      expect(body).toContain(' - [ ] <!-- approve-branch=branchName2 -->pr2');
+      expect(body).toContain(' - [ ] <!-- approve-all-pending-prs -->');
+      expect(body).toContain('## Awaiting Schedule');
+      expect(body).toContain(
+        ' - [x] <!-- unschedule-branch=branchName3 -->pr3',
+      );
+      expect(body).not.toContain('rebase-all-open-prs');
     });
 
     it('skips fetching issue if content unchanged', async () => {
@@ -1415,7 +1598,41 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('## Detected Dependencies');
+          // one manager block in full, to pin down the nesting
+          expect(body).toContain(codeBlock`
+            <details><summary>dockerfile (1)</summary>
+            <blockquote>
+
+            <details><summary>Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\` → [Updates: \`22.04\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+          `);
+          expect(body).toContain('<details><summary>npm (1)</summary>');
+          expect(body).toContain(
+            '<details><summary>package.json (8)</summary>',
+          );
+          expect(body).toContain(' - `cookie-parser ^1.4.5`');
+          expect(body).toContain(' - `express ~4.17.1` → [Updates: `~4.18.0`]');
+          expect(body).toContain(' - `express-handlebars >=5.3.4`');
+          expect(body).toContain(' - `geoip-lite 1.4.*`');
+          expect(body).toContain(' - `nodemailer 6.7.0` → [Updates: `6.7.4`]');
+          expect(body).toContain(
+            ' - `redis 3.1.2-3.4.0` → [Updates: `3.1.1`, `3.1.2`, `4.1.0`]',
+          );
+          expect(body).toContain(' - `dotenv 10.0.0` → [Updates: `16.0.0`]');
+          expect(body).toContain(' - `nodemon 2.0.14` → [Updates: `2.0.16`]');
+          expect(body).toContain('<details><summary>poetry (1)</summary>');
+          expect(body).toContain(
+            '<details><summary>pyproject.toml (1)</summary>',
+          );
+          expect(body).toContain(' - `six <=1.3.0` → [Updates: `<=1.16.0`]');
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1432,7 +1649,9 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('## Detected Dependencies\n\nNone detected');
+          expect(body).not.toContain('<details>');
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1449,7 +1668,9 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('## Detected Dependencies\n\nNone detected');
+          expect(body).not.toContain('<details>');
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1465,7 +1686,31 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('<details><summary>dockerfile (4)</summary>');
+          expect(body).toContain(
+            '<details><summary>digest-only/Dockerfile (1)</summary>',
+          );
+          expect(body).toContain(
+            ' - `ubuntu sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f`',
+          );
+          // a dep with neither version nor digest gets no count and no entry
+          expect(body).toContain(codeBlock`
+            <details><summary>no-ver-no-digest/Dockerfile</summary>
+
+
+            </details>
+          `);
+          expect(body).toContain(
+            '<details><summary>ver-and-digest/Dockerfile (1)</summary>',
+          );
+          expect(body).toContain(
+            ' - `ubuntu 18.04@sha256:a7ed45c4a95fbe19f9c5fb9d1ca58b2431b2a4984754be2f50ccec99d9428b79`',
+          );
+          expect(body).toContain(
+            '<details><summary>ver-only/Dockerfile (1)</summary>',
+          );
+          expect(body).toContain(' - `ubuntu 20.04`');
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1501,6 +1746,79 @@ None detected
           );
           // same with dry run
           await dryRun(branches, platform, 0, 1);
+        });
+
+        it('shows replacement as unavailable when target already exists as sibling', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithExistingReplacement: Record<
+            string,
+            PackageFile[]
+          > = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: '@material-ui/core',
+                    deprecationMessage: 'This package is deprecated',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@material-ui/icons',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/icons-material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/icons-material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          PackageFiles.add('main', packageFilesWithExistingReplacement);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithExistingReplacement,
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toInclude('Deprecations / Replacements');
+          expect(body).toInclude('@material-ui/core');
+          expect(body).toInclude('@material-ui/icons');
+          expect(body).not.toInclude(
+            '![Available](https://img.shields.io/badge/available-green?style=flat-square)',
+          );
+          expect(body).toInclude(
+            '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)',
+          );
         });
 
         it('handles missing version/digest values correctly', async () => {
@@ -1591,7 +1909,59 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('## Detected Dependencies');
+          // dependencies are grouped per base branch, base branches sorted
+          const devIndex = body.indexOf(
+            '<details><summary>Branch dev</summary>',
+          );
+          const mainIndex = body.indexOf(
+            '<details><summary>Branch main</summary>',
+          );
+          expect(devIndex).toBeGreaterThan(-1);
+          expect(mainIndex).toBeGreaterThan(devIndex);
+          // both base branches list the same dependencies
+          for (const section of [
+            body.slice(devIndex, mainIndex),
+            body.slice(mainIndex),
+          ]) {
+            expect(section).toContain(
+              '<details><summary>dockerfile (1)</summary>',
+            );
+            expect(section).toContain(
+              '<details><summary>Dockerfile (1)</summary>',
+            );
+            expect(section).toContain(' - `ubuntu 20.04` → [Updates: `22.04`]');
+            expect(section).toContain('<details><summary>npm (1)</summary>');
+            expect(section).toContain(
+              '<details><summary>package.json (8)</summary>',
+            );
+            expect(section).toContain(' - `cookie-parser ^1.4.5`');
+            expect(section).toContain(
+              ' - `express ~4.17.1` → [Updates: `~4.18.0`]',
+            );
+            expect(section).toContain(' - `express-handlebars >=5.3.4`');
+            expect(section).toContain(' - `geoip-lite 1.4.*`');
+            expect(section).toContain(
+              ' - `nodemailer 6.7.0` → [Updates: `6.7.4`]',
+            );
+            expect(section).toContain(
+              ' - `redis 3.1.2-3.4.0` → [Updates: `3.1.1`, `3.1.2`, `4.1.0`]',
+            );
+            expect(section).toContain(
+              ' - `dotenv 10.0.0` → [Updates: `16.0.0`]',
+            );
+            expect(section).toContain(
+              ' - `nodemon 2.0.14` → [Updates: `2.0.16`]',
+            );
+            expect(section).toContain('<details><summary>poetry (1)</summary>');
+            expect(section).toContain(
+              '<details><summary>pyproject.toml (1)</summary>',
+            );
+            expect(section).toContain(
+              ' - `six <=1.3.0` → [Updates: `<=1.16.0`]',
+            );
+          }
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1607,7 +1977,26 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('## Detected Dependencies');
+          // the `dev` branch still lists its dependencies
+          expect(body).toContain('<details><summary>Branch dev</summary>');
+          expect(body).toContain('<details><summary>dockerfile (1)</summary>');
+          expect(body).toContain(' - `ubuntu 20.04` → [Updates: `22.04`]');
+          expect(body).toContain('<details><summary>npm (1)</summary>');
+          expect(body).toContain(' - `cookie-parser ^1.4.5`');
+          expect(body).toContain('<details><summary>poetry (1)</summary>');
+          expect(body).toContain(' - `six <=1.3.0` → [Updates: `<=1.16.0`]');
+          // only the `main` branch falls back to the default message
+          expect(body).toContain(codeBlock`
+            <details><summary>Branch main</summary>
+            <blockquote>
+
+            None detected
+
+            </blockquote>
+            </details>
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1623,7 +2012,26 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('## Detected Dependencies');
+          // the `dev` branch still lists its dependencies
+          expect(body).toContain('<details><summary>Branch dev</summary>');
+          expect(body).toContain('<details><summary>dockerfile (1)</summary>');
+          expect(body).toContain(' - `ubuntu 20.04` → [Updates: `22.04`]');
+          expect(body).toContain('<details><summary>npm (1)</summary>');
+          expect(body).toContain(' - `cookie-parser ^1.4.5`');
+          expect(body).toContain('<details><summary>poetry (1)</summary>');
+          expect(body).toContain(' - `six <=1.3.0` → [Updates: `<=1.16.0`]');
+          // only the `main` branch falls back to the default message
+          expect(body).toContain(codeBlock`
+            <details><summary>Branch main</summary>
+            <blockquote>
+
+            None detected
+
+            </blockquote>
+            </details>
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1681,7 +2089,17 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain(codeBlock`
+            ---
+
+            > [!WARNING]
+            > Renovate failed to look up the following dependencies: \`dependency-2\`.
+            >${' '}
+            > Files affected: \`package.json\`
+
+            ---
+          `);
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });
@@ -1843,34 +2261,52 @@ None detected
         '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
         '> `1`/`2` CVEs have Renovate fixes.\n\n';
 
-      expect(result.trimEnd()).toBe(
-        heading +
-          codeBlock`<details><summary>npm</summary>
-<blockquote>
-
-<details><summary>undefined</summary>
-<blockquote>
-
-<details><summary>express</summary>
-<blockquote>
-
-- [GHSA-29mw-wpgm-hmr9](https://osv.dev/vulnerability/GHSA-29mw-wpgm-hmr9) (fixed in 4.18.1)
-</blockquote>
-</details>
-
-<details><summary>cookie-parser</summary>
-<blockquote>
-
-- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
-</blockquote>
-</details>
-
-</blockquote>
-</details>
-
-</blockquote>
-</details>`,
+      expect(result).toStartWith(heading);
+      expect(result).toContain('<details><summary>npm</summary>');
+      expect(result).toContain('<details><summary>express</summary>');
+      expect(result).toContain(
+        '- [GHSA-29mw-wpgm-hmr9](https://osv.dev/vulnerability/GHSA-29mw-wpgm-hmr9) (fixed in 4.18.1)',
       );
+      expect(result).toContain('<details><summary>cookie-parser</summary>');
+      expect(result).toContain(
+        '- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)',
+      );
+    });
+
+    it('groups two vulnerabilities for the same package together', async () => {
+      const fetchVulnerabilitiesMock = vi.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-29mw-wpgm-hmr9' },
+        },
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-rv95-896h-c2vc' },
+        },
+      ]);
+
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+          osvVulnerabilityAlerts: true,
+        },
+        packageFiles,
+      );
+
+      expect(result).toContain('<details><summary>express</summary>');
+      expect(result).toContain('GHSA-29mw-wpgm-hmr9');
+      expect(result).toContain('GHSA-rv95-896h-c2vc');
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
@@ -1915,27 +2351,15 @@ None detected
         },
         packageFiles,
       );
-      expect(result.trimEnd()).toBe(
-        heading +
-          codeBlock`<details><summary>npm</summary>
-<blockquote>
-
-<details><summary>undefined</summary>
-<blockquote>
-
-<details><summary>cookie-parser</summary>
-<blockquote>
-
-- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
-</blockquote>
-</details>
-
-</blockquote>
-</details>
-
-</blockquote>
-</details>`,
+      expect(result).toStartWith(heading);
+      expect(result).toContain('<details><summary>npm</summary>');
+      expect(result).toContain('<details><summary>cookie-parser</summary>');
+      expect(result).toContain(
+        '- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)',
       );
+      // the vulnerability with a fixed version is left out
+      expect(result).not.toContain('express');
+      expect(result).not.toContain('GHSA-29mw-wpgm-hmr9');
     });
   });
 
@@ -1953,7 +2377,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
 
@@ -1973,7 +2400,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -1983,6 +2413,11 @@ None detected
         '<summary>View abandoned dependencies (1)</summary>',
       );
       expect(result).toContain('> ℹ️ **Note**');
+      // the note must stay outside the <details> block, otherwise GitHub
+      // renders it as plain text rather than a note alert
+      expect(result.indexOf('> ℹ️ **Note**')).toBeLessThan(
+        result.indexOf('<details>'),
+      );
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');
@@ -2022,7 +2457,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2056,7 +2494,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2081,7 +2522,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
   });

@@ -24,6 +24,7 @@ async function getOnboardingConfig(
   if (foundPreset) {
     logger.debug(`Found preset ${foundPreset} - using it in onboarding config`);
     onboardingConfig = {
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- JSON schema reference URL, not a documentation link
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       extends: [foundPreset],
     };
@@ -76,8 +77,7 @@ async function searchDefaultOnboardingPreset(
 
     const orgName = repoPathParts[0];
 
-    // TODO: types (#22198)
-    const platform = GlobalConfig.get('platform')!;
+    const platform = GlobalConfig.get('platform');
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';

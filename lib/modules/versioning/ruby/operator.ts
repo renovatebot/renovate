@@ -11,18 +11,21 @@ const PGTE = '~>';
 const SINGLE = [EQUAL];
 const ALL = [EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE];
 
-const isValidOperator = (operator: string): boolean => ALL.includes(operator);
-const isSingleOperator = (operator: string): boolean =>
-  SINGLE.includes(operator);
+function isValidOperator(operator: string): boolean {
+  return ALL.includes(operator);
+}
+function isSingleOperator(operator: string): boolean {
+  return SINGLE.includes(operator);
+}
 
 export {
   EQUAL,
-  NOT_EQUAL,
   GT,
-  LT,
   GTE,
+  LT,
   LTE,
+  NOT_EQUAL,
   PGTE,
-  isValidOperator,
   isSingleOperator,
+  isValidOperator,
 };

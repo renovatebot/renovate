@@ -35,10 +35,7 @@ export async function getReleaseNotesMd(
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
-  let files: GitlabTreeNode[] = [];
-  if (!files.length) {
-    files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
-  }
+  const files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;
@@ -55,7 +52,7 @@ export async function getReleaseNotesMd(
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#raw-blob-content
   const fileRes = await http.getText(`${apiPrefix}blobs/${id}/raw`);
-  const changelogMd = fileRes.body + '\n#\n##';
+  const changelogMd = `${fileRes.body}\n#\n##`;
   return { changelogFile, changelogMd };
 }
 

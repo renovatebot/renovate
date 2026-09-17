@@ -106,7 +106,7 @@ export class ConanDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const conanPackage = getConanPackage(packageName);
-    const userAndChannel = '@' + conanPackage.userAndChannel;
+    const userAndChannel = `@${conanPackage.userAndChannel}`;
     if (
       isString(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl
@@ -122,6 +122,7 @@ export class ConanDatasource extends Datasource {
       'Looking up conan api dependency',
     );
 
+    // v8 ignore else -- the datasource layer always supplies a registry url
     if (registryUrl) {
       const url = ensureTrailingSlash(registryUrl);
       const lookupUrl = joinUrlParts(
@@ -130,8 +131,8 @@ export class ConanDatasource extends Datasource {
       );
 
       try {
-        const rep = await this.http.getJsonUnchecked(lookupUrl);
-        const conanJson = ConanJSON.parse(rep.body);
+        const rep = await this.http.getJson(lookupUrl, ConanJSON);
+        const conanJson = rep.body;
         if (conanJson) {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };
@@ -183,6 +184,7 @@ export class ConanDatasource extends Datasource {
                 ConanProperties,
               );
               const { sourceUrl } = conanProperties;
+              // v8 ignore else -- needs a full artifactory properties fixture
               if (sourceUrl) {
                 dep.sourceUrl = sourceUrl;
               }

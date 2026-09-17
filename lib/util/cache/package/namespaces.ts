@@ -1,11 +1,10 @@
-// v8 ignore file
+// v8 ignore file -- constant namespace list, no executable logic to cover
 /* IMPORTANT:
  * These namespaces below are used as part of the cacheTtlOverride feature
  * It's OK to add to them (e.g. for new datasources) but we should avoid
  * backwards-incompatible changes in non-major releases
  */
 
-/* v8 ignore next -- BTW don't forget to update `self-hosted-configuration.md` */
 export const packageCacheNamespaces = [
   '_test-namespace',
   'changelog-bitbucket-notes@v2',
@@ -20,6 +19,7 @@ export const packageCacheNamespaces = [
   'changelog-github-release',
   'changelog-gitlab-notes@v2',
   'changelog-gitlab-release',
+  'datasource-apk',
   'datasource-artifactory',
   'datasource-aws-machine-image',
   'datasource-aws-rds',
@@ -67,6 +67,7 @@ export const packageCacheNamespaces = [
   'datasource-gitlab-tags',
   'datasource-glasskube-packages',
   'datasource-go-direct',
+  'datasource-go-proxy-timestamps',
   'datasource-go-proxy',
   'datasource-go',
   'datasource-golang-version',
@@ -79,6 +80,8 @@ export const packageCacheNamespaces = [
   'datasource-jenkins-plugins',
   'datasource-jsr',
   'datasource-maven:cache-provider',
+  'datasource-maven:metadata-not-found',
+  'datasource-maven:pom-cache-provider',
   'datasource-maven:postprocess-reject',
   'datasource-nextcloud',
   'datasource-node-version',
@@ -92,6 +95,7 @@ export const packageCacheNamespaces = [
   'datasource-rpm',
   'datasource-ruby-version',
   'datasource-rubygems',
+  'datasource-rust-version',
   'datasource-sbt-package',
   'datasource-terraform-module',
   'datasource-terraform-provider',
@@ -107,11 +111,10 @@ export const packageCacheNamespaces = [
   'preset',
   'terraform-provider-hash',
   'url-sha256',
-] as const; /* v8 ignore stop -- BTW don't forget to update `self-hosted-configuration.md` */
+] as const;
 
 export type PackageCacheNamespace =
-  | (typeof packageCacheNamespaces)[number]
-  | `datasource-releases-${string}`;
+  (typeof packageCacheNamespaces)[number] | `datasource-releases-${string}`;
 
 export type CombinedKey =
   `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

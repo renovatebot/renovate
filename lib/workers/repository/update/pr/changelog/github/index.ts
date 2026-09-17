@@ -32,7 +32,7 @@ export async function getReleaseNotesMd(
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
   const { default_branch: defaultBranch = 'HEAD' } = (
-    await http.getJsonUnchecked<{ default_branch: string }>(apiPrefix, {
+    await http.getJsonUnchecked<{ default_branch?: string }>(apiPrefix, {
       cacheProvider: memCacheProvider,
     })
   ).body;
@@ -85,7 +85,7 @@ export async function getReleaseNotesMd(
     { cacheProvider: memCacheProvider },
   );
 
-  const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
+  const changelogMd = `${fromBase64(fileRes.body.content)}\n#\n##`;
   return { changelogFile, changelogMd };
 }
 

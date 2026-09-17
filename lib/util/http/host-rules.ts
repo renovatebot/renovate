@@ -10,7 +10,7 @@ import {
 } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import { hasProxy } from '../../proxy.ts';
-import type { HostRule } from '../../types/index.ts';
+import type { CombinedHostRule, HostRule } from '../../types/index.ts';
 import * as hostRules from '../host-rules.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { parseUrl } from '../url.ts';
@@ -21,7 +21,6 @@ import type { GotOptions } from './types.ts';
 export type HostRulesGotOptions = Pick<
   GotOptions & InternalHttpOptions,
   | 'hostType'
-  | 'url'
   | 'noAuth'
   | 'headers'
   | 'token'
@@ -41,7 +40,7 @@ export type HostRulesGotOptions = Pick<
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-): HostRule {
+): CombinedHostRule {
   const { hostType, readOnly } = options;
   let res = hostRules.find({ hostType, url, readOnly });
 
@@ -223,7 +222,7 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   }
 
   if (hostRule.headers) {
-    const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
+    const allowedHeaders = GlobalConfig.get('allowedHeaders');
     const filteredHeaders: Record<string, string> = {};
 
     for (const [header, value] of Object.entries(hostRule.headers)) {
@@ -253,21 +252,21 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (isNonEmptyString(hostRule.httpsCertificateAuthority)) {
     options.https = {
-      ...(options.https ?? {}),
+      ...options.https,
       certificateAuthority: hostRule.httpsCertificateAuthority,
     };
   }
 
   if (isNonEmptyString(hostRule.httpsPrivateKey)) {
     options.https = {
-      ...(options.https ?? {}),
+      ...options.https,
       key: hostRule.httpsPrivateKey,
     };
   }
 
   if (isNonEmptyString(hostRule.httpsCertificate)) {
     options.https = {
-      ...(options.https ?? {}),
+      ...options.https,
       certificate: hostRule.httpsCertificate,
     };
   }

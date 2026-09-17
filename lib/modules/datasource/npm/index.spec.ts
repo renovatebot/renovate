@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
+import { defaultRegistryUrl } from './common.ts';
 import { NpmDatasource, setNpmrc } from './index.ts';
 
 const datasource = NpmDatasource.id;
@@ -44,7 +45,7 @@ describe('modules/datasource/npm/index', () => {
     const missingVersions = { ...npmResponse };
     missingVersions.versions = {};
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/foobar')
       .reply(200, missingVersions);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
@@ -53,11 +54,19 @@ describe('modules/datasource/npm/index', () => {
 
   it('should fetch package info from npm', async () => {
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/foobar')
       .reply(200, npmResponse, { 'Cache-Control': 'public, expires=300' });
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [
+        { version: '0.0.1', releaseTimestamp: '2018-05-06T05:21:53.000Z' },
+        { version: '0.0.2', releaseTimestamp: '2018-05-07T05:21:53.000Z' },
+      ],
+      sourceDirectory: 'src/a',
+      sourceUrl: 'https://github.com/renovateapp/dummy',
+      tags: { latest: '0.0.1' },
+    });
     expect(res?.isPrivate).toBeUndefined();
   });
 
@@ -80,10 +89,12 @@ describe('modules/datasource/npm/index', () => {
         '0.0.1': '2018-05-06T07:21:53+02:00',
       },
     };
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
-    expect(res?.sourceUrl).toBeDefined();
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }],
+      sourceUrl: 'https://github.com/renovateapp/dummy',
+    });
   });
 
   it('should parse repo url (string)', async () => {
@@ -101,10 +112,12 @@ describe('modules/datasource/npm/index', () => {
         '0.0.1': '2018-05-06T07:21:53+02:00',
       },
     };
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
-    expect(res?.sourceUrl).toBeDefined();
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }],
+      sourceUrl: 'https://github.com/renovateapp/dummy',
+    });
   });
 
   it('should return deprecated', async () => {
@@ -132,12 +145,19 @@ describe('modules/datasource/npm/index', () => {
       },
     };
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/foobar')
       .reply(200, deprecatedPackage);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
-    expect(res?.deprecationMessage).toMatchSnapshot();
+    const deprecationMessage =
+      'On registry `https://registry.npmjs.org`, the "latest" version of dependency `foobar` has the following deprecation notice:\n\n`This is deprecated`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.';
+    expect(res).toMatchObject({
+      deprecationMessage,
+      releases: [
+        { version: '0.0.1', isDeprecated: true },
+        { version: '0.0.2', isDeprecated: true },
+      ],
+    });
   });
 
   it('should return attestation', async () => {
@@ -148,7 +168,7 @@ describe('modules/datasource/npm/index', () => {
           foo: 1,
           dist: {
             attestations: {
-              url: 'https://registry.npmjs.org/-/npm/v1/attestations/foobar@0.0.1',
+              url: `${defaultRegistryUrl}/-/npm/v1/attestations/foobar@0.0.1`,
             },
           },
         },
@@ -156,7 +176,7 @@ describe('modules/datasource/npm/index', () => {
           foo: 2,
           dist: {
             attestations: {
-              url: 'https://registry.npmjs.org/-/npm/v1/attestations/foobar@0.0.2',
+              url: `${defaultRegistryUrl}/-/npm/v1/attestations/foobar@0.0.2`,
             },
           },
         },
@@ -174,7 +194,7 @@ describe('modules/datasource/npm/index', () => {
       },
     };
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/foobar')
       .reply(200, deprecatedPackage);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
@@ -193,89 +213,90 @@ describe('modules/datasource/npm/index', () => {
   });
 
   it('should handle foobar', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
     expect(res?.isPrivate).toBeTrue();
   });
 
   it('should handle no time', async () => {
     delete npmResponse.time['0.0.2'];
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [
+        { version: '0.0.1', releaseTimestamp: '2018-05-06T05:21:53.000Z' },
+        { version: '0.0.2' },
+      ],
+    });
+    expect(res?.releases[1].releaseTimestamp).toBeUndefined();
   });
 
   it('should return null if lookup fails 401', async () => {
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(401);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(401);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
     expect(res).toBeNull();
   });
 
   it('should return null if lookup fails', async () => {
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(404);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(404);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
     expect(res).toBeNull();
   });
 
   it('should throw error for unparseable', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, 'oops');
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, 'oops');
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should throw error for 429', async () => {
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(429);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(429);
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should throw error for 5xx', async () => {
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(503);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(503);
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
 
   it('should throw error for 408', async () => {
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(408);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(408);
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
 
   it('should throw error for others', async () => {
-    httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(451);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(451);
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should not send an authorization header if public package', async () => {
     httpMock
-      .scope('https://registry.npmjs.org', {
+      .scope(defaultRegistryUrl, {
         badheaders: ['authorization'],
       })
       .get('/foobar')
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
   });
 
   it('should send an authorization header if provided', async () => {
     httpMock
-      .scope('https://registry.npmjs.org', {
+      .scope(defaultRegistryUrl, {
         reqheaders: { authorization: 'Basic 1234' },
       })
       .get('/@foobar%2Fcore')
@@ -285,7 +306,9 @@ describe('modules/datasource/npm/index', () => {
       packageName: '@foobar/core',
       npmrc: '_auth = 1234',
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
   });
 
   it('should use host rules by hostName if provided', async () => {
@@ -306,7 +329,10 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://npm.mycustomregistry.com',
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
   });
 
   it('should use host rules by baseUrl if provided', async () => {
@@ -332,7 +358,11 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl:
+        'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry',
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
   });
 
   it('resets npmrc', () => {
@@ -343,17 +373,17 @@ describe('modules/datasource/npm/index', () => {
   });
 
   it('should use default registry if missing from npmrc', async () => {
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
+    httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, npmResponse);
     const npmrc = 'foo=bar';
     const res = await getPkgReleases({
       datasource,
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://registry.npmjs.org',
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
   });
 
   it('should fetch package info from custom registry', async () => {
@@ -367,7 +397,10 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://npm.mycustomregistry.com',
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
     expect(res?.isPrivate).toBeTrue();
   });
 
@@ -376,7 +409,7 @@ describe('modules/datasource/npm/index', () => {
       .scope('https://registry.from-env.com')
       .get('/foobar')
       .reply(200, npmResponse);
-    process.env.REGISTRY = 'https://registry.from-env.com';
+    vi.stubEnv('REGISTRY', 'https://registry.from-env.com');
     GlobalConfig.set({ exposeAllEnv: true });
 
     const npmrc = 'registry=${REGISTRY}';
@@ -385,7 +418,10 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      registryUrl: 'https://registry.from-env.com',
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+    });
   });
 
   it('should throw error if necessary env var is not present', () => {

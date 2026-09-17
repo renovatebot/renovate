@@ -44,7 +44,6 @@ Some major platform features are not supported at all by Renovate.
 | --------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jira issues                             | Bitbucket                                 | [#20568](https://github.com/renovatebot/renovate/issues/20568)                                                                                                                               |
 | Jira issues                             | Bitbucket Server                          | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                 |
-| Merge trains                            | GitLab                                    | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                 |
 | Configurable merge strategy and message | Only Bitbucket, Forgejo and Gitea for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
 
 ## What is this `main` branch I see in the documentation?
@@ -98,7 +97,7 @@ The basic idea is that you create a new `packageRules` entry and describe what k
 }
 ```
 
-You may even configure Renovate bot to ask for approval for _all_ updates.
+You may even configure Renovate to ask for approval for _all_ updates.
 The `dependencyDashboardApproval` config option is outside of a `packageRules` array, and so applies to all updates:
 
 ```json

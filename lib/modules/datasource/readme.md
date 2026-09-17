@@ -26,7 +26,7 @@ The config has:
 - `sourceUrl`: a HTTP URL pointing to the source code (for example on GitHub)
 - `homepage`: a HTTP URL for the package's homepage. Ideally should be empty if the homepage and `sourceUrl` are the same
 - `changelogUrl`: a URL pointing to the package's changelog (could be a Markdown file, for example). If not present then Renovate will search the `sourceUrl` for a changelog file
-- `tags`: an object mapping tag -> version, for example `tags: { latest: '3.0.0' }`. This is only used by the `followTags` function
+- `tags`: an object mapping tag → version, for example `tags: { latest: '3.0.0' }`. This is only used by the `followTags` function
 
 ## getDigest
 

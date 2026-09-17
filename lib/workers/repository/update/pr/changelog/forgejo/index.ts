@@ -3,7 +3,7 @@ import { logger } from '../../../../../../logger/index.ts';
 import { Releases } from '../../../../../../modules/datasource/forgejo-releases/schema.ts';
 import {
   ContentsListResponse,
-  ContentsResponse,
+  RepoContents,
 } from '../../../../../../modules/platform/gitea/schema.ts';
 import { ForgejoHttp } from '../../../../../../util/http/forgejo.ts';
 import { fromBase64 } from '../../../../../../util/string.ts';
@@ -37,10 +37,7 @@ export async function getReleaseNotesMd(
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'file');
-  let files: ContentsResponse[] = [];
-  if (!files.length) {
-    files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
-  }
+  const files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;
@@ -58,14 +55,14 @@ export async function getReleaseNotesMd(
 
   const fileRes = await http.getJson(
     `${apiPrefix}/${changelogFile}`,
-    ContentsResponse,
+    RepoContents,
   );
   // istanbul ignore if: should never happen
-  if (!fileRes.body.content) {
+  if (fileRes.body.type !== 'file' || !fileRes.body.content) {
     logger.debug(`Missing content for changelog file, using ${changelogFile}`);
     return null;
   }
-  const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
+  const changelogMd = `${fromBase64(fileRes.body.content)}\n#\n##`;
 
   return { changelogFile, changelogMd };
 }

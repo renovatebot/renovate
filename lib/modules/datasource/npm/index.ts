@@ -1,7 +1,7 @@
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { defaultRegistryUrls as npmDefaultRegistryUrl } from './common.ts';
+import { defaultRegistryUrl } from './common.ts';
 import { getDependency } from './get.ts';
 
 export { setNpmrc } from './npmrc.ts';
@@ -15,7 +15,7 @@ export class NpmDatasource extends Datasource {
 
   override readonly defaultVersioning = npmVersioning.id;
 
-  override readonly defaultRegistryUrls = npmDefaultRegistryUrl;
+  override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -32,7 +32,7 @@ export class NpmDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

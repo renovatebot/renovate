@@ -9,7 +9,7 @@ import {
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
 import * as _aeCvss from 'ae-cvss-calculator';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
@@ -21,6 +21,7 @@ import type {
 } from '../../../modules/manager/types.ts';
 import type { VersioningApi } from '../../../modules/versioning/index.ts';
 import { get as getVersioning } from '../../../modules/versioning/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { sanitizeMarkdown } from '../../../util/markdown.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -168,19 +169,30 @@ export class Vulnerabilities {
       return null;
     }
 
-    let packageName = dep.packageName ?? dep.depName!;
+    const packageName = dep.packageName ?? dep.depName!;
+    let osvPackageName = packageName;
+    let depType: string | undefined;
     if (ecosystem === 'PyPI') {
       // https://peps.python.org/pep-0503/#normalized-names
-      packageName = packageName.toLowerCase().replace(regEx(/[_.-]+/g), '-');
+      osvPackageName = osvPackageName
+        .toLowerCase()
+        .replace(regEx(/[_.-]+/g), '-');
+    } else if (ecosystem === 'Go' && packageName === 'go') {
+      if (dep.depType !== 'toolchain') {
+        // The `go` directive is source compatibility, not the build toolchain, so we skip it
+        return null;
+      }
+      osvPackageName = 'stdlib';
+      depType = dep.depType;
     }
 
     try {
       const osvVulnerabilities = await instrument(
         'get OSV vulnerabilities',
-        () => this.osvOffline.getVulnerabilities(ecosystem, packageName),
+        () => this.osvOffline.getVulnerabilities(ecosystem, osvPackageName),
         {
           attributes: {
-            packageName,
+            osvPackageName,
             ecosystem,
           },
         },
@@ -219,7 +231,7 @@ export class Vulnerabilities {
 
         this.skipMaliciousPackages(
           ecosystem,
-          packageName,
+          osvPackageName,
           depVersion,
           versioningApi,
           dep,
@@ -228,10 +240,10 @@ export class Vulnerabilities {
           osvVulnerability,
         );
 
-        for (const affected of osvVulnerability.affected ?? []) {
+        for (const affected of coerceArray(osvVulnerability.affected)) {
           const isVulnerable = this.isPackageVulnerable(
             ecosystem,
-            packageName,
+            osvPackageName,
             depVersion,
             affected,
             versioningApi,
@@ -252,8 +264,10 @@ export class Vulnerabilities {
 
           vulnerabilities.push({
             packageName,
+            osvPackageName,
             vulnerability: osvVulnerability,
             affected,
+            depType,
             depVersion,
             fixedVersion,
             datasource: dep.datasource!,
@@ -274,7 +288,7 @@ export class Vulnerabilities {
 
   private skipMaliciousPackages(
     ecosystem: Ecosystem,
-    packageName: string,
+    osvPackageName: string,
     depVersion: string,
     versioningApi: VersioningApi,
     dep: PackageDependency,
@@ -285,11 +299,11 @@ export class Vulnerabilities {
     // the OpenSSF's Malicious Packages (https://github.com/ossf/malicious-packages) is a source of advisories through osv.dev, which takes various sources of advisories, and will re-publish them with more specific information about their malicious usage
     if (osvVulnerability.id.startsWith('MAL-')) {
       // is the current dependency vulnerable?
-      for (const affected of osvVulnerability.affected ?? []) {
+      for (const affected of coerceArray(osvVulnerability.affected)) {
         // is the current dependency vulnerable?
         const isVulnerable = this.isPackageVulnerable(
           ecosystem,
-          packageName,
+          osvPackageName,
           depVersion,
           affected,
           versioningApi,
@@ -312,12 +326,12 @@ export class Vulnerabilities {
         }
 
         // or are any of the updates vulnerable?
-        for (const update of dep.updates ?? []) {
+        for (const update of coerceArray(dep.updates)) {
           const newVersion = update.newVersion ?? update.newValue!;
 
           const isUpdateVulnerable = this.isPackageVulnerable(
             ecosystem,
-            packageName,
+            osvPackageName,
             newVersion,
             affected,
             versioningApi,
@@ -393,12 +407,17 @@ export class Vulnerabilities {
 
   private isPackageAffected(
     ecosystem: Ecosystem,
-    packageName: string,
+    osvPackageName: string,
     affected: Osv.Affected,
   ): boolean {
+    const pkg = affected.package;
+    if (pkg?.name !== osvPackageName) {
+      return false;
+    }
+
+    // Match exact ecosystems and OSV sub-ecosystems (e.g. Packagist:https://packages.drupal.org/8).
     return (
-      affected.package?.name === packageName &&
-      affected.package?.ecosystem === ecosystem
+      pkg.ecosystem === ecosystem || pkg.ecosystem.startsWith(`${ecosystem}:`)
     );
   }
 
@@ -414,7 +433,7 @@ export class Vulnerabilities {
     affected: Osv.Affected,
     versioningApi: VersioningApi,
   ): boolean {
-    for (const range of affected.ranges ?? []) {
+    for (const range of coerceArray(affected.ranges)) {
       if (range.type === 'GIT') {
         continue;
       }
@@ -451,13 +470,13 @@ export class Vulnerabilities {
   // https://ossf.github.io/osv-schema/#evaluation
   private isPackageVulnerable(
     ecosystem: Ecosystem,
-    packageName: string,
+    osvPackageName: string,
     depVersion: string,
     affected: Osv.Affected,
     versioningApi: VersioningApi,
   ): boolean {
     return (
-      this.isPackageAffected(ecosystem, packageName, affected) &&
+      this.isPackageAffected(ecosystem, osvPackageName, affected) &&
       (this.includedInVersions(depVersion, affected) ||
         this.includedInRanges(depVersion, affected, versioningApi))
     );
@@ -472,7 +491,7 @@ export class Vulnerabilities {
     const fixedVersions: string[] = [];
     const lastAffectedVersions: string[] = [];
 
-    for (const range of affected.ranges ?? []) {
+    for (const range of coerceArray(affected.ranges)) {
       if (range.type === 'GIT') {
         continue;
       }
@@ -555,6 +574,7 @@ export class Vulnerabilities {
       vulnerability,
       affected,
       packageName,
+      depType,
       depVersion,
       fixedVersion,
       datasource,
@@ -567,7 +587,15 @@ export class Vulnerabilities {
       return null;
     }
 
+    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
+    const versioning = getDefaultVersioning(datasource);
+
     logger.debug(
+      {
+        datasource,
+        versioning,
+      },
+
       `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
     );
 
@@ -579,7 +607,9 @@ export class Vulnerabilities {
     return {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
+      ...(depType ? { matchDepTypes: [depType] } : {}),
       matchCurrentVersion: depVersion,
+      versioning,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
       vulnerabilitySeverity: severityDetails.severityLevel,
@@ -591,14 +621,14 @@ export class Vulnerabilities {
   }
 
   static evaluateCvssVector(vector: string): [string, string] {
-    const CvssJsonSchema = z.object({
+    const CvssJson = z.object({
       baseScore: z.number().default(0.0),
       baseSeverity: z.string().toUpperCase().default('UNKNOWN'),
     });
 
     try {
       const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
-      const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
+      const res = CvssJson.parse(parsedCvssScore?.createJsonSchema());
 
       return [res.baseScore.toFixed(1), res.baseSeverity];
     } catch {
@@ -612,15 +642,20 @@ export class Vulnerabilities {
     vulnerability: Osv.Vulnerability,
     affected: Osv.Affected,
   ): string[] {
-    let aliases = [vulnerability.id].concat(vulnerability.aliases ?? []).sort();
+    let aliases = [vulnerability.id]
+      .concat(coerceArray(vulnerability.aliases))
+      .sort();
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
         return `[${id}](https://nvd.nist.gov/vuln/detail/${id})`;
-      } else if (id.startsWith('GHSA-')) {
+      }
+      if (id.startsWith('GHSA-')) {
         return `[${id}](https://github.com/advisories/${id})`;
-      } else if (id.startsWith('GO-')) {
+      }
+      if (id.startsWith('GO-')) {
         return `[${id}](https://pkg.go.dev/vuln/${id})`;
-      } else if (id.startsWith('RUSTSEC-')) {
+      }
+      if (id.startsWith('RUSTSEC-')) {
         return `[${id}](https://rustsec.org/advisories/${id}.html)`;
       }
 

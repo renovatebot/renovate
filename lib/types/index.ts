@@ -18,7 +18,11 @@ export type { BranchResult, PrBlockedBy } from '../workers/types.ts';
 export type { ModuleApi, RenovatePackageJson } from './base.ts';
 export type { BranchStatus } from './branch-status.ts';
 export type { CommitMessageJSON } from './commit-message-json.ts';
-export type { CombinedHostRule, HostRule } from './host-rules.ts';
+export type {
+  CombinedHostRule,
+  HostRule,
+  InternalHostGrant,
+} from './host-rules.ts';
 export type { PrState } from './pr-state.ts';
 export type { SkipReason, StageName } from './skip-reason.ts';
 export type { RangeStrategy } from './versioning.ts';
@@ -35,3 +39,16 @@ type Val = NonNullable<unknown>;
 export type Nullish<T extends Val> = T | null | undefined;
 
 export type MaybePromise<T> = T | Promise<T>;
+
+/**
+ * The Extends utility type ensures that U is a subset of T (typically a union).
+ * This helps ensure that we get a typescript error should anything ever be removed
+ * from T but still remain in U.
+ *
+ * @example
+ * type MyType = Extends<AutoMergeType, 'pr' | 'branch'>; // works
+ *
+ * @example
+ * type IsBroken = Extends<AutoMergeType, 'pr' | 'branch' | 'oh-no' >;  // This will give a typescript error
+ */
+export type Extends<T, U extends T> = U;

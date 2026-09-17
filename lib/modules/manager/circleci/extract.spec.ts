@@ -332,5 +332,55 @@ describe('modules/manager/circleci/extract', () => {
         ],
       });
     });
+
+    it('extracts deps from configs with multiple merge keys per mapping', () => {
+      // YAML 1.2 rejects a mapping with two `<<` keys as a duplicate key and
+      // the entire file is skipped. CircleCI itself parses these files as
+      // YAML 1.1, where merge keys are valid and additive, so Renovate must
+      // do the same to avoid silently missing every dep in the file.
+      const res = extractPackageFile(codeBlock`
+        version: 2.1
+
+        aliases:
+          - &node-base
+            docker:
+              - image: node:18
+          - &node-env
+            environment:
+              NODE_ENV: production
+
+        orbs:
+          python: circleci/python@2.1.1
+
+        jobs:
+          build:
+            <<: *node-base
+            <<: *node-env
+            steps:
+              - checkout
+      `);
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '2.1.1',
+          datasource: 'orb',
+          depName: 'python',
+          depType: 'orb',
+          packageName: 'circleci/python',
+          versioning: 'npm',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '18',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          depType: 'docker',
+          replaceString: 'node:18',
+        },
+      ]);
+    });
   });
 });

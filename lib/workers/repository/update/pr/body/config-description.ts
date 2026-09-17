@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../../config/global.ts';
 import { emojify } from '../../../../../util/emoji.ts';
 import { getReadableCronSchedule } from '../../../../../util/schedule.ts';
 import type { BranchConfig } from '../../../../types.ts';
@@ -13,14 +14,8 @@ export function getPrConfigDescription(config: BranchConfig): string {
   }
   prBody += '\n\n'; // to ensure that Markdown renderers will note that the Schedule is a different element to the list
 
-  prBody +=
-    '- Branch creation\n' +
-    scheduleToString(config.schedule, config.timezone) +
-    '\n';
-  prBody +=
-    '- Automerge\n' +
-    scheduleToString(config.automergeSchedule, config.timezone) +
-    '\n';
+  prBody += `- Branch creation\n${scheduleToString(config.schedule, config.timezone)}\n`;
+  prBody += `- Automerge\n${scheduleToString(config.automergeSchedule, config.timezone)}\n`;
 
   prBody += '\n\n';
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
@@ -44,7 +39,7 @@ export function getPrConfigDescription(config: BranchConfig): string {
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
-      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`,
+      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${GlobalConfig.get('productLinks').help}) if that's undesired.\n\n`,
     );
   } else {
     prBody += emojify(
@@ -61,7 +56,7 @@ function scheduleToString(
   timezone: string | undefined,
 ): string {
   const scheduleLines = [];
-  if (schedule && schedule[0] !== 'at any time') {
+  if (schedule?.length && schedule[0] !== 'at any time') {
     const r = getReadableCronSchedule(schedule);
     if (r) {
       scheduleLines.push(...r);
@@ -71,5 +66,5 @@ function scheduleToString(
   } else {
     scheduleLines.push('At any time (no schedule defined)');
   }
-  return '  - ' + scheduleLines.join('\n  - ');
+  return `  - ${scheduleLines.join('\n  - ')}`;
 }

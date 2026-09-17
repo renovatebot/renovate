@@ -9,19 +9,14 @@ import { capitalize } from './string.ts';
 export function getReadableCronSchedule(
   scheduleText: string[],
 ): string[] | null {
-  // assuming if one schedule is cron the others in the array will be cron too
   try {
-    new CronPattern(scheduleText[0]); // validate cron
-    return scheduleText.map(
-      (cron) =>
-        capitalize(
-          cronstrue
-            .toString(cron, {
-              throwExceptionOnParseError: false,
-            })
-            .replace('Every minute, ', ''),
-        ) + ` (\`${cron}\`)`,
-    );
+    return scheduleText.map((cron) => {
+      new CronPattern(cron);
+      const description = cronstrue
+        .toString(cron, { throwExceptionOnParseError: false })
+        .replace('Every minute, ', '');
+      return `${capitalize(description)} (\`${cron}\`)`;
+    });
   } catch {
     return null;
   }

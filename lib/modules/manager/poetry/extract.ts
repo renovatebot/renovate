@@ -1,5 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
   getSiblingFileName,
@@ -36,6 +37,7 @@ export async function extractPackageFile(
   let pythonVersion: string | undefined;
   filterMap(res.deps, (dep) => {
     if (dep.depName === 'python') {
+      // v8 ignore else -- a python dep always carries a current value
       if (dep.currentValue) {
         pythonVersion = dep.currentValue;
       }
@@ -62,7 +64,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints: Record<string, any> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
 
   if (isNonEmptyString(pythonVersion)) {
     extractedConstraints.python = pythonVersion;

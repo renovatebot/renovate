@@ -10,6 +10,12 @@ describe('util/schedule', () => {
       expect(getReadableCronSchedule(['at any time'])).toBeNull();
     });
 
+    it('returns null when any schedule is not cron', () => {
+      expect(
+        getReadableCronSchedule(['* 5 * * *', 'before 5am on Monday']),
+      ).toBeNull();
+    });
+
     it('converts a simple daily cron expression', () => {
       expect(getReadableCronSchedule(['* 5 * * *'])).toEqual([
         'Between 05:00 AM and 05:59 AM (`* 5 * * *`)',

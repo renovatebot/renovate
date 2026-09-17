@@ -10,7 +10,10 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../types.ts';
-import { parseCatalog } from './extract/catalog.ts';
+import {
+  parseCatalog,
+  unifyCatalogSharedVariableNames,
+} from './extract/catalog.ts';
 import {
   isGcvPropsFile,
   parseGcv,
@@ -33,6 +36,7 @@ import {
   reorderFiles,
   toAbsolutePath,
   updateVars,
+  updateVarsFromDefaultCatalog,
 } from './utils.ts';
 
 const mavenDatasource = MavenDatasource.id;
@@ -49,6 +53,7 @@ function updatePackageRegistries(
         item.registryType === url.registryType &&
         item.content === url.content,
     );
+    // v8 ignore else -- needs a registry that is already known
     if (!registryAlreadyKnown) {
       packageRegistries.push(url);
     }
@@ -115,7 +120,8 @@ export function matchesContentDescriptor(
       if (isMatch) {
         matchesInclude = true;
       }
-    } else if (mode === 'exclude') {
+    } else {
+      // the only other mode is `exclude`
       hasExcludes = true;
       if (isMatch) {
         matchesExclude = true;
@@ -126,10 +132,12 @@ export function matchesContentDescriptor(
   if (hasIncludes && hasExcludes) {
     // if both includes and excludes exist, dep must match include and not match exclude
     return matchesInclude && !matchesExclude;
-  } else if (hasIncludes) {
+  }
+  if (hasIncludes) {
     // if only includes exist, dep must match at least one include
     return matchesInclude;
-  } else if (hasExcludes) {
+  }
+  if (hasExcludes) {
     // if only excludes exist, dep must not match any exclude
     return !matchesExclude;
   }
@@ -191,7 +199,13 @@ async function parsePackageFiles(
         updateVars(varRegistry, packageFileDir, vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const deps = parseCatalog(packageFile, content);
+        const { vars, deps } = parseCatalog(packageFile, content);
+        updateVarsFromDefaultCatalog(
+          varRegistry,
+          packageFileDir,
+          packageFile,
+          vars,
+        );
         extractedDeps.push(...deps);
       } else if (
         isGcvPropsFile(packageFile) &&
@@ -254,6 +268,8 @@ export async function extractAllPackageFiles(
     return null;
   }
 
+  unifyCatalogSharedVariableNames(extractedDeps);
+
   for (const dep of extractedDeps) {
     dep.fileReplacePosition = dep?.managerData?.fileReplacePosition; // #8224
 
@@ -272,6 +288,7 @@ export async function extractAllPackageFiles(
 
       dep.datasource ??= mavenDatasource;
 
+      // v8 ignore else -- every dep here defaults to the maven datasource above
       if (dep.datasource === mavenDatasource) {
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 

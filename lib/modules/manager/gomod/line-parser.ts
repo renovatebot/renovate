@@ -6,7 +6,7 @@ import { isVersion } from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
 
 function trimQuotes(str: string): string {
-  return str.replace(regEx(/^"(.*)"$/), '$1');
+  return str.replace(regEx(/^"(?<value>.*)"$/), '$<value>');
 }
 
 const requireRegex = regEx(
@@ -51,6 +51,7 @@ export function parseLine(input: string): PackageDependency | null {
       depType: 'golang',
       depName: 'go',
       currentValue,
+      commitMessageTopic: 'go module directive',
     };
 
     if (!semver.validRange(currentValue)) {
@@ -69,6 +70,7 @@ export function parseLine(input: string): PackageDependency | null {
       depType: 'toolchain',
       depName: 'go',
       currentValue,
+      commitMessageTopic: 'go toolchain directive',
     };
 
     if (!semver.valid(currentValue)) {

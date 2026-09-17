@@ -24,7 +24,7 @@ export function parseLockFile(lockFile: string): ParseLockFileResult {
 }
 
 export function composeLockFile(lockFile: LockFile, indent: string): string {
-  return JSON.stringify(lockFile, null, indent) + '\n';
+  return `${JSON.stringify(lockFile, null, indent)}\n`;
 }
 
 export async function getNpmrcContent(dir: string): Promise<string | null> {

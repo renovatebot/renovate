@@ -1,6 +1,8 @@
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
 import { scm } from '../../platform/scm.ts';
@@ -19,6 +21,19 @@ async function findPackageResolvedFiles(): Promise<string[]> {
 }
 
 function normalizeUrl(url: string): string {
+  try {
+    const parsed = parseGitUrl(url);
+    // Only use parsed result when both resource and full_name are present,
+    // otherwise fall through to basic normalization
+    if (parsed.resource && parsed.full_name) {
+      // Normalize to host/full_name form to allow cross-protocol matching
+      // e.g. https://github.com/owner/repo, git@github.com:owner/repo.git
+      //   -> github.com/owner/repo
+      return `${parsed.resource}/${trimTrailingSlash(parsed.full_name)}`.toLowerCase();
+    }
+  } catch {
+    // Fall through to basic normalization
+  }
   return url
     .replace(regEx(/\.git$/), '')
     .replace(regEx(/\/$/), '')
@@ -32,6 +47,7 @@ function matchPinForDep(
   let depUrl: string;
 
   if (dep.datasource === GitTagsDatasource.id) {
+    /* v8 ignore next -- extract always sets depName for a git-tags dep */
     depUrl = dep.depName ?? '';
   } else {
     const registryUrl = dep.registryUrls?.[0] ?? 'https://github.com';
@@ -88,7 +104,7 @@ function updatePinInJson(
 
   // Find the pin block by its unique identity value
   const identityPattern = regEx(
-    `"identity"\\s*:\\s*"${escapeRegExp(pin.identity)}"`,
+    `"identity"\\s*:\\s*"${RegExp.escape(pin.identity)}"`,
   );
   const identityMatch = identityPattern.exec(updated);
   /* istanbul ignore if: identity always exists after JSON parse + matchPinForDep */
@@ -126,13 +142,13 @@ function updatePinInJson(
   let pinBlock = updated.slice(blockStart, blockEnd);
 
   // Replace version within the pin block
-  const versionPattern = regEx(/("version"\s*:\s*)"[^"]*"/);
-  pinBlock = pinBlock.replace(versionPattern, `$1"${newVersion}"`);
+  const versionPattern = regEx(/(?<prefix>"version"\s*:\s*)"[^"]*"/);
+  pinBlock = pinBlock.replace(versionPattern, `$<prefix>"${newVersion}"`);
 
   // Replace revision within the pin block if we have a new one
   if (newRevision) {
-    const revisionPattern = regEx(/("revision"\s*:\s*)"[^"]*"/);
-    pinBlock = pinBlock.replace(revisionPattern, `$1"${newRevision}"`);
+    const revisionPattern = regEx(/(?<prefix>"revision"\s*:\s*)"[^"]*"/);
+    pinBlock = pinBlock.replace(revisionPattern, `$<prefix>"${newRevision}"`);
   }
 
   updated = updated.slice(0, blockStart) + pinBlock + updated.slice(blockEnd);
@@ -171,7 +187,7 @@ export async function updateArtifacts({
     const parseResult = PackageResolvedJson.safeParse(content);
     if (!parseResult.success) {
       logger.debug(
-        { resolvedFile, error: parseResult.error },
+        { resolvedFile, err: parseResult.error },
         'swift: could not parse Package.resolved',
       );
       continue;

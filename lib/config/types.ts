@@ -2,7 +2,11 @@ import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
+import type {
+  GitUrlOption,
+  RepoSortMethod,
+  SortMethod,
+} from '../modules/platform/types.ts';
 import type {
   AutoMergeType,
   HostRule,
@@ -11,29 +15,26 @@ import type {
   SkipReason,
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
-import type { ConstraintName, ToolName } from '../util/exec/types.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+  ToolName,
+} from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
-  | 'global'
-  | 'inherit'
-  | 'repository'
-  | 'package'
-  | 'branch'
-  | 'pr';
+  'global' | 'inherit' | 'repository' | 'package' | 'branch' | 'pr';
 
 export type RenovateSplit =
-  | 'init'
-  | 'onboarding'
-  | 'extract'
-  | 'lookup'
-  | 'update';
+  'init' | 'onboarding' | 'extract' | 'lookup' | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
+export type InternalHostAccess = 'allow' | 'warn' | 'block';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
@@ -42,6 +43,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type StatusCheckWhen = 'always' | 'never' | 'failed';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -69,6 +71,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -82,6 +85,7 @@ export interface RenovateSharedConfig {
   commitMessageLowerCase?: 'auto' | 'never';
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
+  commitTrailers?: string[];
   confidential?: boolean;
   configValidationError?: boolean;
   changelogUrl?: string;
@@ -98,6 +102,7 @@ export interface RenovateSharedConfig {
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
   groupName?: string;
+  groupSingleUpdates?: boolean;
   groupSlug?: string;
   hashedBranchLength?: number;
   ignoreDeps?: string[];
@@ -112,6 +117,7 @@ export interface RenovateSharedConfig {
   manager?: string;
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeBuffer?: Nullish<string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -130,7 +136,6 @@ export interface RenovateSharedConfig {
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
-  productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
@@ -192,6 +197,7 @@ export interface GlobalOnlyConfigLegacy {
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
+  exitCodeForErrors?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -233,6 +239,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
+  checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
@@ -247,7 +254,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
-  localDir?: string;
+  inheritConfigTrusted?: boolean;
+  internalHostAccess?: InternalHostAccess;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
@@ -265,7 +273,16 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
-  toolSettings?: ToolSettingsOptions;
+  productLinks?: Record<string, string>;
+  rebaseAllOpenBranches?: boolean;
+  toolSettings?: GlobalToolSettingsOptions;
+}
+
+/**
+ * Internal variables which are referenced from `GlobalConfig`, but are *not* user-configurable options.
+ */
+export interface InternalGlobalConfigOptions {
+  localDir?: string;
 }
 
 /**
@@ -314,17 +331,16 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (RenovateConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = AllConfig & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
-  | 'timestamp-required'
-  | 'timestamp-optional';
+  'timestamp-required' | 'timestamp-optional';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -382,6 +398,7 @@ export interface RenovateConfig
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   description?: string | string[];
+  overrideDescription?: string | string[];
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;
@@ -455,14 +472,18 @@ export interface RenovateConfig
   variables?: Record<string, string>;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
 
-  checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands
    */
@@ -475,7 +496,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -499,6 +520,7 @@ export interface CustomDatasourceConfig {
  */
 export interface AllConfig
   extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
+  gitUrl?: GitUrlOption;
   password?: string;
   token?: string;
   username?: string;
@@ -559,9 +581,7 @@ export type MergeStrategy =
 
 // This list should be added to as any new unsafe execution commands should be permitted
 export type AllowedUnsafeExecution =
-  | 'bazelModDeps'
-  | 'goGenerate'
-  | 'gradleWrapper';
+  'bazelModDeps' | 'goGenerate' | 'gradleWrapper' | 'mise' | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -599,7 +619,8 @@ export interface PackageRule
 }
 
 export interface ValidationMessage {
-  topic: string;
+  // Topic is either the known list of topics, or a dynamically generated one
+  topic: ConfigValidationTopic | (string & {});
   message: string;
 }
 
@@ -622,6 +643,17 @@ export interface RenovateOptionBase {
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
   globalOnly?: boolean;
+
+  /**
+   * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
+   *
+   * This is in addition to any existing config validation, and ensures that these options are re-validated due to their sensitive nature.
+   *
+   * A failure of that check **must** lead to a {@link ConfigValidationTopic.Security} error (which is then a full config validation error), stopping the Renovate run.
+   *
+   * After this check has been performed, additional filtering (for defence in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
+   */
+  requiresCheckAtTrustBoundary?: boolean;
 
   inheritConfigSupport?: boolean;
 
@@ -687,6 +719,12 @@ export interface RenovateOptionBase {
    * Conditions that must be met for this option to be required.
    */
   requiredIf?: RenovateRequiredOption[];
+
+  /**
+   * If true, the option's value supports Renovate templating.
+   * @see https://docs.renovatebot.com/templates/
+   */
+  supportsTemplating?: boolean;
 }
 
 export interface RenovateRequiredOption {
@@ -819,8 +857,27 @@ export interface BumpVersionConfig {
   name?: string;
 }
 
-export interface ToolSettingsOptions {
+/**
+ * Global Config for specified `toolSettings` options.
+ *
+ */
+export interface GlobalToolSettingsOptions {
+  /** An upper limit on what the Java Virtual Machine's maximum memory can be set to. Repositories can specify <= this value */
   jvmMaxMemory?: number;
+  /** An upper limit on what the Java Virtual Machine's starting memory can be set to. Repositories can specify <= this value */
   jvmMemory?: number;
+  /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
+  nodeMaxMemory?: number;
+}
+
+/**
+ * Repository config options for `toolSettings` options.
+ */
+export interface RepoToolSettingsOptions {
+  /** The maximum memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMaxMemory?: number;
+  /** The starting memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMemory?: number;
+  /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
 }

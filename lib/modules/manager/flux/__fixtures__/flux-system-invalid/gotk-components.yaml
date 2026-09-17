@@ -1,0 +1,5 @@
+# This file is missing the required Flux Version header
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system

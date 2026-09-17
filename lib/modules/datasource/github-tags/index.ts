@@ -1,4 +1,4 @@
-import { isBoolean } from '@sindresorhus/is';
+import { isBoolean, isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   queryReleases,
@@ -103,6 +103,17 @@ export class GithubTagsDatasource extends Datasource {
         const isReleaseStable = releasesMap.get(release.version)?.isStable;
         if (isBoolean(isReleaseStable)) {
           release.isStable = isReleaseStable;
+        }
+
+        const releaseTimestamp = releasesMap.get(
+          release.version,
+        )?.releaseTimestamp;
+        if (
+          releaseTimestamp &&
+          (isNullOrUndefined(release.releaseTimestamp) ||
+            releaseTimestamp > release.releaseTimestamp)
+        ) {
+          release.releaseTimestamp = releaseTimestamp;
         }
       }
     } catch (err) /* istanbul ignore next */ {

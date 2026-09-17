@@ -1,9 +1,15 @@
+import { partial } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { JsrDatasource } from './index.ts';
 import { MINIMUM_RELEASE_TIMESTAMP } from './schema.ts';
 
-const jsrPackageMetadataResponse = {
+interface JsrPackageMetadataResponse {
+  latest: string;
+  versions: Record<string, { createdAt?: string; yanked?: boolean }>;
+}
+
+const jsrPackageMetadataResponse = partial<JsrPackageMetadataResponse>({
   latest: '0.0.2',
   versions: {
     // Mixed createdAt fields for testing:
@@ -13,10 +19,7 @@ const jsrPackageMetadataResponse = {
     // has explicit createdAt (should use actual timestamp)
     '0.0.2': { createdAt: '2025-11-15T00:00:00.000Z' },
   },
-} as {
-  latest: string;
-  versions: Record<string, { createdAt?: string; yanked?: boolean }>;
-};
+});
 
 describe('modules/datasource/jsr/index', () => {
   const jsr = new JsrDatasource();
@@ -109,7 +112,7 @@ describe('modules/datasource/jsr/index', () => {
         packageName: '@scope/package-name',
         registryUrl: jsr.defaultRegistryUrls[0],
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('Request failed with status code 404 (Not Found)');
   });
 
   it('should throw error for unparseable', async () => {
@@ -122,6 +125,6 @@ describe('modules/datasource/jsr/index', () => {
         packageName: '@scope/package-name',
         registryUrl: jsr.defaultRegistryUrls[0],
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('Unexpected token \'o\', "oops" is not valid JSON');
   });
 });

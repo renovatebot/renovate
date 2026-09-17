@@ -17,6 +17,11 @@ import {
   updateNpmrcContent,
 } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  resolveToolConstraint,
+} from '../util.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -71,7 +76,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'bun',
-          constraint: updateArtifact?.config?.constraints?.bun,
+          constraint: await resolveToolConstraint(config, 'bun'),
         },
       ],
     };
@@ -86,27 +91,12 @@ export async function updateArtifacts(
     ) {
       return null;
     }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
-    ];
+    return [fileAddition(lockFileName, newLockFileContent)];
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

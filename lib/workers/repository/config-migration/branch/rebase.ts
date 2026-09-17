@@ -54,7 +54,8 @@ export async function rebaseMigrationBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
-    labels: config.labels,
+    // Only needed by Gerrit platform
+    prTitle: commitMessageFactory.getPrTitle(),
   });
 }
 
@@ -73,6 +74,7 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
+  // v8 ignore next -- JSON5 output is always serializable back to JSON
   return (
     quickStringify(JSON5.parse(json)) ??
     /* istanbul ignore next: should never happen */ null

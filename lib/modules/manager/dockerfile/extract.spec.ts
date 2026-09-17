@@ -16,6 +16,122 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('keeps the syntax dep type when there is no FROM', () => {
+      const res = extractPackageFile(
+        '# syntax=docker/dockerfile:1.9.0\n',
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.9.0',
+          datasource: 'docker',
+          depName: 'docker/dockerfile',
+          depType: 'syntax',
+          packageName: 'docker/dockerfile',
+          replaceString: 'docker/dockerfile:1.9.0',
+        },
+      ]);
+    });
+
+    it('extracts apk deps in a fragment without a FROM', () => {
+      const res = extractPackageFile(
+        'RUN apk add --no-cache bash=5.2.37-r2\n',
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate: 'bash={{{newValue}}}',
+          currentValue: '5.2.37-r2',
+          datasource: 'apk',
+          depName: 'bash',
+          depType: 'install',
+          replaceString: 'bash=5.2.37-r2',
+        },
+      ]);
+    });
+
+    it('extracts apk deps from a RUN instruction', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21
+          RUN apk add --no-cache bash=5.2.37-r2
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.21',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'final',
+          packageName: 'alpine',
+          replaceString: 'alpine:3.21',
+        },
+        {
+          autoReplaceStringTemplate: 'bash={{{newValue}}}',
+          currentValue: '5.2.37-r2',
+          datasource: 'apk',
+          depName: 'bash',
+          depType: 'install',
+          replaceString: 'bash=5.2.37-r2',
+        },
+      ]);
+    });
+
+    it('keeps the final stage when each stage has its own apk deps', () => {
+      const digest =
+        'sha256:96ff486b326d15db16aa1fbd41a17043a557bebf76d2c0ac932e717534025940';
+      const res = extractPackageFile(
+        codeBlock`
+          FROM cgr.dev/chainguard/wolfi-base:latest@${digest} AS builder
+          RUN apk add --no-cache curl-dev=8.9.1-r4
+          FROM cgr.dev/chainguard/wolfi-base:latest@${digest}
+          RUN apk add --no-cache curl=8.9.1-r4
+        `,
+        '',
+        {},
+      );
+      // the trailing dep is an apk one, so `final` has to be the last `FROM`
+      // rather than whatever was extracted last
+      expect(
+        res?.deps.map(({ depName, currentValue, depType }) => ({
+          depName,
+          currentValue,
+          depType,
+        })),
+      ).toEqual([
+        {
+          depName: 'cgr.dev/chainguard/wolfi-base',
+          currentValue: 'latest',
+          depType: 'stage',
+        },
+        {
+          depName: 'curl-dev',
+          currentValue: '8.9.1-r4',
+          depType: 'install',
+        },
+        {
+          depName: 'cgr.dev/chainguard/wolfi-base',
+          currentValue: 'latest',
+          depType: 'final',
+        },
+        {
+          depName: 'curl',
+          currentValue: '8.9.1-r4',
+          depType: 'install',
+        },
+      ]);
+    });
+
     it('handles naked dep', () => {
       const res = extractPackageFile('FROM node\n', '', {})?.deps;
       expect(res).toEqual([
@@ -586,6 +702,12 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'final',
           replaceString: 'alpine:latest',
         },
+        {
+          datasource: 'apk',
+          depName: 'ca-certificates',
+          depType: 'install',
+          skipReason: 'unspecified-version',
+        },
       ]);
       const passed = [
         res?.[2].depType === 'final',
@@ -621,6 +743,24 @@ describe('modules/manager/dockerfile/extract', () => {
           packageName: 'buildkite/puppeteer',
           depType: 'final',
           replaceString: 'buildkite/puppeteer:1.1.1',
+        },
+        {
+          datasource: 'apk',
+          depName: 'python',
+          depType: 'install',
+          skipReason: 'unspecified-version',
+        },
+        {
+          datasource: 'apk',
+          depName: 'make',
+          depType: 'install',
+          skipReason: 'unspecified-version',
+        },
+        {
+          datasource: 'apk',
+          depName: 'g++',
+          depType: 'install',
+          skipReason: 'unspecified-version',
         },
       ]);
     });
@@ -957,6 +1097,29 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('handles FROM with single-quoted empty ARG default value', () => {
+      const res = extractPackageFile(
+        "ARG DOCKER_HUB_MIRROR=''\n" +
+          'ARG NODE_VERSION=21\n' +
+          'FROM ${DOCKER_HUB_MIRROR}node:${NODE_VERSION}-alpine\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '21-alpine',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          depType: 'final',
+          replaceString: 'node:21-alpine',
+        },
+      ]);
+    });
+
     it('handles FROM with version in ARG value', () => {
       const res = extractPackageFile(
         'ARG\tVARIANT="1.60.0-bullseye" \nFROM\trust:${VARIANT}\n',
@@ -1147,6 +1310,15 @@ describe('modules/manager/dockerfile/extract', () => {
           replaceString: 'nginx:1.20',
         },
       ]);
+    });
+
+    it('keeps the default escape character for an unknown escape directive', () => {
+      const res = extractPackageFile(
+        '# escape = /\nFROM nginx:1.20',
+        '',
+        {},
+      )?.deps;
+      expect(res).toMatchObject([{ depName: 'nginx', currentValue: '1.20' }]);
     });
 
     it('handles an alternative escape character', () => {
@@ -1621,13 +1793,22 @@ describe('modules/manager/dockerfile/extract', () => {
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
 
     it.each`
-      name                         | registryAliases                                         | imageName                     | dep
-      ${'simple aliases'}          | ${{ 'foo.com/some': 'foo.registry.com' }}               | ${'foo.com/some/image:1.0'}   | ${{ depName: 'foo.com/some/image', packageName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo.com/some/image${versionAndDigestTemplate}` }}
-      ${'multiple aliases'}        | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }} | ${'foo/image:1.0'}            | ${{ depName: 'foo/image', packageName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/image${versionAndDigestTemplate}` }}
-      ${'aliased variable'}        | ${{ $CI_REGISTRY: 'registry.com' }}                     | ${'$CI_REGISTRY/image:1.0'}   | ${{ depName: '$CI_REGISTRY/image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/image${versionAndDigestTemplate}` }}
-      ${'variables with brackets'} | ${{ '${CI_REGISTRY}': 'registry.com' }}                 | ${'${CI_REGISTRY}/image:1.0'} | ${{ depName: '${CI_REGISTRY}/image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/image${versionAndDigestTemplate}` }}
-      ${'not aliased variable'}    | ${{}}                                                   | ${'$CI_REGISTRY/image:1.0'}   | ${{ autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
-      ${'plain image'}             | ${{}}                                                   | ${'registry.com/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
+      name                                           | registryAliases                                                                                 | imageName                                                                                          | dep
+      ${'simple aliases'}                            | ${{ 'foo.com/some': 'foo.registry.com' }}                                                       | ${'foo.com/some/image:1.0'}                                                                        | ${{ depName: 'foo.com/some/image', packageName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo.com/some/image${versionAndDigestTemplate}` }}
+      ${'multiple aliases'}                          | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }}                                         | ${'foo/image:1.0'}                                                                                 | ${{ depName: 'foo/image', packageName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/image${versionAndDigestTemplate}` }}
+      ${'aliased variable'}                          | ${{ $CI_REGISTRY: 'registry.com' }}                                                             | ${'$CI_REGISTRY/image:1.0'}                                                                        | ${{ depName: '$CI_REGISTRY/image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/image${versionAndDigestTemplate}` }}
+      ${'overlapping prefixes'}                      | ${{ $CI_REGISTRY: 'registry.example.com', $CI_REGISTRY_IMAGE: 'registry.example.com/project' }} | ${'$CI_REGISTRY_IMAGE/image:1.0'}                                                                  | ${{ depName: '$CI_REGISTRY_IMAGE/image', packageName: 'registry.example.com/project/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY_IMAGE/image${versionAndDigestTemplate}` }}
+      ${'variables with brackets'}                   | ${{ '${CI_REGISTRY}': 'registry.com' }}                                                         | ${'${CI_REGISTRY}/image:1.0'}                                                                      | ${{ depName: '${CI_REGISTRY}/image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/image${versionAndDigestTemplate}` }}
+      ${'variables with default and slash'}          | ${{ '${CI_REGISTRY:-}': 'registry.com' }}                                                       | ${'${CI_REGISTRY:-}/image:1.0'}                                                                    | ${{ depName: '${CI_REGISTRY:-}/image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY:-}/image${versionAndDigestTemplate}` }}
+      ${'variables with default no slash'}           | ${{ '${CI_REGISTRY:-}': 'registry.com/' }}                                                      | ${'${CI_REGISTRY:-}image:1.0'}                                                                     | ${{ depName: '${CI_REGISTRY:-}image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY:-}image${versionAndDigestTemplate}` }}
+      ${'empty alias value'}                         | ${{ '${CI_REGISTRY:-}': '' }}                                                                   | ${'${CI_REGISTRY:-}image:1.0'}                                                                     | ${{ depName: '${CI_REGISTRY:-}image', packageName: 'image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY:-}image${versionAndDigestTemplate}` }}
+      ${'special prefix alias value, slash form'}    | ${{ $CI_REG: 'library' }}                                                                       | ${'$CI_REG/foo:1.0'}                                                                               | ${{ depName: 'foo', packageName: 'library/foo', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REG/foo${versionAndDigestTemplate}` }}
+      ${'special prefix alias value, variable form'} | ${{ '${CI_REGISTRY:-}': 'library' }}                                                            | ${'${CI_REGISTRY:-}foo:1.0'}                                                                       | ${{ depName: 'foo', packageName: 'library/foo', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY:-}foo${versionAndDigestTemplate}` }}
+      ${'registry with port'}                        | ${{ 'localhost:5000/repo': 'docker.io' }}                                                       | ${'localhost:5000/repo/image/service:1.0'}                                                         | ${{ depName: 'localhost:5000/repo/image/service', packageName: 'docker.io/image/service', currentValue: '1.0', autoReplaceStringTemplate: `localhost:5000/repo/image/service${versionAndDigestTemplate}` }}
+      ${'registry with port without tag'}            | ${{ 'localhost:5000/repo': 'docker.io' }}                                                       | ${'localhost:5000/repo/image/service'}                                                             | ${{ depName: 'localhost:5000/repo/image/service', packageName: 'docker.io/image/service', autoReplaceStringTemplate: 'localhost:5000/repo/image/service' }}
+      ${'alias with digest only'}                    | ${{ '${CI_REGISTRY:-}': 'registry.com' }}                                                       | ${'${CI_REGISTRY:-}image@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789'} | ${{ depName: '${CI_REGISTRY:-}image', packageName: 'registry.com/image', currentDigest: 'sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789', autoReplaceStringTemplate: `$\{CI_REGISTRY:-}image@{{#if newDigest}}{{newDigest}}{{/if}}` }}
+      ${'not aliased variable'}                      | ${{}}                                                                                           | ${'$CI_REGISTRY/image:1.0'}                                                                        | ${{ autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
+      ${'plain image'}                               | ${{}}                                                                                           | ${'registry.com/image:1.0'}                                                                        | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
     `(
       'supports registry aliases - $name',
       ({

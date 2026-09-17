@@ -68,6 +68,18 @@ const bitbucketTreeResponseNoChangelogFiles = {
   ],
 };
 
+const bitbucketTreeResponseSingleChangelogFile = {
+  values: [
+    {
+      type: 'commit_file',
+      path: 'CHANGELOG.md',
+      commit: {
+        hash: 'abcd',
+      },
+    },
+  ],
+};
+
 const bitbucketProject = partial<ChangeLogProject>({
   type: 'bitbucket',
   repository: 'some-org/some-repo',
@@ -87,8 +99,21 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
 
     expect(res).toMatchObject({
       changelogFile: 'CHANGELOG.md',
-      changelogMd: changelogMd + '\n#\n##',
+      changelogMd: `${changelogMd}\n#\n##`,
     });
+  });
+
+  it('handles a single changelog candidate', async () => {
+    httpMock
+      .scope(apiBaseUrl)
+      .get('/2.0/repositories/some-org/some-repo/src/HEAD?pagelen=100')
+      .reply(200, bitbucketTreeResponseSingleChangelogFile)
+      .get('/2.0/repositories/some-org/some-repo/src/abcd/CHANGELOG.md')
+      .reply(200, changelogMd);
+
+    const res = await getReleaseNotesMdFile(bitbucketProject);
+
+    expect(res).toMatchObject({ changelogFile: 'CHANGELOG.md' });
   });
 
   it('handles missing release notes', async () => {

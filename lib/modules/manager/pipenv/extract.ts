@@ -1,8 +1,9 @@
 import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import { isArray, isObject, isString } from '@sindresorhus/is';
+import { isArray, isObject, isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getParentDir, localPathExists } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -99,21 +100,20 @@ function extractFromSection(
       }
       if (sources && isObject(requirements) && requirements.index) {
         const source = sources.find((item) => item.name === requirements.index);
+        // v8 ignore else -- needs a requirement naming an index that is not declared
         if (source) {
           dep.registryUrls = [source.url];
         }
       }
       return dep;
     })
-    .filter(Boolean);
+    .filter(isTruthy);
   return deps;
 }
 
 function isPipRequirements(
   section?:
-    | Record<string, PipRequirement>
-    | Record<string, string>
-    | PipSource[],
+    Record<string, PipRequirement> | Record<string, string> | PipSource[],
 ): section is Record<string, PipRequirement> {
   return (
     !isArray(section) &&
@@ -162,7 +162,7 @@ export async function extractPackageFile(
     return null;
   }
 
-  const extractedConstraints: Record<string, any> = {};
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
 
   const pipfileDir = getParentDir(ensureLocalPath(packageFile));
 

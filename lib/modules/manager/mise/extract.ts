@@ -6,36 +6,65 @@ import {
   isObject,
   isString,
 } from '@sindresorhus/is';
+import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
+import type { StaticTooling } from '../asdf/types.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { BackendToolingConfig } from './backends.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
+  createGitlabToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
-import type { ToolingDefinition } from './upgradeable-tooling.ts';
-import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
+import { MiseLockFile } from './schema.ts';
+import type { BackendToolingConfig, ToolingDefinition } from './types.ts';
+import {
+  asdfTooling,
+  getOrderedMiseRegistryBackends,
+  miseTooling,
+} from './upgradeable-tooling.ts';
 import { parseTomlFile } from './utils.ts';
 
 // Tool names can have options in the tool name
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
+const nonVersionSelectorRegex = regEx(/^(?:ref:|path:|sub-\d+(?::|$))/);
+const partialSelectorRegex = regEx(
+  /^(?<prefix>[^\d]*)(?<major>\d+)(?:\.(?<minor>\d+))?$/,
+);
+const versionPrefixRegex = regEx(/^(?<prefix>[^\d]*)\d/);
 
-export function extractPackageFile(
+type MiseDependency = PackageDependency & { depName: string };
+
+interface MiseSelectorConfig {
+  allowedVersions?: string;
+  ignoreUnstable?: boolean;
+}
+
+/**
+ * Extracts mise tool dependencies from a mise configuration file.
+ * Supports various backends (core, asdf, aqua, cargo, etc.) and
+ * extracts locked versions when a corresponding lock file exists.
+ */
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`mise.extractPackageFile(${packageFile})`);
 
   const misefile = parseTomlFile(content, packageFile);
@@ -43,32 +72,49 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps: PackageDependency[] = [];
-  const tools = misefile.tools;
+  const toolEntries: [string, MiseTool, string][] = [];
 
-  if (tools) {
-    for (const [name, toolData] of Object.entries(tools)) {
-      const version = parseVersion(toolData);
-      // Parse the tool options in the tool name
-      const { name: depName, options: optionsInName } =
-        optionInToolNameRegex.exec(name.trim())!.groups!;
-      const delimiterIndex = name.indexOf(':');
-      const backend = depName.substring(0, delimiterIndex);
-      const toolName = depName.substring(delimiterIndex + 1);
-      const options = parseOptions(
-        optionsInName,
-        isNonEmptyObject(toolData) ? toolData : {},
-      );
-      const toolConfig =
-        version === null
-          ? null
-          : getToolConfig(backend, toolName, version, options);
-      const dep = createDependency(depName, version, toolConfig);
-      deps.push(dep);
+  for (const [name, toolData] of Object.entries(misefile.tools)) {
+    toolEntries.push([name, toolData, 'tools']);
+  }
+
+  for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
+    for (const [name, toolData] of Object.entries(
+      coerceObject(taskData.tools),
+    )) {
+      toolEntries.push([name, toolData, `task-${taskName}-tools`]);
     }
   }
 
-  return deps.length ? { deps } : null;
+  if (!toolEntries.length) {
+    return null;
+  }
+
+  const lockFileName = getLockFileName(packageFile);
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+  let lockFileData: MiseLockFile | undefined;
+  if (lockFileContent) {
+    const lockFileParsed = MiseLockFile.safeParse(lockFileContent);
+    if (lockFileParsed.success) {
+      lockFileData = lockFileParsed.data;
+    } else {
+      logger.debug(
+        { lockFileName, err: lockFileParsed.error },
+        'Failed to parse mise lock file',
+      );
+    }
+  }
+
+  const deps = toolEntries.map(([name, toolData, depType]) =>
+    extractToolEntry(name, toolData, depType, lockFileData),
+  );
+  const result: PackageFileContent = { deps };
+
+  if (lockFileData) {
+    result.lockFiles = [lockFileName];
+  }
+
+  return result;
 }
 
 function parseVersion(toolData: MiseTool): string | null {
@@ -113,9 +159,44 @@ function getToolConfig(
   toolOptions: MiseToolOptions,
 ): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
-    case '':
+    case '': {
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
-      return getRegistryToolConfig(toolName, version);
+      const staticResult = getRegistryToolConfig(toolName, version);
+      if (staticResult) {
+        return staticResult;
+      }
+
+      // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
+      const backends = getOrderedMiseRegistryBackends(toolName);
+
+      // prioritise the github backend as the best source for data
+      if (backends.github) {
+        const result = getToolConfig(
+          'github',
+          backends.github,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+
+      for (const [backendType, backendName] of Object.entries(backends)) {
+        const result = getToolConfig(
+          backendType,
+          backendName,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+      return null;
+    }
     // We can specify core, asdf, vfox, aqua backends for tools in the default registry
     // e.g. 'core:rust', 'asdf:rust', 'vfox:clang', 'aqua:act'
     case 'core':
@@ -137,6 +218,8 @@ function getToolConfig(
       return createGemToolConfig(toolName);
     case 'github':
       return createGithubToolConfig(toolName, version, toolOptions);
+    case 'gitlab':
+      return createGitlabToolConfig(toolName, version, toolOptions);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':
@@ -185,28 +268,200 @@ function getConfigFromTooling(
   ); // Ensure null is returned instead of undefined
 }
 
+function getLtsDatasource(
+  backend: string,
+  toolName: string,
+  datasource: string | undefined,
+): string | undefined {
+  if (datasource) {
+    return datasource;
+  }
+  if ((backend === '' || backend === 'core') && toolName === 'java') {
+    return JavaVersionDatasource.id;
+  }
+  return undefined;
+}
+
+function getSelectorConfig(
+  version: string,
+  backend: string,
+  toolName: string,
+  datasource: string | undefined,
+  lockedVersion: string,
+): MiseSelectorConfig | null {
+  if (version === 'latest') {
+    return {};
+  }
+
+  if (version === 'lts') {
+    const ltsDatasource = getLtsDatasource(backend, toolName, datasource);
+    if (ltsDatasource === NodeVersionDatasource.id) {
+      return { ignoreUnstable: true };
+    }
+    if (ltsDatasource === JavaVersionDatasource.id) {
+      return {
+        allowedVersions: `/^(?:${javaLtsVersions.join('|')})(?:\\.|-|\\+|$)/`,
+        ignoreUnstable: true,
+      };
+    }
+    return null;
+  }
+
+  if (nonVersionSelectorRegex.test(version)) {
+    return null;
+  }
+
+  const match = partialSelectorRegex.exec(version);
+  if (!match?.groups || lockedVersion === version) {
+    return null;
+  }
+
+  const { prefix, major, minor } = match.groups;
+  const lockedPrefix = versionPrefixRegex.exec(lockedVersion)?.groups?.prefix;
+  const effectivePrefix = prefix || lockedPrefix;
+  let prefixPattern = '';
+  if (effectivePrefix) {
+    prefixPattern = `(?:${RegExp.escape(effectivePrefix)})?`;
+  } else if (
+    datasource === GithubReleasesDatasource.id ||
+    datasource === NodeVersionDatasource.id
+  ) {
+    prefixPattern = `(?:${RegExp.escape('v')})?`;
+  }
+  const precisionPattern = minor
+    ? `\\.${minor}(?:\\.|-|\\+|$)`
+    : `(?:\\.|-|\\+|$)`;
+  return {
+    allowedVersions: `/^${prefixPattern}${major}${precisionPattern}/`,
+  };
+}
+
+function extractSelectorLockedDependency(
+  depName: string,
+  version: string,
+  backend: string,
+  toolName: string,
+  options: MiseToolOptions,
+  toolConfig: StaticTooling | BackendToolingConfig | null,
+  lockedVersion: string,
+  depType: string,
+): PackageDependency | null {
+  const selectorConfig = getSelectorConfig(
+    version,
+    backend,
+    toolName,
+    toolConfig?.datasource,
+    lockedVersion,
+  );
+  if (!selectorConfig) {
+    return null;
+  }
+
+  const resolvedToolConfig = getToolConfig(
+    backend,
+    toolName,
+    lockedVersion,
+    options,
+  );
+  if (!resolvedToolConfig) {
+    return null;
+  }
+
+  const comparableLockedVersion =
+    resolvedToolConfig.currentValue ?? lockedVersion;
+  return {
+    ...createDependency(depName, version, resolvedToolConfig, depType),
+    currentValue: version,
+    lockedVersion: comparableLockedVersion,
+    rangeStrategy: 'update-lockfile',
+    isLockfileOnly: true,
+    ...selectorConfig,
+  };
+}
+
+function extractToolEntry(
+  name: string,
+  toolData: MiseTool,
+  depType: string,
+  lockFileData?: MiseLockFile,
+): PackageDependency {
+  const version = parseVersion(toolData);
+  const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
+    name.trim(),
+  )!.groups!;
+  const delimiterIndex = depName.indexOf(':');
+  const backend = depName.substring(0, delimiterIndex);
+  const toolName = depName.substring(delimiterIndex + 1);
+  const options = parseOptions(
+    optionsInName,
+    isNonEmptyObject(toolData) ? toolData : {},
+  );
+  const toolConfig =
+    version === null
+      ? null
+      : getToolConfig(backend, toolName, version, options);
+  const dependency = createDependency(depName, version, toolConfig, depType);
+  const lockedVersion = lockFileData
+    ? getLockedVersion(lockFileData, dependency.depName)
+    : undefined;
+
+  if (version !== null && lockedVersion) {
+    const selectorDependency = extractSelectorLockedDependency(
+      depName,
+      version,
+      backend,
+      toolName,
+      options,
+      toolConfig,
+      lockedVersion,
+      depType,
+    );
+    if (selectorDependency) {
+      return selectorDependency;
+    }
+  }
+
+  if (lockedVersion) {
+    return { ...dependency, lockedVersion };
+  }
+  return dependency;
+}
+
+function getConfiguredDepName(
+  config: StaticTooling | BackendToolingConfig,
+): string | undefined {
+  if ('depName' in config) {
+    return config.depName;
+  }
+  return undefined;
+}
+
 function createDependency(
   name: string,
   version: string | null,
   config: StaticTooling | BackendToolingConfig | null,
-): PackageDependency {
+  depType: string,
+): MiseDependency {
   if (version === null) {
     return {
       depName: name,
+      depType,
       skipReason: 'unspecified-version',
     };
   }
   if (config === null) {
     return {
       depName: name,
+      depType,
       skipReason: 'unsupported-datasource',
     };
   }
 
   return {
-    depName: name,
+    depType,
     currentValue: version,
-    // Spread the config last to override other properties
     ...config,
+    // Allow tooling definitions to override the parsed mise tool name.
+    depName: getConfiguredDepName(config) ?? name,
   };
 }

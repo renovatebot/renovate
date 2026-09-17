@@ -6,7 +6,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'elm';
 export const displayName = 'Elm';
-export const urls = ['https://elm-lang.org'];
+export const urls = ['[Elm](https://elm-lang.org)'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
