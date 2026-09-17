@@ -5943,6 +5943,61 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('uses a release-specific sourceDirectory, when set, over the package-level default', async () => {
+      // Minimal synthetic registry response (no suitable real-world fixture
+      // has per-release sourceDirectory divergence): package-level default
+      // comes from dist-tags.latest (2.0.0, packages/new), but the release
+      // actually proposed as the update (1.5.0, restricted via
+      // allowedVersions) is still under packages/old. sourceUrl is
+      // identical everywhere so only the sourceDirectory branch is
+      // exercised here.
+      config.currentValue = '1.0.0';
+      config.packageName = 'monorepo-pkg';
+      config.datasource = NpmDatasource.id;
+      config.allowedVersions = '< 2.0.0';
+      httpMock
+        .scope(npmDefaultRegistryUrl)
+        .get('/monorepo-pkg')
+        .reply(200, {
+          name: 'monorepo-pkg',
+          'dist-tags': { latest: '2.0.0' },
+          versions: {
+            '1.0.0': {
+              version: '1.0.0',
+              repository: {
+                url: 'https://github.com/foo/bar',
+                directory: 'packages/old',
+              },
+            },
+            '1.5.0': {
+              version: '1.5.0',
+              repository: {
+                url: 'https://github.com/foo/bar',
+                directory: 'packages/old',
+              },
+            },
+            '2.0.0': {
+              version: '2.0.0',
+              repository: {
+                url: 'https://github.com/foo/bar',
+                directory: 'packages/new',
+              },
+            },
+          },
+        });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.sourceDirectory).toBe('packages/new');
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0]).toMatchObject({
+        newVersion: '1.5.0',
+        sourceDirectory: 'packages/old',
+      });
+    });
+
     it('handles current age packageRules with version restrictions', async () => {
       config.packageName = 'openjdk';
       config.currentValue = '17.0.0';
