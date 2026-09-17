@@ -1,9 +1,15 @@
 import { isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../logger/index.ts';
 import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
 import type { ConstraintName } from '../../util/exec/types.ts';
-import { readLocalFile } from '../../util/fs/index.ts';
+import {
+  deleteLocalFile,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs/index.ts';
+import type { FileChange } from '../../util/git/types.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
@@ -13,6 +19,7 @@ import type {
   PackageDependency,
   ToolConstraintsConfig,
   UpdateArtifactsResult,
+  UpdateLockFileConfig,
 } from './types.ts';
 
 export function applyGitSource(
@@ -76,27 +83,13 @@ export function artifactErrorMessageFromExecError(
 }
 
 /**
- * Read a binary lock file back after the package manager has run and turn it into an artifact result.
- *
- * Returns `null` when the file is gone or byte-identical to `oldContent`, which is what `updateArtifacts()` returns for "nothing changed".
+ * Wraps {@link FileChange}s, e.g. the result of `collectFileChanges()`, into the
+ * result shape returned by `updateArtifacts()`.
  */
-export async function readUpdatedBinaryLockFile(
-  lockFileName: string,
-  oldContent: Buffer,
-): Promise<UpdateArtifactsResult[] | null> {
-  const newContent = await readLocalFile(lockFileName);
-  if (!newContent || Buffer.compare(oldContent, newContent) === 0) {
-    return null;
-  }
-  return [
-    {
-      file: {
-        type: 'addition',
-        path: lockFileName,
-        contents: newContent,
-      },
-    },
-  ];
+export function fileChangesToArtifactResults(
+  changes: FileChange[],
+): UpdateArtifactsResult[] {
+  return changes.map((file) => ({ file }));
 }
 
 /**
@@ -132,4 +125,98 @@ export async function resolveToolConstraint(
   }
   const extracted = config.extractedConstraints?.[toolName];
   return isNonEmptyString(extracted) ? extracted : undefined;
+}
+
+/**
+ * The result which reports `path` as created or updated.
+ */
+export function fileAddition(
+  path: string,
+  contents: string | Buffer | null,
+): UpdateArtifactsResult {
+  return { file: { type: 'addition', path, contents } };
+}
+
+/**
+ * The result which reports a failed artifact update to the user.
+ */
+export function artifactError(
+  fileName: string | undefined,
+  stderr: string,
+): UpdateArtifactsResult {
+  return { artifactError: { fileName, stderr } };
+}
+
+/**
+ * The result for an artifact update which threw, using the most informative
+ * output the error carries. Callers are expected to have rethrown
+ * `TEMPORARY_ERROR` and logged the error before calling this.
+ */
+export function artifactErrorResult(
+  fileName: string | undefined,
+  err: Error & Partial<ExecError>,
+): UpdateArtifactsResult[] {
+  return [
+    artifactError(
+      fileName,
+      artifactErrorMessageFromExecError(err, err.message),
+    ),
+  ];
+}
+
+/**
+ * The skeleton shared by the managers which regenerate a single lock file:
+ * rewrite the package file, optionally drop the lock file, run the package
+ * manager and return the lock file when its content changed.
+ *
+ * Errors from `run()` are not handled here - callers keep their own logging and
+ * pass the error to {@link artifactErrorResult}.
+ */
+export async function updateLockFile({
+  lockFileName,
+  existingLockFileContent,
+  packageFile,
+  deleteLockFile,
+  run,
+}: UpdateLockFileConfig): Promise<UpdateArtifactsResult[] | null> {
+  if (packageFile) {
+    await writeLocalFile(packageFile.path, packageFile.contents);
+  }
+
+  if (deleteLockFile) {
+    await deleteLocalFile(lockFileName);
+  }
+
+  await run();
+
+  const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  if (!newLockFileContent) {
+    logger.debug(`No ${lockFileName} found`);
+    return null;
+  }
+
+  if (existingLockFileContent === newLockFileContent) {
+    logger.debug(`${lockFileName} is unchanged`);
+    return null;
+  }
+
+  return [fileAddition(lockFileName, newLockFileContent)];
+}
+
+/**
+ * Read a binary lock file back after the package manager has run and turn it
+ * into an artifact result.
+ *
+ * Returns `null` when the file is gone or byte-identical to `oldContent`, which
+ * is what `updateArtifacts()` returns for "nothing changed".
+ */
+export async function readUpdatedBinaryLockFile(
+  lockFileName: string,
+  oldContent: Buffer,
+): Promise<UpdateArtifactsResult[] | null> {
+  const newContent = await readLocalFile(lockFileName);
+  if (!newContent || Buffer.compare(oldContent, newContent) === 0) {
+    return null;
+  }
+  return [fileAddition(lockFileName, newContent)];
 }

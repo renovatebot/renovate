@@ -13,7 +13,11 @@ import {
 import { processHostRules } from '../npm/post-update/rules.ts';
 import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { readUpdatedBinaryLockFile, resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  readUpdatedBinaryLockFile,
+  resolveToolConstraint,
+} from '../util.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -88,13 +92,6 @@ export async function updateArtifacts(
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

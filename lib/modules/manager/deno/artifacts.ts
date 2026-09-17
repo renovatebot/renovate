@@ -14,7 +14,12 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
 import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { readUpdatedBinaryLockFile, resolveToolConstraint } from '../util.ts';
+import {
+  artifactError,
+  artifactErrorResult,
+  readUpdatedBinaryLockFile,
+  resolveToolConstraint,
+} from '../util.ts';
 import type { DenoManagerData } from './types.ts';
 
 export async function updateArtifacts(
@@ -41,14 +46,7 @@ export async function updateArtifacts(
   const oldLockFileContent = await readLocalFile(lockFileName);
   if (!oldLockFileContent) {
     logger.debug(`Failed to read ${lockFileName}. Skipping artifact update.`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: `Failed to read "${lockFileName}"`,
-        },
-      },
-    ];
+    return [artifactError(lockFileName, `Failed to read "${lockFileName}"`)];
   }
 
   for (const updateDep of updatedDeps) {
@@ -65,12 +63,10 @@ export async function updateArtifacts(
         "Dependency can't be updated with a lock file",
       );
       return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
-          },
-        },
+        artifactError(
+          lockFileName,
+          `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
+        ),
       ];
     }
   }
@@ -152,13 +148,6 @@ export async function updateArtifacts(
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }
