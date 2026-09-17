@@ -4,7 +4,7 @@ import { Releases } from '../../../../../../modules/datasource/forgejo-releases/
 import {
   ContentsListResponse,
   RepoContents,
-} from '../../../../../../modules/platform/forgejo/schema.ts';
+} from '../../../../../../modules/platform/gitea/schema.ts';
 import { ForgejoHttp } from '../../../../../../util/http/forgejo.ts';
 import { fromBase64 } from '../../../../../../util/string.ts';
 import { compareChangelogFilePath } from '../common.ts';
@@ -37,10 +37,7 @@ export async function getReleaseNotesMd(
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'file');
-  let files: RepoContents[] = [];
-  if (!files.length) {
-    files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
-  }
+  const files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;

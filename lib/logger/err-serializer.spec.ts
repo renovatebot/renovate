@@ -101,7 +101,7 @@ describe('logger/err-serializer', () => {
       // sanitize like Bunyan
       expect(sanitizeValue(err)).toMatchObject({
         message:
-          'Request failed with status code 412 (Precondition Failed): POST https://**redacted**@github.com/api',
+          'Request failed with status code 412 (Precondition Failed): POST https://github.com/api',
         name: 'HTTPError',
         options: {
           headers: {

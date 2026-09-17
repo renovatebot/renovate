@@ -62,65 +62,48 @@ https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64/APKINDEX.tar.gz
 https://dl-cdn.alpinelinux.org/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
 ```
 
-<!-- TODO #43711 -->
+## Versioning
 
-## Usage example
+This datasource uses [`apk` versioning](../../versioning/apk/index.md) by default, which follows Alpine's version format (`3.2.1-r0`, `2.39.0_rc1-r0`, `6.5_p20250503-r0`) and understands APK's version constraints.
 
-Say you pin Alpine packages in a `Dockerfile` and want Renovate to bump the versions.
-Combine the `apk` datasource with a [regex manager](../../manager/regex/index.md).
+This means a `currentValue` may be a constraint rather than a plain version, e.g. `=~8.12.1` to accept any `8.12.1-rN`.
+Read the [`apk` versioning](../../versioning/apk/index.md) docs for the operators it supports.
 
-Add a custom manager in `renovate.json`.
-The optional `branch` capture group is filled from the Renovate comment and interpolated into `registryUrlTemplate` by the regex manager.
+Depending on which APK repository you are using, you may want to use [the `loose` versioning scheme](../../versioning/loose/index.md), like so:
 
-```json
+```json title="Specify loose versioning for apk lookups"
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "customManagers": [
+  "packageRules": [
     {
-      "customType": "regex",
-      "managerFilePatterns": ["/^Dockerfile$/"],
-      "matchStrings": [
-        "#\\s*renovate:\\s*(?:branch=(?<branch>\\S+)\\s+)?depName=(?<depName>\\S+)\\s+ENV .*?_VERSION=\"(?<currentValue>.*)\""
-      ],
-      "registryUrlTemplate": "https://dl-cdn.alpinelinux.org/alpine?branch={{#if branch}}{{branch}}{{else}}v3.19{{/if}}&components=main,community&arch=x86_64",
-      "datasourceTemplate": "apk"
+      "matchDatasources": ["apk"],
+      "versioning": "loose"
     }
   ]
 }
 ```
 
-The regex manager supplies `depName` (becomes `packageName`) and `currentValue` (the pinned APK version).
-The datasource then fetches `APKINDEX.tar.gz` for each component, finds `depName` in the index, and compares versions.
+## Dockerfile support
 
-Match the `registryUrl` parameters to your image: the Alpine branch (`v3.19` in the default above) and the architecture (`x86_64` here, use `aarch64` on arm64).
+When using distributions built on `apk` packages, it is common to use a version pin for your packages, like so:
 
 ```dockerfile
-FROM alpine:3.19
-
-# renovate: branch=v3.19 depName=nginx
-ENV NGINX_VERSION="1.26.2-r0"
-
-RUN apk add --no-cache "nginx=${NGINX_VERSION}"
+FROM alpine:3.18
+RUN apk add --no-cache bash=5.2.37-r2
 ```
 
-`depName` must match the package name in `APKINDEX` (the `P:` field), e.g. `nginx` for the `nginx` package.
-You can omit `branch=` in the comment when the template default (`v3.19` above) matches your Alpine line.
+This provides reproducibility in the case that the upstream package updates under you.
 
-### Multiple Dockerfiles or Alpine versions
+The [`dockerfile` manager](../../manager/dockerfile/index.md) extracts these packages, allowing updates to them directly, without needing a Custom Manager.
 
-The datasource receives one `registryUrl` per lookup.
-Besides the optional `branch=` pattern in the usage example, you can:
+The manager does not set a `registryUrl`, so you will need to set one which matches your base image as shown above.
 
-1. **Several custom managers** with different `managerFilePatterns` / `matchFilePatterns` and a fixed `registryUrlTemplate` each (e.g. one for `docker/alpine-3.18/**`, another for `docker/alpine-3.19/**`).
-
-1. **`packageRules`** with `matchFileNames` / `matchPaths` and `registryUrls` to override the parameters for specific paths or packages.
-
-For example, this `packageRules` entry overrides the `registryUrl` for the `nginx` package:
+<!-- TODO: #45706 auto-detect `registryUrl` -->
 
 ```json title="Override apk registryUrl with a packageRules entry"
 {
   "packageRules": [
     {
+      "matchFileNames": ["Dockerfile"],
       "matchDatasources": ["apk"],
       "matchPackageNames": ["nginx"],
       "registryUrls": [

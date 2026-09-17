@@ -65,7 +65,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: { cwd: 'some-dir' },
       },
     ]);
@@ -87,7 +87,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: { cwd: 'some-dir' },
       },
     ]);
@@ -106,7 +106,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: { cwd: 'some-dir' },
       },
     ]);
@@ -294,7 +294,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
       },
       {
         cmd: 'pnpm update --no-save some-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
@@ -313,7 +313,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: { cwd: 'some-dir' },
       },
     ]);
@@ -333,7 +333,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
       },
       {
         cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
@@ -360,7 +360,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
       },
       {
         cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
@@ -383,7 +383,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: { cwd: 'some-dir' },
       },
     ]);
@@ -412,7 +412,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: {
           cwd: 'some-folder',
           env: {
@@ -456,7 +456,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: {
           cwd: 'some-folder',
           env: {
@@ -513,7 +513,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         options: {
           cwd: 'some-folder',
           env: {
@@ -583,7 +583,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +
-          '&& pnpm install --lockfile-only' +
+          '&& pnpm install --lockfile-only --no-frozen-lockfile' +
           "'",
       },
     ]);
@@ -609,7 +609,55 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool pnpm 6.0.0' },
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+      },
+    ]);
+  });
+
+  it('falls back to the extracted pnpm constraint', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: {}, extractedConstraints: { pnpm: '6.0.0' } },
+      upgrades,
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool pnpm 6.0.0' },
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+      },
+    ]);
+  });
+
+  it('prefers the derived pnpm constraint over the extracted one', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{"packageManager":"pnpm@7.0.0"}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: {}, extractedConstraints: { pnpm: '6.0.0' } },
+      upgrades,
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool pnpm 7.0.0' },
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
       },
     ]);
   });
@@ -635,7 +683,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool pnpm 6.0.0' },
       {
-        cmd: 'pnpm install --lockfile-only --ignore-scripts',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --no-frozen-lockfile',
       },
     ]);
   });
@@ -663,7 +711,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res.lockFile).toBe('package-lock-contents');
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         },
       ]);
 
@@ -690,7 +738,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res.lockFile).toBe('package-lock-contents');
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
         },
       ]);
 

@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
 import { fs } from '~test/util.ts';
+import { getUserPixiConfig } from './extract.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -631,7 +632,7 @@ describe('modules/manager/pixi/extract', () => {
     });
   });
 
-  it(`extract package with channel priority`, async () => {
+  it(`extract package with channel options`, async () => {
     const result = await extractPackageFile(
       codeBlock`
         [project]
@@ -642,7 +643,12 @@ describe('modules/manager/pixi/extract', () => {
         version = "0.1.0"
 
         [feature.scipy]
-        channels = ["anaconda", {channel = 'cuda', priority = 1},  {channel = 'cuda2', priority = 1}]
+        channels = [
+          "anaconda",
+          { channel = "community", exclude-newer = "7d" },
+          { channel = "cuda", priority = 1 },
+          { channel = "cuda2", priority = 1 },
+        ]
         dependencies = { scipy = "==1.15.1" }
 
         [feature.numpy]
@@ -661,6 +667,7 @@ describe('modules/manager/pixi/extract', () => {
             'https://api.anaconda.org/package/cuda/',
             'https://api.anaconda.org/package/cuda2/',
             'https://api.anaconda.org/package/anaconda/',
+            'https://api.anaconda.org/package/community/',
             'https://api.anaconda.org/package/conda-forge/',
             'https://api.anaconda.org/package/conda-not-forge/',
           ],
@@ -680,6 +687,24 @@ describe('modules/manager/pixi/extract', () => {
       ],
       lockFiles: [],
     });
+  });
+
+  it('parses optional channel configuration', () => {
+    expect(
+      getUserPixiConfig(
+        codeBlock`
+          [project]
+          channels = [
+            { channel = "conda-forge", exclude-newer = "7d" },
+            { channel = "cuda", priority = 1 },
+          ]
+        `,
+        'pixi.toml',
+      )?.project.channels,
+    ).toEqual([
+      { channel: 'conda-forge', 'exclude-newer': '7d' },
+      { channel: 'cuda', priority: 1 },
+    ]);
   });
 
   it('returns null for non-known config file', async () => {

@@ -553,6 +553,34 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBeUndefined();
   });
 
+  it('extracts integrity and tarball', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        versions: {
+          '1.0.0': {
+            dist: {
+              integrity: 'sha512-abc',
+              tarball: 'https://test.org/react-1.0.0.tgz',
+            },
+          },
+        },
+        'dist-tags': { latest: '1.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.releases[0]).toMatchObject({
+      version: '1.0.0',
+      newDigest: 'sha512-abc',
+      downloadUrl: 'https://test.org/react-1.0.0.tgz',
+    });
+  });
+
   describe('cache', () => {
     const httpResponse: HttpResponse<unknown> = {
       statusCode: 200,
@@ -604,6 +632,7 @@ describe('modules/datasource/npm/get', () => {
                     url: 'https://example.com/attestations',
                     issuer: 'ignore me',
                   },
+                  integrity: 'sha512-abc',
                   tarball: 'https://example.com/some-package.tgz',
                 },
                 scripts: { test: 'vitest' },
@@ -658,6 +687,8 @@ describe('modules/datasource/npm/get', () => {
                     attestations: {
                       url: 'https://example.com/attestations',
                     },
+                    integrity: 'sha512-abc',
+                    tarball: 'https://example.com/some-package.tgz',
                   },
                 },
               },

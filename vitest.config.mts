@@ -6,10 +6,7 @@ import {
   mergeConfig,
 } from 'vitest/config';
 import { testShards } from './tools/test/shards.ts';
-import {
-  getCoverageIgnorePatterns,
-  normalizePattern,
-} from './tools/test/utils.ts';
+import { normalizePattern } from './tools/test/utils.ts';
 
 const ci = !!process.env.CI;
 const agentHook = !!process.env.RENOVATE_AGENT_HOOK;
@@ -104,7 +101,6 @@ export default defineConfig(() =>
           enabled: true,
           exclude: [
             ...coverageConfigDefaults.exclude,
-            ...getCoverageIgnorePatterns(),
             '**/*.spec.ts', // should work from defaults
             'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
             'lib/**/types.ts',

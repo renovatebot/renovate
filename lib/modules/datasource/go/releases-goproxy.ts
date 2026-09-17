@@ -28,10 +28,11 @@ import { Datasource } from '../datasource.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import { getSourceUrl } from './common.ts';
+import { getSourceUrl, isPublicGoPackage, publicGoproxyUrl } from './common.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { VersionInfo } from './schema.ts';
+import { GoVersionTimestampCache } from './timestamp-cache.ts';
 
 /** TODO #42566 */
 const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
@@ -118,7 +119,7 @@ export class GoProxyDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-    const goproxy = getEnv().GOPROXY ?? 'https://proxy.golang.org,direct';
+    const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
     if (goproxy === 'direct') {
       return this.direct.getReleases(config);
     }
@@ -259,6 +260,7 @@ export class GoProxyDatasource extends Datasource {
       {
         namespace: `datasource-${GoProxyDatasource.id}`,
         key: GoProxyDatasource.getCacheKey(config),
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -340,6 +342,7 @@ export class GoProxyDatasource extends Datasource {
         key: GoProxyDatasource.getVersionedCacheKey(packageName, version),
         // a module's `go.mod` should /never/ change after it's published. If going via the Go Proxy and the Go Checksum Database, a change in this value will result in build failures.
         ttlMinutes: 100 * 24 * 60,
+        cacheable: isPublicGoPackage(packageName),
       },
       () => this._retrieveGoDirectiveForModule(baseUrl, packageName, version),
     );
@@ -416,9 +419,9 @@ export class GoProxyDatasource extends Datasource {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
-    const baseMod =
-      modParts?.baseMod ??
-      /* v8 ignore next -- defensive: modRegex matches any non-empty package name, so baseMod is always set */ packageName;
+    /* v8 ignore start: defensive - modRegex matches any non-empty package name, so baseMod is always set */
+    const baseMod = modParts?.baseMod ?? packageName;
+    /* v8 ignore stop */
     const packageMajor = parseInt(modParts?.majorVersion ?? '0', 10);
 
     const result: ReleaseResult = { releases: [] };
@@ -446,6 +449,8 @@ export class GoProxyDatasource extends Datasource {
           );
         });
 
+        const timestamps = await GoVersionTimestampCache.init(baseUrl, pkg);
+
         releases = await p.map(filteredReleases, async (versionInfo) => {
           const { version, newDigest, releaseTimestamp } = versionInfo;
 
@@ -453,13 +458,24 @@ export class GoProxyDatasource extends Datasource {
             return { version, newDigest, releaseTimestamp };
           }
 
+          const cachedTimestamp = timestamps.get(version);
+          if (cachedTimestamp) {
+            return { version, releaseTimestamp: cachedTimestamp };
+          }
+
           try {
-            return await this.versionInfo(baseUrl, pkg, version);
+            const release = await this.versionInfo(baseUrl, pkg, version);
+            if (release.releaseTimestamp) {
+              timestamps.set(version, release.releaseTimestamp);
+            }
+            return release;
           } catch (err) {
             logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
             return { version };
           }
         });
+
+        await timestamps.save();
 
         if (constraintsFiltering === 'strict') {
           releases = await p.map(releases, async (rel) => {
@@ -514,6 +530,7 @@ export class GoProxyDatasource extends Datasource {
         }
         if (!result.releases.length) {
           const releaseFromLatest = pseudoVersionToRelease(latestVersion);
+          // v8 ignore else -- needs an empty version list plus a non-pseudo latest
           if (releaseFromLatest) {
             result.releases.push(releaseFromLatest);
           }

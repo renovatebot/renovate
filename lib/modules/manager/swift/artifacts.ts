@@ -47,6 +47,7 @@ function matchPinForDep(
   let depUrl: string;
 
   if (dep.datasource === GitTagsDatasource.id) {
+    /* v8 ignore next -- extract always sets depName for a git-tags dep */
     depUrl = dep.depName ?? '';
   } else {
     const registryUrl = dep.registryUrls?.[0] ?? 'https://github.com';
@@ -186,7 +187,7 @@ export async function updateArtifacts({
     const parseResult = PackageResolvedJson.safeParse(content);
     if (!parseResult.success) {
       logger.debug(
-        { resolvedFile, error: parseResult.error },
+        { resolvedFile, err: parseResult.error },
         'swift: could not parse Package.resolved',
       );
       continue;
