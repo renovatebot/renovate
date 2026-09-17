@@ -10,6 +10,7 @@ import type {
 } from '../types.ts';
 import type { HelmDockerImageDependency } from './types.ts';
 import {
+  getHelmValuesSiblingVersion,
   matchesHelmValuesDockerHeuristic,
   matchesHelmValuesInlineImage,
 } from './util.ts';
@@ -60,7 +61,21 @@ export function findDependenciesInternal(
         getHelmDep(registry, repository, tag, registryAliases),
       );
     } else if (matchesHelmValuesInlineImage(key, value)) {
-      packageDependencies.push(getDep(value, true, registryAliases));
+      const dep = getDep(value, true, registryAliases);
+      // An inline reference without an embedded version can be completed by a
+      // sibling `tag`/`version` key: `cli: { image: ..., tag: v1.0.0 }`
+      if (!dep.currentValue && !dep.currentDigest) {
+        const siblingVersion = getHelmValuesSiblingVersion(parsedContent);
+        if (siblingVersion) {
+          packageDependencies.push(
+            getHelmDep('', value, siblingVersion, registryAliases),
+          );
+        } else {
+          packageDependencies.push(dep);
+        }
+      } else {
+        packageDependencies.push(dep);
+      }
     } else {
       findDependenciesInternal(
         value as Record<string, unknown>,

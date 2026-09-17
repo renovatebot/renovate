@@ -90,7 +90,7 @@ function getDeps(doc: TektonResource): PackageDependency[] {
 }
 
 const annotationRegex = regEx(
-  /^pipelinesascode\.tekton\.dev\/(?:task(-[0-9]+)?|pipeline)$/,
+  /^pipelinesascode\.tekton\.dev\/(?:task(?:-[0-9]+)?|pipeline)$/,
 );
 
 function addPipelineAsCodeAnnotations(

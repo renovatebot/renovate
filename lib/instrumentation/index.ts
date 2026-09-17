@@ -3,7 +3,9 @@ import type { Context, Span, Tracer, TracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
@@ -17,6 +19,7 @@ import {
   BatchSpanProcessor,
   ConsoleSpanExporter,
   SimpleSpanProcessor,
+  type SpanExporter,
   type SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
@@ -33,6 +36,7 @@ import { FileSpanExporter } from './file-exporter.ts';
 import type { RenovateSpanOptions } from './types.ts';
 import {
   getFileExporterPath,
+  getOtlpProtocol,
   isFileExporterEnabled,
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
@@ -41,6 +45,17 @@ import {
 } from './utils.ts';
 
 let instrumentations: Instrumentation[] = [];
+
+function createOtlpExporter(): SpanExporter {
+  const protocol = getOtlpProtocol();
+  if (protocol === 'grpc') {
+    return new OTLPTraceExporterGrpc();
+  }
+  if (protocol === 'http/protobuf') {
+    return new OTLPTraceExporterProto();
+  }
+  return new OTLPTraceExporterHttp();
+}
 
 export function init(): void {
   const spanProcessors: SpanProcessor[] = [
@@ -73,8 +88,7 @@ export function init(): void {
 
   // OTEL specification environment variable
   if (isTraceSendingEnabled()) {
-    const exporter = new OTLPTraceExporter();
-    spanProcessors.push(new BatchSpanProcessor(exporter));
+    spanProcessors.push(new BatchSpanProcessor(createOtlpExporter()));
   }
 
   if (isFileExporterEnabled()) {

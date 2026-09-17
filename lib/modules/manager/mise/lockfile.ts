@@ -1,13 +1,7 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex.ts';
-import type { MiseLockFile } from './schema.ts';
-
-export interface MiseConfigType {
-  /** True when config filename contains `.local.` (e.g. mise.local.toml) */
-  isLocal: boolean;
-  /** Environment name extracted from filename, e.g. 'test' for mise.test.toml */
-  env?: string;
-}
+import type { MiseLockFile, MiseLockTool } from './schema.ts';
+import type { MiseConfigType } from './types.ts';
 
 /**
  * Parses the config file name to determine its type (local, env-specific, or default).
@@ -85,6 +79,17 @@ export function getLockedVersion(
   lockFileData: MiseLockFile,
   depName: string,
 ): string | undefined {
+  return getLockedTool(lockFileData, depName)?.[0]?.version;
+}
+
+/**
+ * Returns the lockfile entries for a dependency, using the same backend-name
+ * fallback as getLockedVersion().
+ */
+export function getLockedTool(
+  lockFileData: MiseLockFile,
+  depName: string,
+): MiseLockTool[] | undefined {
   // Try full name first (for non-registry tools like ubi:, aqua:)
   let lockedTools = lockFileData.tools[depName];
 
@@ -97,5 +102,5 @@ export function getLockedVersion(
     }
   }
 
-  return lockedTools?.[0]?.version;
+  return lockedTools;
 }

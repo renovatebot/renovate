@@ -2,7 +2,7 @@ name: Check for Undesirable Code
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [edited, opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -108,3 +108,43 @@ jobs:
           fi
 
           echo "🎉 All checks passed successfully."
+      - name: Check TODOs for references resolved by this PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const body = context.payload.pull_request.body ?? '';
+            const closingPattern = /\b(?:close[sd]?|fix(?:es|ed)?|resolve[sd]?):?\s+(?:https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/|#)(?<referenceNumber>\d+)\b/gi;
+            const referenceNumbers = new Set();
+
+            for (const match of body.matchAll(closingPattern)) {
+              referenceNumbers.add(match.groups.referenceNumber);
+            }
+
+            if (referenceNumbers.size === 0) {
+              core.info('No issues or discussions are resolved by this pull request');
+              return;
+            }
+
+            const references = [...referenceNumbers].join('|');
+            const todoPattern = `TODO.*#(${references})([^0-9]|$)`;
+            const result = await exec.getExecOutput(
+              'git',
+              ['grep', '-n', '-E', todoPattern, '--', '.'],
+              { ignoreReturnCode: true, silent: true },
+            );
+
+            if (result.exitCode === 1) {
+              core.info(
+                'No TODOs reference issues or discussions resolved by this pull request',
+              );
+              return;
+            }
+
+            if (result.exitCode !== 0) {
+              core.setFailed(`git grep failed: ${result.stderr}`);
+              return;
+            }
+
+            core.setFailed(
+              `Remove or update TODOs that reference issues or discussions resolved by this pull request:\n${result.stdout}`,
+            );

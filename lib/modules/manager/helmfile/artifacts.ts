@@ -5,17 +5,18 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ToolConstraint } from '../../../util/exec/types.ts';
-import {
-  getSiblingFileName,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { getSiblingFileName } from '../../../util/fs/index.ts';
 import { getFile } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { generateHelmEnvs } from '../helmv3/common.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 import { Doc, LockVersion } from './schema.ts';
 import { generateRegistryLoginCmd, isOCIRegistry } from './utils.ts';
 
@@ -45,18 +46,16 @@ export async function updateArtifacts({
   }
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-
     const toolConstraints: ToolConstraint[] = [
       {
         toolName: 'helm',
-        constraint: config.constraints?.helm,
+        constraint: await resolveToolConstraint(config, 'helm'),
       },
       {
         toolName: 'helmfile',
-        constraint:
-          config.constraints?.helmfile ??
+        constraint: await resolveToolConstraint(config, 'helmfile', () =>
           Result.parse(existingLockFileContent, LockVersion).unwrapOrNull(),
+        ),
       },
     ];
     const needKustomize = updatedDeps.some(
@@ -65,7 +64,7 @@ export async function updateArtifacts({
     if (needKustomize) {
       toolConstraints.push({
         toolName: 'kustomize',
-        constraint: config.constraints?.kustomize,
+        constraint: await resolveToolConstraint(config, 'kustomize'),
       });
     }
 
@@ -85,6 +84,7 @@ export async function updateArtifacts({
           value.url.replace(regEx(/\/.*/), ''),
         );
 
+        // v8 ignore else -- needs a repository the login helper cannot handle
         if (loginCmd) {
           cmd.push(loginCmd);
         }
@@ -92,40 +92,24 @@ export async function updateArtifacts({
     }
 
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
-    await exec(cmd, {
-      docker: {},
-      extraEnv: generateHelmEnvs(),
-      toolConstraints,
+
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: () =>
+        exec(cmd, {
+          docker: {},
+          extraEnv: generateHelmEnvs(),
+          toolConstraints,
+        }),
     });
-
-    const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
-    if (existingLockFileContent === newHelmLockContent) {
-      logger.debug('helmfile.lock is unchanged');
-      return null;
-    }
-
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newHelmLockContent,
-        },
-      },
-    ];
   } catch (err) {
-    // istanbul ignore if
+    /* v8 ignore if -- defensive rethrow, not reproduced in the helmfile specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug({ err }, 'Failed to update Helmfile lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }
