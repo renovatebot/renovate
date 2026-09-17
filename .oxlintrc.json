@@ -278,7 +278,6 @@
         "lib/modules/datasource/bitbucket-server-tags/index.ts",
         "lib/modules/datasource/bitbucket-tags/index.ts",
         "lib/modules/datasource/bitrise/index.ts",
-        "lib/modules/datasource/buildpacks-registry/index.ts",
         "lib/modules/datasource/conan/index.ts",
         "lib/modules/datasource/conda/index.ts",
         "lib/modules/datasource/deb/index.ts",
