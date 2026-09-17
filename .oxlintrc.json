@@ -307,7 +307,6 @@
         "lib/modules/datasource/hermit/index.ts",
         "lib/modules/datasource/hexpm-bob/index.ts",
         "lib/modules/datasource/jenkins-plugins/index.ts",
-        "lib/modules/datasource/jsr/index.ts",
         "lib/modules/datasource/nextcloud/index.ts",
         "lib/modules/datasource/node-version/index.ts",
         "lib/modules/datasource/nuget/v3.ts",
