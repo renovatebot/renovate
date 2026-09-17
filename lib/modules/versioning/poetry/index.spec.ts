@@ -191,10 +191,10 @@ describe('modules/versioning/poetry/index', () => {
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']}          | ${'^4.0.0, = 0.5.0'}           | ${null}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']}          | ${'^4.0.0, > 4.1.0, <= 4.3.5'} | ${'4.2.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']}          | ${'^6.2.0, 3.*'}               | ${null}
+    ${['2.0.0', '3.0.1', '3.3.0', '3.4.0', '4.0.0']} | ${'>=2.6, !=3.0.*, <4'}        | ${'3.3.0'}
     ${['0.8.0a2', '0.8.0a7']}                        | ${'^0.8.0-alpha.0'}            | ${'0.8.0-alpha.2'}
     ${['1.0.0', '2.0.0']}                            | ${'^3.0.0'}                    | ${null}
-    ${['2.0.0', '3.0.1', '3.3.0', '3.4.0', '4.0.0']} | ${'>=2.6, !=3.0.*, <4'}        | ${'3.3.0'}
-    ${['1.0.0', 'not-a-version', '1.1.0']}           | ${'^1.0.0'}                    | ${'1.0.0'}
+    ${['not-a-version', '1.0.0', '2.0.0']}           | ${'^1.0.0'}                    | ${'1.0.0'}
   `(
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -203,13 +203,13 @@ describe('modules/versioning/poetry/index', () => {
   );
 
   it.each`
-    versions                                                  | range                   | expected
-    ${['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'4.*.0, < 4.2.5'}     | ${'4.2.1'}
-    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3']} | ${'5.0, > 5.0.0'}       | ${'5.0.3'}
-    ${['0.8.0a2', '0.8.0a7']}                                 | ${'^0.8.0-alpha.0'}     | ${'0.8.0-alpha.7'}
-    ${['1.0.0', '2.0.0']}                                     | ${'^3.0.0'}             | ${null}
-    ${['2.0.0', '3.0.1', '3.3.0', '3.4.0', '4.0.0']}          | ${'>=2.6, !=3.0.*, <4'} | ${'3.4.0'}
-    ${['1.0.0', 'not-a-version', '1.1.0']}                    | ${'^1.0.0'}             | ${'1.1.0'}
+    versions                                                  | range               | expected
+    ${['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'4.*.0, < 4.2.5'} | ${'4.2.1'}
+    ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3']} | ${'5.0, > 5.0.0'}   | ${'5.0.3'}
+    ${['2.0.0', '3.0.1', '3.3.0', '3.4.0', '4.0.0']}          | ${'>=2.6, !=3.0.*'} | ${'4.0.0'}
+    ${['0.8.0a2', '0.8.0a7']}                                 | ${'^0.8.0-alpha.0'} | ${'0.8.0-alpha.7'}
+    ${['1.0.0', '2.0.0']}                                     | ${'^3.0.0'}         | ${null}
+    ${['not-a-version', '1.0.0', '2.0.0']}                    | ${'^1.0.0'}         | ${'1.0.0'}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -266,9 +266,7 @@ describe('modules/versioning/poetry/index', () => {
     ${'~1'}               | ${'replace'}  | ${'1.2.3'}         | ${'2.0.0'}         | ${'~2'}
     ${'^2.2'}             | ${'widen'}    | ${'2.2.0'}         | ${'3.0.0'}         | ${'^2.2 || ^3.0.0'}
     ${'^2.2 || ^3.0.0'}   | ${'widen'}    | ${'3.0.0'}         | ${'4.0.0'}         | ${'^2.2 || ^3.0.0 || ^4.0.0'}
-    ${'!=1.2.3'}          | ${'replace'}  | ${'1.0.0'}         | ${'1.2.3'}         | ${null}
-    ${'~=1.1.0, !=1.1.1'} | ${'replace'}  | ${'1.0.0'}         | ${'1.2.3'}         | ${'~=1.2.3, !=1.1.1'}
-    ${'*'}                | ${'bump'}     | ${'1.0.0'}         | ${'1.2.3'}         | ${'*'}
+    ${'<=1.0.0, >=0.5.0'} | ${'widen'}    | ${'0.5.0'}         | ${'2.0.0'}         | ${'<=1.0.0, >=0.5.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -279,6 +277,24 @@ describe('modules/versioning/poetry/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
+    },
+  );
+
+  it.each`
+    currentValue          | rangeStrategy | currentVersion | newVersion | expected
+    ${'!=1.2.3'}          | ${'replace'}  | ${'1.0.0'}     | ${'1.2.3'} | ${null}
+    ${'~=1.1.0, !=1.1.1'} | ${'replace'}  | ${'1.0.0'}     | ${'1.2.3'} | ${'~=1.2.3, !=1.1.1'}
+  `(
+    'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected" through pep440',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      expect(
+        versioning.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+        }),
+      ).toEqual(expected);
     },
   );
 
