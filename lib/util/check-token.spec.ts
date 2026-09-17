@@ -7,6 +7,8 @@ import type { PackageFileContent } from '../modules/manager/types.ts';
 import * as memCache from '../util/cache/memory/index.ts';
 import {
   checkGithubToken,
+  findGithubComHostRule,
+  findGithubComToken,
   findGithubToken,
   isGithubFineGrainedPersonalAccessToken,
   isGithubPersonalAccessToken,
@@ -195,6 +197,50 @@ describe('util/check-token', () => {
       expect(findGithubToken({ token: TOKEN_STRING_WITH_PREFIX })).toBe(
         TOKEN_STRING,
       );
+    });
+  });
+
+  describe('findGithubComHostRule', () => {
+    it('returns the host rule matching the github.com API', () => {
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'ghp_TOKEN',
+      });
+
+      expect(findGithubComHostRule()).toMatchObject({ token: 'ghp_TOKEN' });
+    });
+
+    it('returns an empty result when no host rule is configured', () => {
+      expect(findGithubComHostRule()).toStrictEqual({});
+    });
+
+    it('accepts a custom hostType', () => {
+      hostRules.add({
+        hostType: 'github-tags',
+        matchHost: 'api.github.com',
+        token: 'ghp_TOKEN',
+      });
+
+      expect(findGithubComHostRule('github-tags')).toMatchObject({
+        token: 'ghp_TOKEN',
+      });
+    });
+  });
+
+  describe('findGithubComToken', () => {
+    it('returns the normalized token for the github.com API', () => {
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'x-access-token:ghp_TOKEN',
+      });
+
+      expect(findGithubComToken()).toBe('ghp_TOKEN');
+    });
+
+    it('returns undefined when no token is configured', () => {
+      expect(findGithubComToken()).toBeUndefined();
     });
   });
 

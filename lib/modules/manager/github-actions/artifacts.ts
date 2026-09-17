@@ -3,7 +3,11 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { findGithubToken } from '../../../util/check-token.ts';
+import {
+  GITHUB_API_URL,
+  findGithubComToken,
+  findGithubToken,
+} from '../../../util/check-token.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
@@ -37,7 +41,7 @@ function findToken(url: string): string | undefined {
  * Public actions are still resolved against github.com from there, so pass a token for both hosts.
  */
 function getTokenEnv(): ExtraEnv {
-  const githubComEndpoint = 'https://api.github.com/';
+  const githubComEndpoint = GITHUB_API_URL;
   const configuredEndpoint = GlobalConfig.get('endpoint');
   // The configured endpoint only says where GitHub lives when Renovate is talking to GitHub: workflows mirrored onto another platform still resolve their actions against github.com.
   const endpoint =
@@ -59,7 +63,7 @@ function getTokenEnv(): ExtraEnv {
     }
   }
 
-  const token = findToken(githubComEndpoint);
+  const token = findGithubComToken();
   if (token) {
     env.GH_TOKEN = token;
   }

@@ -4,7 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { findGithubToken } from '../../../util/check-token.ts';
+import { findGithubComToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type {
   ExecOptions,
@@ -12,7 +12,6 @@ import type {
   ToolConstraint,
 } from '../../../util/exec/types.ts';
 import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
 import type {
@@ -204,12 +203,7 @@ export async function updateArtifacts({
   if (safeMode) {
     extraEnv.MISE_SAFE = '1';
   }
-  const token = findGithubToken(
-    hostRules.find({
-      hostType: 'github',
-      url: 'https://api.github.com/',
-    }),
-  );
+  const token = findGithubComToken();
   if (token) {
     extraEnv.GITHUB_TOKEN = token;
   }
