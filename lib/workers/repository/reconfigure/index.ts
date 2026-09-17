@@ -124,7 +124,6 @@ export async function checkReconfigureBranch(
     return;
   }
 
-  // the catch above returns, so a successful extraction always left a result
   const commentEnsured = await ensureReconfigurePrComment(
     newConfig,
     extractResult.packageFiles,
