@@ -288,7 +288,6 @@
         "lib/modules/datasource/forgejo-releases/index.ts",
         "lib/modules/datasource/forgejo-tags/index.ts",
         "lib/modules/datasource/galaxy-collection/index.ts",
-        "lib/modules/datasource/galaxy/index.ts",
         "lib/modules/datasource/git-refs/base.ts",
         "lib/modules/datasource/git-refs/index.ts",
         "lib/modules/datasource/git-tags/index.ts",
