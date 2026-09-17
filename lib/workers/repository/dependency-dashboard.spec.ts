@@ -2303,6 +2303,29 @@ None detected
       expect(result).not.toContain('express');
       expect(result).not.toContain('GHSA-29mw-wpgm-hmr9');
     });
+
+    it('returns a fallback message instead of throwing when the OSV database is unavailable', async () => {
+      createVulnerabilitiesMock.mockRejectedValueOnce(
+        new Error('Request failed with status code 404 (Not Found)'),
+      );
+
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+        },
+        packageFiles,
+      );
+
+      expect(result).toBe(
+        '## Vulnerabilities\n\n' +
+          'Renovate was unable to fetch CVE information from [osv.dev](https://osv.dev) this run.\n\n',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Unable to read vulnerability information',
+      );
+    });
   });
 
   describe('getAbandonedPackagesMd()', () => {
