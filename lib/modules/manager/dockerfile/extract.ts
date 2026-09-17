@@ -15,6 +15,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { extractApkDeps } from './apk.ts';
 
 const variableMarker = '$';
 
@@ -465,6 +466,11 @@ export function extractPackageFile(
         );
         deps.push(dep);
       }
+    }
+
+    for (const dep of extractApkDeps(instruction, escapeChar)) {
+      dep.depType = 'install';
+      deps.push(dep);
     }
 
     lineNumber += 1;

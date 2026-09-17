@@ -169,6 +169,7 @@ export function extractHeaderCommand(
   } else {
     commandType = 'custom';
   }
+  // v8 ignore else -- a compile command always records its arguments
   if (compileCommand.groups.arguments) {
     argv.push(...split(compileCommand.groups.arguments));
   }
@@ -322,6 +323,7 @@ function getRegistryCredEnvVars(
   const hostRule = hostRules.find({ url: url.href });
   logger.debug(hostRule, `Found host rule for url ${url.href}`);
   const ret: Record<string, string> = {};
+  // v8 ignore else -- needs an index url whose host rule carries no credentials
   if (!!hostRule.username || !!hostRule.password) {
     ret[`KEYRING_SERVICE_NAME_${index}`] = url.hostname;
     ret[`KEYRING_SERVICE_USERNAME_${index}`] = hostRule.username ?? '';

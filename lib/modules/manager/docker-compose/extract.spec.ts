@@ -13,6 +13,36 @@ describe('modules/manager/docker-compose/extract', () => {
       expect(extractPackageFile('', '', {})).toBeNull();
     });
 
+    it('ignores an x- extension that carries no image', () => {
+      expect(
+        extractPackageFile(
+          codeBlock`
+            x-no-image:
+              command: echo hello
+          `,
+          'docker-compose.yml',
+          {},
+        )?.deps,
+      ).toBeEmpty();
+    });
+
+    it('ignores an x- extension of a modern file that carries no image', () => {
+      expect(
+        extractPackageFile(
+          codeBlock`
+            services:
+              web:
+                image: node:10.0.0
+            x-no-image:
+              command: echo hello
+            x-not-an-object: hello
+          `,
+          'docker-compose.yml',
+          {},
+        )?.deps,
+      ).toMatchObject([{ depName: 'node', currentValue: '10.0.0' }]);
+    });
+
     it('returns null for non-object YAML', () => {
       expect(extractPackageFile('nothing here', '', {})).toBeNull();
     });

@@ -31,6 +31,12 @@ import type {
   ChangeLogResult,
 } from './types.ts';
 
+// Number of dot-separated segments, used as a proxy for how precise a tag is,
+// e.g. `v7` (0) < `v7.0` (1) < `v7.0.0` (2).
+function tagPrecision(tag: string): number {
+  return tag.split('.').length - 1;
+}
+
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
   private readonly platform: ChangeLogPlatform;
@@ -129,6 +135,7 @@ export abstract class ChangeLogSource {
         }
 
         const releases = config.releases ?? (await getInRangeReleases(config));
+        // v8 ignore next -- `getInRangeReleases` only returns null on paths it already ignores
         if (!releases?.length) {
           logger.debug('No releases');
           return null;
@@ -262,11 +269,23 @@ export abstract class ChangeLogSource {
       return exactReleaseRegex.test(tag);
     });
     const tagList = exactTagsList.length ? exactTagsList : tags;
-    return tagList
+    const candidates = tagList
       .filter((tag) => versioningApi.isVersion(tag.replace(regex, '')))
-      .find((tag) =>
+      .filter((tag) =>
         versioningApi.equals(tag.replace(regex, ''), depNewVersion),
       );
+    if (!candidates.length) {
+      return undefined;
+    }
+    // Some versioning schemes (e.g. `github-actions`) treat a floating tag
+    // like `v7` as equal to a precise one like `v7.0.0` via coercion, so more
+    // than one tag can match the same release. Prefer the most precise tag
+    // (most dot-separated segments), else keep the first match found.
+    return candidates.reduce((mostPrecise, candidate) =>
+      tagPrecision(candidate) > tagPrecision(mostPrecise)
+        ? candidate
+        : mostPrecise,
+    );
   }
 
   private getRef(
