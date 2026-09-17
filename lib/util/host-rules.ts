@@ -1,6 +1,7 @@
 import {
   isFalsy,
   isNonEmptyString,
+  isNullOrUndefined,
   isString,
   isTruthy,
   isUndefined,
@@ -475,6 +476,32 @@ export function hostType({ url }: { url: string }): string | null {
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
   return hostRules.filter((rule) => rule.hostType === hostType);
+}
+
+/**
+ * Every rule that would authenticate a request of the given `hostType`.
+ *
+ * Unlike {@link findAll}, this mirrors what {@link find} applies: a rule
+ * without a `hostType` matches every `hostType`, so a `matchHost`-only rule -
+ * the documented way of configuring credentials for a host - is included here
+ * too. Use this rather than `findAll()` when materialising credentials into a
+ * package manager's own auth file or command line, so that the rules which
+ * authenticate the lookup also authenticate the artifact update.
+ *
+ * A rule without a `matchHost` is left out, as there is no host to write the
+ * credentials against. Where a typed and an untyped rule name the same
+ * `matchHost`, only the typed one is returned: it is the more specific of the
+ * two, and `find()` would let it win.
+ */
+export function findAllForHostType(hostType: string): HostRule[] {
+  const typedRules = hostRules.filter((rule) => rule.hostType === hostType);
+  const untypedRules = hostRules.filter(
+    (rule) =>
+      isNullOrUndefined(rule.hostType) &&
+      rule.matchHost &&
+      !typedRules.some((typed) => typed.matchHost === rule.matchHost),
+  );
+  return [...typedRules, ...untypedRules];
 }
 
 /**
