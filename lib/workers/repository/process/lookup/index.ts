@@ -455,6 +455,7 @@ export async function lookupUpdates(
         // An update between two pseudo-versions of the same package changes the
         // commit and nothing else, so it is a digest update - see #29034
         if (
+          config.manager === 'gomod' &&
           compareValue &&
           isPseudoVersion(compareValue) &&
           update.newValue &&
