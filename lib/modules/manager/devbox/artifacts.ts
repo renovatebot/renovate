@@ -8,8 +8,8 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactErrorResult,
-  fileAddition,
   resolveToolConstraint,
+  updateLockFile,
 } from '../util.ts';
 
 export async function updateArtifacts({
@@ -83,17 +83,11 @@ export async function updateArtifacts({
   }
 
   try {
-    await exec(cmd, execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName);
-
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-    logger.trace('Returning updated devbox.lock');
-    return [fileAddition(lockFileName, newLockFileContent)];
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent: oldLockFileContent,
+      run: () => exec(cmd, execOptions),
+    });
   } catch (err) {
     logger.warn({ err }, 'Error updating devbox.lock');
     return artifactErrorResult(lockFileName, err);
