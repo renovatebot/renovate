@@ -18,7 +18,6 @@ export function isPublicPageUrl(pageUrl: string): boolean {
     return false;
   }
 
-  // The release API excludes unpublished releases and has no account selector.
   const publicParameters = [
     'limit',
     'offset',
