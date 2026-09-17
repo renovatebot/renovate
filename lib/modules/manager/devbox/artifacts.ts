@@ -49,7 +49,7 @@ export async function updateArtifacts({
     docker: {},
   };
 
-  const cmd = [];
+  const cmd: string[] = [];
   if (config.isLockFileMaintenance) {
     cmd.push(
       supportsNoInstall ? 'devbox update --no-install' : 'devbox update',
