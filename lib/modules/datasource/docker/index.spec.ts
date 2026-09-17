@@ -3717,30 +3717,19 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags/list?n=10000')
         .reply(200, '', {}) // Auth probe
         .get('/library/node/tags/list?n=10000')
-        .reply(200, { tags: ['1.0.0'] }, {})
-        // The mock replies below should never be reached if caching works
-        // as expected.
-        // They are marked as optional to avoid 'unused HTTP mocks' errors.
-        .get('/library/node/tags/list?n=10000')
-        .optionally()
-        .reply(200, '', {})
-        .get('/library/node/tags/list?n=10000')
-        .optionally()
-        .reply(200, { tags: ['9.9.9'] }, {});
+        .reply(200, { tags: ['1.0.0'] }, {});
 
       const ds = new DockerDatasource();
 
       await expect(ds.getTags(DOCKER_HUB, 'library/node')).resolves.toEqual([
         '1.0.0',
       ]);
-      expect(httpMock.getTrace()).toHaveLength(2);
 
       // Second call pulls from the cache which was hydrated by the first call,
       // resulting in no additional requests to the HTTP mock.
       await expect(ds.getTags(DOCKER_HUB, 'library/node')).resolves.toEqual([
         '1.0.0',
       ]);
-      expect(httpMock.getTrace()).toHaveLength(2);
     });
 
     it('does not cache tags for a private registry', async () => {
@@ -3760,12 +3749,10 @@ describe('modules/datasource/docker/index', () => {
       await expect(
         ds.getTags('https://registry.company.com', 'node'),
       ).resolves.toEqual(['1.0.0']);
-      expect(httpMock.getTrace()).toHaveLength(2);
 
       await expect(
         ds.getTags('https://registry.company.com', 'node'),
       ).resolves.toEqual(['1.0.0', '2.0.0']);
-      expect(httpMock.getTrace()).toHaveLength(4);
     });
 
     it('does not cache failed lookups when cachePrivatePackages is enabled', async () => {
@@ -3785,14 +3772,12 @@ describe('modules/datasource/docker/index', () => {
       await expect(
         ds.getTags('https://registry.company.com', 'node'),
       ).resolves.toBeUndefined();
-      expect(httpMock.getTrace()).toHaveLength(1);
 
       // The previous auth error (`undefined`) didn't get cached, so the second
       // lookup hits the mock as expected.
       await expect(
         ds.getTags('https://registry.company.com', 'node'),
       ).resolves.toEqual(['1.0.0']);
-      expect(httpMock.getTrace()).toHaveLength(3);
     });
   });
 });

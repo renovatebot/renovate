@@ -28,7 +28,11 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import * as branch from './branch.ts';
-import { enableAutoMergeMutation, repoInfoQuery } from './graphql.ts';
+import {
+  enableAutoMergeMutation,
+  enqueuePullRequestMutation,
+  repoInfoQuery,
+} from './graphql.ts';
 import * as github from './index.ts';
 import type { ApiPageCache, GhRestPr } from './types.ts';
 
@@ -5588,13 +5592,6 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBeTrue();
-      expect(httpMock.getTrace()).toMatchObject([
-        { url: 'https://api.github.com/graphql' },
-        {
-          url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-        },
-        { url: 'https://api.github.com/repos/some/repo/pulls/1234/merge' },
-      ]);
       // The PR is merged, so it must be cached as merged
       await expect(github.getPr(1234)).resolves.toMatchObject({
         number: 1234,
@@ -5615,7 +5612,10 @@ describe('modules/platform/github/index', () => {
           message:
             'At least 1 approving review is required by reviewers with write access.',
         })
-        .post('/graphql')
+        .post('/graphql', {
+          query: enqueuePullRequestMutation,
+          variables: { pullRequestId: 'abcd' },
+        })
         .reply(200, {
           data: {
             enqueuePullRequest: {
@@ -5631,21 +5631,6 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBeTrue();
-      expect(httpMock.getTrace()).toMatchObject([
-        { url: 'https://api.github.com/graphql' },
-        {
-          url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-        },
-        { url: 'https://api.github.com/repos/some/repo/pulls/1234/merge' },
-        { url: 'https://api.github.com/graphql' },
-        {
-          url: 'https://api.github.com/graphql',
-          graphql: {
-            mutation: { enqueuePullRequest: {} },
-            variables: { pullRequestId: 'abcd' },
-          },
-        },
-      ]);
       // The PR is not merged yet, so it must not be cached as merged
       await expect(github.getPr(1234)).resolves.toMatchObject({
         number: 1234,
@@ -5767,11 +5752,6 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBeFalse();
-      expect(httpMock.getTrace()).not.toContainEqual(
-        expect.objectContaining({
-          graphql: { mutation: { enqueuePullRequest: {} } },
-        }),
-      );
     });
 
     it('should add PR to the merge queue when the direct merge is refused with an unrecognized message', async () => {
