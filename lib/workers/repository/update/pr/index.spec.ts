@@ -949,6 +949,80 @@ describe('workers/repository/update/pr/index', () => {
         });
       });
 
+      it('processes a changelog with no project and no versions', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            partial<BranchUpgradeConfig>({
+              branchName: sourceBranch,
+              depType: 'foo',
+              depName: 'bar',
+              manager: 'npm',
+              currentValue: '1.2.3',
+              newVersion: '4.5.6',
+              logJSON: { hasReleaseNotes: true },
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig).toMatchObject({
+          upgrades: [{ hasReleaseNotes: false, releases: [] }],
+        });
+      });
+
+      it('processes a changelog with a project but no versions', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            partial<BranchUpgradeConfig>({
+              branchName: sourceBranch,
+              depType: 'foo',
+              depName: 'bar',
+              manager: 'npm',
+              currentValue: '1.2.3',
+              newVersion: '4.5.6',
+              logJSON: {
+                hasReleaseNotes: true,
+                project: {
+                  type: 'github',
+                  repository: 'other/repo',
+                  baseUrl: 'https://github.com',
+                  apiBaseUrl: 'https://api.github.com/',
+                  sourceUrl: 'https://github.com/other/repo',
+                },
+              },
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig).toMatchObject({
+          upgrades: [{ hasReleaseNotes: true, releases: [] }],
+        });
+      });
+
+      it('skips a repo whose release notes were already committed', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [dummyUpgrade, { ...dummyUpgrade, depName: 'baz' }],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig).toMatchObject({
+          upgrades: [{ hasReleaseNotes: true }, { hasReleaseNotes: false }],
+        });
+      });
+
       it('handles missing GitHub token', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
