@@ -8,7 +8,6 @@ import {
   getDefaultVersioning,
 } from '../../../../modules/datasource/common.ts';
 import type {
-  DatasourceApi,
   Release,
   ReleaseResult,
 } from '../../../../modules/datasource/index.ts';
@@ -20,6 +19,7 @@ import {
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
+import { isPseudoVersion } from '../../../../modules/versioning/go-mod-directive/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
@@ -55,10 +55,6 @@ import {
   restoreVersionCompatibility,
 } from './version-compatibility.ts';
 import { applyVulnerabilityFixFilter } from './vulnerability.ts';
-
-function isPseudoVersion(datasource: DatasourceApi, version: string): boolean {
-  return datasource.isPseudoVersion?.(version) ?? false;
-}
 
 async function getTimestamp(
   config: LookupUpdateConfig,
@@ -119,8 +115,10 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
-    const datasourceApi = getDatasourceFor(config.datasource);
-    if (!isGetPkgReleasesConfig(config) || !datasourceApi) {
+    if (
+      !isGetPkgReleasesConfig(config) ||
+      !getDatasourceFor(config.datasource)
+    ) {
       res.skipReason = 'invalid-config';
       return Result.ok(res);
     }
@@ -454,12 +452,13 @@ export async function lookupUpdates(
           allReleaseVersions,
         );
 
-        // An update between two pseudo-versions of the same package changes the commit and nothing else, so it is a digest update - see #29034
+        // An update between two pseudo-versions of the same package changes the
+        // commit and nothing else, so it is a digest update - see #29034
         if (
           compareValue &&
-          isPseudoVersion(datasourceApi, compareValue) &&
+          isPseudoVersion(compareValue) &&
           update.newValue &&
-          isPseudoVersion(datasourceApi, update.newValue) &&
+          isPseudoVersion(update.newValue) &&
           config.currentDigest !== update.newDigest
         ) {
           update.updateType = 'digest';
