@@ -81,6 +81,7 @@ export class JsDelivrDatasource extends Datasource {
         {
           namespace: `datasource-${JsDelivrDatasource.id}`,
           key: `getReleases:${type}:${parsedPackageName}`,
+          cacheable: true,
           fallback: true,
         },
         () => this.getNpmReleases(parsedPackageName),
@@ -91,6 +92,7 @@ export class JsDelivrDatasource extends Datasource {
       {
         namespace: `datasource-${JsDelivrDatasource.id}`,
         key: `getReleases:${type}:${parsedPackageName}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),
@@ -142,6 +144,7 @@ export class JsDelivrDatasource extends Datasource {
       {
         namespace: `datasource-${JsDelivrDatasource.id}`,
         key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getDigest(config, newValue),
