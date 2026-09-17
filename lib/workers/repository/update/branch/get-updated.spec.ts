@@ -221,6 +221,25 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    it('handles an update that reports no files', async () => {
+      config.upgrades.push({
+        packageFile: 'mise.toml',
+        manager: 'mise',
+        branchName: '',
+        lockFile: 'mise.lock',
+        isLockfileUpdate: true,
+        depName: 'node',
+        currentVersion: '20.0.0',
+        newVersion: '22.0.0',
+      });
+      git.getFile.mockResolvedValue('existing content');
+      mise.updateLockedDependency.mockReturnValueOnce({ status: 'updated' });
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.updatedPackageFiles).toBeEmptyArray();
+    });
+
     it('passes mise lockfile updates to the artifact refresh', async () => {
       config.upgrades.push({
         packageFile: 'mise.toml',
