@@ -57,6 +57,141 @@ async function disableGitAutoMaintenance(
   await repo.addConfig('receive.autogc', 'false');
 }
 
+// The describe below rebuilds a bare clone and calls `initRepo()` before every
+// test, which costs about 0.7s each. These tests never touch a repository, so
+// they live in their own root describe and skip that setup. `mockReset` and
+// `unstubEnvs` in the vitest config reset module mocks and `vi.stubEnv`
+// between tests; the spy and the custom env are reset here.
+describe('util/git/index', () => {
+  afterEach(() => {
+    setCustomEnv({});
+    vi.restoreAllMocks();
+  });
+
+  describe('createSimpleGit()', () => {
+    it('adds authentication to the approved child environment', () => {
+      setCustomEnv({
+        GIT_CONFIG_COUNT: '1',
+        GIT_CONFIG_KEY_0: 'existing-key',
+        GIT_CONFIG_VALUE_0: 'existing-value',
+      });
+      const authenticatedEnv = {
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0: 'existing-key',
+        GIT_CONFIG_VALUE_0: 'existing-value',
+      };
+      auth.getGitEnvironmentVariables.mockReturnValue(authenticatedEnv);
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+
+      git.createSimpleGit({
+        authentication: { hostTypes: ['git-refs'] },
+      });
+
+      expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          GIT_CONFIG_COUNT: '1',
+          GIT_CONFIG_KEY_0: 'existing-key',
+          GIT_CONFIG_VALUE_0: 'existing-value',
+        }),
+        ['git-refs'],
+      );
+      expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
+    });
+  });
+
+  // `gitRetry` reads `NODE_ENV`, and two of these stub it, so they stay
+  // sequential.
+  describe('gitRetry', () => {
+    it('returns result if git returns successfully', async () => {
+      const gitFunc = vi.fn().mockImplementation((args) => {
+        if (args === undefined) {
+          return 'some result';
+        }
+        return 'different result';
+      });
+      await expect(git.gitRetry(() => gitFunc())).resolves.toBe('some result');
+      await expect(git.gitRetry(() => gitFunc('arg'))).resolves.toBe(
+        'different result',
+      );
+      expect(gitFunc).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries the func call if ExternalHostError thrown', async () => {
+      vi.stubEnv('NODE_ENV', '');
+      const gitFunc = vi
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new Error('The remote end hung up unexpectedly');
+        })
+        .mockImplementationOnce(() => {
+          throw new Error('The remote end hung up unexpectedly');
+        })
+        .mockImplementationOnce(() => 'some result');
+      await expect(git.gitRetry(() => gitFunc())).resolves.toBe('some result');
+      expect(gitFunc).toHaveBeenCalledTimes(3);
+    });
+
+    it('retries the func call up to retry count if ExternalHostError thrown', async () => {
+      vi.stubEnv('NODE_ENV', '');
+      const gitFunc = vi.fn().mockImplementation(() => {
+        throw new Error('The remote end hung up unexpectedly');
+      });
+      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
+        'The remote end hung up unexpectedly',
+      );
+      expect(gitFunc).toHaveBeenCalledTimes(6);
+    });
+
+    it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
+      const gitFunc = vi.fn().mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
+      expect(gitFunc).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe.concurrent('validateGitVersion()', () => {
+    it('has a git version greater or equal to the minimum required', async () => {
+      const res = await git.validateGitVersion();
+      expect(res).toBeTrue();
+    });
+  });
+
+  describe.concurrent('Storage.getUrl()', () => {
+    const getUrl = git.getUrl;
+
+    it('returns https url', () => {
+      expect(
+        getUrl({
+          protocol: 'https',
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        }),
+      ).toBe('https://user:pass@host/some/repo.git');
+      expect(
+        getUrl({
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        }),
+      ).toBe('https://user:pass@host/some/repo.git');
+    });
+
+    it('returns ssh url', () => {
+      expect(
+        getUrl({
+          protocol: 'ssh',
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        }),
+      ).toBe('git@host:some/repo.git');
+    });
+  });
+});
+
 describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -209,94 +344,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
   afterAll(async () => {
     setCustomEnv({});
     await base?.cleanup();
-  });
-
-  describe('createSimpleGit()', () => {
-    it('adds authentication to the approved child environment', () => {
-      setCustomEnv({
-        GIT_CONFIG_COUNT: '1',
-        GIT_CONFIG_KEY_0: 'existing-key',
-        GIT_CONFIG_VALUE_0: 'existing-value',
-      });
-      const authenticatedEnv = {
-        GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_0: 'existing-key',
-        GIT_CONFIG_VALUE_0: 'existing-value',
-      };
-      auth.getGitEnvironmentVariables.mockReturnValue(authenticatedEnv);
-      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
-
-      git.createSimpleGit({
-        authentication: { hostTypes: ['git-refs'] },
-      });
-
-      expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          GIT_CONFIG_COUNT: '1',
-          GIT_CONFIG_KEY_0: 'existing-key',
-          GIT_CONFIG_VALUE_0: 'existing-value',
-        }),
-        ['git-refs'],
-      );
-      expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
-    });
-  });
-
-  describe('gitRetry', () => {
-    it('returns result if git returns successfully', async () => {
-      const gitFunc = vi.fn().mockImplementation((args) => {
-        if (args === undefined) {
-          return 'some result';
-        }
-        return 'different result';
-      });
-      await expect(git.gitRetry(() => gitFunc())).resolves.toBe('some result');
-      await expect(git.gitRetry(() => gitFunc('arg'))).resolves.toBe(
-        'different result',
-      );
-      expect(gitFunc).toHaveBeenCalledTimes(2);
-    });
-
-    it('retries the func call if ExternalHostError thrown', async () => {
-      vi.stubEnv('NODE_ENV', '');
-      const gitFunc = vi
-        .fn()
-        .mockImplementationOnce(() => {
-          throw new Error('The remote end hung up unexpectedly');
-        })
-        .mockImplementationOnce(() => {
-          throw new Error('The remote end hung up unexpectedly');
-        })
-        .mockImplementationOnce(() => 'some result');
-      await expect(git.gitRetry(() => gitFunc())).resolves.toBe('some result');
-      expect(gitFunc).toHaveBeenCalledTimes(3);
-    });
-
-    it('retries the func call up to retry count if ExternalHostError thrown', async () => {
-      vi.stubEnv('NODE_ENV', '');
-      const gitFunc = vi.fn().mockImplementation(() => {
-        throw new Error('The remote end hung up unexpectedly');
-      });
-      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
-        'The remote end hung up unexpectedly',
-      );
-      expect(gitFunc).toHaveBeenCalledTimes(6);
-    });
-
-    it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
-      const gitFunc = vi.fn().mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
-      await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
-      expect(gitFunc).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('validateGitVersion()', () => {
-    it('has a git version greater or equal to the minimum required', async () => {
-      const res = await git.validateGitVersion();
-      expect(res).toBeTrue();
-    });
   });
 
   describe('checkoutBranch(branchName)', () => {
@@ -1415,39 +1462,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
         'master message',
         'past message',
       ]);
-    });
-  });
-
-  describe('Storage.getUrl()', () => {
-    const getUrl = git.getUrl;
-
-    it('returns https url', () => {
-      expect(
-        getUrl({
-          protocol: 'https',
-          auth: 'user:pass',
-          hostname: 'host',
-          repository: 'some/repo',
-        }),
-      ).toBe('https://user:pass@host/some/repo.git');
-      expect(
-        getUrl({
-          auth: 'user:pass',
-          hostname: 'host',
-          repository: 'some/repo',
-        }),
-      ).toBe('https://user:pass@host/some/repo.git');
-    });
-
-    it('returns ssh url', () => {
-      expect(
-        getUrl({
-          protocol: 'ssh',
-          auth: 'user:pass',
-          hostname: 'host',
-          repository: 'some/repo',
-        }),
-      ).toBe('git@host:some/repo.git');
     });
   });
 
