@@ -47,17 +47,6 @@ export function isPublicGoPackage(packageName: string): boolean {
   );
 }
 
-/**
- * Whether the version is a Go pseudo-version for a module without any release tag.
- *
- * Go also derives pseudo-versions from tagged releases, such as `v1.2.3-0.20240506185236-b8a5c65736ae`, and `GoDatasource.pversionRegexp` matches those too. Only the untagged form is recognised here, because that is the form Renovate reports as a digest update - see #29034.
- *
- * @see https://go.dev/ref/mod#pseudo-versions
- */
-export function isPseudoVersion(version: string): boolean {
-  return version.startsWith('v0.0.0-');
-}
-
 export function getSourceUrl(
   dataSource?: DataSource | null,
 ): string | undefined {

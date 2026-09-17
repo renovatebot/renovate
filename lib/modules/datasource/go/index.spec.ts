@@ -68,15 +68,6 @@ describe('modules/datasource/go/index', () => {
     });
   });
 
-  describe('isPseudoVersion', () => {
-    it('detects pseudo-versions of untagged modules', () => {
-      expect(
-        datasource.isPseudoVersion('v0.0.0-20240506185236-b8a5c65736ae'),
-      ).toBe(true);
-      expect(datasource.isPseudoVersion('v1.2.3')).toBe(false);
-    });
-  });
-
   describe('getDigest', () => {
     it('returns null for no go-source tag', async () => {
       httpMock

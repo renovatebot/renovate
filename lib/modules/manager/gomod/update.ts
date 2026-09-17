@@ -1,7 +1,7 @@
 // TODO: types (#22198)
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { isPseudoVersion } from '../../datasource/go/common.ts';
+import { isPseudoVersion } from '../../versioning/go-mod-directive/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
 function getNameWithNoVersion(name: string): string {

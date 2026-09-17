@@ -46,8 +46,6 @@ export abstract class Datasource implements DatasourceApi {
 
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
-  isPseudoVersion?(version: string): boolean;
-
   handleHttpErrors(_err: HttpError): void {
     // intentionally empty
   }
