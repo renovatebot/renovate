@@ -57,6 +57,10 @@ function isGreaterThan(a: string, b: string): boolean {
 }
 
 function isLessThanRange(version: string, range: string): boolean {
+  if (!isPoetryRange(range)) {
+    return pep440.isLessThanRange!(version, range);
+  }
+
   const semverVersion = poetry2semver(version);
   return !!(
     isVersion(version) &&
@@ -111,6 +115,10 @@ function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
+  if (!isPoetryRange(range)) {
+    return pep440.getSatisfyingVersion(versions, range);
+  }
+
   const semverVersions: string[] = [];
   versions.forEach((version) => {
     const semverVersion = poetry2semver(version);
@@ -127,6 +135,10 @@ function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
+  if (!isPoetryRange(range)) {
+    return pep440.minSatisfyingVersion(versions, range);
+  }
+
   const semverVersions: string[] = [];
   versions.forEach((version) => {
     const semverVersion = poetry2semver(version);
@@ -170,12 +182,12 @@ function handleShort(
   return null;
 }
 
-function getNewValue({
-  currentValue,
-  rangeStrategy,
-  currentVersion,
-  newVersion,
-}: NewValueConfig): string {
+function getNewValue(config: NewValueConfig): string | null {
+  const { currentValue, rangeStrategy, currentVersion, newVersion } = config;
+  if (!isPoetryRange(currentValue)) {
+    return pep440.getNewValue(config);
+  }
+
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     try {
@@ -255,6 +267,10 @@ function sortVersions(a: string, b: string): number {
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
+  if (!isPoetryRange(subRange) || !isPoetryRange(superRange)) {
+    return undefined;
+  }
+
   return npm.subset!(poetry2npm(subRange), poetry2npm(superRange));
 }
 
