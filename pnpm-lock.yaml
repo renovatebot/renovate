@@ -128,8 +128,8 @@ importers:
         specifier: 5.0.1
         version: 5.0.1
       '@renovatebot/pgp':
-        specifier: 1.4.1
-        version: 1.4.1
+        specifier: 1.4.2
+        version: 1.4.2
       '@renovatebot/ruby-semver':
         specifier: 5.0.0
         version: 5.0.0
@@ -1823,8 +1823,8 @@ packages:
     resolution: {integrity: sha512-KmMz+X68YvrS6aN6TJWtDiH8aCIL2Igcvceh17STHxMUN3KxXsC24COoOXjMOl/Gb+okBwwduMm8PY/WY/0Cpg==}
     engines: {node: ^22.11.0 || >=24.10.0, pnpm: '>=10.0.0'}
 
-  '@renovatebot/pgp@1.4.1':
-    resolution: {integrity: sha512-e4lknjxPe354YISRvhR5s9Vx2gB9hEJVK+O6dYzeE9MsAbyTpcHKcIeDXE2QGGi8h0WV5seUAQUhDh3f5jZ1Wg==}
+  '@renovatebot/pgp@1.4.2':
+    resolution: {integrity: sha512-pEg5oCkt+KJljTMNGuwq37ql0a38Mml1lUYxAmfuNTXrgeFNfUx3nASibe5zelARFHInXQwCeXSp0Rbfpg2CyA==}
     engines: {node: ^22.11.0 || >=24.10.0, pnpm: '>=10.0.0'}
 
   '@renovatebot/ruby-semver@5.0.0':
@@ -7114,7 +7114,7 @@ snapshots:
 
   '@renovatebot/pep440@5.0.1': {}
 
-  '@renovatebot/pgp@1.4.1': {}
+  '@renovatebot/pgp@1.4.2': {}
 
   '@renovatebot/ruby-semver@5.0.0': {}
 
