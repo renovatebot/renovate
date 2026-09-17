@@ -1,10 +1,10 @@
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { parseUrl } from '../../../util/url.ts';
 import * as Unity3dVersioning from '../../versioning/unity3d/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { UnityReleasesJSON } from './schema.ts';
+import { isPublicPageUrl } from './url.ts';
 
 export class Unity3dDatasource extends Datasource {
   static readonly baseUrl =
@@ -57,35 +57,6 @@ export class Unity3dDatasource extends Datasource {
 
   private getPageUrl(registryUrl: string, offset: number): string {
     return `${registryUrl}&limit=${Unity3dDatasource.limit}&offset=${offset}`;
-  }
-
-  private isPublicRegistry(registryUrl: string | undefined): boolean {
-    const url = parseUrl(
-      this.getPageUrl(this.translateStream(registryUrl!), 0),
-    );
-    if (
-      url?.origin !== 'https://services.api.unity.com' ||
-      url.username ||
-      url.password ||
-      url.hash ||
-      url.pathname !== '/unity/editor/release/v1/releases'
-    ) {
-      return false;
-    }
-
-    // The release API excludes unpublished releases and has no account selector.
-    const publicParameters = [
-      'limit',
-      'offset',
-      'order',
-      'stream',
-      'platform',
-      'architecture',
-      'version',
-    ];
-    return [...url.searchParams.keys()].every((key) =>
-      publicParameters.includes(key),
-    );
   }
 
   async getByStream(
@@ -148,7 +119,9 @@ export class Unity3dDatasource extends Datasource {
         namespace: `datasource-${Unity3dDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
-        cacheable: this.isPublicRegistry(config.registryUrl),
+        cacheable: isPublicPageUrl(
+          this.getPageUrl(this.translateStream(config.registryUrl!), 0),
+        ),
       },
       () => this._getReleases(config),
     );
