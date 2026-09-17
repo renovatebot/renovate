@@ -11,16 +11,13 @@ import * as hostRules from '../../../util/host-rules.ts';
 import type { S3UrlParts } from '../../../util/s3.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
-import {
-  ensureTrailingSlash,
-  parseUrl,
-  resolveBaseUrl,
-} from '../../../util/url.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import * as helmVersioning from '../../versioning/helm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { HelmRepository } from './schema.ts';
+import { isPublicRepository } from './url.ts';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';
@@ -185,12 +182,4 @@ function getS3Credentials(
     secretAccessKey: password,
     sessionToken: token,
   };
-}
-
-function isPublicRepository(helmRepository: string): boolean {
-  const indexUrl = parseUrl(
-    resolveBaseUrl(ensureTrailingSlash(helmRepository), 'index.yaml'),
-  );
-
-  return indexUrl?.href === 'https://charts.helm.sh/stable/index.yaml';
 }
