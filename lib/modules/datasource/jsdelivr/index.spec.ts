@@ -1,4 +1,3 @@
-import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { HttpError } from '../../../util/http/index.ts';
@@ -111,18 +110,25 @@ describe('modules/datasource/jsdelivr/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('processes real gh data', async () => {
+    it('processes gh data', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathFor('gh/twbs/bootstrap'))
-        .reply(200, Fixtures.get('gh_bootstrap.json'));
+        .reply(200, {
+          tags: {},
+          versions: [
+            { version: '5.3.6' },
+            { version: '5.3.7' },
+            { version: '5.3.8' },
+          ],
+        });
       const res = await getPkgReleases({
         datasource: JsDelivrDatasource.id,
         packageName: 'gh/twbs/bootstrap/dist/js/bootstrap.min.js',
       });
       expect(res?.tags).toBeEmptyObject();
 
-      expect(res?.releases).toHaveLength(4);
+      expect(res?.releases).toHaveLength(3);
       expect(res?.releases[res?.releases.length - 1].version).toBe('5.3.8');
 
       expect(res?.registryUrl).toBe(baseUrl);
@@ -258,7 +264,14 @@ describe('modules/datasource/jsdelivr/index', () => {
             '2.11.8',
           ),
         )
-        .reply(200, Fixtures.get('npm_scoped_popperjs_core_digest.json'));
+        .reply(200, {
+          files: [
+            {
+              name: '/dist/umd/popper.min.js',
+              hash: 'whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=',
+            },
+          ],
+        });
 
       const res = await getDigest(
         {
@@ -274,7 +287,14 @@ describe('modules/datasource/jsdelivr/index', () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('npm/jquery/dist/jquery.min.js', '4.0.0'))
-        .reply(200, Fixtures.get('npm_unscoped_jquery_digest.json'));
+        .reply(200, {
+          files: [
+            {
+              name: '/dist/jquery.min.js',
+              hash: 'OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=',
+            },
+          ],
+        });
 
       const res = await getDigest(
         {
@@ -292,7 +312,14 @@ describe('modules/datasource/jsdelivr/index', () => {
         .get(
           pathForDigest('gh/twbs/bootstrap/dist/js/bootstrap.min.js', '5.3.8'),
         )
-        .reply(200, Fixtures.get('gh_bootstrap_digest.json'));
+        .reply(200, {
+          files: [
+            {
+              name: '/dist/js/bootstrap.min.js',
+              hash: 'ew8UiV1pJH/YjpOEBInP1HxVvT/SfrCmwSoUzF9JIgc=',
+            },
+          ],
+        });
 
       const res = await getDigest(
         {
