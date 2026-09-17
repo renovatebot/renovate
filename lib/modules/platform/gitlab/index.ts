@@ -16,6 +16,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_PENDING_DELETION,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -234,6 +235,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug(`Discovered ${repos.length} project(s)`);
     return repos
       .filter((repo) => !repo.mirror || config?.includeMirrors)
+      .filter((repo) => !repo.marked_for_deletion_at)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
@@ -297,6 +299,13 @@ export async function initRepo({
       throw new Error(REPOSITORY_ARCHIVED);
     }
 
+    if (res.body.marked_for_deletion_at) {
+      logger.debug(
+        'Repository is marked for deletion - throwing error to abort renovation',
+      );
+      throw new Error(REPOSITORY_PENDING_DELETION);
+    }
+
     if (res.body.mirror && GlobalConfig.get('includeMirrors') !== true) {
       logger.debug(
         'Repository is a mirror - throwing error to abort renovation',
@@ -343,7 +352,13 @@ export async function initRepo({
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
+    if (
+      [
+        REPOSITORY_ARCHIVED,
+        REPOSITORY_EMPTY,
+        REPOSITORY_PENDING_DELETION,
+      ].includes(err.message)
+    ) {
       throw err;
     }
     if (err.statusCode === 403) {

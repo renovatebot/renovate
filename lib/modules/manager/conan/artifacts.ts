@@ -9,6 +9,11 @@ import {
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  resolveToolConstraint,
+} from '../util.ts';
 
 const gitExec = withGitEnvironment(['conan']);
 
@@ -74,8 +79,8 @@ export async function updateArtifacts(
     await conanLockUpdate(
       packageFileName,
       isLockFileMaintenance,
-      config.constraints?.conan,
-      config.constraints?.python,
+      await resolveToolConstraint(config, 'conan'),
+      await resolveToolConstraint(config, 'python'),
     );
 
     const newLockFileContent = await readLocalFile(lockFileName);
@@ -90,15 +95,7 @@ export async function updateArtifacts(
     }
 
     logger.trace(`Returning updated ${lockFileName}`);
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
-    ];
+    return [fileAddition(lockFileName, newLockFileContent)];
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
@@ -109,13 +106,6 @@ export async function updateArtifacts(
       'Lockfile update failed',
     );
 
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

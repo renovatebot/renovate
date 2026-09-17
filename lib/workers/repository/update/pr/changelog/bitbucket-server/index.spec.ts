@@ -288,6 +288,7 @@ describe('workers/repository/update/pr/changelog/bitbucket-server/index', () => 
         ${'https://some-host:7990/projects/some-org/repos/some-repo/raw/src/CHANGELOG.md?at=HEAD'} | ${'some-org/some-repo'}
         ${'https://tools.domain.com/bitbucket/projects/mygroup/repos/my-library'}                  | ${'mygroup/my-library'}
         ${'some-random-value'}                                                                     | ${''}
+        ${'https://some-host.org/not-a-repo-path'}                                                 | ${''}
       `('$input', ({ input, expected }) => {
         expect(
           changelogSource.getRepositoryFromUrl({

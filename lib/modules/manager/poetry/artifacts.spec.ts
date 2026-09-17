@@ -653,6 +653,42 @@ describe('modules/manager/poetry/artifacts', () => {
       ]);
     });
 
+    it('falls back to the extracted python constraint', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      // python
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
+      });
+      // poetry
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.2.0' }],
+      });
+
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [{ depName: 'dep1' }],
+          // neither the pyproject nor the lock file pin python
+          newPackageFileContent: '[tool.poetry.dependencies]\ndep1 = "1.0"',
+          config: {
+            ...config,
+            extractedConstraints: { python: '~2.7 || ^3.4' },
+          },
+        }),
+      ).resolves.not.toBeNull();
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool python 2.7.5' },
+        { cmd: 'install-tool poetry 1.2.0' },
+        { cmd: 'poetry update --lock --no-interaction dep1' },
+      ]);
+    });
+
     it('catches errors', async () => {
       const execSnapshots = mockExecAll();
       // poetry.lock

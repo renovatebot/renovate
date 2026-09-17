@@ -157,7 +157,9 @@ export function setNpmrc(input?: string): void {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
     packageRules = npmrcRules.packageRules;
-  } else if (npmrc) {
+  } else {
+    // `npmrc` starts as an object and is only ever reassigned to one, so it is
+    // always truthy here
     logger.debug('Resetting npmrc');
     npmrc = {};
     npmrcRaw = '';

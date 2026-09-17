@@ -1048,6 +1048,77 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe('some-new-digest');
     });
 
+    it('returns null when a non-list manifest carries no digest header', async () => {
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull',
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+            size: 2917,
+            digest:
+              'sha256:4591c431eb2fcf90ebb32476db6cfe342617fc3d3ca9653b9e0c47859cac1cf9',
+          },
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value',
+      );
+
+      // no header to read, so the digest falls back to the manifest hash
+      expect(res).toBe(
+        'sha256:4dfd2fd0672c541746a28371af8d2e31e83dede2fa716c4d4344358dc181ebca',
+      );
+    });
+
     it('handles missing architecture-specific digest', async () => {
       const currentDigest =
         'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
@@ -1901,6 +1972,49 @@ describe('modules/datasource/docker/index', () => {
       };
       const res = await getPkgReleases(config);
       expect(res?.releases).toHaveLength(2);
+    });
+
+    it('fetches all pages for Red Hat registry', async () => {
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      const rhUrl = 'https://registry.access.redhat.com/v2';
+      httpMock
+        .scope(rhUrl)
+        .get('/hi/go-builder/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/hi/go-builder/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['0.1.0'] },
+          {
+            link: `<${rhUrl}/hi/go-builder/tags/list?n=100&last=0.1.0>; rel="next", `,
+          },
+        )
+        .get('/hi/go-builder/tags/list?n=100&last=0.1.0')
+        .reply(
+          200,
+          { tags: ['0.2.0'] },
+          {
+            link: `<${rhUrl}/hi/go-builder/tags/list?n=100&last=0.2.0>; rel="next", `,
+          },
+        )
+        .get('/hi/go-builder/tags/list?n=100&last=0.2.0')
+        .reply(200, { tags: ['9.9.9'] }, {})
+        .get('/')
+        .reply(200, '', {})
+        .get('/hi/go-builder/manifests/9.9.9')
+        .reply(200, '', {});
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'hi/go-builder',
+        registryUrls: ['https://registry.access.redhat.com'],
+      });
+
+      expect(res?.releases?.map((release) => release.version)).toEqual([
+        '0.1.0',
+        '0.2.0',
+        '9.9.9',
+      ]);
     });
 
     it('uses custom registry in packageName', async () => {

@@ -5713,7 +5713,39 @@ describe('modules/platform/github/index', () => {
       });
     }
 
-    it('should add PR to the merge queue instead of merging', async () => {
+    it('should merge directly if the branch has a merge queue and the merge succeeds (bypass)', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeTrue();
+      expect(httpMock.getTrace()).toMatchObject([
+        { url: 'https://api.github.com/graphql' },
+        {
+          url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        },
+        { url: 'https://api.github.com/repos/some/repo/pulls/1234/merge' },
+      ]);
+      // The PR is merged, so it must be cached as merged
+      await expect(github.getPr(1234)).resolves.toMatchObject({
+        number: 1234,
+        state: 'merged',
+      });
+    });
+
+    it('should add PR to the merge queue when the direct merge is refused', async () => {
       const scope = httpMock.scope(githubApiHost);
       mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
       scope
@@ -5721,6 +5753,11 @@ describe('modules/platform/github/index', () => {
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         )
         .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, {
+          message:
+            'At least 1 approving review is required by reviewers with write access.',
+        })
         .post('/graphql')
         .reply(200, {
           data: {
@@ -5742,6 +5779,7 @@ describe('modules/platform/github/index', () => {
         {
           url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         },
+        { url: 'https://api.github.com/repos/some/repo/pulls/1234/merge' },
         { url: 'https://api.github.com/graphql' },
         {
           url: 'https://api.github.com/graphql',
@@ -5766,6 +5804,11 @@ describe('modules/platform/github/index', () => {
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         )
         .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, {
+          message:
+            'At least 1 approving review is required by reviewers with write access.',
+        })
         .post('/graphql')
         .reply(200, {
           errors: [
@@ -5793,6 +5836,11 @@ describe('modules/platform/github/index', () => {
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         )
         .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, {
+          message:
+            'At least 1 approving review is required by reviewers with write access.',
+        })
         .post('/graphql')
         .reply(200, {
           errors: [
@@ -5820,6 +5868,11 @@ describe('modules/platform/github/index', () => {
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         )
         .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, {
+          message:
+            'At least 1 approving review is required by reviewers with write access.',
+        })
         .post('/graphql')
         .replyWithError('unknown error');
       await github.initRepo({ repository: 'some/repo' });
@@ -5834,6 +5887,96 @@ describe('modules/platform/github/index', () => {
         { prNumber: 1234, err: expect.any(Error) },
         'Failed to add PR to the merge queue',
       );
+    });
+
+    it('should return false if the direct merge is refused and the branch has no merge queue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, null);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, {
+          message:
+            'At least 1 approving review is required by reviewers with write access.',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeFalse();
+      expect(httpMock.getTrace()).not.toContainEqual(
+        expect.objectContaining({
+          graphql: { mutation: { enqueuePullRequest: {} } },
+        }),
+      );
+    });
+
+    it('should add PR to the merge queue when the direct merge is refused with an unrecognized message', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' })
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' })
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' })
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' })
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            enqueuePullRequest: {
+              mergeQueueEntry: { id: 'MQE_1', position: 1 },
+            },
+          },
+        });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      // The unrecognized refusal falls through method guessing before the
+      // merge queue fallback
+      expect(res).toBeTrue();
+    });
+
+    it('should return false when the direct merge is refused with an unrecognized message and the branch has no merge queue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      mergeQueueMock(scope, null);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [pullsListItem])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' })
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' })
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' })
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Pull request is not mergeable' });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+      });
+
+      expect(res).toBeFalse();
     });
 
     it('should merge directly if the PR cannot be found', async () => {
@@ -5860,7 +6003,7 @@ describe('modules/platform/github/index', () => {
 
     it('should merge directly if the branch has no merge queue', async () => {
       const scope = httpMock.scope(githubApiHost);
-      mergeQueueMock(scope, null);
+      initRepoMock(scope, 'some/repo');
       scope
         .get(
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',

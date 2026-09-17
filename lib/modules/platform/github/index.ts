@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { MergeStrategy } from '../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -250,6 +251,7 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
+      // v8 ignore next -- TODO: coverage error #40625
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -2223,12 +2225,21 @@ export async function mergePr({
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
   const pr = await getPr(prNo);
+  if (await directMergePr(prNo, strategy)) {
+    return true;
+  }
   if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
-    // The PR is not merged directly but through the merge queue, so it must
-    // not be cached as merged nor may its branch be deleted yet
+    // The direct merge was refused - fall back to adding the PR to the merge
+    // queue, so it must not be cached as merged nor may its branch be deleted
     return tryEnqueuePr(pr);
   }
+  return false;
+}
 
+async function directMergePr(
+  prNo: number,
+  strategy?: MergeStrategy,
+): Promise<boolean> {
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;

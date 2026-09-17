@@ -1,12 +1,15 @@
+import dnsPromises from 'node:dns/promises';
 import { ZodError, z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
+  HOST_BLOCKED,
   HOST_DISABLED,
 } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.ts';
+import { hasProxy } from '../../proxy.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { resetCache } from '../cache/repository/index.ts';
 import * as hostRules from '../host-rules.ts';
@@ -15,6 +18,13 @@ import { Http, HttpError } from './index.ts';
 import * as queue from './queue.ts';
 import * as throttle from './throttle.ts';
 import type { HttpResponse } from './types.ts';
+
+vi.mock('node:dns/promises', () => ({
+  default: { lookup: vi.fn() },
+}));
+vi.mock('../../proxy.ts', () => ({
+  hasProxy: vi.fn(),
+}));
 
 const baseUrl = 'http://renovate.com';
 
@@ -338,6 +348,343 @@ describe('util/http/index', () => {
     expect(() => http.stream('http://renovate.com/test')).toThrow(
       HOST_DISABLED,
     );
+  });
+
+  describe('host guard', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    describe('by default', () => {
+      describe('when response does not become config', () => {
+        it('warns about, but allows, requests to internal hosts', async () => {
+          httpMock.scope('http://10.1.2.3').get('/test').reply(200, 'ok');
+
+          const res = await http.getText('http://10.1.2.3/test');
+
+          expect(res.body).toBe('ok');
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            { hostname: '10.1.2.3', hostType: 'dummy' },
+            expect.stringContaining('HTTP request to an internal host'),
+          );
+        });
+
+        it('permits the platform endpoint host', async () => {
+          GlobalConfig.set({ endpoint: 'http://10.1.2.3/api/v4/' });
+          httpMock.scope('http://10.1.2.3').get('/test').reply(200, 'ok');
+
+          const res = await http.getText('http://10.1.2.3/test');
+
+          expect(res.body).toBe('ok');
+        });
+
+        it('permits a host the admin named in a trusted hostRule', async () => {
+          hostRules.add({ matchHost: '10.1.2.3' }, { trusted: true });
+          httpMock.scope('http://10.1.2.3').get('/test').reply(200, 'ok');
+
+          const res = await http.getText('http://10.1.2.3/test');
+
+          expect(res.body).toBe('ok');
+        });
+
+        it('does not require a scoped grant for a request which is not config', async () => {
+          const plainHttp = new Http('preset');
+          hostRules.add({ matchHost: '10.1.2.3' }, { trusted: true });
+          httpMock
+            .scope('http://10.1.2.3')
+            .get('/preset.json')
+            .reply(200, '{}');
+
+          const res = await plainHttp.getText('http://10.1.2.3/preset.json');
+
+          expect(res.body).toBe('{}');
+        });
+      });
+
+      describe('when response becomes config', () => {
+        it('warns about, but allows, an internal host with only an implicit grant', async () => {
+          const presetHttp = new Http('preset', {
+            responseBecomesConfig: true,
+          });
+          // an implicit grant is enough for lookups, but only warns for something which becomes config
+          hostRules.add({ matchHost: '10.1.2.3' }, { trusted: true });
+          httpMock
+            .scope('http://10.1.2.3')
+            .get('/preset.json')
+            .reply(200, '{}');
+
+          const res = await presetHttp.getText('http://10.1.2.3/preset.json');
+
+          expect(res.body).toBe('{}');
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            { hostname: '10.1.2.3', hostType: 'preset' },
+            expect.stringContaining('whose response becomes configuration'),
+          );
+        });
+      });
+    });
+
+    describe('when internalHostAccess=block', () => {
+      describe('when response does not become config', () => {
+        it('blocks requests to internal hosts', async () => {
+          GlobalConfig.set({ internalHostAccess: 'block' });
+
+          await expect(http.get('http://127.0.0.1:8080/test')).rejects.toThrow(
+            HOST_BLOCKED,
+          );
+          await expect(http.get('http://10.1.2.3/test')).rejects.toThrow(
+            HOST_BLOCKED,
+          );
+        });
+
+        it('does not let an untrusted hostRule permit an internal host', async () => {
+          GlobalConfig.set({ internalHostAccess: 'block' });
+          hostRules.add({ matchHost: '10.1.2.3' });
+
+          await expect(http.get('http://10.1.2.3/test')).rejects.toThrow(
+            HOST_BLOCKED,
+          );
+        });
+
+        it('blocks the stream path too', () => {
+          GlobalConfig.set({ internalHostAccess: 'block' });
+
+          expect(() => http.stream('http://127.0.0.1/test')).toThrow(
+            HOST_BLOCKED,
+          );
+        });
+      });
+
+      describe('when response becomes config', () => {
+        it('requires a scoped grant', async () => {
+          GlobalConfig.set({ internalHostAccess: 'block' });
+          const presetHttp = new Http('preset', {
+            responseBecomesConfig: true,
+          });
+          // an implicit grant is enough for lookups, but not for anything which becomes config
+          hostRules.add({ matchHost: '10.1.2.3' }, { trusted: true });
+
+          await expect(
+            presetHttp.get('http://10.1.2.3/preset.json'),
+          ).rejects.toThrow(HOST_BLOCKED);
+
+          hostRules.add(
+            { hostType: 'preset', matchHost: '10.1.2.3', allowInternal: true },
+            { trusted: true },
+          );
+          httpMock
+            .scope('http://10.1.2.3')
+            .get('/preset.json')
+            .reply(200, '{}');
+
+          const res = await presetHttp.getText('http://10.1.2.3/preset.json');
+
+          expect(res.body).toBe('{}');
+        });
+      });
+    });
+
+    describe('when internalHostAccess=warn', () => {
+      describe('when response does not become config', () => {
+        it('warns about, but allows, requests to internal hosts', async () => {
+          GlobalConfig.set({ internalHostAccess: 'warn' });
+          httpMock.scope('http://10.1.2.3').get('/test').reply(200, 'ok');
+
+          const res = await http.getText('http://10.1.2.3/test');
+
+          expect(res.body).toBe('ok');
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            { hostname: '10.1.2.3', hostType: 'dummy' },
+            expect.stringContaining('HTTP request to an internal host'),
+          );
+        });
+      });
+
+      describe('when response becomes config', () => {
+        it('warns about, but allows, an internal host with only an implicit grant', async () => {
+          GlobalConfig.set({ internalHostAccess: 'warn' });
+          const presetHttp = new Http('preset', {
+            responseBecomesConfig: true,
+          });
+          hostRules.add({ matchHost: '10.1.2.3' }, { trusted: true });
+          httpMock
+            .scope('http://10.1.2.3')
+            .get('/preset.json')
+            .reply(200, '{}');
+
+          const res = await presetHttp.getText('http://10.1.2.3/preset.json');
+
+          expect(res.body).toBe('{}');
+          expect(logger.logger.once.warn).toHaveBeenCalledWith(
+            { hostname: '10.1.2.3', hostType: 'preset' },
+            expect.stringContaining('whose response becomes configuration'),
+          );
+        });
+      });
+    });
+
+    describe('when internalHostAccess=allow', () => {
+      describe('when response does not become config', () => {
+        it('blocks requests to metadata endpoints', async () => {
+          GlobalConfig.set({ internalHostAccess: 'allow' });
+
+          await expect(
+            http.get('http://169.254.169.254/latest/meta-data/'),
+          ).rejects.toThrow(HOST_BLOCKED);
+          await expect(
+            http.get('http://metadata.google.internal/computeMetadata/v1/'),
+          ).rejects.toThrow(HOST_BLOCKED);
+        });
+
+        it('permits internal hosts', async () => {
+          GlobalConfig.set({ internalHostAccess: 'allow' });
+          httpMock.scope('http://10.1.2.3').get('/test').reply(200, 'ok');
+
+          const res = await http.getText('http://10.1.2.3/test');
+
+          expect(res.body).toBe('ok');
+        });
+      });
+
+      describe('when response becomes config', () => {
+        it('permits an internal host even without a scoped grant', async () => {
+          GlobalConfig.set({ internalHostAccess: 'allow' });
+          const presetHttp = new Http('preset', {
+            responseBecomesConfig: true,
+          });
+          httpMock
+            .scope('http://10.1.2.3')
+            .get('/preset.json')
+            .reply(200, '{}');
+
+          const res = await presetHttp.getText('http://10.1.2.3/preset.json');
+
+          expect(res.body).toBe('{}');
+        });
+      });
+    });
+
+    describe('redirects', () => {
+      it('blocks a redirect to an internal host', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/redirect')
+          .reply(302, '', { location: 'http://169.254.169.254/latest/' });
+
+        await expect(http.get(`${baseUrl}/redirect`)).rejects.toThrow(
+          HOST_BLOCKED,
+        );
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { url: 'http://169.254.169.254/latest/', hostType: 'dummy' },
+          'Blocked HTTP request to a cloud instance-metadata endpoint',
+        );
+      });
+
+      it('follows a redirect to a permitted host', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/redirect')
+          .reply(302, '', { location: `${baseUrl}/target` });
+        httpMock.scope(baseUrl).get('/target').reply(200, 'ok');
+
+        const res = await http.getText(`${baseUrl}/redirect`);
+
+        expect(res.body).toBe('ok');
+      });
+
+      it('strips authorization when redirected to another host', async () => {
+        hostRules.add({ matchHost: 'renovate.com', token: 'secret-token' });
+        httpMock
+          .scope(baseUrl)
+          .get('/redirect')
+          .reply(302, '', { location: 'http://other.example.com/target' });
+        httpMock
+          .scope('http://other.example.com', {
+            badheaders: ['authorization'],
+          })
+          .get('/target')
+          .reply(200, 'ok');
+
+        const res = await http.getText(`${baseUrl}/redirect`);
+
+        expect(res.body).toBe('ok');
+      });
+
+      it('strips authorization when a redirect downgrades https to http', async () => {
+        hostRules.add({ matchHost: 'renovate.com', token: 'secret-token' });
+        httpMock
+          .scope('https://renovate.com')
+          .get('/redirect')
+          .reply(302, '', { location: 'http://renovate.com/target' });
+        httpMock
+          .scope('http://renovate.com', {
+            badheaders: ['authorization'],
+          })
+          .get('/target')
+          .reply(200, 'ok');
+
+        const res = await http.getText('https://renovate.com/redirect');
+
+        expect(res.body).toBe('ok');
+      });
+    });
+
+    describe('caching', () => {
+      it('does not serve a cached response for a URL that is now blocked', async () => {
+        GlobalConfig.set({ internalHostAccess: 'allow' });
+        httpMock.scope('http://10.1.2.3').get('/cached').reply(200, 'ok');
+        const res = await http.getText('http://10.1.2.3/cached');
+        expect(res.body).toBe('ok');
+
+        GlobalConfig.set({ internalHostAccess: 'block' });
+
+        await expect(http.getText('http://10.1.2.3/cached')).rejects.toThrow(
+          HOST_BLOCKED,
+        );
+      });
+    });
+
+    describe('proxied deployments', () => {
+      beforeEach(() => {
+        // a proxy agent resolves the target hostname itself, so the `dnsLookup` guard is replaced by a pre-flight lookup
+        vi.mocked(hasProxy).mockReturnValue(true);
+      });
+
+      it('blocks a hostname which resolves to an internal address', async () => {
+        GlobalConfig.set({ internalHostAccess: 'block' });
+        vi.mocked(dnsPromises.lookup).mockResolvedValue([
+          { address: '10.0.0.1', family: 4 },
+        ] as never);
+
+        await expect(http.get(`${baseUrl}/test`)).rejects.toThrow(HOST_BLOCKED);
+      });
+
+      it('warns about a hostname which resolves to an internal address by default', async () => {
+        vi.mocked(dnsPromises.lookup).mockResolvedValue([
+          { address: '10.0.0.1', family: 4 },
+        ] as never);
+        httpMock.scope(baseUrl).get('/test').reply(200, 'ok');
+
+        const res = await http.getText(`${baseUrl}/test`);
+
+        expect(res.body).toBe('ok');
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { hostname: 'renovate.com', hostType: 'dummy' },
+          expect.stringContaining('HTTP request to an internal host'),
+        );
+      });
+
+      it('allows a hostname which resolves to a public address', async () => {
+        vi.mocked(dnsPromises.lookup).mockResolvedValue([
+          { address: '93.184.216.34', family: 4 },
+        ] as never);
+        httpMock.scope(baseUrl).get('/test').reply(200, 'ok');
+
+        const res = await http.getText(`${baseUrl}/test`);
+
+        expect(res.body).toBe('ok');
+      });
+    });
   });
 
   it('limits concurrency by host', async () => {

@@ -101,6 +101,17 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'internalHostAccess',
+    description:
+      'Whether Renovate may make HTTP requests to internal hosts, such as loopback, private-range and link-local addresses. `warn` logs the requests which `block` would refuse.',
+    type: 'string',
+    allowedValues: ['allow', 'warn', 'block'],
+    default: 'warn',
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
+  },
+  {
     name: 'useCloudMetadataServices',
     description:
       'If `false`, Renovate does not try to access cloud metadata services.',
@@ -693,7 +704,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.97.0',
+    default: 'ghcr.io/renovatebot/base-image:13.99.1',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -857,6 +868,16 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+  },
+  {
+    name: 'inheritConfigTrusted',
+    description:
+      'If `true`, `hostRules` in inherited config may grant access to internal hosts.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'requireConfig',
@@ -2177,6 +2198,13 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
+    name: 'minimumReleaseAgeBuffer',
+    description:
+      'Extra time added to `minimumReleaseAge` before an update is considered stable.',
+    type: 'string',
+    default: '30 minutes',
+  },
+  {
     name: 'abandonmentThreshold',
     description:
       'Flags packages that have not been updated within this period as abandoned.',
@@ -2903,6 +2931,19 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     advancedUse: true,
+  },
+  {
+    name: 'allowInternal',
+    description:
+      "Whether requests to this host may reach internal addresses when `internalHostAccess=block`. Only honored from the self-hosted administrator's own configuration, or from inherited config when `inheritConfigTrusted=true`.",
+    type: 'boolean',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+    globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'abortOnError',
