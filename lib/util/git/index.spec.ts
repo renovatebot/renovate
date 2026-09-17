@@ -63,7 +63,7 @@ async function disableGitAutoMaintenance(
 // last one write to `base`, so the shared-clone describe has to stay ahead of
 // it. The three nested describes split the tests by how much git setup they
 // need. (Layout and comments by Claude Fable 5.1.)
-describe('util/git/index', () => {
+describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -691,7 +691,7 @@ describe('util/git/index', () => {
   // a fresh local checkout and a fresh `initRepo()`, so it may commit, push,
   // check out branches, change git config or re-init freely. That setup costs
   // about 0.7s per test, which is why the read-only tests live above.
-  describe('clone per test', { timeout: 30000 }, () => {
+  describe('clone per test', () => {
     let origin: tmp.DirectoryResult;
     let tmpDir: tmp.DirectoryResult;
 
