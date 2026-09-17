@@ -1,10 +1,8 @@
 import { ZodError } from 'zod/v4';
 
 import { logger } from '../../../logger/index.ts';
-import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
-import type { HttpError } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -49,15 +47,18 @@ export class JsDelivrDatasource extends Datasource {
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
-      .transform(({ packageName, registryUrl }) => {
+      .transform(async ({ packageName, registryUrl }) => {
         const { type, package: parsedPackageName } =
           parseJsDelivrPackageName(packageName);
         const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}`;
-        return this.http.getJson(
+
+        const { body } = await this.http.getJson(
           url,
           { cacheProvider: memCacheProvider },
           JsDelivrPackageResponse,
         );
+
+        return JsDelivrPackageResponse.parse(body);
       })
       .transform(({ versions, tags }): ReleaseResult => {
         const res: ReleaseResult = {
@@ -116,9 +117,11 @@ export class JsDelivrDatasource extends Datasource {
     } = parseJsDelivrPackageName(packageName);
 
     const result = Result.parse(config, DigestsConfig).transform(
-      ({ registryUrl }) => {
+      async ({ registryUrl }) => {
         const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}@${newValue}?structure=flat`;
-        return this.http.getJson(url, JsDelivrDigestResponse);
+
+        const { body } = await this.http.getJson(url, JsDelivrDigestResponse);
+        return JsDelivrDigestResponse.parse(body);
       },
     );
 
@@ -153,11 +156,5 @@ export class JsDelivrDatasource extends Datasource {
       },
       () => this._getDigest(config, newValue),
     );
-  }
-
-  override handleHttpErrors(err: HttpError): void {
-    if (err.response?.statusCode !== 404) {
-      throw new ExternalHostError(err);
-    }
   }
 }
