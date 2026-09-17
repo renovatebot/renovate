@@ -622,6 +622,9 @@ async function managerUpdateArtifacts(
     return null;
   }
 
+  updateArtifact.config.defaultRegistryUrls =
+    updateArtifact.updatedDeps?.[0]?.defaultRegistryUrls;
+
   return await updateArtifacts(updateArtifact);
 }
 
