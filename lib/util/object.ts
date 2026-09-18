@@ -9,6 +9,7 @@ export function hasKey<K extends string, T>(
   k: K,
   o: T,
 ): o is T & Record<K, unknown> {
+  // oxlint-disable-next-line renovate/prefer-is-object -- generic guard used on arbitrary values across the codebase; isObject() additionally matches functions, which would change semantics for every caller
   return o && typeof o === 'object' && k in o;
 }
 

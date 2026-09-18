@@ -41,10 +41,8 @@ function isVersion(input: string): boolean {
   if (input && !input.includes('[')) {
     const qualifiers = getOptions(input);
     const version = cleanVersion(input);
-    if (qualifiers.loose) {
-      if (looseAPI.isVersion(version)) {
-        return true;
-      }
+    if (qualifiers.loose && looseAPI.isVersion(version)) {
+      return true;
     }
     return makeVersion(version, qualifiers) !== null;
   }

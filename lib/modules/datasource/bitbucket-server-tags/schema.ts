@@ -1,8 +1,9 @@
 import { z } from 'zod/v4';
+import { Nullish } from '../../../util/schema-utils/index.ts';
 
 export const BitbucketServerTag = z.object({
   displayId: z.string(),
-  hash: z.string().nullish(),
+  hash: Nullish(z.string()),
 });
 
 export const BitbucketServerTags = z.array(BitbucketServerTag);

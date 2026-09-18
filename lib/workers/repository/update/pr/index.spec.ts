@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -19,7 +20,7 @@ import { embedChangelogs } from '../../changelog/index.ts';
 import * as _statusChecks from '../branch/status-checks.ts';
 import * as _prBody from './body/index.ts';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types.ts';
-import { ensurePr } from './index.ts';
+import { ensurePr, updatePrDebugData } from './index.ts';
 import * as _participants from './participants.ts';
 import * as _prCache from './pr-cache.ts';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
@@ -45,6 +46,25 @@ vi.mock('./pr-cache.ts');
 const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
+  describe('updatePrDebugData', () => {
+    it('records labels for a new pr', () => {
+      const res = updatePrDebugData('base', ['dep'], undefined);
+
+      expect(res).toMatchObject({ targetBranch: 'base', labels: ['dep'] });
+    });
+
+    it('leaves labels out when the existing debug data has none', () => {
+      const res = updatePrDebugData('base', ['dep'], {
+        createdInVer: '1.0.0',
+        updatedInVer: '1.0.0',
+        targetBranch: 'base',
+      });
+
+      expect(res.labels).toBeUndefined();
+      expect(res).toMatchObject({ createdInVer: '1.0.0' });
+    });
+  });
+
   describe('ensurePr', () => {
     const number = 123;
     const sourceBranch = 'renovate-branch';
@@ -119,7 +139,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
-      it('ignores PR limits on vulnerability alert', async () => {
+      it('aborts PR creation once vulnerability alert limit is exceeded', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
@@ -127,9 +147,21 @@ describe('workers/repository/update/pr/index', () => {
         delete prConfig.prTitle; // for coverage
         const res = await ensurePr(prConfig);
 
+        expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'RateLimited' });
+        expect(platform.createPr).not.toHaveBeenCalled();
+      });
+
+      it('counts vulnerability alert PRs against their own limit', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, isVulnerabilityAlert: true });
+
         expect(res).toEqual({ type: 'with-pr', pr });
-        expect(platform.createPr).toHaveBeenCalled();
-        expect(prCache.setPrCache).toHaveBeenCalled();
+        expect(limits.incCountValue).toHaveBeenNthCalledWith(
+          1,
+          'VulnerabilityConcurrentPRs',
+        );
+        expect(limits.incCountValue).toHaveBeenNthCalledWith(2, 'HourlyPRs');
       });
 
       it('creates rollback PR', async () => {
@@ -178,6 +210,22 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
+      it('creates PR for unapproved dependencies which have been unpended', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          prCreation: 'approval',
+          dependencyDashboardChecks: {
+            'renovate-branch': 'unpend',
+          },
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
       it('skips PR creation before prNotPendingHours is hit', async () => {
         const now = DateTime.now();
         const then = now.minus({ hours: 1 });
@@ -196,6 +244,37 @@ describe('workers/repository/update/pr/index', () => {
           prBlockedBy: 'AwaitingTests',
         });
         expect(prCache.setPrCache).not.toHaveBeenCalled();
+      });
+
+      it('skips assignees and reviewers when the platform returns no PR', async () => {
+        platform.createPr.mockResolvedValueOnce(null);
+
+        const res = await ensurePr(config);
+
+        expect(res).toMatchObject({ type: 'without-pr' });
+        expect(participants.addParticipants).not.toHaveBeenCalled();
+      });
+
+      it('creates a PR when a not-pending branch is no longer yellow', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, prCreation: 'not-pending' });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+      });
+
+      it('creates a PR despite a pending branch when forcePr is set', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          prCreation: 'not-pending',
+          forcePr: true,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
       });
 
       it('skips PR creation due to stabilityStatus', async () => {
@@ -282,6 +361,19 @@ describe('workers/repository/update/pr/index', () => {
     });
 
     describe('Update', () => {
+      it('updates a PR whose rebase was requested', async () => {
+        const existingPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct('Some other body'),
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+
+        const res = await ensurePr({ ...config, rebaseRequested: true });
+
+        expect(res).toMatchObject({ type: 'with-pr', pr: { number } });
+        expect(platform.updatePr).toHaveBeenCalled();
+      });
+
       it('updates PR if labels have changed in config', async () => {
         const prDebugData = {
           createdInVer: '1.0.0',
@@ -593,6 +685,23 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
+      it('forces PR on dashboard unpend check', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          reviewers: ['somebody'],
+          dependencyDashboardChecks: {
+            'renovate-branch': 'unpend',
+          },
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
       it('adds assignees for PR automerge with red status', async () => {
         const changedPr: Pr = {
           ...pr,
@@ -710,6 +819,32 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(platform.createPr).toHaveBeenCalled();
         expect(platform.massageMarkdown).toHaveBeenCalled();
+        expect(comment.ensureComment).toHaveBeenCalledExactlyOnceWith({
+          content: 'markdown content',
+          number: 123,
+          topic: 'Branch automerge failure',
+        });
+      });
+
+      it('comments on automerge failure due to merge queue', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+        platform.massageMarkdown.mockReturnValueOnce('markdown content');
+
+        await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'branch',
+          branchAutomergeFailureMessage: 'automerge aborted - merge queue',
+          suppressNotifications: [],
+        });
+
+        expect(platform.massageMarkdown).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'The base branch only accepts changes through its merge queue and rejected the direct push, so branch automerge is not possible. Please set `automergeType=pr` instead, or allow Renovate to bypass the merge queue.',
+          ),
+          undefined,
+        );
         expect(comment.ensureComment).toHaveBeenCalledExactlyOnceWith({
           content: 'markdown content',
           number: 123,
@@ -877,6 +1012,100 @@ describe('workers/repository/update/pr/index', () => {
         });
       });
 
+      it('ignores a changelog error other than a missing token', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            partial<BranchUpgradeConfig>({
+              branchName: sourceBranch,
+              depName: 'bar',
+              manager: 'npm',
+              logJSON: { error: 'MissingGitlabToken' },
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
+      });
+
+      it('processes a changelog with no project and no versions', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            partial<BranchUpgradeConfig>({
+              branchName: sourceBranch,
+              depType: 'foo',
+              depName: 'bar',
+              manager: 'npm',
+              currentValue: '1.2.3',
+              newVersion: '4.5.6',
+              logJSON: { hasReleaseNotes: true },
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig).toMatchObject({
+          upgrades: [{ hasReleaseNotes: false, releases: [] }],
+        });
+      });
+
+      it('processes a changelog with a project but no versions', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            partial<BranchUpgradeConfig>({
+              branchName: sourceBranch,
+              depType: 'foo',
+              depName: 'bar',
+              manager: 'npm',
+              currentValue: '1.2.3',
+              newVersion: '4.5.6',
+              logJSON: {
+                hasReleaseNotes: true,
+                project: {
+                  type: 'github',
+                  repository: 'other/repo',
+                  baseUrl: 'https://github.com',
+                  apiBaseUrl: 'https://api.github.com/',
+                  sourceUrl: 'https://github.com/other/repo',
+                },
+              },
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig).toMatchObject({
+          upgrades: [{ hasReleaseNotes: true, releases: [] }],
+        });
+      });
+
+      it('skips a repo whose release notes were already committed', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [dummyUpgrade, { ...dummyUpgrade, depName: 'baz' }],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig).toMatchObject({
+          upgrades: [{ hasReleaseNotes: true }, { hasReleaseNotes: false }],
+        });
+      });
+
       it('handles missing GitHub token', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
@@ -896,7 +1125,14 @@ describe('workers/repository/update/pr/index', () => {
         const {
           upgrades: [{ prBodyNotes }],
         } = prBody.getPrBody.mock.calls[0][0];
-        expect(prBodyNotes).toBeNonEmptyArray();
+        expect(prBodyNotes).toEqual([
+          codeBlock`
+            > ❗ **Important**
+            >
+            > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
+            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+          `,
+        ]);
       });
 
       it('removes duplicate changelogs', async () => {
@@ -1069,12 +1305,12 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [
                 {
                   prBodyNotes: [
-                    `> :stop_sign: **Caution**
->
-> bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
-> Verify that release 2.3.4 was published by the expected author.
-
-`,
+                    codeBlock`
+                      > 🛑 **Caution**
+                      >
+                      > bar 1.2.3 was released with an attestation, but 2.3.4 has no attestation.
+                      > Verify that release 2.3.4 was published by the expected author.
+                    `,
                   ],
                 },
               ],
@@ -1308,6 +1544,11 @@ describe('workers/repository/update/pr/index', () => {
         });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { prTitle },
+          'PR approval required',
+        );
       });
     });
   });

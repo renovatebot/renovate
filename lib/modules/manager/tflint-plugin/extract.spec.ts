@@ -1,10 +1,13 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { extractPackageFile } from './index.ts';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
@@ -130,6 +133,29 @@ describe('modules/manager/tflint-plugin/extract', () => {
           },
           {
             skipReason: 'no-source',
+          },
+        ],
+      });
+    });
+
+    it('ignores quoted attributes other than version and source', () => {
+      const extraAttribute = codeBlock`
+        plugin "aws" {
+          enabled = true
+          signing_key = "0xDEADBEEF"
+          version = "0.4.0"
+          source  = "github.com/terraform-linters/tflint-ruleset-aws"
+        }
+      `;
+
+      const res = extractPackageFile(extraAttribute, 'tflint-extra.hcl', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '0.4.0',
+            datasource: 'github-releases',
+            depName: 'terraform-linters/tflint-ruleset-aws',
+            depType: 'plugin',
           },
         ],
       });

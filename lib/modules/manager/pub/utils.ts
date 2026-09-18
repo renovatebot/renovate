@@ -8,9 +8,9 @@ export function parsePubspec(
   const res = Pubspec.safeParse(fileContent);
   if (res.success) {
     return res.data;
-  } else {
-    logger.debug({ err: res.error, fileName }, 'Error parsing pubspec.');
   }
+  logger.debug({ err: res.error, fileName }, 'Error parsing pubspec.');
+
   return null;
 }
 
@@ -21,11 +21,8 @@ export function parsePubspecLock(
   const res = PubspecLock.safeParse(fileContent);
   if (res.success) {
     return res.data;
-  } else {
-    logger.debug(
-      { err: res.error, fileName },
-      'Error parsing pubspec lockfile.',
-    );
   }
+  logger.debug({ err: res.error, fileName }, 'Error parsing pubspec lockfile.');
+
   return null;
 }

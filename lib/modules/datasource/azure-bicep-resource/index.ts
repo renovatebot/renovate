@@ -56,6 +56,7 @@ export class AzureBicepResourceDatasource extends Datasource {
         namespace: `datasource-${AzureBicepResourceDatasource.id}`,
         key: `getReleases-${config.packageName}`,
         fallback: true,
+        cacheable: true,
       },
       () => this._getReleases(config),
     );
@@ -75,6 +76,7 @@ export class AzureBicepResourceDatasource extends Datasource {
         namespace: `datasource-${AzureBicepResourceDatasource.id}`,
         key: 'getResourceVersionIndex',
         ttlMinutes: 24 * 60,
+        cacheable: true,
       },
       () => this._getResourceVersionIndex(),
     );

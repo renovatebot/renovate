@@ -3,6 +3,7 @@ import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchConfig } from './generate.ts';
@@ -167,7 +168,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         branchName: 'some-branch',
         prTitle: 'some-title',
         isLockFileMaintenance: true,
@@ -226,7 +227,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         branchName: 'some-branch',
         prTitle: 'some-title',
         isLockfileUpdate: true,
@@ -349,6 +350,39 @@ describe('workers/repository/updates/generate', () => {
         bar: '2.0.0',
       });
       expect(res.recreateClosed).toBe(false);
+    });
+
+    it('merges extractedConstraints of all upgrades', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { python: '==3.11' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { poetry: '1.8.0' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.extractedConstraints).toEqual({
+        python: '==3.11',
+        poetry: '1.8.0',
+      });
     });
 
     it('groups major updates with different versions but same newValue, no recreateWhen', () => {
@@ -816,6 +850,28 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
+    it('uses semantic commits without a scope', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      const res = generateBranchConfig(branch);
+
+      expect(res.commitMessage).toBe(
+        'chore: update dependency some-dep to v1.2.0',
+      );
+    });
+
     it('calculates the highest priority semanticCommitType', () => {
       const branch = [
         {
@@ -1131,7 +1187,8 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeUndefined();
-      expect(generateBranchConfig(branch)).toMatchSnapshot({
+      expect(res).toMatchObject({
+        hasTypes: true,
         upgrades: [
           {
             manager: 'some-manager',
@@ -1146,6 +1203,7 @@ describe('workers/repository/updates/generate', () => {
             newValue: '1.0.0',
           },
           {
+            manager: 'some-manager',
             depName: '@types/some-dep',
             branchName: 'some-branch',
             newValue: '0.5.8',
@@ -1189,7 +1247,8 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
       ] satisfies BranchUpgradeConfig[];
-      expect(generateBranchConfig(branch)).toMatchSnapshot({
+      expect(generateBranchConfig(branch)).toMatchObject({
+        labels: ['a', 'c', 'b'],
         upgrades: [
           {
             manager: 'some-manager',
@@ -1206,6 +1265,7 @@ describe('workers/repository/updates/generate', () => {
             labels: ['a', 'b'],
           },
           {
+            manager: 'some-manager',
             depName: '@types/some-dep',
             branchName: 'some-branch',
             newValue: '0.5.7',
@@ -1528,7 +1588,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      const excludeCommitPaths = res.excludeCommitPaths ?? [];
+      const excludeCommitPaths = coerceArray(res.excludeCommitPaths);
       expect(excludeCommitPaths.sort()).toStrictEqual(
         ['some/path', 'some/other/path', 'some/other-manager/path'].sort(),
       );
@@ -1647,9 +1707,11 @@ describe('workers/repository/updates/generate', () => {
         | docker     | some-dep    | 5.1.0 | 5.1.2 |
       `);
       expect([
+        // oxlint-disable-next-line renovate/prefer-coerce-array -- matchAll() yields an iterator, which coerceArray() does not accept
         ...(res.commitMessage?.matchAll(/another-dep/g) ?? []),
       ]).toBeArrayOfSize(1);
       expect([
+        // oxlint-disable-next-line renovate/prefer-coerce-array -- matchAll() yields an iterator, which coerceArray() does not accept
         ...(res.commitMessage?.matchAll(/some-dep/g) ?? []),
       ]).toBeArrayOfSize(2);
     });
@@ -1761,7 +1823,7 @@ describe('workers/repository/updates/generate', () => {
             '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1794,7 +1856,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1805,7 +1867,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1816,7 +1878,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1843,7 +1905,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1854,7 +1916,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1865,7 +1927,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1891,7 +1953,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           skipArtifactsUpdate: true,
           fileReplacePosition: 1,
           prBodyDefinitions: {
@@ -1903,7 +1965,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           skipArtifactsUpdate: true,
           fileReplacePosition: 2,
           prBodyDefinitions: {
@@ -1915,7 +1977,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           skipArtifactsUpdate: true,
           fileReplacePosition: 0,
           prBodyDefinitions: {
@@ -1944,7 +2006,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep1',
             newVersion: '1.2.0',
             newValue: '1.2.0',
-            updateType: 'minor' as UpdateType,
+            updateType: 'minor',
             skipArtifactsUpdate: first,
             fileReplacePosition: 1,
             prBodyDefinitions: {
@@ -1956,7 +2018,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep2',
             newVersion: '1.0.0',
             newValue: '1.0.0',
-            updateType: 'major' as UpdateType,
+            updateType: 'major',
             fileReplacePosition: 2,
             prBodyDefinitions: {
               Issue: 'I2',
@@ -1967,7 +2029,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep3',
             newVersion: '1.2.3',
             newValue: '1.2.3',
-            updateType: 'patch' as UpdateType,
+            updateType: 'patch',
             skipArtifactsUpdate: true,
             fileReplacePosition: 0,
             prBodyDefinitions: {

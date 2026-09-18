@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
-import { exec } from '../../../../util/exec/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import type {
   ExecOptions,
   ToolConstraint,
@@ -12,8 +12,9 @@ import {
   findLocalSiblingOrParent,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { find } from '../../../../util/host-rules.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -24,13 +25,24 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
-import { applyGitSource } from '../../util.ts';
-import { type PyProject, UvLockfile } from '../schema.ts';
+import {
+  applyGitSource,
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../../util.ts';
+import { type PyProject, UvLockfile, type UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
-
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
+const gitExec = withGitEnvironment(['pep621']);
+
+function isUvIndexSource(
+  source: UvSource,
+): source is Extract<UvSource, { index: string }> {
+  return 'index' in source;
+}
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -60,7 +72,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     // Skip sources that do not make sense to handle (e.g. path).
     if (uv.sources || defaultIndex || implicitIndexUrls) {
       for (const dep of deps) {
-        /* v8 ignore next 3 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!dep.packageName) {
           continue;
         }
@@ -71,34 +83,49 @@ export class UvProcessor extends BasePyProjectProcessor {
 
         // Using `packageName` as it applies PEP 508 normalization, which is
         // also applied by uv when matching a source to a dependency.
-        const depSource = uv.sources?.[dep.packageName];
-        if (depSource) {
-          // Dependency is pinned to a specific source.
+        const depSources = uv.sources?.[dep.packageName];
+        if (depSources) {
+          // Dependency is pinned to one or more specific sources.
           dep.depType = depTypes.uvSources;
-          if ('index' in depSource) {
-            const index = uv.index?.find(
-              ({ name }) => name === depSource.index,
-            );
-            if (index) {
-              dep.registryUrls = [index.url];
+          if (depSources.every(isUvIndexSource)) {
+            // Sources referencing an index, possibly disambiguated by
+            // environment markers. Any of the indexes can serve the package,
+            // so use all of them as registries.
+            const registryUrls: string[] = [];
+            for (const depSource of depSources) {
+              const index = uv.index?.find(
+                ({ name }) => name === depSource.index,
+              );
+              if (index) {
+                registryUrls.push(index.url);
+              }
             }
-          } else if ('git' in depSource) {
-            applyGitSource(
-              dep,
-              depSource.git,
-              depSource.rev,
-              depSource.tag,
-              depSource.branch,
-            );
-          } else if ('url' in depSource) {
-            dep.skipReason = 'unsupported-url';
-          } else if ('path' in depSource) {
-            dep.skipReason = 'path-dependency';
-          } else if ('workspace' in depSource) {
-            dep.skipReason = 'inherited-dependency';
+            if (registryUrls.length) {
+              dep.registryUrls = [...new Set(registryUrls)];
+            }
+          } else if (depSources.length === 1) {
+            const depSource = depSources[0];
+            if ('git' in depSource) {
+              applyGitSource(
+                dep,
+                depSource.git,
+                depSource.rev,
+                depSource.tag,
+                depSource.branch,
+              );
+            } else if ('url' in depSource) {
+              dep.skipReason = 'unsupported-url';
+            } else if ('path' in depSource) {
+              dep.skipReason = 'path-dependency';
+            } else if ('workspace' in depSource) {
+              dep.skipReason = 'inherited-dependency';
+            } else {
+              dep.skipReason = 'unknown-registry';
+            }
           } else {
-            /* v8 ignore next -- unreachable through schema */
-            dep.skipReason = 'unknown-registry';
+            // Multiple sources that are not all indexes (e.g. a git source
+            // per platform) cannot be represented as a single update.
+            dep.skipReason = 'unsupported';
           }
         } else {
           // Dependency is not pinned to a specific source, so we need to
@@ -186,17 +213,22 @@ export class UvProcessor extends BasePyProjectProcessor {
 
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
-        constraint:
-          config.constraints?.python ?? project.project?.['requires-python'],
+        constraint: await resolveToolConstraint(
+          config,
+          'python',
+          () => project.project?.['requires-python'],
+        ),
       };
       const uvConstraint: ToolConstraint = {
         toolName: 'uv',
-        constraint:
-          config.constraints?.uv ?? project.tool?.uv?.['required-version'],
+        constraint: await resolveToolConstraint(
+          config,
+          'uv',
+          () => project.tool?.uv?.['required-version'],
+        ),
       };
 
       const extraEnv = {
-        ...getGitEnvironmentVariables(['pep621']),
         ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
         ...(await getUvIndexCredentials(project)),
       };
@@ -215,38 +247,17 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
-      await exec(cmd, execOptions);
-
-      // check for changes
-      const fileChanges: UpdateArtifactsResult[] = [];
-      const newLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newLockContent;
-      if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newLockContent,
-          },
-        });
-      } else {
-        logger.debug('uv.lock is unchanged');
-      }
-
-      return fileChanges.length ? fileChanges : null;
+      return await updateLockFile({
+        lockFileName,
+        existingLockFileContent,
+        run: () => gitExec(cmd, execOptions),
+      });
     } catch (err) {
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
       logger.debug({ err }, 'Failed to update uv lock file');
-      return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: err.message,
-          },
-        },
-      ];
+      return artifactErrorResult(lockFileName, err);
     }
   }
 }
@@ -293,9 +304,8 @@ async function getUsernamePassword(
     const hostRule = await getGoogleAuthHostRule();
     if (hostRule) {
       return hostRule;
-    } else {
-      logger.once.debug({ url }, 'Could not get Google access token');
     }
+    logger.once.debug({ url }, 'Could not get Google access token');
   }
 
   return {};
@@ -317,8 +327,9 @@ async function getUvExtraIndexUrl(
     .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
-      const configuredIndexUrls =
-        project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      const configuredIndexUrls = coerceArray(
+        project.tool?.uv?.index?.map(({ url }) => url),
+      );
       return (
         registryUrl !== PypiDatasource.defaultURL &&
         !configuredIndexUrls.includes(registryUrl)
@@ -336,9 +347,11 @@ async function getUvExtraIndexUrl(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
     if (username || password) {
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (username) {
         parsedUrl.username = username;
       }
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (password) {
         parsedUrl.password = password;
       }
@@ -365,7 +378,7 @@ async function getUvIndexCredentials(
 
   for (const { name, url } of uv_indexes) {
     const parsedUrl = parseUrl(url);
-    /* v8 ignore next 3 -- needs test */
+    /* v8 ignore next -- needs test */
     if (!parsedUrl) {
       continue;
     }
@@ -377,12 +390,14 @@ async function getUvIndexCredentials(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
 
-    const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+    const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);
     }
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (password) {
       entries.push([`UV_INDEX_${NAME}_PASSWORD`, password]);
     }

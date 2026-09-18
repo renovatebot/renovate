@@ -207,7 +207,9 @@ plugins:
   - search:
       separator: '[\s\-,:!?=\[\]()<>{}"/\\]+|\.(?!\d)|&[lg]t;'
   - awesome-pages
-  - privacy
+  - privacy:
+      assets_exclude:
+        - asciinema.org/*
 
 # Page Tree/Sidebar
 # https://www.mkdocs.org/user-guide/writing-your-docs/#configure-pages-and-navigation

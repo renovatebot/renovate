@@ -27,6 +27,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
   REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_PENDING_DELETION,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -73,6 +74,11 @@ export default async function handleError(
     }
     if (err.message === REPOSITORY_MIRRORED) {
       logger.info('Repository is a mirror - skipping');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === REPOSITORY_PENDING_DELETION) {
+      logger.info('Repository is pending deletion - skipping');
       delete config.branchList;
       return err.message;
     }
@@ -132,23 +138,23 @@ export default async function handleError(
     if (err.message === CONFIG_VALIDATION) {
       delete config.branchList;
       if (config.configValidationError) {
-        logger.error({ error: err }, 'Repository has invalid config');
+        logger.error({ err }, 'Repository has invalid config');
       } else {
-        logger.warn({ error: err }, 'Repository has invalid config');
+        logger.warn({ err }, 'Repository has invalid config');
       }
       await raiseConfigWarningIssue(config, err);
       return err.message;
     }
     if (err.message === MISSING_API_CREDENTIALS) {
       delete config.branchList;
-      logger.info({ error: err }, MISSING_API_CREDENTIALS);
+      logger.info({ err }, MISSING_API_CREDENTIALS);
       await raiseCredentialsWarningIssue(config, err);
       return err.message;
     }
     if (err.message === CONFIG_SECRETS_EXPOSED) {
       delete config.branchList;
       logger.warn(
-        { error: err },
+        { err },
         'Repository aborted due to potential secrets exposure',
       );
       return err.message;
