@@ -244,7 +244,7 @@ export function setBranchStatus(
 
 export function getBranchStatusCheck(
   _branchName: string,
-  _context: string | null | undefined,
+  _context: string,
 ): Promise<BranchStatus | null> {
   logger.debug('Not implemented setBranchStatus');
   return Promise.resolve(null);
