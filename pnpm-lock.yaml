@@ -143,8 +143,8 @@ importers:
         specifier: 3.1.0
         version: 3.1.0
       adm-zip:
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.6.1
+        version: 0.6.1
       ae-cvss-calculator:
         specifier: 1.0.13
         version: 1.0.13
@@ -2543,8 +2543,8 @@ packages:
     resolution: {integrity: sha512-/XrFJgzQQQHpti1raDJC6m4ws6aNktmjBlhk8Fdlk7LwCEuDoieEJJY9OFHjfiFJFFRM2tK+Ky/IsfbbmlMu1w==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
-  adm-zip@0.6.0:
-    resolution: {integrity: sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==}
+  adm-zip@0.6.1:
+    resolution: {integrity: sha512-Xwrja8nx9e5o2N1my4DsKCeKpdrnACyr1wtbPxBDgGzKzKyE9kRtBFA8mWldI+RVlD7CBZNWY/wQ2+ydwOR6kQ==}
     engines: {node: '>=14.0'}
 
   ae-cvss-calculator@1.0.13:
@@ -7104,7 +7104,7 @@ snapshots:
   '@renovatebot/osv-offline@3.0.10(supports-color@7.2.0)':
     dependencies:
       '@renovatebot/osv-offline-db': 3.0.10(supports-color@7.2.0)
-      adm-zip: 0.6.0
+      adm-zip: 0.6.1
       debug: 4.4.3(supports-color@7.2.0)
       fs-extra: 11.4.0
       got: 15.1.0
@@ -7765,7 +7765,7 @@ snapshots:
   abbrev@5.0.0:
     optional: true
 
-  adm-zip@0.6.0: {}
+  adm-zip@0.6.1: {}
 
   ae-cvss-calculator@1.0.13: {}
 
