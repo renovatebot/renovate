@@ -44,7 +44,8 @@ This provides reproducibility in the case that the upstream package updates unde
 
 The [`dockerfile` manager](../../manager/dockerfile/index.md) extracts these packages, allowing updates to them directly, without needing a Custom Manager.
 
-The manager does not set a `registryUrl`, so you will need to set one which matches your base image as shown above.
+The manager does not work out a `registryUrl` from your base image, so it skips these packages with `skipReason: unknown-registry` rather than look them up against a suite which may hold versions your image cannot install.
+Set the `registryUrls` which match your base image with a `packageRules` entry to have them looked up.
 
 <!-- TODO: #45706 auto-detect `registryUrl` -->
 

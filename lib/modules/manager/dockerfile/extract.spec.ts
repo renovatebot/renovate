@@ -51,6 +51,8 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'bash',
           depType: 'install',
           replaceString: 'bash=5.2.37-r2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -83,6 +85,8 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'bash',
           depType: 'install',
           replaceString: 'bash=5.2.37-r2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -118,6 +122,8 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'curl',
           depType: 'install',
           replaceString: 'curl=8.14.1-2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -165,6 +171,21 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'install',
         },
       ]);
+    });
+
+    it('keeps the reason a package was already skipped for', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21
+          RUN apk add bash
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'bash',
+        skipReason: 'unspecified-version',
+      });
     });
 
     it('handles naked dep', () => {
