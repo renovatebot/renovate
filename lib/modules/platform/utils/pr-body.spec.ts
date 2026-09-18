@@ -1,6 +1,13 @@
 import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
-import { smartTruncate } from './pr-body.ts';
+import {
+  flattenDetailsSummary,
+  replaceRebaseCheckboxHints,
+  replaceRenovateHiddenComments,
+  rewriteRelativeLinks,
+  smartTruncate,
+  stripRebaseCheckSection,
+} from './pr-body.ts';
 
 const prBody = Fixtures.get('pr-body.txt');
 
@@ -87,6 +94,114 @@ describe('modules/platform/utils/pr-body', () => {
 
     it('does not truncate', () => {
       expect(smartTruncate(prBody, 60000)).toEqual(prBody);
+    });
+  });
+
+  describe('.replaceRebaseCheckboxHints', () => {
+    const input =
+      '**Rebasing**: Never, or you tick the rebase/retry checkbox.\n' +
+      'You can manually request rebase by checking the rebase/retry box above.';
+
+    it('uses the rename wording by default', () => {
+      expect(replaceRebaseCheckboxHints(input)).toBe(
+        '**Rebasing**: Never, or PR is renamed to start with "rebase!".\n' +
+          'You can manually request rebase by renaming the PR to start with "rebase!".',
+      );
+    });
+
+    it('replaces only the tick phrase', () => {
+      expect(replaceRebaseCheckboxHints(input, { tick: 'you say so' })).toBe(
+        '**Rebasing**: Never, or you say so.\n' +
+          'You can manually request rebase by checking the rebase/retry box above.',
+      );
+    });
+
+    it('replaces only the checking phrase', () => {
+      expect(replaceRebaseCheckboxHints(input, { checking: 'saying so' })).toBe(
+        '**Rebasing**: Never, or you tick the rebase/retry checkbox.\n' +
+          'You can manually request rebase by saying so.',
+      );
+    });
+
+    it('leaves the body alone when no hints are given', () => {
+      expect(replaceRebaseCheckboxHints(input, {})).toBe(input);
+    });
+  });
+
+  describe('.stripRebaseCheckSection', () => {
+    it('removes the section followed by more content', () => {
+      const body =
+        'header\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n\nfooter';
+      expect(stripRebaseCheckSection(body)).toBe('header\nfooter');
+    });
+
+    it('removes the section at the end of the body', () => {
+      const body =
+        'header\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box';
+      expect(stripRebaseCheckSection(body)).toBe('header');
+    });
+
+    it('leaves a body without the section alone', () => {
+      expect(stripRebaseCheckSection('header\n\nfooter')).toBe(
+        'header\n\nfooter',
+      );
+    });
+  });
+
+  describe('.flattenDetailsSummary', () => {
+    it('turns summaries into bold text and drops the details tags', () => {
+      expect(
+        flattenDetailsSummary(
+          '<details><summary>foo</summary>bar</details>text<details>',
+        ),
+      ).toBe('**foo**bartext');
+    });
+  });
+
+  describe('.replaceRenovateHiddenComments', () => {
+    const input =
+      'text<!--renovate-debug:abc-->more<!--renovate-config-hash:0-->';
+
+    it('drops the comments by default', () => {
+      expect(replaceRenovateHiddenComments(input)).toBe('textmore');
+    });
+
+    it('applies a custom replacement', () => {
+      expect(replaceRenovateHiddenComments(input, '[//]: # ($&)')).toBe(
+        'text[//]: # (<!--renovate-debug:abc-->)more[//]: # (<!--renovate-config-hash:0-->)',
+      );
+    });
+
+    it('leaves other comments alone', () => {
+      expect(replaceRenovateHiddenComments('<!-- rebase-check -->')).toBe(
+        '<!-- rebase-check -->',
+      );
+    });
+  });
+
+  describe('.rewriteRelativeLinks', () => {
+    const input = '[#1](../issues/1) [#2](../pull/2)';
+
+    it('rewrites both link types', () => {
+      expect(
+        rewriteRelativeLinks(input, { issues: 'issues/', pulls: 'pulls/' }),
+      ).toBe('[#1](issues/1) [#2](pulls/2)');
+    });
+
+    it('rewrites issue links only', () => {
+      expect(rewriteRelativeLinks(input, { issues: '#' })).toBe(
+        '[#1](#1) [#2](../pull/2)',
+      );
+    });
+
+    it('rewrites pull request links only', () => {
+      expect(rewriteRelativeLinks(input, { pulls: '!' })).toBe(
+        '[#1](../issues/1) [#2](!2)',
+      );
+    });
+
+    it('leaves the body alone when no targets are given', () => {
+      expect(rewriteRelativeLinks(input, {})).toBe(input);
     });
   });
 });
