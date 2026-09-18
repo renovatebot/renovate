@@ -250,6 +250,10 @@ export interface PackageDependency<
   isAbandoned?: boolean;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s, for this dependency alone.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
+  /**
    * Whether the package registry has attestation information for the given update.
    *
    * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.

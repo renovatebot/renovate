@@ -219,6 +219,75 @@ describe('workers/repository/process/fetch', () => {
           }),
         );
       });
+
+      it('is merged from dep with packageFile and config', async () => {
+        config.constraintsVersioning = { '%goMod': 'config-version' };
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              constraintsVersioning: {
+                '%goMod': 'pfile-version',
+                perl: 'pfile-perl-version',
+              },
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  constraintsVersioning: {
+                    '%goMod': 'dep-version',
+                    perl: 'dep-perl-version',
+                    vscode: 'dep-vscode-version',
+                  },
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: {
+              '%goMod': 'config-version',
+              perl: 'pfile-perl-version',
+              vscode: 'dep-vscode-version',
+            },
+          }),
+        );
+      });
+
+      it('is set from dep if only set on dep', async () => {
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  constraintsVersioning: { perl: 'dep-perl-version' },
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: { perl: 'dep-perl-version' },
+          }),
+        );
+      });
     });
 
     it('prefers configured constraints over extracted constraints', async () => {
