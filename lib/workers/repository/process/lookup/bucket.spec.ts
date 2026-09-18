@@ -37,6 +37,54 @@ describe('workers/repository/process/lookup/bucket', () => {
         ),
       ).toBe('non-major');
     });
+
+    it('separates a minor which only isSame() can see', () => {
+      const versioningApi = partial<VersioningApi>({
+        getMajor: () => 1,
+        // the numbers claim both versions share a minor
+        getMinor: () => 2,
+        isSame: (type) => type === 'major',
+      });
+
+      expect(
+        getBucket(
+          { separateMajorMinor: true, separateMinorPatch: true },
+          '1.2.0',
+          '1.2.1',
+          versioningApi,
+        ),
+      ).toBe('minor');
+    });
+
+    it('treats a minor which isSame() calls unchanged as a patch', () => {
+      const versioningApi = partial<VersioningApi>({
+        getMajor: () => 1,
+        getMinor: (version) => (version === '1.2.0' ? 2 : 3),
+        isSame: () => true,
+      });
+
+      expect(
+        getBucket(
+          { separateMajorMinor: true, separateMinorPatch: true },
+          '1.2.0',
+          '1.3.0',
+          versioningApi,
+        ),
+      ).toBe('patch');
+    });
+
+    it('separates a pvp major which its getMajor() cannot distinguish', () => {
+      const pvpVersioning = allVersioning.get('pvp');
+
+      expect(
+        getBucket(
+          { separateMajorMinor: true },
+          '1.1.0.0',
+          '1.10.0.0',
+          pvpVersioning,
+        ),
+      ).toBe('major');
+    });
   });
 
   describe('groupReleasesIntoBuckets()', () => {
