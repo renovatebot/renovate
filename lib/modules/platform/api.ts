@@ -10,9 +10,9 @@ import * as github from './github/index.ts';
 import * as gitlab from './gitlab/index.ts';
 import * as local from './local/index.ts';
 import * as scmm from './scm-manager/index.ts';
-import type { Platform } from './types.ts';
+import type { PlatformModule } from './types.ts';
 
-const api = new Map<PlatformId, Platform>();
+const api = new Map<PlatformId, PlatformModule>();
 export default api;
 
 api.set(azure.id, azure);

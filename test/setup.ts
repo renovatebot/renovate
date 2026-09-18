@@ -11,6 +11,7 @@ vi.mock('../lib/modules/platform/index.ts', () => ({
   platform: mockDeep<Platform>(),
   initPlatform: vi.fn(),
   getPlatformList: vi.fn(),
+  platformSupports: vi.fn(),
 }));
 
 vi.mock('../lib/modules/platform/scm.ts', () => ({
