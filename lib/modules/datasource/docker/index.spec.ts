@@ -1974,6 +1974,49 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(2);
     });
 
+    it('fetches all pages for Red Hat registry', async () => {
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      const rhUrl = 'https://registry.access.redhat.com/v2';
+      httpMock
+        .scope(rhUrl)
+        .get('/hi/go-builder/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/hi/go-builder/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['0.1.0'] },
+          {
+            link: `<${rhUrl}/hi/go-builder/tags/list?n=100&last=0.1.0>; rel="next", `,
+          },
+        )
+        .get('/hi/go-builder/tags/list?n=100&last=0.1.0')
+        .reply(
+          200,
+          { tags: ['0.2.0'] },
+          {
+            link: `<${rhUrl}/hi/go-builder/tags/list?n=100&last=0.2.0>; rel="next", `,
+          },
+        )
+        .get('/hi/go-builder/tags/list?n=100&last=0.2.0')
+        .reply(200, { tags: ['9.9.9'] }, {})
+        .get('/')
+        .reply(200, '', {})
+        .get('/hi/go-builder/manifests/9.9.9')
+        .reply(200, '', {});
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'hi/go-builder',
+        registryUrls: ['https://registry.access.redhat.com'],
+      });
+
+      expect(res?.releases?.map((release) => release.version)).toEqual([
+        '0.1.0',
+        '0.2.0',
+        '9.9.9',
+      ]);
+    });
+
     it('uses custom registry in packageName', async () => {
       const tags = ['1.0.0'];
       httpMock

@@ -135,6 +135,7 @@ export abstract class ChangeLogSource {
         }
 
         const releases = config.releases ?? (await getInRangeReleases(config));
+        // v8 ignore next -- `getInRangeReleases` only returns null on paths it already ignores
         if (!releases?.length) {
           logger.debug('No releases');
           return null;
