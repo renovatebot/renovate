@@ -22,6 +22,12 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'bazelbuild/bazelisk',
     versioning: 'semver',
   },
+  buf: {
+    datasource: 'github-releases',
+    packageName: 'bufbuild/buf',
+    extractVersion: '^v(?<version>.*)$',
+    versioning: 'semver',
+  },
   bun: {
     datasource: 'github-releases',
     packageName: 'oven-sh/bun',
