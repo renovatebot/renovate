@@ -95,10 +95,11 @@ This provides reproducibility in the case that the upstream package updates unde
 
 The [`dockerfile` manager](../../manager/dockerfile/index.md) extracts these packages, allowing updates to them directly, without needing a Custom Manager.
 
-The manager does not work out a `registryUrl` from your base image, so it skips these packages with `skipReason: unknown-registry` rather than look them up against a registry which may hold versions your image cannot install.
-Set the `registryUrls` which match your base image with a `packageRules` entry to have them looked up.
+The manager works the `registryUrl` out from the stage's base image, so `alpine:3.18` is looked up against the Alpine 3.18 repositories.
+Read the [`dockerfile` manager](../../manager/dockerfile/index.md) docs for the images it recognises.
 
-<!-- TODO: #45706 auto-detect `registryUrl` -->
+An image which names no Alpine release, such as `vault:1.13.3`, has its packages skipped with `skipReason: unknown-registry` rather than looked up against a repository which may hold versions the image cannot install.
+Set the `registryUrls` yourself with a `packageRules` entry for those, to use a mirror, or to build for another architecture:
 
 ```json title="Override apk registryUrl with a packageRules entry"
 {
