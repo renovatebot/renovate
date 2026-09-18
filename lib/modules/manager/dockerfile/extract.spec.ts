@@ -87,6 +87,41 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('extracts deb deps from a RUN instruction', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM debian:trixie
+          RUN apt-get update \\
+            && apt-get install -y --no-install-recommends curl=8.14.1-2 \\
+            && rm -rf /var/lib/apt/lists/*
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'trixie',
+          datasource: 'docker',
+          depName: 'debian',
+          depType: 'final',
+          packageName: 'debian',
+          replaceString: 'debian:trixie',
+          versioning: 'debian',
+        },
+        {
+          autoReplaceStringTemplate: 'curl={{{newValue}}}',
+          currentValue: '8.14.1-2',
+          datasource: 'deb',
+          depName: 'curl',
+          depType: 'install',
+          replaceString: 'curl=8.14.1-2',
+        },
+      ]);
+    });
+
     it('keeps the final stage when each stage has its own apk deps', () => {
       const digest =
         'sha256:96ff486b326d15db16aa1fbd41a17043a557bebf76d2c0ac932e717534025940';
