@@ -167,6 +167,62 @@ describe('modules/manager/buf/artifacts', () => {
     });
   });
 
+  it('injects BUF_TOKEN for a self-hosted BSR host', async () => {
+    hostRules.add({
+      hostType: BufModuleDatasource.id,
+      matchHost: 'bsr.example.com',
+      token: 'private',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('old lock');
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    const execSnapshots = mockExecAll();
+    await updateArtifacts({
+      packageFileName: 'buf.lock',
+      updatedDeps: [
+        {
+          depName: 'acme/weather',
+          registryUrls: ['https://bsr.example.com'],
+        },
+      ],
+      newPackageFileContent: 'buf.lock',
+      config,
+    });
+    expect(execSnapshots[0].options?.env).toMatchObject({
+      BUF_TOKEN: 'private@bsr.example.com',
+    });
+  });
+
+  it('joins BUF_TOKEN entries across multiple registries', async () => {
+    hostRules.add({
+      hostType: BufModuleDatasource.id,
+      matchHost: 'buf.build',
+      token: 'public',
+    });
+    hostRules.add({
+      hostType: BufModuleDatasource.id,
+      matchHost: 'bsr.example.com',
+      token: 'private',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('old lock');
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    const execSnapshots = mockExecAll();
+    await updateArtifacts({
+      packageFileName: 'buf.lock',
+      updatedDeps: [
+        googleapisDep,
+        {
+          depName: 'acme/weather',
+          registryUrls: ['https://bsr.example.com'],
+        },
+      ],
+      newPackageFileContent: 'buf.lock',
+      config,
+    });
+    expect(execSnapshots[0].options?.env).toMatchObject({
+      BUF_TOKEN: 'public@buf.build,private@bsr.example.com',
+    });
+  });
+
   it('returns an artifact error when buf fails', async () => {
     fs.readLocalFile.mockResolvedValueOnce('old lock');
     mockExecAll(new Error('buf exploded'));
