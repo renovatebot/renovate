@@ -1,10 +1,9 @@
 import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
-import { git, partial, platform } from '~test/util.ts';
+import { fakeSha, git, partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { Pr } from '../../../modules/platform/types.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { validateReconfigureBranch } from './validate.ts';
 
 vi.mock('../../../util/git/index.ts');
@@ -27,7 +26,7 @@ describe('workers/repository/reconfigure/validate', () => {
 
   beforeEach(() => {
     config.repository = 'some/repo';
-    git.getBranchCommit.mockReturnValue('sha' as LongCommitSha);
+    git.getBranchCommit.mockReturnValue(fakeSha('sha'));
     platform.getBranchStatusCheck.mockResolvedValue(null);
     GlobalConfig.reset();
   });

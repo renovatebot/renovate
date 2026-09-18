@@ -11,6 +11,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { getFile } from '../../../../util/git/index.ts';
 import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
 import { coerceString } from '../../../../util/string.ts';
@@ -67,6 +68,97 @@ function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
     }
   }
   return false;
+}
+
+function getUpdatedLockFileContent(
+  updatedDeps: BranchUpgradeConfig[],
+  updatedFileContents: Record<string, string>,
+): string | undefined {
+  for (const upgrade of updatedDeps) {
+    const lockFiles = [upgrade.lockFile, ...coerceArray(upgrade.lockFiles)];
+    for (const lockFile of lockFiles) {
+      if (lockFile && updatedFileContents[lockFile] !== undefined) {
+        return updatedFileContents[lockFile];
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function removeUnrefreshedLockfileOnlyChanges(
+  packageFiles: FileChange[],
+  updatedDeps: BranchUpgradeConfig[],
+  results: UpdateArtifactsResult[] | null,
+): string[] {
+  const removedLockFiles: string[] = [];
+  const refreshedFiles = new Set(
+    coerceArray(results).flatMap((result) =>
+      result.file ? [result.file.path] : [],
+    ),
+  );
+  const lockFiles = new Set(
+    updatedDeps
+      .filter((upgrade) => upgrade.isLockfileOnly)
+      .flatMap((upgrade) => [
+        upgrade.lockFile,
+        ...coerceArray(upgrade.lockFiles),
+      ]),
+  );
+  for (let index = packageFiles.length - 1; index >= 0; index -= 1) {
+    const path = packageFiles[index].path;
+    if (lockFiles.has(path) && !refreshedFiles.has(path)) {
+      packageFiles.splice(index, 1);
+      removedLockFiles.push(path);
+    }
+  }
+  return removedLockFiles;
+}
+
+function reportUnrefreshedLockfileOnlyChanges(
+  removedLockFiles: string[],
+  results: UpdateArtifactsResult[] | null,
+  artifactErrors: ArtifactError[],
+): void {
+  const artifactErrorFiles = new Set(
+    coerceArray(results).flatMap((result) =>
+      result.artifactError ? [result.artifactError.fileName] : [],
+    ),
+  );
+  for (const lockFile of removedLockFiles) {
+    if (!artifactErrorFiles.has(lockFile)) {
+      artifactErrors.push({
+        fileName: lockFile,
+        stderr: 'Lockfile-only update could not be refreshed',
+      });
+    }
+  }
+}
+
+function removeSupersededLockFileChanges(
+  packageFiles: FileChange[],
+  updatedDeps: BranchUpgradeConfig[],
+  results: UpdateArtifactsResult[] | null,
+): void {
+  const artifactFiles = new Set(
+    coerceArray(results).flatMap((result) =>
+      result.file ? [result.file.path] : [],
+    ),
+  );
+  const lockFiles = new Set(
+    updatedDeps
+      .filter((upgrade) => upgrade.isLockfileOnly)
+      .flatMap((upgrade) => [
+        upgrade.lockFile,
+        ...coerceArray(upgrade.lockFiles),
+      ]),
+  );
+  for (let index = packageFiles.length - 1; index >= 0; index -= 1) {
+    const path = packageFiles[index].path;
+    if (lockFiles.has(path) && artifactFiles.has(path)) {
+      packageFiles.splice(index, 1);
+    }
+  }
 }
 
 type FilePath = Pick<FileChange, 'path'>;
@@ -284,7 +376,7 @@ export async function getUpdatedPackageFiles(
       }
       if (newContent !== packageFileContent) {
         if (reuseExistingBranch) {
-          // This ensure it's always 1 commit from the bot
+          // This ensure it's always 1 commit from Renovate
           logger.debug(
             { packageFile, depName },
             'Need to update package file so will rebase first',
@@ -300,11 +392,12 @@ export async function getUpdatedPackageFiles(
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
-      if (newContent === packageFileContent) {
-        if (upgrade.manager === 'git-submodules') {
-          updatedFileContents[packageFile] = newContent;
-          delete nonUpdatedFileContents[packageFile];
-        }
+      if (
+        newContent === packageFileContent &&
+        upgrade.manager === 'git-submodules'
+      ) {
+        updatedFileContents[packageFile] = newContent;
+        delete nonUpdatedFileContents[packageFile];
       }
     }
   }
@@ -337,12 +430,33 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
+          newLockFileContent: getUpdatedLockFileContent(
+            updatedDeps,
+            updatedFileContents,
+          ),
           config: patchConfigForArtifactsUpdate(
             config,
             manager,
             packageFile.path,
           ),
         });
+        if (manager === 'mise') {
+          const removedLockFiles = removeUnrefreshedLockfileOnlyChanges(
+            updatedPackageFiles,
+            updatedDeps,
+            results,
+          );
+          reportUnrefreshedLockfileOnlyChanges(
+            removedLockFiles,
+            results,
+            artifactErrors,
+          );
+          removeSupersededLockFileChanges(
+            updatedPackageFiles,
+            updatedDeps,
+            results,
+          );
+        }
         processUpdateArtifactResults(
           results,
           updatedArtifacts,
@@ -388,6 +502,10 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
+          newLockFileContent: getUpdatedLockFileContent(
+            updatedDeps,
+            updatedFileContents,
+          ),
           config: patchConfigForArtifactsUpdate(
             config,
             manager,
@@ -588,7 +706,7 @@ async function checkForPendingVersions(
           branchName: config.branchName,
           depName: dep.depName,
         },
-        `No depName found after updating '${packageFileName}'`,
+        'No depName found after updating package file',
       );
       throw new Error(WORKER_FILE_UPDATE_FAILED);
     }
@@ -610,7 +728,7 @@ async function checkForPendingVersions(
           branchName: config.branchName,
           depName,
         },
-        `Could not determine resolved version for '${depName}' after updating '${packageFileName}'; skipping pending-version check`,
+        'Could not determine resolved version after updating package file; skipping pending-version check',
       );
       continue;
     }
@@ -628,7 +746,7 @@ async function checkForPendingVersions(
             newVersion: resolvedVersion,
             expectedVersion,
           },
-          `No expectedVersion found for '${depName}' after updating '${packageFileName}'`,
+          'No expectedVersion found after updating package file',
         );
         continue;
       }

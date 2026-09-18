@@ -1,6 +1,7 @@
 import { execa } from 'execa';
 import { z } from 'zod/v4';
 import { MiseRegistryJson } from '../../lib/modules/manager/mise/schema.ts';
+import { Json } from '../../lib/util/schema-utils/index.ts';
 import { updateJsonFile } from './utils.mjs';
 
 const MiseVersion = z.object({ version: z.string() });
@@ -12,12 +13,12 @@ const MiseRegistry = z.array(
 const versionOutput = await execa('mise', ['version', '--json'], {
   encoding: 'utf8',
 });
-const version = MiseVersion.parse(JSON.parse(versionOutput.stdout));
+const version = Json.pipe(MiseVersion).parse(versionOutput.stdout);
 console.log(`Generating mise registry using mise version ${version.version}`);
 const output = await execa('mise', ['registry', '--json'], {
   encoding: 'utf8',
 });
-const tools = MiseRegistry.parse(JSON.parse(output.stdout));
+const tools = Json.pipe(MiseRegistry).parse(output.stdout);
 
 const registry = MiseRegistryJson.parse({
   meta: {

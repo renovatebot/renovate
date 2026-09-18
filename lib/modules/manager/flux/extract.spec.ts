@@ -1,7 +1,10 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { compile } from '../../../util/template/index.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -14,7 +17,9 @@ import type { ExtractConfig } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
 const config: ExtractConfig = {};
-const adminConfig: RepoGlobalConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+};
 const fixtureHelmSource = Fixtures.get('helmSource.yaml');
 const fixtureHelmChart = Fixtures.get('helmChart.yaml');
 const fixtureHelmChartRefRelease = Fixtures.get('helmChartRefRelease.yaml');
@@ -258,6 +263,7 @@ describe('modules/manager/flux/extract', () => {
             datasource: DockerDatasource.id,
             depName: 'sealed-secrets',
             packageName: 'ghcr.io/charts/sealed-secrets',
+            pinDigests: false,
           },
         ],
       });
@@ -724,6 +730,45 @@ describe('modules/manager/flux/extract', () => {
           { depName: 'renovate-repo', skipReason: 'unversioned-reference' },
         ],
       });
+    });
+
+    it('derives no source url from an ssh GitRepository url', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            url: ssh://git@example.com/renovatebot/renovate.git
+            ref:
+              tag: v1.0.0
+        `,
+        'test.yaml',
+      );
+      expect(result?.deps).toMatchObject([
+        { depName: 'renovate-repo', currentValue: 'v1.0.0' },
+      ]);
+      expect(result?.deps[0].sourceUrl).toBeUndefined();
+    });
+
+    it('derives no source url from an ssh GitRepository url with a commit', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            url: ssh://git@example.com/renovatebot/renovate.git
+            ref:
+              commit: c93b2ec7a1d2bc4e0b4b8a5e9dd9d0f3f5a0c111
+        `,
+        'test.yaml',
+      );
+      expect(result?.deps[0].sourceUrl).toBeUndefined();
     });
 
     it('extracts GitRepository with a commit', () => {
@@ -1752,6 +1797,7 @@ describe('modules/manager/flux/extract', () => {
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
               packageName:
                 'ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set',
+              pinDigests: false,
             },
           ],
           packageFile:
@@ -1773,6 +1819,7 @@ describe('modules/manager/flux/extract', () => {
               datasource: DockerDatasource.id,
               depName: 'kyverno',
               packageName: 'ghcr.io/kyverno/charts/kyverno',
+              pinDigests: false,
             },
           ],
           packageFile:

@@ -116,7 +116,7 @@ describe('util/yaml', () => {
             }),
           },
         ),
-      ).toThrow();
+      ).toThrow('Failed to parse YAML file');
     });
 
     it('should throw if schema does not match and failureBehaviour "throw"', () => {
@@ -137,7 +137,7 @@ describe('util/yaml', () => {
             failureBehaviour: 'throw',
           },
         ),
-      ).toThrow();
+      ).toThrow('Failed to parse YAML file');
     });
 
     it('should still return valid elements if schema does not match with "filter" behaviour', () => {
@@ -286,7 +286,7 @@ describe('util/yaml', () => {
             }),
           },
         ),
-      ).toThrow();
+      ).toThrow('Invalid input: expected object, received string');
     });
 
     it('should parse content with multiple documents', () => {
@@ -297,7 +297,7 @@ describe('util/yaml', () => {
           ---
           foo: bar
         `),
-      ).toThrow();
+      ).toThrow('Failed to parse YAML file');
     });
 
     it('should parse content with template', () => {

@@ -8,7 +8,7 @@ describe('modules/versioning/regex/index', () => {
     );
 
     it('requires a valid configuration to be initialized', () => {
-      expect(() => get('regex:not a regex')).toThrow();
+      expect(() => get('regex:not a regex')).toThrow('config-validation');
     });
 
     it('works without config', () => {

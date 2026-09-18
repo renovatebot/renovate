@@ -34,13 +34,13 @@ function isVersion(input: string | undefined | null): boolean {
   return !!valid(input!);
 }
 
-const isStable = (input: string): boolean => {
+function isStable(input: string): boolean {
   const version = explain(input);
   if (!version) {
     return false;
   }
   return !version.is_prerelease;
-};
+}
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
 export function isValid(input: string): boolean {
@@ -52,7 +52,7 @@ function getSatisfyingVersion(
   range: string,
 ): string | null {
   const found = pep440.filter(versions, range).sort(sortVersions);
-  return found.length === 0 ? null : found[found.length - 1];
+  return found.length === 0 ? null : found.at(-1)!;
 }
 
 function minSatisfyingVersion(
@@ -72,8 +72,9 @@ export function isSingleVersion(constraint: string): boolean {
 
 export { isVersion, matches };
 
-const equals = (version1: string, version2: string): boolean =>
-  isVersion(version1) && isVersion(version2) && eq(version1, version2);
+function equals(version1: string, version2: string): boolean {
+  return isVersion(version1) && isVersion(version2) && eq(version1, version2);
+}
 
 function matches(version: string, range: string): boolean {
   if (!isVersion(version)) {

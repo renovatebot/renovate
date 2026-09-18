@@ -107,7 +107,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.stabilityStatus = 'green';
       await setStability({
         ...config,
-        statusCheckNames: undefined as never,
+        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -266,7 +266,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.confidenceStatus = 'green';
       await setConfidence({
         ...config,
-        statusCheckNames: undefined as never,
+        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -342,7 +342,9 @@ describe('workers/repository/update/branch/status-checks', () => {
 
   describe('getBranchStatus', () => {
     it('should return green if ignoreTests=true', async () => {
-      expect(await resolveBranchStatus('somebranch', true, true)).toBe('green');
+      await expect(resolveBranchStatus('somebranch', true, true)).resolves.toBe(
+        'green',
+      );
     });
   });
 });

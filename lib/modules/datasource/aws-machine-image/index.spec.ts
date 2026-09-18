@@ -1,6 +1,7 @@
 import type { DescribeImagesResult, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { mockClient } from 'aws-sdk-client-mock';
+import * as hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { AwsMachineImageDatasource } from './index.ts';
 
@@ -133,6 +134,10 @@ function mockDescribeImagesCommand(result: DescribeImagesResult): void {
 }
 
 describe('modules/datasource/aws-machine-image/index', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   describe('getSortedAwsMachineImages()', () => {
     it('with 3 returned images', async () => {
       mockDescribeImagesCommand(mock3Images);
@@ -152,6 +157,31 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([image3]);
       expect(ec2Mock.calls()).toHaveLength(1);
+    });
+
+    it('prefers host rule credentials over the configured profile', async () => {
+      hostRules.add({
+        hostType: datasource,
+        username: 'access-key-id',
+        password: 'secret-access-key',
+        token: 'session-token',
+      });
+      mockDescribeImagesCommand(mock1Image);
+
+      const ec2DataSource = new AwsMachineImageDatasource();
+      await ec2DataSource.getSortedAwsMachineImages(
+        '[{"Name":"name","Values":["host-rule-credentials"]},{"profile":"ignored-profile"}]',
+      );
+
+      const ec2 = ec2Mock.call(0).thisValue as EC2Client;
+      await expect(ec2.config.credentials()).resolves.toEqual({
+        accessKeyId: 'access-key-id',
+        secretAccessKey: 'secret-access-key',
+        sessionToken: 'session-token',
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
+      });
     });
 
     it('without returned images', async () => {
@@ -184,6 +214,16 @@ describe('modules/datasource/aws-machine-image/index', () => {
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, with one matching image to return that image"]}]',
       });
       expect(res).toStrictEqual(image3.Name);
+    });
+
+    it('without newValue, with newest image missing a name to be null', async () => {
+      const { Name, ...imageWithoutName } = image3;
+      mockDescribeImagesCommand({ Images: [imageWithoutName] });
+      const res = await getDigest({
+        datasource,
+        packageName: '[{"Name":"owner-id","Values":["602401143452"]}]',
+      });
+      expect(res).toBeNull();
     });
 
     it('without newValue, with 3 matching image to return the newest image', async () => {
@@ -272,15 +312,27 @@ describe('modules/datasource/aws-machine-image/index', () => {
       });
     });
 
-    it('with 3 matching image to return the newest image', async () => {
+    it('with 3 matching images returns all images as releases, not just the newest', async () => {
       mockDescribeImagesCommand(mock3Images);
       const res = await getPkgReleases({
         datasource,
         packageName:
-          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching image to return the newest image"]}]',
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching images returns all"]}]',
       });
       expect(res).toEqual({
         releases: [
+          {
+            isDeprecated: false,
+            newDigest: image1.Name,
+            releaseTimestamp: image1.CreationDate,
+            version: image1.ImageId,
+          },
+          {
+            isDeprecated: true,
+            newDigest: image2.Name,
+            releaseTimestamp: image2.CreationDate,
+            version: image2.ImageId,
+          },
           {
             isDeprecated: false,
             newDigest: image3.Name,
