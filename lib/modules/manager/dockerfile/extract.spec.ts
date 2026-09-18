@@ -84,9 +84,10 @@ describe('modules/manager/dockerfile/extract', () => {
           datasource: 'apk',
           depName: 'bash',
           depType: 'install',
+          registryUrls: [
+            'https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64',
+          ],
           replaceString: 'bash=5.2.37-r2',
-          skipReason: 'unknown-registry',
-          skipStage: 'extract',
         },
       ]);
     });
@@ -121,9 +122,10 @@ describe('modules/manager/dockerfile/extract', () => {
           datasource: 'deb',
           depName: 'curl',
           depType: 'install',
+          registryUrls: [
+            'https://deb.debian.org/debian?suite=trixie&components=main,contrib,non-free&binaryArch=amd64',
+          ],
           replaceString: 'curl=8.14.1-2',
-          skipReason: 'unknown-registry',
-          skipStage: 'extract',
         },
       ]);
     });
@@ -173,10 +175,160 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('uses the repositories of the stage a package is installed in', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21 AS builder
+          RUN apk add --no-cache curl-dev=8.9.1-r4
+          FROM debian:bookworm
+          RUN apt-get install -y curl=7.88.1-10+deb12u12
+        `,
+        '',
+        {},
+      );
+      expect(
+        res?.deps.map(({ depName, registryUrls }) => ({
+          depName,
+          registryUrls,
+        })),
+      ).toEqual([
+        { depName: 'alpine', registryUrls: undefined },
+        {
+          depName: 'curl-dev',
+          registryUrls: [
+            'https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64',
+          ],
+        },
+        { depName: 'debian', registryUrls: undefined },
+        {
+          depName: 'curl',
+          registryUrls: [
+            'https://deb.debian.org/debian?suite=bookworm&components=main,contrib,non-free&binaryArch=amd64',
+          ],
+        },
+      ]);
+    });
+
+    it('resolves the repositories of an ARG-templated base image', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          ARG ALPINE_VERSION=3.21
+          FROM alpine:\${ALPINE_VERSION}
+          RUN apk add --no-cache bash=5.2.37-r2
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'bash',
+        registryUrls: [
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64',
+        ],
+      });
+    });
+
+    it('defaults an untagged digest-only pin to the latest branch', () => {
+      const digest =
+        'sha256:96ff486b326d15db16aa1fbd41a17043a557bebf76d2c0ac932e717534025940';
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine@${digest}
+          RUN apk add --no-cache bash=5.2.37-r2
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'bash',
+        registryUrls: [
+          'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main,community&arch=x86_64',
+        ],
+      });
+    });
+
+    it('takes the repositories of the stage a later stage builds on', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.19 AS base
+          FROM base
+          RUN apk add --no-cache bash=5.2.21-r0
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'bash',
+        registryUrls: [
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+        ],
+      });
+    });
+
+    it('detects no repositories for a stage which names itself', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM base AS base
+          RUN apk add --no-cache bash=5.2.21-r0
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          datasource: 'apk',
+          depName: 'bash',
+          depType: 'install',
+          currentValue: '5.2.21-r0',
+          replaceString: 'bash=5.2.21-r0',
+          autoReplaceStringTemplate: 'bash={{{newValue}}}',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
+        },
+      ]);
+    });
+
+    it('detects no repositories for a stage built from scratch', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21 AS builder
+          FROM scratch
+          RUN apk add --no-cache bash=5.2.21-r0
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'bash',
+        skipReason: 'unknown-registry',
+      });
+      expect(res?.deps.at(-1)).not.toHaveProperty('registryUrls');
+    });
+
+    it('skips a package whose base image does not name its distribution', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM vault:1.13.3
+          RUN apk add bash=5.2.15-r5 openssh=9.3_p2-r3
+        `,
+        '',
+        {},
+      );
+      // the base image is built on Alpine, but says no more than that, so
+      // looking the packages up against any particular branch would offer
+      // versions this image cannot install
+      expect(
+        res?.deps.map(({ depName, skipReason }) => ({ depName, skipReason })),
+      ).toEqual([
+        { depName: 'vault', skipReason: undefined },
+        { depName: 'bash', skipReason: 'unknown-registry' },
+        { depName: 'openssh', skipReason: 'unknown-registry' },
+      ]);
+    });
+
     it('keeps the reason a package was already skipped for', () => {
       const res = extractPackageFile(
         codeBlock`
-          FROM alpine:3.21
+          FROM vault:1.13.3
           RUN apk add bash
         `,
         '',
@@ -762,6 +914,9 @@ describe('modules/manager/dockerfile/extract', () => {
           datasource: 'apk',
           depName: 'ca-certificates',
           depType: 'install',
+          registryUrls: [
+            'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main,community&arch=x86_64',
+          ],
           skipReason: 'unspecified-version',
         },
       ]);
