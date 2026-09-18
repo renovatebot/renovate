@@ -6,6 +6,7 @@ import {
 } from '../../../util/schema-utils/index.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { api as pep440 } from '../../versioning/pep440/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
@@ -37,6 +38,7 @@ export function DependencyGroup(depType: string): DependencyGroup {
       const deps: PackageDependency[] = [];
       for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
         for (const dep of groupDeps) {
+          // v8 ignore else -- the parser always sets a package name on a group dep
           if (dep.packageName) {
             dep.depName = dep.packageName;
           }
@@ -147,6 +149,14 @@ const UvSource = z.union([
   UvPathSource,
   UvWorkspaceSource,
 ]);
+export type UvSource = z.infer<typeof UvSource>;
+
+// A dependency can declare a single source or, when disambiguated by
+// environment markers, an array of sources. Normalize both to an array.
+// https://docs.astral.sh/uv/concepts/projects/dependencies/#multiple-sources
+const UvSources = z
+  .union([UvSource, z.array(UvSource).min(1)])
+  .transform((source) => (Array.isArray(source) ? source : [source]));
 
 const UvConfig = z.object({
   'dev-dependencies': LooseArray(
@@ -156,7 +166,7 @@ const UvConfig = z.object({
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
-    UvSource,
+    UvSources,
   ).optional(),
   index: z
     .array(
@@ -191,8 +201,10 @@ const PixiMinimalConfig = z
       .catch(undefined),
   })
   .transform((val) => ({
+    /* v8 ignore start: needs a pixi manifest declaring the requirement only under workspace */
     'requires-pixi':
       val.project?.['requires-pixi'] ?? val.workspace?.['requires-pixi'],
+    /* v8 ignore stop */
   }))
   .optional()
   .catch(undefined);
@@ -247,8 +259,14 @@ export const UvLockfile = Toml.pipe(
       }),
     ),
   }),
-).transform(({ package: pkg }) =>
-  Object.fromEntries(
-    pkg.map(({ name, version }): [string, string] => [name, version]),
-  ),
-);
+).transform(({ package: pkgs }) => {
+  const pkgMap: Record<string, string> = {};
+
+  for (const { name, version } of pkgs) {
+    if (!(name in pkgMap) || pep440.isGreaterThan(pkgMap[name], version)) {
+      pkgMap[name] = version;
+    }
+  }
+
+  return pkgMap;
+});

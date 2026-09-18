@@ -44,11 +44,11 @@ export interface UnknownChallenge {
 export type Challenge = SimpleChallenge | ParamsChallenge | UnknownChallenge;
 
 const tokenizer: Tokenizer[] = [
-  { type: 'token', matcher: regEx(/^([a-zA-Z0-9!#$%&'*+.^_`|~-]+)/) }, // token
-  { type: 'token', matcher: regEx(/^"((?:[^"\\]|\\\\|\\")*)"/) }, // quoted-string
+  { type: 'token', matcher: regEx(/^(?<value>[a-zA-Z0-9!#$%&'*+.^_`|~-]+)/) }, // token
+  { type: 'token', matcher: regEx(/^"(?<value>(?:[^"\\]|\\\\|\\")*)"/) }, // quoted-string
   { matcher: regEx(/^\s+/) }, // whitespace (ignored)
-  { type: 'equals', matcher: regEx(/^(=)/) }, // equals
-  { type: 'comma', matcher: regEx(/^(,)/) }, // comma
+  { type: 'equals', matcher: regEx(/^(?<value>=)/) }, // equals
+  { type: 'comma', matcher: regEx(/^(?<value>,)/) }, // comma
 ];
 
 function tokenize(input: string): Token[] {

@@ -1,4 +1,5 @@
 import { isArray, isString } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import { AbstractMigration } from '../base/abstract-migration.ts';
 
 export class FileMatchMigration extends AbstractMigration {
@@ -10,7 +11,7 @@ export class FileMatchMigration extends AbstractMigration {
     if (isString(value) || isArray(value, isString)) {
       const fileMatch = isArray(value) ? value : [value];
 
-      let managerFilePatterns = this.get('managerFilePatterns') ?? [];
+      let managerFilePatterns = coerceArray(this.get('managerFilePatterns'));
       managerFilePatterns = managerFilePatterns.concat(
         fileMatch.map((match) => `/${match}/`),
       );

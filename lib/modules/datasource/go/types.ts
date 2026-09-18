@@ -1,4 +1,6 @@
-import type { GoproxyFallback } from './common.ts';
+export type GoproxyFallback =
+  | ',' // WhenNotFoundOrGone
+  | '|'; // Always
 
 export interface DataSource {
   datasource: string;

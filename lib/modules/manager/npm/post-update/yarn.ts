@@ -22,10 +22,12 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -55,7 +57,10 @@ export async function checkYarnrc(
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+        yarnPath = pathLine.replace(
+          regEx(/^yarn-path\s+"?(?<path>.+?)"?$/),
+          '$<path>',
+        );
       }
       if (yarnPath) {
         // resolve binary relative to `yarnrc`
@@ -113,12 +118,16 @@ export async function generateLockFile(
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility =
-      (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
-      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-      getYarnVersionFromLock(await getYarnLock(lockFileName));
-    const minYarnVersion =
-      semver.validRange(yarnCompatibility) &&
-      semver.minVersion(yarnCompatibility);
+      yarnUpdate?.newValue ??
+      (await resolveToolConstraint(
+        config,
+        'yarn',
+        async () =>
+          getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+          getYarnVersionFromLock(await getYarnLock(lockFileName)),
+      ));
+    const yarnRange = semver.validRange(yarnCompatibility);
+    const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
@@ -145,7 +154,7 @@ export async function generateLockFile(
     if (!isYarn1 && hasPackageManager) {
       toolConstraints.push({
         toolName: 'corepack',
-        constraint: config.constraints?.corepack,
+        constraint: await resolveToolConstraint(config, 'corepack'),
       });
     } else {
       toolConstraints.push(yarnTool);
@@ -157,7 +166,6 @@ export async function generateLockFile(
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      CI: 'true',
     };
 
     const commands: (string | CommandWithOptions)[] = [];
@@ -220,7 +228,7 @@ export async function generateLockFile(
       docker: {},
       toolConstraints,
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -365,17 +373,19 @@ export function fuzzyMatchAdditionalYarnrcYml<
   T extends { npmRegistries?: Record<string, unknown> },
 >(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
   const keys = new Map(
-    Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
-      x.replace(/\/$/, '').replace(/^https?:/, ''),
+    Object.keys(coerceObject(existingYarnrRcYml.npmRegistries)).map((x) => [
+      x.replace(regEx(/\/$/), '').replace(regEx(/^https?:/), ''),
       x,
     ]),
   );
 
   return {
     ...additionalYarnRcYml,
-    npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
+    npmRegistries: Object.entries(
+      coerceObject(additionalYarnRcYml.npmRegistries),
+    )
       .map(([k, v]) => {
-        const key = keys.get(k.replace(/\/$/, '')) ?? k;
+        const key = keys.get(k.replace(regEx(/\/$/), '')) ?? k;
         return { [key]: v };
       })
       .reduce((acc, cur) => ({ ...acc, ...cur }), {}),

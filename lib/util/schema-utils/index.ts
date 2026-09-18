@@ -395,6 +395,7 @@ export function withTraceMessage<Output>(
 }
 
 function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
+  // oxlint-disable-next-line renovate/prefer-is-object -- functions must stay non-circular leaves; isObject() matches functions and would send them into the property walk
   if (value === null || typeof value !== 'object') {
     return false;
   }

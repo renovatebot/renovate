@@ -4,12 +4,7 @@
 
 This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API.
 
-Because the datasource uses the AWS-SDK for JavaScript, you can configure it like other AWS Tools.
-You can use common AWS configuration options, for example (partial list):
-
-- Setting the region via `AWS_REGION` (environment variable) or your `~/.aws/config` file
-- Provide credentials via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
-- Select the profile to use via `AWS_PROFILE` environment variable
+See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
 You can also provide credentials specifically for this datasource with a `hostRules` entry.
 Set `hostType` to `aws-machine-image`, `username` to the access key ID, `password` to the secret access key, and optionally `token` to the session token:

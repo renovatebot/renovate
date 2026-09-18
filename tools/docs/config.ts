@@ -137,6 +137,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'advancedUse',
     'deprecationMsg',
     'patternMatch',
+    'requiresCheckAtTrustBoundary',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -310,6 +311,24 @@ function generateCacheNamespacesList(): string {
   return list;
 }
 
+function generateInheritConfigSupportList(): string {
+  const inheritable = options
+    .filter((option) => option.inheritConfigSupport)
+    .map((option) => {
+      const parent = option.parents?.find((p) => p !== '.');
+      return parent ? `${parent}.${option.name}` : option.name;
+    })
+    .sort((a, b) => a.localeCompare(b));
+
+  let list = '\n';
+  for (const fullName of inheritable) {
+    list += `- \`${fullName}\`\n`;
+  }
+  list += '\n';
+
+  return list;
+}
+
 function generateStatusCheckWhenTable(): string {
   const option = options.find((o) => o.name === 'statusCheckWhen');
   const defaults = coerceObject<Record<string, string>>(option?.default);
@@ -391,9 +410,12 @@ function generateToolsForInstallTools(): string {
   return output;
 }
 
-export async function generateConfig(dist: string, bot = false): Promise<void> {
+export async function generateConfig(
+  dist: string,
+  globalOnly = false,
+): Promise<void> {
   let configFile = `configuration-options.md`;
-  if (bot) {
+  if (globalOnly) {
     configFile = `self-hosted-configuration.md`;
   }
 
@@ -405,7 +427,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   options
     .filter(
-      (option) => !!option.globalOnly === bot && !managers.has(option.name),
+      (option) =>
+        !!option.globalOnly === globalOnly && !managers.has(option.name),
     )
     .forEach((option) => {
       // TODO: fix types (#22198,#9610)
@@ -464,7 +487,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   let content = configOptionsRaw.join('\n');
 
-  if (bot) {
+  if (globalOnly) {
     content = replaceContent(
       content,
       generateCacheNamespacesList(),
@@ -472,7 +495,15 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (globalOnly) {
+    content = replaceContent(
+      content,
+      generateInheritConfigSupportList(),
+      '<!-- Autogenerate inheritConfigSupport-list -->',
+    );
+  }
+
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateLockFileTable(),
@@ -480,7 +511,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateConfigFileNames(),
@@ -488,7 +519,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForConstraints(),
@@ -496,7 +527,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateAdditionalConstraints(),
@@ -504,7 +535,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForInstallTools(),
@@ -512,7 +543,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateStatusCheckWhenTable(),
