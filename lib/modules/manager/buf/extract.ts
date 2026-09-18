@@ -10,6 +10,7 @@ import { regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { BufModuleDatasource } from '../../datasource/buf-module/index.ts';
 import { BufPluginDatasource } from '../../datasource/buf-plugin/index.ts';
+import { api as loose } from '../../versioning/loose/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -94,14 +95,21 @@ function extractBufGenYaml(
  *
  * `buf.lock` records the full transitive closure, but only direct deps are
  * independently updatable — `buf dep update` re-resolves everything else from
- * `buf.yaml`. When `directModules` is supplied, deps not in it are marked
- * transitive with a `skipReason` (they stay in the array so `depIndex` still
- * lines up with the unfiltered re-extraction autoReplace performs).
+ * `buf.yaml`. When `directModules` is supplied (a map of each direct module to
+ * its optional pinned reference), deps not in it are marked transitive with a
+ * `skipReason` (they stay in the array so `depIndex` still lines up with the
+ * unfiltered re-extraction autoReplace performs).
+ *
+ * A direct dep's `buf.yaml` reference, when present, is recovered as its
+ * `currentValue` so `getDigest` tracks that label/branch/commit rather than the
+ * default `main`. A version-like reference (e.g. `v1.2.3`) is skipped instead:
+ * the `buf-module` datasource exposes opaque commits, not tags, so it cannot be
+ * resolved, and tracking would otherwise silently fall back to `main`.
  */
 function extractBufLock(
   content: string,
   packageFile: string,
-  directModules?: Set<string>,
+  directModules?: Map<string, string | undefined>,
 ): PackageFileContent | null {
   let bufLock: ReturnType<typeof BufLock.parse>;
   try {
@@ -144,8 +152,20 @@ function extractBufLock(
       currentDigest: dep.commit,
     };
 
-    if (directModules && !directModules.has(`${host}/${owner}/${repository}`)) {
-      packageDep.skipReason = 'inherited-dependency';
+    if (directModules) {
+      const moduleKey = `${host}/${owner}/${repository}`;
+      if (directModules.has(moduleKey)) {
+        const reference = directModules.get(moduleKey);
+        if (reference) {
+          if (loose.isValid(reference)) {
+            packageDep.skipReason = 'unsupported-version';
+          } else {
+            packageDep.currentValue = reference;
+          }
+        }
+      } else {
+        packageDep.skipReason = 'inherited-dependency';
+      }
     }
 
     deps.push(packageDep);
@@ -167,8 +187,10 @@ export function extractPackageFile(
 }
 
 /**
- * The set of direct module references (`host/owner/repository`) declared in a
- * sibling `buf.yaml`, used to tell direct deps from transitive ones.
+ * The direct module references declared in a sibling `buf.yaml`, mapping each
+ * module (`host/owner/repository`) to its optional pinned reference (the
+ * `:reference` suffix, if any). Used to tell direct deps from transitive ones
+ * and to recover a dep's tracked reference.
  *
  * Returns `undefined` when there is no sibling `buf.yaml` or it cannot be
  * parsed, so the caller leaves deps unfiltered rather than wrongly marking them
@@ -176,7 +198,7 @@ export function extractPackageFile(
  */
 async function resolveDirectModules(
   packageFile: string,
-): Promise<Set<string> | undefined> {
+): Promise<Map<string, string | undefined> | undefined> {
   const bufYamlFile = getSiblingFileName(packageFile, 'buf.yaml');
   if (!(await localPathIsFile(bufYamlFile))) {
     logger.debug(
@@ -202,10 +224,15 @@ async function resolveDirectModules(
     return undefined;
   }
 
-  const modules = new Set<string>();
+  const modules = new Map<string, string | undefined>();
   for (const ref of coerceArray(bufYaml.deps)) {
-    // Drop any `:reference` suffix, keeping the `host/owner/repository` part.
-    modules.add(ref.split(':')[0]);
+    // Split off a `:reference` suffix, keeping the `host/owner/repository` key.
+    const colon = ref.indexOf(':');
+    if (colon === -1) {
+      modules.set(ref, undefined);
+    } else {
+      modules.set(ref.slice(0, colon), ref.slice(colon + 1));
+    }
   }
   return modules;
 }

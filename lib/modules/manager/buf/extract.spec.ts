@@ -261,21 +261,31 @@ describe('modules/manager/buf/extract', () => {
 
   describe('extractAllPackageFiles()', () => {
     // buf.lock records the full transitive closure; buf.yaml lists only the
-    // direct deps. googleapis is direct, grpc/grpc is transitive.
+    // direct deps (optionally with a `:reference`). googleapis (no ref),
+    // acme/labeled (label ref) and acme/tagged (version-like ref) are direct;
+    // grpc/grpc is transitive.
     const bufLock = codeBlock`
       version: v2
       deps:
         - name: buf.build/googleapis/googleapis
           commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-          digest: b5:direct
-        - name: buf.build/grpc/grpc
+          digest: b5:1
+        - name: buf.build/acme/labeled
           commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-          digest: b5:transitive
+          digest: b5:2
+        - name: buf.build/acme/tagged
+          commit: cccccccccccccccccccccccccccccccc
+          digest: b5:3
+        - name: buf.build/grpc/grpc
+          commit: dddddddddddddddddddddddddddddddd
+          digest: b5:4
     `;
     const bufYaml = codeBlock`
       version: v2
       deps:
         - buf.build/googleapis/googleapis
+        - buf.build/acme/labeled:staging
+        - buf.build/acme/tagged:v1.2.3
     `;
 
     beforeEach(() => {
@@ -288,7 +298,7 @@ describe('modules/manager/buf/extract', () => {
       });
     }
 
-    it('marks transitive deps and keeps direct deps updatable', async () => {
+    it('filters transitive deps and recovers direct-dep references', async () => {
       mockFiles({ 'buf.lock': bufLock, 'buf.yaml': bufYaml });
       fs.localPathIsFile.mockResolvedValue(true);
 
@@ -299,16 +309,35 @@ describe('modules/manager/buf/extract', () => {
           packageFile: 'buf.lock',
           deps: [
             {
+              // direct, no reference -> tracks the default `main` label
               depName: 'googleapis/googleapis',
               datasource: BufModuleDatasource.id,
               registryUrls: ['https://buf.build'],
               currentDigest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
             },
             {
-              depName: 'grpc/grpc',
+              // direct, label reference -> recovered as currentValue
+              depName: 'acme/labeled',
               datasource: BufModuleDatasource.id,
               registryUrls: ['https://buf.build'],
               currentDigest: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+              currentValue: 'staging',
+            },
+            {
+              // direct, version-like reference -> unsupported (datasource has
+              // no tags), skipped rather than silently tracking `main`
+              depName: 'acme/tagged',
+              datasource: BufModuleDatasource.id,
+              registryUrls: ['https://buf.build'],
+              currentDigest: 'cccccccccccccccccccccccccccccccc',
+              skipReason: 'unsupported-version',
+            },
+            {
+              // transitive -> not independently updatable
+              depName: 'grpc/grpc',
+              datasource: BufModuleDatasource.id,
+              registryUrls: ['https://buf.build'],
+              currentDigest: 'dddddddddddddddddddddddddddddddd',
               skipReason: 'inherited-dependency',
             },
           ],
@@ -316,16 +345,17 @@ describe('modules/manager/buf/extract', () => {
       ]);
     });
 
+    // With no usable buf.yaml, deps are neither filtered nor reference-enriched.
+    const allUpdatable = [undefined, undefined, undefined, undefined];
+
     it('leaves all deps updatable when there is no sibling buf.yaml', async () => {
       mockFiles({ 'buf.lock': bufLock });
       fs.localPathIsFile.mockResolvedValue(false);
 
       const res = await extractAllPackageFiles({}, ['buf.lock']);
 
-      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual([
-        undefined,
-        undefined,
-      ]);
+      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual(allUpdatable);
+      expect(res[0].deps.map((dep) => dep.currentValue)).toEqual(allUpdatable);
     });
 
     it('leaves all deps updatable when buf.yaml is unreadable', async () => {
@@ -334,10 +364,7 @@ describe('modules/manager/buf/extract', () => {
 
       const res = await extractAllPackageFiles({}, ['buf.lock']);
 
-      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual([
-        undefined,
-        undefined,
-      ]);
+      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual(allUpdatable);
     });
 
     it('leaves all deps updatable when buf.yaml is unparseable', async () => {
@@ -346,10 +373,7 @@ describe('modules/manager/buf/extract', () => {
 
       const res = await extractAllPackageFiles({}, ['buf.lock']);
 
-      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual([
-        undefined,
-        undefined,
-      ]);
+      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual(allUpdatable);
     });
 
     it('extracts buf.gen.yaml plugins without a sibling lookup', async () => {
