@@ -16,7 +16,7 @@ import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts
 import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
-import { getUpdateType } from './update-type.ts';
+import { classifyRelease } from './update-type.ts';
 
 export interface InternalChecksResult {
   release?: Release;
@@ -150,8 +150,7 @@ export async function filterInternalChecks(
       const candidateConfig = mergeChildConfig(config, candidateRelease);
       const releaseConfig = await resolveUpdateTypeConfig(
         candidateConfig,
-        getUpdateType(
-          candidateConfig,
+        classifyRelease(
           versioningApi,
           // TODO #22198
           currentVersion!,
