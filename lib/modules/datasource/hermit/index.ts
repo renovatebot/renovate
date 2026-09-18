@@ -22,8 +22,6 @@ export class HermitDatasource extends Datasource {
 
   override readonly customRegistrySupport = true;
 
-  override readonly registryStrategy = 'first';
-
   override readonly defaultVersioning = id;
 
   override readonly defaultRegistryUrls = [
