@@ -57,12 +57,9 @@ async function disableGitAutoMaintenance(
   await repo.addConfig('receive.autogc', 'false');
 }
 
-// One root describe, named after the file as `renovate/test-root-describe`
-// requires. The `base` repository built here is what the three
-// repository-backed describes clone from. Describes run in file order, and
-// some tests in the last one write to `base`, so the two describes that reuse
-// a clone have to stay ahead of it. The four nested describes split the tests
-// by how much git setup they need. (Layout and comments by Claude Fable 5.1.)
+// `base` is the repository the describes below clone from. They run in file
+// order, and some tests in the last one write to `base`, so the describes that
+// reuse a clone must stay ahead of it.
 describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -181,9 +178,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await base?.cleanup();
   });
 
-  // These tests never touch a repository, so there is no repository setup here
-  // at all. `mockReset` and `unstubEnvs` in the vitest config reset module mocks
-  // and `vi.stubEnv` between tests; the spy and the custom env are reset here.
+  // Tests that never touch a repository.
   describe('without a repository', () => {
     afterEach(() => {
       setCustomEnv({});
@@ -320,15 +315,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  // Read-only tests. This describe clones `base` and runs `initRepo()` once, in
-  // `beforeAll`, so each test costs only the git commands it runs itself. A test
-  // belongs here only if it leaves the clone, its refs, the working tree and the
-  // module singleton alone: no `commitFiles`, `checkoutBranch`, `initRepo`,
-  // `setUserRepoConfig` or local git config changes. `isBranchModified()` is
-  // read-only on disk but caches per-branch results in `config.branchIsModified`,
-  // which only `initRepo()` clears, so it lives in the next describe. The two
-  // mocked result caches are wiped by `mockReset`; their default is restored per
-  // test.
+  // Read-only tests: one clone and one `initRepo()` for the whole describe.
+  // Tests here must not change the clone, its refs, the working tree or the
+  // module state (`commitFiles`, `checkoutBranch`, `initRepo`,
+  // `setUserRepoConfig`, local git config).
   describe('shared clone', () => {
     let origin: tmp.DirectoryResult;
     let tmpDir: tmp.DirectoryResult;
@@ -687,16 +677,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  // Local-only writers. One bare clone of `base` and one local checkout for the
-  // whole describe, but `initRepo()` and `syncGit()` run again before every
-  // test. On an existing checkout `syncGit()` takes its fetch path: `fetch
-  // --prune`, `reset --hard`, `checkout` of the default branch, `clean -fd` and
-  // deletion of every other local branch. Together with the fresh `config` from
-  // `initRepo()` that undoes everything a test can do to the local repository
-  // or the module singleton, at a fraction of the cost of a clone. Tests here
-  // may check out, commit or merge locally, change local git config or register
-  // virtual branches; they must not push to `origin`, call `initRepo()` with
-  // options of their own or touch `base`.
+  // Local-only writers: one clone, but `initRepo()` and `syncGit()` run again
+  // before every test. On an existing checkout `syncGit()` fetches, resets to
+  // the default branch, cleans the working tree and deletes other local
+  // branches, and `initRepo()` resets the module state. Tests here may change
+  // the local checkout but must not push to `origin`, call `initRepo()` with
+  // their own options or touch `base`.
   describe('reused clone', () => {
     let origin: tmp.DirectoryResult;
     let tmpDir: tmp.DirectoryResult;
@@ -1153,10 +1139,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  // Tests that write to `origin` or `base`, or call `initRepo()` with options
-  // of their own. Every test gets a fresh bare clone of `base` as `origin`, a
-  // fresh local checkout and a fresh `initRepo()`. That setup costs about 0.7s
-  // per test, which is why the other three describes exist.
+  // Tests that push to `origin`, write to `base` or call `initRepo()` with
+  // their own options. Each gets a fresh clone and `initRepo()`.
   describe('clone per test', () => {
     let origin: tmp.DirectoryResult;
     let tmpDir: tmp.DirectoryResult;
