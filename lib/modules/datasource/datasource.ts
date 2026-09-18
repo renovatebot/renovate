@@ -15,7 +15,9 @@ import type {
   SourceUrlSupport,
 } from './types.ts';
 
-export abstract class Datasource implements DatasourceApi {
+export abstract class Datasource<
+  H extends Http = Http,
+> implements DatasourceApi {
   public readonly id: string;
 
   /**
@@ -25,9 +27,14 @@ export abstract class Datasource implements DatasourceApi {
    */
   protected readonly cacheNamespace: PackageCacheNamespace;
 
-  protected constructor(id: string) {
+  /**
+   * A subclass that narrows `H` to a specialised client (`GithubHttp`,
+   * `GitlabHttp`, ...) must construct that client itself and pass it as
+   * `http`, since this constructor can only build the plain `Http` default.
+   */
+  protected constructor(id: string, http?: H) {
     this.id = id;
-    this.http = new Http(id);
+    this.http = http ?? (new Http(id) as H);
     this.cacheNamespace = `datasource-${id}` as PackageCacheNamespace;
   }
 
@@ -49,7 +56,7 @@ export abstract class Datasource implements DatasourceApi {
   sourceUrlSupport: SourceUrlSupport = 'none';
   sourceUrlNote?: string | undefined;
 
-  protected http: Http;
+  protected readonly http: H;
 
   abstract getReleases(
     getReleasesConfig: GetReleasesConfig,

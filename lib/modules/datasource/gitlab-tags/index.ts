@@ -11,10 +11,8 @@ import type {
 import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util.ts';
 
-export class GitlabTagsDatasource extends Datasource {
+export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
-
-  protected override http: GitlabHttp;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -24,8 +22,7 @@ export class GitlabTagsDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(GitlabTagsDatasource.id);
-    this.http = new GitlabHttp(GitlabTagsDatasource.id);
+    super(GitlabTagsDatasource.id, new GitlabHttp(GitlabTagsDatasource.id));
   }
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];

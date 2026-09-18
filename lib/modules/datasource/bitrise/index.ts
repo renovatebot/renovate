@@ -11,15 +11,11 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { BitriseStepFile } from './schema.ts';
 
-export class BitriseDatasource extends Datasource {
+export class BitriseDatasource extends Datasource<GithubHttp> {
   static readonly id = 'bitrise';
 
-  override readonly http: GithubHttp;
-
   constructor() {
-    super(BitriseDatasource.id);
-
-    this.http = new GithubHttp(this.id);
+    super(BitriseDatasource.id, new GithubHttp(BitriseDatasource.id));
   }
 
   override readonly customRegistrySupport = true;

@@ -14,12 +14,10 @@ import type {
 
 export const cacheNamespace = 'datasource-github-releases';
 
-export class GithubReleasesDatasource extends Datasource {
+export class GithubReleasesDatasource extends Datasource<GithubHttp> {
   static readonly id = 'github-releases';
 
   override readonly defaultRegistryUrls = ['https://github.com'];
-
-  override http: GithubHttp;
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
@@ -30,8 +28,10 @@ export class GithubReleasesDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(GithubReleasesDatasource.id);
-    this.http = new GithubHttp(GithubReleasesDatasource.id);
+    super(
+      GithubReleasesDatasource.id,
+      new GithubHttp(GithubReleasesDatasource.id),
+    );
   }
 
   /**

@@ -53,8 +53,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     'The source URL is determined from the `scm` tags in the results.';
 
   constructor(id = SbtPackageDatasource.id) {
-    super(id);
-    this.http = new Http('sbt');
+    super(id, new Http('sbt'));
   }
 
   protected static parseDepCoordinate(packageName: string): ScalaDepCoordinate {

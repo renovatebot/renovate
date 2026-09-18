@@ -12,17 +12,18 @@ import type {
 } from '../types.ts';
 import { BitbucketCommits, BitbucketTag, BitbucketTags } from './schema.ts';
 
-export class BitbucketTagsDatasource extends Datasource {
+export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
   static readonly id = 'bitbucket-tags';
-
-  bitbucketHttp = new BitbucketHttp(BitbucketTagsDatasource.id);
 
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
   constructor() {
-    super(BitbucketTagsDatasource.id);
+    super(
+      BitbucketTagsDatasource.id,
+      new BitbucketHttp(BitbucketTagsDatasource.id),
+    );
   }
 
   override readonly defaultRegistryUrls =
@@ -63,7 +64,7 @@ export class BitbucketTagsDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
     const bitbucketTags = (
-      await this.bitbucketHttp.getJson(url, { paginate: true }, BitbucketTags)
+      await this.http.getJson(url, { paginate: true }, BitbucketTags)
     ).body;
 
     const dependency: ReleaseResult = {
@@ -102,8 +103,7 @@ export class BitbucketTagsDatasource extends Datasource {
   ): Promise<string | null> {
     const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
 
-    const bitbucketTag = (await this.bitbucketHttp.getJson(url, BitbucketTag))
-      .body;
+    const bitbucketTag = (await this.http.getJson(url, BitbucketTag)).body;
 
     return bitbucketTag.target?.hash ?? null;
   }
@@ -130,9 +130,8 @@ export class BitbucketTagsDatasource extends Datasource {
     _registryUrl: string,
     repo: string,
   ): Promise<string> {
-    return (
-      await this.bitbucketHttp.getJson(`/2.0/repositories/${repo}`, RepoInfo)
-    ).body.mainbranch;
+    return (await this.http.getJson(`/2.0/repositories/${repo}`, RepoInfo)).body
+      .mainbranch;
   }
 
   getMainBranch(registryUrl: string, repo: string): Promise<string> {
@@ -166,9 +165,8 @@ export class BitbucketTagsDatasource extends Datasource {
     );
 
     const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
-    const bitbucketCommits = (
-      await this.bitbucketHttp.getJson(url, BitbucketCommits)
-    ).body;
+    const bitbucketCommits = (await this.http.getJson(url, BitbucketCommits))
+      .body;
 
     if (bitbucketCommits.length === 0) {
       return null;
