@@ -26,7 +26,11 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { isArtifactoryServer } from '../util.ts';
+import {
+  isArtifactoryServer,
+  isCrossOriginPaginationAllowed,
+  resolvePaginationUrl,
+} from '../util.ts';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
@@ -199,7 +203,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    /* v8 ignore next 4 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -250,7 +254,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    /* v8 ignore next 4 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -312,7 +316,7 @@ export class DockerDatasource extends Datasource {
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!manifestResponse) {
       return null;
     }
@@ -408,6 +412,7 @@ export class DockerDatasource extends Datasource {
             ? _err.err
             : /* istanbul ignore next: can never happen */ _err;
 
+        // v8 ignore else -- needs a non-5xx failure from the manifest request
         if (
           typeof err.statusCode === 'number' &&
           err.statusCode >= 500 &&
@@ -446,6 +451,7 @@ export class DockerDatasource extends Datasource {
       );
 
       // TODO: fix me, architecture is required in spec
+      // v8 ignore else -- needs a config blob with neither key
       if (
         configResponse &&
         ('config' in configResponse.body ||
@@ -583,9 +589,11 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
+          // v8 ignore else -- needs the helm config blob request to come back empty
           if (configResponse) {
             // Helm chart
             const url = findHelmSourceUrl(configResponse.body);
+            // v8 ignore else -- needs a helm chart with no source url
             if (url) {
               labels[sourceLabel] = url;
             }
@@ -604,7 +612,7 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
-          /* v8 ignore next 3 -- should never happen */
+          /* v8 ignore next -- should never happen */
           if (!configResponse) {
             return labels;
           }
@@ -622,6 +630,7 @@ export class DockerDatasource extends Datasource {
         }
       }
 
+      // v8 ignore else -- labels are always set by the branches above
       if (labels) {
         logger.debug(
           {
@@ -729,7 +738,7 @@ export class DockerDatasource extends Datasource {
   private async getDockerApiTags(
     registryHost: string,
     dockerRepository: string,
-  ): Promise<string[] | null> {
+  ): Promise<string[] | undefined> {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
     // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
@@ -749,17 +758,21 @@ export class DockerDatasource extends Datasource {
     );
     if (!headers) {
       logger.debug('Failed to get authHeaders for getTags lookup');
-      return null;
+      return undefined;
     }
     let page = 0;
     const hostsNeedingAllPages = [
       'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
       'https://quay.io', // Quay sorts from oldest to newest, so we need to get all pages
+      'https://cgr.dev', // Chainguard sorts lexically and publishes a tag per build, so current versions sort past the page limit
+      'https://registry.access.redhat.com', // RH catalog; Quay-style lexicographic sort, high tag counts
+      'https://registry.redhat.io', // RH authenticated catalog; same backend
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
       : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
+    const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<RegistryTagsList>;
@@ -802,8 +815,20 @@ export class DockerDatasource extends Datasource {
           url = null;
         }
       } else if (linkHeader?.next?.url) {
-        // for the normal case we can still use URL to resolve relative-next
-        url = new URL(linkHeader.next.url, url).href;
+        // Resolve the relative-or-absolute next link, not following cross-origin requests unless explicitly opted in
+        const nextUrl = resolvePaginationUrl(
+          url,
+          linkHeader.next.url,
+          allowCrossOrigin,
+        );
+        if (!nextUrl) {
+          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          logger.once.warn(
+            { registryHost, nextUrl: linkHeader.next.url },
+            'Ignoring cross-origin or invalid Docker registry tags pagination link',
+          );
+        }
+        url = nextUrl;
       } else {
         url = null;
       }
@@ -815,10 +840,10 @@ export class DockerDatasource extends Datasource {
   private async _getTags(
     registryHost: string,
     dockerRepository: string,
-  ): Promise<string[] | null> {
+  ): Promise<string[] | undefined> {
     try {
       const isQuay = registryHost === 'https://quay.io';
-      let tags: string[] | null;
+      let tags: string[] | undefined;
       if (isQuay) {
         try {
           // Due to pagination and sorting limits on Quay Docker v2 API implementation we try the Quay v1 API first
@@ -903,11 +928,12 @@ export class DockerDatasource extends Datasource {
   getTags(
     registryHost: string,
     dockerRepository: string,
-  ): Promise<string[] | null> {
+  ): Promise<string[] | undefined> {
     return withCache(
       {
         namespace: 'datasource-docker-tags',
         key: `${registryHost}:${dockerRepository}`,
+        cacheable: registryHost === DOCKER_HUB,
       },
       () => this._getTags(registryHost, dockerRepository),
     );
@@ -1026,6 +1052,9 @@ export class DockerDatasource extends Datasource {
               }
               // TODO: return null if no matching architecture digest found
               // https://github.com/renovatebot/renovate/discussions/22639
+              // NOTE: reaching the implicit else needs a manifest list with no
+              // digest header. A coverage-ignore hint cannot suppress it on an
+              // `else if`.
             } else if (
               hasKey('docker-content-digest', manifestResponse.headers)
             ) {
@@ -1125,6 +1154,7 @@ export class DockerDatasource extends Datasource {
 
     const cache = await DockerHubCache.init(dockerRepository);
     const maxPages = GlobalConfig.get('dockerMaxPages');
+    const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {
@@ -1145,7 +1175,17 @@ export class DockerDatasource extends Datasource {
         break;
       }
 
-      url = next;
+      // Only follow the `next` link when it's on the same origin, unless explicitly opted in
+      const nextUrl = resolvePaginationUrl(url, next, allowCrossOrigin);
+      if (!nextUrl) {
+        logger.once.warn(
+          { dockerRepository, nextUrl: next },
+          'Ignoring cross-origin or invalid Docker Hub tags pagination link',
+        );
+        break;
+      }
+
+      url = nextUrl;
     }
 
     await cache.save();
@@ -1241,7 +1281,7 @@ export class DockerDatasource extends Datasource {
       ? 'latest'
       : (findLatestStable(tags) ?? tags.at(-1));
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!latestTag) {
       return ret;
     }

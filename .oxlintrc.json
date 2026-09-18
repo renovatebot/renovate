@@ -1,9 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
-  "jsPlugins": ["./tools/lint/rules.js"],
+  "jsPlugins": ["./tools/lint/rules.ts"],
   "options": {
     "typeAware": true
+  },
+  "env": {
+    "node": true,
+    "es2025": true
   },
   "categories": {
     "correctness": "error"
@@ -21,8 +25,10 @@
     "promise/catch-or-return": "error",
     "promise/no-callback-in-promise": "warn",
     "promise/no-new-statics": "error",
+    "promise/no-return-in-finally": "error",
     "promise/valid-params": "warn",
     "import/default": "error",
+    "import/export": "error",
     "import/named": "error",
     "import/namespace": "error",
     "typescript/consistent-type-imports": [
@@ -63,6 +69,7 @@
       }
     ],
     "no-unassigned-vars": "error",
+    "no-undef": "error",
     "prefer-template": "error",
     "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
     "func-style": ["error", "declaration"],
@@ -71,15 +78,13 @@
     "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
-    "renovate/logger-static-message": "error",
-    "renovate/no-hardcoded-docs-url": "error",
-    "renovate/no-new-url": "error",
-    "renovate/no-stateful-global-regex": "error",
-    "renovate/no-tools-import": "error",
+    "renovate/no-number-constructor": "error",
     "renovate/prefer-json-pipe": "error",
     "renovate/prefer-nullish-util": "error",
-    "renovate/zod-schema-location": "error",
+    "renovate/require-regex-util": "error",
+    "renovate/v8-ignore-no-count": "error",
     "renovate/v8-ignore-reason": "error",
+    "renovate/validate-config-warnings-and-errors": "error",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
@@ -163,6 +168,7 @@
     "no-regex-spaces": "error",
     "no-var": "error",
     "prefer-const": "error",
+    "prefer-named-capture-group": "error",
     "prefer-rest-params": "error",
     "prefer-spread": "error",
     "typescript/ban-ts-comment": "error",
@@ -173,6 +179,7 @@
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error",
+    "unicorn/no-useless-iterator-to-array": "error",
     "unicorn/prefer-at": "error",
     "unicorn/prefer-node-protocol": "error",
 
@@ -183,11 +190,28 @@
       { "assertFunctionNames": ["expect", "expectTypeOf", "checkKeysSorted"] }
     ],
     "vitest/no-conditional-expect": "error",
+    "vitest/no-restricted-matchers": [
+      "error",
+      {
+        "toMatchSnapshot": "Use explicit assertions such as toEqual, toMatchObject or toBe so the expected value stays visible in the test file.",
+        "toThrowErrorMatchingSnapshot": "Use toThrow with the expected message.",
+        "rejects.toThrowErrorMatchingSnapshot": "Use rejects.toThrow with the expected message.",
+        "resolves.toMatchSnapshot": "Use explicit assertions such as resolves.toEqual or resolves.toMatchObject so the expected value stays visible in the test file.",
+        "toMatchFileSnapshot": "Use explicit assertions such as toEqual, toMatchObject or toBe so the expected value stays visible in the test file."
+      }
+    ],
     "vitest/no-standalone-expect": "error",
+    "vitest/prefer-expect-resolves": "error",
     "vitest/prefer-snapshot-hint": "error",
     "vitest/require-to-throw-message": "error"
   },
   "overrides": [
+    {
+      "files": ["**/*.spec.ts", "test/**", "tools/**"],
+      "rules": {
+        "renovate/require-regex-util": "off"
+      }
+    },
     {
       "files": ["tools/**", "**/*.spec.ts"],
       "rules": {
@@ -195,7 +219,179 @@
       }
     },
     {
+      "files": ["lib/**"],
+      "rules": {
+        "renovate/logger-err-key": "error",
+        "renovate/logger-static-message": "error",
+        "renovate/no-new-url": "error",
+        "renovate/no-stateful-global-regex": "error",
+        "renovate/no-tools-import": "error",
+        "renovate/prefer-coerce-array": "error",
+        "renovate/prefer-coerce-object": "error",
+        "renovate/prefer-is-helpers": "error",
+        "renovate/prefer-is-object": "error"
+      }
+    },
+    {
+      "files": ["lib/**"],
+      "excludeFiles": ["**/*.spec.ts"],
+      "rules": {
+        "renovate/no-dev-dependency-import": "error",
+        "renovate/no-exec-shell-option": "error",
+        "renovate/no-hardcoded-docs-url": "error",
+        "renovate/no-unquoted-exec-interpolation": "error",
+        "renovate/prefer-fs-util": "error",
+        "renovate/prefer-luxon": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/manager/**"],
+      "excludeFiles": ["**/*.spec.ts", "lib/modules/manager/util.ts"],
+      "rules": {
+        "renovate/prefer-resolve-tool-constraint": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/datasource/**"],
+      "excludeFiles": ["**/*.spec.ts"],
+      "rules": {
+        "renovate/no-unvalidated-pagination-url": "error"
+      }
+    },
+    {
+      "files": ["lib/**"],
+      "excludeFiles": ["**/*.spec.ts"],
+      "rules": {
+        "renovate/require-cacheable": "error"
+      }
+    },
+    {
+      "files": [
+        "lib/modules/datasource/apk/index.ts",
+        "lib/modules/datasource/artifactory/index.ts",
+        "lib/modules/datasource/aws-eks-addon/index.ts",
+        "lib/modules/datasource/aws-machine-image/index.ts",
+        "lib/modules/datasource/aws-rds/index.ts",
+        "lib/modules/datasource/azure-pipelines-tasks/index.ts",
+        "lib/modules/datasource/azure-tags/index.ts",
+        "lib/modules/datasource/bazel/index.ts",
+        "lib/modules/datasource/bitbucket-server-tags/index.ts",
+        "lib/modules/datasource/bitbucket-tags/index.ts",
+        "lib/modules/datasource/bitrise/index.ts",
+        "lib/modules/datasource/conan/index.ts",
+        "lib/modules/datasource/conda/index.ts",
+        "lib/modules/datasource/deb/index.ts",
+        "lib/modules/datasource/deno/index.ts",
+        "lib/modules/datasource/docker/index.ts",
+        "lib/modules/datasource/endoflife-date/index.ts",
+        "lib/modules/datasource/forgejo-releases/index.ts",
+        "lib/modules/datasource/forgejo-tags/index.ts",
+        "lib/modules/datasource/galaxy-collection/index.ts",
+        "lib/modules/datasource/git-refs/base.ts",
+        "lib/modules/datasource/git-refs/index.ts",
+        "lib/modules/datasource/git-tags/index.ts",
+        "lib/modules/datasource/gitea-releases/index.ts",
+        "lib/modules/datasource/gitea-tags/index.ts",
+        "lib/modules/datasource/github-digest/index.ts",
+        "lib/modules/datasource/github-release-attachments/index.ts",
+        "lib/modules/datasource/gitlab-packages/index.ts",
+        "lib/modules/datasource/gitlab-releases/index.ts",
+        "lib/modules/datasource/gitlab-tags/index.ts",
+        "lib/modules/datasource/glasskube-packages/index.ts",
+        "lib/modules/datasource/go/index.ts",
+        "lib/modules/datasource/go/releases-direct.ts",
+        "lib/modules/datasource/go/releases-goproxy.ts",
+        "lib/modules/datasource/golang-version/index.ts",
+        "lib/modules/datasource/gradle-version/index.ts",
+        "lib/modules/datasource/helm/index.ts",
+        "lib/modules/datasource/hermit/index.ts",
+        "lib/modules/datasource/hexpm-bob/index.ts",
+        "lib/modules/datasource/jenkins-plugins/index.ts",
+        "lib/modules/datasource/nextcloud/index.ts",
+        "lib/modules/datasource/node-version/index.ts",
+        "lib/modules/datasource/nuget/v3.ts",
+        "lib/modules/datasource/orb/index.ts",
+        "lib/modules/datasource/packagist/index.ts",
+        "lib/modules/datasource/pod/index.ts",
+        "lib/modules/datasource/python-version/index.ts",
+        "lib/modules/datasource/repology/index.ts",
+        "lib/modules/datasource/rpm/index.ts",
+        "lib/modules/datasource/sbt-package/index.ts",
+        "lib/modules/datasource/terraform-module/base.ts",
+        "lib/modules/datasource/terraform-module/index.ts",
+        "lib/modules/datasource/terraform-provider/index.ts",
+        "lib/modules/datasource/unity3d-packages/index.ts",
+        "lib/modules/datasource/unity3d/index.ts",
+        "lib/modules/manager/maven-wrapper/artifacts.ts",
+        "lib/modules/manager/terraform/lockfile/hash.ts"
+      ],
+      "rules": {
+        "renovate/require-cacheable": "warn"
+      }
+    },
+    {
+      "files": ["lib/modules/**"],
+      "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
+      "rules": {
+        "renovate/zod-schema-location": "error"
+      }
+    },
+    {
+      "files": ["lib/modules/**"],
+      "excludeFiles": ["**/*.spec.ts", "**/schema.ts", "**/schema/**"],
+      "rules": {
+        "renovate/types-location": "error"
+      }
+    },
+    {
+      "files": ["lib/util/url.ts"],
+      "rules": {
+        "renovate/no-new-url": "off"
+      }
+    },
+    {
+      "files": ["lib/util/exec/**"],
+      "rules": {
+        "renovate/no-exec-shell-option": "off"
+      }
+    },
+    {
+      "files": ["lib/config/options/index.ts"],
+      "rules": {
+        "renovate/no-hardcoded-docs-url": "off"
+      }
+    },
+    {
+      "files": [
+        "lib/config-validator.ts",
+        "lib/instrumentation/**",
+        "lib/logger/**",
+        "lib/util/fs/**",
+        "lib/util/git/**",
+        "lib/workers/global/**"
+      ],
+      "rules": {
+        "renovate/prefer-fs-util": "off"
+      }
+    },
+    {
+      "files": [
+        "lib/util/date.ts",
+        "lib/util/pretty-time.ts",
+        "lib/util/timestamp.ts"
+      ],
+      "rules": {
+        "renovate/prefer-luxon": "off"
+      }
+    },
+    {
       "files": ["**/*.spec.ts", "test/**"],
+      "env": {
+        "vitest": true
+      },
+      "globals": {
+        "fixtures": "readonly"
+      },
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
@@ -204,10 +400,12 @@
         "renovate/no-host-rules-mock": "error",
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
+        "renovate/inline-single-use-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-fake-sha-in-specs": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/prefer-partial-in-specs": "error",
+        "renovate/prefer-stub-env": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }
@@ -293,7 +491,6 @@
     "**/.venv/",
     "tools/mkdocs/docs",
     "tools/mkdocs/site",
-    ".github/workflows/**/*.js",
     ".worktrees/**/*",
     ".markdownlint-cli2.mjs",
     "tools/mkdocs/.cache",

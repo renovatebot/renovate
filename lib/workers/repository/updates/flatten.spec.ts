@@ -22,6 +22,14 @@ describe('workers/repository/updates/flatten', () => {
         'https-some.host.name-a-path-to.git',
       );
     });
+
+    it('strips shell-style variable placeholders', () => {
+      expect(sanitizeDepName('${DEPENDENCY_PROXY}python')).toBe('python');
+      expect(sanitizeDepName('${DEPENDENCY_PROXY:-}python')).toBe('python');
+      expect(sanitizeDepName('${DEPENDENCY_PROXY}/python')).toBe('python');
+      expect(sanitizeDepName('${DEPENDENCY_PROXY:-}/python')).toBe('python');
+      expect(sanitizeDepName('$CI_REGISTRY/image')).toBe('ci_registry-image');
+    });
   });
 
   describe('flattenUpdates()', () => {
@@ -464,6 +472,28 @@ describe('workers/repository/updates/flatten', () => {
         res.find((update) => update.depName === 'old-pkg'),
       ).toBeUndefined();
       expect(res.find((update) => update.depName === 'alias')).toBeDefined();
+    });
+
+    it('does not detect semantic commits when they are already decided', async () => {
+      config.semanticCommits = 'enabled';
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'some-dep',
+                updates: [{ newValue: '^2.0.0', updateType: 'minor' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toHaveLength(1);
+      expect(res[0].semanticCommits).toBe('enabled');
     });
   });
 });

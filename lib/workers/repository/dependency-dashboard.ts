@@ -23,6 +23,10 @@ import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
 import type { Vulnerability } from './process/types.ts';
 import { Vulnerabilities } from './process/vulnerabilities.ts';
+import type {
+  DependencyDashboardCheck,
+  DependencyDashboardListItemType,
+} from './types.ts';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
@@ -199,9 +203,10 @@ export async function readDashboardBody(
 
   const checkedBranches = GlobalConfig.get('checkedBranches');
   if (isNonEmptyArray(checkedBranches)) {
-    const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-      checkedBranches.map((branchName) => [branchName, 'global-config']),
-    );
+    const checkedBranchesRec: Record<string, DependencyDashboardCheck> =
+      Object.fromEntries(
+        checkedBranches.map((branchName) => [branchName, 'global-config']),
+      );
     dashboardChecks.dependencyDashboardChecks = {
       ...dashboardChecks.dependencyDashboardChecks,
       ...checkedBranchesRec,
@@ -219,7 +224,10 @@ function formatAsMarkdownLink(name: string, url?: string | null): string {
   return url ? `[${name}](${url})` : `\`${name}\``;
 }
 
-function getListItem(branch: BranchConfig, type: string): string {
+function getListItem(
+  branch: BranchConfig,
+  type: DependencyDashboardListItemType,
+): string {
   let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
@@ -260,7 +268,10 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
   return { categories, uncategorized, hasCategorized, hasUncategorized };
 }
 
-function getBranchList(branches: BranchConfig[], listItemType: string): string {
+function getBranchList(
+  branches: BranchConfig[],
+  listItemType: DependencyDashboardListItemType,
+): string {
   return branches
     .map((branch: BranchConfig): string => getListItem(branch, listItemType))
     .join('');
@@ -275,7 +286,7 @@ function getBranchesListMd(
   ) => unknown,
   title: string,
   description: string,
-  listItemType = 'approvePr',
+  listItemType: DependencyDashboardListItemType = 'approvePr',
   bulkComment?: string,
   bulkMessage?: string,
   bulkIcon?: '🔐',
@@ -353,19 +364,17 @@ export async function ensureDependencyDashboard(
       branch.result !== 'automerged' &&
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
-  if (
-    !(
-      config.dependencyDashboard === true ||
-      config.dependencyDashboardApproval === true ||
-      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
-        true ||
-      branches.some(
-        (branch) =>
-          !!branch.dependencyDashboardApproval ||
-          !!branch.dependencyDashboardPrApproval,
-      )
+  if (!(
+    config.dependencyDashboard === true ||
+    config.dependencyDashboardApproval === true ||
+    config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+      true ||
+    branches.some(
+      (branch) =>
+        !!branch.dependencyDashboardApproval ||
+        !!branch.dependencyDashboardPrApproval,
     )
-  ) {
+  )) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },
@@ -552,6 +561,7 @@ export async function ensureDependencyDashboard(
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
+    'unpend',
   );
   issueBody += getBranchesListMd(
     branches,
@@ -715,13 +725,15 @@ export function getAbandonedPackagesMd(
   abandonedMd +=
     'The following dependencies have not received updates for an extended period and may be unmaintained.\n\n';
 
-  abandonedMd += '<details>\n';
-  abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
-
+  // Keep the note outside the `<details>` block: GitHub only renders alert
+  // callouts at the top level of a body, not inside collapsible sections.
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
   abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
+
+  abandonedMd += '<details>\n';
+  abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
   abandonedMd += '| Datasource | Package | Last Updated |\n';
   abandonedMd += '|------------|------|-------------|\n';

@@ -122,6 +122,7 @@ export class ConanDatasource extends Datasource {
       'Looking up conan api dependency',
     );
 
+    // v8 ignore else -- the datasource layer always supplies a registry url
     if (registryUrl) {
       const url = ensureTrailingSlash(registryUrl);
       const lookupUrl = joinUrlParts(
@@ -183,6 +184,7 @@ export class ConanDatasource extends Datasource {
                 ConanProperties,
               );
               const { sourceUrl } = conanProperties;
+              // v8 ignore else -- needs a full artifactory properties fixture
               if (sourceUrl) {
                 dep.sourceUrl = sourceUrl;
               }

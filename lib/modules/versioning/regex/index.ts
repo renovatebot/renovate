@@ -1,22 +1,15 @@
+import { isUndefined } from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import { parseRange, satisfiesComparator } from '../generic-range.ts';
 import type { VersioningApiConstructor } from '../types.ts';
+import type { RegExpVersion } from './types.ts';
 
 export const id = 'regex';
 export const displayName = 'Regular Expression';
 export const urls = [];
 export const supportsRanges = false;
-
-export interface RegExpVersion extends GenericVersion {
-  /**
-   * compatibility, if present, are treated as a compatibility layer: we will
-   * never try to update to a version with a different compatibility.
-   */
-  compatibility: string;
-}
 
 export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
   // config is expected to be overridden by a user-specified RegExp value
@@ -65,9 +58,9 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const { major, minor, patch, build, revision, prerelease, compatibility } =
       groups;
     const release = [
-      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
+      isUndefined(major) ? 0 : Number.parseInt(major, 10),
+      isUndefined(minor) ? 0 : Number.parseInt(minor, 10),
+      isUndefined(patch) ? 0 : Number.parseInt(patch, 10),
     ];
 
     if (build) {

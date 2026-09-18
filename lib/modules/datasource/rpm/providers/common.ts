@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { createGunzip } from 'node:zlib';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import * as fs from '../../../../util/fs/index.ts';
@@ -17,13 +18,13 @@ export function formatRpmVersion(
   ver: RpmVersionValue,
   rel?: RpmVersionValue,
 ): string | null {
-  if (ver === undefined || ver === null) {
+  if (isNullOrUndefined(ver)) {
     return null;
   }
 
   const version = String(ver);
 
-  if (rel === undefined || rel === null) {
+  if (isNullOrUndefined(rel)) {
     return version;
   }
 

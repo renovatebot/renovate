@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import * as _datasourceCommon from '../../../../modules/datasource/common.ts';
 import { Datasource } from '../../../../modules/datasource/datasource.ts';
 import type {
@@ -8,12 +9,18 @@ import type {
   ReleaseResult,
 } from '../../../../modules/datasource/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
+import type { UpdateType } from '../../../../types/index.ts';
 import { clone } from '../../../../util/clone.ts';
 import * as _dateUtil from '../../../../util/date.ts';
 import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
-import { filterInternalChecks } from './filter-checks.ts';
+import {
+  checkMinimumConfidence,
+  filterInternalChecks,
+  isMinimumConfidenceApplicable,
+  isMinimumReleaseAgeApplicable,
+} from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
 vi.mock('../../../../util/date.ts');
@@ -284,6 +291,50 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         expect(res.release?.version).toBe('1.0.4');
       });
 
+      it('returns the latest release, if minimumReleaseAgeBehaviour is not set', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.4',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '100 days';
+        // minimumReleaseAgeBehaviour deliberately left unset
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'patch',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+        expect(res.release?.version).toBe('1.0.4');
+        // the release is not recorded against either behaviour, so neither is reported
+        expect(logger.logger.once.warn).not.toHaveBeenCalledWith(
+          expect.stringContaining(
+            'minimumReleaseAgeBehaviour=timestamp-optional',
+          ),
+        );
+        expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+          expect.objectContaining({ check: 'minimumReleaseAge' }),
+          expect.any(String),
+        );
+      });
+
       it('returns latest release, if minimumReleaseAgeBehaviour=timestamp-required but minimumReleaseAge=0 days', async () => {
         const releasesWithMissingReleaseTimestamp: Release[] = [
           {
@@ -336,6 +387,113 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');
+    });
+  });
+
+  describe('.isMinimumReleaseAgeApplicable()', () => {
+    // Exhaustive by construction, so we get a type error if we add a new UpdateType
+    const expectedByUpdateType: Record<UpdateType, boolean> = {
+      major: true,
+      minor: true,
+      patch: true,
+      digest: true,
+      pinDigest: true,
+      pin: false,
+      replacement: false,
+      lockFileMaintenance: false,
+      lockfileUpdate: false,
+      rollback: false,
+      bump: false,
+    };
+
+    it.each(Object.entries(expectedByUpdateType))(
+      'updateType=%s returns %s',
+      (updateType, expected) => {
+        expect(isMinimumReleaseAgeApplicable(updateType as UpdateType)).toBe(
+          expected,
+        );
+      },
+    );
+
+    it('returns true for updateType=undefined', () => {
+      expect(isMinimumReleaseAgeApplicable(undefined)).toBeTrue();
+    });
+  });
+
+  describe('.isMinimumConfidenceApplicable()', () => {
+    // Exhaustive by construction, so we get a type error if we add a new UpdateType
+    const expectedByUpdateType: Record<UpdateType, boolean> = {
+      digest: false,
+      pinDigest: false,
+      major: true,
+      minor: true,
+      patch: true,
+      pin: true,
+      rollback: true,
+      replacement: true,
+      lockFileMaintenance: true,
+      lockfileUpdate: true,
+      bump: true,
+    };
+
+    it.each(Object.entries(expectedByUpdateType))(
+      'updateType=%s returns %s',
+      (updateType, expected) => {
+        expect(isMinimumConfidenceApplicable(updateType as UpdateType)).toBe(
+          expected,
+        );
+      },
+    );
+
+    it('returns true for updateType=undefined', () => {
+      expect(isMinimumConfidenceApplicable(undefined)).toBeTrue();
+    });
+  });
+
+  describe('.checkMinimumConfidence()', () => {
+    it('is not pending if minimumConfidence is not active', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(false);
+      const res = await checkMinimumConfidence(
+        { minimumConfidence: 'high' },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: false });
+    });
+
+    it('is pending if the confidence level does not satisfy minimumConfidence', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('low');
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(false);
+      const res = await checkMinimumConfidence(
+        {
+          minimumConfidence: 'high',
+          datasource: 'npm',
+          packageName: 'some-package',
+        },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: true });
+    });
+
+    it('is not pending if the confidence level satisfies minimumConfidence', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('high');
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
+      const res = await checkMinimumConfidence(
+        {
+          minimumConfidence: 'high',
+          datasource: 'npm',
+          packageName: 'some-package',
+        },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: false });
     });
   });
 });

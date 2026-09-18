@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { api as lambdaVer } from './index.ts';
-import type { LambdaData } from './schedule.ts';
+import type { LambdaData } from './types.ts';
 
 vi.mock('../../../data-files.generated.ts', async (importOriginal) => {
   const dataFiles = (
