@@ -726,7 +726,7 @@ describe('modules/datasource/crate/index', () => {
         });
         expect(setCache).toHaveBeenCalledWith(
           'datasource-crate-registry-api',
-          registryUrl,
+          ownApi,
           true,
           24 * 60,
         );
@@ -1002,7 +1002,7 @@ describe('modules/datasource/crate/index', () => {
         expect(res2).toEqual({ version: '4.5.18' });
         expect(setCache).toHaveBeenCalledWith(
           'datasource-crate-registry-api',
-          registryUrl,
+          api,
           true,
           24 * 60,
         );

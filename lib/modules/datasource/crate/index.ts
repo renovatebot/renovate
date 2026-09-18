@@ -220,15 +220,16 @@ export class CrateDatasource extends Datasource {
     return err instanceof HttpError && err.response?.statusCode === 404;
   }
 
-  private async isReadApiUnsupported(
-    rawUrl: string,
-    api: string,
-  ): Promise<boolean> {
+  /**
+   * The marker is keyed by the `api` URL, since the missing endpoints are a
+   * property of the API server, not of the index that points to it.
+   */
+  private async isReadApiUnsupported(api: string): Promise<boolean> {
     if (CrateDatasource.isCratesIoApi(api)) {
       return false;
     }
 
-    const memKey = `crate-datasource/registry-api-unsupported/${rawUrl}`;
+    const memKey = `crate-datasource/registry-api-unsupported/${api}`;
     const cached = memCache.get<boolean>(memKey);
     if (isBoolean(cached)) {
       return cached;
@@ -236,7 +237,7 @@ export class CrateDatasource extends Datasource {
 
     const persisted = await packageCache.get<boolean>(
       'datasource-crate-registry-api',
-      rawUrl,
+      api,
     );
     const unsupported = persisted === true;
     memCache.set(memKey, unsupported);
@@ -244,20 +245,15 @@ export class CrateDatasource extends Datasource {
   }
 
   private async markReadApiUnsupported(
-    rawUrl: string,
+    registryUrl: string,
     api: string,
   ): Promise<void> {
     logger.debug(
-      { registryUrl: rawUrl, api },
+      { registryUrl, api },
       'Registry does not implement the crates.io read API, skipping crate metadata and release timestamp lookups',
     );
-    memCache.set(`crate-datasource/registry-api-unsupported/${rawUrl}`, true);
-    await packageCache.set(
-      'datasource-crate-registry-api',
-      rawUrl,
-      true,
-      24 * 60,
-    );
+    memCache.set(`crate-datasource/registry-api-unsupported/${api}`, true);
+    await packageCache.set('datasource-crate-registry-api', api, true, 24 * 60);
   }
 
   private async _getCrateMetadata(
@@ -270,7 +266,7 @@ export class CrateDatasource extends Datasource {
     }
 
     const { api } = registryConfig;
-    if (await this.isReadApiUnsupported(info.rawUrl, api)) {
+    if (await this.isReadApiUnsupported(api)) {
       return null;
     }
 
@@ -595,7 +591,7 @@ export class CrateDatasource extends Datasource {
     }
 
     const { api } = config;
-    if (await this.isReadApiUnsupported(rawUrl, api)) {
+    if (await this.isReadApiUnsupported(api)) {
       return release;
     }
 
