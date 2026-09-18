@@ -186,8 +186,10 @@ export class CrateDatasource extends Datasource {
     info: RegistryInfo,
     packageName: string,
   ): Promise<CrateMetadata | null> {
-    // The `api/v1/crates/<name>` endpoint is crates.io-specific and not part
-    // of the registry web API that Cargo itself uses, so private registries
+    // The registry web API specification only defines publish, yank, unyank,
+    // owners, search and login endpoints, see
+    // https://doc.rust-lang.org/cargo/reference/registry-web-api.html.
+    // `GET api/v1/crates/<name>` is crates.io-specific, so private registries
     // (Artifactory, CodeArtifact, ...) respond with 404 even when their
     // `config.json` advertises an `api` URL for publishing.
     if (info.flavor !== 'crates.io') {
@@ -499,7 +501,9 @@ export class CrateDatasource extends Datasource {
       return release;
     }
 
-    // Only crates.io serves per-version metadata over the web API
+    // `GET api/v1/crates/<name>/<version>` is crates.io-specific and not part
+    // of the registry web API specification, see `_getCrateMetadata`. Other
+    // registries can supply timestamps via the `pubtime` index field instead.
     if (!registryUrl || !CrateDatasource.isCratesIo(registryUrl)) {
       return release;
     }
