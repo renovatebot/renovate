@@ -235,8 +235,14 @@ function getScheduleDescription(
   return `Schedule (${timezone ?? 'UTC'}): ${descriptions.join(', ')}`;
 }
 
+function getScheduleKey(branch: BranchConfig): string {
+  return JSON.stringify([
+    branch.timezone ?? 'UTC',
+    coerceArray(branch.schedule),
+  ]);
+}
+
 function getListItem(
-  config: RenovateConfig,
   branch: BranchConfig,
   type: DependencyDashboardListItemType,
 ): string {
@@ -251,13 +257,6 @@ function getListItem(
     // TODO: types (#22198)
     ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
-  if (
-    config.dependencyDashboardReportSchedules &&
-    type === 'unschedule' &&
-    branch.schedule?.length
-  ) {
-    item += ` → ${getScheduleDescription(branch.schedule, branch.timezone)}`;
-  }
   if (uniquePackages.length < 2) {
     return `${item}\n`;
   }
@@ -291,12 +290,43 @@ function getBranchList(
   config: RenovateConfig,
   branches: BranchConfig[],
   listItemType: DependencyDashboardListItemType,
+  nested = false,
 ): string {
-  return branches
-    .map((branch: BranchConfig): string =>
-      getListItem(config, branch, listItemType),
-    )
-    .join('');
+  if (
+    !config.dependencyDashboardReportSchedules ||
+    listItemType !== 'unschedule'
+  ) {
+    return branches
+      .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+      .join('');
+  }
+
+  const scheduleGroups = new Map<string, BranchConfig[]>();
+  for (const branch of branches) {
+    const scheduleKey = getScheduleKey(branch);
+    const scheduleGroup = scheduleGroups.get(scheduleKey);
+    if (scheduleGroup) {
+      scheduleGroup.push(branch);
+    } else {
+      scheduleGroups.set(scheduleKey, [branch]);
+    }
+  }
+
+  let result = '';
+  for (const groupedBranches of scheduleGroups.values()) {
+    if (result) {
+      result = `${result.trimEnd()}\n\n`;
+    }
+    const [firstBranch] = groupedBranches;
+    const description = firstBranch.schedule?.length
+      ? getScheduleDescription(firstBranch.schedule, firstBranch.timezone)
+      : 'Schedule unavailable';
+    result += `${nested ? '####' : '###'} ${description}\n\n`;
+    result += groupedBranches
+      .map((branch) => getListItem(branch, listItemType))
+      .join('');
+  }
+  return result;
 }
 
 function getBranchesListMd(
@@ -328,7 +358,7 @@ function getBranchesListMd(
     )) {
       result = `${result.trimEnd()}\n\n`;
       result += `### ${category}\n\n`;
-      result += getBranchList(config, branches, listItemType);
+      result += getBranchList(config, branches, listItemType, true);
     }
     if (hasUncategorized) {
       result = `${result.trimEnd()}\n\n`;
@@ -336,7 +366,7 @@ function getBranchesListMd(
     }
   }
   result = `${result.trimEnd()}\n\n`;
-  result += getBranchList(config, uncategorized, listItemType);
+  result += getBranchList(config, uncategorized, listItemType, hasCategorized);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
     if (hasCategorized) {
