@@ -1,8 +1,10 @@
 import fs from 'fs-extra';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { hostRules, partial } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { partial } from '~test/util.ts';
 import { exec } from '../../../util/exec/index.ts';
 import { ensureDir, privateCacheDir } from '../../../util/fs/index.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { execUv } from './uv.ts';
 
 vi.mock('google-auth-library');
@@ -32,13 +34,12 @@ describe('modules/manager/pip-compile/uv', () => {
 
   it.each`
     registryUrls
-    ${undefined}
-    ${['invalid-url']}
-    ${['https://example.com/simple']}
+    ${[]}
+    ${[parseUrl('https://example.com/simple')!]}
   `(
     'does not create a netrc without credentials: $registryUrls',
     async ({ registryUrls }) => {
-      await execUv(cmd, options, [{ deps: [], registryUrls }]);
+      await execUv(cmd, options, registryUrls);
 
       expect(exec).toHaveBeenCalledWith(cmd, options);
       expect(fs.mkdtemp).not.toHaveBeenCalled();
@@ -46,7 +47,7 @@ describe('modules/manager/pip-compile/uv', () => {
     },
   );
 
-  it('uses PyPI and unscoped host rules for source and additional registries', async () => {
+  it('uses PyPI and unscoped host rules for registry URLs', async () => {
     hostRules.add({
       hostType: 'npm',
       matchHost: 'example.com',
@@ -65,12 +66,9 @@ describe('modules/manager/pip-compile/uv', () => {
     });
 
     await execUv(cmd, options, [
-      {
-        deps: [],
-        registryUrls: ['https://example.com/private/simple'],
-        additionalRegistryUrls: ['https://other.example.com/simple'],
-      },
-      { deps: [], registryUrls: ['https://example.com/private/simple'] },
+      parseUrl('https://example.com/private/simple')!,
+      parseUrl('https://other.example.com/simple')!,
+      parseUrl('https://example.com/private/simple')!,
     ]);
 
     expect(ensureDir).toHaveBeenCalledWith('/cache/__renovate-private-cache');
@@ -104,12 +102,9 @@ describe('modules/manager/pip-compile/uv', () => {
     });
 
     await execUv(cmd, options, [
-      {
-        deps: [],
-        registryUrls: [
-          'https://someregion-python.pkg.dev/some-project/some-repo/simple',
-        ],
-      },
+      parseUrl(
+        'https://someregion-python.pkg.dev/some-project/some-repo/simple',
+      )!,
     ]);
 
     expect(fs.writeFile).toHaveBeenCalledWith(
@@ -129,9 +124,7 @@ describe('modules/manager/pip-compile/uv', () => {
     async ({ username, password, expected }) => {
       hostRules.add({ matchHost: 'example.com', username, password });
 
-      await execUv(cmd, {}, [
-        { deps: [], registryUrls: ['https://example.com/simple'] },
-      ]);
+      await execUv(cmd, {}, [parseUrl('https://example.com/simple')!]);
 
       expect(fs.writeFile).toHaveBeenCalledWith(
         '/cache/__renovate-private-cache/uv-random/.netrc',
@@ -157,9 +150,7 @@ describe('modules/manager/pip-compile/uv', () => {
       }
 
       await expect(
-        execUv(cmd, options, [
-          { deps: [], registryUrls: ['https://example.com/simple'] },
-        ]),
+        execUv(cmd, options, [parseUrl('https://example.com/simple')!]),
       ).rejects.toThrow(error);
 
       expect(fs.remove).toHaveBeenCalledWith(

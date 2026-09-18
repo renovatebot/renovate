@@ -6,8 +6,6 @@ import type { ExecOptions } from '../../../util/exec/types.ts';
 import { ensureDir, privateCacheDir } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
-import type { PackageFileContent } from '../types.ts';
-import { getRegistryUrlsFromPackageFiles } from './common.ts';
 
 function quoteNetrc(value: string): string {
   return `"${value.replace(regEx(/["\\]/g), '\\$&')}"`;
@@ -16,10 +14,10 @@ function quoteNetrc(value: string): string {
 export async function execUv(
   cmd: string,
   options: ExecOptions,
-  packageFiles: PackageFileContent[],
+  registryUrls: URL[],
 ): Promise<void> {
   const entries = new Map<string, string>();
-  for (const url of getRegistryUrlsFromPackageFiles(packageFiles)) {
+  for (const url of registryUrls) {
     const { username, password } = await findPypiIndexCredentials(url.href);
     if (username || password) {
       entries.set(

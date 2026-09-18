@@ -3,7 +3,6 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
-import { exec } from '../../../util/exec/index.ts';
 import {
   deleteLocalFile,
   readLocalFile,
@@ -22,9 +21,10 @@ import {
   extractHeaderCommand,
   extractPythonVersion,
   getExecOptions,
-  getRegistryCredVarsFromPackageFiles,
+  getRegistryUrlsFromPackageFiles,
   matchManager,
 } from './common.ts';
+import { execPipCompile } from './pip-tools.ts';
 import type { PipCompileArgs } from './types.ts';
 import { inferCommandExecDir } from './utils.ts';
 import { execUv } from './uv.ts';
@@ -139,33 +139,25 @@ export async function updateArtifacts({
         }
       }
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
-      const registryCredVars =
-        compileArgs.commandType === 'uv'
-          ? {}
-          : await getRegistryCredVarsFromPackageFiles(packageFiles);
+      const registryUrls = getRegistryUrlsFromPackageFiles([
+        ...packageFiles,
+        {
+          deps: [],
+          registryUrls: compileArgs.indexUrl ? [compileArgs.indexUrl] : [],
+          additionalRegistryUrls: compileArgs.extraIndexUrl,
+        },
+      ]);
       const execOptions = await getExecOptions(
         config,
         compileArgs.commandType,
         cwd,
-        registryCredVars,
         pythonVersion,
       );
-      // only the variable names: the values are registry credentials
-      logger.trace(
-        { cwd, cmd, registryCredVars: Object.keys(registryCredVars) },
-        'pip-compile command',
-      );
+      logger.trace({ cwd, cmd }, 'pip-compile command');
       if (compileArgs.commandType === 'uv') {
-        await execUv(cmd, execOptions, [
-          ...packageFiles,
-          {
-            deps: [],
-            registryUrls: compileArgs.indexUrl ? [compileArgs.indexUrl] : [],
-            additionalRegistryUrls: compileArgs.extraIndexUrl,
-          },
-        ]);
+        await execUv(cmd, execOptions, registryUrls);
       } else {
-        await exec(cmd, execOptions);
+        await execPipCompile(cmd, execOptions, registryUrls);
       }
       const status = await getRepoStatus();
       if (status?.modified.includes(outputFileName)) {
