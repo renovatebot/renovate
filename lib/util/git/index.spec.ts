@@ -316,9 +316,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
   });
 
   // Read-only tests: one clone and one `initRepo()` for the whole describe.
-  // Tests here must not change the clone, its refs, the working tree or the
-  // module state (`commitFiles`, `checkoutBranch`, `initRepo`,
-  // `setUserRepoConfig`, local git config).
+  // The module config is reset before each test, so tests may set ignored
+  // authors, but must not change the clone, its refs or the working tree
+  // (`commitFiles`, `checkoutBranch`, `initRepo`, local git config).
   describe('shared clone', () => {
     let origin: tmp.DirectoryResult;
     let tmpDir: tmp.DirectoryResult;
@@ -346,6 +346,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     beforeEach(() => {
+      git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+      git.setGitAuthor('Jest <Jest@example.com>');
+      git.setPlatformIgnoredAuthors([]);
+      git.clearBranchIsModifiedCache();
       behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
       updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
     });
@@ -428,6 +432,164 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       it('should return null', () => {
         expect(git.getBranchCommit('not_found')).toBeNull();
+      });
+    });
+
+    describe('isBranchModified()', () => {
+      beforeEach(() => {
+        modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+      });
+
+      it('should return false when branch is not found', async () => {
+        await expect(
+          git.isBranchModified('renovate/not_found', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return false when author matches', async () => {
+        await expect(
+          git.isBranchModified('renovate/future_branch', defaultBranch),
+        ).resolves.toBeFalse();
+        await expect(
+          git.isBranchModified('renovate/future_branch', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return false when author is ignored', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: ['custom@example.com'],
+        });
+        await expect(
+          git.isBranchModified('renovate/custom_author', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return false when author matches ignored regex', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: ['/^custom@e.+\\.com$/'],
+        });
+        await expect(
+          git.isBranchModified('renovate/custom_author', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return false when author matches ignored case-insensitive regex', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: ['/^CUSTOM@E.+\\.COM$/i'],
+        });
+        await expect(
+          git.isBranchModified('renovate/custom_author', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return false when ignored author contains literal brackets', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: [
+            '29139614+renovate[bot]@users.noreply.github.com',
+          ],
+        });
+        await expect(
+          git.isBranchModified(
+            'renovate/custom_author_brackets',
+            defaultBranch,
+          ),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return false when author matches ignored regex with escaped brackets', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: [
+            '/renovate\\[bot\\]@users\\.noreply\\.github\\.com$/',
+          ],
+        });
+        await expect(
+          git.isBranchModified(
+            'renovate/custom_author_brackets',
+            defaultBranch,
+          ),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return true when author does not match ignored regex', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: ['/^other@example\\.com$/'],
+        });
+        await expect(
+          git.isBranchModified('renovate/custom_author', defaultBranch),
+        ).resolves.toBeTrue();
+      });
+
+      it('should return false when author matches ignored glob pattern', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: ['custom@*'],
+        });
+        await expect(
+          git.isBranchModified('renovate/custom_author', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return true when author does not match bracketed email pattern', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: [
+            '29139614+renovate[bxy]@users.noreply.github.com',
+          ],
+        });
+        await expect(
+          git.isBranchModified(
+            'renovate/custom_author_brackets',
+            defaultBranch,
+          ),
+        ).resolves.toBeTrue();
+      });
+
+      it('should return true when non-ignored authors commit followed by an ignored author', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: ['author1@example.com'],
+        });
+        await expect(
+          git.isBranchModified(
+            'renovate/branch_with_multiple_authors',
+            defaultBranch,
+          ),
+        ).resolves.toBeTrue();
+      });
+
+      it('should return false with multiple authors that are each ignored', async () => {
+        git.setUserRepoConfig({
+          gitIgnoredAuthors: ['author1@example.com', 'author2@example.com'],
+        });
+        await expect(
+          git.isBranchModified(
+            'renovate/branch_with_multiple_authors',
+            defaultBranch,
+          ),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return true when custom author is unknown', async () => {
+        await expect(
+          git.isBranchModified('renovate/custom_author', defaultBranch),
+        ).resolves.toBeTrue();
+      });
+
+      it('should return true when committer is different from author', async () => {
+        await expect(
+          git.isBranchModified('renovate/different_committer', defaultBranch),
+        ).resolves.toBeTrue();
+      });
+
+      it('should return false for ignored platformCommit committer', async () => {
+        git.setPlatformIgnoredAuthors(['noreply@github.com']);
+        await expect(
+          git.isBranchModified('renovate/platform_commit', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('should return value stored in modifiedCacheResult', async () => {
+        modifiedCache.getCachedModifiedResult.mockReturnValue(true);
+        await expect(
+          git.isBranchModified('renovate/future_branch', defaultBranch),
+        ).resolves.toBeTrue();
       });
     });
 
@@ -736,164 +898,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       it('sets non-master base branch', async () => {
         await expect(git.checkoutBranch('develop')).resolves.not.toThrow();
-      });
-    });
-
-    describe('isBranchModified()', () => {
-      beforeEach(() => {
-        modifiedCache.getCachedModifiedResult.mockReturnValue(null);
-      });
-
-      it('should return false when branch is not found', async () => {
-        await expect(
-          git.isBranchModified('renovate/not_found', defaultBranch),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return false when author matches', async () => {
-        await expect(
-          git.isBranchModified('renovate/future_branch', defaultBranch),
-        ).resolves.toBeFalse();
-        await expect(
-          git.isBranchModified('renovate/future_branch', defaultBranch),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return false when author is ignored', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: ['custom@example.com'],
-        });
-        await expect(
-          git.isBranchModified('renovate/custom_author', defaultBranch),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return false when author matches ignored regex', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: ['/^custom@e.+\\.com$/'],
-        });
-        await expect(
-          git.isBranchModified('renovate/custom_author', defaultBranch),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return false when author matches ignored case-insensitive regex', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: ['/^CUSTOM@E.+\\.COM$/i'],
-        });
-        await expect(
-          git.isBranchModified('renovate/custom_author', defaultBranch),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return false when ignored author contains literal brackets', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: [
-            '29139614+renovate[bot]@users.noreply.github.com',
-          ],
-        });
-        await expect(
-          git.isBranchModified(
-            'renovate/custom_author_brackets',
-            defaultBranch,
-          ),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return false when author matches ignored regex with escaped brackets', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: [
-            '/renovate\\[bot\\]@users\\.noreply\\.github\\.com$/',
-          ],
-        });
-        await expect(
-          git.isBranchModified(
-            'renovate/custom_author_brackets',
-            defaultBranch,
-          ),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return true when author does not match ignored regex', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: ['/^other@example\\.com$/'],
-        });
-        await expect(
-          git.isBranchModified('renovate/custom_author', defaultBranch),
-        ).resolves.toBeTrue();
-      });
-
-      it('should return false when author matches ignored glob pattern', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: ['custom@*'],
-        });
-        await expect(
-          git.isBranchModified('renovate/custom_author', defaultBranch),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return true when author does not match bracketed email pattern', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: [
-            '29139614+renovate[bxy]@users.noreply.github.com',
-          ],
-        });
-        await expect(
-          git.isBranchModified(
-            'renovate/custom_author_brackets',
-            defaultBranch,
-          ),
-        ).resolves.toBeTrue();
-      });
-
-      it('should return true when non-ignored authors commit followed by an ignored author', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: ['author1@example.com'],
-        });
-        await expect(
-          git.isBranchModified(
-            'renovate/branch_with_multiple_authors',
-            defaultBranch,
-          ),
-        ).resolves.toBeTrue();
-      });
-
-      it('should return false with multiple authors that are each ignored', async () => {
-        git.setUserRepoConfig({
-          gitIgnoredAuthors: ['author1@example.com', 'author2@example.com'],
-        });
-        await expect(
-          git.isBranchModified(
-            'renovate/branch_with_multiple_authors',
-            defaultBranch,
-          ),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return true when custom author is unknown', async () => {
-        await expect(
-          git.isBranchModified('renovate/custom_author', defaultBranch),
-        ).resolves.toBeTrue();
-      });
-
-      it('should return true when committer is different from author', async () => {
-        await expect(
-          git.isBranchModified('renovate/different_committer', defaultBranch),
-        ).resolves.toBeTrue();
-      });
-
-      it('should return false for ignored platformCommit committer', async () => {
-        git.setPlatformIgnoredAuthors(['noreply@github.com']);
-        await expect(
-          git.isBranchModified('renovate/platform_commit', defaultBranch),
-        ).resolves.toBeFalse();
-      });
-
-      it('should return value stored in modifiedCacheResult', async () => {
-        modifiedCache.getCachedModifiedResult.mockReturnValue(true);
-        await expect(
-          git.isBranchModified('renovate/future_branch', defaultBranch),
-        ).resolves.toBeTrue();
       });
     });
 
@@ -1268,7 +1272,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
-    // The local-only `isBranchModified()` tests are in the reused-clone describe above.
+    // The read-only `isBranchModified()` tests are in the shared-clone describe above.
     describe('isBranchModified()', () => {
       beforeEach(() => {
         modifiedCache.getCachedModifiedResult.mockReturnValue(null);
