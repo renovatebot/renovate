@@ -11,6 +11,10 @@ export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
 const validRegex = regEx(/^\d+\.\d+(?:\.\d+)?$/);
 
+const pseudoVersionRegex = regEx(
+  /^v0\.0\.0-(?:\w+\.)?(?:0\.)?\d{14}-[a-f0-9]{12}$/,
+);
+
 function toNpmRange(range: string): string {
   return `^${range}`;
 }
@@ -49,6 +53,22 @@ function isLessThanRange(version: string, range: string): boolean {
 
 export function isValid(input: string): boolean {
   return !!input.match(validRegex);
+}
+
+/**
+ * Whether the version is a Go pseudo-version of a module without any release
+ * tag, such as `v0.0.0-20240506185236-b8a5c65736ae`.
+ *
+ * An update between two such versions changes the commit and nothing else, so
+ * Renovate reports it as a digest update - see #29034. Go also derives
+ * pseudo-versions from tagged releases, such as
+ * `v1.2.3-0.20240506185236-b8a5c65736ae`, and `GoDatasource.pversionRegexp`
+ * matches those too; they are not recognised here.
+ *
+ * @see https://go.dev/ref/mod#pseudo-versions
+ */
+export function isPseudoVersion(version: string): boolean {
+  return pseudoVersionRegex.test(version);
 }
 
 function matches(version: string, range: string): boolean {

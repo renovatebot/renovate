@@ -1,6 +1,7 @@
 // TODO: types (#22198)
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { isPseudoVersion } from '../../versioning/go-mod-directive/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
 function getNameWithNoVersion(name: string): string {
@@ -87,7 +88,8 @@ export function updateDependency({
       // has no data and newValue may equal currentValue. In that case, fall
       // through to the bare hash path so that gomodTidy can resolve it.
       if (
-        upgrade.newValue?.startsWith('v0.0.0-') &&
+        upgrade.newValue &&
+        isPseudoVersion(upgrade.newValue) &&
         upgrade.newValue !== upgrade.currentValue
       ) {
         logger.debug(
