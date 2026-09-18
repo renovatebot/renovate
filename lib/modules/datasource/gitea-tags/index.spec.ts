@@ -296,4 +296,21 @@ describe('modules/datasource/gitea-tags/index', () => {
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
     });
   });
+
+  describe('getSourceUrl', () => {
+    it('uses the default registry', () => {
+      expect(GiteaTagsDatasource.getSourceUrl('gitea/helm-chart')).toBe(
+        'https://gitea.com/gitea/helm-chart',
+      );
+    });
+
+    it('uses the given registry', () => {
+      expect(
+        GiteaTagsDatasource.getSourceUrl(
+          'gitea/helm-chart',
+          'https://git.example.com',
+        ),
+      ).toBe('https://git.example.com/gitea/helm-chart');
+    });
+  });
 });

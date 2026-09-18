@@ -303,4 +303,12 @@ describe('modules/datasource/forgejo-tags/index', () => {
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
     });
   });
+
+  describe('getSourceUrl', () => {
+    it('uses the forgejo default registry', () => {
+      expect(
+        ForgejoTagsDatasource.getSourceUrl('forgejo-helm/forgejo-helm'),
+      ).toBe('https://code.forgejo.org/forgejo-helm/forgejo-helm');
+    });
+  });
 });
