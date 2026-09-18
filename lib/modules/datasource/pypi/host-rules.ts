@@ -9,10 +9,10 @@ import type { PypiIndexCredentials } from './types.ts';
  * Resolves the credentials for a Python package index URL.
  *
  * The URL's own `user:password@` part - which is often a placeholder such as
- * `${USER}:${PASS}@` - is stripped before matching, so that a `matchHost`
- * containing a path still matches. Google Artifact Registry is only asked for a
- * token when no host rule supplies credentials, so an explicitly configured
- * username/password always wins.
+ * `${USER}:${PASS}@` - does not stop it matching a `matchHost` without
+ * credentials, as `find()` ignores userinfo when matching. Google Artifact
+ * Registry is only asked for a token when no host rule supplies credentials,
+ * so an explicitly configured username/password always wins.
  */
 export async function findPypiIndexCredentials(
   indexUrl: string | undefined,
@@ -23,8 +23,6 @@ export async function findPypiIndexCredentials(
     return {};
   }
 
-  parsedUrl.username = '';
-  parsedUrl.password = '';
   const { username, password } = find({
     hostType: pypiDatasourceId,
     url: parsedUrl.toString(),
