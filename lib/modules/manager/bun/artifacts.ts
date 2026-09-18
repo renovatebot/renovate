@@ -5,23 +5,15 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  deleteLocalFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from '../npm/utils.ts';
+import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactErrorResult,
-  fileAddition,
   resolveToolConstraint,
+  updateLockFile,
 } from '../util.ts';
 
 export async function updateArtifacts(
@@ -55,62 +47,55 @@ export async function updateArtifacts(
   }
 
   const lockFileDir = upath.dirname(lockFileName);
-  const originalNpmrcContent = await getNpmrcContent(lockFileDir);
   const { npmrc, npmrcFileName } = await resolveNpmrc(lockFileName, config);
   // Use the resolved npmrc unless it came from outside the lockfile directory.
   const baseNpmrcContent =
     isString(npmrc) &&
     (!npmrcFileName || npmrcFileName === upath.join(lockFileDir, '.npmrc'))
       ? npmrc
-      : originalNpmrcContent;
+      : undefined;
   const { additionalNpmrcContent } = processHostRules();
-  await updateNpmrcContent(
-    lockFileDir,
-    originalNpmrcContent,
-    additionalNpmrcContent,
-    baseNpmrcContent,
-  );
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
+    return await withNpmrcHostRules(
+      lockFileDir,
+      additionalNpmrcContent,
+      async () => {
+        let cmd = 'bun install';
 
-    let cmd = 'bun install';
+        if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+          cmd += ' --ignore-scripts';
+        }
 
-    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
-      cmd += ' --ignore-scripts';
-    }
+        const execOptions: ExecOptions = {
+          cwdFile: lockFileName,
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'bun',
+              constraint: await resolveToolConstraint(config, 'bun'),
+            },
+          ],
+        };
 
-    const execOptions: ExecOptions = {
-      cwdFile: lockFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'bun',
-          constraint: await resolveToolConstraint(config, 'bun'),
-        },
-      ],
-    };
-
-    await exec(cmd, execOptions);
-
-    const newLockFileContent = await readLocalFile(lockFileName);
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-    return [fileAddition(lockFileName, newLockFileContent)];
+        return await updateLockFile({
+          lockFileName,
+          existingLockFileContent: oldLockFileContent,
+          packageFile: {
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+          deleteLockFile: isLockFileMaintenance,
+          run: () => exec(cmd, execOptions),
+        });
+      },
+      baseNpmrcContent,
+    );
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
     return artifactErrorResult(lockFileName, err);
-  } finally {
-    await resetNpmrcContent(lockFileDir, originalNpmrcContent);
   }
 }

@@ -328,8 +328,12 @@ export interface UpdateLockFileConfig {
   /** The lock file which the update regenerates. */
   lockFileName: string;
 
-  /** Content of the lock file before the update, null when it did not exist. */
-  existingLockFileContent: string | null;
+  /**
+   * Content of the lock file before the update, null when it did not exist.
+   * Pass a Buffer for lock files which may be binary, the new content is then
+   * compared and returned as bytes as well.
+   */
+  existingLockFileContent: string | Buffer | null;
 
   /** Package file to rewrite before the update runs. */
   packageFile?: { path: string; contents: string };

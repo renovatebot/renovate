@@ -16,6 +16,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractApkDeps } from './apk.ts';
+import { extractDebDeps } from './deb.ts';
 
 const variableMarker = '$';
 
@@ -468,8 +469,18 @@ export function extractPackageFile(
       }
     }
 
-    for (const dep of extractApkDeps(instruction, escapeChar)) {
+    for (const dep of [
+      ...extractApkDeps(instruction, escapeChar),
+      ...extractDebDeps(instruction, escapeChar),
+    ]) {
       dep.depType = 'install';
+      if (!dep.skipReason) {
+        // Renovate cannot tell which distribution release the base image
+        // installs from, so any repository it looked the package up against
+        // would offer versions the image cannot install
+        dep.skipReason = 'unknown-registry';
+        dep.skipStage = 'extract';
+      }
       deps.push(dep);
     }
 

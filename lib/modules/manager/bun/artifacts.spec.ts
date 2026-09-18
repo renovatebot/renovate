@@ -253,34 +253,6 @@ describe('modules/manager/bun/artifacts', () => {
         );
       });
 
-      it('resets npmrc when the bun command fails', async () => {
-        const execError = new ExecError('nope', {
-          cmd: '',
-          stdout: '',
-          stderr: '',
-          options: {},
-        });
-        updateArtifact.packageFileName = 'package.json';
-        updateArtifact.config.npmrc = 'registry=https://registry.example.com/';
-        updateArtifact.updatedDeps = [
-          { manager: 'bun', lockFiles: ['bun.lockb'] },
-        ];
-        const oldLock = Buffer.from('old');
-        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
-        fs.readLocalFile.mockResolvedValueOnce('# dummy');
-        exec.mockRejectedValueOnce(execError);
-
-        await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
-          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
-        ]);
-        expect(fs.writeLocalFile).toHaveBeenCalledTimes(3);
-        expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
-          3,
-          '.npmrc',
-          '# dummy',
-        );
-      });
-
       it('supports lockFileMaintenance', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
@@ -366,6 +338,28 @@ describe('modules/manager/bun/artifacts', () => {
         await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
           { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
+      });
+
+      it('restores .npmrc when the install fails', async () => {
+        const execError = new ExecError('nope', {
+          cmd: '',
+          stdout: '',
+          stderr: '',
+          options: {},
+        });
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
+        // npmrc
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
+        exec.mockRejectedValueOnce(execError);
+
+        await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
+        ]);
+
+        expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
       });
     });
 
