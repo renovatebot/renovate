@@ -85,6 +85,126 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
 
+    it('keeps skipping an unknown-registry dep which config gives no registry', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('looks up an unknown-registry dep which config gives a registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipStage',
+      );
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        }),
+      );
+    });
+
+    it('looks up an unknown-registry dep which config gives a default registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.defaultRegistryUrls = [
+        'https://dl-cdn.alpinelinux.org/alpine?arch=x86_64',
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(lookupUpdates).toHaveBeenCalledOnce();
+    });
+
+    it('keeps skipping an unknown-registry dep which brought its own registry', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['git-refs'],
+          registryUrls: ['https://example.com'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        'pre-commit': [
+          {
+            packageFile: '.pre-commit-config.yaml',
+            deps: [
+              {
+                depName: 'some/repo',
+                datasource: 'git-refs',
+                skipReason: 'unknown-registry',
+                registryUrls: ['https://unknown-host.com'],
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles['pre-commit'][0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       // @ts-expect-error -- intentionally using invalid constraint names
