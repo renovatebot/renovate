@@ -44,3 +44,15 @@ export const BufLock = z
     deps: LooseArray(BufLockDep).optional(),
   })
   .loose();
+
+/**
+ * The parts of `buf.yaml` we care about: the `deps[]` list of direct module
+ * references (e.g. `buf.build/googleapis/googleapis`). This is what
+ * distinguishes a direct dependency from a transitive one, since `buf.lock`
+ * records both but only direct deps are independently updatable.
+ */
+export const BufYaml = z
+  .object({
+    deps: LooseArray(z.string()).optional(),
+  })
+  .loose();

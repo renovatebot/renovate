@@ -16,6 +16,10 @@ Plugin entries without a pinned version (`buf.build/owner/name` with no `:versio
 It reads the module dependencies pinned in `buf.lock` (both `v1`, which spells each module as `remote`/`owner`/`repository`, and `v2`, which uses a single `name`) and looks them up via the [`buf-module` datasource](../../datasource/buf-module/index.md).
 Each dependency's resolved `commit` becomes its `currentDigest`, since BSR modules have no semantic version — a bump repoints the module to a newer commit.
 
+`buf.lock` records the full transitive closure, but only the **direct** dependencies (those declared in the sibling `buf.yaml`) are updated.
+Transitive entries are skipped, because `buf dep update` re-resolves them from the direct deps — updating one directly would just be overwritten on the next run.
+If no sibling `buf.yaml` is found, every entry is treated as updatable.
+
 ### How updates are applied
 
 A bump first swaps the `commit` in `buf.lock`, then Renovate runs `buf dep update` to regenerate the file — recomputing the accompanying `b5:` content digest (and any transitive entries) that a plain text edit cannot.

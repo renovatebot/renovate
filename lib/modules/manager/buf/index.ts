@@ -3,7 +3,7 @@ import { BufModuleDatasource } from '../../datasource/buf-module/index.ts';
 import { BufPluginDatasource } from '../../datasource/buf-plugin/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
-export { extractPackageFile } from './extract.ts';
+export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 export const url = 'https://buf.build/docs/generate/overview';
 

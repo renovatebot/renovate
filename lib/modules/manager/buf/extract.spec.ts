@@ -2,7 +2,9 @@ import { codeBlock } from 'common-tags';
 import { fs, logger } from '~test/util.ts';
 import { BufModuleDatasource } from '../../datasource/buf-module/index.ts';
 import { BufPluginDatasource } from '../../datasource/buf-plugin/index.ts';
-import { extractPackageFile } from './index.ts';
+import { extractAllPackageFiles, extractPackageFile } from './index.ts';
+
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/buf/extract', () => {
   describe('extractPackageFile() - buf.gen.yaml', () => {
@@ -254,6 +256,137 @@ describe('modules/manager/buf/extract', () => {
         { packageFile: 'buf.lock', module: 'buf.build/incomplete' },
         'buf: skipping buf.lock dep with unparseable module name',
       );
+    });
+  });
+
+  describe('extractAllPackageFiles()', () => {
+    // buf.lock records the full transitive closure; buf.yaml lists only the
+    // direct deps. googleapis is direct, grpc/grpc is transitive.
+    const bufLock = codeBlock`
+      version: v2
+      deps:
+        - name: buf.build/googleapis/googleapis
+          commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          digest: b5:direct
+        - name: buf.build/grpc/grpc
+          commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          digest: b5:transitive
+    `;
+    const bufYaml = codeBlock`
+      version: v2
+      deps:
+        - buf.build/googleapis/googleapis
+    `;
+
+    beforeEach(() => {
+      fs.getSiblingFileName.mockReturnValue('buf.yaml');
+    });
+
+    function mockFiles(files: Record<string, string | null>): void {
+      fs.readLocalFile.mockImplementation((file): Promise<any> => {
+        return Promise.resolve(file in files ? files[file] : null);
+      });
+    }
+
+    it('marks transitive deps and keeps direct deps updatable', async () => {
+      mockFiles({ 'buf.lock': bufLock, 'buf.yaml': bufYaml });
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      const res = await extractAllPackageFiles({}, ['buf.lock']);
+
+      expect(res).toEqual([
+        {
+          packageFile: 'buf.lock',
+          deps: [
+            {
+              depName: 'googleapis/googleapis',
+              datasource: BufModuleDatasource.id,
+              registryUrls: ['https://buf.build'],
+              currentDigest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            },
+            {
+              depName: 'grpc/grpc',
+              datasource: BufModuleDatasource.id,
+              registryUrls: ['https://buf.build'],
+              currentDigest: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+              skipReason: 'inherited-dependency',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('leaves all deps updatable when there is no sibling buf.yaml', async () => {
+      mockFiles({ 'buf.lock': bufLock });
+      fs.localPathIsFile.mockResolvedValue(false);
+
+      const res = await extractAllPackageFiles({}, ['buf.lock']);
+
+      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual([
+        undefined,
+        undefined,
+      ]);
+    });
+
+    it('leaves all deps updatable when buf.yaml is unreadable', async () => {
+      mockFiles({ 'buf.lock': bufLock, 'buf.yaml': null });
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      const res = await extractAllPackageFiles({}, ['buf.lock']);
+
+      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual([
+        undefined,
+        undefined,
+      ]);
+    });
+
+    it('leaves all deps updatable when buf.yaml is unparseable', async () => {
+      mockFiles({ 'buf.lock': bufLock, 'buf.yaml': '}}}not yaml' });
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      const res = await extractAllPackageFiles({}, ['buf.lock']);
+
+      expect(res[0].deps.map((dep) => dep.skipReason)).toEqual([
+        undefined,
+        undefined,
+      ]);
+    });
+
+    it('extracts buf.gen.yaml plugins without a sibling lookup', async () => {
+      const genYaml = codeBlock`
+        version: v2
+        plugins:
+          - remote: buf.build/protocolbuffers/go:v1.28.0
+      `;
+      mockFiles({ 'buf.gen.yaml': genYaml });
+
+      const res = await extractAllPackageFiles({}, ['buf.gen.yaml']);
+
+      expect(res).toEqual([
+        {
+          packageFile: 'buf.gen.yaml',
+          deps: [
+            {
+              depName: 'protocolbuffers/go',
+              datasource: BufPluginDatasource.id,
+              registryUrls: ['https://buf.build'],
+              currentValue: 'v1.28.0',
+              replaceString: 'buf.build/protocolbuffers/go:v1.28.0',
+              autoReplaceStringTemplate:
+                'buf.build/protocolbuffers/go:{{#if newValue}}{{newValue}}{{/if}}',
+            },
+          ],
+        },
+      ]);
+      expect(fs.localPathIsFile).not.toHaveBeenCalled();
+    });
+
+    it('skips files with no content', async () => {
+      mockFiles({});
+
+      const res = await extractAllPackageFiles({}, ['buf.lock']);
+
+      expect(res).toEqual([]);
     });
   });
 });
