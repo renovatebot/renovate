@@ -442,7 +442,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res2).not.toBeNull();
     });
 
-    it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
+    it('refuses to clone custom non-sparse registry if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
@@ -583,7 +583,7 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('does not clone for sparse registries', async () => {
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig });
       const { mockClone } = setupGitMocks();
 
       const url = 'https://github.com/mcorbin/othertestregistry';
