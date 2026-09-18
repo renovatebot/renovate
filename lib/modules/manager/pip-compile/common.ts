@@ -2,16 +2,11 @@ import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
-import type {
-  ExecOptions,
-  ExtraEnv,
-  ToolConstraint,
-} from '../../../util/exec/types.ts';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 import type {
@@ -55,7 +50,6 @@ export async function getExecOptions(
   config: UpdateArtifactsConfig,
   commandType: CommandType,
   cwd: string,
-  extraEnv: ExtraEnv<string>,
   extractedPythonVersion: string | undefined,
 ): Promise<ExecOptions> {
   const constraint = await getPythonVersionConstraint(
@@ -77,7 +71,6 @@ export async function getExecOptions(
       PIP_NO_INPUT: 'true', // ensure pip doesn't block forever waiting for credentials on stdin
       PIP_KEYRING_PROVIDER: 'import',
       PYTHON_KEYRING_BACKEND: 'keyrings.envvars.keyring.EnvvarsKeyring',
-      ...extraEnv,
     },
   };
   return execOptions;
@@ -316,23 +309,9 @@ function throwForUnknownOption(commandType: CommandType, arg: string): void {
   throw new Error(`Option ${arg} not supported (yet)`);
 }
 
-async function getRegistryCredEnvVars(
-  url: URL,
-  index: number,
-): Promise<Record<string, string>> {
-  const { username, password } = await findPypiIndexCredentials(url.href);
-  const ret: Record<string, string> = {};
-  if (!!username || !!password) {
-    ret[`KEYRING_SERVICE_NAME_${index}`] = url.hostname;
-    ret[`KEYRING_SERVICE_USERNAME_${index}`] = username ?? '';
-    ret[`KEYRING_SERVICE_PASSWORD_${index}`] = password ?? '';
-  }
-  return ret;
-}
-
-export async function getRegistryCredVarsFromPackageFiles(
+export function getRegistryUrlsFromPackageFiles(
   packageFiles: PackageFileContent[],
-): Promise<ExtraEnv<string>> {
+): URL[] {
   const urls: string[] = [];
   for (const packageFile of packageFiles) {
     urls.push(
@@ -342,19 +321,7 @@ export async function getRegistryCredVarsFromPackageFiles(
   }
   logger.debug(urls, 'Extracted registry URLs from package files');
 
-  // The full URL is kept, so that a `matchHost` narrowed to a path still matches
-  const parsedUrls = urls.map(parseUrl).filter(isNotNullOrUndefined);
-
-  let allCreds: ExtraEnv<string> = {};
-  for (const [index, url] of parsedUrls.entries()) {
-    const hostCreds = await getRegistryCredEnvVars(url, index);
-    allCreds = {
-      ...allCreds,
-      ...hostCreds,
-    };
-  }
-
-  return allCreds;
+  return urls.map((url) => parseUrl(url)).filter(isNotNullOrUndefined);
 }
 
 export function matchManager(filename: string): SupportedManagers | 'unknown' {

@@ -486,17 +486,19 @@ name = "pypi"
 
 ### pip-compile
 
-The pip-compile manager can extract these directives from the input file given to Renovate:
+For both `pip-compile` and `uv pip compile`, Renovate extracts these index options from source requirements files and the generated command header:
 
 - `--index-url`
 - `--extra-index-url`
 
 Renovate matches those URLs with credentials from matching `hostRules` blocks in the Renovate configuration.
 Then Renovate passes the information to `pip-compile` via environment variables.
+Because `uv` does not support the environment variable keyring backend we use for `pip-compile`, Renovate instead supplies credentials through a temporary `.netrc` file when using `uv pip compile`.
+No Python keyring packages are needed for `uv pip compile`.
 
-!!! warning "Put directives in the .in file, avoid the lockfile"
-  You must put the `--[extra-]index-url` directive(s) in the `.in` file, for `pip-compile` to use during Renovate jobs.
-  Do _not_ put the directive(s) in the lockfile, as this is _not_ supported.
+!!! note "Index locations"
+  Put index directives in the source `.in` file or pass them as command-line options recorded in the generated command header.
+  Standalone index directives in the generated lockfile are not used for credential lookup.
 
 ```title="requirements.in"
 --extra-index-url https://pypi.my.domain/simple
@@ -521,11 +523,11 @@ private-package==1.2.3
 
 #### Packages that Renovate needs
 
-Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrings.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+When running `pip-compile` (not `uv pip compile`), Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrings.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
 
 ##### Self-hosting Renovate
 
-This section only applies to users who self-host Renovate.
+This section only applies to users who self-host Renovate and use `pip-compile`, not `uv pip compile`.
 If you self-host and use Containerbase, or our Docker sidecar container, then Renovate can already access the packages it needs.
 
 But if you are self-hosting Renovate and:
