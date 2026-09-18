@@ -1,3 +1,5 @@
+import { isString } from '@sindresorhus/is';
+import type { Release } from '../../../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../../../modules/versioning/types.ts';
 
 export interface BucketConfig {
@@ -78,4 +80,36 @@ export function getBucket(
   }
   // default path for patch updates is not to separate them from minor
   return 'non-major';
+}
+
+/**
+ * Group candidate releases by the bucket their update would land in.
+ *
+ * Releases which have no bucket are dropped.
+ */
+export function groupReleasesIntoBuckets(
+  config: BucketConfig,
+  currentVersion: string,
+  releases: Release[],
+  versioningApi: VersioningApi,
+): Record<string, Release[]> {
+  const buckets: Record<string, Release[]> = {};
+  for (const release of releases) {
+    const bucket = getBucket(
+      config,
+      currentVersion,
+      release.version,
+      versioningApi,
+    );
+    // `getBucket()` only returns null when the versioning api cannot
+    // determine a major, but every release reaching it has already passed
+    // `isVersion()`, so a null major contradicts that and the else looks
+    // unreachable rather than merely untested
+    // v8 ignore else -- see #40625
+    if (isString(bucket)) {
+      buckets[bucket] ??= [];
+      buckets[bucket].push(release);
+    }
+  }
+  return buckets;
 }
