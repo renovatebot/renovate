@@ -18,3 +18,10 @@
 .md-source__fact .md-source__fact--version {
   display: none;
 }
+
+/** Material only makes img/svg/video responsive by default, not object */
+.md-typeset object.renovate-banner {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 756 / 250;
+}

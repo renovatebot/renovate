@@ -75,6 +75,7 @@ export class JsrDatasource extends Datasource {
         namespace: `datasource-${JsrDatasource.id}`,
         // TODO: types (#22198)
         key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

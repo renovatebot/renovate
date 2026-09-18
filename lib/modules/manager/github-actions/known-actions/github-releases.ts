@@ -3,7 +3,11 @@ import * as condaVersioning from '../../../versioning/conda/index.ts';
 import * as nodeVersioning from '../../../versioning/node/index.ts';
 import * as npmVersioning from '../../../versioning/npm/index.ts';
 import type { KnownActionConfig } from '../types.ts';
-import { actionsVersionsExtractVersion, valSchema } from './utils.ts';
+import {
+  actionsVersionsExtractVersion,
+  partialValSchema,
+  valSchema,
+} from './utils.ts';
 
 export const githubReleasesActions: Record<string, KnownActionConfig> = {
   // https://github.com/actions/setup-go
@@ -142,11 +146,18 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'gitversion',
     packageName: 'GitTools/GitVersion',
+    // `versionSpec` is documented as "the form of 6.8.x or exact version
+    // like 6.0.0", so it may be a range
+    versioning: npmVersioning.id,
     withSchema: valSchema('versionSpec'),
   },
+  // https://github.com/golangci/golangci-lint-action
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
+    // in the default `binary` install mode, `version` may be a partial
+    // version such as `v2.3` rather than a pinned version
+    withSchema: partialValSchema('version'),
   },
   // https://github.com/goreleaser/goreleaser-action
   'goreleaser/goreleaser-action': {
@@ -166,6 +177,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'terraform',
     packageName: 'hashicorp/terraform',
+    // `terraform_version` may be a constraint string (e.g. `<1.2.0`,
+    // `~1.1.0`) rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('terraform_version'),
   },
   // https://github.com/helm/chart-releaser-action
@@ -201,12 +215,19 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'julia',
     packageName: 'JuliaLang/julia',
+    // the action resolves `version` with node's semver package, so the value
+    // may be a partial version (e.g. `1.10`) or a range (e.g. `^1.6`) rather
+    // than a pinned version
+    versioning: npmVersioning.id,
   },
   // https://github.com/jwlawson/actions-setup-cmake
   'jwlawson/actions-setup-cmake': {
     datasource: GithubReleasesDatasource.id,
     depName: 'cmake',
     packageName: 'Kitware/CMake',
+    // `cmake-version` may be partly specified (e.g. `3.2`) or a wildcard
+    // (e.g. `3.2.x`) rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('cmake-version'),
   },
   // https://github.com/mozilla-actions/sccache-action
@@ -220,6 +241,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'opentofu',
     packageName: 'opentofu/opentofu',
+    // as with `hashicorp/setup-terraform` above, `tofu_version` may be a
+    // constraint string rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('tofu_version'),
   },
   // https://github.com/peaceiris/actions-hugo
@@ -284,6 +308,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'flutter',
     packageName: 'flutter/flutter',
+    // `flutter-version` may be an x-range (e.g. `3.x`, `1.22.x`) used to
+    // pick the latest release of that line, rather than a full version
+    versioning: npmVersioning.id,
     withSchema: valSchema('flutter-version'),
   },
   // https://github.com/superfly/flyctl-actions (there is no root-level
@@ -301,7 +328,9 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'swiftlang/swift',
     // swiftlang/swift tags releases like `swift-6.3.3-RELEASE`
     extractVersion: '^swift-(?<version>.+)-RELEASE$',
-    withSchema: valSchema('swift-version'),
+    // a partial `swift-version` such as `5.0` resolves to the latest
+    // matching release, rather than a pinned version
+    withSchema: partialValSchema('swift-version'),
   },
   'UpCloudLtd/upcloud-cli-action': {
     datasource: GithubReleasesDatasource.id,
