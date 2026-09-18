@@ -1,5 +1,5 @@
 // TODO #22198
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString, isString } from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
@@ -36,7 +36,13 @@ async function lookup(
 
   dep.packageName ??= dep.depName;
 
-  if (dep.skipReason) {
+  // `unknown-registry` says the manager could not work out where to look. When
+  // it has no registry of its own to offer either, a `packageRules` entry can
+  // still supply one, so the dep is dropped once the rules have been applied
+  // rather than before
+  const mayBeGivenARegistry =
+    dep.skipReason === 'unknown-registry' && !isNonEmptyArray(dep.registryUrls);
+  if (dep.skipReason && !mayBeGivenARegistry) {
     return Result.ok(dep);
   }
 
@@ -64,6 +70,23 @@ async function lookup(
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
   depConfig.packageName ??= depConfig.depName;
+
+  if (mayBeGivenARegistry) {
+    if (
+      !isNonEmptyArray(depConfig.registryUrls) &&
+      !isNonEmptyArray(depConfig.defaultRegistryUrls)
+    ) {
+      return Result.ok(dep);
+    }
+
+    logger.debug(
+      `Dependency: ${depName!}, has no registry of its own but is given one by config`,
+    );
+    delete dep.skipReason;
+    delete dep.skipStage;
+    delete depConfig.skipReason;
+    delete depConfig.skipStage;
+  }
 
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#22198)
