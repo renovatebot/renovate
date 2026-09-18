@@ -72,6 +72,7 @@ export class BuildpacksRegistryDatasource extends Datasource {
       {
         namespace: `datasource-${BuildpacksRegistryDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

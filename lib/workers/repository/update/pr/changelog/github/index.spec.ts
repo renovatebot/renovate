@@ -153,6 +153,20 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
       ]);
     });
 
+    it('reuses a release that is already cached', async () => {
+      const cached = {
+        version: '2.5.2',
+        date: '2021-01-01',
+        changes: [],
+        compare: {},
+      };
+      vi.spyOn(packageCache, 'get').mockResolvedValue(cached);
+
+      const res = await getChangeLogJSON({ ...upgrade });
+
+      expect(res?.versions?.[0]).toMatchObject({ version: '2.5.2' });
+    });
+
     it('filters unnecessary warns', async () => {
       await expect(
         getChangeLogJSON({
