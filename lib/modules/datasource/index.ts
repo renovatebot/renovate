@@ -1,10 +1,5 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import {
-  isFunction,
-  isNonEmptyArray,
-  isString,
-  isTruthy,
-} from '@sindresorhus/is';
+import { isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_BLOCKED, HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -340,25 +335,22 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return isFunction(datasource.defaultRegistryUrls)
-      ? datasource.defaultRegistryUrls()
-      : coerceArray(datasource.defaultRegistryUrls);
+    return coerceArray(datasource.defaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
-  let resolvedUrls: string[] = [];
   if (isNonEmptyArray(customUrls)) {
-    resolvedUrls = [...customUrls];
-  } else if (isNonEmptyArray(defaultRegistryUrls)) {
-    resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isFunction(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
+    return massageRegistryUrls(customUrls);
   }
-  return massageRegistryUrls(resolvedUrls);
+  const defaultUrls = isNonEmptyArray(defaultRegistryUrls)
+    ? defaultRegistryUrls
+    : datasource.defaultRegistryUrls;
+  if (!isNonEmptyArray(defaultUrls)) {
+    return [];
+  }
+  return massageRegistryUrls([
+    ...defaultUrls,
+    ...coerceArray(additionalRegistryUrls),
+  ]);
 }
 
 function applyReplacements(
