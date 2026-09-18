@@ -633,6 +633,7 @@ export async function mergeRenovateConfig(
       migratedConfig.errors,
     );
   }
+  // v8 ignore else -- migration always leaves a warnings array behind
   if (migratedConfig.warnings) {
     returnConfig.warnings = [
       ...coerceArray(returnConfig.warnings),

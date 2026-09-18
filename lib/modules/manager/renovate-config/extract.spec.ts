@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
+import { presetSources } from '../../../config/presets/index.ts';
 import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/renovate-config/extract', () => {
@@ -387,6 +388,41 @@ describe('modules/manager/renovate-config/extract', () => {
             },
           ],
         });
+      });
+
+      describe('the internal supportedPresetSources map stays in sync with supported presets', () => {
+        const repoHostedSources = Object.entries(presetSources)
+          .filter(
+            ([source, { repoHosted }]) =>
+              repoHosted &&
+              // but `local` uses the existing platform, so doesn't get its own `-tags` datasource lookup
+              source !== 'local',
+          )
+          .map(([source]) => source);
+
+        it.each(repoHostedSources)(
+          'extracts a pinned "%s>" preset reference',
+          (source) => {
+            expect(
+              extractPackageFile(
+                codeBlock`
+                {
+                  "extends": ["${source}>abc/foo#1.2.3"]
+                }
+              `,
+                'renovate.json',
+              ),
+            ).toEqual({
+              deps: [
+                {
+                  datasource: `${source}-tags`,
+                  depName: 'abc/foo',
+                  currentValue: '1.2.3',
+                },
+              ],
+            });
+          },
+        );
       });
     });
 

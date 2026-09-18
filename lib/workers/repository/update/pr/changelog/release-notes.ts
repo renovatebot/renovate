@@ -273,6 +273,7 @@ async function releaseNotesResult(
   if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
+    // v8 ignore next -- a matched release always carries its own url
     releaseNotes.url = releaseMatch.url
       ? releaseMatch.url
       : /* istanbul ignore next */

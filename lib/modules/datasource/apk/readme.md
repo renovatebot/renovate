@@ -82,65 +82,28 @@ Depending on which APK repository you are using, you may want to use [the `loose
 }
 ```
 
-<!-- TODO #43711 -->
+## Dockerfile support
 
-## Usage example
-
-Say you pin Alpine packages in a `Dockerfile` and want Renovate to bump the versions.
-Combine the `apk` datasource with a [regex manager](../../manager/regex/index.md).
-
-Add a custom manager in `renovate.json`.
-The optional `branch` capture group is filled from the Renovate comment and interpolated into `registryUrlTemplate` by the regex manager.
-
-```json
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": ["/^Dockerfile$/"],
-      "matchStrings": [
-        "#\\s*renovate:\\s*(?:branch=(?<branch>\\S+)\\s+)?depName=(?<depName>\\S+)\\s+ENV .*?_VERSION=\"(?<currentValue>.*)\""
-      ],
-      "registryUrlTemplate": "https://dl-cdn.alpinelinux.org/alpine?branch={{#if branch}}{{branch}}{{else}}v3.19{{/if}}&components=main,community&arch=x86_64",
-      "datasourceTemplate": "apk"
-    }
-  ]
-}
-```
-
-The regex manager supplies `depName` (becomes `packageName`) and `currentValue` (the pinned APK version).
-The datasource then fetches `APKINDEX.tar.gz` for each component, finds `depName` in the index, and compares versions.
-
-Match the `registryUrl` parameters to your image: the Alpine branch (`v3.19` in the default above) and the architecture (`x86_64` here, use `aarch64` on arm64).
+When using distributions built on `apk` packages, it is common to use a version pin for your packages, like so:
 
 ```dockerfile
-FROM alpine:3.19
-
-# renovate: branch=v3.19 depName=nginx
-ENV NGINX_VERSION="1.26.2-r0"
-
-RUN apk add --no-cache "nginx=${NGINX_VERSION}"
+FROM alpine:3.18
+RUN apk add --no-cache bash=5.2.37-r2
 ```
 
-`depName` must match the package name in `APKINDEX` (the `P:` field), e.g. `nginx` for the `nginx` package.
-You can omit `branch=` in the comment when the template default (`v3.19` above) matches your Alpine line.
+This provides reproducibility in the case that the upstream package updates under you.
 
-### Multiple Dockerfiles or Alpine versions
+The [`dockerfile` manager](../../manager/dockerfile/index.md) extracts these packages, allowing updates to them directly, without needing a Custom Manager.
 
-The datasource receives one `registryUrl` per lookup.
-Besides the optional `branch=` pattern in the usage example, you can:
+The manager does not set a `registryUrl`, so you will need to set one which matches your base image as shown above.
 
-1. **Several custom managers** with different `managerFilePatterns` / `matchFilePatterns` and a fixed `registryUrlTemplate` each (e.g. one for `docker/alpine-3.18/**`, another for `docker/alpine-3.19/**`).
-
-1. **`packageRules`** with `matchFileNames` and `registryUrls` to override the parameters for specific paths or packages.
-
-For example, this `packageRules` entry overrides the `registryUrl` for the `nginx` package:
+<!-- TODO: #45706 auto-detect `registryUrl` -->
 
 ```json title="Override apk registryUrl with a packageRules entry"
 {
   "packageRules": [
     {
+      "matchFileNames": ["Dockerfile"],
       "matchDatasources": ["apk"],
       "matchPackageNames": ["nginx"],
       "registryUrls": [
@@ -150,3 +113,76 @@ For example, this `packageRules` entry overrides the `registryUrl` for the `ngin
   ]
 }
 ```
+
+## Wolfi and Chainguard Images example
+
+Wolfi serves its index directly below the repository root, so its `registryUrl` needs neither `branch` nor `components` - only `arch`:
+
+```json title="Point apk lookups at the Wolfi repository"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["apk"],
+      "registryUrls": ["https://packages.wolfi.dev/os?arch=x86_64"]
+    }
+  ]
+}
+```
+
+Renovate then fetches a single index:
+
+```
+https://packages.wolfi.dev/os/x86_64/APKINDEX.tar.gz
+```
+
+Use `arch=aarch64` for an arm64 image.
+
+### Pinning packages in a Wolfi image
+
+As the Wolfi (un)distribution follows a rolling release cadence, it is common to pin the version of a package you depend on.
+Similarly, the package's revision (`-rN`) changes more often than its version.
+
+For instance, you may have a Docker image like so:
+
+```dockerfile
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:96ff486b326d15db16aa1fbd41a17043a557bebf76d2c0ac932e717534025940
+
+RUN apk add --no-cache \
+      curl=~8.12.1 \
+      jq=1.7.1-r4 \
+      bash
+```
+
+In this case:
+
+- `curl=~8.12.1` is a prefix constraint, so it already accepts every `8.12.1-rN`.
+  Renovate doesn't propose an update while there are only revision-based updates.
+  Once `8.13.0` exists, Renovate will provide an update to `curl=~8.13.0`.
+- `jq=1.7.1-r4` is an exact pin, so Renovate raises a PR for a new revision (`jq=1.7.1-r5`) as well as for a new version (`jq=1.8.0-r0`).
+- `bash` has no version at all, so Renovate skips with `skipReason: unsupported-version`
+
+### Mixing Alpine and Wolfi in one repository
+
+A `registryUrl` applies per lookup, so a repository holding both Alpine and Wolfi images needs the two scoped apart.
+Match on the file the dependency was found in:
+
+```json title="Separate apk registries for Alpine and Wolfi Dockerfiles"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["apk"],
+      "registryUrls": [
+        "https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64"
+      ]
+    },
+    {
+      "matchDatasources": ["apk"],
+      "matchFileNames": ["**/*.wolfi", "**/Dockerfile.wolfi"],
+      "registryUrls": ["https://packages.wolfi.dev/os?arch=x86_64"]
+    }
+  ]
+}
+```
+
+A later rule overrides an earlier one, so set the repository you use most as the first rule and narrow it with the rules after it.
+Putting the narrower rule first would let the broader one overwrite its `registryUrls` again.

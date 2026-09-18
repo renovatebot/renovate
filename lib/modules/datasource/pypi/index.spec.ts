@@ -447,6 +447,48 @@ describe('modules/datasource/pypi/index', () => {
       expect(googleAuth).not.toHaveBeenCalled();
     });
 
+    it('builds Basic auth from a username-only host rule', async () => {
+      hostRules.add({
+        matchHost: 'someregion-python.pkg.dev',
+        username: 'user',
+      });
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .matchHeader('authorization', 'Basic dXNlcjo=')
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const res = await getPkgReleases({
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
+      expect(googleAuth).not.toHaveBeenCalled();
+    });
+
+    it('builds Basic auth from a password-only host rule', async () => {
+      hostRules.add({
+        matchHost: 'someregion-python.pkg.dev',
+        password: 'pass',
+      });
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .matchHeader('authorization', 'Basic OnBhc3M=')
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const res = await getPkgReleases({
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
+      expect(googleAuth).not.toHaveBeenCalled();
+    });
+
     it('supports Google Auth not being configured', async () => {
       httpMock
         .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
