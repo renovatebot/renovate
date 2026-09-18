@@ -270,7 +270,7 @@
     "url-join": "5.0.0",
     "validate-npm-package-name": "7.0.2",
     "xmldoc": "3.0.0",
-    "yaml": "2.9.0",
+    "yaml": "2.9.1",
     "yauzl": "3.4.0",
     "zod": "4.6.2"
   },
