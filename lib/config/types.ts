@@ -121,6 +121,7 @@ export interface RenovateSharedConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
+  pdmUpdateStrategy?: PdmUpdateStrategy;
 
   pinDigests?: boolean;
   platformAutomerge?: boolean;
@@ -569,6 +570,8 @@ export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
 export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
+
+export type PdmUpdateStrategy = 'eager' | 'all';
 
 export type MergeStrategy =
   | 'auto'
