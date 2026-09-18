@@ -16,6 +16,7 @@ import type {
 } from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
@@ -562,6 +563,19 @@ describe('modules/datasource/crate/index', () => {
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
 
+    it('reads config.json from cloned registry', async () => {
+      const { mockClone } = setupGitMocks();
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      const url = 'https://github.com/mcorbin/testregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalled();
+      expect(res).not.toBeNull();
+    });
+
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -615,6 +629,7 @@ describe('modules/datasource/crate/index', () => {
 
       const url = 'https://github.com/mcorbin/othertestregistry';
       const sparseUrl = `sparse+${url}`;
+      httpMock.scope(url).get('/config.json').reply(404);
       httpMock.scope(url).get('/my/pk/mypkg').reply(200, {});
 
       const res = await getPkgReleases({
@@ -626,21 +641,142 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeNull();
     });
 
-    it('does not query the crates.io web API for other registries', async () => {
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
-      const url = 'https://example.codeartifact.amazonaws.com/cargo/index';
-      httpMock.scope(url).get('/my/pk/mypkg').reply(200, Fixtures.get('mypkg'));
+    describe('registry web API', () => {
+      const registryUrl =
+        'https://example.codeartifact.amazonaws.com/cargo/index';
+      const sparseRegistryUrl = `sparse+${registryUrl}`;
+      const ownApi = 'https://example.codeartifact.amazonaws.com/cargo/index/-';
+      const mypkgReleases = [{ version: '0.1.0' }, { version: '0.1.1' }];
 
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'mypkg',
-        registryUrls: [`sparse+${url}`],
+      function mockRegistryConfig(api: string): void {
+        httpMock
+          .scope(registryUrl)
+          .get('/config.json')
+          .reply(200, { dl: `${registryUrl}/dl`, api });
+      }
+
+      function mockIndex(): void {
+        httpMock
+          .scope(registryUrl)
+          .get('/my/pk/mypkg')
+          .reply(200, Fixtures.get('mypkg'));
+      }
+
+      beforeEach(() => {
+        GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       });
 
-      expect(res).toEqual({
-        dependencyUrl: `${url}/mypkg`,
-        registryUrl: `sparse+${url}`,
-        releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
+      it('uses the crates.io API for mirrors of the crates.io index', async () => {
+        mockRegistryConfig(API_BASE_URL);
+        mockIndex();
+        mockCratesApiCallFor('mypkg', {
+          crate: { repository: 'https://github.com/example/mypkg' },
+        });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({
+          sourceUrl: 'https://github.com/example/mypkg',
+          releases: mypkgReleases,
+        });
+      });
+
+      it('uses the web API of registries implementing the read endpoints', async () => {
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock
+          .scope(ownApi)
+          .get('/api/v1/crates/mypkg?include=')
+          .reply(200, {
+            crate: { repository: 'https://github.com/example/mypkg' },
+          });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({
+          sourceUrl: 'https://github.com/example/mypkg',
+          releases: mypkgReleases,
+        });
+      });
+
+      it('probes the web API once and remembers registries answering 404', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock.scope(ownApi).get('/api/v1/crates/mypkg?include=').reply(404);
+
+        const res1 = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res1).toEqual({
+          dependencyUrl: `${registryUrl}/mypkg`,
+          registryUrl: sparseRegistryUrl,
+          releases: mypkgReleases,
+        });
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-crate-registry-api',
+          registryUrl,
+          true,
+          24 * 60,
+        );
+
+        // Second package: no config.json and no web API request
+        httpMock
+          .scope(registryUrl)
+          .get('/ot/he/otherpkg')
+          .reply(200, Fixtures.get('mypkg'));
+
+        const res2 = await getPkgReleases({
+          datasource,
+          packageName: 'otherpkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res2).toMatchObject({ releases: mypkgReleases });
+        expect(res2?.sourceUrl).toBeUndefined();
+      });
+
+      it('skips the web API when a previous run found it unsupported', async () => {
+        vi.spyOn(packageCache, 'get').mockResolvedValueOnce(true);
+        mockRegistryConfig(ownApi);
+        mockIndex();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({ releases: mypkgReleases });
+        expect(res?.sourceUrl).toBeUndefined();
+      });
+
+      it('does not remember other web API errors', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock.scope(ownApi).get('/api/v1/crates/mypkg?include=').reply(500);
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({ releases: mypkgReleases });
+        expect(res?.sourceUrl).toBeUndefined();
+        expect(setCache).not.toHaveBeenCalled();
       });
     });
 
@@ -735,24 +871,8 @@ describe('modules/datasource/crate/index', () => {
       const res = await datasource.postprocessRelease(
         {
           packageName: 'clap',
-          registryUrl: CRATES_IO_REGISTRY_URL,
+          registryUrl: 'https://example.com',
         },
-        releaseOrig,
-      );
-
-      expect(res).toBe(releaseOrig);
-    });
-
-    it('no-op for registries other than crates.io', async () => {
-      const registryUrl = 'https://example.com/index/';
-      memCache.set(`crate-datasource/registry-config/${registryUrl}`, {
-        dl: 'https://example.com/crates',
-        api: 'https://example.com/-',
-      });
-      const releaseOrig = { version: '4.5.17' };
-
-      const res = await datasource.postprocessRelease(
-        { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
         releaseOrig,
       );
 
@@ -816,6 +936,89 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toEqual({
         version: '4.5.17',
         releaseTimestamp: '2024-09-04T19:16:41.355Z',
+      });
+    });
+
+    it('rethrows errors from crates.io', async () => {
+      memCache.set(
+        `crate-datasource/registry-config/${CRATES_IO_REGISTRY_URL_PARSED}`,
+        cratesIoConfig,
+      );
+      httpMock.scope(API_BASE_URL).get('/api/v1/crates/clap/4.5.17').reply(404);
+
+      await expect(
+        datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: CRATES_IO_REGISTRY_URL },
+          { version: '4.5.17' },
+        ),
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
+    });
+
+    describe('other registries', () => {
+      const registryUrl = 'https://example.com/index';
+      const api = 'https://example.com/-';
+
+      beforeEach(() => {
+        memCache.set(`crate-datasource/registry-config/${registryUrl}`, {
+          dl: 'https://example.com/dl',
+          api,
+        });
+      });
+
+      it('fetches releaseTimestamp from registries implementing the read endpoints', async () => {
+        httpMock
+          .scope(api)
+          .get('/api/v1/crates/clap/4.5.17')
+          .reply(200, {
+            version: { created_at: '2024-09-04T19:16:41.355243+00:00' },
+          });
+
+        const res = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          { version: '4.5.17' },
+        );
+
+        expect(res).toEqual({
+          version: '4.5.17',
+          releaseTimestamp: '2024-09-04T19:16:41.355Z',
+        });
+      });
+
+      it('probes once and remembers registries answering 404', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        httpMock.scope(api).get('/api/v1/crates/clap/4.5.17').reply(404);
+        const releaseOrig = { version: '4.5.17' };
+
+        const res1 = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          releaseOrig,
+        );
+        const res2 = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          { version: '4.5.18' },
+        );
+
+        expect(res1).toBe(releaseOrig);
+        expect(res2).toEqual({ version: '4.5.18' });
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-crate-registry-api',
+          registryUrl,
+          true,
+          24 * 60,
+        );
+      });
+
+      it('rethrows other errors', async () => {
+        httpMock.scope(api).get('/api/v1/crates/clap/4.5.17').reply(500);
+
+        await expect(
+          datasource.postprocessRelease(
+            { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+            { version: '4.5.17' },
+          ),
+        ).rejects.toThrow(
+          'Request failed with status code 500 (Internal Server Error)',
+        );
       });
     });
   });

@@ -1,14 +1,18 @@
+import { isBoolean } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as cargoVersioning from '../../versioning/cargo/index.ts';
@@ -167,41 +171,110 @@ export class CrateDatasource extends Datasource {
       return cached;
     }
 
-    try {
-      const configUrl = joinUrlParts(info.rawUrl, 'config.json');
-      const { body } = await this.http.getJson(configUrl, RegistryConfig);
-      memCache.set(cacheKey, body);
-      return body;
-    } catch {
-      logger.debug(
-        { registryUrl: info.rawUrl },
-        'Could not fetch registry config.json',
-      );
+    if (info.clonePath) {
+      try {
+        const configPath = upath.join(info.clonePath, 'config.json');
+        const content = await readCacheFile(configPath, 'utf8');
+        const parsed = Json.pipe(RegistryConfig).parse(content);
+        memCache.set(cacheKey, parsed);
+        return parsed;
+      } catch {
+        logger.debug(
+          { registryUrl: info.rawUrl },
+          'Could not read config.json from cloned registry',
+        );
+      }
+    } else {
+      try {
+        const configUrl = joinUrlParts(info.rawUrl, 'config.json');
+        const { body } = await this.http.getJson(configUrl, RegistryConfig);
+        memCache.set(cacheKey, body);
+        return body;
+      } catch {
+        logger.debug(
+          { registryUrl: info.rawUrl },
+          'Could not fetch registry config.json',
+        );
+      }
     }
 
     return null;
+  }
+
+  /**
+   * The registry web API specification only defines publish, yank, unyank,
+   * owners, search and login endpoints, see
+   * https://doc.rust-lang.org/cargo/reference/registry-web-api.html.
+   * `GET api/v1/crates/<name>` and `GET api/v1/crates/<name>/<version>` are
+   * crates.io extensions. Registries which mirror the crates.io index keep
+   * `api` pointing at crates.io and are used without probing. Any other
+   * registry is probed once and remembered as unsupported when it answers
+   * 404, since private registries (Artifactory, CodeArtifact, ...) advertise
+   * an `api` URL for publishing only.
+   */
+  private static isCratesIoApi(api: string): boolean {
+    return parseUrl(api)?.hostname === 'crates.io';
+  }
+
+  private static isNotFound(err: unknown): boolean {
+    return err instanceof HttpError && err.response?.statusCode === 404;
+  }
+
+  private async isReadApiUnsupported(
+    rawUrl: string,
+    api: string,
+  ): Promise<boolean> {
+    if (CrateDatasource.isCratesIoApi(api)) {
+      return false;
+    }
+
+    const memKey = `crate-datasource/registry-api-unsupported/${rawUrl}`;
+    const cached = memCache.get<boolean>(memKey);
+    if (isBoolean(cached)) {
+      return cached;
+    }
+
+    const persisted = await packageCache.get<boolean>(
+      'datasource-crate-registry-api',
+      rawUrl,
+    );
+    const unsupported = persisted === true;
+    memCache.set(memKey, unsupported);
+    return unsupported;
+  }
+
+  private async markReadApiUnsupported(
+    rawUrl: string,
+    api: string,
+  ): Promise<void> {
+    logger.debug(
+      { registryUrl: rawUrl, api },
+      'Registry does not implement the crates.io read API, skipping crate metadata and release timestamp lookups',
+    );
+    memCache.set(`crate-datasource/registry-api-unsupported/${rawUrl}`, true);
+    await packageCache.set(
+      'datasource-crate-registry-api',
+      rawUrl,
+      true,
+      24 * 60,
+    );
   }
 
   private async _getCrateMetadata(
     info: RegistryInfo,
     packageName: string,
   ): Promise<CrateMetadata | null> {
-    // The registry web API specification only defines publish, yank, unyank,
-    // owners, search and login endpoints, see
-    // https://doc.rust-lang.org/cargo/reference/registry-web-api.html.
-    // `GET api/v1/crates/<name>` is crates.io-specific, so private registries
-    // (Artifactory, CodeArtifact, ...) respond with 404 even when their
-    // `config.json` advertises an `api` URL for publishing.
-    if (info.flavor !== 'crates.io') {
-      return null;
-    }
-
     const registryConfig = await this.fetchRegistryConfig(info);
     if (!registryConfig?.api) {
       return null;
     }
 
-    const apiBaseUrl = joinUrlParts(registryConfig.api, 'api/v1/');
+    const { api } = registryConfig;
+    if (await this.isReadApiUnsupported(info.rawUrl, api)) {
+      return null;
+    }
+
+    const apiBaseUrl = joinUrlParts(api, 'api/v1/');
 
     // The `?include=` suffix is required to avoid unnecessary database queries
     // on the crates.io server. This lets us work around the regular request
@@ -217,6 +290,15 @@ export class CrateDatasource extends Datasource {
       const { body } = await this.http.getJson(crateUrl, CrateMetadataResponse);
       return body.crate;
     } catch (err) {
+      // The index lookup preceding this call found the crate, so a 404 means
+      // the registry does not implement the endpoint at all
+      if (
+        !CrateDatasource.isCratesIoApi(api) &&
+        CrateDatasource.isNotFound(err)
+      ) {
+        await this.markReadApiUnsupported(info.rawUrl, api);
+        return null;
+      }
       logger.debug(
         { err, packageName, registryUrl: info.rawUrl },
         'failed to download crate metadata',
@@ -501,22 +583,23 @@ export class CrateDatasource extends Datasource {
       return release;
     }
 
-    // `GET api/v1/crates/<name>/<version>` is crates.io-specific and not part
-    // of the registry web API specification, see `_getCrateMetadata`. Other
-    // registries can supply timestamps via the `pubtime` index field instead.
-    if (!registryUrl || !CrateDatasource.isCratesIo(registryUrl)) {
+    // Look up the registry config from cache (populated during getReleases)
+    const rawUrl = registryUrl?.replace(regEx(/^sparse\+/), '');
+    if (!rawUrl) {
       return release;
     }
-
-    // Look up the registry config from cache (populated during getReleases)
-    const rawUrl = registryUrl.replace(regEx(/^sparse\+/), '');
     const cacheKey = `crate-datasource/registry-config/${rawUrl}`;
-    const config = memCache.get<{ dl: string; api?: string }>(cacheKey);
+    const config = memCache.get<RegistryConfig>(cacheKey);
     if (!config?.api) {
       return release;
     }
 
-    const apiBaseUrl = joinUrlParts(config.api, 'api/v1/');
+    const { api } = config;
+    if (await this.isReadApiUnsupported(rawUrl, api)) {
+      return release;
+    }
+
+    const apiBaseUrl = joinUrlParts(api, 'api/v1/');
     const url = `${apiBaseUrl}crates/${packageName}/${release.versionOrig ?? release.version}`;
     logger.trace(
       { url, packageName, version: release.version, registryUrl },
@@ -524,12 +607,22 @@ export class CrateDatasource extends Datasource {
     );
     // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
     // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
-    const { body: releaseTimestamp } = await this.http.getJson(
-      url,
-      { cacheProvider: memCacheProvider },
-      ReleaseTimestamp,
-    );
-    release.releaseTimestamp = releaseTimestamp;
+    try {
+      const { body: releaseTimestamp } = await this.http.getJson(
+        url,
+        { cacheProvider: memCacheProvider },
+        ReleaseTimestamp,
+      );
+      release.releaseTimestamp = releaseTimestamp;
+    } catch (err) {
+      if (
+        CrateDatasource.isCratesIoApi(api) ||
+        !CrateDatasource.isNotFound(err)
+      ) {
+        throw err;
+      }
+      await this.markReadApiUnsupported(rawUrl, api);
+    }
     return release;
   }
 
