@@ -25,6 +25,26 @@ describe('workers/repository/reconfigure/reconfigure-cache', () => {
       });
     });
 
+    it('sets new cache with an extract result', () => {
+      const dummyCache = {} satisfies RepoCacheData;
+      const extractResult = {
+        packageFiles: {},
+        branches: [partial<BranchConfig>()],
+        branchList: ['some-branch'],
+      };
+      cache.getCache.mockReturnValue(dummyCache);
+
+      setReconfigureBranchCache('reconfigure-sha', true, extractResult);
+
+      expect(dummyCache).toEqual({
+        reconfigureBranchCache: {
+          reconfigureBranchSha: 'reconfigure-sha',
+          isConfigValid: true,
+          extractResult,
+        },
+      });
+    });
+
     it('updates old cache', () => {
       const dummyCache = {
         reconfigureBranchCache: {

@@ -25,7 +25,12 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
-import { applyGitSource, resolveToolConstraint } from '../../util.ts';
+import {
+  applyGitSource,
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../../util.ts';
 import { type PyProject, UvLockfile, type UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
@@ -242,38 +247,17 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
-      await gitExec(cmd, execOptions);
-
-      // check for changes
-      const fileChanges: UpdateArtifactsResult[] = [];
-      const newLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newLockContent;
-      if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newLockContent,
-          },
-        });
-      } else {
-        logger.debug('uv.lock is unchanged');
-      }
-
-      return fileChanges.length ? fileChanges : null;
+      return await updateLockFile({
+        lockFileName,
+        existingLockFileContent,
+        run: () => gitExec(cmd, execOptions),
+      });
     } catch (err) {
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
       logger.debug({ err }, 'Failed to update uv lock file');
-      return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: err.message,
-          },
-        },
-      ];
+      return artifactErrorResult(lockFileName, err);
     }
   }
 }
@@ -363,9 +347,11 @@ async function getUvExtraIndexUrl(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
     if (username || password) {
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (username) {
         parsedUrl.username = username;
       }
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (password) {
         parsedUrl.password = password;
       }
@@ -406,10 +392,12 @@ async function getUvIndexCredentials(
 
     const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);
     }
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (password) {
       entries.push([`UV_INDEX_${NAME}_PASSWORD`, password]);
     }

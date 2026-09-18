@@ -93,6 +93,23 @@ describe('modules/manager/composer/schema', () => {
       });
     });
 
+    it('ignores an inline package repository', () => {
+      expect(
+        Repos.parse([
+          { type: 'package' },
+          {
+            name: 'wpackagist',
+            type: 'composer',
+            url: 'https://wpackagist.org',
+          },
+        ]),
+      ).toEqual({
+        pathRepos: {},
+        registryUrls: ['https://wpackagist.org', 'https://repo.packagist.org'],
+        gitRepos: {},
+      });
+    });
+
     it(`parses repositories with packagist disabled`, () => {
       expect(
         Repos.parse({

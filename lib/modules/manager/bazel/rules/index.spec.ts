@@ -337,6 +337,24 @@ describe('modules/manager/bazel/rules/index', () => {
         },
       ]);
     });
+
+    it('sets neither value nor digest when the archive name is only a suffix', () => {
+      expect(
+        extractDepsFromFragmentData({
+          rule: 'http_archive',
+          name: 'foo_bar',
+          sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          url: 'https://github.com/foo/bar/archive/.tar.gz',
+        }),
+      ).toEqual([
+        {
+          datasource: 'github-tags',
+          depName: 'foo_bar',
+          depType: 'http_archive',
+          packageName: 'foo/bar',
+        },
+      ]);
+    });
   });
 
   describe('docker', () => {

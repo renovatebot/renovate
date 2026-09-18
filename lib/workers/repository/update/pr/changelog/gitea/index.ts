@@ -37,10 +37,7 @@ export async function getReleaseNotesMd(
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'file');
-  let files: RepoContents[] = [];
-  if (!files.length) {
-    files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
-  }
+  const files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;
