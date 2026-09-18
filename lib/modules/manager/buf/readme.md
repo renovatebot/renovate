@@ -23,5 +23,6 @@ This requires the [`buf`](https://buf.build/docs/cli/) binary; Renovate can inst
 
 Because `buf dep update` refreshes the whole lock file, this manager also supports [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
 
-To authenticate against a private or rate-limited registry, add a [`hostRules`](../../../../usage/configuration-options.md#hostrules) entry with `hostType: buf-module` and a `token`.
-Renovate passes it to the CLI as `BUF_TOKEN`.
+Each dependency's registry host is taken from its `buf.lock` entry, so self-hosted BSR instances (any host other than `buf.build`) are looked up and authenticated against their own domain.
+To authenticate against a private or rate-limited registry, add a [`hostRules`](../../../configuration-options.md#hostrules) entry with `hostType: buf-module` and a `token`, matching the registry's host.
+Renovate passes these to the CLI as `BUF_TOKEN`, joining multiple registries into the `token@host,token@host` form buf expects.
