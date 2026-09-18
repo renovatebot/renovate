@@ -1,10 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { regEx } from '../../util/regex.ts';
-
-export interface RangeComparator {
-  operator: string;
-  version: string;
-}
+import type { RangeComparator } from './types.ts';
 
 // Comparator operators, longest first so `<=` is matched ahead of `<`, `>=`
 // ahead of `>`, and `==` ahead of `=`.

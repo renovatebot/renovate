@@ -157,3 +157,12 @@ export interface VersioningApi {
 }
 
 export type VersioningApiConstructor = new (config?: string) => VersioningApi;
+
+/**
+ * One term of a comparator range, such as the `<=` and the `1.2.3` of `<=1.2.3`.
+ * The terms parsed from a single range are ANDed together.
+ */
+export interface RangeComparator {
+  operator: string;
+  version: string;
+}
