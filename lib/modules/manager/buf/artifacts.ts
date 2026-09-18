@@ -1,18 +1,16 @@
 import { isEmptyArray } from '@sindresorhus/is';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  getSiblingFileName,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { BufModuleDatasource } from '../../datasource/buf-module/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 /**
  * Build a `BUF_TOKEN` value from any configured `buf-module` host rules.
@@ -42,15 +40,20 @@ export async function updateArtifacts(
     updateArtifact;
   logger.debug(`buf.updateArtifacts(${packageFileName})`);
 
+  // The module manager keys on buf.lock; buf.gen.yaml plugin updates are
+  // applied in-place by autoReplace and have nothing to regenerate.
+  if (upath.basename(packageFileName) !== 'buf.lock') {
+    return null;
+  }
+
   if (isEmptyArray(updatedDeps) && !config.isLockFileMaintenance) {
     logger.debug('buf: no updated deps - returning null');
     return null;
   }
 
-  const lockFileName =
-    updatedDeps[0]?.lockFiles?.[0] ??
-    config.lockFiles?.[0] ??
-    getSiblingFileName(packageFileName, 'buf.lock');
+  // In this manager buf.lock is itself the package file, so it is both what we
+  // rewrite and the lock `buf dep update` regenerates.
+  const lockFileName = packageFileName;
 
   const oldLockFileContent = await readLocalFile(lockFileName);
   if (!oldLockFileContent) {
@@ -70,7 +73,10 @@ export async function updateArtifacts(
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [
-        { toolName: 'buf', constraint: config.constraints?.buf },
+        {
+          toolName: 'buf',
+          constraint: await resolveToolConstraint(config, 'buf'),
+        },
       ],
       extraEnv: bufToken ? { BUF_TOKEN: bufToken } : undefined,
     };

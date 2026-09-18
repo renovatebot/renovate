@@ -29,7 +29,6 @@ const config: UpdateArtifactsConfig = {};
 const googleapisDep = {
   depName: 'googleapis/googleapis',
   registryUrls: ['https://buf.build'],
-  lockFiles: ['buf.lock'],
 };
 
 describe('modules/manager/buf/artifacts', () => {
@@ -42,10 +41,24 @@ describe('modules/manager/buf/artifacts', () => {
     GlobalConfig.reset();
   });
 
+  it('ignores non-buf.lock package files (e.g. buf.gen.yaml plugins)', async () => {
+    const execSnapshots = mockExecAll();
+    await expect(
+      updateArtifacts({
+        packageFileName: 'buf.gen.yaml',
+        updatedDeps: [{ depName: 'protocolbuffers/go' }],
+        newPackageFileContent: 'new buf.gen.yaml',
+        config,
+      }),
+    ).resolves.toBeNull();
+    expect(execSnapshots).toEqual([]);
+    expect(fs.readLocalFile).not.toHaveBeenCalled();
+  });
+
   it('returns null if no updated deps and not lockFileMaintenance', async () => {
     await expect(
       updateArtifacts({
-        packageFileName: 'buf.yaml',
+        packageFileName: 'buf.lock',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
@@ -53,11 +66,11 @@ describe('modules/manager/buf/artifacts', () => {
     ).resolves.toBeNull();
   });
 
-  it('returns null if no buf.lock is found', async () => {
+  it('returns null if buf.lock cannot be read', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     await expect(
       updateArtifacts({
-        packageFileName: 'buf.yaml',
+        packageFileName: 'buf.lock',
         updatedDeps: [googleapisDep],
         newPackageFileContent: '',
         config,
@@ -71,13 +84,13 @@ describe('modules/manager/buf/artifacts', () => {
     const execSnapshots = mockExecAll();
     await expect(
       updateArtifacts({
-        packageFileName: 'buf.yaml',
+        packageFileName: 'buf.lock',
         updatedDeps: [googleapisDep],
-        newPackageFileContent: 'new buf.yaml',
+        newPackageFileContent: 'new buf.lock',
         config,
       }),
     ).resolves.toBeNull();
-    expect(fs.writeLocalFile).toHaveBeenCalledWith('buf.yaml', 'new buf.yaml');
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('buf.lock', 'new buf.lock');
     expect(execSnapshots).toMatchObject([
       { cmd: 'buf dep update', options: { cwd: '/tmp/github/some/repo' } },
     ]);
@@ -89,12 +102,10 @@ describe('modules/manager/buf/artifacts', () => {
     const execSnapshots = mockExecAll();
     await expect(
       updateArtifacts({
-        packageFileName: 'buf.yaml',
+        packageFileName: 'buf.lock',
         // a dep with no registryUrls exercises the token-collection fallback
-        updatedDeps: [
-          { depName: 'googleapis/googleapis', lockFiles: ['buf.lock'] },
-        ],
-        newPackageFileContent: 'buf.yaml',
+        updatedDeps: [{ depName: 'googleapis/googleapis' }],
+        newPackageFileContent: 'buf.lock',
         config,
       }),
     ).resolves.toBeNull();
@@ -106,9 +117,9 @@ describe('modules/manager/buf/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     const execSnapshots = mockExecAll();
     const res = await updateArtifacts({
-      packageFileName: 'buf.yaml',
+      packageFileName: 'buf.lock',
       updatedDeps: [googleapisDep],
-      newPackageFileContent: 'new buf.yaml',
+      newPackageFileContent: 'new buf.lock',
       config,
     });
     expect(res).toEqual([
@@ -119,15 +130,14 @@ describe('modules/manager/buf/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: 'buf dep update' }]);
   });
 
-  it('supports lockFileMaintenance and falls back to a sibling lock', async () => {
-    fs.getSiblingFileName.mockReturnValueOnce('buf.lock');
+  it('supports lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('old lock');
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     mockExecAll();
     const res = await updateArtifacts({
-      packageFileName: 'buf.yaml',
+      packageFileName: 'buf.lock',
       updatedDeps: [],
-      newPackageFileContent: 'buf.yaml',
+      newPackageFileContent: 'buf.lock',
       config: { ...config, isLockFileMaintenance: true },
     });
     expect(res).toEqual([
@@ -135,7 +145,6 @@ describe('modules/manager/buf/artifacts', () => {
         file: { type: 'addition', path: 'buf.lock', contents: 'new lock' },
       },
     ]);
-    expect(fs.getSiblingFileName).toHaveBeenCalledWith('buf.yaml', 'buf.lock');
   });
 
   it('injects BUF_TOKEN from host rules', async () => {
@@ -148,9 +157,9 @@ describe('modules/manager/buf/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     const execSnapshots = mockExecAll();
     await updateArtifacts({
-      packageFileName: 'buf.yaml',
+      packageFileName: 'buf.lock',
       updatedDeps: [googleapisDep],
-      newPackageFileContent: 'buf.yaml',
+      newPackageFileContent: 'buf.lock',
       config,
     });
     expect(execSnapshots[0].options?.env).toMatchObject({
@@ -162,9 +171,9 @@ describe('modules/manager/buf/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('old lock');
     mockExecAll(new Error('buf exploded'));
     const res = await updateArtifacts({
-      packageFileName: 'buf.yaml',
+      packageFileName: 'buf.lock',
       updatedDeps: [googleapisDep],
-      newPackageFileContent: 'buf.yaml',
+      newPackageFileContent: 'buf.lock',
       config,
     });
     expect(res).toEqual([

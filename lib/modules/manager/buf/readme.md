@@ -11,16 +11,17 @@ Only remote/curated plugin references are managed. Local plugins (`local:`, `pro
 
 Plugin entries without a pinned version (`buf.build/owner/name` with no `:version`) are skipped, since there is no current version for Renovate to bump from.
 
-## `buf.yaml` — module dependencies
+## `buf.lock` — module dependencies
 
-It extracts the module dependencies listed under `deps[]` (both `v1` and `v2`) and looks them up via the [`buf-module` datasource](../../datasource/buf-module/index.md).
-Each dependency is pinned to the resolved commit recorded for it in the sibling `buf.lock` file, which becomes the dependency's `currentDigest`.
-Dependencies with no matching `buf.lock` entry are surfaced but skipped, since there is no resolved commit to bump from.
+It reads the module dependencies pinned in `buf.lock` (both `v1`, which spells each module as `remote`/`owner`/`repository`, and `v2`, which uses a single `name`) and looks them up via the [`buf-module` datasource](../../datasource/buf-module/index.md).
+Each dependency's resolved `commit` becomes its `currentDigest`, since BSR modules have no semantic version — a bump repoints the module to a newer commit.
 
-### Updating `buf.lock`
+### How updates are applied
 
-Because both the resolved commit and its content digest live in `buf.lock` (not `buf.yaml`), updates are applied by regenerating the lock file with `buf dep update` rather than by editing text in place.
+A bump first swaps the `commit` in `buf.lock`, then Renovate runs `buf dep update` to regenerate the file — recomputing the accompanying `b5:` content digest (and any transitive entries) that a plain text edit cannot.
 This requires the [`buf`](https://buf.build/docs/cli/) binary; Renovate can install it automatically when `binarySource` is `install` or `docker`.
+
+Because `buf dep update` refreshes the whole lock file, this manager also supports [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).
 
 To authenticate against a private or rate-limited registry, add a [`hostRules`](../../../../usage/configuration-options.md#hostrules) entry with `hostType: buf-module` and a `token`.
 Renovate passes it to the CLI as `BUF_TOKEN`.
