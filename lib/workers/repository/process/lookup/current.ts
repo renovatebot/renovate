@@ -56,6 +56,40 @@ export function getCurrentVersion(
 }
 
 /**
+ * Run `getCurrentVersion()` over the non-deprecated releases first, falling back to all of them.
+ */
+function getCurrentVersionFromReleases(
+  compareValue: string | undefined,
+  lockedVersion: string | undefined,
+  versioningApi: VersioningApi,
+  rangeStrategy: string | null | undefined,
+  latestVersion: string | undefined,
+  releases: Release[],
+): string | null {
+  return (
+    getCurrentVersion(
+      // TODO #22198
+      compareValue!,
+      lockedVersion!,
+      versioningApi,
+      rangeStrategy!,
+      latestVersion!,
+      releases
+        .filter((release) => !release.isDeprecated)
+        .map((release) => release.version),
+    ) ??
+    getCurrentVersion(
+      compareValue!,
+      lockedVersion!,
+      versioningApi,
+      rangeStrategy!,
+      latestVersion!,
+      releases.map((release) => release.version),
+    )
+  );
+}
+
+/**
  * Resolve the version `currentValue` is treated as being at, preferring
  * non-deprecated releases and falling back to all of them.
  */
@@ -65,8 +99,7 @@ export function resolveCurrentVersion(
   versioningApi: VersioningApi,
   rangeStrategy: string | null | undefined,
   latestVersion: string | undefined,
-  allVersions: string[],
-  nonDeprecatedVersions: string[],
+  releases: Release[],
 ): string | undefined {
   let currentVersion: string | undefined;
   if (rangeStrategy === 'update-lockfile') {
@@ -74,30 +107,20 @@ export function resolveCurrentVersion(
   } else if (
     compareValue &&
     versioningApi.isSingleVersion(compareValue) &&
-    allVersions.includes(compareValue)
+    releases.some((release) => release.version === compareValue)
   ) {
     currentVersion = compareValue;
   }
 
-  // TODO #22198
   currentVersion ??=
-    getCurrentVersion(
-      compareValue!,
-      lockedVersion!,
+    getCurrentVersionFromReleases(
+      compareValue,
+      lockedVersion,
       versioningApi,
-      rangeStrategy!,
-      latestVersion!,
-      nonDeprecatedVersions,
-    ) ??
-    getCurrentVersion(
-      compareValue!,
-      lockedVersion!,
-      versioningApi,
-      rangeStrategy!,
-      latestVersion!,
-      allVersions,
-    ) ??
-    undefined;
+      rangeStrategy,
+      latestVersion,
+      releases,
+    ) ?? undefined;
 
   return currentVersion;
 }
@@ -113,26 +136,15 @@ export function getNewestMatchingVersion(
   compareValue: string | undefined,
   versioningApi: VersioningApi,
   latestVersion: string | undefined,
-  allVersions: Release[],
+  releases: Release[],
 ): string | null {
-  // Resolve from the already filtered releases (so that filters like followTag apply), preferring non-deprecated versions with a fallback - both like `resolveCurrentVersion()`.
-  return (
-    getCurrentVersion(
-      // TODO #22198
-      compareValue!,
-      '',
-      versioningApi,
-      'replace',
-      latestVersion!,
-      allVersions.filter((v) => !v.isDeprecated).map((v) => v.version),
-    ) ??
-    getCurrentVersion(
-      compareValue!,
-      '',
-      versioningApi,
-      'replace',
-      latestVersion!,
-      allVersions.map((v) => v.version),
-    )
+  // Resolve from the already filtered releases, so that filters like followTag apply - like `resolveCurrentVersion()`, but always with the `replace` range strategy.
+  return getCurrentVersionFromReleases(
+    compareValue,
+    '',
+    versioningApi,
+    'replace',
+    latestVersion,
+    releases,
   );
 }
