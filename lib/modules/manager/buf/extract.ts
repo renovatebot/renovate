@@ -1,11 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import {
-  getSiblingFileName,
-  localPathIsFile,
-  readLocalFile,
-} from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { BufModuleDatasource } from '../../datasource/buf-module/index.ts';
@@ -13,19 +8,12 @@ import { BufPluginDatasource } from '../../datasource/buf-plugin/index.ts';
 import type {
   ExtractConfig,
   PackageDependency,
-  PackageFile,
   PackageFileContent,
 } from '../types.ts';
-import { BufGenYaml, BufLock, BufYaml } from './schema.ts';
+import { BufGenYaml, BufLock } from './schema.ts';
 
 const remotePluginRegex = regEx(
   /^(?<host>[\w-]+(?:\.[\w-]+)+)\/(?<owner>[\w-]+)\/(?<name>[\w-]+)(?::(?<version>[\w.-]+))?$/,
-);
-
-// `buf.build/<owner>/<repository>[:<reference>]` — the module reference spelling
-// shared by `buf.yaml` deps and (in `v2`) `buf.lock` `name` entries.
-const moduleRefRegex = regEx(
-  /^(?<host>[\w-]+(?:\.[\w-]+)+)\/(?<owner>[\w-]+)\/(?<repository>[\w-]+)(?::(?<reference>[\w.-]+))?$/,
 );
 
 function extractPlugin(ref: string): PackageDependency | null {
@@ -57,10 +45,9 @@ function extractPlugin(ref: string): PackageDependency | null {
   return dep;
 }
 
-export function extractPackageFile(
+function extractBufGenYaml(
   content: string,
   packageFile: string,
-  _config: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
@@ -89,142 +76,69 @@ export function extractPackageFile(
 }
 
 /**
- * Build a `remote/owner/repository` -> resolved `commit` map from `buf.lock`.
+ * Extract the module dependencies pinned in a `buf.lock` file.
  *
- * The commit is what pins each module, so it becomes the dep's
- * `currentDigest`; version bumps are then driven by the `buf-module`
- * datasource's digest resolution rather than by version ordering.
+ * The resolved commit (a 32-char hex string that lives in the file text)
+ * becomes each dep's `currentDigest`, so a bump is applied by autoReplace
+ * swapping the commit in place; `updateArtifacts` then runs `buf dep update`
+ * to recompute the accompanying `b5:` content digest.
+ *
+ * Deps are emitted in file order so `depIndex` is stable across re-extraction
+ * (autoReplace's `confirmIfDepUpdated` re-parses the modified file).
  */
-function parseLockCommits(content: string): Map<string, string> {
-  const commits = new Map<string, string>();
-
-  let deps: ReturnType<typeof BufLock.parse>['deps'];
+function extractBufLock(
+  content: string,
+  packageFile: string,
+): PackageFileContent | null {
+  let bufLock: ReturnType<typeof BufLock.parse>;
   try {
-    ({ deps } = BufLock.parse(parseSingleYaml(content)));
+    bufLock = BufLock.parse(parseSingleYaml(content));
   } catch (err) {
-    logger.debug({ err }, 'buf: failed to parse buf.lock');
-    return commits;
+    logger.debug({ packageFile, err }, 'Failed to parse buf.lock');
+    return null;
   }
 
-  for (const dep of coerceArray(deps)) {
+  const deps: PackageDependency[] = [];
+  for (const dep of coerceArray(bufLock.deps)) {
     if (!dep.commit) {
       continue;
     }
 
     // v2 spells the module as a single `name`; v1 as remote/owner/repository.
-    let key: string | undefined;
+    let host: string | undefined;
+    let owner: string | undefined;
+    let repository: string | undefined;
     if (dep.name) {
-      key = dep.name;
-    } else if (dep.remote && dep.owner && dep.repository) {
-      key = `${dep.remote}/${dep.owner}/${dep.repository}`;
+      [host, owner, repository] = dep.name.split('/');
+    } else {
+      host = dep.remote;
+      owner = dep.owner;
+      repository = dep.repository;
     }
 
-    if (key) {
-      commits.set(key, dep.commit);
+    if (!host || !owner || !repository) {
+      continue;
     }
+
+    deps.push({
+      depName: `${owner}/${repository}`,
+      datasource: BufModuleDatasource.id,
+      registryUrls: [`https://${host}`],
+      currentDigest: dep.commit,
+    });
   }
 
-  return commits;
+  return deps.length ? { deps } : null;
 }
 
-function extractModuleDep(
-  ref: string,
-  commits: Map<string, string>,
-): PackageDependency | null {
-  const match = moduleRefRegex.exec(ref)?.groups;
-  if (!match) {
-    return null;
-  }
-
-  const { host, owner, repository, reference } = match;
-  const dep: PackageDependency = {
-    depName: `${owner}/${repository}`,
-    datasource: BufModuleDatasource.id,
-    registryUrls: [`https://${host}`],
-  };
-
-  if (reference) {
-    dep.currentValue = reference;
-  }
-
-  const commit = commits.get(`${host}/${owner}/${repository}`);
-  if (commit) {
-    dep.currentDigest = commit;
-  } else {
-    // No entry in buf.lock, so there is no resolved commit to bump from.
-    dep.skipReason = 'unversioned-reference';
-  }
-
-  return dep;
-}
-
-async function extractBufModule(
+export function extractPackageFile(
   content: string,
   packageFile: string,
-): Promise<PackageFile | null> {
-  let bufYaml: ReturnType<typeof BufYaml.parse>;
-  try {
-    bufYaml = BufYaml.parse(parseSingleYaml(content));
-  } catch (err) {
-    logger.debug({ packageFile, err }, 'buf: failed to parse buf.yaml');
-    return null;
+  _config: ExtractConfig,
+): PackageFileContent | null {
+  if (upath.basename(packageFile).includes('buf.gen.')) {
+    return extractBufGenYaml(content, packageFile);
   }
 
-  if (!bufYaml.deps?.length) {
-    return null;
-  }
-
-  const lockFile = getSiblingFileName(packageFile, 'buf.lock');
-  const lockContent = (await localPathIsFile(lockFile))
-    ? await readLocalFile(lockFile, 'utf8')
-    : null;
-  const commits = lockContent ? parseLockCommits(lockContent) : new Map();
-
-  const deps: PackageDependency[] = [];
-  for (const ref of bufYaml.deps) {
-    const dep = extractModuleDep(ref, commits);
-    if (dep) {
-      deps.push(dep);
-    }
-  }
-
-  if (!deps.length) {
-    return null;
-  }
-
-  const result: PackageFile = { deps, packageFile };
-  if (lockContent) {
-    result.lockFiles = [lockFile];
-  }
-  return result;
-}
-
-export async function extractAllPackageFiles(
-  config: ExtractConfig,
-  matchedFiles: string[],
-): Promise<PackageFile[]> {
-  const packageFiles: PackageFile[] = [];
-
-  for (const packageFile of matchedFiles) {
-    const content = await readLocalFile(packageFile, 'utf8');
-    if (!content) {
-      logger.debug({ packageFile }, 'buf: package file has no content');
-      continue;
-    }
-
-    if (upath.basename(packageFile).includes('buf.gen.')) {
-      const res = extractPackageFile(content, packageFile, config);
-      if (res) {
-        packageFiles.push({ ...res, packageFile });
-      }
-      continue;
-    }
-
-    const res = await extractBufModule(content, packageFile);
-    if (res) {
-      packageFiles.push(res);
-    }
-  }
-
-  return packageFiles;
+  return extractBufLock(content, packageFile);
 }

@@ -22,17 +22,6 @@ export const BufGenYaml = z.object({
 });
 
 /**
- * `buf.yaml` module manifest. `deps[]` entries are BSR module references,
- * e.g. `buf.build/googleapis/googleapis` — optionally with a trailing
- * `:<reference>` label. The list is identical in shape for `v1` and `v2`.
- */
-export const BufYaml = z
-  .object({
-    deps: LooseArray(z.string()).optional(),
-  })
-  .loose();
-
-/**
  * A single `deps[]` entry from `buf.lock`, covering both config versions.
  *
  * v1: the module is spelled out as `remote` / `owner` / `repository`.
