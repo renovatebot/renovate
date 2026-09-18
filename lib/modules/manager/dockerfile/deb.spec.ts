@@ -1,9 +1,28 @@
 import { codeBlock } from 'common-tags';
-import { extractDebDeps } from './deb.ts';
+import { DateTime } from 'luxon';
+import { detectDebRegistryUrls, extractDebDeps } from './deb.ts';
 
 const escapeChar = '\\\\';
 
+const debian = 'https://deb.debian.org/debian';
+const debianParams = 'components=main,contrib,non-free&binaryArch=amd64';
+const ubuntu = 'https://archive.ubuntu.com/ubuntu';
+const ubuntuSecurity = 'https://security.ubuntu.com/ubuntu';
+const ubuntuParams =
+  'components=main,restricted,universe,multiverse&binaryArch=amd64';
+
 describe('modules/manager/dockerfile/deb', () => {
+  // Debian's rolling aliases name whichever release is current, so the clock is
+  // pinned to a date at which `stable` was bookworm and `oldstable` bullseye
+  beforeAll(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(DateTime.fromISO('2024-07-01').valueOf());
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
   describe('extractDebDeps()', () => {
     it('ignores instructions which are not RUN', () => {
       expect(extractDebDeps('FROM debian:bookworm', escapeChar)).toBeEmpty();
@@ -303,6 +322,142 @@ describe('modules/manager/dockerfile/deb', () => {
       expect(
         extractDebDeps('RUN apt-get install -y "curl=8.14.1-2', escapeChar),
       ).toBeEmpty();
+    });
+  });
+
+  describe('detectDebRegistryUrls()', () => {
+    it('returns nothing for an image it cannot identify', () => {
+      // a `FROM` which Renovate could not parse
+      expect(
+        detectDebRegistryUrls({ skipReason: 'contains-variable' }),
+      ).toBeUndefined();
+      // built on Debian, but its name does not say which release
+      expect(
+        detectDebRegistryUrls({ depName: 'node', currentValue: '22' }),
+      ).toBeUndefined();
+      expect(detectDebRegistryUrls({ depName: 'node' })).toBeUndefined();
+      // an Alpine tag suffix is not a Debian codename
+      expect(
+        detectDebRegistryUrls({
+          depName: 'node',
+          currentValue: '22-alpine3.21',
+        }),
+      ).toBeUndefined();
+      // a suite with no release of its own
+      expect(
+        detectDebRegistryUrls({ depName: 'debian', currentValue: 'sid' }),
+      ).toBeUndefined();
+      // Ubuntu's floating tags name no release
+      expect(
+        detectDebRegistryUrls({ depName: 'ubuntu', currentValue: 'rolling' }),
+      ).toBeUndefined();
+      expect(detectDebRegistryUrls({ depName: 'ubuntu' })).toBeUndefined();
+    });
+
+    it('detects the suite of the debian image', () => {
+      expect(
+        detectDebRegistryUrls({ depName: 'debian', currentValue: 'trixie' }),
+      ).toEqual([`${debian}?suite=trixie&${debianParams}`]);
+    });
+
+    it('detects the suite of a registry-qualified debian image', () => {
+      expect(
+        detectDebRegistryUrls({
+          depName: 'public.ecr.aws/docker/library/debian',
+          currentValue: 'bookworm',
+        }),
+      ).toEqual([`${debian}?suite=bookworm&${debianParams}`]);
+    });
+
+    it('detects the suite a debian version names', () => {
+      const bookworm = [`${debian}?suite=bookworm&${debianParams}`];
+      expect(
+        detectDebRegistryUrls({ depName: 'debian', currentValue: '12' }),
+      ).toEqual(bookworm);
+      // a point release names no suite of its own
+      expect(
+        detectDebRegistryUrls({ depName: 'debian', currentValue: '12.11' }),
+      ).toEqual(bookworm);
+    });
+
+    it('ignores the variant and build date of a debian tag', () => {
+      const bookworm = [`${debian}?suite=bookworm&${debianParams}`];
+      expect(
+        detectDebRegistryUrls({
+          depName: 'debian',
+          currentValue: 'bookworm-slim',
+        }),
+      ).toEqual(bookworm);
+      expect(
+        detectDebRegistryUrls({
+          depName: 'debian',
+          currentValue: 'bookworm-20240110-slim',
+        }),
+      ).toEqual(bookworm);
+    });
+
+    it('resolves the debian rolling aliases', () => {
+      expect(
+        detectDebRegistryUrls({
+          depName: 'debian',
+          currentValue: 'stable-slim',
+        }),
+      ).toEqual([`${debian}?suite=bookworm&${debianParams}`]);
+      expect(
+        detectDebRegistryUrls({ depName: 'debian', currentValue: 'oldstable' }),
+      ).toEqual([`${debian}?suite=bullseye&${debianParams}`]);
+      // an untagged image, and `debian:latest`, are the current stable release
+      const stable = [`${debian}?suite=bookworm&${debianParams}`];
+      expect(
+        detectDebRegistryUrls({ depName: 'debian', currentValue: 'latest' }),
+      ).toEqual(stable);
+      expect(detectDebRegistryUrls({ depName: 'debian' })).toEqual(stable);
+    });
+
+    it('detects the suites of the ubuntu image', () => {
+      const noble = [
+        `${ubuntu}?suite=noble&${ubuntuParams}`,
+        `${ubuntu}?suite=noble-updates&${ubuntuParams}`,
+        `${ubuntuSecurity}?suite=noble-security&${ubuntuParams}`,
+      ];
+      expect(
+        detectDebRegistryUrls({ depName: 'ubuntu', currentValue: 'noble' }),
+      ).toEqual(noble);
+      expect(
+        detectDebRegistryUrls({ depName: 'ubuntu', currentValue: '24.04' }),
+      ).toEqual(noble);
+      expect(
+        detectDebRegistryUrls({
+          depName: 'ubuntu',
+          currentValue: 'noble-20240801',
+        }),
+      ).toEqual(noble);
+    });
+
+    it('detects the release which another image tags itself with', () => {
+      expect(
+        detectDebRegistryUrls({
+          depName: 'node',
+          currentValue: '22-bookworm-slim',
+        }),
+      ).toEqual([`${debian}?suite=bookworm&${debianParams}`]);
+      // the release comes last, after the tag's own version and variant
+      expect(
+        detectDebRegistryUrls({
+          depName: 'python',
+          currentValue: '3.12-slim-bookworm',
+        }),
+      ).toEqual([`${debian}?suite=bookworm&${debianParams}`]);
+      expect(
+        detectDebRegistryUrls({
+          depName: 'eclipse-temurin',
+          currentValue: '21-jdk-jammy',
+        }),
+      ).toEqual([
+        `${ubuntu}?suite=jammy&${ubuntuParams}`,
+        `${ubuntu}?suite=jammy-updates&${ubuntuParams}`,
+        `${ubuntuSecurity}?suite=jammy-security&${ubuntuParams}`,
+      ]);
     });
   });
 });

@@ -91,12 +91,26 @@ RUN apk add --no-cache \
       rsyslog=8.2412.0-r1
 ```
 
-Renovate does _not_ work out which Alpine release your base image installs from, and the `apk` datasource's default registry may not match it, so a lookup against that default would offer versions your image cannot install.
-Renovate therefore skips these packages with `skipReason: unknown-registry` until you say which repositories to read.
+Renovate reads the `registryUrl` from the base image of the stage the package is installed in, so the packages it offers are the ones that image can install.
+A stage which builds on another stage installs from that stage's repositories.
 
-<!-- TODO: #45706 auto-detect `registryUrl` -->
+These base images are recognised:
 
-Give them a `registryUrls` with a `packageRules` entry to have them looked up:
+| Base image                                | Repositories                                      |
+| ----------------------------------------- | ------------------------------------------------- |
+| `alpine:3.21`, `alpine:3.21.4`            | Alpine `v3.21`, components `main` and `community` |
+| `alpine`, `alpine:latest`                 | Alpine `latest-stable`                            |
+| `alpine:edge`                             | Alpine `edge`                                     |
+| any image tagged `...-alpine3.21`         | Alpine `v3.21`                                    |
+| `cgr.dev/chainguard/...`, `...wolfi-base` | Wolfi                                             |
+
+A registry prefix makes no difference, so `public.ecr.aws/docker/library/alpine:3.21` is recognised too.
+
+Renovate does _not_ guess the release of an image which does not name one - `vault:1.13.3` is built on Alpine, but its tag does not say which release, and neither does a bare `-alpine` suffix.
+Rather than look those packages up against a repository which may hold versions the image cannot install, Renovate skips them with `skipReason: unknown-registry`.
+
+Give those images a `registryUrls` with a `packageRules` entry to have them looked up after all.
+Use one to override what Renovate detects too, say to use a mirror, or to look up another architecture than the `x86_64` which Renovate assumes:
 
 ```json title="Point apk lookups at the Alpine 3.21 repositories"
 {
@@ -126,7 +140,7 @@ Renovate skips packages which it cannot update, and says why in the `packageFile
 - packages without a version, e.g. `apk add bash`
 - packages whose version comes from a variable, e.g. `apk add "bash=$BASH_VERSION"`
 - packages constrained to an identity hash with `><`, which is not a version
-- every package, until you give it a `registryUrls` -- see above
+- packages installed in a stage whose base image names no Alpine release, unless you give them a `registryUrls`
 
 Renovate also proposes no new value for the `<`, `<=`, `>`, `>=`, `>~` and `<~` operators, as there is no single obvious new bound for them.
 
@@ -160,13 +174,30 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 ```
 
-The `deb` datasource needs a `registryUrl` which says which suite, components and architecture to look in, and Renovate does _not_ work that out from your base image.
-Its default is the Debian `stable` suite for `amd64`, which may not match your base image, so a lookup against that default would offer versions your image cannot install.
-Renovate therefore skips these packages with `skipReason: unknown-registry` until you say which repositories to read.
+The `deb` datasource needs a `registryUrl` which says which suite, components and architecture to look in.
+Renovate reads it from the base image of the stage the package is installed in, so the packages it offers are the ones that image can install.
+A stage which builds on another stage installs from that stage's repositories.
 
-<!-- TODO: #45706 auto-detect `registryUrl` -->
+These base images are recognised:
 
-Give them a `registryUrls` with a `packageRules` entry to have them looked up:
+| Base image                                        | Repositories                                         |
+| ------------------------------------------------- | ---------------------------------------------------- |
+| `debian:trixie`, `debian:13`, `debian:13.1`       | Debian `trixie`                                      |
+| `debian`, `debian:latest`, `debian:stable`        | the current Debian stable release                    |
+| `ubuntu:noble`, `ubuntu:24.04`                    | Ubuntu `noble`, `noble-updates` and `noble-security` |
+| any image tagged `...-bookworm`, `...-jammy`, ... | the Debian or Ubuntu release the codename names      |
+
+A `-slim` variant and a build date are ignored, so `debian:bookworm-20240110-slim` is read as `bookworm`.
+A registry prefix makes no difference either, so `public.ecr.aws/docker/library/debian:trixie` is recognised too.
+
+Renovate reads only Debian's own suite, because Debian folds `-updates` and `-security` into it at each point release, and those two suites publish an index which the `deb` datasource cannot read.
+A security update released between point releases is therefore not offered until the next point release.
+
+Renovate does _not_ guess the release of an image which does not name one, such as `node:22`.
+Rather than look those packages up against a suite which may hold versions the image cannot install, Renovate skips them with `skipReason: unknown-registry`.
+
+Give those images a `registryUrls` with a `packageRules` entry to have them looked up after all.
+Use one to override what Renovate detects too, say to use a mirror, or to look up another architecture than the `amd64` which Renovate assumes:
 
 ```json title="Point deb lookups at the Debian trixie repositories"
 {
@@ -189,7 +220,7 @@ Renovate skips packages which it cannot update, and says why in the `packageFile
 - packages whose version comes from a variable, e.g. `apt-get install -y "curl=$CURL_VERSION"`
   This can be handled with a Custom Manager, instead.
 - packages given a wildcard version, e.g. `apt-get install -y 'curl=8.14.*'`
-- every package, until you give it a `registryUrls` -- see above
+- packages installed in a stage whose base image names no Debian or Ubuntu release, unless you give them a `registryUrls`
 
 Local or remote `.deb` files, removal markers like `vim-` and pattern matches like `^gnome` are ignored.
 `dpkg -i` is not supported, because it installs a local file rather than a package from a repository.

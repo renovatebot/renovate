@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { extractApkDeps } from './apk.ts';
+import { detectApkRegistryUrls, extractApkDeps } from './apk.ts';
 
 const escapeChar = '\\\\';
 
@@ -392,6 +392,105 @@ describe('modules/manager/dockerfile/apk', () => {
       expect(
         extractApkDeps('RUN apk add "bash=5.2.37-r2', escapeChar),
       ).toBeEmpty();
+    });
+  });
+
+  describe('detectApkRegistryUrls()', () => {
+    it('returns nothing for an image it cannot identify', () => {
+      // a `FROM` which Renovate could not parse
+      expect(
+        detectApkRegistryUrls({ skipReason: 'contains-variable' }),
+      ).toBeUndefined();
+      // built on Alpine, but its name does not say which release
+      expect(
+        detectApkRegistryUrls({ depName: 'vault', currentValue: '1.13.3' }),
+      ).toBeUndefined();
+      // names Alpine, but not which release of it
+      expect(
+        detectApkRegistryUrls({ depName: 'node', currentValue: '22-alpine' }),
+      ).toBeUndefined();
+      // a release Renovate cannot turn into a branch
+      expect(
+        detectApkRegistryUrls({
+          depName: 'alpine',
+          currentValue: '3.22.0_rc1',
+        }),
+      ).toBeUndefined();
+      expect(detectApkRegistryUrls({ depName: 'node' })).toBeUndefined();
+    });
+
+    it('detects the branch of the alpine image', () => {
+      expect(
+        detectApkRegistryUrls({ depName: 'alpine', currentValue: '3.21' }),
+      ).toEqual([
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64',
+      ]);
+    });
+
+    it('detects the branch of an alpine point release', () => {
+      expect(
+        detectApkRegistryUrls({ depName: 'alpine', currentValue: '3.21.4' }),
+      ).toEqual([
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64',
+      ]);
+    });
+
+    it('detects the branch of a registry-qualified alpine image', () => {
+      expect(
+        detectApkRegistryUrls({
+          depName: 'public.ecr.aws/docker/library/alpine',
+          currentValue: '3.19',
+        }),
+      ).toEqual([
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+      ]);
+    });
+
+    it('treats an untagged or latest alpine image as the stable branch', () => {
+      const latestStable = [
+        'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main,community&arch=x86_64',
+      ];
+      expect(detectApkRegistryUrls({ depName: 'alpine' })).toEqual(
+        latestStable,
+      );
+      expect(
+        detectApkRegistryUrls({ depName: 'alpine', currentValue: 'latest' }),
+      ).toEqual(latestStable);
+    });
+
+    it('detects the edge branch', () => {
+      expect(
+        detectApkRegistryUrls({ depName: 'alpine', currentValue: 'edge' }),
+      ).toEqual([
+        'https://dl-cdn.alpinelinux.org/alpine?branch=edge&components=main,community&arch=x86_64',
+      ]);
+    });
+
+    it('detects the branch which another image tags itself with', () => {
+      expect(
+        detectApkRegistryUrls({
+          depName: 'node',
+          currentValue: '22-alpine3.21',
+        }),
+      ).toEqual([
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.21&components=main,community&arch=x86_64',
+      ]);
+    });
+
+    it('detects Wolfi images', () => {
+      const wolfi = ['https://packages.wolfi.dev/os?arch=x86_64'];
+      expect(
+        detectApkRegistryUrls({
+          depName: 'cgr.dev/chainguard/wolfi-base',
+          currentValue: 'latest',
+        }),
+      ).toEqual(wolfi);
+      expect(
+        detectApkRegistryUrls({ depName: 'cgr.dev/chainguard/node' }),
+      ).toEqual(wolfi);
+      expect(
+        detectApkRegistryUrls({ depName: 'my-mirror.io/wolfi-base' }),
+      ).toEqual(wolfi);
     });
   });
 });
