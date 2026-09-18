@@ -78,6 +78,8 @@ mod 'example/samba',
 
 Renovate reads the `dependencies` array of a Puppet module's `metadata.json`:
 
+<!-- schema-validation-disable-next-block -->
+
 ```json title="metadata.json"
 {
   "name": "example-mymodule",
