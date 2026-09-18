@@ -1,6 +1,7 @@
 import { logger } from '~test/util.ts';
 import {
   isCrossOriginPaginationAllowed,
+  isGoogleArtifactRegistry,
   resolvePaginationUrl,
 } from './util.ts';
 
@@ -26,6 +27,18 @@ describe('modules/datasource/util', () => {
 
     it('returns false for a datasource without a flag', () => {
       expect(isCrossOriginPaginationAllowed('npm')).toBe(false);
+    });
+  });
+
+  describe('isGoogleArtifactRegistry', () => {
+    it.each`
+      hostname                       | expected
+      ${'someregion-python.pkg.dev'} | ${true}
+      ${'someregion-docker.pkg.dev'} | ${true}
+      ${'pkg.dev.example.com'}       | ${false}
+      ${'pypi.org'}                  | ${false}
+    `('$hostname -> $expected', ({ hostname, expected }) => {
+      expect(isGoogleArtifactRegistry(hostname)).toBe(expected);
     });
   });
 
