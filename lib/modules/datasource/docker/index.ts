@@ -767,6 +767,8 @@ export class DockerDatasource extends Datasource {
       'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
       'https://quay.io', // Quay sorts from oldest to newest, so we need to get all pages
       'https://cgr.dev', // Chainguard sorts lexically and publishes a tag per build, so current versions sort past the page limit
+      'https://registry.access.redhat.com', // RH catalog; Quay-style lexicographic sort, high tag counts
+      'https://registry.redhat.io', // RH authenticated catalog; same backend
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000

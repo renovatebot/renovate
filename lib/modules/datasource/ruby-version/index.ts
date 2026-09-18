@@ -84,6 +84,7 @@ export class RubyVersionDatasource extends Datasource {
       {
         namespace: `datasource-${RubyVersionDatasource.id}`,
         key: 'all',
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

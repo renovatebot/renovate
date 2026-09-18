@@ -18,6 +18,7 @@ import {
   getReleaseNotes,
   getReleaseNotesMd as getReleaseNotesMdRaw,
   massageBody,
+  massageName,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
 } from './release-notes.ts';
@@ -230,6 +231,25 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it.each([null, undefined, 'fake', 123])('handles invalid: %s', (date) => {
       expect(releaseNotesCacheMinutes(date as never)).toBe(55);
+    });
+  });
+
+  describe('massageName()', () => {
+    it('strips a leading version', () => {
+      expect(massageName('Release v1.2.3 some title', '1.2.3')).toBe(
+        'some title',
+      );
+    });
+
+    it('leaves the name alone when there is no version', () => {
+      expect(massageName('v1.2.3 some title', undefined)).toBe(
+        'v1.2.3 some title',
+      );
+    });
+
+    it('returns undefined for a name that is left empty', () => {
+      expect(massageName('1.2.3', '1.2.3')).toBeUndefined();
+      expect(massageName(null, undefined)).toBeUndefined();
     });
   });
 

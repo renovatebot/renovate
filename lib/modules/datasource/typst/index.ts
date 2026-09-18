@@ -9,6 +9,10 @@ import { Registry } from './schema.ts';
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
+
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://packages.typst.org/preview/index.json'];
   }
@@ -22,11 +26,7 @@ export class TypstDatasource extends Datasource {
   private async _getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const [namespace, pkg] = packageName.split('/');
-    if (namespace !== 'preview') {
-      logger.debug(`Unsupported namespace for @${packageName}`);
-      return null;
-    }
+    const [, pkg] = packageName.split('/');
 
     const [registryUrl] = this.getDefaultRegistryUrls('');
 
@@ -51,14 +51,21 @@ export class TypstDatasource extends Datasource {
     return result;
   }
 
-  override getReleases(
+  override async getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
+    const [namespace] = config.packageName.split('/');
+    if (namespace !== 'preview') {
+      logger.debug(`Unsupported namespace for @${config.packageName}`);
+      return null;
+    }
+
     return withCache(
       {
         namespace: `datasource-${TypstDatasource.id}:registry-releases`,
         key: config.packageName,
         fallback: true,
+        cacheable: true,
       },
       () => this._getReleases(config),
     );

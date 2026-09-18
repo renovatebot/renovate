@@ -96,6 +96,7 @@ function getNewValue({
       isReplacement,
     });
 
+    // v8 ignore next -- pep440 always answers for a well-formed `==X.Y.*`
     return newValue?.replace(regEx(/^==/), '') ?? null;
   }
 

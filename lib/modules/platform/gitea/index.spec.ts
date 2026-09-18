@@ -2004,6 +2004,41 @@ describe('modules/platform/gitea/index', () => {
         });
       },
     );
+
+    it('should use "fast-forward-only" for platform automerge when repo allows only fast-forward-only', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge', {
+          Do: 'fast-forward-only',
+          merge_when_checks_succeed: true,
+          delete_branch_after_merge: true,
+        })
+        .reply(200);
+      await initFakePlatform(scope, '1.24.0');
+      await initFakeRepo(scope, {
+        allow_rebase: false,
+        allow_fast_forward_only_merge: true,
+        default_merge_style: 'fast-forward-only',
+      });
+
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformPrOptions: {
+          automergeStrategy: 'fast-forward',
+          usePlatformAutomerge: true,
+        },
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        title: 'pr-title',
+      });
+    });
   });
 
   describe('updatePr', () => {
@@ -2264,6 +2299,74 @@ describe('modules/platform/gitea/index', () => {
       });
 
       expect(res).toBe(false);
+    });
+
+    it('should use "fast-forward-only" for fast-forward strategy when repo allows only fast-forward-only', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls/1/merge', {
+          Do: 'fast-forward-only',
+        })
+        .reply(200);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope, {
+        allow_rebase: false,
+        allow_fast_forward_only_merge: true,
+        default_merge_style: 'fast-forward-only',
+      });
+
+      const res = await gitea.mergePr({
+        branchName: 'some-branch',
+        id: 1,
+        strategy: 'fast-forward',
+      });
+
+      expect(res).toBe(true);
+    });
+
+    it('should use "rebase" for fast-forward strategy when repo allows only rebase', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls/1/merge', {
+          Do: 'rebase',
+        })
+        .reply(200);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope, {
+        allow_rebase: true,
+        allow_fast_forward_only_merge: false,
+      });
+
+      const res = await gitea.mergePr({
+        branchName: 'some-branch',
+        id: 1,
+        strategy: 'fast-forward',
+      });
+
+      expect(res).toBe(true);
+    });
+
+    it('should prefer "fast-forward-only" for fast-forward strategy when repo allows both', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls/1/merge', {
+          Do: 'fast-forward-only',
+        })
+        .reply(200);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope, {
+        allow_rebase: true,
+        allow_fast_forward_only_merge: true,
+        default_merge_style: 'fast-forward-only',
+      });
+
+      const res = await gitea.mergePr({
+        branchName: 'some-branch',
+        id: 1,
+        strategy: 'fast-forward',
+      });
+
+      expect(res).toBe(true);
     });
   });
 

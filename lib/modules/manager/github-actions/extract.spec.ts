@@ -1541,6 +1541,42 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'dotnet-sdk',
           depType: 'uses-with',
           packageName: 'dotnet-sdk',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a channel installs the latest patch release on it, rather than
+      // pinning a version
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0' },
+      },
+      expected: [
+        {
+          currentValue: '8.0',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // the idiomatic x-range form is a range too
+      step: {
+        uses: 'actions/setup-dotnet@v4',
+        with: { 'dotnet-version': '8.0.x' },
+      },
+      expected: [
+        {
+          currentValue: '8.0.x',
+          datasource: 'dotnet-version',
+          depName: 'dotnet-sdk',
+          depType: 'uses-with',
+          packageName: 'dotnet-sdk',
+          versioning: 'npm',
         },
       ],
     },
@@ -1557,6 +1593,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'dotnet-sdk',
           depType: 'uses-with',
           packageName: 'dotnet-sdk',
+          versioning: 'npm',
         },
       ],
     },
@@ -1575,6 +1612,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'dotnet-sdk',
           depType: 'uses-with',
           packageName: 'dotnet-sdk',
+          versioning: 'npm',
         },
       ],
     },
@@ -1590,6 +1628,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -1605,6 +1644,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -1624,6 +1664,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jre',
           depType: 'uses-with',
           packageName: 'java-jre',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -1674,6 +1715,143 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // a major.minor `java-version` is a range too, so it must keep its
+      // precision rather than gain a patch/build component
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0' },
+      },
+      expected: [
+        {
+          currentValue: '21.0',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      // a fully-qualified `java-version` is pinned, not a range, so it's
+      // looked up with the default Java versioning
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0.9+11.0.LTS' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.9+11.0.LTS',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0.9' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.9',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.0.9-ea' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.9-ea',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // `latest` isn't a version we can pin or bump
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
+    },
+    {
+      // an `x`-range has no single version to bump it to
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21.x' },
+      },
+      expected: [
+        {
+          currentValue: '21.x',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
+    },
+    {
+      // a comparator range has no single version to bump it to
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '>=21' },
+      },
+      expected: [
+        {
+          currentValue: '>=21',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
+    },
+    {
+      // early-access releases aren't published by the java-version datasource
+      step: {
+        uses: 'actions/setup-java@v4',
+        with: { distribution: 'temurin', 'java-version': '21-ea' },
+      },
+      expected: [
+        {
+          currentValue: '21-ea',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
         },
       ],
     },
@@ -2257,6 +2435,25 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // `'latest'` is the default `pixi-version`, and is a valid version according to Conda versioning, but not one that can be used to bump the verson
+      step: {
+        uses: 'prefix-dev/setup-pixi@v0.8.3',
+        with: {
+          'pixi-version': 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'prefix-dev/pixi',
+          depType: 'uses-with',
+          packageName: 'prefix-dev/pixi',
+          versioning: 'conda',
+        },
+      ],
+    },
+    {
       step: {
         uses: 'oven-sh/setup-bun@v2',
         with: {},
@@ -2366,6 +2563,8 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // a short `ruby-version` is the latest release matching it, so it must
+      // keep its precision rather than gain a patch component
       step: {
         uses: 'ruby/setup-ruby@v1',
         with: { 'ruby-version': '3.4' },
@@ -2373,6 +2572,22 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '3.4',
+          datasource: 'ruby-version',
+          depName: 'ruby',
+          depType: 'uses-with',
+          packageName: 'ruby',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'ruby/setup-ruby@v1',
+        with: { 'ruby-version': '3.4.7' },
+      },
+      expected: [
+        {
+          currentValue: '3.4.7',
           datasource: 'ruby-version',
           depName: 'ruby',
           depType: 'uses-with',
@@ -2471,6 +2686,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'golangci/golangci-lint',
           depType: 'uses-with',
           packageName: 'golangci/golangci-lint',
+        },
+      ],
+    },
+    {
+      // a partial `version` resolves to the latest matching release, so it
+      // must keep both its precision and its `v` prefix
+      step: {
+        uses: 'golangci/golangci-lint-action@v9',
+        with: { version: 'v2.5' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.5',
+          datasource: 'github-releases',
+          depName: 'golangci/golangci-lint',
+          depType: 'uses-with',
+          packageName: 'golangci/golangci-lint',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -2900,6 +3133,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'elixir-lang/elixir',
           depType: 'uses-with',
           packageName: 'elixir-lang/elixir',
+          versioning: 'npm',
         },
         {
           currentValue: '1.5.1',
@@ -2907,6 +3141,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gleam-lang/gleam',
           depType: 'uses-with',
           packageName: 'gleam-lang/gleam',
+          versioning: 'npm',
         },
         {
           currentValue: '3.24.0',
@@ -2914,6 +3149,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'erlang/rebar3',
           depType: 'uses-with',
           packageName: 'erlang/rebar3',
+          versioning: 'npm',
         },
       ],
     },
@@ -2930,6 +3166,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'erlang/otp',
           depType: 'uses-with',
           packageName: 'erlang/otp',
+        },
+      ],
+    },
+    {
+      // the documented version specification form is a range, not a pinned
+      // version
+      step: {
+        uses: 'erlef/setup-beam@v1',
+        with: { 'elixir-version': '1.17.x' },
+      },
+      expected: [
+        {
+          currentValue: '1.17.x',
+          datasource: 'github-releases',
+          depName: 'elixir-lang/elixir',
+          depType: 'uses-with',
+          packageName: 'elixir-lang/elixir',
+          versioning: 'npm',
         },
       ],
     },
@@ -2958,6 +3212,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'erlang/rebar3',
           depType: 'uses-with',
           packageName: 'erlang/rebar3',
+          versioning: 'npm',
         },
       ],
     },
@@ -2984,6 +3239,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gleam-lang/gleam',
           depType: 'uses-with',
           packageName: 'gleam-lang/gleam',
+          versioning: 'npm',
         },
       ],
     },
@@ -3078,6 +3334,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gitversion',
           depType: 'uses-with',
           packageName: 'GitTools/GitVersion',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // the documented `versionSpec` form is a range, not a pinned version
+      step: {
+        uses: 'GitTools/actions/gitversion/setup@v3',
+        with: { versionSpec: '6.8.x' },
+      },
+      expected: [
+        {
+          currentValue: '6.8.x',
+          datasource: 'github-releases',
+          depName: 'gitversion',
+          depType: 'uses-with',
+          packageName: 'GitTools/GitVersion',
+          versioning: 'npm',
         },
       ],
     },
@@ -3094,6 +3368,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'gitversion',
           depType: 'uses-with',
           packageName: 'GitTools/GitVersion',
+          versioning: 'npm',
         },
       ],
     },
@@ -3109,6 +3384,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'flutter',
           depType: 'uses-with',
           packageName: 'flutter/flutter',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // an x-range is a range, not a pinned version
+      step: {
+        uses: 'subosito/flutter-action@v2',
+        with: { 'flutter-version': '3.24.x' },
+      },
+      expected: [
+        {
+          currentValue: '3.24.x',
+          datasource: 'github-releases',
+          depName: 'flutter',
+          depType: 'uses-with',
+          packageName: 'flutter/flutter',
+          versioning: 'npm',
         },
       ],
     },
@@ -3125,6 +3418,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'flutter',
           depType: 'uses-with',
           packageName: 'flutter/flutter',
+          versioning: 'npm',
         },
       ],
     },
@@ -3527,6 +3821,42 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'gradle/actions/setup-gradle@v4',
+        with: { 'gradle-version': 'wrapper' },
+      },
+      expected: [
+        {
+          currentValue: 'wrapper',
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          depType: 'uses-with',
+          packageName: 'gradle/gradle',
+          versioning: 'gradle',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'gradle/actions/setup-gradle@v4',
+        with: { 'gradle-version': 'release-candidate' },
+      },
+      expected: [
+        {
+          currentValue: 'release-candidate',
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          datasource: 'gradle-version',
+          depName: 'gradle',
+          depType: 'uses-with',
+          packageName: 'gradle/gradle',
+          versioning: 'gradle',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'hashicorp/setup-terraform@v3',
         with: { terraform_version: '1.13.0' },
       },
@@ -3537,6 +3867,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'terraform',
           depType: 'uses-with',
           packageName: 'hashicorp/terraform',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a constraint string is a range, not a pinned version
+      step: {
+        uses: 'hashicorp/setup-terraform@v3',
+        with: { terraform_version: '~1.13.0' },
+      },
+      expected: [
+        {
+          currentValue: '~1.13.0',
+          datasource: 'github-releases',
+          depName: 'terraform',
+          depType: 'uses-with',
+          packageName: 'hashicorp/terraform',
+          versioning: 'npm',
         },
       ],
     },
@@ -3553,6 +3901,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'terraform',
           depType: 'uses-with',
           packageName: 'hashicorp/terraform',
+          versioning: 'npm',
         },
       ],
     },
@@ -3601,6 +3950,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'opentofu',
           depType: 'uses-with',
           packageName: 'opentofu/opentofu',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a constraint string is a range, not a pinned version
+      step: {
+        uses: 'opentofu/setup-opentofu@v1',
+        with: { tofu_version: '<1.9.0' },
+      },
+      expected: [
+        {
+          currentValue: '<1.9.0',
+          datasource: 'github-releases',
+          depName: 'opentofu',
+          depType: 'uses-with',
+          packageName: 'opentofu/opentofu',
+          versioning: 'npm',
         },
       ],
     },
@@ -3617,6 +3984,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'opentofu',
           depType: 'uses-with',
           packageName: 'opentofu/opentofu',
+          versioning: 'npm',
         },
       ],
     },
@@ -4124,6 +4492,24 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // an SDK release version installs the latest patch release of that
+      // version, so it must keep its precision
+      step: {
+        uses: 'dart-lang/setup-dart@v1',
+        with: { sdk: '3.5' },
+      },
+      expected: [
+        {
+          currentValue: '3.5',
+          datasource: 'dart-version',
+          depName: 'dart',
+          depType: 'uses-with',
+          packageName: 'dart-lang/sdk',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
       step: {
         uses: 'dart-lang/setup-dart@v1',
         with: {},
@@ -4159,6 +4545,8 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // the action resolves `version` with node's semver package, so a
+      // partial version is a range rather than a pinned version
       step: {
         uses: 'julia-actions/setup-julia@v2',
         with: { version: '1.10' },
@@ -4170,6 +4558,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'julia',
           depType: 'uses-with',
           packageName: 'JuliaLang/julia',
+          versioning: 'npm',
         },
       ],
     },
@@ -4343,6 +4732,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
         {
           currentValue: '21.0.1',
@@ -4385,6 +4775,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'java-jdk',
           depType: 'uses-with',
           packageName: 'java-jdk',
+          versioning: 'semver-partial',
         },
       ],
     },
@@ -4396,6 +4787,41 @@ describe('modules/manager/github-actions/extract', () => {
         with: {},
       },
       expected: [],
+    },
+    {
+      // `java-version` is a range here too, so it must keep its precision
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': '21.0.2' },
+      },
+      expected: [
+        {
+          currentValue: '21.0.2',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+        },
+      ],
+    },
+    {
+      // `dev` and `latest-ea` are documented `java-version`s that we have no
+      // version to bump them to
+      step: {
+        uses: 'graalvm/setup-graalvm@v1',
+        with: { 'java-version': 'latest-ea' },
+      },
+      expected: [
+        {
+          currentValue: 'latest-ea',
+          datasource: 'java-version',
+          depName: 'java-jdk',
+          depType: 'uses-with',
+          packageName: 'java-jdk',
+          skipStage: 'extract',
+          skipReason: 'unsupported-version',
+        },
+      ],
     },
     {
       step: {
@@ -4514,6 +4940,32 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // a partial version installs the latest patch of that release series,
+      // so it must keep its precision
+      step: {
+        uses: 'crystal-lang/install-crystal@v1',
+        with: { crystal: '1.21', shards: '0.20' },
+      },
+      expected: [
+        {
+          currentValue: '1.21',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/crystal',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/crystal',
+          versioning: 'semver-partial',
+        },
+        {
+          currentValue: '0.20',
+          datasource: 'github-releases',
+          depName: 'crystal-lang/shards',
+          depType: 'uses-with',
+          packageName: 'crystal-lang/shards',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
       // neither input is set, so no deps should be extracted at all (rather
       // than emitting skipped deps for inputs no one set)
       step: {
@@ -4583,6 +5035,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'cmake',
           depType: 'uses-with',
           packageName: 'Kitware/CMake',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      // a wildcard version is a range, not a pinned version
+      step: {
+        uses: 'jwlawson/actions-setup-cmake@v2',
+        with: { 'cmake-version': '4.3.x' },
+      },
+      expected: [
+        {
+          currentValue: '4.3.x',
+          datasource: 'github-releases',
+          depName: 'cmake',
+          depType: 'uses-with',
+          packageName: 'Kitware/CMake',
+          versioning: 'npm',
         },
       ],
     },
@@ -4599,6 +5069,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'cmake',
           depType: 'uses-with',
           packageName: 'Kitware/CMake',
+          versioning: 'npm',
         },
       ],
     },
@@ -4614,6 +5085,24 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'swift',
           depType: 'uses-with',
           packageName: 'swiftlang/swift',
+        },
+      ],
+    },
+    {
+      // a partial `swift-version` resolves to the latest matching release,
+      // so it must keep its precision
+      step: {
+        uses: 'swift-actions/setup-swift@v2',
+        with: { 'swift-version': '6.3' },
+      },
+      expected: [
+        {
+          currentValue: '6.3',
+          datasource: 'github-releases',
+          depName: 'swift',
+          depType: 'uses-with',
+          packageName: 'swiftlang/swift',
+          versioning: 'semver-partial',
         },
       ],
     },

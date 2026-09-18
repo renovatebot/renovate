@@ -73,6 +73,7 @@ export class DotnetVersionDatasource extends Datasource {
         key: config.packageName,
         ttlMinutes: 1440,
         fallback: true,
+        cacheable: true,
       },
       () => this._getReleases(config),
     );
@@ -101,6 +102,7 @@ export class DotnetVersionDatasource extends Datasource {
         namespace: `datasource-${DotnetVersionDatasource.id}`,
         key: `${releaseUrl}:${packageName}`,
         ttlMinutes: 1440,
+        cacheable: true,
       },
       () => this._getChannelReleases(releaseUrl, packageName),
     );
