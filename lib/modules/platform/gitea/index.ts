@@ -40,7 +40,7 @@ import type {
   SortMethod,
   UpdatePrConfig,
 } from '../types.ts';
-import { repoFingerprint } from '../util.ts';
+import { findPrInList, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
@@ -95,17 +95,6 @@ function toRenovateIssue(data: Issue): Issue {
     title: data.title,
     body: data.body,
   };
-}
-
-function matchesState(actual: string, expected: string): boolean {
-  if (expected === 'all') {
-    return true;
-  }
-  if (expected.startsWith('!')) {
-    return actual !== expected.substring(1);
-  }
-
-  return actual === expected;
 }
 
 function findCommentByTopic(
@@ -572,13 +561,14 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         return toRenovatePR(pr, null);
       }
       const prList = await platform.getPrList();
-      const pr = prList.find(
-        (p) =>
-          p.sourceRepo === config.repository &&
-          p.sourceBranch === branchName &&
-          matchesState(p.state, state) &&
-          (!title || p.title === title),
+      const sameRepoPrList = prList.filter(
+        (p) => p.sourceRepo === config.repository,
       );
+      const pr = findPrInList(sameRepoPrList, {
+        branchName,
+        prTitle: title,
+        state,
+      });
 
       if (pr) {
         logger.debug(`Found PR #${pr.number}`);
