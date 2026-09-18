@@ -23,11 +23,13 @@ export class BitriseDatasource extends Datasource {
     this.http = new GithubHttp(this.id);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = [
-    'https://github.com/bitrise-io/bitrise-steplib.git',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com/bitrise-io/bitrise-steplib.git'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

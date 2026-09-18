@@ -25,8 +25,9 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     super(TerraformModuleDatasource.id);
   }
 
-  override readonly defaultRegistryUrls =
-    TerraformModuleDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return TerraformModuleDatasource.defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 

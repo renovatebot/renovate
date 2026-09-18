@@ -16,7 +16,9 @@ export class ArtifactoryDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly caching = true;
 

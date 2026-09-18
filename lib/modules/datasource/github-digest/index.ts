@@ -20,7 +20,9 @@ export class GithubDigestDatasource extends Datasource {
 
   private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${GithubDigestDatasource.id}`;
 
-  override readonly defaultRegistryUrls = ['https://github.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com'];
+  }
 
   override readonly registryStrategy = 'hunt';
 

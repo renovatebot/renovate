@@ -22,11 +22,15 @@ export abstract class Datasource implements DatasourceApi {
 
   caching: boolean | undefined;
 
-  customRegistrySupport = true;
-
   defaultConfig: Record<string, unknown> | undefined;
 
-  defaultRegistryUrls?: string[] | (() => string[]);
+  getDefaultRegistryUrls(_packageName: string): string[] | undefined {
+    return undefined;
+  }
+
+  supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   defaultVersioning?: string | undefined;
 

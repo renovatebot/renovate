@@ -10,9 +10,13 @@ import type { ParsedManifestUrl } from './types.ts';
 export class RustVersionDatasource extends Datasource {
   static readonly id = 'rust-version';
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://static.rust-lang.org'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://static.rust-lang.org'];
+  }
 
   override readonly defaultVersioning = rustVersioning.id;
 

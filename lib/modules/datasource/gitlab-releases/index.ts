@@ -8,7 +8,9 @@ import { GitlabReleases } from './schema.ts';
 export class GitlabReleasesDatasource extends Datasource {
   static readonly id = 'gitlab-releases';
 
-  override readonly defaultRegistryUrls = ['https://gitlab.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://gitlab.com'];
+  }
 
   static readonly registryStrategy = 'first';
 
