@@ -442,6 +442,46 @@ describe('modules/datasource/crate/index', () => {
       expect(res2).not.toBeNull();
     });
 
+    it('skips crate metadata when config.json cannot be fetched', async () => {
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/config.json')
+        .reply(404);
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'libc',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+
+      expect(res).not.toBeNull();
+      expect(res?.sourceUrl).toBeUndefined();
+    });
+
+    it('skips crate metadata when config.json has no api URL', async () => {
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/config.json')
+        .reply(200, { dl: DL_BASE_URL });
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'libc',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+
+      expect(res).not.toBeNull();
+      expect(res?.sourceUrl).toBeUndefined();
+    });
+
     it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
@@ -522,19 +562,6 @@ describe('modules/datasource/crate/index', () => {
       expect(mockClone).toHaveBeenCalledTimes(1);
     });
 
-    it('reads config.json from cloned registry', async () => {
-      const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
-      const url = 'https://github.com/mcorbin/testregistry';
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'mypkg',
-        registryUrls: [url],
-      });
-      expect(mockClone).toHaveBeenCalled();
-      expect(res).not.toBeNull();
-    });
-
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
@@ -588,7 +615,6 @@ describe('modules/datasource/crate/index', () => {
 
       const url = 'https://github.com/mcorbin/othertestregistry';
       const sparseUrl = `sparse+${url}`;
-      httpMock.scope(url).get('/config.json').reply(404);
       httpMock.scope(url).get('/my/pk/mypkg').reply(200, {});
 
       const res = await getPkgReleases({
@@ -598,6 +624,24 @@ describe('modules/datasource/crate/index', () => {
       });
       expect(mockClone).toHaveBeenCalledTimes(0);
       expect(res).toBeNull();
+    });
+
+    it('does not query the crates.io web API for other registries', async () => {
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      const url = 'https://example.codeartifact.amazonaws.com/cargo/index';
+      httpMock.scope(url).get('/my/pk/mypkg').reply(200, Fixtures.get('mypkg'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [`sparse+${url}`],
+      });
+
+      expect(res).toEqual({
+        dependencyUrl: `${url}/mypkg`,
+        registryUrl: `sparse+${url}`,
+        releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
+      });
     });
 
     it('retries if shallow fails because of dumb http git repo', async () => {
@@ -691,8 +735,24 @@ describe('modules/datasource/crate/index', () => {
       const res = await datasource.postprocessRelease(
         {
           packageName: 'clap',
-          registryUrl: 'https://example.com',
+          registryUrl: CRATES_IO_REGISTRY_URL,
         },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
+    it('no-op for registries other than crates.io', async () => {
+      const registryUrl = 'https://example.com/index/';
+      memCache.set(`crate-datasource/registry-config/${registryUrl}`, {
+        dl: 'https://example.com/crates',
+        api: 'https://example.com/-',
+      });
+      const releaseOrig = { version: '4.5.17' };
+
+      const res = await datasource.postprocessRelease(
+        { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
         releaseOrig,
       );
 

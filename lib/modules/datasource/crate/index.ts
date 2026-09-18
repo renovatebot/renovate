@@ -9,7 +9,6 @@ import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as cargoVersioning from '../../versioning/cargo/index.ts';
@@ -168,31 +167,16 @@ export class CrateDatasource extends Datasource {
       return cached;
     }
 
-    if (info.clonePath) {
-      try {
-        const configPath = upath.join(info.clonePath, 'config.json');
-        const content = await readCacheFile(configPath, 'utf8');
-        const parsed = Json.pipe(RegistryConfig).parse(content);
-        memCache.set(cacheKey, parsed);
-        return parsed;
-      } catch {
-        logger.debug(
-          { registryUrl: info.rawUrl },
-          'Could not read config.json from cloned registry',
-        );
-      }
-    } else {
-      try {
-        const configUrl = joinUrlParts(info.rawUrl, 'config.json');
-        const { body } = await this.http.getJson(configUrl, RegistryConfig);
-        memCache.set(cacheKey, body);
-        return body;
-      } catch {
-        logger.debug(
-          { registryUrl: info.rawUrl },
-          'Could not fetch registry config.json',
-        );
-      }
+    try {
+      const configUrl = joinUrlParts(info.rawUrl, 'config.json');
+      const { body } = await this.http.getJson(configUrl, RegistryConfig);
+      memCache.set(cacheKey, body);
+      return body;
+    } catch {
+      logger.debug(
+        { registryUrl: info.rawUrl },
+        'Could not fetch registry config.json',
+      );
     }
 
     return null;
@@ -202,6 +186,14 @@ export class CrateDatasource extends Datasource {
     info: RegistryInfo,
     packageName: string,
   ): Promise<CrateMetadata | null> {
+    // The `api/v1/crates/<name>` endpoint is crates.io-specific and not part
+    // of the registry web API that Cargo itself uses, so private registries
+    // (Artifactory, CodeArtifact, ...) respond with 404 even when their
+    // `config.json` advertises an `api` URL for publishing.
+    if (info.flavor !== 'crates.io') {
+      return null;
+    }
+
     const registryConfig = await this.fetchRegistryConfig(info);
     if (!registryConfig?.api) {
       return null;
@@ -507,11 +499,13 @@ export class CrateDatasource extends Datasource {
       return release;
     }
 
-    // Look up the registry config from cache (populated during getReleases)
-    const rawUrl = registryUrl?.replace(regEx(/^sparse\+/), '');
-    if (!rawUrl) {
+    // Only crates.io serves per-version metadata over the web API
+    if (!registryUrl || !CrateDatasource.isCratesIo(registryUrl)) {
       return release;
     }
+
+    // Look up the registry config from cache (populated during getReleases)
+    const rawUrl = registryUrl.replace(regEx(/^sparse\+/), '');
     const cacheKey = `crate-datasource/registry-config/${rawUrl}`;
     const config = memCache.get<{ dl: string; api?: string }>(cacheKey);
     if (!config?.api) {
