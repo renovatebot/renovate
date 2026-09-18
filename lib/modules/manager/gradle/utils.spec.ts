@@ -7,6 +7,7 @@ import {
   isGradleScriptFile,
   isGradleSettingsFile,
   isGradleVersionsFile,
+  isGroupArtifactString,
   isKotlinSourceFile,
   isPropsFile,
   isTOMLFile,
@@ -78,6 +79,22 @@ describe('modules/manager/gradle/utils', () => {
       ${'foo:bar:1.2.3@zip@foo'}               | ${false}
     `('$input', ({ input, output }) => {
       expect(isDependencyString(input)).toBe(output);
+    });
+  });
+
+  describe('isGroupArtifactString', () => {
+    it.each`
+      input                | output
+      ${'foo:bar'}         | ${true}
+      ${'foo.foo:bar.bar'} | ${true}
+      ${'foo'}             | ${false}
+      ${'foo:bar:1.2.3'}   | ${false}
+      ${':bar'}            | ${false}
+      ${'foo:'}            | ${false}
+      ${'foo$foo:bar'}     | ${false}
+      ${'foo:bar$bar'}     | ${false}
+    `('$input', ({ input, output }) => {
+      expect(isGroupArtifactString(input)).toBe(output);
     });
   });
 
