@@ -15,6 +15,8 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { extractApkDeps } from './apk.ts';
+import { extractDebDeps } from './deb.ts';
 
 const variableMarker = '$';
 
@@ -276,7 +278,7 @@ export function extractPackageFile(
 
   const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
-  for (let lineNumber = 0; lineNumber < lines.length; ) {
+  for (let lineNumber = 0; lineNumber < lines.length;) {
     const lineNumberInstrStart = lineNumber;
     let instruction = lines[lineNumber];
 
@@ -465,6 +467,14 @@ export function extractPackageFile(
         );
         deps.push(dep);
       }
+    }
+
+    for (const dep of [
+      ...extractApkDeps(instruction, escapeChar),
+      ...extractDebDeps(instruction, escapeChar),
+    ]) {
+      dep.depType = 'install';
+      deps.push(dep);
     }
 
     lineNumber += 1;

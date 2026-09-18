@@ -4,8 +4,8 @@ import upath from 'upath';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { ensureDir, privateCacheDir } from '../../../util/fs/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { PackageFileContent } from '../types.ts';
 import { getRegistryUrlsFromPackageFiles } from './common.ts';
 
@@ -20,7 +20,7 @@ export async function execUv(
 ): Promise<void> {
   const entries = new Map<string, string>();
   for (const url of getRegistryUrlsFromPackageFiles(packageFiles)) {
-    const { username, password } = hostRules.find({ url: url.href });
+    const { username, password } = await findPypiIndexCredentials(url.href);
     if (username || password) {
       entries.set(
         url.hostname,

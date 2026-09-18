@@ -139,17 +139,22 @@ export async function updateArtifacts({
         }
       }
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
+      const registryCredVars =
+        compileArgs.commandType === 'uv'
+          ? {}
+          : await getRegistryCredVarsFromPackageFiles(packageFiles);
       const execOptions = await getExecOptions(
         config,
         compileArgs.commandType,
         cwd,
-        compileArgs.commandType === 'uv'
-          ? {}
-          : getRegistryCredVarsFromPackageFiles(packageFiles),
+        registryCredVars,
         pythonVersion,
       );
-      logger.trace({ cwd, cmd }, 'pip-compile command');
-      logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
+      // only the variable names: the values are registry credentials
+      logger.trace(
+        { cwd, cmd, registryCredVars: Object.keys(registryCredVars) },
+        'pip-compile command',
+      );
       if (compileArgs.commandType === 'uv') {
         await execUv(cmd, execOptions, [
           ...packageFiles,

@@ -37,6 +37,136 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('extracts apk deps in a fragment without a FROM', () => {
+      const res = extractPackageFile(
+        'RUN apk add --no-cache bash=5.2.37-r2\n',
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate: 'bash={{{newValue}}}',
+          currentValue: '5.2.37-r2',
+          datasource: 'apk',
+          depName: 'bash',
+          depType: 'install',
+          replaceString: 'bash=5.2.37-r2',
+        },
+      ]);
+    });
+
+    it('extracts apk deps from a RUN instruction', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21
+          RUN apk add --no-cache bash=5.2.37-r2
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.21',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'final',
+          packageName: 'alpine',
+          replaceString: 'alpine:3.21',
+        },
+        {
+          autoReplaceStringTemplate: 'bash={{{newValue}}}',
+          currentValue: '5.2.37-r2',
+          datasource: 'apk',
+          depName: 'bash',
+          depType: 'install',
+          replaceString: 'bash=5.2.37-r2',
+        },
+      ]);
+    });
+
+    it('extracts deb deps from a RUN instruction', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM debian:trixie
+          RUN apt-get update \\
+            && apt-get install -y --no-install-recommends curl=8.14.1-2 \\
+            && rm -rf /var/lib/apt/lists/*
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'trixie',
+          datasource: 'docker',
+          depName: 'debian',
+          depType: 'final',
+          packageName: 'debian',
+          replaceString: 'debian:trixie',
+          versioning: 'debian',
+        },
+        {
+          autoReplaceStringTemplate: 'curl={{{newValue}}}',
+          currentValue: '8.14.1-2',
+          datasource: 'deb',
+          depName: 'curl',
+          depType: 'install',
+          replaceString: 'curl=8.14.1-2',
+        },
+      ]);
+    });
+
+    it('keeps the final stage when each stage has its own apk deps', () => {
+      const digest =
+        'sha256:96ff486b326d15db16aa1fbd41a17043a557bebf76d2c0ac932e717534025940';
+      const res = extractPackageFile(
+        codeBlock`
+          FROM cgr.dev/chainguard/wolfi-base:latest@${digest} AS builder
+          RUN apk add --no-cache curl-dev=8.9.1-r4
+          FROM cgr.dev/chainguard/wolfi-base:latest@${digest}
+          RUN apk add --no-cache curl=8.9.1-r4
+        `,
+        '',
+        {},
+      );
+      // the trailing dep is an apk one, so `final` has to be the last `FROM`
+      // rather than whatever was extracted last
+      expect(
+        res?.deps.map(({ depName, currentValue, depType }) => ({
+          depName,
+          currentValue,
+          depType,
+        })),
+      ).toEqual([
+        {
+          depName: 'cgr.dev/chainguard/wolfi-base',
+          currentValue: 'latest',
+          depType: 'stage',
+        },
+        {
+          depName: 'curl-dev',
+          currentValue: '8.9.1-r4',
+          depType: 'install',
+        },
+        {
+          depName: 'cgr.dev/chainguard/wolfi-base',
+          currentValue: 'latest',
+          depType: 'final',
+        },
+        {
+          depName: 'curl',
+          currentValue: '8.9.1-r4',
+          depType: 'install',
+        },
+      ]);
+    });
+
     it('handles naked dep', () => {
       const res = extractPackageFile('FROM node\n', '', {})?.deps;
       expect(res).toEqual([
@@ -607,6 +737,12 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'final',
           replaceString: 'alpine:latest',
         },
+        {
+          datasource: 'apk',
+          depName: 'ca-certificates',
+          depType: 'install',
+          skipReason: 'unspecified-version',
+        },
       ]);
       const passed = [
         res?.[2].depType === 'final',
@@ -642,6 +778,24 @@ describe('modules/manager/dockerfile/extract', () => {
           packageName: 'buildkite/puppeteer',
           depType: 'final',
           replaceString: 'buildkite/puppeteer:1.1.1',
+        },
+        {
+          datasource: 'apk',
+          depName: 'python',
+          depType: 'install',
+          skipReason: 'unspecified-version',
+        },
+        {
+          datasource: 'apk',
+          depName: 'make',
+          depType: 'install',
+          skipReason: 'unspecified-version',
+        },
+        {
+          datasource: 'apk',
+          depName: 'g++',
+          depType: 'install',
+          skipReason: 'unspecified-version',
         },
       ]);
     });
@@ -1191,6 +1345,15 @@ describe('modules/manager/dockerfile/extract', () => {
           replaceString: 'nginx:1.20',
         },
       ]);
+    });
+
+    it('keeps the default escape character for an unknown escape directive', () => {
+      const res = extractPackageFile(
+        '# escape = /\nFROM nginx:1.20',
+        '',
+        {},
+      )?.deps;
+      expect(res).toMatchObject([{ depName: 'nginx', currentValue: '1.20' }]);
     });
 
     it('handles an alternative escape character', () => {

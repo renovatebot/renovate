@@ -1,8 +1,11 @@
 import fs from 'fs-extra';
-import { hostRules } from '~test/host-rules.ts';
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import { hostRules, partial } from '~test/util.ts';
 import { exec } from '../../../util/exec/index.ts';
 import { ensureDir, privateCacheDir } from '../../../util/fs/index.ts';
 import { execUv } from './uv.ts';
+
+vi.mock('google-auth-library');
 
 vi.mock('fs-extra', () => ({
   default: {
@@ -43,13 +46,14 @@ describe('modules/manager/pip-compile/uv', () => {
     },
   );
 
-  it('uses host rules without a host type for source and additional registries', async () => {
+  it('uses PyPI and unscoped host rules for source and additional registries', async () => {
     hostRules.add({
-      hostType: 'pypi',
+      hostType: 'npm',
       matchHost: 'example.com',
       password: 'wrong',
     });
     hostRules.add({
+      hostType: 'pypi',
       matchHost: 'https://example.com/private/',
       username: 'user',
       password: 'secret',
@@ -87,6 +91,31 @@ describe('modules/manager/pip-compile/uv', () => {
     });
     expect(fs.remove).toHaveBeenCalledWith(
       '/cache/__renovate-private-cache/uv-random',
+    );
+  });
+
+  it('supports Google Artifact Registry credentials', async () => {
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // eslint-disable-next-line prefer-arrow-callback
+    vi.mocked(_googleAuth).mockImplementationOnce(function () {
+      return partial<InstanceType<typeof _googleAuth>>({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
+      });
+    });
+
+    await execUv(cmd, options, [
+      {
+        deps: [],
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo/simple',
+        ],
+      },
+    ]);
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      '/cache/__renovate-private-cache/uv-random/.netrc',
+      'machine "someregion-python.pkg.dev" login "oauth2accesstoken" password "some-token"\n',
+      { mode: 0o600 },
     );
   });
 

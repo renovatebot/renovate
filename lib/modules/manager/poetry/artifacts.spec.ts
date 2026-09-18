@@ -280,6 +280,49 @@ describe('modules/manager/poetry/artifacts', () => {
       ]);
     });
 
+    it('falls back to Google auth when the matching rule has no credentials', async () => {
+      hostRules.add({
+        matchHost: 'someregion-python.pkg.dev',
+        enabled: true,
+      });
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      // pyproject.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      googleAuth.mockImplementationOnce(
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
+      );
+      const updatedDeps = [{ depName: 'dep1' }];
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: pyproject13toml,
+          config,
+        }),
+      ).resolves.not.toBeNull();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          options: {
+            env: {
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_USERNAME: 'oauth2accesstoken',
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_PASSWORD: 'some-token',
+            },
+          },
+        },
+      ]);
+    });
+
     it('continues if Google auth is not configured', async () => {
       // poetry.lock
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
@@ -645,6 +688,42 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool python 2.7.5' },
+        { cmd: 'install-tool poetry 1.2.0' },
+        { cmd: 'poetry update --lock --no-interaction dep1' },
+      ]);
+    });
+
+    it('falls back to the extracted python constraint', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      // python
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
+      });
+      // poetry
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.2.0' }],
+      });
+
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [{ depName: 'dep1' }],
+          // neither the pyproject nor the lock file pin python
+          newPackageFileContent: '[tool.poetry.dependencies]\ndep1 = "1.0"',
+          config: {
+            ...config,
+            extractedConstraints: { python: '~2.7 || ^3.4' },
+          },
+        }),
+      ).resolves.not.toBeNull();
 
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool python 2.7.5' },

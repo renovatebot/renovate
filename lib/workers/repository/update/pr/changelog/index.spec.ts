@@ -1,11 +1,15 @@
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../config/global.ts';
+import { logger } from '../../../../../logger/index.ts';
+import * as githubActionsVersioning from '../../../../../modules/versioning/github-actions/index.ts';
 import * as semverVersioning from '../../../../../modules/versioning/semver/index.ts';
+import { ExternalHostError } from '../../../../../types/errors/external-host-error.ts';
 import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
 import * as hostRules from '../../../../../util/host-rules.ts';
 import type { Timestamp } from '../../../../../util/timestamp.ts';
 import type { BranchConfig } from '../../../../types.ts';
+import api from './api.ts';
 import { getChangeLogJSON } from './index.ts';
 import * as releases from './releases.ts';
 
@@ -76,6 +80,35 @@ describe('workers/repository/update/pr/changelog/index', () => {
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
+    });
+
+    it('logs a warning when changelog fetching fails with an external host error', async () => {
+      const changeLogSource = api.get('github')!;
+      vi.spyOn(changeLogSource, 'getChangeLogJSON').mockRejectedValueOnce(
+        new ExternalHostError(new Error('some error')),
+      );
+
+      await expect(getChangeLogJSON({ ...upgrade })).resolves.toBeNull();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'getChangeLogJSON error',
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs an error when changelog fetching fails unexpectedly', async () => {
+      const changeLogSource = api.get('github')!;
+      vi.spyOn(changeLogSource, 'getChangeLogJSON').mockRejectedValueOnce(
+        new Error('some error'),
+      );
+
+      await expect(getChangeLogJSON({ ...upgrade })).resolves.toBeNull();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        'getChangeLogJSON error',
+      );
     });
 
     it('returns null if @types', async () => {
@@ -160,6 +193,71 @@ describe('workers/repository/update/pr/changelog/index', () => {
           ...upgrade,
         }),
       ).resolves.toMatchObject(expectedChangeLog());
+    });
+
+    it('prefers a precise tag over a floating one resolving to the same version', async () => {
+      httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
+      githubTagsMock.mockResolvedValue([
+        { version: 'v7' },
+        { version: 'v7.0.0' },
+        { version: 'v7.0.1' },
+      ] as never);
+      githubReleasesMock.mockResolvedValue([]);
+      const res = await getChangeLogJSON({
+        ...upgrade,
+        packageName: 'actions/upload-artifact',
+        versioning: githubActionsVersioning.id,
+        currentVersion: '7.0.0',
+        newVersion: '7.0.1',
+        sourceUrl: 'https://github.com/actions/upload-artifact',
+        releases: [{ version: '7.0.0' }, { version: '7.0.1' }],
+      });
+      expect(res?.versions?.[0].compare.url).toBe(
+        'https://github.com/actions/upload-artifact/compare/v7.0.0...v7.0.1',
+      );
+    });
+
+    it('keeps the precise tag when a floating tag appears later in the list', async () => {
+      httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
+      githubTagsMock.mockResolvedValue([
+        { version: 'v6.0.0' },
+        { version: 'v7.0.0' },
+        { version: 'v7' },
+      ] as never);
+      githubReleasesMock.mockResolvedValue([]);
+      const res = await getChangeLogJSON({
+        ...upgrade,
+        packageName: 'actions/upload-artifact',
+        versioning: githubActionsVersioning.id,
+        currentVersion: '6.0.0',
+        newVersion: '7.0.0',
+        sourceUrl: 'https://github.com/actions/upload-artifact',
+        releases: [{ version: '6.0.0' }, { version: '7.0.0' }],
+      });
+      expect(res?.versions?.[0].compare.url).toBe(
+        'https://github.com/actions/upload-artifact/compare/v6.0.0...v7.0.0',
+      );
+    });
+
+    it('falls back to a floating tag when no precise tag exists', async () => {
+      httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
+      githubTagsMock.mockResolvedValue([
+        { version: 'v7' },
+        { version: 'v7.0.1' },
+      ] as never);
+      githubReleasesMock.mockResolvedValue([]);
+      const res = await getChangeLogJSON({
+        ...upgrade,
+        packageName: 'actions/upload-artifact',
+        versioning: githubActionsVersioning.id,
+        currentVersion: '7.0.0',
+        newVersion: '7.0.1',
+        sourceUrl: 'https://github.com/actions/upload-artifact',
+        releases: [{ version: '7.0.0' }, { version: '7.0.1' }],
+      });
+      expect(res?.versions?.[0].compare.url).toBe(
+        'https://github.com/actions/upload-artifact/compare/v7...v7.0.1',
+      );
     });
 
     it('filters unnecessary warns', async () => {

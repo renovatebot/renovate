@@ -273,6 +273,7 @@ async function releaseNotesResult(
   if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
+    // v8 ignore next -- a matched release always carries its own url
     releaseNotes.url = releaseMatch.url
       ? releaseMatch.url
       : /* istanbul ignore next */
@@ -301,7 +302,7 @@ async function releaseNotesResult(
 function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
   const lines = text.split(newlineRegex);
-  const tokens = markdown.parse(text, undefined);
+  const tokens = markdown.parse(text, {});
   tokens.forEach((token) => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substring(1);

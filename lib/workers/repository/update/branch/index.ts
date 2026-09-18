@@ -39,8 +39,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
-import { coerceNumber } from '../../../../util/number.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
+import { calculateMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import * as template from '../../../../util/template/index.ts';
 import { getCount, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -458,9 +457,7 @@ export async function processBranch(
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        const minimumReleaseAgeMs = isNonEmptyString(upgrade.minimumReleaseAge)
-          ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
-          : 0;
+        const minimumReleaseAgeMs = calculateMinimumReleaseAgeMs(upgrade);
 
         if (minimumReleaseAgeMs) {
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
@@ -625,11 +622,9 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (
-      !(
-        config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
-      )
-    ) {
+    if (!(
+      config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
+    )) {
       await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       if (res.artifactErrors && config.artifactErrors) {
@@ -913,6 +908,7 @@ export async function processBranch(
         config.branchAutomergeFailureMessage = mergeStatus;
       }
       if (
+        mergeStatus === 'automerge aborted - merge queue' ||
         mergeStatus === 'automerge aborted - PR exists' ||
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
@@ -1130,12 +1126,10 @@ export async function processBranch(
         });
         content = platform.massageMarkdown(content, config.rebaseLabel);
         // v8 ignore else -- TODO: add test #40625
-        if (
-          !(
-            config.suppressNotifications!.includes('artifactErrors') ||
-            config.suppressNotifications!.includes('lockFileErrors')
-          )
-        ) {
+        if (!(
+          config.suppressNotifications!.includes('artifactErrors') ||
+          config.suppressNotifications!.includes('lockFileErrors')
+        )) {
           if (GlobalConfig.get('dryRun')) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`,

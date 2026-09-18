@@ -1,4 +1,6 @@
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { hostRules } from '~test/host-rules.ts';
+import { partial } from '~test/util.ts';
 import { logger } from '../../../logger/index.ts';
 import {
   allowedOptions,
@@ -9,6 +11,10 @@ import {
   matchManager,
 } from './common.ts';
 import { inferCommandExecDir } from './utils.ts';
+
+vi.mock('google-auth-library');
+
+const googleAuth = vi.mocked(_googleAuth);
 
 function getCommandInHeader(command: string) {
   return `#
@@ -252,7 +258,7 @@ describe('modules/manager/pip-compile/common', () => {
   });
 
   describe('getRegistryCredVarsFromPackageFiles()', () => {
-    it('handles both registryUrls and additionalRegistryUrls', () => {
+    it('handles both registryUrls and additionalRegistryUrls', async () => {
       hostRules.add({
         matchHost: 'example.com',
         username: 'user1',
@@ -263,7 +269,7 @@ describe('modules/manager/pip-compile/common', () => {
         username: 'user2',
         password: 'password2',
       });
-      expect(
+      await expect(
         getRegistryCredVarsFromPackageFiles([
           {
             deps: [],
@@ -271,7 +277,7 @@ describe('modules/manager/pip-compile/common', () => {
             additionalRegistryUrls: ['https://example2.com/pypi/simple'],
           },
         ]),
-      ).toEqual({
+      ).resolves.toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user1',
         KEYRING_SERVICE_PASSWORD_0: 'password1',
@@ -281,7 +287,7 @@ describe('modules/manager/pip-compile/common', () => {
       });
     });
 
-    it('handles multiple additionalRegistryUrls', () => {
+    it('handles multiple additionalRegistryUrls', async () => {
       hostRules.add({
         matchHost: 'example.com',
         username: 'user1',
@@ -292,7 +298,7 @@ describe('modules/manager/pip-compile/common', () => {
         username: 'user2',
         password: 'password2',
       });
-      expect(
+      await expect(
         getRegistryCredVarsFromPackageFiles([
           {
             deps: [],
@@ -302,7 +308,7 @@ describe('modules/manager/pip-compile/common', () => {
             ],
           },
         ]),
-      ).toEqual({
+      ).resolves.toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user1',
         KEYRING_SERVICE_PASSWORD_0: 'password1',
@@ -312,55 +318,116 @@ describe('modules/manager/pip-compile/common', () => {
       });
     });
 
-    it('handles hosts with only a username', () => {
+    it('handles hosts with only a username', async () => {
       hostRules.add({
         username: 'user',
       });
-      expect(
+      await expect(
         getRegistryCredVarsFromPackageFiles([
           {
             deps: [],
             additionalRegistryUrls: ['https://example.com/pypi/simple'],
           },
         ]),
-      ).toEqual({
+      ).resolves.toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user',
         KEYRING_SERVICE_PASSWORD_0: '',
       });
     });
 
-    it('handles hosts with only a password', () => {
+    it('handles hosts with only a password', async () => {
       hostRules.add({
         password: 'password',
       });
-      expect(
+      await expect(
         getRegistryCredVarsFromPackageFiles([
           {
             deps: [],
             additionalRegistryUrls: ['https://example.com/pypi/simple'],
           },
         ]),
-      ).toEqual({
+      ).resolves.toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: '',
         KEYRING_SERVICE_PASSWORD_0: 'password',
       });
     });
 
-    it('handles invalid URLs', () => {
-      expect(
+    it('handles invalid URLs', async () => {
+      await expect(
         getRegistryCredVarsFromPackageFiles([
           {
             deps: [],
             additionalRegistryUrls: ['invalid-url'],
           },
         ]),
-      ).toEqual({});
+      ).resolves.toEqual({});
+    });
+
+    it('matches a rule scoped to a path', async () => {
+      hostRules.add({
+        matchHost: 'https://example.com/pypi/',
+        username: 'user',
+        password: 'password',
+      });
+      await expect(
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: ['https://example.com/pypi/simple'],
+          },
+        ]),
+      ).resolves.toEqual({
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user',
+        KEYRING_SERVICE_PASSWORD_0: 'password',
+      });
+    });
+
+    it('ignores a rule scoped to another hostType', async () => {
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'example.com',
+        username: 'user',
+        password: 'password',
+      });
+      await expect(
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: ['https://example.com/pypi/simple'],
+          },
+        ]),
+      ).resolves.toEqual({});
+    });
+
+    it('supports Google Artifact Registry', async () => {
+      // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+      // eslint-disable-next-line prefer-arrow-callback
+      googleAuth.mockImplementationOnce(function () {
+        return partial<InstanceType<typeof _googleAuth>>({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
+        });
+      });
+      await expect(
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: [
+              'https://someregion-python.pkg.dev/some-project/some-repo/simple',
+            ],
+          },
+        ]),
+      ).resolves.toEqual({
+        KEYRING_SERVICE_NAME_0: 'someregion-python.pkg.dev',
+        KEYRING_SERVICE_USERNAME_0: 'oauth2accesstoken',
+        KEYRING_SERVICE_PASSWORD_0: 'some-token',
+      });
     });
   });
 
-  it('handles multiple package files', () => {
+  it('handles multiple package files', async () => {
     hostRules.add({
       matchHost: 'example.com',
       username: 'user1',
@@ -371,7 +438,7 @@ describe('modules/manager/pip-compile/common', () => {
       username: 'user2',
       password: 'password2',
     });
-    expect(
+    await expect(
       getRegistryCredVarsFromPackageFiles([
         {
           deps: [],
@@ -382,7 +449,7 @@ describe('modules/manager/pip-compile/common', () => {
           additionalRegistryUrls: ['https://example2.com/pypi/simple'],
         },
       ]),
-    ).toEqual({
+    ).resolves.toEqual({
       KEYRING_SERVICE_NAME_0: 'example.com',
       KEYRING_SERVICE_USERNAME_0: 'user1',
       KEYRING_SERVICE_PASSWORD_0: 'password1',

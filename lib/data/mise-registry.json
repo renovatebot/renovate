@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.9.1 linux-x64 (2026-09-02)"
+    "version": "2026.9.6 linux-x64 (2026-09-12)"
   },
   "tools": {
     "1password": {
@@ -59,6 +59,9 @@
     "agebox": {
       "aqua": "slok/agebox",
       "asdf": "slok/asdf-agebox"
+    },
+    "agent-browser": {
+      "aqua": "vercel-labs/agent-browser"
     },
     "agy": {
       "aqua": "google-antigravity/antigravity-cli"
@@ -207,7 +210,8 @@
     "aube": {
       "aqua": "jdx/aube",
       "cargo": "aube",
-      "github": "jdx/aube"
+      "github": "jdx/aube",
+      "packslip": "github.com/aubepkg/aube"
     },
     "auto-doc": {
       "asdf": "mise-plugins/mise-auto-doc",
@@ -308,6 +312,9 @@
     "balena-cli": {
       "asdf": "jaredallard/asdf-balena-cli",
       "github": "balena-io/balena-cli"
+    },
+    "basecamp": {
+      "github": "basecamp/basecamp-cli"
     },
     "bashbot": {
       "aqua": "mathew-fleisch/bashbot",
@@ -464,6 +471,9 @@
       "aqua": "cargo-bins/cargo-binstall",
       "cargo": "cargo-binstall"
     },
+    "cargo-deny": {
+      "aqua": "EmbarkStudios/cargo-deny"
+    },
     "cargo-dist": {
       "aqua": "axodotdev/cargo-dist",
       "cargo": "cargo-dist",
@@ -616,6 +626,9 @@
       "asdf": "mise-plugins/mise-clickhouse",
       "vfox": "mise-plugins/vfox-clickhouse"
     },
+    "clipboard": {
+      "github": "Slackadays/Clipboard"
+    },
     "clj-kondo": {
       "asdf": "rynkowsg/asdf-clj-kondo",
       "github": "clj-kondo/clj-kondo"
@@ -705,7 +718,8 @@
       "aqua": "crate-ci/committed"
     },
     "communique": {
-      "github": "jdx/communique"
+      "github": "jdx/communique",
+      "packslip": "github.com/jdx/communique"
     },
     "conan": {
       "asdf": "mise-plugins/mise-pyapp",
@@ -784,11 +798,11 @@
       "aqua": "schollz/croc"
     },
     "crossplane": {
-      "aqua": "crossplane/crossplane",
+      "aqua": "crossplane/cli",
       "asdf": "joke/asdf-crossplane-cli"
     },
     "crossplane-cli": {
-      "aqua": "crossplane/crossplane",
+      "aqua": "crossplane/cli",
       "asdf": "joke/asdf-crossplane-cli"
     },
     "crush": {
@@ -1035,8 +1049,8 @@
       "aqua": "microsoft/edit"
     },
     "editorconfig-checker": {
-      "aqua": "editorconfig-checker/editorconfig-checker",
-      "asdf": "gabitchov/asdf-editorconfig-checker"
+      "asdf": "gabitchov/asdf-editorconfig-checker",
+      "github": "editorconfig-checker/editorconfig-checker"
     },
     "ejson": {
       "aqua": "Shopify/ejson",
@@ -1180,7 +1194,8 @@
       "github": "flyway/flyway"
     },
     "fnox": {
-      "github": "jdx/fnox"
+      "github": "jdx/fnox",
+      "packslip": "github.com/jdx/fnox"
     },
     "foundry": {
       "aqua": "foundry-rs/foundry"
@@ -1582,6 +1597,11 @@
     "hey-cli": {
       "github": "basecamp/hey-cli"
     },
+    "himalaya": {
+      "aqua": "pimalaya/himalaya",
+      "cargo": "himalaya",
+      "github": "pimalaya/himalaya"
+    },
     "hishtory": {
       "asdf": "asdf-community/asdf-hishtory",
       "github": "ddworken/hishtory"
@@ -1591,7 +1611,8 @@
       "go": "github.com/DarthSim/hivemind"
     },
     "hk": {
-      "aqua": "jdx/hk"
+      "aqua": "jdx/hk",
+      "packslip": "github.com/jdx/hk"
     },
     "hledger": {
       "asdf": "airtonix/asdf-hledger",
@@ -1856,6 +1877,9 @@
     "kind": {
       "aqua": "kubernetes-sigs/kind",
       "asdf": "johnlayton/asdf-kind"
+    },
+    "kingfisher": {
+      "github": "mongodb/kingfisher"
     },
     "kiota": {
       "aqua": "microsoft/kiota",
@@ -2198,8 +2222,8 @@
       "vfox": "mise-plugins/vfox-maven"
     },
     "mc": {
-      "aqua": "minio/mc",
-      "asdf": "mise-plugins/mise-mc"
+      "asdf": "mise-plugins/mise-mc",
+      "github": "minio/mc"
     },
     "mdbook": {
       "aqua": "rust-lang/mdBook",
@@ -2294,6 +2318,7 @@
     },
     "mongodb": {
       "asdf": "mise-plugins/mise-mongodb",
+      "conda": "mongodb",
       "vfox": "jdx/vfox-mongod"
     },
     "mongosh": {
@@ -2306,11 +2331,18 @@
     "mprocs": {
       "aqua": "pvolok/dekit"
     },
+    "mpv": {
+      "conda": "mpv"
+    },
     "mr-boxington": {
-      "github": "jdx/mr-boxington"
+      "github": "jdx/mr-boxington",
+      "packslip": "github.com/jdx/mr-boxington"
     },
     "mssqldef": {
       "aqua": "sqldef/sqldef/mssqldef"
+    },
+    "muse": {
+      "http": "muse"
     },
     "mutagen": {
       "aqua": "mutagen-io/mutagen",
@@ -2411,12 +2443,18 @@
       "asdf": "dex4er/asdf-nsc",
       "github": "nats-io/nsc"
     },
+    "nu": {
+      "aqua": "nushell/nushell"
+    },
     "nub": {
       "npm": "@nubjs/nub"
     },
     "numbat": {
       "aqua": "sharkdp/numbat",
       "cargo": "numbat-cli"
+    },
+    "nushell": {
+      "aqua": "nushell/nushell"
     },
     "oapi-codegen": {
       "asdf": "dylanrayboss/asdf-oapi-codegen",
@@ -2576,6 +2614,11 @@
       "aqua": "hashicorp/packer",
       "asdf": "mise-plugins/mise-hashicorp"
     },
+    "packslip": {
+      "cargo": "packslip",
+      "github": "jdx/packslip",
+      "packslip": "packslip.dev"
+    },
     "pandoc": {
       "asdf": "Fbrisset/asdf-pandoc",
       "github": "jgm/pandoc"
@@ -2639,7 +2682,8 @@
       "asdf": "mise-plugins/mise-pipx"
     },
     "pitchfork": {
-      "aqua": "jdx/pitchfork"
+      "aqua": "jdx/pitchfork",
+      "packslip": "github.com/jdx/pitchfork"
     },
     "pivnet": {
       "aqua": "pivotal-cf/pivnet-cli",
@@ -2707,6 +2751,7 @@
     },
     "postgres": {
       "asdf": "mise-plugins/mise-postgres",
+      "conda": "postgresql",
       "vfox": "mise-plugins/vfox-postgres"
     },
     "powerline-go": {
@@ -2843,6 +2888,7 @@
     },
     "redis": {
       "asdf": "mise-plugins/mise-redis",
+      "conda": "redis-server",
       "vfox": "mise-plugins/vfox-redis"
     },
     "redpanda-connect": {
@@ -3066,9 +3112,15 @@
       "aqua": "koalaman/shellcheck",
       "asdf": "luizm/asdf-shellcheck"
     },
+    "shellharden": {
+      "aqua": "anordal/shellharden"
+    },
     "shellspec": {
       "aqua": "shellspec/shellspec",
       "asdf": "poikilotherm/asdf-shellspec"
+    },
+    "sherif": {
+      "github": "QuiiBz/sherif"
     },
     "shfmt": {
       "aqua": "mvdan/sh",
@@ -3341,6 +3393,9 @@
     "task": {
       "aqua": "go-task/task",
       "asdf": "particledecay/asdf-task"
+    },
+    "tauri-cli": {
+      "aqua": "tauri-apps/tauri/cargo-tauri"
     },
     "tbls": {
       "aqua": "k1LoW/tbls"
@@ -3642,7 +3697,8 @@
     "usage": {
       "aqua": "jdx/usage",
       "asdf": "mise-plugins/mise-usage",
-      "cargo": "usage-cli"
+      "cargo": "usage-cli",
+      "packslip": "github.com/jdx/usage"
     },
     "usql": {
       "aqua": "xo/usql",
