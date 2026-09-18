@@ -15,8 +15,9 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
-import { detectApkRegistryUrls, extractApkDeps } from './apk.ts';
-import { detectDebRegistryUrls, extractDebDeps } from './deb.ts';
+import { extractApkDeps } from './apk.ts';
+import { extractDebDeps } from './deb.ts';
+import { detectApkRegistryUrls, detectDebRegistryUrls } from './registry.ts';
 
 /**
  * The registries a stage's `FROM` image installs system packages from, keyed by
