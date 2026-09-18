@@ -18,7 +18,6 @@ import {
   supportsDigests,
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
-import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import { isPseudoVersion } from '../../../../modules/versioning/go-mod-directive/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
@@ -504,11 +503,8 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           isString(update.newValue) &&
           versioningApi.isSingleVersion(update.newValue);
-        // Guards against a docker downgrade, which the datasources used in
-        // these tests never produce - see #40625
-        // istanbul ignore if
+        // Nothing but a rollback should ever propose a lower version, so a downgrade means the lookup went wrong and the update is dropped - see #29921
         if (
-          config.versioning === dockerVersioningId &&
           update.updateType !== 'rollback' &&
           update.newValue &&
           versioningApi.isVersion(update.newValue) &&
