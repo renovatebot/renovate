@@ -33,4 +33,18 @@ describe('util/http/queue', () => {
     expect(q1b).not.toBe(q2a);
     expect(q1b).not.toBe(q2b);
   });
+
+  it('reads the limit from a hostType-scoped rule', () => {
+    hostRules.clear();
+    hostRules.add({
+      hostType: 'npm',
+      matchHost: 'example.com',
+      concurrentRequestLimit: 143,
+    });
+
+    expect(getQueue('https://example.com')).toBeNull();
+
+    clear();
+    expect(getQueue('https://example.com', 'npm')).not.toBeNull();
+  });
 });
