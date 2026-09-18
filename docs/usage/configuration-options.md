@@ -4773,6 +4773,10 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
 
+In some situations managers can not derive which registry a given dependency comes from.
+In that case, managers skip it with `skipReason: unknown-registry` rather than look it up somewhere which may hold the wrong versions.
+When specifying `registryUrls` alongside a dependency with `skipReason: unknown-registry`, Renovate will use the configured `registryUrls`.
+
 ## `replacement`
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
