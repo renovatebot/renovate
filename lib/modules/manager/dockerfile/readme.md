@@ -120,7 +120,7 @@ RUN apk add --no-cache curl=~8.12.1
 
 `~8.12.1` matches every `8.12.1-rN`, so Renovate only raises a PR once a version outside the constraint is released, and keeps the precision you wrote it with - `curl=~8.13.0`, not `curl=~8.13.0-r0`.
 
-Renovate skips packages which it cannot update, and says why in its logs:
+Renovate skips packages which it cannot update, and says why in the `packageFiles with updates` log line:
 
 - packages without a version, e.g. `apk add bash`
 - packages whose version comes from a variable, e.g. `apk add "bash=$BASH_VERSION"`
@@ -178,7 +178,7 @@ Set the `registryUrls` which match your base image with a `packageRules` entry:
 }
 ```
 
-Renovate skips packages which it cannot update, and says why in its logs:
+Renovate skips packages which it cannot update, and says why in the `packageFiles with updates` log line:
 
 - packages without a version, e.g. `apt-get install -y curl`
 - packages pinned to a suite instead of a version, e.g. `apt-get install -y curl/trixie-backports`
