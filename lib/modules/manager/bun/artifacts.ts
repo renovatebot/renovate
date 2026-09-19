@@ -1,4 +1,4 @@
-import { isEmptyArray } from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -6,6 +6,7 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { resolveNpmrc } from '../npm/npmrc.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
 import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
@@ -45,12 +46,19 @@ export async function updateArtifacts(
     return null;
   }
 
-  const pkgFileDir = upath.dirname(packageFileName);
+  const lockFileDir = upath.dirname(lockFileName);
+  const { npmrc, npmrcFileName } = await resolveNpmrc(lockFileName, config);
+  // Use the resolved npmrc unless it came from outside the lockfile directory.
+  const baseNpmrcContent =
+    isString(npmrc) &&
+    (!npmrcFileName || npmrcFileName === upath.join(lockFileDir, '.npmrc'))
+      ? npmrc
+      : undefined;
   const { additionalNpmrcContent } = processHostRules();
 
   try {
     return await withNpmrcHostRules(
-      pkgFileDir,
+      lockFileDir,
       additionalNpmrcContent,
       async () => {
         let cmd = 'bun install';
@@ -81,6 +89,7 @@ export async function updateArtifacts(
           run: () => exec(cmd, execOptions),
         });
       },
+      baseNpmrcContent,
     );
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
