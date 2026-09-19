@@ -5,6 +5,7 @@ import * as gradleVersioning from '../../versioning/gradle/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { GradleReleases } from './schema.ts';
+import { isPublicRegistry, publicRegistryUrl } from './url.ts';
 
 export class GradleVersionDatasource extends Datasource {
   static readonly id = 'gradle-version';
@@ -13,9 +14,7 @@ export class GradleVersionDatasource extends Datasource {
     super(GradleVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
-    'https://services.gradle.org/versions/all',
-  ];
+  override readonly defaultRegistryUrls = [publicRegistryUrl];
 
   override readonly defaultVersioning = gradleVersioning.id;
 
@@ -78,6 +77,7 @@ export class GradleVersionDatasource extends Datasource {
         // TODO: types (#22198)
         key: `${config.registryUrl}`,
         fallback: true,
+        cacheable: isPublicRegistry(config.registryUrl),
       },
       () => this._getReleases(config),
     );
