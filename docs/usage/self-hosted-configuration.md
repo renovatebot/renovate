@@ -1272,6 +1272,16 @@ In that case, Renovate searches the repository config file for any of these conf
 If Renovate finds any of the above configurations, it continues initializing the repository.
 If not, then Renovate skips the repository without cloning it.
 
+## `packageCacheMemoryLimit`
+
+Use a non-negative value. Setting it to `0` disables the in-memory cache.
+
+When the cache reaches the limit, it evicts the least recently used entries. Entries larger than the limit bypass the in-memory cache.
+
+The size estimate uses JSON-serialized values, cache keys, and an allowance for bookkeeping. Actual memory use can differ.
+
+The cache is cleared between repositories.
+
 ## `password`
 
 ## `persistRepoData`

@@ -166,6 +166,17 @@ describe('config/index', () => {
   });
 
   describe('removeGlobalConfig()', () => {
+    it.each([false, true])(
+      'removes the administrator memory limit (keepInherited=%s)',
+      (keepInherited) => {
+        const config = { packageCacheMemoryLimit: 128, prHourlyLimit: 2 };
+
+        expect(removeGlobalConfig(config, keepInherited)).toEqual({
+          prHourlyLimit: 2,
+        });
+      },
+    );
+
     it('removes all global config', () => {
       const filteredConfig = removeGlobalConfig(defaultConfig, false);
       expect(filteredConfig).not.toHaveProperty('onboarding');

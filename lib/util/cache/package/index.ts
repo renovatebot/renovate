@@ -1,10 +1,14 @@
+import { LRUCache } from 'lru-cache';
 import type { AllConfig } from '../../../config/types.ts';
-import { PackageCacheStats } from '../../stats.ts';
-import * as memCache from '../memory/index.ts';
+import { DEFAULT_PACKAGE_CACHE_MEMORY_LIMIT } from '../../../constants/cache.ts';
+import { logger } from '../../../logger/index.ts';
 import * as backend from './backend.ts';
-import { getCombinedKey } from './key.ts';
-import { getTtlOverride } from './ttl.ts';
+import { type MemoryEntry, PackageCache } from './package-cache.ts';
 import type { PackageCacheNamespace } from './types.ts';
+
+export { PackageCache } from './package-cache.ts';
+
+export let packageCache = new PackageCache(undefined, null);
 
 export function getCacheType(): ReturnType<typeof backend.getCacheType> {
   return backend.getCacheType();
@@ -14,20 +18,7 @@ export async function get<T = any>(
   namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
-  if (!backend.getCacheType()) {
-    return undefined;
-  }
-
-  const combinedKey = getCombinedKey(namespace, key);
-  let cachedPromise = memCache.get(combinedKey);
-  if (!cachedPromise) {
-    cachedPromise = PackageCacheStats.wrapGet(() =>
-      backend.get(namespace, key),
-    );
-    memCache.set(combinedKey, cachedPromise);
-  }
-
-  return await cachedPromise;
+  return await packageCache.get<T>(namespace, key);
 }
 
 /**
@@ -39,8 +30,7 @@ export async function set(
   value: unknown,
   hardTtlMinutes: number,
 ): Promise<void> {
-  const rawTtl = getTtlOverride(namespace) ?? hardTtlMinutes;
-  await setWithRawTtl(namespace, key, value, rawTtl);
+  await packageCache.set(namespace, key, value, hardTtlMinutes);
 }
 
 /**
@@ -53,23 +43,36 @@ export async function setWithRawTtl(
   value: unknown,
   hardTtlMinutes: number,
 ): Promise<void> {
-  if (!backend.getCacheType()) {
-    return;
-  }
-
-  await PackageCacheStats.wrapSet(() =>
-    backend.set(namespace, key, value, hardTtlMinutes),
-  );
-
-  const combinedKey = getCombinedKey(namespace, key);
-  const p = Promise.resolve(value);
-  memCache.set(combinedKey, p);
+  await packageCache.setWithRawTtl(namespace, key, value, hardTtlMinutes);
 }
 
 export async function init(config: AllConfig): Promise<void> {
+  const memoryLimit =
+    config.packageCacheMemoryLimit ?? DEFAULT_PACKAGE_CACHE_MEMORY_LIMIT;
+  const maxSize = memoryLimit * 1024 ** 2;
+  if (
+    !Number.isSafeInteger(memoryLimit) ||
+    memoryLimit < 0 ||
+    !Number.isSafeInteger(maxSize)
+  ) {
+    throw new Error(
+      'packageCacheMemoryLimit must be a non-negative integer in MiB',
+    );
+  }
+
+  const memory =
+    maxSize > 0 ? new LRUCache<string, MemoryEntry>({ maxSize }) : null;
   await backend.init(config);
+  packageCache = new PackageCache(backend.getBackend(), memory);
 }
 
 export async function cleanup(_config: AllConfig): Promise<void> {
-  await backend.destroy();
+  try {
+    packageCache.softReset();
+    await backend.destroy();
+  } catch (err) {
+    logger.warn({ err }, 'Package cache destroy failed');
+  } finally {
+    packageCache = new PackageCache(undefined, null);
+  }
 }
