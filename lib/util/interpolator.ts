@@ -102,7 +102,11 @@ export function replaceInterpolatedValuesInObject(
     delete config[name];
   }
   for (const [key, value] of Object.entries(config)) {
-    if (isPlainObject(value) && key !== 'onboardingConfig') {
+    if (
+      isPlainObject(value) &&
+      key !== 'customPresets' &&
+      key !== 'onboardingConfig'
+    ) {
       // @ts-expect-error -- type can't be narrowed
       config[key] = replaceInterpolatedValuesInObject(
         value,
