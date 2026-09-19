@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { fs, logger } from '~test/util.ts';
 import { BufModuleDatasource } from '../../datasource/buf-module/index.ts';
 import { BufPluginDatasource } from '../../datasource/buf-plugin/index.ts';
 import { extractPackageFile } from './index.ts';
@@ -224,6 +225,35 @@ describe('modules/manager/buf/extract', () => {
           currentDigest: '1111111111111111111111111111beef',
         },
       ]);
+    });
+
+    it('skips and logs a committed dep whose name is not host/owner/repository', () => {
+      // The schema types `name` as an arbitrary string, so a reference missing
+      // a segment passes validation and the commit guard, then trips the
+      // host/owner/repository split.
+      const content = codeBlock`
+        version: v2
+        deps:
+          - name: buf.build/incomplete
+            commit: 2222222222222222222222222222cafe
+            digest: b5:bad
+          - name: buf.build/valid/module
+            commit: 1111111111111111111111111111beef
+            digest: b5:ok
+      `;
+      const res = extractPackageFile(content, 'buf.lock', {});
+      expect(res?.deps).toEqual([
+        {
+          depName: 'valid/module',
+          datasource: BufModuleDatasource.id,
+          registryUrls: ['https://buf.build'],
+          currentDigest: '1111111111111111111111111111beef',
+        },
+      ]);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { packageFile: 'buf.lock', module: 'buf.build/incomplete' },
+        'buf: skipping buf.lock dep with unparseable module name',
+      );
     });
   });
 });

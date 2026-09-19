@@ -117,6 +117,10 @@ function extractBufLock(
     }
 
     if (!host || !owner || !repository) {
+      logger.debug(
+        { packageFile, module: dep.name ?? dep.remote },
+        'buf: skipping buf.lock dep with unparseable module name',
+      );
       continue;
     }
 
