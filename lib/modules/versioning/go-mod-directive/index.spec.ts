@@ -1,4 +1,4 @@
-import { api as semver } from './index.ts';
+import { isPseudoVersion, api as semver } from './index.ts';
 
 describe('modules/versioning/go-mod-directive/index', () => {
   it.each`
@@ -90,4 +90,17 @@ describe('modules/versioning/go-mod-directive/index', () => {
       ).toBe(expected);
     },
   );
+
+  it.each`
+    version                                         | expected
+    ${'v0.0.0-20240506185236-b8a5c65736ae'}         | ${true}
+    ${'v0.0.0-alpha.0.20240506185236-b8a5c65736ae'} | ${true}
+    ${'v1.2.3-0.20240506185236-b8a5c65736ae'}       | ${false}
+    ${'v2.0.0-20240506185236-b8a5c65736ae'}         | ${false}
+    ${'v0.0.0-rc1'}                                 | ${false}
+    ${'v0.0.0'}                                     | ${false}
+    ${'v1.2.3'}                                     | ${false}
+  `('isPseudoVersion("$version") === $expected', ({ version, expected }) => {
+    expect(isPseudoVersion(version)).toBe(expected);
+  });
 });
