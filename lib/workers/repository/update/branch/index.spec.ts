@@ -205,6 +205,55 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('automerges an existing PR outside the branch update schedule', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      config.automerge = true;
+      config.updateNotScheduled = false;
+      scm.branchExists.mockResolvedValue(true);
+      const branchPr = partial<Pr>({
+        number: 5,
+        state: 'open',
+      });
+      platform.getBranchPr.mockResolvedValueOnce(branchPr);
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+
+      const res = await branchWorker.processBranch(config);
+
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledExactlyOnceWith(
+        branchPr,
+        expect.objectContaining({ isScheduledNow: false }),
+      );
+      expect(getUpdated.getUpdatedPackageFiles).not.toHaveBeenCalled();
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        branchExists: true,
+        commitSha: null,
+        result: 'automerged',
+      });
+    });
+
+    it('does not update an existing PR that cannot automerge outside the schedule', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      config.automerge = true;
+      config.updateNotScheduled = false;
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({ number: 5, state: 'open' }),
+      );
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
+
+      const res = await branchWorker.processBranch(config);
+
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(getUpdated.getUpdatedPackageFiles).not.toHaveBeenCalled();
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: 5,
+        result: 'update-not-scheduled',
+      });
+    });
+
     it('skips branch for fresh release with minimumReleaseAge', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
