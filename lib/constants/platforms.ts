@@ -163,27 +163,3 @@ export const PLATFORM_FAMILIES = {
     webDirPath: 'tree/HEAD',
   },
 } satisfies Record<PlatformFamilyId, PlatformFamily>;
-
-/*
- * Aliases for the families whose `apiUsingHostTypes` is still read by name.
- *
- * TODO: migrate `lib/util/http/auth.ts` and `lib/util/http/host-rules.ts` to
- * read `PLATFORM_FAMILIES` directly, then delete these.
- */
-export const GITEA_API_USING_HOST_TYPES =
-  PLATFORM_FAMILIES.gitea.apiUsingHostTypes;
-
-export const FORGEJO_API_USING_HOST_TYPES =
-  PLATFORM_FAMILIES.forgejo.apiUsingHostTypes;
-
-export const GITHUB_API_USING_HOST_TYPES =
-  PLATFORM_FAMILIES.github.apiUsingHostTypes;
-
-export const GITLAB_API_USING_HOST_TYPES =
-  PLATFORM_FAMILIES.gitlab.apiUsingHostTypes;
-
-export const BITBUCKET_API_USING_HOST_TYPES =
-  PLATFORM_FAMILIES.bitbucket.apiUsingHostTypes;
-
-export const BITBUCKET_SERVER_API_USING_HOST_TYPES =
-  PLATFORM_FAMILIES['bitbucket-server'].apiUsingHostTypes;
