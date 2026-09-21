@@ -6,7 +6,6 @@ import {
   listRepoDir,
 } from '../../../../../../modules/platform/gitea/files.ts';
 import { GiteaHttp } from '../../../../../../util/http/gitea.ts';
-import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import { ChangeLogSource } from '../source.ts';
 import type {
@@ -25,16 +24,9 @@ export class GiteaChangeLogSource extends ChangeLogSource {
    */
   protected readonly http: GiteaHttp = new GiteaHttp(id);
 
-  /** Platforms which speak the Gitea API pass their own ids. */
-  constructor(
-    platform: 'gitea' | 'forgejo' = 'gitea',
-    datasource: 'gitea-tags' | 'forgejo-tags' = 'gitea-tags',
-  ) {
-    super(platform, datasource);
-  }
-
-  getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return `${this.getBaseUrl(config)}api/v1/`;
+  /** Platforms which speak the Gitea API pass their own id. */
+  constructor(platform: 'gitea' | 'forgejo' = 'gitea') {
+    super(platform);
   }
 
   getCompareURL(
