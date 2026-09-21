@@ -1,6 +1,6 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger/index.ts';
-import { Releases } from '../../../../../../modules/datasource/forgejo-releases/schema.ts';
+import { Releases } from '../../../../../../modules/datasource/gitea-releases/schema.ts';
 import {
   ContentsListResponse,
   RepoContents,
