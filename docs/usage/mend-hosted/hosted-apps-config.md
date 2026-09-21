@@ -36,12 +36,12 @@ Follow these steps to see which version the Mend Renovate app used for a specifi
    ```
    INFO: Renovate started
    {
-     "renovateVersion": "44.0.1"
+     "renovateVersion": "44.104.2"
    }
    ...
    INFO: Repository started
    {
-     "renovateVersion": "44.0.1"
+     "renovateVersion": "44.104.2"
    }
    ```
 
@@ -89,7 +89,8 @@ The Mend Renovate app automatically applies inherited config to all installed re
 1. A repository called `renovate-config` exists in the same organization, and the organization has installed the Mend Renovate app. The repository does not need to be onboarded
 1. Renovate finds a file called `org-inherited-config.json` in the `renovate-config` repository
 
-If you use a Mend-hosted app, you can _not_ change the values for the `inheritConfigFileName` and the `inheritConfigRepoName` config options.
+!!! tip
+  If you're an Enterprise customer on Mend-hosted apps, you [can change these settings through their respective environment variables](./environment-variables.md#enterprise-and-mend-appsec-users-environment-variables).
 
 To avoid wasted API calls, Mend apps will enable `inheritConfig` in an org only when Renovate detects a commit for the `inheritConfig` file.
 This means the `inheritConfig` file will not be detected if the Mend Renovate app is not installed on the `renovate-config` repository at the time of adding or changing the file.

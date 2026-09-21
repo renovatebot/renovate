@@ -110,5 +110,15 @@ describe('util/markdown', () => {
         'mention @&#8203;user here',
       );
     });
+
+    it('should not add zero-width space to @ inside URLs', async () => {
+      const input =
+        'Read more at https://medium.com/@fastifyjs/fastify-v4-ga-59f2103b5f0e by @user';
+      const linkified = await linkify(input, { repository: 'some/repo' });
+
+      expect(sanitizeMarkdown(linkified)).toEqual(
+        'Read more at <https://medium.com/@fastifyjs/fastify-v4-ga-59f2103b5f0e> by [@&#8203;user](https://github.com/user)\n',
+      );
+    });
   });
 });

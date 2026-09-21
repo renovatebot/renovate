@@ -158,8 +158,9 @@ describe('modules/versioning/ivy/index', () => {
   );
 
   it.each`
-    versions           | range     | expected
-    ${['0', '1', '2']} | ${'(,2)'} | ${'1'}
+    versions                  | range     | expected
+    ${['0', '1', '2']}        | ${'(,2)'} | ${'1'}
+    ${['0', '1', '0.5', '2']} | ${'(,2)'} | ${'1'}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {

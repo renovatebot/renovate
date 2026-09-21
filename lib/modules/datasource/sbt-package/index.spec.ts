@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -20,7 +21,18 @@ describe('modules/datasource/sbt-package/index', () => {
       extractPageLinks(Fixtures.get(`maven-index.html`), (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'autofix-3.0.6_2.11',
+      'sbt-scalatest_2.12_1.0',
+      'scalatest',
+      'scalatest-app_native0.4_3',
+      'scalatest_2.12',
+      'scalatest_2.13',
+      'scalatest_2.13.0-RC1',
+      'scalatest_3',
+      'scalatest_sjs1.0.0-M7_2.13.0-RC2',
+      'test-interface',
+    ]);
   });
 
   it('parses sbt index directory', () => {
@@ -28,7 +40,15 @@ describe('modules/datasource/sbt-package/index', () => {
       extractPageLinks(Fixtures.get(`sbt-plugins-index.html`), (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'au.com.onegeek',
+      'ch',
+      'com.github.DavidPerezIngeniero',
+      'org.portable-scala',
+      'scalajs-react-interface',
+      'uk.co.josephearl',
+      'woshilaiceshide',
+    ]);
   });
 
   it('uses proper hostType', () => {
@@ -300,7 +320,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .spyOn(urlUtil, 'parseUrl')
         .mockImplementation((url) => {
           if (
-            typeof url === 'string' &&
+            isString(url) &&
             url === 'https://repo.maven.apache.org/maven2/org/example/'
           ) {
             return null;
@@ -339,7 +359,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .spyOn(urlUtil, 'parseUrl')
         .mockImplementation((url) => {
           if (
-            typeof url === 'string' &&
+            isString(url) &&
             url === 'https://repo.maven.apache.org/maven2/org/example/example/'
           ) {
             return null;

@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import { fetchUpdates } from '../../../workers/repository/process/fetch.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
 import type { PackageFile } from '../types.ts';
@@ -15,6 +16,7 @@ describe('modules/manager/gomod/integration', () => {
     baseConfig = partial<LookupUpdateConfig>(getConfig() as never);
     baseConfig.manager = 'gomod';
     baseConfig.constraintsFiltering = 'strict';
+    vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValue([]);
   });
 
   describe('when constraintsFiltering=strict', () => {

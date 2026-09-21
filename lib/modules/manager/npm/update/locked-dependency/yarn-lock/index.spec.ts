@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { partial } from '~test/util.ts';
 import type { UpdateLockedConfig } from '../../../../types.ts';
@@ -58,5 +59,58 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/index', () => {
       config.newVersion = '0.3.1';
       expect(updateLockedDependency(config).status).toBe('updated');
     });
+
+    it.each`
+      otherSelector            | targetSelector
+      ${'other-foo@^1.0.0'}    | ${'foo@^1.0.0'}
+      ${'"@scope/foo@^1.0.0"'} | ${'"foo@^1.0.0"'}
+      ${'other-foo@^1.0.0'}    | ${'foo@~1.0.0, foo@^1.0.0'}
+    `(
+      'updates $targetSelector without changing $otherSelector',
+      ({ otherSelector, targetSelector }) => {
+        const lockFileContent = codeBlock`
+          # yarn lockfile v1
+
+          ${otherSelector}:
+            version "1.0.0"
+            resolved "https://registry.yarnpkg.com/other/-/other-1.0.0.tgz"
+
+          ${targetSelector}:
+            version "1.0.0"
+            resolved "https://registry.yarnpkg.com/foo/-/foo-1.0.0.tgz"
+
+          zzz@^1.0.0:
+            version "1.0.0"
+        `;
+
+        const result = updateLockedDependency({
+          ...config,
+          lockFile: 'yarn.lock',
+          lockFileContent,
+          depName: 'foo',
+          currentVersion: '1.0.0',
+          newVersion: '1.0.1',
+        });
+
+        expect(result).toEqual({
+          status: 'updated',
+          files: {
+            'yarn.lock': codeBlock`
+              # yarn lockfile v1
+
+              ${otherSelector}:
+                version "1.0.0"
+                resolved "https://registry.yarnpkg.com/other/-/other-1.0.0.tgz"
+
+              ${targetSelector}:
+                version "1.0.1"
+
+              zzz@^1.0.0:
+                version "1.0.0"
+            `,
+          },
+        });
+      },
+    );
   });
 });
