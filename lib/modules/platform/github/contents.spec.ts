@@ -1,5 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
-import { GithubHttp } from '../../../util/http/github.ts';
+import { GithubHttp, setBaseUrl } from '../../../util/http/github.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { getRepoFile } from './contents.ts';
 
@@ -29,6 +29,18 @@ describe('modules/platform/github/contents', () => {
     const res = await getRepoFile(http, 'some/repo', 'renovate.json', 'dev', {
       baseUrl: `${apiHost}/`,
     });
+
+    expect(res).toBe('{}');
+  });
+
+  it('falls back to the client base url', async () => {
+    setBaseUrl('https://ghe.example.com/api/v3/');
+    httpMock
+      .scope('https://ghe.example.com')
+      .get('/api/v3/repos/some/repo/contents/renovate.json')
+      .reply(200, { content: toBase64('{}') });
+
+    const res = await getRepoFile(http, 'some/repo', 'renovate.json');
 
     expect(res).toBe('{}');
   });
