@@ -17,7 +17,10 @@ export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const lockFileNames = ['buf.lock'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['/(^|/)buf\\.gen\\.ya?ml$/', '/(^|/)buf\\.lock$/'],
+  managerFilePatterns: [
+    '/(^|/)buf\\.gen(?:\\.w+)?\\.ya?ml$/',
+    '/(^|/)buf\\.lock$/',
+  ],
 };
 
 export const supportedDatasources = [
