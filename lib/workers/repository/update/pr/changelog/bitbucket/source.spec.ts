@@ -80,6 +80,8 @@ const bitbucketTreeResponseSingleChangelogFile = {
   ],
 };
 
+const changelogSource = new BitbucketChangeLogSource();
+
 const bitbucketProject = partial<ChangeLogProject>({
   type: 'bitbucket',
   repository: 'some-org/some-repo',
@@ -87,7 +89,7 @@ const bitbucketProject = partial<ChangeLogProject>({
   apiBaseUrl,
 });
 
-describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
+describe('workers/repository/update/pr/changelog/bitbucket/source', () => {
   it('handles release notes', async () => {
     httpMock
       .scope(apiBaseUrl)
@@ -95,7 +97,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       .reply(200, bitbucketTreeResponse)
       .get('/2.0/repositories/some-org/some-repo/src/abcd/CHANGELOG.md')
       .reply(200, changelogMd);
-    const res = await getReleaseNotesMdFile(bitbucketProject);
+    const res = await getReleaseNotesMdFile(bitbucketProject, changelogSource);
 
     expect(res).toMatchObject({
       changelogFile: 'CHANGELOG.md',
@@ -111,7 +113,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       .get('/2.0/repositories/some-org/some-repo/src/abcd/CHANGELOG.md')
       .reply(200, changelogMd);
 
-    const res = await getReleaseNotesMdFile(bitbucketProject);
+    const res = await getReleaseNotesMdFile(bitbucketProject, changelogSource);
 
     expect(res).toMatchObject({ changelogFile: 'CHANGELOG.md' });
   });
@@ -121,7 +123,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
       .scope(apiBaseUrl)
       .get('/2.0/repositories/some-org/some-repo/src/HEAD?pagelen=100')
       .reply(200, bitbucketTreeResponseNoChangelogFiles);
-    const res = await getReleaseNotesMdFile(bitbucketProject);
+    const res = await getReleaseNotesMdFile(bitbucketProject, changelogSource);
     expect(res).toBeNull();
   });
 
@@ -129,20 +131,24 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
     const res = await getReleaseList(
       bitbucketProject,
       partial<ChangeLogRelease>({}),
+      changelogSource,
     );
     expect(res).toBeEmptyArray();
   });
 
   describe('source', () => {
     it('returns api base url', () => {
-      const source = new BitbucketChangeLogSource();
-      expect(source.getAPIBaseUrl(upgrade)).toBe(apiBaseUrl);
+      expect(changelogSource.getAPIBaseUrl(upgrade)).toBe(apiBaseUrl);
     });
 
     it('returns get ref comparison url', () => {
-      const source = new BitbucketChangeLogSource();
       expect(
-        source.getCompareURL(baseUrl, 'some-org/some-repo', 'abc', 'xzy'),
+        changelogSource.getCompareURL(
+          baseUrl,
+          'some-org/some-repo',
+          'abc',
+          'xzy',
+        ),
       ).toBe(
         'https://bitbucket.org/some-org/some-repo/branches/compare/xzy%0Dabc',
       );
