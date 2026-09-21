@@ -24,6 +24,7 @@ import {
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
+  createPypiToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
@@ -231,6 +232,8 @@ function getToolConfig(
       return createNpmToolConfig(toolName);
     case 'pipx':
       return createPipxToolConfig(toolName);
+    case 'pypi':
+      return createPypiToolConfig(toolName);
     case 'spm':
       return createSpmToolConfig(toolName);
     case 'ubi':
