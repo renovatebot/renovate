@@ -433,10 +433,10 @@ export class CrateDatasource extends Datasource {
 
     if (
       registry.flavor !== 'crates.io' &&
-      !GlobalConfig.get('allowCustomCrateRegistries')
+      !GlobalConfig.get('allowCustomCrateGitRegistries')
     ) {
       logger.warn(
-        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out',
+        'crate datasource: allowCustomCrateGitRegistries=true is required for registries other than crates.io, bailing out',
       );
       return null;
     }

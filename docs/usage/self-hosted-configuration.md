@@ -24,7 +24,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 !!! note
   Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
-## `allowCustomCrateRegistries`
+## `allowCustomCrateGitRegistries`
 
 ## `allowPlugins`
 
