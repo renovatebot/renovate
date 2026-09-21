@@ -1,9 +1,9 @@
 import type { MergeStrategy } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { GitUrlOption } from '../types.ts';
+import { rewriteRelativeLinks } from '../utils/pr-body.ts';
 import type { PrMergeMethod, Repo } from './schema.ts';
 
 export function mapPrState(
@@ -20,7 +20,7 @@ export function mapPrState(
 }
 
 export function smartLinks(body: string): string {
-  return body.replace(regEx(/]\(\.\.\/pull\//g), '](pulls/');
+  return rewriteRelativeLinks(body, { pulls: 'pulls/' });
 }
 
 export function getRepoUrl(
