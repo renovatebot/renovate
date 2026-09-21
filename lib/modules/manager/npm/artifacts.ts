@@ -1,4 +1,5 @@
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
@@ -11,18 +12,16 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants.ts';
 import { getNodeToolConstraint } from './post-update/node-version.ts';
 import { processHostRules } from './post-update/rules.ts';
 import { lazyLoadPackageJson } from './post-update/utils.ts';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from './utils.ts';
+import { withNpmrcHostRules } from './utils.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
@@ -35,8 +34,10 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
   let res: UpdateArtifactsResult[] = [];
-  res.push((await handlePackageManagerUpdates(updateArtifactsConfig)) ?? {});
-  res.push((await updatePnpmWorkspace(updateArtifactsConfig)) ?? {});
+  res.push(
+    coerceObject(await handlePackageManagerUpdates(updateArtifactsConfig)),
+  );
+  res.push(coerceObject(await updatePnpmWorkspace(updateArtifactsConfig)));
 
   res = res.filter(isNonEmptyObject);
   if (res.length === 0) {
@@ -78,9 +79,8 @@ async function handlePackageManagerUpdates(
   // As it should not be regular practice to have different package managers in different workspaces
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${depName}@${newVersion}`;
+  const cmd = `corepack use ${quote(`${depName}@${newVersion}`)}`;
 
   const nodeConstraints = await getNodeToolConstraint(
     config,
@@ -106,41 +106,47 @@ async function handlePackageManagerUpdates(
       nodeConstraints,
       {
         toolName: 'corepack',
-        constraint: config.constraints?.corepack,
+        constraint: await resolveToolConstraint(config, 'corepack'),
       },
     ],
     docker: {},
   };
 
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
-  try {
-    await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-    const newPackageFileContent = await readLocalFile(packageFileName, 'utf8');
-    if (
-      !newPackageFileContent ||
-      existingPackageFileContent === newPackageFileContent
-    ) {
-      return null;
-    }
-    logger.debug('Returning updated package.json');
-    return {
-      file: {
-        type: 'addition',
-        path: packageFileName,
-        contents: newPackageFileContent,
-      },
-    };
-  } catch (err) {
-    logger.warn({ err }, 'Error updating package.json');
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-    return {
-      artifactError: {
-        fileName: packageFileName,
-        stderr: err.message,
-      },
-    };
-  }
+  return await withNpmrcHostRules(
+    pkgFileDir,
+    additionalNpmrcContent,
+    async () => {
+      try {
+        await exec(cmd, execOptions);
+        const newPackageFileContent = await readLocalFile(
+          packageFileName,
+          'utf8',
+        );
+        if (
+          !newPackageFileContent ||
+          existingPackageFileContent === newPackageFileContent
+        ) {
+          return null;
+        }
+        logger.debug('Returning updated package.json');
+        return {
+          file: {
+            type: 'addition',
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+        };
+      } catch (err) {
+        logger.warn({ err }, 'Error updating package.json');
+        return {
+          artifactError: {
+            fileName: packageFileName,
+            stderr: err.message,
+          },
+        };
+      }
+    },
+  );
 }
 
 /**
@@ -157,14 +163,14 @@ async function updatePnpmWorkspace(
     return null;
   }
 
-  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap;
-  if (!isString(pnpmShrinkwrap)) {
+  const pnpmLockFile = upgrades[0].managerData?.pnpmLockFile;
+  if (!isString(pnpmLockFile)) {
     logger.debug(
       'No pnpm shrinkwrap found, not attempting to update pnpm-workspace.yaml',
     );
     return null;
   }
-  const lockFileDir = upath.dirname(pnpmShrinkwrap);
+  const lockFileDir = upath.dirname(pnpmLockFile);
   const pnpmWorkspaceFilePath = upath.join(lockFileDir, 'pnpm-workspace.yaml');
 
   if (!(await localPathExists(pnpmWorkspaceFilePath))) {

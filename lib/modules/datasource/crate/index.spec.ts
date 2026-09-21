@@ -1,4 +1,5 @@
 import { setTimeout } from 'node:timers/promises';
+import { isUndefined } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
@@ -15,6 +16,7 @@ import type {
 } from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
@@ -153,23 +155,23 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(404, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid registry url', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: ['3'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
@@ -179,13 +181,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing fields', async () => {
@@ -195,13 +197,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, undefined);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty list', async () => {
@@ -211,13 +213,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, '\n');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
@@ -225,13 +227,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/so/me/some_crate')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -253,13 +255,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/so/me/some_crate')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data: libc', async () => {
@@ -275,9 +277,76 @@ describe('modules/datasource/crate/index', () => {
         packageName: 'libc',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/rust-lang/libc',
+        releases: [
+          { version: '0.1.0' },
+          { version: '0.1.1' },
+          { version: '0.1.2' },
+          { version: '0.1.3' },
+          { version: '0.1.4' },
+          { version: '0.1.5' },
+          { version: '0.1.6' },
+          { version: '0.1.7' },
+          { version: '0.1.8' },
+          { version: '0.1.9', isDeprecated: true },
+          { version: '0.1.10' },
+          { version: '0.1.11', isDeprecated: true },
+          { version: '0.1.12' },
+          { version: '0.2.0' },
+          { version: '0.2.1' },
+          { version: '0.2.2' },
+          { version: '0.2.3' },
+          { version: '0.2.4' },
+          { version: '0.2.5' },
+          { version: '0.2.6' },
+          { version: '0.2.7' },
+          { version: '0.2.8' },
+          { version: '0.2.9' },
+          { version: '0.2.10' },
+          { version: '0.2.11' },
+          { version: '0.2.12' },
+          { version: '0.2.13' },
+          { version: '0.2.14' },
+          { version: '0.2.15' },
+          { version: '0.2.16' },
+          { version: '0.2.17' },
+          { version: '0.2.18' },
+          { version: '0.2.19' },
+          { version: '0.2.20' },
+          { version: '0.2.21' },
+          { version: '0.2.22' },
+          { version: '0.2.23' },
+          { version: '0.2.24' },
+          { version: '0.2.25' },
+          { version: '0.2.26' },
+          { version: '0.2.27' },
+          { version: '0.2.28' },
+          { version: '0.2.29' },
+          { version: '0.2.30' },
+          { version: '0.2.31' },
+          { version: '0.2.32' },
+          { version: '0.2.33' },
+          { version: '0.2.34' },
+          { version: '0.2.35' },
+          { version: '0.2.36' },
+          { version: '0.2.37' },
+          { version: '0.2.38' },
+          { version: '0.2.39' },
+          { version: '0.2.40' },
+          { version: '0.2.41' },
+          { version: '0.2.42' },
+          { version: '0.2.43' },
+          { version: '0.2.44' },
+          { version: '0.2.45' },
+          { version: '0.2.46' },
+          { version: '0.2.47' },
+          { version: '0.2.48' },
+          { version: '0.2.49' },
+          { version: '0.2.50', releaseTimestamp: '2019-03-05T11:06:03.000Z' },
+          { version: '0.2.51', versionOrig: '0.2.51+metadata' },
+        ],
+      });
     });
 
     it('processes real data: amethyst', async () => {
@@ -293,9 +362,31 @@ describe('modules/datasource/crate/index', () => {
         packageName: 'amethyst',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toMatchObject({
+        homepage: 'https://amethyst.rs/',
+        sourceUrl: 'https://github.com/amethyst/amethyst',
+        releases: [
+          { version: '0.1.0' },
+          { version: '0.1.1' },
+          { version: '0.1.3' },
+          { version: '0.1.4' },
+          { version: '0.2.1' },
+          { version: '0.3.0' },
+          { version: '0.3.1' },
+          { version: '0.4.0' },
+          { version: '0.4.1' },
+          { version: '0.4.2' },
+          { version: '0.4.3' },
+          { version: '0.5.0' },
+          { version: '0.5.1' },
+          { version: '0.6.0' },
+          { version: '0.7.0' },
+          { version: '0.8.0' },
+          { version: '0.9.0' },
+          { version: '0.10.0' },
+          { version: '0.10.1', isDeprecated: true },
+        ],
+      });
     });
 
     it('processes real data: sentry', async () => {
@@ -311,9 +402,15 @@ describe('modules/datasource/crate/index', () => {
         packageName: 'sentry',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toMatchObject({
+        homepage: 'https://sentry.io/welcome/',
+        sourceUrl: 'https://github.com/getsentry/sentry-rust',
+        releases: [
+          { version: '0.1.0', releaseTimestamp: '2016-05-20T17:24:17.000Z' },
+          { version: '0.1.1', releaseTimestamp: '2016-05-22T17:14:04.000Z' },
+          { version: '0.1.2', releaseTimestamp: '2016-05-29T18:29:40.000Z' },
+        ],
+      });
     });
 
     it('uses cached registry config for subsequent packages', async () => {
@@ -346,6 +443,46 @@ describe('modules/datasource/crate/index', () => {
       expect(res2).not.toBeNull();
     });
 
+    it('skips crate metadata when config.json cannot be fetched', async () => {
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/config.json')
+        .reply(404);
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'libc',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+
+      expect(res).not.toBeNull();
+      expect(res?.sourceUrl).toBeUndefined();
+    });
+
+    it('skips crate metadata when config.json has no api URL', async () => {
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/config.json')
+        .reply(200, { dl: DL_BASE_URL });
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'libc',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+
+      expect(res).not.toBeNull();
+      expect(res?.sourceUrl).toBeUndefined();
+    });
+
     it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
@@ -369,9 +506,11 @@ describe('modules/datasource/crate/index', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalled();
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toMatchObject({
+        dependencyUrl:
+          'https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg',
+        releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
+      });
     });
 
     it('clones other private registry with explicit gitTimeout', async () => {
@@ -401,9 +540,10 @@ describe('modules/datasource/crate/index', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalled();
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toMatchObject({
+        dependencyUrl: 'https://github.com/mcorbin/testregistry/mypkg',
+        releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
+      });
     });
 
     it('clones once then reuses the cache', async () => {
@@ -501,13 +641,152 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeNull();
     });
 
+    describe('registry web API', () => {
+      const registryUrl =
+        'https://example.codeartifact.amazonaws.com/cargo/index';
+      const sparseRegistryUrl = `sparse+${registryUrl}`;
+      const ownApi = 'https://example.codeartifact.amazonaws.com/cargo/index/-';
+      const mypkgReleases = [{ version: '0.1.0' }, { version: '0.1.1' }];
+
+      function mockRegistryConfig(api: string): void {
+        httpMock
+          .scope(registryUrl)
+          .get('/config.json')
+          .reply(200, { dl: `${registryUrl}/dl`, api });
+      }
+
+      function mockIndex(): void {
+        httpMock
+          .scope(registryUrl)
+          .get('/my/pk/mypkg')
+          .reply(200, Fixtures.get('mypkg'));
+      }
+
+      beforeEach(() => {
+        GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      });
+
+      it('uses the crates.io API for mirrors of the crates.io index', async () => {
+        mockRegistryConfig(API_BASE_URL);
+        mockIndex();
+        mockCratesApiCallFor('mypkg', {
+          crate: { repository: 'https://github.com/example/mypkg' },
+        });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({
+          sourceUrl: 'https://github.com/example/mypkg',
+          releases: mypkgReleases,
+        });
+      });
+
+      it('uses the web API of registries implementing the read endpoints', async () => {
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock
+          .scope(ownApi)
+          .get('/api/v1/crates/mypkg?include=')
+          .reply(200, {
+            crate: { repository: 'https://github.com/example/mypkg' },
+          });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({
+          sourceUrl: 'https://github.com/example/mypkg',
+          releases: mypkgReleases,
+        });
+      });
+
+      it('probes the web API once and remembers registries answering 404', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock.scope(ownApi).get('/api/v1/crates/mypkg?include=').reply(404);
+
+        const res1 = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res1).toEqual({
+          dependencyUrl: `${registryUrl}/mypkg`,
+          registryUrl: sparseRegistryUrl,
+          releases: mypkgReleases,
+        });
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-crate-registry-api',
+          ownApi,
+          true,
+          24 * 60,
+        );
+
+        // Second package: no config.json and no web API request
+        httpMock
+          .scope(registryUrl)
+          .get('/ot/he/otherpkg')
+          .reply(200, Fixtures.get('mypkg'));
+
+        const res2 = await getPkgReleases({
+          datasource,
+          packageName: 'otherpkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res2).toMatchObject({ releases: mypkgReleases });
+        expect(res2?.sourceUrl).toBeUndefined();
+      });
+
+      it('skips the web API when a previous run found it unsupported', async () => {
+        vi.spyOn(packageCache, 'get').mockResolvedValueOnce(true);
+        mockRegistryConfig(ownApi);
+        mockIndex();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({ releases: mypkgReleases });
+        expect(res?.sourceUrl).toBeUndefined();
+      });
+
+      it('does not remember other web API errors', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock.scope(ownApi).get('/api/v1/crates/mypkg?include=').reply(500);
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({ releases: mypkgReleases });
+        expect(res?.sourceUrl).toBeUndefined();
+        expect(setCache).not.toHaveBeenCalled();
+      });
+    });
+
     it('retries if shallow fails because of dumb http git repo', async () => {
       const mockClone = vi
         .fn()
         .mockName('clone')
         .mockImplementation(
           async (_registryUrl: string, clonePath: string, opts) => {
-            if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+            if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
               throw new Error(
                 'fatal: dumb http transport does not support shallow capabilities',
               );
@@ -553,7 +832,7 @@ describe('modules/datasource/crate/index', () => {
         .fn()
         .mockName('clone')
         .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-          if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+          if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
             return Promise.reject(
               new Error(
                 'fatal: dumb http transport does not support shallow capabilities',
@@ -657,6 +936,89 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toEqual({
         version: '4.5.17',
         releaseTimestamp: '2024-09-04T19:16:41.355Z',
+      });
+    });
+
+    it('rethrows errors from crates.io', async () => {
+      memCache.set(
+        `crate-datasource/registry-config/${CRATES_IO_REGISTRY_URL_PARSED}`,
+        cratesIoConfig,
+      );
+      httpMock.scope(API_BASE_URL).get('/api/v1/crates/clap/4.5.17').reply(404);
+
+      await expect(
+        datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: CRATES_IO_REGISTRY_URL },
+          { version: '4.5.17' },
+        ),
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
+    });
+
+    describe('other registries', () => {
+      const registryUrl = 'https://example.com/index';
+      const api = 'https://example.com/-';
+
+      beforeEach(() => {
+        memCache.set(`crate-datasource/registry-config/${registryUrl}`, {
+          dl: 'https://example.com/dl',
+          api,
+        });
+      });
+
+      it('fetches releaseTimestamp from registries implementing the read endpoints', async () => {
+        httpMock
+          .scope(api)
+          .get('/api/v1/crates/clap/4.5.17')
+          .reply(200, {
+            version: { created_at: '2024-09-04T19:16:41.355243+00:00' },
+          });
+
+        const res = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          { version: '4.5.17' },
+        );
+
+        expect(res).toEqual({
+          version: '4.5.17',
+          releaseTimestamp: '2024-09-04T19:16:41.355Z',
+        });
+      });
+
+      it('probes once and remembers registries answering 404', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        httpMock.scope(api).get('/api/v1/crates/clap/4.5.17').reply(404);
+        const releaseOrig = { version: '4.5.17' };
+
+        const res1 = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          releaseOrig,
+        );
+        const res2 = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          { version: '4.5.18' },
+        );
+
+        expect(res1).toBe(releaseOrig);
+        expect(res2).toEqual({ version: '4.5.18' });
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-crate-registry-api',
+          api,
+          true,
+          24 * 60,
+        );
+      });
+
+      it('rethrows other errors', async () => {
+        httpMock.scope(api).get('/api/v1/crates/clap/4.5.17').reply(500);
+
+        await expect(
+          datasource.postprocessRelease(
+            { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+            { version: '4.5.17' },
+          ),
+        ).rejects.toThrow(
+          'Request failed with status code 500 (Internal Server Error)',
+        );
       });
     });
   });

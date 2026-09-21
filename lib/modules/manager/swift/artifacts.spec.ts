@@ -199,6 +199,86 @@ describe('modules/manager/swift/artifacts', () => {
     );
   });
 
+  it('parses lockfile with mixed source-control and registry pins', async () => {
+    // Regression test: SwiftPM Package Registry (SE-0292)
+    const v2MixedFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'alamofire',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/Alamofire/Alamofire',
+            state: {
+              revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
+              version: '5.9.1',
+            },
+          },
+          {
+            identity: 'example.registry-package',
+            kind: 'registry',
+            location: '',
+            state: {
+              version: '1.2.3',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2MixedFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'Alamofire/Alamofire',
+            datasource: GithubTagsDatasource.id,
+            newVersion: 'v5.10.0',
+            newValue: '5.10.0',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: JSON.stringify(
+            {
+              pins: [
+                {
+                  identity: 'alamofire',
+                  kind: 'remoteSourceControl',
+                  location: 'https://github.com/Alamofire/Alamofire',
+                  state: {
+                    revision: 'newrevisionsha123',
+                    version: '5.10.0',
+                  },
+                },
+                {
+                  identity: 'example.registry-package',
+                  kind: 'registry',
+                  location: '',
+                  state: { version: '1.2.3' },
+                },
+              ],
+              version: 2,
+            },
+            null,
+            2,
+          ),
+        },
+      },
+    ]);
+  });
+
   it('does not write `from:` range to Package.resolved', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2Fixture);
@@ -872,5 +952,174 @@ describe('modules/manager/swift/artifacts', () => {
       expect.objectContaining({ datasource: GithubTagsDatasource.id }),
       'v5.10.0',
     );
+  });
+
+  it('skips a pin in an unrelated package whose version does not match the from-version (exact spec)', async () => {
+    // Package that depends on Yams directly and pins it at the from-version.
+    const directFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '0e75dd8ccd5e3f27e4def2a7f0dd0ef5e3af5e2e',
+              version: '6.2.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    // Unrelated package: Yams is only a transitive pin (via XcodeGen, which
+    // requires `from: "5.0.0"`, i.e. < 6.0.0), so 6.x must not be written here.
+    const transitiveFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '01835dc202670b5bb90d07f3eae41867e9ed29f6',
+              version: '5.0.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+
+    scm.getFileList.mockResolvedValue([
+      'Package.resolved',
+      'tools/Package.resolved',
+    ]);
+    fs.readLocalFile
+      .mockResolvedValueOnce(directFixture)
+      .mockResolvedValueOnce(transitiveFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue(
+      'a27b21e0c81c5bf42049b897a62aaf387e80f279',
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'jpsim/Yams',
+          datasource: GithubTagsDatasource.id,
+          currentValue: '6.2.1',
+          currentVersion: '6.2.1',
+          newVersion: '6.2.2',
+          newValue: '6.2.2',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    // Only the direct dependent (pinned at the from-version 6.2.1) is updated;
+    // the unrelated package's transitive pin (5.0.1) is left untouched.
+    expect(result).toHaveLength(1);
+    expect(result![0].file!.path).toBe('Package.resolved');
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "6.2.2"');
+    expect(contents).toContain(
+      '"revision": "a27b21e0c81c5bf42049b897a62aaf387e80f279"',
+    );
+  });
+
+  it('updates a pin whose version matches the from-version (exact spec)', async () => {
+    const fixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '0e75dd8ccd5e3f27e4def2a7f0dd0ef5e3af5e2e',
+              version: '6.2.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue(
+      'a27b21e0c81c5bf42049b897a62aaf387e80f279',
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'jpsim/Yams',
+          datasource: GithubTagsDatasource.id,
+          currentValue: '6.2.1',
+          newVersion: '6.2.2',
+          newValue: '6.2.2',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "6.2.2"');
+  });
+
+  it('updates a pin for a range spec regardless of its current version (guard applies only to exact specs)', async () => {
+    const fixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'yams',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/jpsim/Yams.git',
+            state: {
+              revision: '01835dc202670b5bb90d07f3eae41867e9ed29f6',
+              version: '5.0.1',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(fixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue(
+      '11b8e57b8cc07be48e5d1e35c9e2f7abdfd3c81b',
+    );
+
+    const result = await updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [
+        {
+          depName: 'jpsim/Yams',
+          datasource: GithubTagsDatasource.id,
+          currentValue: 'from: "5.0.0"',
+          newVersion: '5.1.0',
+          newValue: 'from: "5.0.0"',
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(result).toHaveLength(1);
+    const { contents } = result![0].file as { contents: string };
+    expect(contents).toContain('"version": "5.1.0"');
   });
 });
