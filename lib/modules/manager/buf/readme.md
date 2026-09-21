@@ -20,12 +20,14 @@ Each dependency's resolved `commit` becomes its `currentDigest`, since BSR modul
 Transitive entries are skipped, because `buf dep update` re-resolves them from the direct deps — updating one directly would just be overwritten on the next run.
 If no sibling `buf.yaml` is found, every entry is treated as updatable.
 
-When a direct dependency pins a reference in `buf.yaml` (e.g. `buf.build/acme/weather:staging`), that reference is tracked so digests follow it rather than the default `main` label.
-A version-like reference (e.g. `:v1.2.3`) is skipped instead, since BSR exposes opaque commits rather than tags and cannot resolve one.
+When a direct dependency pins a **label** or branch in `buf.yaml` (e.g. `buf.build/acme/weather:staging`), that reference is tracked so digests follow it rather than the default `main` label.
+A **version-like** reference (e.g. `:v1.2.3`) is skipped instead, since BSR exposes opaque commits rather than tags and cannot resolve one.
+A **commit** reference (e.g. `:ba48c1a6…`) can never advance on its own — resolving a commit just returns that same commit — so it is treated like an unpinned dependency and tracked against `main`, letting the pinned commit move forward.
 
 #### How updates are applied
 
 A bump first swaps the `commit` in `buf.lock`, then Renovate runs `buf dep update` to regenerate the file — recomputing the accompanying `b5:` content digest (and any transitive entries) that a plain text edit cannot.
+When a dependency is commit-pinned in `buf.yaml`, Renovate also advances that pin to the new commit **before** running `buf dep update`; otherwise `buf dep update` would re-resolve the old pin and revert the bump.
 This requires the [`buf`](https://buf.build/docs/cli/) binary; Renovate can install it automatically when `binarySource` is `install` or `docker`.
 
 Because `buf dep update` refreshes the whole lock file, this manager also supports [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance).

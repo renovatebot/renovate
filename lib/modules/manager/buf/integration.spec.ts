@@ -45,8 +45,14 @@ describe('modules/manager/buf/integration', () => {
     `;
 
     git.getFile.mockResolvedValue(oldLock);
-    // updateArtifacts reads the on-disk lock, then re-reads after buf runs
+    fs.getSiblingFileName.mockReturnValue('buf.yaml');
+    // updateArtifacts reads the on-disk lock, checks the sibling buf.yaml for
+    // commit pins to advance (this dep is unpinned, so it's a no-op), then
+    // re-reads the lock after buf runs
     fs.readLocalFile.mockResolvedValueOnce(oldLock);
+    fs.readLocalFile.mockResolvedValueOnce(
+      'version: v2\ndeps:\n  - buf.build/googleapis/googleapis\n',
+    );
     fs.readLocalFile.mockResolvedValueOnce(regeneratedLock);
     const execSnapshots = mockExecAll();
 
@@ -88,6 +94,73 @@ describe('modules/manager/buf/integration', () => {
     // the correct content wins.
     expect(res.updatedArtifacts).toEqual([
       { type: 'addition', path: 'buf.lock', contents: regeneratedLock },
+    ]);
+    expect(res.artifactErrors).toEqual([]);
+  });
+
+  it('advances a commit-pinned buf.yaml so buf dep update does not revert the bump', async () => {
+    const oldCommit = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const newCommit = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+    const oldLock = codeBlock`
+      version: v2
+      deps:
+        - name: buf.build/googleapis/googleapis
+          commit: ${oldCommit}
+          digest: b5:staledigestfromtheoldcommit
+    `;
+    const autoReplacedLock = oldLock.replace(oldCommit, newCommit);
+    const regeneratedLock = codeBlock`
+      version: v2
+      deps:
+        - name: buf.build/googleapis/googleapis
+          commit: ${newCommit}
+          digest: b5:freshdigestfromthenewcommit
+    `;
+    // buf.yaml pins the module to the old commit - this is what buf dep update
+    // re-resolves from, so it must be advanced or the bump is reverted.
+    const oldBufYaml = `version: v2\ndeps:\n  - buf.build/googleapis/googleapis:${oldCommit}\n`;
+    const newBufYaml = `version: v2\ndeps:\n  - buf.build/googleapis/googleapis:${newCommit}\n`;
+
+    git.getFile.mockResolvedValue(oldLock);
+    fs.getSiblingFileName.mockReturnValue('buf.yaml');
+    fs.readLocalFile.mockResolvedValueOnce(oldLock); // initial buf.lock
+    fs.readLocalFile.mockResolvedValueOnce(oldBufYaml); // sibling buf.yaml (pinned)
+    fs.readLocalFile.mockResolvedValueOnce(regeneratedLock); // buf.lock after buf
+    const execSnapshots = mockExecAll();
+
+    const config: BranchConfig = {
+      baseBranch: 'main',
+      manager: 'buf',
+      branchName: 'renovate/buf',
+      upgrades: [
+        {
+          manager: 'buf',
+          branchName: 'renovate/buf',
+          packageFile: 'buf.lock',
+          depName: 'googleapis/googleapis',
+          datasource: 'buf-module',
+          registryUrls: ['https://buf.build'],
+          updateType: 'digest',
+          currentDigest: oldCommit,
+          newDigest: newCommit,
+          depIndex: 0,
+        },
+      ],
+    };
+
+    const res = await getUpdatedPackageFiles(config);
+
+    expect(execSnapshots).toMatchObject([{ cmd: 'buf dep update' }]);
+    // the pin in buf.yaml was advanced ahead of buf dep update
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('buf.yaml', newBufYaml);
+    // both the advanced buf.yaml and the regenerated buf.lock are committed,
+    // buf.yaml first
+    expect(res.updatedArtifacts).toEqual([
+      { type: 'addition', path: 'buf.yaml', contents: newBufYaml },
+      { type: 'addition', path: 'buf.lock', contents: regeneratedLock },
+    ]);
+    expect(res.updatedPackageFiles).toEqual([
+      { type: 'addition', path: 'buf.lock', contents: autoReplacedLock },
     ]);
     expect(res.artifactErrors).toEqual([]);
   });

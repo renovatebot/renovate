@@ -35,6 +35,7 @@ describe('modules/manager/buf/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
+    fs.getSiblingFileName.mockReturnValue('buf.yaml');
   });
 
   afterEach(() => {
@@ -128,6 +129,122 @@ describe('modules/manager/buf/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: 'buf dep update' }]);
+  });
+
+  const pinnedDep = {
+    depName: 'protocolbuffers/wellknowntypes',
+    packageName: 'protocolbuffers/wellknowntypes',
+    registryUrls: ['https://buf.build'],
+    currentDigest: 'ba48c1a6dc7d47d0aa9940aa3601b039',
+    newDigest: 'f1151727eddb493abf82a1d919dc35e4',
+  };
+
+  it('advances a commit pin in buf.yaml so the bump survives buf dep update', async () => {
+    const bufYaml =
+      'version: v2\ndeps:\n  - buf.build/protocolbuffers/wellknowntypes:ba48c1a6dc7d47d0aa9940aa3601b039\n';
+    fs.readLocalFile.mockResolvedValueOnce('old lock'); // initial buf.lock read
+    fs.readLocalFile.mockResolvedValueOnce(bufYaml); // sibling buf.yaml read
+    fs.readLocalFile.mockResolvedValueOnce('new lock'); // buf.lock after buf dep update
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'buf.lock',
+      updatedDeps: [pinnedDep],
+      newPackageFileContent: 'new buf.lock',
+      config,
+    });
+
+    // buf.yaml pin advanced, and committed ahead of the regenerated buf.lock.
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'buf.yaml',
+          contents:
+            'version: v2\ndeps:\n  - buf.build/protocolbuffers/wellknowntypes:f1151727eddb493abf82a1d919dc35e4\n',
+        },
+      },
+      {
+        file: { type: 'addition', path: 'buf.lock', contents: 'new lock' },
+      },
+    ]);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'buf.yaml',
+      'version: v2\ndeps:\n  - buf.build/protocolbuffers/wellknowntypes:f1151727eddb493abf82a1d919dc35e4\n',
+    );
+    expect(execSnapshots).toMatchObject([{ cmd: 'buf dep update' }]);
+  });
+
+  it('commits the advanced buf.yaml even when buf.lock is unchanged', async () => {
+    const bufYaml =
+      'version: v2\ndeps:\n  - buf.build/protocolbuffers/wellknowntypes:ba48c1a6dc7d47d0aa9940aa3601b039\n';
+    fs.readLocalFile.mockResolvedValueOnce('same lock'); // initial buf.lock read
+    fs.readLocalFile.mockResolvedValueOnce(bufYaml); // sibling buf.yaml read
+    fs.readLocalFile.mockResolvedValueOnce('same lock'); // buf.lock after buf dep update
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'buf.lock',
+      // No packageName: extract emits only depName, so the pin is built from it.
+      updatedDeps: [{ ...pinnedDep, packageName: undefined }],
+      newPackageFileContent: 'new buf.lock',
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'buf.yaml',
+          contents:
+            'version: v2\ndeps:\n  - buf.build/protocolbuffers/wellknowntypes:f1151727eddb493abf82a1d919dc35e4\n',
+        },
+      },
+    ]);
+  });
+
+  it('leaves buf.yaml alone when it holds no matching pin', async () => {
+    // Unpinned (tracks main) or a different module: no `:currentDigest` to swap.
+    const bufYaml =
+      'version: v2\ndeps:\n  - buf.build/protocolbuffers/wellknowntypes\n';
+    fs.readLocalFile.mockResolvedValueOnce('old lock'); // initial buf.lock read
+    fs.readLocalFile.mockResolvedValueOnce(bufYaml); // sibling buf.yaml read
+    fs.readLocalFile.mockResolvedValueOnce('new lock'); // buf.lock after buf dep update
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'buf.lock',
+      updatedDeps: [pinnedDep],
+      newPackageFileContent: 'new buf.lock',
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: { type: 'addition', path: 'buf.lock', contents: 'new lock' },
+      },
+    ]);
+    expect(fs.writeLocalFile).not.toHaveBeenCalledWith('buf.yaml', bufYaml);
+  });
+
+  it('skips the buf.yaml read when there is no sibling file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('old lock'); // initial buf.lock read
+    fs.readLocalFile.mockResolvedValueOnce(null); // sibling buf.yaml missing
+    fs.readLocalFile.mockResolvedValueOnce('new lock'); // buf.lock after buf dep update
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'buf.lock',
+      updatedDeps: [pinnedDep],
+      newPackageFileContent: 'new buf.lock',
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: { type: 'addition', path: 'buf.lock', contents: 'new lock' },
+      },
+    ]);
   });
 
   it('supports lockFileMaintenance', async () => {
