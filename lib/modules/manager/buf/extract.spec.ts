@@ -345,6 +345,43 @@ describe('modules/manager/buf/extract', () => {
       ]);
     });
 
+    it('tracks `main` for a commit-pinned direct dep so the sha can advance', async () => {
+      // A `buf.yaml` dep pinned to a specific commit (the normal state right
+      // after `buf dep update`) must NOT recover that commit as currentValue:
+      // getDigest would resolve the commit to itself and never bump.
+      const lock = codeBlock`
+        version: v2
+        deps:
+          - name: buf.build/protocolbuffers/wellknowntypes
+            commit: ba48c1a6dc7d47d0aa9940aa3601b039
+            digest: b5:1
+      `;
+      const yaml = codeBlock`
+        version: v2
+        deps:
+          - buf.build/protocolbuffers/wellknowntypes:ba48c1a6dc7d47d0aa9940aa3601b039
+      `;
+      mockFiles({ 'buf.lock': lock, 'buf.yaml': yaml });
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      const res = await extractAllPackageFiles({}, ['buf.lock']);
+
+      expect(res).toEqual([
+        {
+          packageFile: 'buf.lock',
+          deps: [
+            {
+              // no currentValue and no skipReason -> tracks the default `main`
+              depName: 'protocolbuffers/wellknowntypes',
+              datasource: BufModuleDatasource.id,
+              registryUrls: ['https://buf.build'],
+              currentDigest: 'ba48c1a6dc7d47d0aa9940aa3601b039',
+            },
+          ],
+        },
+      ]);
+    });
+
     // With no usable buf.yaml, deps are neither filtered nor reference-enriched.
     const allUpdatable = [undefined, undefined, undefined, undefined];
 

@@ -23,6 +23,12 @@ const remotePluginRegex = regEx(
   /^(?<host>[\w-]+(?:\.[\w-]+)+)\/(?<owner>[\w-]+)\/(?<name>[\w-]+)(?::(?<version>[\w.-]+))?$/,
 );
 
+// A BSR commit reference is a 32-char hex string. Pinning a `buf.yaml` dep to a
+// specific commit freezes tracking (getDigest resolves a commit to itself), so
+// it is treated like an absent reference: tracking falls back to the module's
+// default `main` label, letting the pinned commit advance.
+const bufCommitRegex = regEx(/^[0-9a-f]{32}$/i);
+
 function extractPlugin(ref: string): PackageDependency | null {
   const match = remotePluginRegex.exec(ref)?.groups;
   if (!match) {
@@ -101,10 +107,14 @@ function extractBufGenYaml(
  * unfiltered re-extraction autoReplace performs).
  *
  * A direct dep's `buf.yaml` reference, when present, is recovered as its
- * `currentValue` so `getDigest` tracks that label/branch/commit rather than the
- * default `main`. A version-like reference (e.g. `v1.2.3`) is skipped instead:
- * the `buf-module` datasource exposes opaque commits, not tags, so it cannot be
- * resolved, and tracking would otherwise silently fall back to `main`.
+ * `currentValue` so `getDigest` tracks that label/branch rather than the
+ * default `main`. Two reference kinds are handled specially instead:
+ * - a version-like reference (e.g. `v1.2.3`) is skipped: the `buf-module`
+ *   datasource exposes opaque commits, not tags, so it cannot be resolved, and
+ *   tracking would otherwise silently fall back to `main`.
+ * - a bare commit reference (32-char hex) freezes tracking, since `getDigest`
+ *   resolves a commit to itself; it is treated like an absent reference so the
+ *   dep tracks `main` and the pinned commit can actually advance.
  */
 function extractBufLock(
   content: string,
@@ -157,7 +167,10 @@ function extractBufLock(
       if (directModules.has(moduleKey)) {
         const reference = directModules.get(moduleKey);
         if (reference) {
-          if (loose.isValid(reference)) {
+          if (bufCommitRegex.test(reference)) {
+            // Commit-pinned: leave currentValue unset so getDigest tracks `main`
+            // rather than resolving the frozen commit back to itself.
+          } else if (loose.isValid(reference)) {
             packageDep.skipReason = 'unsupported-version';
           } else {
             packageDep.currentValue = reference;
