@@ -732,7 +732,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it('supports corepack even if managerData is missing the hasPackageManager flag', async () => {
     // nested resolutions clobber the managerData flag, see #25853
-    process.env.CONTAINERBASE = 'true';
+    vi.stubEnv('CONTAINERBASE', 'true');
     GlobalConfig.set({
       localDir: '.',
       binarySource: 'install',
