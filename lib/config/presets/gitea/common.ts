@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { getRepoFile } from '../../../modules/platform/gitea/contents.ts';
+import { getRepoFile } from '../../../modules/platform/gitea/files.ts';
 import type { RepoContents } from '../../../modules/platform/gitea/schema.ts';
 import { API_PATH } from '../../../modules/platform/gitea/utils.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
