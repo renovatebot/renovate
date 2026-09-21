@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fs, logger, partial, scm } from '~test/util.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
 import * as templates from '../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { bumpVersions } from './bump-versions.ts';
@@ -800,6 +801,35 @@ describe('workers/repository/update/branch/bump-versions', () => {
         { file: '.release-version' },
         'bumpVersions(test): No newVersion found in branch upgrades for sync type',
       );
+    });
+
+    it('reads from disk when the pending change carries no contents', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['first-file'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        // the target file is pending in both lists, but neither entry has
+        // contents, so the current version has to come off disk
+        updatedPackageFiles: [
+          partial<FileChange>({ type: 'addition', path: 'first-file' }),
+        ],
+        updatedArtifacts: [
+          partial<FileChange>({ type: 'addition', path: 'first-file' }),
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['first-file']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      expect(config.updatedPackageFiles).toMatchObject([
+        { type: 'addition', path: 'first-file' },
+        { type: 'addition', path: 'first-file', contents: '1.1.0' },
+      ]);
     });
 
     it('should collect bumpVersions from all upgrades, not just the first', async () => {

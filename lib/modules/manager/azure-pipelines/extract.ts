@@ -198,6 +198,7 @@ export function extractPackageFile(
 
   for (const container of coerceArray(pkg.resources?.containers)) {
     const dep = extractContainer(container);
+    // v8 ignore else -- `extractContainer()` always returns a dep
     if (dep) {
       deps.push(dep);
     }
