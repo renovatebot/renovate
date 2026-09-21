@@ -138,6 +138,7 @@ export class SbtPackageDatasource extends MavenDatasource {
         const scalaSubdir = artifactSubdirs.find((x) =>
           x.endsWith(`/${artifactId}_${scalaVersion}/`),
         );
+        // v8 ignore else -- needs a nested directory listing fixture
         if (scalaSubdir) {
           packageUrls = [scalaSubdir];
           break;
@@ -200,6 +201,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       );
     }
 
+    // v8 ignore else -- an empty list returns before reaching here
     if (packageUrls.length > 0) {
       const packageUrlsKey = `package-urls:${registryUrl}:${packageName}`;
       await packageCache.set(
@@ -363,7 +365,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!config.registryUrl) {
       return release;
     }
@@ -374,6 +376,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       release.version,
     );
 
+    // v8 ignore else -- needs a pom fixture carrying no timestamp
     if (res?.releaseTimestamp) {
       release.releaseTimestamp = res.releaseTimestamp;
     }

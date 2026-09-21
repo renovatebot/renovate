@@ -11,6 +11,7 @@ import {
   replaceUrlPath,
   resolveBaseUrl,
   resolveSameOriginUrl,
+  stripUrlCredentials,
   trimSlashes,
   trimTrailingSlash,
 } from './url.ts';
@@ -228,6 +229,37 @@ describe('util/url', () => {
     expect(massageHostUrl('https://domain.com')).toBe('https://domain.com');
   });
 
+  describe('stripUrlCredentials', () => {
+    it('removes username and password', () => {
+      expect(stripUrlCredentials('https://user:pass@example.com/simple/')).toBe(
+        'https://example.com/simple/',
+      );
+    });
+
+    it('removes a placeholder-style userinfo', () => {
+      expect(
+        stripUrlCredentials('https://${USER}:${PASS}@example.com/simple/'),
+      ).toBe('https://example.com/simple/');
+    });
+
+    it('returns the href unchanged when there is no userinfo', () => {
+      expect(stripUrlCredentials('https://example.com/simple/')).toBe(
+        'https://example.com/simple/',
+      );
+    });
+
+    it('returns null for an unparseable URL', () => {
+      expect(stripUrlCredentials('not-a-url')).toBeNull();
+    });
+
+    it('accepts a URL instance without mutating it', () => {
+      const url = parseUrl('https://user:pass@example.com/simple/')!;
+      expect(stripUrlCredentials(url)).toBe('https://example.com/simple/');
+      expect(url.username).toBe('user');
+      expect(url.password).toBe('pass');
+    });
+  });
+
   describe('resolveSameOriginUrl', () => {
     it('resolves a same-origin absolute URL', () => {
       expect(
@@ -236,6 +268,33 @@ describe('util/url', () => {
           'https://registry.example.com/v2/foo/tags/list?n=10&last=z',
         ),
       ).toBe('https://registry.example.com/v2/foo/tags/list?n=10&last=z');
+    });
+
+    it('upgrades an HTTP URL to HTTPS when the host is the same', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://community.chocolatey.org/api/v2/FindPackagesById',
+          'http://community.chocolatey.org/api/v2/FindPackagesById?page=2',
+        ),
+      ).toBe('https://community.chocolatey.org/api/v2/FindPackagesById?page=2');
+    });
+
+    it('does not upgrade HTTP to HTTPS when the next URL has a non-standard port', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://community.chocolatey.org/api/v2/FindPackagesById',
+          'http://community.chocolatey.org:8080/api/v2/FindPackagesById?page=2',
+        ),
+      ).toBeNull();
+    });
+
+    it('rejects a different port on the same host', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://registry.example.com:8443/v2/foo',
+          'https://registry.example.com/v2/foo?page=2',
+        ),
+      ).toBeNull();
     });
 
     it('resolves a relative next URL against the base', () => {

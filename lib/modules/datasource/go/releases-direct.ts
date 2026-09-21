@@ -10,7 +10,7 @@ import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import { getSourceUrl } from './common.ts';
+import { getSourceUrl, isPublicGoPackage } from './common.ts';
 
 /**
  * This function tries to select tags with longest prefix could be constructed from `packageName`.
@@ -130,13 +130,13 @@ export class GoDirectDatasource extends Datasource {
         res = await this.bitbucket.getReleases(source);
         break;
       }
-      /* v8 ignore next 3 -- should never happen */
+      /* v8 ignore next -- should never happen */
       default: {
         return null;
       }
     }
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!res) {
       return null;
     }
@@ -155,6 +155,7 @@ export class GoDirectDatasource extends Datasource {
       {
         namespace: `datasource-${GoDirectDatasource.id}`,
         key: config.packageName,
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

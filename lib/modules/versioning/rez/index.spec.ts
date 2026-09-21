@@ -197,6 +197,11 @@ describe('modules/versioning/rez/index', () => {
     ${'1.2.3'}           | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'} | ${'1.2.4'}
     ${'1.2.3'}           | ${'replace'}  | ${'1.2.3'}     | ${'1.2.4'} | ${'1.2.4'}
     ${'1.2.3'}           | ${'widen'}    | ${'1.2.3'}     | ${'1.2.4'} | ${'1.2.4'}
+    ${'1'}               | ${'replace'}  | ${'1'}         | ${'3.2.1'} | ${'3'}
+    ${'1.0'}             | ${'replace'}  | ${'1.0'}       | ${'3.2.1'} | ${'3.2'}
+    ${'1.0.0'}           | ${'replace'}  | ${'1.0.0'}     | ${'3.2.1'} | ${'3.2.1'}
+    ${'1.x'}             | ${'replace'}  | ${'1.0'}       | ${'3.2.1'} | ${'3.2'}
+    ${'1.x.y'}           | ${'replace'}  | ${'1.0.0'}     | ${'3.2.1'} | ${'3.2.1'}
     ${'7..8'}            | ${'replace'}  | ${'7.2.3'}     | ${'8.2.5'} | ${'8..9'}
     ${'7.2..8'}          | ${'replace'}  | ${'7.2.3'}     | ${'8.2.5'} | ${'8.2..9'}
     ${'7.2.3..8'}        | ${'replace'}  | ${'7.2.3'}     | ${'8.2.5'} | ${'8.2.5..9'}
@@ -439,6 +444,18 @@ describe('modules/versioning/rez/index', () => {
       expect(res).toBe(expected);
     },
   );
+
+  it('getNewValue() replaces a plain version with a four-component version', () => {
+    // rez versions may have more than three components, which npm rejects,
+    // so the new value is determined via pep440 instead of version precision
+    const res = versioning.getNewValue({
+      currentValue: '1.2.3',
+      rangeStrategy: 'replace',
+      currentVersion: '1.2.3',
+      newVersion: '1.2.3.4',
+    });
+    expect(res).toBe('1.2.3.4');
+  });
 
   it.each`
     version    | expected

@@ -33,13 +33,13 @@ function filterByMaxMajorIncrement(
   depName: string,
 ): Release[] {
   const currentMajor = versioningApi.getMajor(currentVersion);
-  /* v8 ignore next 3 -- shouldn't happen */
+  /* v8 ignore next -- shouldn't happen */
   if (currentMajor === null) {
     return releases;
   }
   return releases.filter((r) => {
     const releaseMajor = versioningApi.getMajor(r.version);
-    /* v8 ignore next 3 -- shouldn't happen */
+    /* v8 ignore next -- shouldn't happen */
     if (releaseMajor === null) {
       return true;
     }
@@ -64,7 +64,7 @@ export function filterVersions(
   const { ignoreUnstable, ignoreDeprecated, respectLatest, maxMajorIncrement } =
     config;
 
-  /* v8 ignore next 3 -- shouldn't happen */
+  /* v8 ignore next -- shouldn't happen */
   if (!currentVersion) {
     return [];
   }
@@ -139,7 +139,7 @@ export function filterVersions(
         semver.satisfies(
           semver.valid(r.version)
             ? r.version
-            : /* v8 ignore start: not reachable, but it's safer to preserve it */ semver.coerce(
+            : /* v8 ignore start: only for a version the configured versioning accepts but semver cannot parse, e.g. a four-part docker tag, see #40625 */ semver.coerce(
                 r.version,
               )!,
           /* v8 ignore stop */

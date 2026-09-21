@@ -1,6 +1,7 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
@@ -69,11 +70,7 @@ function createHttpUrl(url: URL, endpoint: string, repository: string): string {
 
   url.username = opts.username;
   url.password = opts.password;
-  url.pathname = joinUrlParts(
-    url.pathname,
-    'a',
-    encodeURIComponent(repository),
-  );
+  url.pathname = joinUrlParts(url.pathname, 'a', repository);
   return url.toString();
 }
 
@@ -113,8 +110,9 @@ export function mapGerritChangeToPr(
     title: change.subject,
     createdAt: convertGerritDateToISO(change.created),
     labels: change.hashtags,
-    reviewers:
-      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
+    reviewers: coerceArray(
+      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!),
+    ),
     bodyStruct: {
       hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
     },
@@ -139,12 +137,12 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
   let sourceBranch: string | undefined = undefined;
 
   if (change.current_revision) {
-    const re = regEx(/^Renovate-Branch: (.+)$/m);
+    const re = regEx(/^Renovate-Branch: (?<branch>.+)$/m);
     const currentRevision = change.revisions![change.current_revision];
     const message = currentRevision.commit_with_footers;
     // v8 ignore else -- TODO: add test #40625
     if (message) {
-      sourceBranch = re.exec(message)?.[1];
+      sourceBranch = re.exec(message)?.groups?.branch;
     }
   }
 
@@ -152,12 +150,12 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {
-  const msg = Array.from(change.messages ?? [])
+  const msg = Array.from(coerceArray(change.messages))
     .reverse()
     .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {
     // Gerrit adds a "Patch Set X:" prefix to comments
-    return msg.message.replace(/^Patch Set \d+:\n\n/, '');
+    return msg.message.replace(regEx(/^Patch Set \d+:\n\n/), '');
   }
   return undefined;
 }
