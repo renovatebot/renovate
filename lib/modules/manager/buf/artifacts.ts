@@ -14,9 +14,9 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { BufModuleDatasource } from '../../datasource/buf-module/index.ts';
 import type {
-  PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 
@@ -56,7 +56,7 @@ function getBufToken(registryUrls: string[]): string | undefined {
  */
 async function advanceBufYamlPins(
   packageFileName: string,
-  updatedDeps: PackageDependency[],
+  updatedDeps: Upgrade[],
 ): Promise<UpdateArtifactsResult | null> {
   const pinUpdates = updatedDeps.filter(
     (dep) => dep.currentDigest && dep.newDigest,
