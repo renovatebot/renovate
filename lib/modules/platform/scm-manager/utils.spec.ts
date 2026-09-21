@@ -1,15 +1,9 @@
 import type { MergeStrategy } from '../../../config/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import type { GitUrlOption, Pr } from '../types.ts';
+import type { GitUrlOption } from '../types.ts';
 import { invalidatePrCache } from './index.ts';
 import type { Repo } from './schema.ts';
-import type { PrFilterByState } from './types.ts';
-import {
-  getMergeMethod,
-  getRepoUrl,
-  matchPrState,
-  smartLinks,
-} from './utils.ts';
+import { getMergeMethod, getRepoUrl, smartLinks } from './utils.ts';
 
 describe('modules/platform/scm-manager/utils', () => {
   describe('getMergeMethod', () => {
@@ -44,48 +38,6 @@ describe('modules/platform/scm-manager/utils', () => {
       'adjust $body to smart link $result',
       ({ body, result }: { body: string; result: string }) => {
         expect(smartLinks(body)).toEqual(result);
-      },
-    );
-  });
-
-  describe('matchPrState', () => {
-    const defaultPr: Pr = {
-      sourceBranch: 'feature/test',
-      createdAt: '2023-08-02T10:48:24.762Z',
-      number: 1,
-      state: '',
-      title: 'Feature Test PR',
-      isDraft: false,
-    };
-
-    it.each`
-      pr                                   | state       | expectedResult
-      ${{ ...defaultPr, state: 'open' }}   | ${'all'}    | ${true}
-      ${{ ...defaultPr, state: 'merged' }} | ${'all'}    | ${true}
-      ${{ ...defaultPr, state: 'closed' }} | ${'all'}    | ${true}
-      ${{ ...defaultPr, state: 'open' }}   | ${'open'}   | ${true}
-      ${{ ...defaultPr, state: 'merged' }} | ${'open'}   | ${false}
-      ${{ ...defaultPr, state: 'closed' }} | ${'open'}   | ${false}
-      ${{ ...defaultPr, state: 'open' }}   | ${'!open'}  | ${false}
-      ${{ ...defaultPr, state: 'merged' }} | ${'!open'}  | ${true}
-      ${{ ...defaultPr, state: 'closed' }} | ${'!open'}  | ${true}
-      ${{ ...defaultPr, state: 'open' }}   | ${'closed'} | ${false}
-      ${{ ...defaultPr, state: 'merged' }} | ${'closed'} | ${false}
-      ${{ ...defaultPr, state: 'closed' }} | ${'closed'} | ${true}
-    `(
-      'match scm pr state $pr.state to renovate pr state $state',
-      ({
-        pr,
-        state,
-        expectedResult,
-      }: {
-        pr: Pr;
-        state: string;
-        expectedResult: boolean;
-      }) => {
-        expect(matchPrState(pr, state as PrFilterByState)).toEqual(
-          expectedResult,
-        );
       },
     );
   });
