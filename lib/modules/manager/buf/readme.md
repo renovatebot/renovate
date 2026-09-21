@@ -1,5 +1,9 @@
 This manager handles two [buf](https://buf.build) config files.
 
+It is enabled by default, and activates automatically when a repository contains a `buf.lock` or a `buf.gen.yaml` file (including language-specific templates such as `buf.gen.go.yaml`).
+A `buf.yaml` on its own does not activate the manager; it is only read as a sibling of `buf.lock` to tell direct dependencies from transitive ones.
+To turn the manager off, set `"buf": { "enabled": false }`, or omit `buf` from [`enabledManagers`](../../../configuration-options.md#enabledmanagers) if you use that allowlist.
+
 ### `buf.gen.yaml` — remote code-generation plugins
 
 It extracts remote plugin references so Renovate can update them via the [`buf-plugin` datasource](../../datasource/buf-plugin/index.md), for both config versions:
@@ -35,3 +39,46 @@ Because `buf dep update` refreshes the whole lock file, this manager also suppor
 Each dependency's registry host is taken from its `buf.lock` entry, so self-hosted BSR instances (any host other than `buf.build`) are looked up and authenticated against their own domain.
 To authenticate against a private or rate-limited registry, add a [`hostRules`](../../../configuration-options.md#hostrules) entry with `hostType: buf-module` and a `token`, matching the registry's host.
 Renovate passes these to the CLI as `BUF_TOKEN`, joining multiple registries into the `token@host,token@host` form buf expects.
+
+### Grouping and scoping updates
+
+The manager spans two datasources, and its two kinds of dependency update differently — worth knowing before you write `packageRules`.
+
+**BSR modules always update as digests.**
+Because modules have no semantic version, every module update is [`updateType: "digest"`](../../../configuration-options.md#packagerulesmatchupdatetypes) — never `major`, `minor`, or `patch`.
+A rule such as `matchUpdateTypes: ["minor", "patch"]` therefore silently never matches a BSR module.
+Codegen plugins (from `buf.gen.yaml`) _are_ versioned, so they produce normal `major`/`minor`/`patch` updates.
+
+**Two datasources, two axes.**
+[`matchManagers: ["buf"]`](../../../configuration-options.md#packagerulesmatchmanagers) targets everything this manager produces — both modules and plugins.
+To handle them separately, match the [datasource](../../../configuration-options.md#packagerulesmatchdatasources) instead: `buf-module` for BSR modules, `buf-plugin` for codegen plugins.
+
+Group every buf dependency into a single PR:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["buf"],
+      "groupName": "buf dependencies"
+    }
+  ]
+}
+```
+
+Group modules and plugins separately — often what you want, since module digest churn is noisier than plugin version bumps:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["buf-module"],
+      "groupName": "BSR modules"
+    },
+    {
+      "matchDatasources": ["buf-plugin"],
+      "groupName": "buf codegen plugins"
+    }
+  ]
+}
+```
