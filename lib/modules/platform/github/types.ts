@@ -133,6 +133,7 @@ export interface LocalRepoConfig {
   renovateForkUser: string | undefined;
   productLinks: any;
   ignorePrAuthor: boolean;
+  allowedPrAuthors: string[];
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
@@ -185,6 +186,7 @@ export interface ApiPageItem {
  * Mutable object designed to be used in the repository cache
  */
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
+  authorFilter?: string[] | null;
   items: Record<number, T>;
   lastModified?: string;
 }

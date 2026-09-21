@@ -552,6 +552,7 @@ export async function initRepo({
     cloneSubmodules,
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
+    allowedPrAuthors: GlobalConfig.get('allowedPrAuthors'),
     mergeQueueEnabled: {},
   } as any;
   const opts = hostRules.find({
@@ -946,6 +947,17 @@ function cachePr(pr?: GhPr | null): void {
   }
 }
 
+function getPrAuthorFilter(): string[] | null {
+  if (config.forkToken || config.ignorePrAuthor) {
+    return null;
+  }
+
+  const authors = [config.renovateUsername, ...config.allowedPrAuthors]
+    .filter(isNonEmptyString)
+    .map((author) => author.toLowerCase());
+  return authors.length ? [...new Set(authors)].sort() : null;
+}
+
 // Fetch fresh Pull Request and cache it when possible
 async function fetchPr(prNo: number): Promise<GhPr | null> {
   try {
@@ -989,14 +1001,11 @@ export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
 
-    let username = config.renovateUsername;
-    if (config.forkToken || config.ignorePrAuthor) {
-      username = undefined;
-    }
+    const authorFilter = getPrAuthorFilter();
 
     // TODO: check null `repo` (#22198)
     const prCache = await instrument('getPrCache', () =>
-      getPrCache(githubApi, repo!, username),
+      getPrCache(githubApi, repo!, authorFilter),
     );
     config.prList = Object.values(prCache).sort(
       ({ number: a }, { number: b }) => b - a,
