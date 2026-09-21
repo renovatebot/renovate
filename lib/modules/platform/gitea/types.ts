@@ -145,3 +145,11 @@ export interface PrCacheData {
   updated_at: string | null;
   author: string | null;
 }
+
+/**
+ * The Gitea/Forgejo merge styles allowed by a repository, as determined by
+ * `isAllowed()`. Passed to `getMergeMethod()` so it can pick the best
+ * matching merge style for a given `MergeStrategy` when more than one style
+ * could apply.
+ */
+export type AllowedMergeMethods = ReadonlySet<PRMergeMethod>;

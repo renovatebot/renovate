@@ -63,10 +63,7 @@ export async function extractPackageFile(
     deps.push(...projectDependencies);
   }
 
-  const dependencyGroups = def['dependency-groups'];
-  if (dependencyGroups) {
-    deps.push(...dependencyGroups);
-  }
+  deps.push(...def['dependency-groups']);
 
   const projectOptionalDependencies = def.project?.['optional-dependencies'];
   if (projectOptionalDependencies) {
