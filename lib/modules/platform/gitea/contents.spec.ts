@@ -1,8 +1,8 @@
 import * as httpMock from '~test/http-mock.ts';
 import { ForgejoHttp } from '../../../util/http/forgejo.ts';
-import { GiteaHttp } from '../../../util/http/gitea.ts';
+import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { API_BASE_PATH, getRepoFile, listRepoDir } from './contents.ts';
+import { getRepoFile, listRepoDir } from './contents.ts';
 
 describe('modules/platform/gitea/contents', () => {
   const apiHost = 'https://gitea.renovatebot.com';
@@ -22,12 +22,9 @@ describe('modules/platform/gitea/contents', () => {
           content: toBase64('top secret'),
         });
 
-      const res = await getRepoFile(
-        giteaHttp,
-        apiBaseUrl,
-        'some/repo',
-        'dummy.txt',
-      );
+      const res = await getRepoFile(giteaHttp, 'some/repo', 'dummy.txt', null, {
+        baseUrl: apiBaseUrl,
+      });
 
       expect(res).toEqual({
         type: 'file',
@@ -51,10 +48,10 @@ describe('modules/platform/gitea/contents', () => {
 
       const res = await getRepoFile(
         forgejoHttp,
-        apiBaseUrl,
         'some/repo',
         'dummy.txt',
         'dev',
+        { baseUrl: apiBaseUrl },
       );
 
       expect(res).toMatchObject({ type: 'file', contentString: '' });
@@ -72,9 +69,10 @@ describe('modules/platform/gitea/contents', () => {
 
       const res = await getRepoFile(
         giteaHttp,
-        apiBaseUrl,
         'some/repo',
         'nested/some path/dummy.txt',
+        null,
+        { baseUrl: apiBaseUrl },
       );
 
       expect(res).toEqual({
@@ -84,7 +82,9 @@ describe('modules/platform/gitea/contents', () => {
       });
     });
 
-    it('resolves the default API path against a baseUrl option', async () => {
+    it('falls back to the client base url', async () => {
+      setBaseUrl(apiBaseUrl);
+
       httpMock
         .scope(apiHost)
         .get('/api/v1/repos/some/repo/contents/dummy.txt')
@@ -95,14 +95,7 @@ describe('modules/platform/gitea/contents', () => {
           content: toBase64('data'),
         });
 
-      const res = await getRepoFile(
-        giteaHttp,
-        API_BASE_PATH,
-        'some/repo',
-        'dummy.txt',
-        null,
-        { baseUrl: `${apiHost}/` },
-      );
+      const res = await getRepoFile(giteaHttp, 'some/repo', 'dummy.txt');
 
       expect(res).toMatchObject({ contentString: 'data' });
     });
@@ -118,7 +111,9 @@ describe('modules/platform/gitea/contents', () => {
           { type: 'submodule', name: 'sub', path: 'sub' },
         ]);
 
-      const res = await listRepoDir(forgejoHttp, apiBaseUrl, 'some/repo');
+      const res = await listRepoDir(forgejoHttp, 'some/repo', undefined, {
+        baseUrl: apiBaseUrl,
+      });
 
       expect(res).toEqual([
         { type: 'dir', name: 'docs', path: 'docs' },
@@ -132,13 +127,10 @@ describe('modules/platform/gitea/contents', () => {
         .get('/api/v1/repos/some/repo/contents/charts/some')
         .reply(200, []);
 
-      const res = await listRepoDir(
-        giteaHttp,
-        apiBaseUrl,
-        'some/repo',
-        'charts/some',
-        { paginate: false },
-      );
+      const res = await listRepoDir(giteaHttp, 'some/repo', 'charts/some', {
+        baseUrl: apiBaseUrl,
+        paginate: false,
+      });
 
       expect(res).toBeEmptyArray();
     });

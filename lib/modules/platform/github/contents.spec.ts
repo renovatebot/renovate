@@ -13,12 +13,9 @@ describe('modules/platform/github/contents', () => {
       .get('/repos/some/repo/contents/renovate.json')
       .reply(200, { content: toBase64('{}') });
 
-    const res = await getRepoFile(
-      http,
-      `${apiHost}/`,
-      'some/repo',
-      'renovate.json',
-    );
+    const res = await getRepoFile(http, 'some/repo', 'renovate.json', null, {
+      baseUrl: `${apiHost}/`,
+    });
 
     expect(res).toBe('{}');
   });
@@ -29,13 +26,9 @@ describe('modules/platform/github/contents', () => {
       .get('/repos/some/repo/contents/renovate.json?ref=dev')
       .reply(200, { content: toBase64('{}') });
 
-    const res = await getRepoFile(
-      http,
-      `${apiHost}/`,
-      'some/repo',
-      'renovate.json',
-      'dev',
-    );
+    const res = await getRepoFile(http, 'some/repo', 'renovate.json', 'dev', {
+      baseUrl: `${apiHost}/`,
+    });
 
     expect(res).toBe('{}');
   });

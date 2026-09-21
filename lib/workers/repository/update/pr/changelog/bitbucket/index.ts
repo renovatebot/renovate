@@ -64,10 +64,10 @@ export async function getReleaseNotesMd(
 
   const fileContent = await getRepoFile(
     bitbucketHttp,
-    apiBaseUrl,
     repository,
     changelogFile.path,
     changelogFile.commit.hash,
+    { baseUrl: apiBaseUrl },
   );
 
   const changelogMd = `${fileContent}\n#\n##`;

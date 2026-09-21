@@ -207,16 +207,9 @@ export async function getRawFile(
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
-  return await getRepoFile(
-    bitbucketHttp,
-    '/',
-    repo,
-    fileName,
-    finalBranchOrTag,
-    {
-      cacheProvider: repoCacheProvider,
-    },
-  );
+  return await getRepoFile(bitbucketHttp, repo, fileName, finalBranchOrTag, {
+    cacheProvider: repoCacheProvider,
+  });
 }
 
 export async function getJsonFile(

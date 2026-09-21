@@ -19,10 +19,10 @@ export async function fetchJSONFile(
   try {
     content = await getRepoFile(
       gitlabApi,
-      endpoint,
       encodeURIComponent(repo),
       fileName,
       tag,
+      { baseUrl: endpoint },
     );
   } catch (err) {
     if (err instanceof ExternalHostError) {

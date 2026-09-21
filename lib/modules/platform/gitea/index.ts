@@ -18,7 +18,7 @@ import * as git from '../../../util/git/index.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import { getPrBodyStruct, hashBody } from '../pr-body.ts';
 import type {
   AutodiscoverConfig,
@@ -42,7 +42,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
-import { API_BASE_PATH, getRepoFile } from './contents.ts';
+import { getRepoFile } from './contents.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
@@ -56,6 +56,7 @@ import type {
   PRUpdateParams,
 } from './types.ts';
 import {
+  API_PATH,
   DRAFT_PREFIX,
   getMergeMethod,
   getRepoUrl,
@@ -255,13 +256,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       branchOrTag?: string,
     ): Promise<string | null> {
       const repo = repoName ?? config.repository;
-      const contents = await getRepoFile(
-        http,
-        API_BASE_PATH,
-        repo,
-        fileName,
-        branchOrTag,
-      );
+      const contents = await getRepoFile(http, repo, fileName, branchOrTag, {
+        baseUrl: joinUrlParts(defaults.endpoint, API_PATH),
+      });
       if (contents.type !== 'file') {
         return null;
       }

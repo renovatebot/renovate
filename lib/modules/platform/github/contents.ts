@@ -7,20 +7,20 @@ import { fromBase64 } from '../../../util/string.ts';
 /**
  * Read a single file from a repository, optionally at a given ref.
  *
- * `apiBaseUrl` must end with a slash, or be empty to use the `Http`
- * instance's own base URL.
+ * The URL is relative to the API root, which comes from `options.baseUrl`, or
+ * from the `Http` instance's own base URL when the caller reads the host it is
+ * configured for.
  *
  * https://docs.github.com/en/rest/repos/contents
  */
 export async function getRepoFile(
   http: GithubHttp,
-  apiBaseUrl: string,
   repo: string,
   fileName: string,
   ref?: string | null,
   options: GithubHttpOptions = {},
 ): Promise<string> {
-  let url = `${apiBaseUrl}repos/${repo}/contents/${fileName}`;
+  let url = `repos/${repo}/contents/${fileName}`;
   if (ref) {
     url += `?ref=${ref}`;
   }

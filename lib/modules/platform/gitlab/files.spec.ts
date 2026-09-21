@@ -16,12 +16,9 @@ describe('modules/platform/gitlab/files', () => {
       )
       .reply(200, { content: toBase64('{}') });
 
-    const res = await getRepoFile(
-      http,
-      apiBaseUrl,
-      'some%2Frepo',
-      'renovate.json',
-    );
+    const res = await getRepoFile(http, 'some%2Frepo', 'renovate.json', null, {
+      baseUrl: apiBaseUrl,
+    });
 
     expect(res).toBe('{}');
   });
@@ -36,10 +33,10 @@ describe('modules/platform/gitlab/files', () => {
 
     const res = await getRepoFile(
       http,
-      apiBaseUrl,
       'some%2Frepo',
       '.github/renovate.json',
       'dev',
+      { baseUrl: apiBaseUrl },
     );
 
     expect(res).toBe('{}');

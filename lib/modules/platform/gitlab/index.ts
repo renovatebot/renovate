@@ -256,7 +256,7 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = urlEscape(repoName) ?? config.repository;
-  return await getRepoFile(gitlabApi, '', repo, fileName, branchOrTag, {
+  return await getRepoFile(gitlabApi, repo, fileName, branchOrTag, {
     cacheProvider: memCacheProvider,
   });
 }

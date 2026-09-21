@@ -19,7 +19,8 @@ export async function fetchJSONFile(
 ): Promise<Nullish<Preset>> {
   let content: string;
   try {
-    content = await getRepoFile(http, endpoint, repo, fileName, tag, {
+    content = await getRepoFile(http, repo, fileName, tag, {
+      baseUrl: endpoint,
       cacheProvider: repoCacheProvider,
     });
   } catch (err) {

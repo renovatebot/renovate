@@ -10,18 +10,18 @@ describe('modules/platform/bitbucket/files', () => {
     setBaseUrl(`${apiHost}/`);
   });
 
-  it('defaults the ref to HEAD and resolves a relative base', async () => {
+  it('defaults the ref to HEAD and uses the client base url', async () => {
     httpMock
       .scope(apiHost)
       .get('/2.0/repositories/some/repo/src/HEAD/renovate.json')
       .reply(200, '{}');
 
-    const res = await getRepoFile(http, '/', 'some/repo', 'renovate.json');
+    const res = await getRepoFile(http, 'some/repo', 'renovate.json');
 
     expect(res).toBe('{}');
   });
 
-  it('uses the given ref and API base URL', async () => {
+  it('uses the given ref and base url option', async () => {
     httpMock
       .scope(apiHost)
       .get('/2.0/repositories/some/repo/src/abc123/docs/CHANGELOG.md')
@@ -29,10 +29,10 @@ describe('modules/platform/bitbucket/files', () => {
 
     const res = await getRepoFile(
       http,
-      `${apiHost}/`,
       'some/repo',
       'docs/CHANGELOG.md',
       'abc123',
+      { baseUrl: `${apiHost}/` },
     );
 
     expect(res).toBe('# changelog');

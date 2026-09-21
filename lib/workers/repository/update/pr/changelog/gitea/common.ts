@@ -42,15 +42,10 @@ export function createChangelogApi(
     sourceDirectory?: string,
   ): Promise<ChangeLogFile | null> {
     logger.trace({ id }, 'getReleaseNotesMd()');
-    const tree = await listRepoDir(
-      http,
-      apiBaseUrl,
-      repository,
-      sourceDirectory,
-      {
-        paginate: false, // no pagination yet
-      },
-    );
+    const tree = await listRepoDir(http, repository, sourceDirectory, {
+      baseUrl: apiBaseUrl,
+      paginate: false, // no pagination yet
+    });
     const files = tree.filter(
       (f) => f.type === 'file' && changelogFilenameRegex.test(f.name),
     );
@@ -69,12 +64,9 @@ export function createChangelogApi(
       );
     }
 
-    const fileRes = await getRepoFile(
-      http,
-      apiBaseUrl,
-      repository,
-      changelogFile,
-    );
+    const fileRes = await getRepoFile(http, repository, changelogFile, null, {
+      baseUrl: apiBaseUrl,
+    });
     // istanbul ignore if: should never happen
     if (fileRes.type !== 'file' || !fileRes.content) {
       logger.debug(

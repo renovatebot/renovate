@@ -427,7 +427,6 @@ export async function getRawFile(
 
   return await getRepoFile(
     githubApi,
-    '',
     // TODO #22198
     repo!,
     fileName,
