@@ -94,14 +94,12 @@ export async function checkConfigMigrationBranch(
       result = 'migration-branch-modified';
     } else {
       await rebaseMigrationBranch(config, migratedConfigData);
-      if (platform.refreshPr) {
-        const configMigrationPr = await platform.getBranchPr(
-          configMigrationBranch,
-          config.baseBranch,
-        );
-        if (configMigrationPr) {
-          await platform.refreshPr(configMigrationPr.number);
-        }
+      const configMigrationPr = await platform.getBranchPr(
+        configMigrationBranch,
+        config.baseBranch,
+      );
+      if (configMigrationPr) {
+        await platform.refreshPr(configMigrationPr.number);
       }
       result = 'migration-branch-exists';
     }

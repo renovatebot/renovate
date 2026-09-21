@@ -1,5 +1,4 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import ignore from 'ignore';
 import { logger } from '../../../../logger/index.ts';
 import type { FileOwnerRule, Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
@@ -8,22 +7,11 @@ import {
   getBranchFiles,
   getBranchFilesFromCommit,
 } from '../../../../util/git/index.ts';
-import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { newlineRegex } from '../../../../util/regex.ts';
 
 interface FileOwnersScore {
   file: string;
   userScoreMap: Map<string, number>;
-}
-
-function extractOwnersFromLine(line: string): FileOwnerRule {
-  const [pattern, ...usernames] = line.split(regEx(/\s+/));
-  const matchPattern = ignore().add(pattern);
-  return {
-    usernames,
-    pattern,
-    score: pattern.length,
-    match: (path: string) => matchPattern.ignores(path),
-  };
 }
 
 function matchFileToOwners(
@@ -117,8 +105,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     const cleanedLines = parseCodeOwnersContent(codeOwnersFile);
 
     const fileOwnerRules =
-      platform.extractRulesFromCodeOwnersLines?.(cleanedLines) ??
-      cleanedLines.map(extractOwnersFromLine);
+      platform.extractRulesFromCodeOwnersLines(cleanedLines);
 
     logger.debug(
       { prFiles, fileOwnerRules },
