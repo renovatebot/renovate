@@ -70,8 +70,7 @@ export interface PlatformFamily {
  * mapping.
  *
  * Keys are ordered the way `detectPlatform` used to test them; both the
- * `apiUsingHostTypes` and the `knownHosts` sets are pairwise disjoint, so the
- * order is not load bearing.
+ * `apiUsingHostTypes` and the `knownHosts` sets are pairwise disjoint
  */
 export const PLATFORM_FAMILIES = {
   azure: {
