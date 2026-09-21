@@ -685,7 +685,7 @@ describe('modules/manager/pep621/extract', () => {
       });
     });
 
-    it('should surface transitive deps from uv.lock when osvVulnerabilityAlerts is enabled', async () => {
+    it('should surface transitive deps from uv.lock when vulnerability alerts are enabled', async () => {
       fs.readLocalFile.mockResolvedValue(
         codeBlock`
           version = 1
@@ -734,7 +734,7 @@ describe('modules/manager/pep621/extract', () => {
           requires-python = ">=3.11"
         `,
         'pyproject.toml',
-        { osvVulnerabilityAlerts: true },
+        { vulnerabilityAlertsEnabled: true },
       );
 
       // attrs (direct) keeps its lockedVersion; idna and internal-lib are

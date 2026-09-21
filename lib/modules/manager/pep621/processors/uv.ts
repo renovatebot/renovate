@@ -193,10 +193,10 @@ export class UvProcessor extends BasePyProjectProcessor {
             }
           }
 
-          // Transitive dependencies are only of use to `osvVulnerabilityAlerts`,
-          // and a large `uv.lock` holds a lot of them, so don't surface any
-          // unless that feature is enabled.
-          if (config?.osvVulnerabilityAlerts) {
+          // Transitive dependencies are only of use to vulnerability
+          // remediation, and a large `uv.lock` holds a lot of them, so don't
+          // surface any unless vulnerability alerts are enabled.
+          if (config?.vulnerabilityAlertsEnabled) {
             this.addTransitiveDeps(deps, lockFileMapping);
           }
         }
@@ -210,7 +210,7 @@ export class UvProcessor extends BasePyProjectProcessor {
    * Appends the packages which only exist in `uv.lock` to the given dependencies.
    *
    * They are skipped, so they produce no routine updates, but
-   * `osvVulnerabilityAlerts` can still match them and clear the skip to get a
+   * vulnerability alerts can still match them and clear the skip to get a
    * targeted `uv lock --upgrade-package` when a fixed version exists.
    */
   private addTransitiveDeps(
