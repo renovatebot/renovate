@@ -1,9 +1,9 @@
 import * as httpMock from '~test/http-mock.ts';
 import { GithubHttp, setBaseUrl } from '../../../util/http/github.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { getRepoFile } from './contents.ts';
+import { getRepoFile } from './files.ts';
 
-describe('modules/platform/github/contents', () => {
+describe('modules/platform/github/files', () => {
   const apiHost = 'https://api.github.com';
   const http = new GithubHttp();
 

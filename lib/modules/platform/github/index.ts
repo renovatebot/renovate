@@ -79,7 +79,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
-import { getRepoFile } from './contents.ts';
+import { getRepoFile } from './files.ts';
 import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,

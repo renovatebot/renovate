@@ -4,7 +4,7 @@ import { Releases } from '../../../../../../modules/datasource/gitea-releases/sc
 import {
   getRepoFile,
   listRepoDir,
-} from '../../../../../../modules/platform/gitea/contents.ts';
+} from '../../../../../../modules/platform/gitea/files.ts';
 import { GiteaHttp } from '../../../../../../util/http/gitea.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { compareChangelogFilePath } from '../common.ts';
