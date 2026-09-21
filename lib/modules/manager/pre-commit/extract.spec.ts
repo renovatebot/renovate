@@ -177,17 +177,12 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle private git repos', () => {
-      // a real host rule cannot simultaneously match the url-only query and
-      // miss the github-scoped query, so spy to reach the gitlab loop branch
-      const find = vi.spyOn(hostRules, 'find');
-      // url only
-      find.mockReturnValueOnce({ token: 'value1' });
-      // hostType=forgejo
-      find.mockReturnValueOnce({});
-      // hostType=github
-      find.mockReturnValueOnce({});
-      // hostType=gitlab
-      find.mockReturnValueOnce({ token: 'value' });
+      // no `matchHost`, so that `detectPlatform()` - which only looks at rules
+      // that have one - does not resolve the platform before the loop below
+      hostRules.add({
+        hostType: 'gitlab',
+        token: 'value',
+      });
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -220,13 +215,12 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle unknown private git repos', () => {
-      // a real host rule cannot match the url-only query while missing all
-      // hostType-scoped queries, so spy to reach the loop fall-through
-      const find = vi.spyOn(hostRules, 'find');
-      // First attempt returns a result
-      find.mockReturnValueOnce({ token: 'value' });
-      // But all subsequent checks (those with hostType), then fail:
-      find.mockReturnValue({});
+      // a rule scoped to a hostType none of the supported datasources use
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'enterprise.com',
+        token: 'value',
+      });
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [

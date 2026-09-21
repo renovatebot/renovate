@@ -389,6 +389,11 @@ describe('modules/manager/mix/artifacts', () => {
       matchHost: 'https://example.com/api/repos/also_does_not_match_org/',
     });
     hostRules.add({ matchHost: 'hex.pm' });
+    hostRules.add({
+      hostType: 'hex',
+      matchHost: 'https://hex.pm/api/repos/hex_scoped_organization/',
+      token: 'hex_scoped_token',
+    });
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
@@ -429,6 +434,9 @@ describe('modules/manager/mix/artifacts', () => {
       },
       {
         cmd: 'mix hex.organization auth other_organization --key other_org_token',
+      },
+      {
+        cmd: 'mix hex.organization auth hex_scoped_organization --key hex_scoped_token',
       },
       { cmd: 'mix deps.update some_package' },
     ]);

@@ -1,8 +1,4 @@
-import {
-  isEmptyObject,
-  isNonEmptyObject,
-  isPlainObject,
-} from '@sindresorhus/is';
+import { isNonEmptyObject, isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -68,15 +64,6 @@ function determineDatasource(
     };
   }
   const hostUrl = `https://${hostname}`;
-  const res = find({ url: hostUrl });
-  if (isEmptyObject(res)) {
-    // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
-    logger.debug(
-      { repository, hostUrl },
-      'Provided hostname does not match any hostRules. Ignoring',
-    );
-    return { skipReason: 'unknown-registry', registryUrls: [hostname] };
-  }
   for (const [hostType, sourceId] of [
     ['forgejo', ForgejoTagsDatasource.id],
     ['github', GithubTagsDatasource.id],
