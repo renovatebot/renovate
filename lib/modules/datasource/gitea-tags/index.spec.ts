@@ -295,6 +295,27 @@ describe('modules/datasource/gitea-tags/index', () => {
       );
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
     });
+
+    it('falls back to the default registry when none is given', async () => {
+      const body = {
+        name: 'v9.0.1',
+        commit: {
+          sha: '29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed',
+          created: '2023-07-19T08:42:55+02:00',
+        },
+      };
+      httpMock
+        .scope('https://gitea.com')
+        .get('/api/v1/repos/gitea/helm-chart/tags/v9.0.1')
+        .reply(200, body);
+
+      const res = await new GiteaTagsDatasource().getTagCommit(
+        undefined,
+        'gitea/helm-chart',
+        'v9.0.1',
+      );
+      expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
+    });
   });
 
   describe('getSourceUrl', () => {
