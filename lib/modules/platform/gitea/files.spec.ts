@@ -2,9 +2,9 @@ import * as httpMock from '~test/http-mock.ts';
 import { ForgejoHttp } from '../../../util/http/forgejo.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { getRepoFile, listRepoDir } from './contents.ts';
+import { getRepoFile, listRepoDir } from './files.ts';
 
-describe('modules/platform/gitea/contents', () => {
+describe('modules/platform/gitea/files', () => {
   const apiHost = 'https://gitea.renovatebot.com';
   const apiBaseUrl = `${apiHost}/api/v1/`;
   const giteaHttp = new GiteaHttp();

@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { getRepoFile } from '../../../modules/platform/github/contents.ts';
+import { getRepoFile } from '../../../modules/platform/github/files.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
