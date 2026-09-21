@@ -1,9 +1,9 @@
 import * as httpMock from '~test/http-mock.ts';
-import { GitlabHttp } from '../http/gitlab.ts';
-import { toBase64 } from '../string.ts';
+import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { toBase64 } from '../../../util/string.ts';
 import { getRepoFile } from './files.ts';
 
-describe('util/gitlab/files', () => {
+describe('modules/platform/gitlab/files', () => {
   const apiHost = 'https://gitlab.com';
   const apiBaseUrl = `${apiHost}/api/v4/`;
   const http = new GitlabHttp();

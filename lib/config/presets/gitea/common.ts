@@ -1,8 +1,11 @@
 import { logger } from '../../../logger/index.ts';
+import {
+  API_BASE_PATH,
+  getRepoFile,
+} from '../../../modules/platform/gitea/contents.ts';
+import type { RepoContents } from '../../../modules/platform/gitea/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
-import type { RepoContents } from '../../../util/gitea/contents.ts';
-import { API_BASE_PATH, getRepoFile } from '../../../util/gitea/contents.ts';
 import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import {

@@ -25,7 +25,6 @@ import { coerceArray } from '../../../util/array.ts';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
-import { getRepoFile } from '../../../util/gitlab/files.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
 import { setBaseUrl } from '../../../util/http/gitlab.ts';
@@ -61,6 +60,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,

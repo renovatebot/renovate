@@ -1,7 +1,7 @@
 import { logger } from '../../../logger/index.ts';
+import { getRepoFile } from '../../../modules/platform/github/contents.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
-import { getRepoFile } from '../../../util/github/contents.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { Preset, PresetConfig } from '../types.ts';

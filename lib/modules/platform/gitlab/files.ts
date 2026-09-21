@@ -1,5 +1,8 @@
-import type { GitlabHttp, GitlabHttpOptions } from '../http/gitlab.ts';
-import { fromBase64 } from '../string.ts';
+import type {
+  GitlabHttp,
+  GitlabHttpOptions,
+} from '../../../util/http/gitlab.ts';
+import { fromBase64 } from '../../../util/string.ts';
 
 /**
  * Read a single file from a project at a given ref, defaulting to `HEAD`.

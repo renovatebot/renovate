@@ -1,43 +1,14 @@
 import * as httpMock from '~test/http-mock.ts';
-import { ForgejoHttp } from '../http/forgejo.ts';
-import { GiteaHttp } from '../http/gitea.ts';
-import { toBase64 } from '../string.ts';
-import {
-  API_BASE_PATH,
-  ContentsListResponse,
-  getRepoFile,
-  listRepoDir,
-} from './contents.ts';
+import { ForgejoHttp } from '../../../util/http/forgejo.ts';
+import { GiteaHttp } from '../../../util/http/gitea.ts';
+import { toBase64 } from '../../../util/string.ts';
+import { API_BASE_PATH, getRepoFile, listRepoDir } from './contents.ts';
 
-describe('util/gitea/contents', () => {
+describe('modules/platform/gitea/contents', () => {
   const apiHost = 'https://gitea.renovatebot.com';
   const apiBaseUrl = `${apiHost}/api/v1/`;
   const giteaHttp = new GiteaHttp();
   const forgejoHttp = new ForgejoHttp();
-
-  describe('ContentsListResponse', () => {
-    it('accepts an empty list', () => {
-      expect(ContentsListResponse.parse([])).toBeEmptyArray();
-    });
-
-    it('accepts symlink and submodule entries', () => {
-      const entries = [
-        { name: 'file.md', path: 'file.md', type: 'file', content: '' },
-        { name: 'docs', path: 'docs', type: 'dir', content: null },
-        { name: 'link', path: 'link', type: 'symlink', content: null },
-        { name: 'sub', path: 'sub', type: 'submodule', content: null },
-      ];
-
-      const result = ContentsListResponse.parse(entries);
-
-      expect(result.map((e) => e.type)).toEqual([
-        'file',
-        'dir',
-        'symlink',
-        'submodule',
-      ]);
-    });
-  });
 
   describe('getRepoFile', () => {
     it('reads a file and decodes its content', async () => {

@@ -1,7 +1,7 @@
 import { logger } from '../../../logger/index.ts';
+import { getRepoFile } from '../../../modules/platform/gitlab/files.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
-import { getRepoFile } from '../../../util/gitlab/files.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';

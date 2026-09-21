@@ -1,5 +1,8 @@
-import type { BitbucketHttp, BitbucketHttpOptions } from '../http/bitbucket.ts';
-import { joinUrlParts } from '../url.ts';
+import type {
+  BitbucketHttp,
+  BitbucketHttpOptions,
+} from '../../../util/http/bitbucket.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 
 /**
  * Read a single file from a repository at a given ref, defaulting to `HEAD`.

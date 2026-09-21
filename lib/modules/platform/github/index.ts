@@ -41,7 +41,6 @@ import type {
   CommitFilesConfig,
   CommitResult,
 } from '../../../util/git/types.ts';
-import { getRepoFile } from '../../../util/github/contents.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
@@ -80,6 +79,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
+import { getRepoFile } from './contents.ts';
 import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,

@@ -3,7 +3,6 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
-import { getRepoFile } from '../../../util/bitbucket/files.ts';
 import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -41,6 +40,7 @@ import type {
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as comments from './comments.ts';
+import { getRepoFile } from './files.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import {
   RepoInfo,

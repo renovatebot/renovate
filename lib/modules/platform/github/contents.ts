@@ -1,5 +1,8 @@
-import type { GithubHttp, GithubHttpOptions } from '../http/github.ts';
-import { fromBase64 } from '../string.ts';
+import type {
+  GithubHttp,
+  GithubHttpOptions,
+} from '../../../util/http/github.ts';
+import { fromBase64 } from '../../../util/string.ts';
 
 /**
  * Read a single file from a repository, optionally at a given ref.

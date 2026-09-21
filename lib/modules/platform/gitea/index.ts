@@ -15,7 +15,6 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
-import { API_BASE_PATH, getRepoFile } from '../../../util/gitea/contents.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -43,6 +42,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { API_BASE_PATH, getRepoFile } from './contents.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';

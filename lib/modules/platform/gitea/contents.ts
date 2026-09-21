@@ -1,42 +1,12 @@
-import { z } from 'zod/v4';
-import type { GiteaHttp, GiteaHttpOptions } from '../http/gitea.ts';
-import { fromBase64 } from '../string.ts';
-import { getQueryString } from '../url.ts';
+import type { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea.ts';
+import { getQueryString } from '../../../util/url.ts';
+import { ContentsListResponse, RepoContents } from './schema.ts';
 
 /**
  * The Gitea "repository contents" API, shared by Gitea and Forgejo.
  *
  * https://docs.gitea.com/api/1.20/#tag/repository/operation/repoGetContents
  */
-
-const ContentsCommon = z.object({
-  name: z.string(),
-  path: z.string(),
-});
-
-const ContentsFile = ContentsCommon.extend({
-  type: z.literal('file'),
-  content: z.string().nullable(),
-}).transform((input) => ({
-  ...input,
-  contentString: input.content ? fromBase64(input.content) : '',
-}));
-
-const ContentsDir = ContentsCommon.extend({ type: z.literal('dir') });
-const ContentsSymlink = ContentsCommon.extend({ type: z.literal('symlink') });
-const ContentsSubmodule = ContentsCommon.extend({
-  type: z.literal('submodule'),
-});
-
-export const RepoContents = z.discriminatedUnion('type', [
-  ContentsFile,
-  ContentsDir,
-  ContentsSymlink,
-  ContentsSubmodule,
-]);
-export type RepoContents = z.infer<typeof RepoContents>;
-
-export const ContentsListResponse = z.array(RepoContents);
 
 /**
  * Default API base path, relative to the `Http` instance's base URL or to an

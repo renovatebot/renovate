@@ -4,7 +4,7 @@ import { Releases } from '../../../../../../modules/datasource/gitea-releases/sc
 import {
   getRepoFile,
   listRepoDir,
-} from '../../../../../../util/gitea/contents.ts';
+} from '../../../../../../modules/platform/gitea/contents.ts';
 import type { GiteaHttp } from '../../../../../../util/http/gitea.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import type {

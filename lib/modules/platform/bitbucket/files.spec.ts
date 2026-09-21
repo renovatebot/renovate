@@ -1,8 +1,8 @@
 import * as httpMock from '~test/http-mock.ts';
-import { BitbucketHttp, setBaseUrl } from '../http/bitbucket.ts';
+import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket.ts';
 import { getRepoFile } from './files.ts';
 
-describe('util/bitbucket/files', () => {
+describe('modules/platform/bitbucket/files', () => {
   const apiHost = 'https://api.bitbucket.org';
   const http = new BitbucketHttp();
 
