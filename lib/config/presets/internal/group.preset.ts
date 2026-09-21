@@ -425,6 +425,16 @@ const staticGroups = {
       },
     ],
   },
+  primer: {
+    description: 'Group all `@primer` packages together.',
+    packageRules: [
+      {
+        groupName: 'Primer packages',
+        groupSlug: 'primer',
+        matchPackageNames: ['@primer/**'],
+      },
+    ],
+  },
   pulumi: {
     description: 'Group Pulumi packages together.',
     packageRules: [
@@ -514,6 +524,7 @@ const staticGroups = {
       'group:octokit',
       'group:phpstan',
       'group:polymer',
+      'group:primer',
       'group:puppeteer',
       'group:react',
       'group:remark',
