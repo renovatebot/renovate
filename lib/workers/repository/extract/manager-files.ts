@@ -32,7 +32,8 @@ export async function getManagerPackageFiles(
   }
   // istanbul ignore else
   if (isNonEmptyArray(fileList)) {
-    logger.debug(
+    logger.debug(`Matched ${fileList.length} file(s) for manager ${manager}`);
+    logger.trace(
       `Matched ${
         fileList.length
       } file(s) for manager ${manager}: ${fileList.join(', ')}`,
