@@ -1293,6 +1293,14 @@ CI jobs are usually triggered by these events: pull-request creation, pull-reque
 Set as an integer.
 Default is no limit.
 
+## `prMergeabilityCheckAttempts`
+
+Gitea and Forgejo work out whether a PR is mergeable in the background after a branch is pushed, and reject automerge requests until that is done.
+Before enabling platform automerge on a PR, Renovate checks up to this many times whether the PR is mergeable, waiting `250 * attempt * attempt` milliseconds between checks.
+If the PR is still not mergeable after the last check, Renovate tries to enable automerge anyway.
+
+With the default of `5`, Renovate waits at most 7.5 seconds.
+
 ## `presetCachePersistence`
 
 When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.

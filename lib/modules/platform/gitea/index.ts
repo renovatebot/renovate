@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -32,8 +33,10 @@ import type {
   MergePRConfig,
   Platform,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   RepoSortMethod,
@@ -65,6 +68,9 @@ import {
   trimTrailingApiPath,
   usableRepo,
 } from './utils.ts';
+
+/** Base delay between mergeable checks, grows quadratically per attempt. */
+const MERGEABLE_CHECK_DELAY_MS = 250;
 
 interface GiteaRepoConfig {
   ignorePrAuthor: boolean;
@@ -196,6 +202,78 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       }),
     });
     return repos.filter(usableRepo).map((r) => r.full_name);
+  }
+
+  /**
+   * The platform computes `mergeable` asynchronously after a push and rejects
+   * the merge call with `405 Please try again later` until it is known, so poll
+   * the PR with a growing delay first, like GitLab does.
+   *
+   * Automerge is best-effort: errors are logged and never propagate to the
+   * caller, so they cannot fail the PR creation or update which triggered it.
+   */
+  async function tryPrAutomerge(
+    prNumber: number,
+    platformPrOptions: PlatformPrOptions | undefined,
+  ): Promise<void> {
+    if (!platformPrOptions?.usePlatformAutomerge) {
+      return;
+    }
+
+    // `delete_branch_after_merge` is required to not have undesired
+    // behavior when renovate finds existing branches on next run.
+    const unsupportedReason = checkNativeAutomerge(defaults.version);
+    if (unsupportedReason !== null) {
+      logger.debug({ prNumber }, unsupportedReason);
+      return;
+    }
+
+    try {
+      const attempts = GlobalConfig.get('prMergeabilityCheckAttempts');
+      for (let attempt = 1; attempt <= attempts; attempt += 1) {
+        const pr = await helper.getPR(http, config.repository, prNumber, {
+          memCache: false,
+        });
+        if (pr.mergeable) {
+          break;
+        }
+        if (attempt === attempts) {
+          logger.debug(
+            { prNumber, attempts },
+            'PR not mergeable after all attempts, trying automerge anyway',
+          );
+          break;
+        }
+        logger.debug({ prNumber, attempt }, 'PR not yet mergeable, retrying');
+        await setTimeout(MERGEABLE_CHECK_DELAY_MS * attempt ** 2);
+      }
+
+      await helper.mergePR(http, config.repository, prNumber, {
+        Do:
+          getMergeMethod(
+            platformPrOptions.automergeStrategy,
+            config.allowedMergeMethods,
+          ) ?? config.mergeMethod,
+        merge_when_checks_succeed: true,
+        delete_branch_after_merge: true,
+      });
+
+      logger.debug({ prNumber }, `${name}-native automerge: success`);
+    } catch (err) {
+      // A push does not cancel a scheduled automerge, so re-attempting after a
+      // branch update is answered with 409 Conflict.
+      if (err.statusCode === 409) {
+        logger.debug(
+          { prNumber },
+          `${name}-native automerge: already scheduled`,
+        );
+        return;
+      }
+      logger.warn(
+        { err, prNumber, platform: id },
+        'Platform-native automerge: fail',
+      );
+    }
   }
 
   const platform: Platform = {
@@ -618,36 +696,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           labels: labels.filter(isNumber),
         });
 
-        if (platformPrOptions?.usePlatformAutomerge) {
-          // `delete_branch_after_merge` is required to not have undesired
-          // behavior when renovate finds existing branches on next run.
-          const unsupportedReason = checkNativeAutomerge(defaults.version);
-          if (unsupportedReason === null) {
-            try {
-              await helper.mergePR(http, config.repository, gpr.number, {
-                Do:
-                  getMergeMethod(
-                    platformPrOptions?.automergeStrategy,
-                    config.allowedMergeMethods,
-                  ) ?? config.mergeMethod,
-                merge_when_checks_succeed: true,
-                delete_branch_after_merge: true,
-              });
-
-              logger.debug(
-                { prNumber: gpr.number },
-                `${name}-native automerge: success`,
-              );
-            } catch (err) {
-              logger.warn(
-                { err, prNumber: gpr.number, platform: id },
-                'Platform-native automerge: fail',
-              );
-            }
-          } else {
-            logger.debug({ prNumber: gpr.number }, unsupportedReason);
-          }
-        }
+        await tryPrAutomerge(gpr.number, platformPrOptions);
 
         const pr = toRenovatePR(gpr, botUserName);
         if (!pr) {
@@ -754,6 +803,15 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       if (pr) {
         await prCache.setPr(pr);
       }
+    },
+
+    async reattemptPlatformAutomerge({
+      number,
+      platformPrOptions,
+    }: ReattemptPlatformAutomergeConfig): Promise<void> {
+      await tryPrAutomerge(number, platformPrOptions);
+
+      logger.debug({ prNumber: number }, 'PR platform automerge re-attempted');
     },
 
     async mergePr({ id: prNumber, strategy }: MergePRConfig): Promise<boolean> {
@@ -1194,6 +1252,7 @@ export const {
   initPlatform,
   initRepo,
   mergePr,
+  reattemptPlatformAutomerge,
   setBranchStatus,
   updatePr,
 } = platform;
