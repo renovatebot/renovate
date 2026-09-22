@@ -644,6 +644,29 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain(`${upgrade.newValue} // indirect`);
     });
 
+    it('should keep the note of an indirect dependency', () => {
+      const fileContent = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        require github.com/foo/bar v1.0.0 // indirect; bumped for CVE-2026-0001
+      `;
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade: {
+          depName: 'github.com/foo/bar',
+          managerData: { lineNumber: 2 },
+          newValue: 'v1.1.0',
+          depType: 'indirect',
+        },
+      });
+      expect(res).toBe(codeBlock`
+        module github.com/renovate-tests/gomod
+
+        require github.com/foo/bar v1.1.0 // indirect; bumped for CVE-2026-0001
+      `);
+    });
+
     it('should perform indirect upgrades when in require blocks', () => {
       const upgrade = {
         depName: 'github.com/go-ole/go-ole',

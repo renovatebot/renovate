@@ -181,6 +181,32 @@ describe('modules/manager/gomod/line-parser', () => {
     });
   });
 
+  it('should parse require definition with a comment of several words', () => {
+    const line = 'require foo/foo v1.2.3 // pinned: waiting for upstream fix';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentValue: 'v1.2.3',
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'require',
+    });
+  });
+
+  it('should parse require multi-line definition with an indirect note', () => {
+    const line = '        foo/foo v1.2.3 // indirect; bumped for CVE-2026-0001';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentValue: 'v1.2.3',
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'indirect',
+      enabled: false,
+      managerData: {
+        multiLine: true,
+      },
+    });
+  });
+
   it('should parse require multi-line definition with indirect dependency', () => {
     const line = '        foo/foo v1.2 // indirect';
     const res = parseLine(line);
@@ -287,6 +313,18 @@ describe('modules/manager/gomod/line-parser', () => {
       digestOneAndOnly: true,
       skipReason: 'invalid-version',
       versioning: 'loose',
+    });
+  });
+
+  it('should parse replace definition with a comment of several words', () => {
+    const line =
+      'replace foo/foo => bar/bar v1.2.3 // fork until upstream merges';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentValue: 'v1.2.3',
+      datasource: 'go',
+      depName: 'bar/bar',
+      depType: 'replace',
     });
   });
 

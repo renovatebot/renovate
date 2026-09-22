@@ -3,6 +3,8 @@ import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
+const indirectNoteRegex = regEx(/\/\/\s*indirect\s*;/);
+
 function getNameWithNoVersion(name: string): string {
   // remove version suffixes like /v1 or /v2
   let nameNoVersion = name.replace(regEx(/\/v\d+$/), '');
@@ -175,7 +177,8 @@ export function updateDependency({
       return fileContent;
     }
 
-    if (depType === 'indirect') {
+    // Go writes a note next to the mark as `// indirect; <note>`, which is kept
+    if (depType === 'indirect' && !indirectNoteRegex.test(newLine)) {
       newLine = newLine.replace(
         regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
         ' // indirect',
