@@ -9,8 +9,6 @@ import { Registry } from './schema.ts';
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
-  override readonly customRegistrySupport = false;
-
   override readonly defaultRegistryUrls = [
     'https://packages.typst.org/preview/index.json',
   ];
