@@ -82,7 +82,22 @@ export function extractPackageFile(
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   const { manager, rangeStrategy } = config;
-  if (!manager || !managers.has(manager)) {
+  if (!manager) {
+    return null;
+  }
+  if (!managers.has(manager)) {
+    // Custom managers have no manager-specific logic, but an explicitly
+    // configured strategy should still be honored. `auto` keeps returning
+    // null, which is the behaviour #34083 reverted to.
+    if (
+      customManagers.has(manager) &&
+      rangeStrategy &&
+      rangeStrategy !== 'auto'
+    ) {
+      return rangeStrategy === 'in-range-only'
+        ? 'update-lockfile'
+        : rangeStrategy;
+    }
     return null;
   }
   const m = managers.get(manager)!;

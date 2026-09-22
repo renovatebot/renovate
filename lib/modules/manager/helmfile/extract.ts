@@ -6,7 +6,12 @@ import { regEx } from '../../../util/regex.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import {
+  getOciChartDep,
+  isOCIRegistry,
+  removeOCIPrefix,
+} from '../helmv3/oci.ts';
+import { isLocalChartPath } from '../helmv3/utils.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -24,12 +29,6 @@ function isValidChartName(name: string | undefined, oci: boolean): boolean {
     return !!name && !regEx(/[!@#$%^&*(),.?":{}|<>A-Z]/).test(name);
   }
   return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
-}
-
-function isLocalPath(possiblePath: string): boolean {
-  return ['./', '../', '/'].some((localPrefix) =>
-    possiblePath.startsWith(localPrefix),
-  );
 }
 
 export async function extractPackageFile(
@@ -72,11 +71,11 @@ export async function extractPackageFile(
       ...Object.values(coerceObject(doc.templates)),
     ]) {
       let depName = dep.chart;
-      let packageName: string | null = null;
+      let ociDep: PackageDependency | null = null;
       let repoName: string | null = null;
 
       // If it starts with ./ ../ or / then it's a local path
-      if (isLocalPath(dep.chart)) {
+      if (isLocalChartPath(dep.chart)) {
         if (
           kustomizationsKeysUsed(dep) ||
           (await localChartHasKustomizationsYaml(dep, packageFile))
@@ -91,7 +90,8 @@ export async function extractPackageFile(
       }
 
       if (isOCIRegistry(dep.chart)) {
-        packageName = depName = removeOCIPrefix(dep.chart);
+        depName = removeOCIPrefix(dep.chart);
+        ociDep = getOciChartDep(dep.chart, undefined, config.registryAliases);
       } else {
         if (dep.chart.includes('/')) {
           const v = dep.chart.split('/');
@@ -100,11 +100,13 @@ export async function extractPackageFile(
         } else {
           repoName = dep.chart;
         }
-        if (registryData[repoName]?.oci) {
-          const alias = registryData[repoName]?.url;
-          if (alias) {
-            packageName = `${alias}/${depName}`;
-          }
+        const registry = registryData[repoName];
+        if (registry?.oci) {
+          ociDep = getOciChartDep(
+            registry.url,
+            depName,
+            config.registryAliases,
+          );
           repoName = null;
         }
       }
@@ -124,9 +126,8 @@ export async function extractPackageFile(
       if (kustomizationsKeysUsed(dep)) {
         needKustomize = true;
       }
-      if (packageName) {
-        res.datasource = DockerDatasource.id;
-        res.packageName = packageName;
+      if (ociDep) {
+        Object.assign(res, ociDep);
       } else if (repoName) {
         res.registryUrls = [registryData[repoName]?.url]
           .concat([config.registryAliases?.[repoName]] as string[])
@@ -140,7 +141,7 @@ export async function extractPackageFile(
           isOCIRegistry(dep.chart)
             ? depName.slice(depName.lastIndexOf('/') + 1)
             : depName,
-          !!packageName,
+          !!ociDep,
         )
       ) {
         res.skipReason = 'unsupported-chart-type';

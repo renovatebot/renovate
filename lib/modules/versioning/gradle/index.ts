@@ -1,3 +1,4 @@
+import { isBigint } from '@sindresorhus/is';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import mavenVersion from '../maven/index.ts';
@@ -36,7 +37,7 @@ function getMajor(version: string): number | null {
   if (tokens) {
     const majorToken = tokens?.[0];
     if (majorToken?.type === TokenType.Number) {
-      return Number(majorToken.val);
+      return parseInt(majorToken.val.toString(), 10);
     }
   }
   return null;
@@ -51,7 +52,7 @@ function getMinor(version: string): number | null {
       majorToken?.type === TokenType.Number &&
       minorToken?.type === TokenType.Number
     ) {
-      return Number(minorToken.val);
+      return parseInt(minorToken.val.toString(), 10);
     }
     return 0;
   }
@@ -69,7 +70,7 @@ function getPatch(version: string): number | null {
       minorToken?.type === TokenType.Number &&
       patchToken?.type === TokenType.Number
     ) {
-      return Number(patchToken.val);
+      return parseInt(patchToken.val.toString(), 10);
     }
     return 0;
   }
@@ -91,7 +92,7 @@ function getExactSection(
   const sectionIndex = sectionIndexes[type];
   if (sectionIndex === 0) {
     const token = tokens[sectionIndex];
-    return token?.type === TokenType.Number && typeof token.val === 'bigint'
+    return token?.type === TokenType.Number && isBigint(token.val)
       ? token.val
       : null;
   }

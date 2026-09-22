@@ -6,7 +6,7 @@ import { isVersion } from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
 
 function trimQuotes(str: string): string {
-  return str.replace(regEx(/^"(.*)"$/), '$1');
+  return str.replace(regEx(/^"(?<value>.*)"$/), '$<value>');
 }
 
 const requireRegex = regEx(
@@ -19,7 +19,7 @@ const replaceRegex = regEx(
 
 export const excludeBlockStartRegex = regEx(/^(?<keyword>exclude)\s+\(\s*$/);
 
-export const endBlockRegex = regEx(/^\s+\)\s*$/);
+export const endBlockRegex = regEx(/^\s*\)\s*$/);
 
 const toolRegex = regEx(/^(?<keyword>tool)?\s+(?<module>[^\s]+\/?[^\s]+)\s*$/);
 
