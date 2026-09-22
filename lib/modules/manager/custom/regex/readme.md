@@ -15,6 +15,28 @@ Also read the documentation for the [`customManagers` config option](../../../co
 
 If you have limited managers to run within [`enabledManagers` config option](../../../configuration-options.md#enabledmanagers), you need to add `"custom.regex"` to the list.
 
+### Targeting a regex manager from `packageRules`
+
+Custom managers are named `custom.<customType>` in `packageRules`, so a regex manager is matched with `"custom.regex"`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["custom.regex"],
+      "rangeStrategy": "bump"
+    }
+  ]
+}
+```
+
+A rule that uses `"regex"` instead never matches, and Renovate does not warn about it.
+
+!!! note
+  A regex manager does not inherit the default config of the manager that normally handles the file type, only the built-in defaults.
+  For example, the `nuget` manager defaults `rangeStrategy` to `bump` so that bare NuGet versions keep getting updates, but a regex manager that extracts NuGet dependencies uses the `auto` default instead.
+  Read [Getting updates for non-pinned (bare) versions](../nuget/index.md#getting-updates-for-non-pinned-bare-versions) to learn when you need to set `rangeStrategy` yourself.
+
 ### Required Fields
 
 The first two required fields are `managerFilePatterns` and `matchStrings`:
