@@ -16,7 +16,11 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  resolveToolConstraint,
+} from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
 
 const gitExec = withGitEnvironment(['cargo']);
@@ -115,15 +119,7 @@ async function updateArtifactsImpl(
   const { isLockFileMaintenance } = config;
   if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No more dependencies to update');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: existingLockFileContent,
-        },
-      },
-    ];
+    return [fileAddition(lockFileName, existingLockFileContent)];
   }
 
   const rustConstraint = await resolveToolConstraint(config, 'rust');
@@ -145,6 +141,7 @@ async function updateArtifactsImpl(
       // For crate dependencies, a locked version is expected.
       // In both situations, perform a regular workspace lockfile update.
       if (hasNonCrateDep || crateDepWithoutLockedVersion) {
+        // v8 ignore else -- needs a workspace update driven only by a non-crate dep
         if (crateDepWithoutLockedVersion) {
           // Only warn when a crate dependency has no locked version
           logger.warn(
@@ -165,15 +162,7 @@ async function updateArtifactsImpl(
       logger.debug('Cargo.lock is unchanged');
       return null;
     }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newCargoLockContent,
-        },
-      },
-    ];
+    return [fileAddition(lockFileName, newCargoLockContent)];
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
@@ -198,6 +187,7 @@ async function updateArtifactsImpl(
           ),
       );
 
+      // v8 ignore else -- this retry only runs when a dep was already current
       if (newUpdatedDeps.length < updatedDeps.length) {
         logger.debug(
           'Dependency already up to date - reattempting recursively',
@@ -216,13 +206,6 @@ async function updateArtifactsImpl(
 
     logger.debug({ err }, 'Failed to update Cargo lock file');
 
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

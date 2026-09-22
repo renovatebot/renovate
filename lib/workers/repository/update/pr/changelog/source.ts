@@ -5,6 +5,7 @@ import {
   isNullOrUndefined,
   isTruthy,
 } from '@sindresorhus/is';
+import { PLATFORM_FAMILIES } from '../../../../../constants/index.ts';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
@@ -26,34 +27,28 @@ import { addReleaseNotes } from './release-notes.ts';
 import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
+  ChangeLogFile,
+  ChangeLogNotes,
   ChangeLogPlatform,
+  ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
 
+// Number of dot-separated segments, used as a proxy for how precise a tag is,
+// e.g. `v7` (0) < `v7.0` (1) < `v7.0.0` (2).
+function tagPrecision(tag: string): number {
+  return tag.split('.').length - 1;
+}
+
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
-  private readonly platform: ChangeLogPlatform;
-  private readonly datasource:
-    | 'bitbucket-tags'
-    | 'bitbucket-server-tags'
-    | 'forgejo-tags'
-    | 'gitea-tags'
-    | 'github-tags'
-    | 'gitlab-tags';
+  protected readonly platform: ChangeLogPlatform;
+  private readonly family: (typeof PLATFORM_FAMILIES)[ChangeLogPlatform];
 
-  constructor(
-    platform: ChangeLogPlatform,
-    datasource:
-      | 'bitbucket-tags'
-      | 'bitbucket-server-tags'
-      | 'forgejo-tags'
-      | 'gitea-tags'
-      | 'github-tags'
-      | 'gitlab-tags',
-  ) {
+  constructor(platform: ChangeLogPlatform) {
     this.platform = platform;
-    this.datasource = datasource;
+    this.family = PLATFORM_FAMILIES[platform];
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -64,13 +59,36 @@ export abstract class ChangeLogSource {
     nextHead: string,
   ): string;
 
-  abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return this.family.apiBaseUrl(this.getBaseUrl(config));
+  }
+
+  /**
+   * Fetch the repository's changelog markdown file, if it has one.
+   */
+  abstract getReleaseNotesMd(
+    repository: string,
+    apiBaseUrl: string,
+    sourceDirectory?: string,
+  ): Promise<ChangeLogFile | null>;
+
+  /**
+   * Fetch the platform's list of releases for the project. Platforms without a
+   * releases API keep this default.
+   */
+  getReleaseList(
+    _project: ChangeLogProject,
+    _release: ChangeLogRelease,
+  ): Promise<ChangeLogNotes[]> {
+    logger.trace(`${this.platform}: release lists are not supported`);
+    return Promise.resolve([]);
+  }
 
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
     const tags = (
       await getPkgReleases({
         registryUrls: [endpoint],
-        datasource: this.datasource,
+        datasource: this.family.tagsDatasource,
         packageName: repository,
         versioning:
           'regex:(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?',
@@ -79,7 +97,7 @@ export abstract class ChangeLogSource {
 
     if (isNullOrUndefined(tags) || isEmptyArray(tags)) {
       logger.debug(
-        `No ${this.datasource} tags found for repository: ${repository}`,
+        `No ${this.family.tagsDatasource} tags found for repository: ${repository}`,
       );
 
       return [];
@@ -129,6 +147,7 @@ export abstract class ChangeLogSource {
         }
 
         const releases = config.releases ?? (await getInRangeReleases(config));
+        // v8 ignore next -- `getInRangeReleases` only returns null on paths it already ignores
         if (!releases?.length) {
           logger.debug('No releases');
           return null;
@@ -262,11 +281,23 @@ export abstract class ChangeLogSource {
       return exactReleaseRegex.test(tag);
     });
     const tagList = exactTagsList.length ? exactTagsList : tags;
-    return tagList
+    const candidates = tagList
       .filter((tag) => versioningApi.isVersion(tag.replace(regex, '')))
-      .find((tag) =>
+      .filter((tag) =>
         versioningApi.equals(tag.replace(regex, ''), depNewVersion),
       );
+    if (!candidates.length) {
+      return undefined;
+    }
+    // Some versioning schemes (e.g. `github-actions`) treat a floating tag
+    // like `v7` as equal to a precise one like `v7.0.0` via coercion, so more
+    // than one tag can match the same release. Prefer the most precise tag
+    // (most dot-separated segments), else keep the first match found.
+    return candidates.reduce((mostPrecise, candidate) =>
+      tagPrecision(candidate) > tagPrecision(mostPrecise)
+        ? candidate
+        : mostPrecise,
+    );
   }
 
   private getRef(

@@ -1,7 +1,6 @@
 import * as httpMock from '~test/http-mock.ts';
 import { fakeSha, logger, partial } from '~test/util.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
-import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,
   closePR,
@@ -19,7 +18,6 @@ import {
   getPR,
   getPRByBranch,
   getRepo,
-  getRepoContents,
   getRepoLabels,
   getVersion,
   isOrg,
@@ -44,7 +42,6 @@ import type {
   Label,
   PR,
   Repo,
-  RepoContents,
   User,
 } from './schema.ts';
 
@@ -176,19 +173,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
     name: 'other/branch/with/slashes',
   };
 
-  const mockContents: RepoContents = {
-    type: 'file',
-    name: 'dummy.txt',
-    path: 'dummy.txt',
-    content: toBase64('top secret'),
-    contentString: 'top secret',
-  };
-
-  const otherMockContents: RepoContents = {
-    ...mockContents,
-    path: 'nested/path/dummy.txt',
-  };
-
   beforeEach(() => {
     setBaseUrl(apiHost);
   });
@@ -297,57 +281,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await getRepo(giteaHttp, mockRepo.full_name);
       expect(res).toEqual(mockRepo);
-    });
-  });
-
-  describe('getRepoContents', () => {
-    it('should call /api/v1/repos/[repo]/contents/[file] endpoint', async () => {
-      // The official API only returns the base64-encoded content, so we strip `contentString`
-      // from our mock to verify base64 decoding.
-      httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
-        .reply(200, { ...mockContents, contentString: undefined });
-
-      const res = await getRepoContents(
-        giteaHttp,
-        mockRepo.full_name,
-        mockContents.path,
-      );
-      expect(res).toEqual(mockContents);
-    });
-
-    it('should support passing reference by query', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(
-          `/repos/${mockRepo.full_name}/contents/${mockContents.path}?ref=${mockCommitHash}`,
-        )
-        .reply(200, { ...mockContents, contentString: undefined });
-
-      const res = await getRepoContents(
-        giteaHttp,
-        mockRepo.full_name,
-        mockContents.path,
-        mockCommitHash,
-      );
-      expect(res).toEqual(mockContents);
-    });
-
-    it('should properly escape paths', async () => {
-      const escapedPath = encodeURIComponent(otherMockContents.path);
-
-      httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/contents/${escapedPath}`)
-        .reply(200, otherMockContents);
-
-      const res = await getRepoContents(
-        giteaHttp,
-        mockRepo.full_name,
-        otherMockContents.path,
-      );
-      expect(res).toEqual(otherMockContents);
     });
   });
 

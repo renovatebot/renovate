@@ -256,6 +256,21 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       ).resolves.toEqual(formattedMigratedData.content);
     });
 
+    it('formats with an editorconfig that sets no line length', async () => {
+      vi.mocked(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      vi.mocked(EditorConfig.getCodeFormat).mockResolvedValueOnce({});
+
+      await expect(
+        applyPrettierFormatting('.prettierrc', migratedData.content, 'json', {
+          amount: 0,
+          indent: '  ',
+        }),
+      ).resolves.toEqual(formattedMigratedData.content);
+    });
+
     it('formats with printWith=Infinity', async () => {
       vi.mocked(scm.getFileList).mockResolvedValue([
         '.prettierrc',
