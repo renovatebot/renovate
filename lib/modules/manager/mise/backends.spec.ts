@@ -8,6 +8,7 @@ import {
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
+  createPypiToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
@@ -301,6 +302,49 @@ describe('modules/manager/mise/backends', () => {
     it('provides skipReason for zip file url', () => {
       expect(
         createPipxToolConfig('https://github.com/psf/black/archive/18.9b0.zip'),
+      ).toStrictEqual({
+        packageName: 'https://github.com/psf/black/archive/18.9b0.zip',
+        skipReason: 'unsupported-url',
+      });
+    });
+  });
+
+  describe('createPypiToolConfig()', () => {
+    it('should create a tooling config for pypi package', () => {
+      expect(createPypiToolConfig('yamllint')).toStrictEqual({
+        packageName: 'yamllint',
+        datasource: 'pypi',
+      });
+    });
+
+    it('should create a tooling config for github shorthand', () => {
+      expect(createPypiToolConfig('psf/black')).toStrictEqual({
+        packageName: 'psf/black',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('should create a tooling config for github url', () => {
+      expect(
+        createPypiToolConfig('git+https://github.com/psf/black.git'),
+      ).toStrictEqual({
+        packageName: 'psf/black',
+        datasource: 'github-tags',
+      });
+    });
+
+    it('should create a tooling config for git url', () => {
+      expect(
+        createPypiToolConfig('git+https://gitlab.com/user/repo.git'),
+      ).toStrictEqual({
+        packageName: 'https://gitlab.com/user/repo',
+        datasource: 'git-refs',
+      });
+    });
+
+    it('provides skipReason for zip file url', () => {
+      expect(
+        createPypiToolConfig('https://github.com/psf/black/archive/18.9b0.zip'),
       ).toStrictEqual({
         packageName: 'https://github.com/psf/black/archive/18.9b0.zip',
         skipReason: 'unsupported-url',

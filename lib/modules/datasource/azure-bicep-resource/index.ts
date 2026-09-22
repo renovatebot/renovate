@@ -1,4 +1,3 @@
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -32,7 +31,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     return `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
   }
 
-  private async _getReleases(
+  private async fetchReleases(
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const resourceVersionIndex = await this.getResourceVersionIndex();
@@ -51,18 +50,17 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AzureBicepResourceDatasource.id}`,
         key: `getReleases-${config.packageName}`,
         fallback: true,
         cacheable: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
-  private async _getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
+  private async fetchResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
     const { body } = await this.http.getJson(
       BICEP_TYPES_INDEX_URL,
       BicepResourceVersionIndex,
@@ -71,14 +69,13 @@ export class AzureBicepResourceDatasource extends Datasource {
   }
 
   getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AzureBicepResourceDatasource.id}`,
         key: 'getResourceVersionIndex',
         ttlMinutes: 24 * 60,
         cacheable: true,
       },
-      () => this._getResourceVersionIndex(),
+      () => this.fetchResourceVersionIndex(),
     );
   }
 }
