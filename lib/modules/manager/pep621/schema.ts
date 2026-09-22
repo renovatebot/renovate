@@ -250,21 +250,37 @@ export const PdmLockfile = Toml.pipe(
   )
   .transform((lock) => ({ lock }));
 
+export interface UvLockedPackage {
+  version: string;
+  /**
+   * The index a package was resolved from, if any. Absent for the workspace
+   * root and for virtual/editable/path/git packages, which cannot be
+   * remediated by `uv lock --upgrade-package`.
+   */
+  registryUrl?: string;
+}
+
 export const UvLockfile = Toml.pipe(
   z.object({
     package: LooseArray(
       z.object({
         name: z.string(),
         version: z.string(),
+        source: z.object({ registry: z.string() }).partial().optional(),
       }),
     ),
   }),
 ).transform(({ package: pkgs }) => {
-  const pkgMap: Record<string, string> = {};
+  const pkgMap: Record<string, UvLockedPackage> = {};
 
-  for (const { name, version } of pkgs) {
-    if (!(name in pkgMap) || pep440.isGreaterThan(pkgMap[name], version)) {
-      pkgMap[name] = version;
+  for (const { name, version, source } of pkgs) {
+    // A package can be locked at several versions, e.g. for different Python
+    // versions or platforms. Use the lowest one, so updates are not missed.
+    if (
+      !(name in pkgMap) ||
+      pep440.isGreaterThan(pkgMap[name].version, version)
+    ) {
+      pkgMap[name] = { version, registryUrl: source?.registry };
     }
   }
 

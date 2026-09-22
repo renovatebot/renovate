@@ -18,6 +18,7 @@ import { parseUrl } from '../../../../util/url.ts';
 import { findPypiIndexCredentials } from '../../../datasource/pypi/host-rules.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type {
+  ExtractConfig,
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
@@ -29,7 +30,12 @@ import {
   resolveToolConstraint,
   updateLockFile,
 } from '../../util.ts';
-import { type PyProject, UvLockfile, type UvSource } from '../schema.ts';
+import {
+  type PyProject,
+  type UvLockedPackage,
+  UvLockfile,
+  type UvSource,
+} from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
@@ -41,6 +47,13 @@ function isUvIndexSource(
 ): source is Extract<UvSource, { index: string }> {
   return 'index' in source;
 }
+
+// The public PyPI index, as recorded in `uv.lock` package sources. Transitive
+// deps resolved from it use the datasource default, so no `registryUrls` needed.
+const defaultPypiRegistries = new Set([
+  'https://pypi.org/simple',
+  'https://pypi.org/simple/',
+]);
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -154,6 +167,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     project: PyProject,
     deps: PackageDependency[],
     packageFile: string,
+    config?: ExtractConfig,
   ): Promise<PackageDependency[]> {
     const lockFileName = await findLocalSiblingOrParent(
       packageFile,
@@ -175,14 +189,61 @@ export class UvProcessor extends BasePyProjectProcessor {
           for (const dep of deps) {
             const packageName = dep.packageName;
             if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName];
+              dep.lockedVersion = lockFileMapping[packageName].version;
             }
+          }
+
+          // Transitive dependencies are only of use to vulnerability
+          // remediation, and a large `uv.lock` holds a lot of them, so don't
+          // surface any unless vulnerability alerts are enabled.
+          if (config?.vulnerabilityAlertsEnabled) {
+            this.addTransitiveDeps(deps, lockFileMapping);
           }
         }
       }
     }
 
     return Promise.resolve(deps);
+  }
+
+  /**
+   * Appends the packages which only exist in `uv.lock` to the given dependencies.
+   *
+   * They are skipped, so they produce no routine updates, but
+   * vulnerability alerts can still match them and clear the skip to get a
+   * targeted `uv lock --upgrade-package` when a fixed version exists.
+   */
+  private addTransitiveDeps(
+    deps: PackageDependency[],
+    lockFileMapping: Record<string, UvLockedPackage>,
+  ): void {
+    const declaredPackageNames = new Set(
+      deps.map((dep) => dep.packageName).filter(isString),
+    );
+
+    for (const [packageName, locked] of Object.entries(lockFileMapping)) {
+      if (declaredPackageNames.has(packageName)) {
+        continue;
+      }
+      // Only registry-sourced packages can be remediated by name. Skip the
+      // workspace root and any virtual/editable/path/git packages.
+      if (!locked.registryUrl) {
+        continue;
+      }
+      const transitiveDep: PackageDependency = {
+        packageName,
+        depName: packageName,
+        depType: depTypes.uvTransitiveDependencies,
+        datasource: PypiDatasource.id,
+        lockedVersion: locked.version,
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      };
+      if (!defaultPypiRegistries.has(locked.registryUrl)) {
+        transitiveDep.registryUrls = [locked.registryUrl];
+      }
+      deps.push(transitiveDep);
+    }
   }
 
   async updateArtifacts(
@@ -272,6 +333,17 @@ function generateCMD(updatedDeps: Upgrade[]): string {
       case depTypes.uvDevDependencies:
       case depTypes.uvSources: {
         deps.push(dep.depName!);
+        break;
+      }
+      case depTypes.uvTransitiveDependencies: {
+        // Nothing in `pyproject.toml` constrains a transitive dependency, so an
+        // unpinned upgrade would resolve to the newest release instead of the
+        // version we determined, e.g. the lowest one fixing a vulnerability.
+        deps.push(
+          dep.newVersion
+            ? `${dep.packageName!}==${dep.newVersion}`
+            : dep.packageName!,
+        );
         break;
       }
       case depTypes.buildSystemRequires:

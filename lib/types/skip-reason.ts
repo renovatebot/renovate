@@ -57,7 +57,13 @@ export type SkipReason =
    *
    * Renovate will not propose any updates, and leave you on the version you are currently on, which is currently known as safe.
    */
-  | 'malicious-update-proposed';
+  | 'malicious-update-proposed'
+  /**
+   * The dependency is not declared in any package file, and exists only in a lockfile.
+   *
+   * Renovate will not propose any routine updates: this reason is only removed by the vulnerability processor, and only once a fixed version is known.
+   */
+  | 'lockfile-only';
 
 export type StageName =
   | 'current-timestamp'
