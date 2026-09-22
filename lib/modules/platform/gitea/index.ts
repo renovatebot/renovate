@@ -70,7 +70,7 @@ import {
 } from './utils.ts';
 
 /** Base delay between automerge attempts, grows quadratically per attempt. */
-const MERGEABLE_CHECK_DELAY_MS = 250;
+const AUTOMERGE_RETRY_DELAY_MS = 250;
 
 interface GiteaRepoConfig {
   ignorePrAuthor: boolean;
@@ -222,7 +222,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       return;
     }
 
-    // Cap at 1 so a 0 does not skip automerge entirely.
+    // At least one attempt, so a 0 does not skip automerge entirely.
     const attempts = Math.max(
       GlobalConfig.get('prMergeabilityCheckAttempts'),
       1,
@@ -265,7 +265,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         }
 
         logger.debug({ prNumber, attempt }, 'PR not yet mergeable, retrying');
-        await setTimeout(MERGEABLE_CHECK_DELAY_MS * attempt ** 2);
+        await setTimeout(AUTOMERGE_RETRY_DELAY_MS * attempt ** 2);
       }
     }
   }
