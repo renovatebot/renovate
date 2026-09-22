@@ -1,4 +1,4 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -20,7 +20,11 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
 
 /**
@@ -230,47 +234,22 @@ export async function updateArtifacts({
     : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
     if (newLockFileContent) {
       await writeLocalFile(lockFileName, newLockFileContent);
     }
-    await exec(commands, execOptions);
-    const refreshedLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (
-      !refreshedLockFileContent ||
-      originalLockFileContent === refreshedLockFileContent
-    ) {
-      return null;
-    }
-
-    logger.debug({ lockFileName }, 'Returning updated mise lock file');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: refreshedLockFileContent,
-        },
-      },
-    ];
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent: originalLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: () => exec(commands, execOptions),
+    });
   } catch (err) {
-    // istanbul ignore if: not worth testing
+    /* v8 ignore if -- defensive rethrow, not worth testing */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
 
-    const errorOutput = [err.stdout, err.stderr, err.message]
-      .filter(isString)
-      .join('\n');
-
     logger.warn({ err, lockFileName }, 'Error updating mise lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: errorOutput,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

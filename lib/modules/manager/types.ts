@@ -319,6 +319,30 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
   config: UpdateArtifactsConfig;
 }
 
+/**
+ * Input of the `updateLockFile()` skeleton shared by lock file managers.
+ */
+export interface UpdateLockFileConfig {
+  /** The lock file which the update regenerates. */
+  lockFileName: string;
+
+  /**
+   * Content of the lock file before the update, null when it did not exist.
+   * Pass a Buffer for lock files which may be binary, the new content is then
+   * compared and returned as bytes as well.
+   */
+  existingLockFileContent: string | Buffer | null;
+
+  /** Package file to rewrite before the update runs. */
+  packageFile?: { path: string; contents: string };
+
+  /** Whether to delete the lock file first, i.e. for lock file maintenance. */
+  deleteLockFile?: boolean;
+
+  /** Runs the package manager command which regenerates the lock file. */
+  run: () => Promise<unknown>;
+}
+
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
   packageFile: string;
