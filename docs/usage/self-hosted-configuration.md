@@ -1024,21 +1024,7 @@ If `inheritConfig` is `true` but the inherited config file does _not_ exist then
 If the file exists but cannot be parsed, then Renovate will raise a config warning issue and abort the job.
 
 The inherited config may include all valid repository config and these config options:
-
-- `bbUseDevelopmentBranch`
-- `onboarding`
-- `onboardingBranch`
-- `onboardingCommitMessage`
-- `onboardingConfig`
-- `onboardingConfigFileName`
-- `onboardingNoDeps`
-- `onboardingPrTitle`
-- `onboardingRebaseCheckbox`
-- `requireConfig`
-
-!!! note
-  The above list is prepared manually and may become out of date.
-  Consult the self-hosted configuration docs and look for `inheritConfigSupport` values there for the definitive list.
+<!-- Autogenerate inheritConfigSupport-list -->
 
 This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 

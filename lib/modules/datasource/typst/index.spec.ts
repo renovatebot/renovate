@@ -1,8 +1,122 @@
+import { DateTime } from 'luxon';
+import { type DirectoryResult, dir } from 'tmp-promise';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { TypstDatasource } from './index.ts';
 
 describe('modules/datasource/typst/index', () => {
+  describe('public cache boundary', () => {
+    let cacheDir: DirectoryResult;
+
+    beforeEach(async () => {
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cachePrivatePackages: false });
+      memCache.init();
+      await packageCache.init({ cacheDir: cacheDir.path });
+    });
+
+    afterEach(async () => {
+      vi.restoreAllMocks();
+      await packageCache.cleanup({});
+      memCache.reset();
+      GlobalConfig.reset();
+      await cacheDir.cleanup();
+    });
+
+    it.each`
+      packageName                  | cachePrivatePackages | ageMinutes
+      ${'local/internal-template'} | ${false}             | ${0}
+      ${'local/internal-template'} | ${true}              | ${60}
+      ${'private/internal-tool'}   | ${false}             | ${60}
+    `(
+      'rejects $packageName before cache access',
+      async ({ packageName, cachePrivatePackages, ageMinutes }) => {
+        GlobalConfig.set({ cachePrivatePackages });
+        await packageCache.setWithRawTtl(
+          'datasource-typst:registry-releases',
+          `cache-decorator:${packageName}`,
+          {
+            cachedAt: DateTime.now().minus({ minutes: ageMinutes }).toISO(),
+            value: { releases: [{ version: '1.0.0' }] },
+          },
+          120,
+        );
+        const getCache = vi.spyOn(packageCache, 'get');
+        const setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+
+        const result = await new TypstDatasource().getReleases({
+          packageName,
+          registryUrl: 'https://packages.typst.org/preview/index.json',
+        });
+
+        expect(result).toBeNull();
+        expect(getCache).not.toHaveBeenCalled();
+        expect(setCache).not.toHaveBeenCalled();
+      },
+    );
+
+    it('reuses public releases despite a configured private registry', async () => {
+      httpMock
+        .scope('https://packages.typst.org')
+        .get('/preview/index.json')
+        .reply(
+          200,
+          [
+            {
+              name: 'public-package',
+              version: '1.0.0',
+              repository: 'https://github.com/example/public',
+              updatedAt: 1704708827,
+            },
+          ],
+          { 'Cache-Control': 'must-revalidate, max-age=600' },
+        );
+      const datasource = new TypstDatasource();
+      const config = {
+        packageName: 'preview/public-package',
+        registryUrl: 'https://private.example/index.json',
+      };
+      const expected = {
+        sourceUrl: 'https://github.com/example/public',
+        registryUrl: 'https://packages.typst.org/preview/index.json',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2024-01-08T10:13:47.000Z' },
+        ],
+      };
+
+      const first = await datasource.getReleases(config);
+      memCache.reset();
+      const second = await datasource.getReleases(config);
+
+      expect(first).toEqual(expected);
+      expect(second).toEqual(expected);
+      await expect(
+        packageCache.get(
+          'datasource-typst:cache-provider',
+          'https://packages.typst.org/preview/index.json',
+        ),
+      ).resolves.toBeDefined();
+    });
+
+    it('ignores custom registry URLs in generic lookups', async () => {
+      httpMock
+        .scope('https://packages.typst.org')
+        .get('/preview/index.json')
+        .reply(200, []);
+
+      const result = await getPkgReleases({
+        datasource: TypstDatasource.id,
+        packageName: 'preview/missing',
+        registryUrls: ['https://private.example/index.json'],
+      });
+
+      expect(result).toBeNull();
+    });
+  });
+
   describe('getReleases', () => {
     it('processes real data', async () => {
       const packageName = 'preview/example-package';
