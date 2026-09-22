@@ -121,7 +121,7 @@ describe('modules/manager/deno/artifacts', () => {
 
     it('supports lockFileMaintenance', async () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       // Second read is .npmrc
@@ -192,6 +192,26 @@ describe('modules/manager/deno/artifacts', () => {
       await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         { artifactError: { fileName: 'deno.lock', stderr: 'nope' } },
       ]);
+    });
+
+    it('restores .npmrc when the install fails', async () => {
+      const execError = new ExecError('nope', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: { encoding: 'utf8' },
+      });
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
+      fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce('# dummy');
+      mockExecAll(execError);
+
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+        { artifactError: { fileName: 'deno.lock', stderr: 'nope' } },
+      ]);
+
+      expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
     });
   });
 
@@ -302,7 +322,7 @@ describe('modules/manager/deno/artifacts', () => {
     it('should add private registries to deno install command allow-import option', async () => {
       const updateArtifact: UpdateArtifact = {
         config: {
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           lockFiles: ['deno.lock'],
         },
         newPackageFileContent: '',
@@ -340,7 +360,7 @@ describe('modules/manager/deno/artifacts', () => {
     it('quotes the allow-import list when a hostRule resolvedHost contains shell metacharacters', async () => {
       const updateArtifact: UpdateArtifact = {
         config: {
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           lockFiles: ['deno.lock'],
         },
         newPackageFileContent: '',

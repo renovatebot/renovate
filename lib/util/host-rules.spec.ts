@@ -503,6 +503,27 @@ describe('util/host-rules', () => {
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
 
+    it('matches a URL carrying user:pass@ against a matchHost without credentials', () => {
+      add({
+        matchHost: 'https://domain.com',
+        token: 'def',
+      });
+      expect(find({ url: 'https://user:pass@domain.com' }).token).toBe('def');
+    });
+
+    it('matches a URL carrying user:pass@ against a path-scoped matchHost', () => {
+      add({
+        matchHost: 'https://domain.com/simple/',
+        token: 'def',
+      });
+      expect(find({ url: 'https://user:pass@domain.com/simple/' }).token).toBe(
+        'def',
+      );
+      expect(
+        find({ url: 'https://user:pass@domain.com/other/' }).token,
+      ).toBeUndefined();
+    });
+
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,
