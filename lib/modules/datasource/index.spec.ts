@@ -14,9 +14,9 @@ import datasources from './api.ts';
 import { getDefaultVersioning } from './common.ts';
 import { Datasource } from './datasource.ts';
 import {
-  applyDatasourceDefaultConfig,
   getDatasourceList,
   getDatasources,
+  getDefaultConfig,
   getDigest,
   getPkgReleases,
   supportsDigests,
@@ -156,41 +156,28 @@ describe('modules/datasource/index', () => {
     });
   });
 
-  describe('applyDatasourceDefaultConfig()', () => {
-    it('lets the datasource defaults win over the given config', async () => {
+  describe('getDefaultConfig()', () => {
+    it('returns the defaultConfig of a datasource', async () => {
       class DummyDatasourceWithDefaultConfig extends DummyDatasource {
         override defaultConfig = { commitMessageTopic: 'Dummy {{depName}}' };
       }
       datasources.set(datasource, new DummyDatasourceWithDefaultConfig());
 
-      const res = await applyDatasourceDefaultConfig({
-        datasource,
-        packageName,
-        commitMessageTopic: 'dependency {{depName}}',
-      });
-
-      expect(res).toEqual({
-        datasource,
-        packageName,
+      await expect(getDefaultConfig(datasource)).resolves.toEqual({
         commitMessageTopic: 'Dummy {{depName}}',
       });
     });
 
-    it('keeps the config as-is for a datasource without defaults', async () => {
+    it('returns an empty object for a datasource without defaults', async () => {
       datasources.set(datasource, new DummyDatasource());
 
-      const res = await applyDatasourceDefaultConfig({
-        datasource,
-        packageName,
-      });
-
-      expect(res).toEqual({ datasource, packageName });
+      await expect(getDefaultConfig(datasource)).resolves.toEqual({});
     });
 
-    it('keeps the config as-is without a datasource', async () => {
-      const res = await applyDatasourceDefaultConfig({ packageName });
-
-      expect(res).toEqual({ packageName });
+    it('returns an empty object for an unknown datasource', async () => {
+      await expect(
+        getDefaultConfig('some-unknown-datasource'),
+      ).resolves.toEqual({});
     });
   });
 

@@ -1,5 +1,7 @@
+import * as datasource from '../modules/datasource/index.ts';
 import { getConfig } from './defaults.ts';
 import {
+  applyDatasourceDefaultConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
@@ -162,6 +164,47 @@ describe('config/index', () => {
       };
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.vulnerabilitySeverity).toBe('CRITICAL');
+    });
+  });
+
+  describe('applyDatasourceDefaultConfig()', () => {
+    it('lets the datasource defaults win over the given config', async () => {
+      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({
+        commitMessageTopic: 'Dummy {{depName}}',
+      });
+
+      const res = await applyDatasourceDefaultConfig({
+        datasource: 'dummy',
+        packageName: 'package',
+        commitMessageTopic: 'dependency {{depName}}',
+      });
+
+      expect(res).toEqual({
+        datasource: 'dummy',
+        packageName: 'package',
+        commitMessageTopic: 'Dummy {{depName}}',
+      });
+    });
+
+    it('keeps the config as-is for a datasource without defaults', async () => {
+      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({});
+
+      const res = await applyDatasourceDefaultConfig({
+        datasource: 'dummy',
+        packageName: 'package',
+      });
+
+      expect(res).toEqual({ datasource: 'dummy', packageName: 'package' });
+    });
+
+    it('keeps the config as-is without a datasource', async () => {
+      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({});
+
+      const res = await applyDatasourceDefaultConfig({
+        packageName: 'package',
+      });
+
+      expect(res).toEqual({ packageName: 'package' });
     });
   });
 

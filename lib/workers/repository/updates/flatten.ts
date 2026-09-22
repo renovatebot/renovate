@@ -1,12 +1,12 @@
 import { isUndefined } from '@sindresorhus/is';
 import {
+  applyDatasourceDefaultConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
-import { applyDatasourceDefaultConfig } from '../../../modules/datasource/index.ts';
 import { get } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';

@@ -1,11 +1,14 @@
 // TODO #22198
 import { isNonEmptyArray, isNonEmptyString, isString } from '@sindresorhus/is';
-import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import {
+  applyDatasourceDefaultConfig,
+  getManagerConfig,
+  mergeChildConfig,
+} from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
-import { applyDatasourceDefaultConfig } from '../../../modules/datasource/index.ts';
 import type {
   PackageDependency,
   PackageFile,
