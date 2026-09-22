@@ -11,21 +11,28 @@ import type {
   OutgoingHttpHeaders,
 } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
+import { toBase64 } from '../../../util/string.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import { getGoogleAuthToken } from '../util.ts';
-import { isGitHubRepo, normalizePythonDepName } from './common.ts';
+import { isGoogleArtifactRegistry } from '../util.ts';
+import {
+  isGitHubRepo,
+  normalizePythonDepName,
+  pypiDatasourceId,
+} from './common.ts';
+import { findPypiIndexCredentials } from './host-rules.ts';
 import type { PypiRelease } from './schema.ts';
 import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
-  static readonly id = 'pypi';
+  static readonly id = pypiDatasourceId;
 
   constructor() {
     super(PypiDatasource.id);
@@ -110,19 +117,22 @@ export class PypiDatasource extends Datasource {
       logger.once.debug({ lookupUrl }, 'Failed to parse URL');
       return { headers: {}, lookupUrl };
     }
-    if (parsedUrl.hostname.endsWith('.pkg.dev')) {
-      const auth = await getGoogleAuthToken();
-      if (auth) {
-        const sanitizedLookupUrl = this.sanitizeLookupUrl(lookupUrl, parsedUrl);
-        return {
-          headers: { authorization: `Basic ${auth}` },
-          lookupUrl: sanitizedLookupUrl,
-        };
-      }
-      logger.once.debug({ lookupUrl }, 'Could not get Google access token');
+    // Only Google Artifact Registry needs a header of our own: for every other host `applyHostRule` already turns the matching host rule into request auth
+    if (!isGoogleArtifactRegistry(parsedUrl.hostname)) {
       return { headers: {}, lookupUrl };
     }
-    return { headers: {}, lookupUrl };
+
+    const { username, password } = await findPypiIndexCredentials(lookupUrl);
+    if (!username && !password) {
+      return { headers: {}, lookupUrl };
+    }
+
+    const auth = toBase64(`${username ?? ''}:${password ?? ''}`);
+    addSecretForSanitizing(auth);
+    return {
+      headers: { authorization: `Basic ${auth}` },
+      lookupUrl: this.sanitizeLookupUrl(lookupUrl, parsedUrl),
+    };
   }
 
   private async getDependency(

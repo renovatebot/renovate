@@ -779,11 +779,19 @@ export async function getDashboardMarkdownVulnerabilities(
 
   result += '## Vulnerabilities\n\n';
 
-  const vulnerabilityFetcher = await Vulnerabilities.create();
-  const vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
-    config,
-    packageFiles,
-  );
+  let vulnerabilities: Vulnerability[];
+  try {
+    const vulnerabilityFetcher = await Vulnerabilities.create();
+    vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
+      config,
+      packageFiles,
+    );
+  } catch (err) {
+    logger.warn({ err }, 'Unable to read vulnerability information');
+    result +=
+      'Renovate was unable to fetch CVE information from [osv.dev](https://osv.dev) this run.\n\n';
+    return result;
+  }
 
   if (vulnerabilities.length === 0) {
     result +=

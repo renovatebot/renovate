@@ -85,6 +85,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   if (goDirective?.currentValue) {
     packageFile.extractedConstraints ??= {};
     const range = convertGoDirectiveToSemVerRange(goDirective.currentValue);
+    // v8 ignore else -- a parsed go directive always yields a version
     if (range.version) {
       packageFile.extractedConstraints['%goMod'] = range.version;
 
