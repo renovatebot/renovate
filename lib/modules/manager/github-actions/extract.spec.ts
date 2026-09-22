@@ -517,6 +517,14 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             'grafana/shared-workflows/actions/lint-pr-title@823ed150196915a86971ab4beb899b0c80d835fe # lint-pr-title/v1.2.3',
         },
+        {
+          currentDigest: '823ed150196915a86971ab4beb899b0c80d835fe',
+          currentValue: 'renovate/23.x',
+          datasource: 'github-digest',
+          versioning: 'exact',
+          replaceString:
+            'some-org/some-action@823ed150196915a86971ab4beb899b0c80d835fe # renovate/23.x',
+        },
       ]);
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
     });
@@ -540,6 +548,48 @@ describe('modules/manager/github-actions/extract', () => {
           '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
       });
     });
+
+    it.each(['renovate/23.x', 'feature/v2-migration', 'release-2', 'stable-1'])(
+      'routes branch-style ref %s to github-digest',
+      async (ref) => {
+        const res = await extractPackageFile(
+          `
+        jobs:
+          build:
+            steps:
+              - uses: some-org/some-action@823ed150196915a86971ab4beb899b0c80d835fe # ${ref}
+        `,
+          'workflow.yml',
+        );
+
+        expect(res?.deps[0]).toMatchObject({
+          currentValue: ref,
+          datasource: 'github-digest',
+          versioning: 'exact',
+        });
+      },
+    );
+
+    it.each(['lint-pr-title/v1.2.3', 'actions-runner-controller-0.23.5'])(
+      'routes component-prefixed version-like ref %s to github-tags',
+      async (ref) => {
+        const res = await extractPackageFile(
+          `
+        jobs:
+          build:
+            steps:
+              - uses: some-org/some-action@823ed150196915a86971ab4beb899b0c80d835fe # ${ref}
+        `,
+          'workflow.yml',
+        );
+
+        expect(res?.deps[0]).toMatchObject({
+          currentValue: ref,
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+        });
+      },
+    );
 
     it('extracts pinned non-semver ref with digest', async () => {
       const res = await extractPackageFile(
