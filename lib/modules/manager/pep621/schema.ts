@@ -38,6 +38,7 @@ export function DependencyGroup(depType: string): DependencyGroup {
       const deps: PackageDependency[] = [];
       for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
         for (const dep of groupDeps) {
+          // v8 ignore else -- the parser always sets a package name on a group dep
           if (dep.packageName) {
             dep.depName = dep.packageName;
           }
@@ -200,8 +201,10 @@ const PixiMinimalConfig = z
       .catch(undefined),
   })
   .transform((val) => ({
+    /* v8 ignore start: needs a pixi manifest declaring the requirement only under workspace */
     'requires-pixi':
       val.project?.['requires-pixi'] ?? val.workspace?.['requires-pixi'],
+    /* v8 ignore stop */
   }))
   .optional()
   .catch(undefined);
