@@ -68,6 +68,7 @@ All available options:
   "releases": [
     {
       "version": "v1.0.0",
+      "name": "Release title",
       "isDeprecated": true,
       "releaseTimestamp": "2022-12-24T18:21Z",
       "changelogContent": "Release notes in Markdown.",
@@ -87,6 +88,8 @@ All available options:
 
 ### Embedded release notes
 
+`name` is an optional human-readable release title, not an alternative to `version`.
+When supplied with `changelogContent`, it appears alongside the version in the release-notes heading.
 `changelogContent` is optional Markdown describing only its release.
 Do not include cumulative history in each entry: Renovate combines applicable entries, which would repeat that history.
 Use `changelogUrl` on each release to link to its full notes.

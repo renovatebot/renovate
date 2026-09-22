@@ -135,6 +135,7 @@ describe('modules/datasource/custom/index', () => {
           {
             changelogContent,
             changelogUrl: 'https://example.com/foo/releases/v1.1.0',
+            name: 'RHSA-2026:66358',
             version: 'v1.1.0',
           },
         ],

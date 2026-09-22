@@ -69,6 +69,8 @@ export interface GetPkgReleasesConfig {
 }
 
 export interface Release {
+  /** Optional human-readable release name/title, not a version identifier. */
+  name?: string;
   /**
    * Markdown for this release only, not cumulative history. Applicable entries
    * are combined for the update range and take precedence over repository
@@ -106,6 +108,7 @@ export interface Release {
  */
 export interface ChangelogRelease {
   version: string;
+  name?: string;
   changelogContent: string;
   changelogUrl?: string;
   releaseTimestamp?: Timestamp | null;

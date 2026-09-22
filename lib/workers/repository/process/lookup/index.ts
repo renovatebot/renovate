@@ -640,6 +640,7 @@ export async function lookupUpdates(
         ? [
             {
               version: release.version,
+              ...(release.name !== undefined && { name: release.name }),
               changelogContent: release.changelogContent,
               changelogUrl: release.changelogUrl,
               releaseTimestamp: release.releaseTimestamp,

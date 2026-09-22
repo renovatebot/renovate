@@ -6988,6 +6988,7 @@ describe('workers/repository/process/lookup/index', () => {
           {
             changelogContent: 'testContent',
             changelogUrl: 'http://testChangelogUrl',
+            name: 'RHSA-2026:66358',
             version: '8.1.0',
           },
         ],
@@ -7008,6 +7009,7 @@ describe('workers/repository/process/lookup/index', () => {
           {
             changelogContent: 'testContent',
             changelogUrl: 'http://testChangelogUrl',
+            name: 'RHSA-2026:66358',
             version: '8.1.0',
           },
         ],

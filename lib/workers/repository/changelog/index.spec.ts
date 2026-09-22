@@ -144,6 +144,7 @@ describe('workers/repository/changelog/index', () => {
           {
             changelogContent: 'targetContent',
             changelogUrl: 'https://example.com/releases/1.3.0',
+            name: 'RHSA-2026:66358',
             releaseTimestamp: '2026-01-04T00:00:00.000Z' as Timestamp,
             version: '1.3.0',
           },
@@ -186,6 +187,7 @@ describe('workers/repository/changelog/index', () => {
           gitRef: undefined,
           releaseNotes: {
             body: 'targetContent',
+            name: 'RHSA-2026:66358',
             notesSourceUrl: undefined,
             url: 'https://example.com/releases/1.3.0',
           },

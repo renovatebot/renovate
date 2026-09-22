@@ -54,6 +54,7 @@ function getReleaseChangelog(
       date: release.releaseTimestamp!,
       releaseNotes: {
         body: release.changelogContent,
+        ...(release.name !== undefined && { name: release.name }),
         notesSourceUrl: undefined!,
         url: release.changelogUrl!,
       },
