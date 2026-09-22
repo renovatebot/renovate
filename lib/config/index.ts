@@ -1,4 +1,5 @@
 import { logger } from '../logger/index.ts';
+import { getDefaultConfig } from '../modules/datasource/index.ts';
 import { allManagersList, get } from '../modules/manager/index.ts';
 import * as options from './options/index.ts';
 import type {
@@ -31,6 +32,19 @@ export function getManagerConfig(
     delete managerConfig[i];
   }
   return managerConfig;
+}
+
+/**
+ * Merge the `defaultConfig` of `config.datasource` into `config`, where it wins over the values which are already there.
+ *
+ * The lookup config and the flattened branch upgrade are assembled separately, so both have to apply the datasource defaults themselves.
+ */
+export async function applyDatasourceDefaultConfig<
+  T extends Record<string, any> & { datasource?: string },
+>(config: T): Promise<T> {
+  // TODO: fix types (#22198)
+  const defaultConfig = await getDefaultConfig(config.datasource!);
+  return mergeChildConfig(config, defaultConfig);
 }
 
 export function removeGlobalConfig(
