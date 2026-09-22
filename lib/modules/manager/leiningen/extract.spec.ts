@@ -31,6 +31,7 @@ describe('modules/manager/leiningen/extract', () => {
         currentValue: '1.2.3',
       },
     ]);
+    expect(extractFromVectors('[[foo/bar ~undefined-var]]')).toBeEmptyArray();
     expect(
       extractFromVectors('[[foo/bar ~baz]]', {}, { baz: '1.2.3' }),
     ).toEqual([

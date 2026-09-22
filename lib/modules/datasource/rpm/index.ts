@@ -2,7 +2,7 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
 import { RpmXmlMetadataProvider } from './providers/xml.ts';
-import { fetchPrimaryGzipUrl } from './repomd.ts';
+import { fetchPrimaryUrl } from './repomd.ts';
 
 export class RpmDatasource extends Datasource {
   static readonly id = datasource;
@@ -46,8 +46,8 @@ export class RpmDatasource extends Datasource {
     }
 
     try {
-      const primaryGzipUrl = await this.getPrimaryGzipUrl(registryUrl);
-      return await this.getReleasesByPackageName(primaryGzipUrl, packageName);
+      const primaryUrl = await this.getPrimaryUrl(registryUrl);
+      return await this.getReleasesByPackageName(primaryUrl, packageName);
     } catch (err) {
       this.handleGenericErrors(err);
     }
@@ -64,20 +64,20 @@ export class RpmDatasource extends Datasource {
     );
   }
 
-  getPrimaryGzipUrl(registryUrl: string): Promise<string> {
+  getPrimaryUrl(registryUrl: string): Promise<string> {
     return this.cached(
       {
         key: registryUrl,
         ttlMinutes: 1440,
       },
-      () => fetchPrimaryGzipUrl(this.http, registryUrl),
+      () => fetchPrimaryUrl(this.http, registryUrl),
     );
   }
 
   getReleasesByPackageName(
-    primaryGzipUrl: string,
+    primaryUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    return this.xmlProvider.getReleases(primaryGzipUrl, packageName);
+    return this.xmlProvider.getReleases(primaryUrl, packageName);
   }
 }
