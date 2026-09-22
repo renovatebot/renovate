@@ -1,10 +1,8 @@
 import {
   isArray,
   isFunction,
-  isNonEmptyObject,
   isNonEmptyString,
   isObject,
-  isString,
 } from '@sindresorhus/is';
 import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
@@ -26,11 +24,12 @@ import {
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
+  createPypiToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
-import type { MiseTool, MiseToolOptions } from './schema.ts';
+import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
 import type { BackendToolingConfig, ToolingDefinition } from './types.ts';
 import {
@@ -117,21 +116,28 @@ export async function extractPackageFile(
   return result;
 }
 
-function parseVersion(toolData: MiseTool): string | null {
-  if (isNonEmptyString(toolData)) {
+/**
+ * Returns the primary tool entry. For arrays only the first entry is managed,
+ * e.g. 'erlang = ["23.3", "24.0"]' or
+ * 'rust = [{ version = "1.98.1", profile = "minimal" }, { version = "nightly" }]'.
+ */
+function getPrimaryToolValue(toolData: MiseTool): MiseToolValue | null {
+  if (isArray(toolData)) {
+    return toolData.length ? toolData[0] : null;
+  }
+  return toolData;
+}
+
+function parseVersion(toolValue: MiseToolValue | null): string | null {
+  if (isNonEmptyString(toolValue)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
-    return toolData;
+    return toolValue;
   }
-  if (isArray(toolData, isString)) {
-    // Handle the array case
-    // e.g. 'erlang = ["23.3", "24.0"]'
-    return toolData.length ? toolData[0] : null; // Get the first version in the array
-  }
-  if (isObject(toolData) && isNonEmptyString(toolData.version)) {
+  if (isObject(toolValue) && isNonEmptyString(toolValue.version)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
-    return toolData.version;
+    return toolValue.version;
   }
   return null; // Return null if no version is found
 }
@@ -226,6 +232,8 @@ function getToolConfig(
       return createNpmToolConfig(toolName);
     case 'pipx':
       return createPipxToolConfig(toolName);
+    case 'pypi':
+      return createPypiToolConfig(toolName);
     case 'spm':
       return createSpmToolConfig(toolName);
     case 'ubi':
@@ -385,7 +393,8 @@ function extractToolEntry(
   depType: string,
   lockFileData?: MiseLockFile,
 ): PackageDependency {
-  const version = parseVersion(toolData);
+  const toolValue = getPrimaryToolValue(toolData);
+  const version = parseVersion(toolValue);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
     name.trim(),
   )!.groups!;
@@ -394,7 +403,7 @@ function extractToolEntry(
   const toolName = depName.substring(delimiterIndex + 1);
   const options = parseOptions(
     optionsInName,
-    isNonEmptyObject(toolData) ? toolData : {},
+    isObject(toolValue) ? toolValue : {},
   );
   const toolConfig =
     version === null

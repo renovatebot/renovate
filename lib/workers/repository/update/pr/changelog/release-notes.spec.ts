@@ -14,10 +14,11 @@ import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { getChangeLogSourceFor } from './index.ts';
 import {
   addReleaseNotes as addReleaseNotesRaw,
-  getReleaseList,
-  getReleaseNotes,
+  getReleaseList as getReleaseListRaw,
   getReleaseNotesMd as getReleaseNotesMdRaw,
+  getReleaseNotes as getReleaseNotesRaw,
   massageBody,
+  massageName,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
 } from './release-notes.ts';
@@ -39,6 +40,30 @@ function getReleaseNotesMd(
   return getReleaseNotesMdRaw(
     project,
     release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function getReleaseList(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+): Promise<ChangeLogNotes[]> {
+  return getReleaseListRaw(
+    project,
+    release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function getReleaseNotes(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+  config: BranchUpgradeConfig,
+): Promise<ChangeLogNotes | null> {
+  return getReleaseNotesRaw(
+    project,
+    release,
+    config,
     getChangeLogSourceFor(project.type)!,
   );
 }
@@ -230,6 +255,25 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it.each([null, undefined, 'fake', 123])('handles invalid: %s', (date) => {
       expect(releaseNotesCacheMinutes(date as never)).toBe(55);
+    });
+  });
+
+  describe('massageName()', () => {
+    it('strips a leading version', () => {
+      expect(massageName('Release v1.2.3 some title', '1.2.3')).toBe(
+        'some title',
+      );
+    });
+
+    it('leaves the name alone when there is no version', () => {
+      expect(massageName('v1.2.3 some title', undefined)).toBe(
+        'v1.2.3 some title',
+      );
+    });
+
+    it('returns undefined for a name that is left empty', () => {
+      expect(massageName('1.2.3', '1.2.3')).toBeUndefined();
+      expect(massageName(null, undefined)).toBeUndefined();
     });
   });
 
@@ -697,14 +741,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   describe('getReleaseList()', () => {
-    it('should return empty array if no apiBaseUrl', async () => {
-      const res = await getReleaseList(
-        partial<ChangeLogProject>(),
-        partial<ChangeLogRelease>(),
-      );
-      expect(res).toBeEmptyArray();
-    });
-
     it('should return release list for github repo', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {

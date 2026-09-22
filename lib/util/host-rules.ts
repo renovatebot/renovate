@@ -16,7 +16,12 @@ import { clone } from './clone.ts';
 import * as sanitize from './sanitize.ts';
 import { toBase64 } from './string.ts';
 import { matchRegexOrGlobList } from './string-match.ts';
-import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
+import {
+  isHttpUrl,
+  massageHostUrl,
+  parseUrl,
+  stripUrlCredentials,
+} from './url.ts';
 
 /**
  * How much a host rule is trusted, according to the configuration it came from, from most to least trusted:
@@ -246,7 +251,8 @@ export function matchesHost(url: string, matchHost: string): boolean {
 
   const parsedMatchHost = parseUrl(matchHost);
   if (isHttpUrl(parsedUrl) && isHttpUrl(parsedMatchHost)) {
-    return parsedUrl.href.startsWith(parsedMatchHost!.href);
+    // ignore any userinfo (`user:pass@`) on the searched URL, so a `matchHost` without credentials still matches
+    return stripUrlCredentials(parsedUrl).startsWith(parsedMatchHost!.href);
   }
 
   const { hostname } = parsedUrl;
