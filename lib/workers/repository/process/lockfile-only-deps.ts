@@ -9,14 +9,6 @@ import { hasVulnerabilityAlertsRules } from '../extract/vulnerability-alerts.ts'
 /**
  * Clears the `lockfile-only` skip reason from any dependency a vulnerability
  * alert matches, so a security update can be looked up for it.
- *
- * Dependencies which exist only in a lock file are surfaced with that skip
- * reason purely so vulnerabilities in them can be found: they have no package
- * file entry to update, so a routine update has nothing to write.
- *
- * Matching is done against the package rules, so this runs once vulnerability
- * alerts have been resolved into them, and needs to know nothing about where
- * they came from.
  */
 export async function unskipLockfileOnlyDeps(
   config: RenovateConfig,
