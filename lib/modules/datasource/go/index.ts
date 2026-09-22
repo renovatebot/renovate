@@ -19,6 +19,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
+import { isPublicGoPackage } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { GoProxyDatasource } from './releases-goproxy.ts';
@@ -69,6 +70,7 @@ export class GoDatasource extends Datasource {
         namespace: `datasource-${GoDatasource.id}`,
         // TODO: types (#22198)
         key: `getReleases:${config.packageName}@@${constraintsFilteringKey}`,
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -144,6 +146,7 @@ export class GoDatasource extends Datasource {
       {
         namespace: `datasource-${GoDatasource.id}`,
         key: `getDigest:${config.packageName}:${newValue}`,
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getDigest(config, newValue),

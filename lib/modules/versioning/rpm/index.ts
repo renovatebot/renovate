@@ -107,12 +107,8 @@ class RpmVersioningApi extends GenericVersioningApi {
         continue;
       }
 
-      if (c1 > c2) {
-        return 1;
-      }
-      if (c1 < c2) {
-        return -1;
-      }
+      // the characters differ, so one of them compares greater
+      return c1 > c2 ? 1 : -1;
     }
 
     // Okay, they've been the exact same up until now, so return the longer one

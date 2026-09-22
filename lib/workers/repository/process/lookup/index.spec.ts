@@ -53,6 +53,11 @@ const typescriptJson = Fixtures.get('typescript.json');
 const vueJson = Fixtures.get('vue.json');
 const webpackJson = Fixtures.get('webpack.json');
 
+const githubApiHost = 'https://api.github.com';
+const emptyGithubGraphqlPayload = {
+  data: { repository: { isPrivate: false, payload: { nodes: [] } } },
+};
+
 let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
@@ -92,9 +97,7 @@ describe('workers/repository/process/lookup/index', () => {
     );
   });
 
-  // TODO: fix mocks
   afterEach(() => {
-    httpMock.clear(false);
     hostRules.clear();
   });
 
@@ -169,6 +172,27 @@ describe('workers/repository/process/lookup/index', () => {
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
           hasAttestation: false,
+        },
+      ]);
+    });
+
+    it('warns if there is nothing to roll back to', async () => {
+      // below every published version, so nothing satisfies it and nothing is older
+      config.currentValue = '0.0.0-alpha';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toBeEmpty();
+      expect(res.warnings).toEqual([
+        {
+          topic: 'q',
+          message: "Can't find version matching 0.0.0-alpha for npm package q",
         },
       ]);
     });
@@ -951,6 +975,29 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('bumps instead of updating the lockfile for vulnerabilityAlerts without a locked version', async () => {
+      config.currentValue = '^1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // without a lockfile to update the strategy falls back to bump, which
+      // widens the range rather than leaving it untouched
+      expect(updates).toMatchObject([
+        {
+          isBump: true,
+          newValue: '^1.0.1',
+          newVersion: '1.0.1',
+        },
+      ]);
+    });
+
     it('uses highest available version for vulnerabilityAlerts when vulnerabilityFixStrategy=highest', async () => {
       config.currentValue = '1.0.0';
       config.isVulnerabilityAlert = true;
@@ -1408,6 +1455,101 @@ describe('workers/repository/process/lookup/index', () => {
           hasAttestation: false,
         },
       ]);
+    });
+
+    it('handles lockfile-only updates for pinned locked versions', async () => {
+      config.currentValue = '1.2.1';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.updatePinnedDependencies = false;
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBreaking: false,
+          isLockfileUpdate: true,
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.2.1',
+          newVersion: '1.4.1',
+          newVersionAgeInDays: expect.any(Number),
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+          hasAttestation: false,
+        },
+      ]);
+    });
+
+    it('keeps lockfile-only updates when package rules change rangeStrategy', async () => {
+      config.currentValue = '1.2.1';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'replace';
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: '1.2.1',
+        newVersion: '1.4.1',
+      });
+    });
+
+    it('uses lockedVersion to look up an unversioned lockfile-only selector', async () => {
+      config.currentValue = 'latest';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: 'latest',
+        newVersion: '1.4.1',
+      });
+    });
+
+    it('allows lockfile-only selectors to cross versioning compatibility boundaries', async () => {
+      config.currentValue = '1.2.1-alpine';
+      config.lockedVersion = '1.2.1-alpine';
+      config.rangeStrategy = 'update-lockfile';
+      config.versioning = dockerVersioningId;
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toHaveLength(1);
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: '1.2.1-alpine',
+        newVersion: '1.4.1',
+      });
     });
 
     it('handles the in-range-only strategy and updates lockfile within range', async () => {
@@ -3053,10 +3195,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.updatePinnedDependencies = false;
       config.packageName = '@types/helmet';
       config.datasource = NpmDatasource.id;
-      httpMock
-        .scope(npmDefaultRegistryUrl)
-        .get('/@types%2Fhelmet')
-        .reply(200, helmetJson);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -3226,6 +3364,11 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .times(2)
+        .reply(200, emptyGithubGraphqlPayload);
 
       const { updates, warnings } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -3319,6 +3462,11 @@ describe('workers/repository/process/lookup/index', () => {
             },
           ],
         });
+        httpMock
+          .scope(githubApiHost)
+          .post('/graphql')
+          .times(4)
+          .reply(200, emptyGithubGraphqlPayload);
 
         const { updates, warnings } = await Result.wrap(
           lookup.lookupUpdates(config),
@@ -3864,7 +4012,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = GithubTagsDatasource.id;
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
-      httpMock.scope('https://pypi.org').get('/pypi/foo/json').reply(404);
+      httpMock.scope(githubApiHost).post('/graphql').reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -3879,8 +4027,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageFile = 'requirements.txt';
       config.currentValue = '1.0.0';
       httpMock
-        .scope('https://api.github.com')
-        .get('/repos/some/repo/git/refs/tags?per_page=100')
+        .scope('https://pypi.org')
+        .get('/pypi/foo/json')
+        .reply(404)
+        .get('/pypi/foo/')
         .reply(404);
 
       const { updates } = await Result.wrap(
@@ -3901,6 +4051,8 @@ describe('workers/repository/process/lookup/index', () => {
         .get('/packages.json')
         .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/foo/bar.json')
+        .reply(404)
+        .get('/p2/foo/bar~dev.json')
         .reply(404);
 
       const { updates } = await Result.wrap(
@@ -4176,6 +4328,27 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'npm',
         warnings: [],
       });
+    });
+
+    it('does not skip when the current version is unresolvable but a locked version is set', async () => {
+      // `^5.0.0` matches none of the published versions, so no current version
+      // can be resolved - but a lockedVersion means this is not invalid
+      config.currentValue = '^5.0.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'replace';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // returning before `currentVersion` is recorded proves the early return
+      // was taken, and the missing skipReason proves it was the lockedVersion path
+      expect(res.currentVersion).toBeUndefined();
+      expect(res.skipReason).toBeUndefined();
+      expect(res.updates).toBeEmpty();
     });
 
     it('handles digest pin', async () => {
@@ -4483,6 +4656,26 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('returns no updates if the datasource rejects every candidate release', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'com.example:artifact';
+      config.versioning = mavenVersioningId;
+      config.datasource = MavenDatasource.id;
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+      });
+      // nothing survives postprocessing, so no bucket yields a release
+      postprocessMavenRelease.mockResolvedValue('reject');
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // the current version resolves, proving we reached the per-bucket loop
+      expect(res.currentVersion).toBe('1.0.0');
+      expect(res.updates).toBeEmpty();
+    });
+
     it('applies versionCompatibility for maven', async () => {
       config.currentValue = '12.4.2.jre8';
       config.packageName = 'com.microsoft.sqlserver:mssql-jdbc';
@@ -4499,9 +4692,7 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '12.6.2.jre11' },
         ],
       });
-      postprocessMavenRelease.mockImplementationOnce((_, x) =>
-        Promise.resolve(x),
-      );
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
 
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -6693,10 +6884,12 @@ describe('workers/repository/process/lookup/index', () => {
         )
         .get('/@v/list')
         .reply(200, '')
-        .get('/v2/@v/list')
-        .reply(404)
         .get('/@latest')
         .reply(200, { Version: 'v0.0.0-20240509183442-62759503f434' });
+      httpMock
+        .scope('https://google.golang.org')
+        .get('/genproto/googleapis/rpc?go-get=1')
+        .reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -6748,10 +6941,12 @@ describe('workers/repository/process/lookup/index', () => {
         )
         .get('/@v/list')
         .reply(200, '')
-        .get('/v2/@v/list')
-        .reply(404)
         .get('/@latest')
         .reply(200, { Version: newVersion });
+      httpMock
+        .scope('https://google.golang.org')
+        .get('/genproto/googleapis/rpc?go-get=1')
+        .reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),

@@ -1,6 +1,7 @@
 import { fs, partial } from '~test/util.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import * as _html from '../../../modules/manager/html/index.ts';
+import * as managerApi from '../../../modules/manager/index.ts';
 import * as _fileMatch from './file-match.ts';
 import { getManagerPackageFiles } from './manager-files.ts';
 
@@ -61,6 +62,37 @@ describe('workers/repository/extract/manager-files', () => {
           deps: [{}, { replaceString: 'abc', packageName: 'p', depName: 'p' }],
         },
       ]);
+    });
+
+    it('handles an extractAllPackageFiles that finds nothing', async () => {
+      const managerConfig = {
+        manager: 'npm',
+        enabled: true,
+        fileList: ['package.json'],
+      };
+      fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
+      vi.spyOn(managerApi, 'extractAllPackageFiles').mockResolvedValueOnce(
+        null,
+      );
+
+      const res = await getManagerPackageFiles(managerConfig);
+
+      expect(res).toBeNull();
+    });
+
+    it('skips a file whose extract returns nothing', async () => {
+      const managerConfig = {
+        manager: 'html',
+        enabled: true,
+        fileList: ['Dockerfile'],
+      };
+      fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
+      fs.readLocalFile.mockResolvedValueOnce('some content');
+      html.extractPackageFile = vi.fn(() => null) as never;
+
+      const res = await getManagerPackageFiles(managerConfig);
+
+      expect(res).toHaveLength(0);
     });
 
     it('returns files with extractAllPackageFiles', async () => {

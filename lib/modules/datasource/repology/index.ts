@@ -133,6 +133,7 @@ export class RepologyDatasource extends Datasource {
           pkgType,
         );
 
+        // v8 ignore else -- the resolver either returns a body or throws
         if (response) {
           const pkg = findPackageInResponse(response, repoName, pkgName, [
             pkgType,

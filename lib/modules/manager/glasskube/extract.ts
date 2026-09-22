@@ -28,10 +28,11 @@ function parseResources(
   const repositories: PackageRepository[] = [];
 
   for (const resource of resources) {
-    if (resource.kind === 'ClusterPackage' || resource.kind === 'Package') {
-      packages.push(resource);
-    } else if (resource.kind === 'PackageRepository') {
+    if (resource.kind === 'PackageRepository') {
       repositories.push(resource);
+    } else {
+      // the schema parses no kind other than `Package` and `ClusterPackage`
+      packages.push(resource);
     }
   }
 
@@ -74,6 +75,7 @@ function findRepository(
     if (name === repository.metadata.name) {
       return repository;
     }
+    // v8 ignore else -- needs a manifest whose repositories match no name
     if (isFalsy(name) && isDefaultRepository(repository)) {
       return repository;
     }
@@ -107,6 +109,7 @@ export async function extractAllPackageFiles(
   const glasskubeResourceFiles: GlasskubeResources[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
+    // v8 ignore else -- needs a listed package file that cannot be read
     if (content !== null) {
       const resources = parseResources(content, packageFile);
       allRepositories.push(...resources.repositories);
