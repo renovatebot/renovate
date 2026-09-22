@@ -1,13 +1,12 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
+import { PLATFORM_FAMILIES } from '../../../constants/index.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -184,6 +183,7 @@ function extractWithRegex(
       continue;
     }
 
+    // v8 ignore else -- the parsed ref is either a docker or a repository ref
     if (actionRef.kind === 'repository') {
       deps.push(
         extractRepositoryAction(
@@ -203,16 +203,14 @@ function detectDatasource(registryUrl: string): PackageDependency {
 
   switch (platform) {
     case 'forgejo':
-      return {
-        registryUrls: [registryUrl],
-        datasource: ForgejoTagsDatasource.id,
-      };
     case 'gitea':
       return {
         registryUrls: [registryUrl],
-        datasource: GiteaTagsDatasource.id,
+        datasource: PLATFORM_FAMILIES[platform].tagsDatasource,
       };
     case 'github':
+      // GitHub is left without a datasource on purpose: `extractRepositoryAction`
+      // then picks `github-digest` or `github-tags` from the ref it parsed.
       return { registryUrls: [registryUrl] };
   }
 
@@ -291,6 +289,7 @@ function extractWithYAMLParser(
   for (const job of Object.values(obj.jobs)) {
     if (job.container) {
       const dep = getDep(job.container, true, config.registryAliases);
+      // v8 ignore else -- `getDep()` always returns a dep
       if (dep) {
         dep.depType = 'container';
         deps.push(dep);
@@ -299,6 +298,7 @@ function extractWithYAMLParser(
 
     for (const service of job.services) {
       const dep = getDep(service, true, config.registryAliases);
+      // v8 ignore else -- `getDep()` always returns a dep
       if (dep) {
         dep.depType = 'service';
         deps.push(dep);

@@ -280,6 +280,49 @@ describe('modules/manager/poetry/artifacts', () => {
       ]);
     });
 
+    it('falls back to Google auth when the matching rule has no credentials', async () => {
+      hostRules.add({
+        matchHost: 'someregion-python.pkg.dev',
+        enabled: true,
+      });
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      // pyproject.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      googleAuth.mockImplementationOnce(
+        // TODO: fix typing
+        vi.fn<any>(
+          class {
+            getAccessToken = vi.fn().mockResolvedValue('some-token');
+          },
+        ),
+      );
+      const updatedDeps = [{ depName: 'dep1' }];
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: pyproject13toml,
+          config,
+        }),
+      ).resolves.not.toBeNull();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          options: {
+            env: {
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_USERNAME: 'oauth2accesstoken',
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_PASSWORD: 'some-token',
+            },
+          },
+        },
+      ]);
+    });
+
     it('continues if Google auth is not configured', async () => {
       // poetry.lock
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
