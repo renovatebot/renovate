@@ -207,6 +207,65 @@ describe('modules/manager/gomod/line-parser', () => {
     });
   });
 
+  it('should follow the branch of a pseudo-version', () => {
+    const line =
+      'require foo/foo v1.2.4-0.20210101000000-abcdefabcdef // renovate: branch=main';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentDigest: 'abcdefabcdef',
+      currentValue: 'main',
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'require',
+      digestOneAndOnly: true,
+    });
+  });
+
+  it('should follow the branch of an indirect pseudo-version', () => {
+    const line =
+      '        foo/foo v0.0.0-20210101000000-abcdefabcdef // indirect; renovate: branch=release-1.x';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentDigest: 'abcdefabcdef',
+      currentValue: 'release-1.x',
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'indirect',
+      digestOneAndOnly: true,
+      enabled: false,
+      managerData: {
+        multiLine: true,
+      },
+    });
+  });
+
+  it('should ignore the branch marker on a release', () => {
+    const line = 'require foo/foo v1.2.3 // renovate: branch=main';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentValue: 'v1.2.3',
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'require',
+    });
+  });
+
+  it('should ignore the branch marker on a placeholder pseudo-version', () => {
+    const line =
+      'require foo/foo v0.0.0-00010101000000-000000000000 // renovate: branch=main';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentDigest: '000000000000',
+      currentValue: 'v0.0.0-00010101000000-000000000000',
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'require',
+      digestOneAndOnly: true,
+      skipReason: 'invalid-version',
+      versioning: 'loose',
+    });
+  });
+
   it('should parse require multi-line definition with indirect dependency', () => {
     const line = '        foo/foo v1.2 // indirect';
     const res = parseLine(line);
@@ -325,6 +384,20 @@ describe('modules/manager/gomod/line-parser', () => {
       datasource: 'go',
       depName: 'bar/bar',
       depType: 'replace',
+    });
+  });
+
+  it('should follow the branch of a replacement pseudo-version', () => {
+    const line =
+      'replace foo/foo => bar/bar v0.0.0-20210101000000-abcdefabcdef // renovate: branch=fix-parser';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      currentDigest: 'abcdefabcdef',
+      currentValue: 'fix-parser',
+      datasource: 'go',
+      depName: 'bar/bar',
+      depType: 'replace',
+      digestOneAndOnly: true,
     });
   });
 

@@ -48,6 +48,30 @@ function isIndirect(comment: string | undefined): boolean {
   return comment === 'indirect' || !!comment?.startsWith('indirect;');
 }
 
+const followBranchRegex = regEx(
+  /^(?:indirect;\s*)?renovate:\s*branch=(?<branch>\S+)$/,
+);
+
+/**
+ * A pseudo-version marked with `// renovate: branch=<name>` follows the
+ * commits of that branch, like a `@<sha> # <branch>` pin in GitHub Actions.
+ * The branch becomes the value, which the default `semver` versioning of the
+ * `go` datasource does not read as a version, so the lookup only proposes
+ * digest updates and never switches to a release.
+ */
+function followBranch(
+  dep: PackageDependency,
+  comment: string | undefined,
+): void {
+  const branch = comment
+    ? followBranchRegex.exec(comment)?.groups?.branch
+    : undefined;
+  if (branch && dep.currentDigest && !dep.skipReason) {
+    dep.currentValue = branch;
+    delete dep.versioning;
+  }
+}
+
 export function parseLine(input: string): PackageDependency | null {
   const goVersionMatches = goVersionRegex.exec(input)?.groups;
   if (goVersionMatches) {
@@ -120,6 +144,8 @@ export function parseLine(input: string): PackageDependency | null {
       dep.enabled = false;
     }
 
+    followBranch(dep, comment);
+
     if (!keyword) {
       dep.managerData = { multiLine: true };
     }
@@ -166,6 +192,8 @@ export function parseLine(input: string): PackageDependency | null {
       dep.depType = 'indirect';
       dep.enabled = false;
     }
+
+    followBranch(dep, comment);
 
     if (!keyword) {
       dep.managerData = { multiLine: true };
