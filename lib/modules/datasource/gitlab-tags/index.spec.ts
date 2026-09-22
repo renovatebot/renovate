@@ -11,15 +11,23 @@ describe('modules/datasource/gitlab-tags/index', () => {
         {
           name: 'v1.0.0',
           commit: {
+            id: 'abc100',
             created_at: '2020-03-04T12:01:37.000-06:00',
           },
         },
         {
           name: 'v1.1.0',
-          commit: {},
+          commit: {
+            id: 'abc110',
+            created_at: '',
+          },
         },
         {
           name: 'v1.1.1',
+          commit: {
+            id: 'abc111',
+            created_at: '',
+          },
         },
       ];
       httpMock
@@ -57,15 +65,23 @@ describe('modules/datasource/gitlab-tags/index', () => {
         {
           name: 'v1.0.0',
           commit: {
+            id: 'abc100',
             created_at: '2020-03-04T12:01:37.000-06:00',
           },
         },
         {
           name: 'v1.1.0',
-          commit: {},
+          commit: {
+            id: 'abc110',
+            created_at: '',
+          },
         },
         {
           name: 'v1.1.1',
+          commit: {
+            id: 'abc111',
+            created_at: '',
+          },
         },
       ];
       httpMock
@@ -99,7 +115,10 @@ describe('modules/datasource/gitlab-tags/index', () => {
     });
 
     it('returns tags with default registry', async () => {
-      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      const body = [
+        { name: 'v1.0.0', commit: { id: 'abc100', created_at: '' } },
+        { name: 'v1.1.0', commit: { id: 'abc110', created_at: '' } },
+      ];
       httpMock
         .scope('https://gitlab.com')
         .get('/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
@@ -131,6 +150,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
       const body = [
         {
           id: digest,
+          created_at: '2020-03-04T12:01:37.000-06:00',
         },
       ];
       httpMock
@@ -149,6 +169,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
       const digest = 'abcd00001234';
       const body = {
         id: digest,
+        created_at: '2020-03-04T12:01:37.000-06:00',
       };
       httpMock
         .scope('https://gitlab.company.com')

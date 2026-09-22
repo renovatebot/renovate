@@ -47,6 +47,9 @@ export class DartDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
+    // `body` is only still null if the request above threw, and
+    // `handleGenericErrors()` always rethrows
+    // v8 ignore else -- unreachable
     if (body) {
       const { versions, latest } = body;
       const releases = versions

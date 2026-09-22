@@ -54,6 +54,7 @@ export class NugetV3Api {
         NugetV3Api.cacheNamespace,
         responseCacheKey,
       );
+      // v8 ignore else -- needs a primed package cache
       if (!servicesIndexRaw) {
         servicesIndexRaw = (
           await http.getJson(

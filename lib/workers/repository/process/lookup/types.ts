@@ -35,6 +35,8 @@ export interface RollbackConfig {
 export interface LookupUpdateConfig
   extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
   currentVersion?: string;
+  /** Whether the dependency should only be updated in the lockfile. */
+  isLockfileOnly?: boolean;
 
   digestOneAndOnly?: boolean;
   /**

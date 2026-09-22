@@ -503,5 +503,27 @@ describe('workers/repository/updates/flatten', () => {
       ).toBeUndefined();
       expect(res.find((update) => update.depName === 'alias')).toBeDefined();
     });
+
+    it('does not detect semantic commits when they are already decided', async () => {
+      config.semanticCommits = 'enabled';
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'some-dep',
+                updates: [{ newValue: '^2.0.0', updateType: 'minor' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toHaveLength(1);
+      expect(res[0].semanticCommits).toBe('enabled');
+    });
   });
 });
