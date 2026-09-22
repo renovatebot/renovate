@@ -1,5 +1,5 @@
 import { isOCIRegistry } from './oci.ts';
-import { isAlias, resolveAlias } from './utils.ts';
+import { isAlias, isLocalChartPath, resolveAlias } from './utils.ts';
 
 describe('modules/manager/helmv3/utils', () => {
   describe('.resolveAlias()', () => {
@@ -69,6 +69,21 @@ describe('modules/manager/helmv3/utils', () => {
       // TODO #22198
       const repository = isAlias(undefined as never);
       expect(repository).toBeFalse();
+    });
+  });
+
+  describe('.isLocalChartPath()', () => {
+    it.each`
+      path                            | expected
+      ${'./x'}                        | ${true}
+      ${'../x'}                       | ${true}
+      ${'/x'}                         | ${true}
+      ${'bitnami/nginx'}              | ${false}
+      ${'nginx'}                      | ${false}
+      ${'oci://ghcr.io/x'}            | ${false}
+      ${'https://example.com/charts'} | ${false}
+    `('returns $expected for $path', ({ path, expected }) => {
+      expect(isLocalChartPath(path as string)).toBe(expected);
     });
   });
 
