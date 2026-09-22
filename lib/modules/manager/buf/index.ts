@@ -18,7 +18,7 @@ export const lockFileNames = ['buf.lock'];
 
 export const defaultConfig = {
   managerFilePatterns: [
-    '/(^|/)buf\\.gen(?:\\.w+)?\\.ya?ml$/',
+    '/(^|/)buf\\.gen(?:\\.\\w+)?\\.ya?ml$/',
     '/(^|/)buf\\.lock$/',
   ],
 };
