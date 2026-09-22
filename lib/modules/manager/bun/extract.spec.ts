@@ -189,6 +189,50 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
 
+    it('adds nothing when no file matches the declared workspaces', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: ['packages/*'],
+        }),
+      );
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([{ packageFile: 'package.json' }]);
+    });
+
+    it('skips a workspace package file that yields nothing', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: ['packages/*'],
+          }),
+        )
+        // the workspace package file cannot be read
+        .mockResolvedValueOnce(null);
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([{ packageFile: 'package.json' }]);
+    });
+
     it('skips workspace processing when workspaces is not a valid array', async () => {
       vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
