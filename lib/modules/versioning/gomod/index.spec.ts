@@ -1,4 +1,4 @@
-import gomod, { isPseudoVersion } from './index.ts';
+import gomod, { isPseudoVersion, isUntaggedPseudoVersion } from './index.ts';
 
 describe('modules/versioning/gomod/index', () => {
   it.each`
@@ -19,6 +19,20 @@ describe('modules/versioning/gomod/index', () => {
   `('isPseudoVersion("$version") === $expected', ({ version, expected }) => {
     expect(isPseudoVersion(version)).toBe(expected);
   });
+
+  it.each`
+    version                                   | expected
+    ${'v0.0.0-20191109021931-daa7c04131f5'}   | ${true}
+    ${'v2.0.0-20191109021931-daa7c04131f5'}   | ${false}
+    ${'v1.2.4-0.20191109021931-daa7c04131f5'} | ${false}
+    ${'v0.0.0-rc1'}                           | ${false}
+    ${undefined}                              | ${false}
+  `(
+    'isUntaggedPseudoVersion("$version") === $expected',
+    ({ version, expected }) => {
+      expect(isUntaggedPseudoVersion(version)).toBe(expected);
+    },
+  );
 
   it.each`
     version                                   | other                                     | expected
