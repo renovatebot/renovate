@@ -69,7 +69,7 @@ import {
   usableRepo,
 } from './utils.ts';
 
-/** Base delay between mergeable checks, grows quadratically per attempt. */
+/** Base delay between automerge attempts, grows quadratically per attempt. */
 const MERGEABLE_CHECK_DELAY_MS = 250;
 
 interface GiteaRepoConfig {
@@ -205,10 +205,6 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
   }
 
   /**
-   * The platform computes `mergeable` asynchronously after a push and rejects
-   * the merge call with `405 Please try again later` until it is known, so poll
-   * the PR with a growing delay first, like GitLab does.
-   *
    * Automerge is best-effort: errors are logged and never propagate to the
    * caller, so they cannot fail the PR creation or update which triggered it.
    */
@@ -220,59 +216,57 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       return;
     }
 
-    // `delete_branch_after_merge` is required to not have undesired
-    // behavior when renovate finds existing branches on next run.
     const unsupportedReason = checkNativeAutomerge(defaults.version);
     if (unsupportedReason !== null) {
       logger.debug({ prNumber }, unsupportedReason);
       return;
     }
 
-    try {
-      const attempts = GlobalConfig.get('prMergeabilityCheckAttempts');
-      for (let attempt = 1; attempt <= attempts; attempt += 1) {
-        const pr = await helper.getPR(http, config.repository, prNumber, {
-          memCache: false,
+    // Cap at 1 so a 0 does not skip automerge entirely.
+    const attempts = Math.max(
+      GlobalConfig.get('prMergeabilityCheckAttempts'),
+      1,
+    );
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        await helper.mergePR(http, config.repository, prNumber, {
+          Do:
+            getMergeMethod(
+              platformPrOptions.automergeStrategy,
+              config.allowedMergeMethods,
+            ) ?? config.mergeMethod,
+          merge_when_checks_succeed: true,
+          // `delete_branch_after_merge` is required to not have undesired
+          // behavior when renovate finds existing branches on next run.
+          delete_branch_after_merge: true,
         });
-        if (pr.mergeable) {
-          break;
-        }
-        if (attempt === attempts) {
+
+        logger.debug({ prNumber }, `${name}-native automerge: success`);
+        return;
+      } catch (err) {
+        // A push does not cancel a scheduled automerge, so re-attempting after
+        // a branch update is answered with 409 Conflict.
+        if (err.statusCode === 409) {
           logger.debug(
-            { prNumber, attempts },
-            'PR not mergeable after all attempts, trying automerge anyway',
+            { prNumber },
+            `${name}-native automerge: already scheduled`,
           );
-          break;
+          return;
         }
+
+        // The platform computes `mergeable` in the background after a push and
+        // answers 405 until that is done.
+        if (err.statusCode !== 405 || attempt === attempts) {
+          logger.warn(
+            { err, prNumber, platform: id },
+            'Platform-native automerge: fail',
+          );
+          return;
+        }
+
         logger.debug({ prNumber, attempt }, 'PR not yet mergeable, retrying');
         await setTimeout(MERGEABLE_CHECK_DELAY_MS * attempt ** 2);
       }
-
-      await helper.mergePR(http, config.repository, prNumber, {
-        Do:
-          getMergeMethod(
-            platformPrOptions.automergeStrategy,
-            config.allowedMergeMethods,
-          ) ?? config.mergeMethod,
-        merge_when_checks_succeed: true,
-        delete_branch_after_merge: true,
-      });
-
-      logger.debug({ prNumber }, `${name}-native automerge: success`);
-    } catch (err) {
-      // A push does not cancel a scheduled automerge, so re-attempting after a
-      // branch update is answered with 409 Conflict.
-      if (err.statusCode === 409) {
-        logger.debug(
-          { prNumber },
-          `${name}-native automerge: already scheduled`,
-        );
-        return;
-      }
-      logger.warn(
-        { err, prNumber, platform: id },
-        'Platform-native automerge: fail',
-      );
     }
   }
 

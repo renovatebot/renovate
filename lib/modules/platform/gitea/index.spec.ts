@@ -1819,8 +1819,6 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
         .reply(200, mockNewPR)
-        .get('/repos/some/repo/pulls/42')
-        .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .reply(200);
       await initFakePlatform(scope, '1.24.0');
@@ -1894,8 +1892,6 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
         .reply(200, mockNewPR)
-        .get('/repos/some/repo/pulls/42')
-        .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .replyWithError('unknown error');
       await initFakePlatform(scope, '1.24.0');
@@ -1953,8 +1949,6 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
         .reply(200, mockNewPR)
-        .get('/repos/some/repo/pulls/42')
-        .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .reply(200);
       await initFakePlatform(scope, '10.0.0+gitea-1.22.0');
@@ -1990,8 +1984,6 @@ describe('modules/platform/gitea/index', () => {
           .scope('https://gitea.com/api/v1')
           .post('/repos/some/repo/pulls')
           .reply(200, mockNewPR)
-          .get('/repos/some/repo/pulls/42')
-          .reply(200, mockNewPR)
           .post('/repos/some/repo/pulls/42/merge')
           .reply(200, {
             Do: prMergeStrategy,
@@ -2023,8 +2015,6 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
         .reply(200, mockNewPR)
-        .get('/repos/some/repo/pulls/42')
-        .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge', {
           Do: 'fast-forward-only',
           merge_when_checks_succeed: true,
@@ -2055,16 +2045,14 @@ describe('modules/platform/gitea/index', () => {
       });
     });
 
-    it('waits until the PR is mergeable before enabling platform automerge', async () => {
+    it('retries platform automerge while the PR is not yet mergeable', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
-        .reply(200, { ...mockNewPR, mergeable: false })
-        .get('/repos/some/repo/pulls/42')
-        .times(2)
-        .reply(200, { ...mockNewPR, mergeable: false })
-        .get('/repos/some/repo/pulls/42')
         .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge')
+        .times(2)
+        .reply(405, { message: 'Please try again later' })
         .post('/repos/some/repo/pulls/42/merge')
         .reply(200);
       await initFakePlatform(scope, '1.24.0');
@@ -2088,16 +2076,14 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('tries platform automerge anyway after prMergeabilityCheckAttempts', async () => {
+    it('gives up on platform automerge after prMergeabilityCheckAttempts', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
         .reply(200, mockNewPR)
-        .get('/repos/some/repo/pulls/42')
-        .times(2)
-        .reply(200, { ...mockNewPR, mergeable: false })
         .post('/repos/some/repo/pulls/42/merge')
-        .reply(200);
+        .times(2)
+        .reply(405, { message: 'Please try again later' });
       await initFakePlatform(scope, '1.24.0');
       await initFakeRepo(scope, {}, { prMergeabilityCheckAttempts: 2 });
 
@@ -2109,25 +2095,45 @@ describe('modules/platform/gitea/index', () => {
         platformPrOptions: { usePlatformAutomerge: true },
       });
 
-      expect(res).toMatchObject({ number: 42 });
+      expect(res).toMatchObject({ number: 42, title: 'pr-title' });
       expect(timers.setTimeout).toHaveBeenCalledExactlyOnceWith(250);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        { prNumber: 42, attempts: 2 },
-        'PR not mergeable after all attempts, trying automerge anyway',
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ prNumber: 42, platform: 'gitea' }),
+        'Platform-native automerge: fail',
       );
+    });
+
+    it('tries platform automerge once when prMergeabilityCheckAttempts is 0', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge')
+        .reply(200);
+      await initFakePlatform(scope, '1.24.0');
+      await initFakeRepo(scope, {}, { prMergeabilityCheckAttempts: 0 });
+
+      await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { prNumber: 42 },
         'Gitea-native automerge: success',
       );
     });
 
-    it('still returns the PR when the mergeable check fails', async () => {
+    it('does not retry platform automerge on other errors', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
         .reply(200, mockNewPR)
-        .get('/repos/some/repo/pulls/42')
-        .replyWithError('unknown error');
+        .post('/repos/some/repo/pulls/42/merge')
+        .reply(422, { message: 'invalid merge style' });
       await initFakePlatform(scope, '1.24.0');
       await initFakeRepo(scope);
 
@@ -2140,6 +2146,7 @@ describe('modules/platform/gitea/index', () => {
       });
 
       expect(res).toMatchObject({ number: 42, title: 'pr-title' });
+      expect(timers.setTimeout).not.toHaveBeenCalled();
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42, platform: 'gitea' }),
         'Platform-native automerge: fail',
@@ -2151,8 +2158,6 @@ describe('modules/platform/gitea/index', () => {
     it('enables platform automerge on an existing PR', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .get('/repos/some/repo/pulls/1')
-        .reply(200, mockPRs[0])
         .post('/repos/some/repo/pulls/1/merge', {
           Do: 'rebase',
           merge_when_checks_succeed: true,
@@ -2209,8 +2214,6 @@ describe('modules/platform/gitea/index', () => {
     it('does not warn when platform automerge is already scheduled', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .get('/repos/some/repo/pulls/1')
-        .reply(200, mockPRs[0])
         .post('/repos/some/repo/pulls/1/merge')
         .reply(409, { message: 'auto merge already scheduled' });
       await initFakePlatform(scope, '1.24.0');
@@ -2231,8 +2234,6 @@ describe('modules/platform/gitea/index', () => {
     it('logs a warning when enabling platform automerge fails', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .get('/repos/some/repo/pulls/1')
-        .reply(200, mockPRs[0])
         .post('/repos/some/repo/pulls/1/merge')
         .replyWithError('unknown error');
       await initFakePlatform(scope, '1.24.0');

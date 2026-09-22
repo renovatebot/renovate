@@ -3586,7 +3586,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'prMergeabilityCheckAttempts',
     description:
-      'Number of times to check whether a PR is mergeable before enabling platform automerge on it.',
+      'Number of times to try enabling platform automerge on a PR while the platform is still checking whether it is mergeable.',
     type: 'integer',
     default: 5,
     globalOnly: true,
