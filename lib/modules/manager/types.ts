@@ -169,8 +169,6 @@ export interface LookupUpdate {
 /**
  * @property {string} depName - Display name of the package. See #16012
  * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
- *
- * Managers only need to set one of the two names. Extraction normalizes them - see `normalizeDepNames()` in `lib/workers/repository/extract/manager-files.ts` - so once a dependency has been extracted, both names are set and no consumer needs to fall back from one to the other.
  */
 export interface PackageDependency<
   T = Record<string, any>,
