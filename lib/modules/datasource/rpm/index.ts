@@ -212,9 +212,7 @@ export class RpmDatasource extends Datasource {
     metadataType: RpmMetadataSource,
   ): string {
     const metadataUrl =
-      metadataType === 'primary'
-        ? metadata.primaryUrl
-        : metadata.primaryDbUrl;
+      metadataType === 'primary' ? metadata.primaryUrl : metadata.primaryDbUrl;
 
     if (!metadataUrl) {
       throw new Error(`No ${metadataType} data found in ${metadata.repomdUrl}`);
