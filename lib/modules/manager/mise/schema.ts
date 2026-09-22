@@ -16,13 +16,22 @@ const MiseToolOptions = z.object({
 });
 export type MiseToolOptions = z.infer<typeof MiseToolOptions>;
 
-const MiseTool = z.union([
-  z.string(),
-  MiseToolOptions.extend({
-    version: z.string().optional(),
-  }),
-  z.array(z.string()),
-]);
+const MiseToolObject = MiseToolOptions.extend({
+  version: z.string().optional(),
+});
+
+/**
+ * A single tool entry: either a plain version string or an inline table,
+ * e.g. `"3.11.2"` or `{ version = "3.11.2", virtualenv = ".venv" }`.
+ */
+const MiseToolValue = z.union([z.string(), MiseToolObject]);
+export type MiseToolValue = z.infer<typeof MiseToolValue>;
+
+/**
+ * A tool may also be declared as an array of entries, in which case only
+ * the first (primary) one is managed. Array items may mix both forms.
+ */
+const MiseTool = z.union([MiseToolValue, z.array(MiseToolValue)]);
 export type MiseTool = z.infer<typeof MiseTool>;
 
 const MiseTask = z

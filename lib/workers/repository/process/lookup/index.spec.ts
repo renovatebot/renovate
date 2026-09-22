@@ -53,6 +53,11 @@ const typescriptJson = Fixtures.get('typescript.json');
 const vueJson = Fixtures.get('vue.json');
 const webpackJson = Fixtures.get('webpack.json');
 
+const githubApiHost = 'https://api.github.com';
+const emptyGithubGraphqlPayload = {
+  data: { repository: { isPrivate: false, payload: { nodes: [] } } },
+};
+
 let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
@@ -92,9 +97,7 @@ describe('workers/repository/process/lookup/index', () => {
     );
   });
 
-  // TODO: fix mocks
   afterEach(() => {
-    httpMock.clear(false);
     hostRules.clear();
   });
 
@@ -3192,10 +3195,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.updatePinnedDependencies = false;
       config.packageName = '@types/helmet';
       config.datasource = NpmDatasource.id;
-      httpMock
-        .scope(npmDefaultRegistryUrl)
-        .get('/@types%2Fhelmet')
-        .reply(200, helmetJson);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -3365,6 +3364,11 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .times(2)
+        .reply(200, emptyGithubGraphqlPayload);
 
       const { updates, warnings } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -3458,6 +3462,11 @@ describe('workers/repository/process/lookup/index', () => {
             },
           ],
         });
+        httpMock
+          .scope(githubApiHost)
+          .post('/graphql')
+          .times(4)
+          .reply(200, emptyGithubGraphqlPayload);
 
         const { updates, warnings } = await Result.wrap(
           lookup.lookupUpdates(config),
@@ -4003,7 +4012,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = GithubTagsDatasource.id;
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
-      httpMock.scope('https://pypi.org').get('/pypi/foo/json').reply(404);
+      httpMock.scope(githubApiHost).post('/graphql').reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -4018,8 +4027,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageFile = 'requirements.txt';
       config.currentValue = '1.0.0';
       httpMock
-        .scope('https://api.github.com')
-        .get('/repos/some/repo/git/refs/tags?per_page=100')
+        .scope('https://pypi.org')
+        .get('/pypi/foo/json')
+        .reply(404)
+        .get('/pypi/foo/')
         .reply(404);
 
       const { updates } = await Result.wrap(
@@ -4040,6 +4051,8 @@ describe('workers/repository/process/lookup/index', () => {
         .get('/packages.json')
         .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/foo/bar.json')
+        .reply(404)
+        .get('/p2/foo/bar~dev.json')
         .reply(404);
 
       const { updates } = await Result.wrap(
@@ -4679,9 +4692,7 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '12.6.2.jre11' },
         ],
       });
-      postprocessMavenRelease.mockImplementationOnce((_, x) =>
-        Promise.resolve(x),
-      );
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
 
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -6873,10 +6884,12 @@ describe('workers/repository/process/lookup/index', () => {
         )
         .get('/@v/list')
         .reply(200, '')
-        .get('/v2/@v/list')
-        .reply(404)
         .get('/@latest')
         .reply(200, { Version: 'v0.0.0-20240509183442-62759503f434' });
+      httpMock
+        .scope('https://google.golang.org')
+        .get('/genproto/googleapis/rpc?go-get=1')
+        .reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -6928,10 +6941,12 @@ describe('workers/repository/process/lookup/index', () => {
         )
         .get('/@v/list')
         .reply(200, '')
-        .get('/v2/@v/list')
-        .reply(404)
         .get('/@latest')
         .reply(200, { Version: newVersion });
+      httpMock
+        .scope('https://google.golang.org')
+        .get('/genproto/googleapis/rpc?go-get=1')
+        .reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),

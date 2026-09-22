@@ -331,8 +331,10 @@ function getNewValue({
       });
       if (rangeStrategy === 'replace') {
         newValue = replacementValue;
-      } else if (replacementValue) {
-        const parsedRange = parseRange(replacementValue);
+      } else {
+        // the recursive call above always produces a value: `getNewValue`
+        // falls back to the new version when nothing else matched
+        const parsedRange = parseRange(replacementValue!);
         const element = parsedRange.at(-1)!;
         if (element.operator?.startsWith('<')) {
           const splitCurrent = currentValue.split(element.operator);
