@@ -36,10 +36,6 @@ export interface ExtractConfig extends CustomExtractConfig {
   repository?: string;
   currentDigest?: string;
   newDigest?: string | null;
-  /**
-   * Whether vulnerability remediation is enabled for this repository, from any
-   * vulnerability source (platform alerts or `osvVulnerabilityAlerts`).
-   */
   hasVulnerabilityAlertsRules?: boolean;
 }
 
