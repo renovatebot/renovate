@@ -134,6 +134,20 @@ describe('modules/manager/helmv3/common', () => {
     );
   });
 
+  it('generates a login command with a token as the password', async () => {
+    hostRules.add({
+      hostType: 'docker',
+      matchHost: 'registry.example.com',
+      token: 'testtoken',
+    });
+
+    await expect(
+      generateRegistryLoginCmd('test-repo', 'registry.example.com'),
+    ).resolves.toBe(
+      "helm registry login --username '' --password testtoken registry.example.com",
+    );
+  });
+
   describe('generateHelmEnvs', () => {
     const baseEnvs = {
       HELM_REGISTRY_CONFIG: '/tmp/cache/__renovate-private-cache/registry.json',
