@@ -408,6 +408,8 @@ describe('modules/datasource/metadata', () => {
       ${'ssh://git@github.com/user/repo'}
       ${'git://github.com/user/repo'}
       ${'git+https://github.com/user/repo'}
+      ${'git+ssh://git@github.com/user/repo'}
+      ${'git+git@github.com:user/repo'}
       ${'https://www.github.com/user/repo'}
       ${'https://user.github.com/repo'}
     `('Should massage GitHub url $sourceUrl', ({ sourceUrl }) => {
@@ -422,6 +424,7 @@ describe('modules/datasource/metadata', () => {
       ${'http://gitlab.com/user/repo/'}
       ${'http://gitlab.com/user/repo.git'}
       ${'git@gitlab.com:user/repo.git'}
+      ${'ssh://git@gitlab.com/user/repo'}
       ${'git+https://gitlab.com/user/repo.git'}
       ${'git+https://gitlab.com/user/repo'}
     `('Should massage GitLab url $sourceUrl', ({ sourceUrl }) => {
