@@ -142,6 +142,7 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
+- [`pypi`](https://mise.jdx.dev/dev-tools/backends/pypi.html)
 - [`spm`](https://mise.jdx.dev/dev-tools/backends/spm.html)
 - [`ubi`](https://mise.jdx.dev/dev-tools/backends/ubi.html)
 - [`vfox`](https://mise.jdx.dev/dev-tools/backends/vfox.html)

@@ -59,6 +59,7 @@ const backendDatasources = {
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
+  pypi: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
   ubi: [GithubReleasesDatasource.id],
   // not supported
