@@ -14,9 +14,9 @@ import { hasVulnerabilityAlertsRules } from '../extract/vulnerability-alerts.ts'
  * reason purely so vulnerabilities in them can be found: they have no package
  * file entry to update, so a routine update has nothing to write.
  *
- * Both vulnerability sources are handled, because both end up as package rules
- * before this runs: platform alerts during init, OSV in
- * `appendVulnerabilityPackageRules()`.
+ * Matching is done against the package rules, so this runs once vulnerability
+ * alerts have been resolved into them, and needs to know nothing about where
+ * they came from.
  */
 export async function unskipLockfileOnlyDeps(
   config: RenovateConfig,
