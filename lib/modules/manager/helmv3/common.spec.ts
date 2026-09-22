@@ -4,6 +4,7 @@ import type {
   InternalGlobalConfigOptions,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import {
   generateHelmEnvs,
@@ -110,6 +111,27 @@ describe('modules/manager/helmv3/common', () => {
         generateRegistryLoginCmd('test-repo', 'registry.example.com/other'),
       ).resolves.toBeNull();
     });
+  });
+
+  it('does not log the login command', async () => {
+    const repositoryRule: RepositoryRule = {
+      name: 'test-repo',
+      repository: 'example.com/repo',
+      hostRule: {
+        hostType: 'docker',
+        username: 'testuser',
+        password: 'testpass',
+      },
+    };
+    await generateLoginCmd(repositoryRule);
+    expect(logger.trace).toHaveBeenCalledWith(
+      { host: 'example.com' },
+      'Generated Helm registry login command',
+    );
+    expect(logger.trace).not.toHaveBeenCalledWith(
+      expect.objectContaining({ cmd: expect.stringContaining('testpass') }),
+      expect.anything(),
+    );
   });
 
   describe('generateHelmEnvs', () => {

@@ -769,6 +769,17 @@ describe('modules/manager/terraform/extract', () => {
       });
     });
 
+    it('leaves a source too short to be a registry module alone', async () => {
+      const src = codeBlock`
+        module "short" {
+          source = "hashicorp/consul"
+        }
+      `;
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
+        deps: [{ depType: 'module' }],
+      });
+    });
+
     it('returns null with only not added resources', async () => {
       const src = codeBlock`
         resource "test_resource" "relative" {
@@ -891,6 +902,34 @@ describe('modules/manager/terraform/extract', () => {
           pinDigests: false,
         },
       ]);
+    });
+
+    it('extracts no locks when the lock file cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const res = await extractPackageFile(
+        lockedVersion,
+        'lockedVersion.tf',
+        {},
+      );
+      expect(res?.deps.every((dep) => dep.lockedVersion === undefined)).toBe(
+        true,
+      );
+    });
+
+    it('extracts no locks when the lock file holds none', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
+      fs.readLocalFile.mockResolvedValueOnce('# nothing to see here');
+
+      const res = await extractPackageFile(
+        lockedVersion,
+        'lockedVersion.tf',
+        {},
+      );
+      expect(res?.deps.every((dep) => dep.lockedVersion === undefined)).toBe(
+        true,
+      );
     });
 
     it('update lockfile constraints with range strategy update-lockfile', async () => {
