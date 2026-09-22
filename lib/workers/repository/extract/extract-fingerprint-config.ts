@@ -7,6 +7,7 @@ import { validMatchFields } from '../../../modules/manager/custom/utils.ts';
 import { getEnabledManagersList } from '../../../modules/manager/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { WorkerExtractConfig } from '../../types.ts';
+import { hasVulnerabilityAlertsRules } from './vulnerability-alerts.ts';
 
 export interface FingerprintExtractConfig {
   managerList: Set<string>;
@@ -44,6 +45,7 @@ function getFilteredManagerConfig(
     npmrc: config.npmrc,
     npmrcMerge: config.npmrcMerge,
     enabled: config.enabled,
+    hasVulnerabilityAlertsRules: config.hasVulnerabilityAlertsRules,
     ignorePaths: coerceArray(config.ignorePaths),
     includePaths: coerceArray(config.includePaths),
     skipInstalls: config.skipInstalls,
@@ -57,6 +59,7 @@ export function generateFingerprintConfig(
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
   const managerList = new Set(getEnabledManagersList(config.enabledManagers));
+  const hasAlertRules = hasVulnerabilityAlertsRules(config);
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
@@ -67,11 +70,16 @@ export function generateFingerprintConfig(
       for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({
           ...mergeChildConfig(managerConfig, customManager),
+          hasVulnerabilityAlertsRules: hasAlertRules,
           fileList: [],
         });
       }
     } else {
-      managerExtractConfigs.push({ ...managerConfig, fileList: [] });
+      managerExtractConfigs.push({
+        ...managerConfig,
+        hasVulnerabilityAlertsRules: hasAlertRules,
+        fileList: [],
+      });
     }
   }
 
