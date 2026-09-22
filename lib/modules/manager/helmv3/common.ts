@@ -45,7 +45,8 @@ export async function generateLoginCmd(
     const cmd = `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
     )} ${quote(hostPart)}`;
-    logger.trace({ cmd }, 'Generated Helm registry login command');
+    // the command carries the password, so log the target host only
+    logger.trace({ host: hostPart }, 'Generated Helm registry login command');
     return cmd;
   }
   return null;
