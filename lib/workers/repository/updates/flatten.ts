@@ -140,7 +140,6 @@ export async function flattenUpdates(
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
-            // apply config from datasource
             updateConfig = await applyDatasourceDefaultConfig(updateConfig);
             updateConfig = await applyPackageRules(
               updateConfig,
