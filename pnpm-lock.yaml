@@ -17,10 +17,10 @@ overrides:
   esbuild: 0.28.2
   protobufjs@8.0.1: 8.8.0
   vite: 8.3.0
-  read-yaml-file>js-yaml: 4.3.2
-  write-yaml-file>js-yaml: 4.3.2
-  '@yarnpkg/parsers>js-yaml': 4.3.2
-  cosmiconfig>js-yaml: 4.3.2
+  read-yaml-file>js-yaml@<4.3.2: 4.3.2
+  write-yaml-file>js-yaml@<4.3.2: 4.3.2
+  '@yarnpkg/parsers>js-yaml@<4.3.2': 4.3.2
+  cosmiconfig>js-yaml@<4.3.2: 4.3.2
 
 importers:
 
