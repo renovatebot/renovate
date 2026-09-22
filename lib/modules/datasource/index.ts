@@ -413,10 +413,8 @@ async function fetchReleases(
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {
         dep = await huntRegistries(config, datasource, registryUrls);
-        // NOTE: the strategy is always one of these three, so the implicit
-        // final else is unreachable. A coverage-ignore hint cannot suppress it
-        // on an `else if`, so it stays in the branch count.
-      } else if (registryStrategy === 'merge') {
+      } else {
+        // `merge` is the only remaining strategy
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {

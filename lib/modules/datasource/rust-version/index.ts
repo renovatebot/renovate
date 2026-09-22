@@ -95,6 +95,7 @@ export class RustVersionDatasource extends Datasource {
     return this.cached(
       {
         key: config.registryUrl!,
+        cacheable: true,
       },
       () => this.fetchReleases(config),
     );
