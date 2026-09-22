@@ -1,4 +1,4 @@
-import { PassThrough, Readable } from 'node:stream';
+import { PassThrough, Readable, promises } from 'node:stream';
 import { promisify } from 'node:util';
 import zlib from 'node:zlib';
 import {
@@ -63,6 +63,8 @@ describe('util/compress', () => {
           await createDecompressStream(compressedStream),
         );
         expect(decompressed).toBe(input);
+        expect(compressedStream.closed).toBeTruthy();
+        expect(compressedStream.destroyed).toBeTruthy();
       },
     );
 
@@ -87,7 +89,24 @@ describe('util/compress', () => {
 
       inputStream.destroy(error);
 
-      await expect(decompressor.toArray()).rejects.toThrow(error);
+      await expect(promises.finished(decompressor)).rejects.toThrow(error);
+    });
+
+    it('rejects if decompression fails', async () => {
+      const inputStream = new PassThrough({
+        objectMode: false,
+      });
+
+      inputStream.write(Uint8Array.from([0x1f, 0x8b, 0xab, 0xbc, 0xcd]));
+      const decompressor = await createDecompressStream(inputStream);
+
+      expect(decompressor).toBeInstanceOf(zlib.Gunzip);
+
+      inputStream.end();
+
+      await expect(promises.finished(decompressor)).toReject();
+      expect(inputStream.closed).toBeTruthy();
+      expect(inputStream.destroyed).toBeTruthy();
     });
   });
 });

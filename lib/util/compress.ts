@@ -42,7 +42,9 @@ function peekHeader(readable: Readable, length: number): Promise<Buffer> {
         resolve(result);
       }
     }
+
     readable.on('readable', read);
+
     const cleanup = finished(
       readable,
       { readable: true, writable: false },
@@ -86,7 +88,7 @@ export async function createDecompressStream(
   if (!algorithm) {
     return input;
   }
-  return pipeline(input, algorithm.createStream(), (err) => {
-    input.destroy(err ?? undefined);
+  return pipeline(input, algorithm.createStream(), () => {
+    // Nothing to do here, but the callback argument is required
   });
 }
