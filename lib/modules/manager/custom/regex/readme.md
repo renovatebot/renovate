@@ -15,7 +15,7 @@ Also read the documentation for the [`customManagers` config option](../../../co
 
 If you have limited managers to run within [`enabledManagers` config option](../../../configuration-options.md#enabledmanagers), you need to add `"custom.regex"` to the list.
 
-### Targeting a regex manager from `packageRules`
+### Targeting a custom manager from `packageRules`
 
 Custom managers are named `custom.<customType>` in `packageRules`, so a regex manager is matched with `"custom.regex"`:
 
