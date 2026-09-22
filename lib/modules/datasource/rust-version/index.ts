@@ -99,6 +99,7 @@ export class RustVersionDatasource extends Datasource {
       {
         namespace: `datasource-${RustVersionDatasource.id}`,
         key: config.registryUrl!,
+        cacheable: true,
       },
       () => this._getReleases(config),
     );

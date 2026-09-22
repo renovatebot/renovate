@@ -3,7 +3,6 @@ import pMap from 'p-map';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import {
@@ -12,13 +11,19 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 import { generateHelmEnvs, generateRegistryLoginCmd } from './common.ts';
 import { isOCIRegistry } from './oci.ts';
 import type { ChartDefinition, Repository, RepositoryRule } from './types.ts';
@@ -149,13 +154,7 @@ export async function updateArtifacts({
         !isString(newHelmLockContent) ||
         isHelmLockChanged(existingLockFileContent, newHelmLockContent);
       if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newHelmLockContent,
-          },
-        });
+        fileChanges.push(fileAddition(lockFileName, newHelmLockContent));
       } else {
         logger.debug('Chart.lock is unchanged');
       }
@@ -165,35 +164,15 @@ export async function updateArtifacts({
     if (isTruthy(isUpdateOptionAddChartArchives)) {
       const chartsPath = getSiblingFileName(packageFileName, 'charts');
       const status = await getRepoStatus();
-      const chartsAddition = coerceArray(status.not_added);
-      const chartsDeletion = coerceArray(status.deleted);
-
-      for (const file of chartsAddition) {
-        // only add artifacts in the chart sub path
-        if (!isFileInDir(chartsPath, file)) {
-          continue;
-        }
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: file,
-            contents: await readLocalFile(file),
-          },
-        });
-      }
-
-      for (const file of chartsDeletion) {
-        // only add artifacts in the chart sub path
-        if (!isFileInDir(chartsPath, file)) {
-          continue;
-        }
-        fileChanges.push({
-          file: {
-            type: 'deletion',
-            path: file,
-          },
-        });
-      }
+      fileChanges.push(
+        ...fileChangesToArtifactResults(
+          await collectFileChanges(status, {
+            include: ['not_added', 'deleted'],
+            // only add artifacts in the chart sub path
+            filter: (file) => isFileInDir(chartsPath, file),
+          }),
+        ),
+      );
     }
 
     return fileChanges.length > 0 ? fileChanges : null;
@@ -203,14 +182,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Helm lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }
 

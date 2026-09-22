@@ -986,6 +986,19 @@ replace-with = "mcorbin"
       expect(res?.packageFileVersion).toBe('0.1.0');
     });
 
+    it('should leave the project version unset when the package has none', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBeUndefined();
+    });
+
     it('should extract project version from workspace', async () => {
       const cargotoml = codeBlock`
         [package]

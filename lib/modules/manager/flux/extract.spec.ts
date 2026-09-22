@@ -761,6 +761,45 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('derives no source url from an ssh GitRepository url', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            url: ssh://git@example.com/renovatebot/renovate.git
+            ref:
+              tag: v1.0.0
+        `,
+        'test.yaml',
+      );
+      expect(result?.deps).toMatchObject([
+        { depName: 'renovate-repo', currentValue: 'v1.0.0' },
+      ]);
+      expect(result?.deps[0].sourceUrl).toBeUndefined();
+    });
+
+    it('derives no source url from an ssh GitRepository url with a commit', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            url: ssh://git@example.com/renovatebot/renovate.git
+            ref:
+              commit: c93b2ec7a1d2bc4e0b4b8a5e9dd9d0f3f5a0c111
+        `,
+        'test.yaml',
+      );
+      expect(result?.deps[0].sourceUrl).toBeUndefined();
+    });
+
     it('extracts GitRepository with a commit', () => {
       const result = extractPackageFile(
         codeBlock`
