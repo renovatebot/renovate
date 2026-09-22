@@ -1877,7 +1877,7 @@ describe('modules/manager/dockerfile/extract', () => {
         imageName: string;
         dep: PackageDependency;
       }) => {
-        expect(getDep(imageName, true, registryAliases)).toMatchObject({
+        expect(getDep(imageName, { registryAliases })).toMatchObject({
           ...dep,
           replaceString: imageName,
         });
@@ -1892,7 +1892,7 @@ describe('modules/manager/dockerfile/extract', () => {
       ${'sets depType on a valid dep'}       | ${'nginx:1.0'}     | ${{ depType: 'docker' }}                            | ${{ datasource: 'docker', depType: 'docker', depName: 'nginx', packageName: 'nginx', currentValue: '1.0', replaceString: 'nginx:1.0', autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
       ${'sets depType on an invalid dep'}    | ${''}              | ${{ depType: 'docker' }}                            | ${{ depType: 'docker', skipReason: 'invalid-value' }}
     `(
-      'supports the options form - $name',
+      '$name',
       ({
         imageName,
         options,
@@ -1905,17 +1905,6 @@ describe('modules/manager/dockerfile/extract', () => {
         expect(getDep(imageName, options)).toEqual(dep);
       },
     );
-
-    it('still supports the positional form', () => {
-      const res = getDep('foo/image:1.0', false, { foo: 'foo.registry.com' });
-
-      expect(res).toEqual({
-        datasource: 'docker',
-        depName: 'foo/image',
-        packageName: 'foo.registry.com/image',
-        currentValue: '1.0',
-      });
-    });
   });
 
   describe('extractVariables()', () => {

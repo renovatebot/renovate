@@ -65,7 +65,9 @@ export function extractPackageFile(
       .concat(Object.values(extensions))
       .filter((service) => isString(service?.image) && !service?.build)
       .map((service) => {
-        const dep = getDep(service.image, true, extractConfig.registryAliases);
+        const dep = getDep(service.image, {
+          registryAliases: extractConfig.registryAliases,
+        });
         const lineNumber = lineMapper.pluckLineNumber(service.image);
         // istanbul ignore if
         if (!lineNumber) {

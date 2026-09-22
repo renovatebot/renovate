@@ -1,7 +1,6 @@
 import {
   isNonEmptyStringAndNotWhitespace,
   isNumericString,
-  isObject,
   isString,
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
@@ -174,22 +173,8 @@ const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
  */
 export function getDep(
   currentFrom: string | null | undefined,
-  options?: GetDepOptions,
-): PackageDependency;
-export function getDep(
-  currentFrom: string | null | undefined,
-  specifyReplaceString?: boolean,
-  registryAliases?: Record<string, string>,
-): PackageDependency;
-export function getDep(
-  currentFrom: string | null | undefined,
-  optionsOrSpecifyReplaceString?: GetDepOptions | boolean,
-  registryAliases?: Record<string, string>,
+  options: GetDepOptions = {},
 ): PackageDependency {
-  const options: GetDepOptions = isObject(optionsOrSpecifyReplaceString)
-    ? optionsOrSpecifyReplaceString
-    : { specifyReplaceString: optionsOrSpecifyReplaceString, registryAliases };
-
   const dep = getDepFromImageRef(
     currentFrom,
     options.specifyReplaceString ?? true,
@@ -347,7 +332,9 @@ export function extractPackageFile(
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
-        const dep = getDep(syntaxImage, true, config.registryAliases);
+        const dep = getDep(syntaxImage, {
+          registryAliases: config.registryAliases,
+        });
         dep.depType = 'syntax';
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
@@ -424,7 +411,9 @@ export function extractPackageFile(
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug(`Skipping alias FROM image:${fromImage}`);
       } else {
-        const dep = getDep(fromImage, true, config.registryAliases);
+        const dep = getDep(fromImage, {
+          registryAliases: config.registryAliases,
+        });
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -455,11 +444,9 @@ export function extractPackageFile(
           'Skipping index reference COPY --from',
         );
       } else {
-        const dep = getDep(
-          copyFromMatch.groups.image,
-          true,
-          config.registryAliases,
-        );
+        const dep = getDep(copyFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
@@ -488,11 +475,9 @@ export function extractPackageFile(
           'Skipping alias RUN --mount=from',
         );
       } else {
-        const dep = getDep(
-          runMountFromMatch.groups.image,
-          true,
-          config.registryAliases,
-        );
+        const dep = getDep(runMountFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
