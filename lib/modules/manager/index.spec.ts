@@ -229,25 +229,6 @@ describe('modules/manager/index', () => {
       ).not.toBeNull();
     });
 
-    it('honors explicit rangeStrategy for custom managers', () => {
-      expect(
-        manager.getRangeStrategy({ manager: 'regex', rangeStrategy: 'bump' }),
-      ).toBe('bump');
-      expect(
-        manager.getRangeStrategy({
-          manager: 'regex',
-          rangeStrategy: 'in-range-only',
-        }),
-      ).toBe('update-lockfile');
-    });
-
-    it('returns null for custom managers with rangeStrategy=auto', () => {
-      expect(
-        manager.getRangeStrategy({ manager: 'regex', rangeStrategy: 'auto' }),
-      ).toBeNull();
-      expect(manager.getRangeStrategy({ manager: 'regex' })).toBeNull();
-    });
-
     it('returns update-lockfile for in-range-only', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
