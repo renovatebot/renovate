@@ -26,11 +26,7 @@ export class TypstDatasource extends Datasource {
   private async _getReleases({
     packageName,
   }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
-    const [namespace, pkg] = packageName.split('/');
-    if (namespace !== 'preview') {
-      logger.debug(`Unsupported namespace for @${packageName}`);
-      return null;
-    }
+    const [, pkg] = packageName.split('/');
 
     const [registryUrl] = this.defaultRegistryUrls;
 
@@ -55,14 +51,21 @@ export class TypstDatasource extends Datasource {
     return result;
   }
 
-  override getReleases(
+  override async getReleases(
     config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
+    const [namespace] = config.packageName.split('/');
+    if (namespace !== 'preview') {
+      logger.debug(`Unsupported namespace for @${config.packageName}`);
+      return null;
+    }
+
     return withCache(
       {
         namespace: `datasource-${TypstDatasource.id}:registry-releases`,
         key: config.packageName,
         fallback: true,
+        cacheable: true,
       },
       () => this._getReleases(config),
     );

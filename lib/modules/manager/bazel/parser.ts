@@ -33,6 +33,7 @@ function extractTreeValue(
   tree: parser.Tree,
   offset: number,
 ): string {
+  // v8 ignore else -- type narrowing only
   if (tree.type === 'wrapped-tree') {
     const { endsWith } = tree;
     const to = endsWith.offset + endsWith.value.length;
@@ -67,6 +68,7 @@ const kwParams = q
     // string
     q.str((ctx, { offset, value }) => {
       const frag = currentFragment(ctx);
+      // v8 ignore else -- type narrowing only
       if (frag.type === 'record' && ctx.recordKey) {
         const key = ctx.recordKey;
         frag.children[key] = { type: 'string', value, offset };
@@ -81,6 +83,7 @@ const kwParams = q
       endsWith: ']',
       preHandler: (ctx, tree) => {
         const parentRecord = currentFragment(ctx) as RecordFragment;
+        // v8 ignore else -- type narrowing only
         if (
           parentRecord.type === 'record' &&
           ctx.recordKey &&
@@ -99,9 +102,11 @@ const kwParams = q
       search: q.alt(
         q.str<Ctx>((ctx, { value, offset }) => {
           const parentRecord = currentFragment(ctx);
+          // v8 ignore else -- type narrowing only
           if (parentRecord.type === 'record' && ctx.recordKey) {
             const key = ctx.recordKey;
             const array = parentRecord.children[key];
+            // v8 ignore else -- type narrowing only
             if (array.type === 'array') {
               array.children.push({ type: 'string', value, offset });
             }
@@ -113,6 +118,7 @@ const kwParams = q
           .handler(recordStartHandler)
           .handler((ctx, { value, offset }) => {
             const ruleFragment = currentFragment(ctx);
+            // v8 ignore else -- type narrowing only
             if (ruleFragment.type === 'record') {
               ruleFragment.children._function = {
                 type: 'string',
@@ -125,6 +131,7 @@ const kwParams = q
           .many(
             q.op<Ctx>('.').sym((ctx, { value }) => {
               const ruleFragment = currentFragment(ctx);
+              // v8 ignore else -- type narrowing only
               if (
                 ruleFragment.type === 'record' &&
                 ruleFragment.children._function
@@ -155,6 +162,7 @@ const kwParams = q
 
                 const subRecordKey = ctx.subRecordKey! ?? argIndex.toString();
                 const ruleFragment = currentFragment(ctx);
+                // v8 ignore else -- type narrowing only
                 if (ruleFragment.type === 'record') {
                   ruleFragment.children[subRecordKey] = {
                     type: 'string',
@@ -171,6 +179,7 @@ const kwParams = q
 
               const callFrag = currentFragment(ctx);
               ctx.stack.pop();
+              // v8 ignore else -- type narrowing only
               if (callFrag.type === 'record' && tree.type === 'wrapped-tree') {
                 callFrag.value = extractTreeValue(
                   ctx.source,
@@ -179,9 +188,11 @@ const kwParams = q
                 );
 
                 const parentRecord = currentFragment(ctx);
+                // v8 ignore else -- type narrowing only
                 if (parentRecord.type === 'record' && ctx.recordKey) {
                   const key = ctx.recordKey;
                   const array = parentRecord.children[key];
+                  // v8 ignore else -- type narrowing only
                   if (array.type === 'array') {
                     array.children.push(callFrag);
                   }
@@ -193,6 +204,7 @@ const kwParams = q
       ),
       postHandler: (ctx, tree) => {
         const parentRecord = currentFragment(ctx);
+        // v8 ignore else -- type narrowing only
         if (
           parentRecord.type === 'record' &&
           ctx.recordKey &&
@@ -200,6 +212,7 @@ const kwParams = q
         ) {
           const key = ctx.recordKey;
           const array = parentRecord.children[key];
+          // v8 ignore else -- type narrowing only
           if (array.type === 'array') {
             array.value = extractTreeValue(ctx.source, tree, array.offset);
           }
@@ -229,6 +242,7 @@ function ruleCall(
     search,
     postHandler: (ctx, tree) => {
       const frag = currentFragment(ctx);
+      // v8 ignore else -- type narrowing only
       if (frag.type === 'record' && tree.type === 'wrapped-tree') {
         frag.value = extractTreeValue(ctx.source, tree, frag.offset);
         ctx.stack.pop();
@@ -252,6 +266,7 @@ function recordStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
 
 function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
   const ruleFragment = currentFragment(ctx);
+  // v8 ignore else -- type narrowing only
   if (ruleFragment.type === 'record') {
     ruleFragment.children.rule = { type: 'string', value, offset };
   }

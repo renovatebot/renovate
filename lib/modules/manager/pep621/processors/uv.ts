@@ -2,7 +2,6 @@ import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import type { HostRule } from '../../../../types/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import type {
   ExecOptions,
@@ -13,19 +12,23 @@ import {
   readLocalFile,
 } from '../../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
-import { find } from '../../../../util/host-rules.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
+import { findPypiIndexCredentials } from '../../../datasource/pypi/host-rules.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
-import { getGoogleAuthHostRule } from '../../../datasource/util.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
-import { applyGitSource, resolveToolConstraint } from '../../util.ts';
+import {
+  applyGitSource,
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../../util.ts';
 import { type PyProject, UvLockfile, type UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
@@ -242,38 +245,17 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
-      await gitExec(cmd, execOptions);
-
-      // check for changes
-      const fileChanges: UpdateArtifactsResult[] = [];
-      const newLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newLockContent;
-      if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newLockContent,
-          },
-        });
-      } else {
-        logger.debug('uv.lock is unchanged');
-      }
-
-      return fileChanges.length ? fileChanges : null;
+      return await updateLockFile({
+        lockFileName,
+        existingLockFileContent,
+        run: () => gitExec(cmd, execOptions),
+      });
     } catch (err) {
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
       logger.debug({ err }, 'Failed to update uv lock file');
-      return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: err.message,
-          },
-        },
-      ];
+      return artifactErrorResult(lockFileName, err);
     }
   }
 }
@@ -302,29 +284,6 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   }
 
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
-}
-
-function getMatchingHostRule(url: string | undefined): HostRule {
-  return find({ hostType: PypiDatasource.id, url });
-}
-
-async function getUsernamePassword(
-  url: URL,
-): Promise<{ username?: string; password?: string }> {
-  const rule = getMatchingHostRule(url.toString());
-  if (rule.username || rule.password) {
-    return rule;
-  }
-
-  if (url.hostname.endsWith('.pkg.dev')) {
-    const hostRule = await getGoogleAuthHostRule();
-    if (hostRule) {
-      return hostRule;
-    }
-    logger.once.debug({ url }, 'Could not get Google access token');
-  }
-
-  return {};
 }
 
 async function getUvExtraIndexUrl(
@@ -361,11 +320,15 @@ async function getUvExtraIndexUrl(
       continue;
     }
 
-    const { username, password } = await getUsernamePassword(parsedUrl);
+    const { username, password } = await findPypiIndexCredentials(
+      parsedUrl.toString(),
+    );
     if (username || password) {
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (username) {
         parsedUrl.username = username;
       }
+      // v8 ignore else -- needs a host rule carrying only one of the two
       if (password) {
         parsedUrl.password = password;
       }
@@ -402,14 +365,18 @@ async function getUvIndexCredentials(
       continue;
     }
 
-    const { username, password } = await getUsernamePassword(parsedUrl);
+    const { username, password } = await findPypiIndexCredentials(
+      parsedUrl.toString(),
+    );
 
     const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);
     }
 
+    // v8 ignore else -- needs a host rule carrying only one of the two
     if (password) {
       entries.push([`UV_INDEX_${NAME}_PASSWORD`, password]);
     }
