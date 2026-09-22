@@ -1,6 +1,5 @@
 import readline from 'node:readline';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -60,7 +59,7 @@ export class DebDatasource extends Datasource {
    * @param lastTimestamp - The timestamp of the last modification.
    * @returns a list of packages with minimal Metadata.
    */
-  private async _parseExtractedPackageIndex(
+  private async readExtractedPackageIndex(
     extractedFile: string,
     _lastTimestamp: Date,
   ): Promise<Record<string, PackageDescription[]>> {
@@ -112,17 +111,16 @@ export class DebDatasource extends Datasource {
     extractedFile: string,
     lastTimestamp: Date,
   ): Promise<Record<string, PackageDescription[]>> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${DebDatasource.id}`,
         key: `${extractedFile}:${lastTimestamp.getTime()}`,
         ttlMinutes: 24 * 60,
       },
-      () => this._parseExtractedPackageIndex(extractedFile, lastTimestamp),
+      () => this.readExtractedPackageIndex(extractedFile, lastTimestamp),
     );
   }
 
-  private async _getPackageIndex(
+  private async fetchPackageIndex(
     componentUrl: string,
   ): Promise<Record<string, PackageDescription[]>> {
     const { extractedFile, lastTimestamp } = await downloadAndExtractPackage(
@@ -135,12 +133,11 @@ export class DebDatasource extends Datasource {
   getPackageIndex(
     componentUrl: string,
   ): Promise<Record<string, PackageDescription[]>> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${DebDatasource.id}`,
         key: componentUrl,
       },
-      () => this._getPackageIndex(componentUrl),
+      () => this.fetchPackageIndex(componentUrl),
     );
   }
 
@@ -150,7 +147,7 @@ export class DebDatasource extends Datasource {
    * @param config - Configuration for fetching releases.
    * @returns The release result if the package is found, otherwise null.
    */
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -194,13 +191,12 @@ export class DebDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${DebDatasource.id}`,
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

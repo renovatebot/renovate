@@ -26,7 +26,7 @@ export abstract class GiteaDatasource extends Datasource {
   /** Mirrors the static field, because the registry reads the instance. */
   abstract override readonly defaultRegistryUrls: string[];
 
-  protected abstract readonly cacheNamespace: PackageCacheNamespace;
+  protected abstract override readonly cacheNamespace: PackageCacheNamespace;
 
   override http = new GiteaHttp(this.id);
 

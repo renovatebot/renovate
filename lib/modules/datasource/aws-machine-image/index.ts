@@ -2,7 +2,6 @@ import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { coerceArray } from '../../../util/array.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image/index.ts';
@@ -89,7 +88,7 @@ export class AwsMachineImageDatasource extends Datasource {
     return [filters, config];
   }
 
-  private async _getSortedAwsMachineImages(
+  private async fetchSortedAwsMachineImages(
     serializedAmiFilter: string,
   ): Promise<Image[]> {
     const [amiFilter, clientConfig] = this.loadConfig(serializedAmiFilter);
@@ -110,16 +109,15 @@ export class AwsMachineImageDatasource extends Datasource {
   }
 
   getSortedAwsMachineImages(serializedAmiFilter: string): Promise<Image[]> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getSortedAwsMachineImages:${serializedAmiFilter}`,
       },
-      () => this._getSortedAwsMachineImages(serializedAmiFilter),
+      () => this.fetchSortedAwsMachineImages(serializedAmiFilter),
     );
   }
 
-  private async _getDigest(
+  private async fetchDigest(
     { packageName: serializedAmiFilter }: GetReleasesConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -148,17 +146,16 @@ export class AwsMachineImageDatasource extends Datasource {
     config: GetReleasesConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getDigest:${config.packageName}:${newValue ?? ''}`,
         fallback: true,
       },
-      () => this._getDigest(config, newValue),
+      () => this.fetchDigest(config, newValue),
     );
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
@@ -177,13 +174,12 @@ export class AwsMachineImageDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getReleases:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }
