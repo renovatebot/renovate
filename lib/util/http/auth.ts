@@ -1,10 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import {
-  FORGEJO_API_USING_HOST_TYPES,
-  GITEA_API_USING_HOST_TYPES,
-  GITHUB_API_USING_HOST_TYPES,
-  GITLAB_API_USING_HOST_TYPES,
-} from '../../constants/index.ts';
+import { PLATFORM_FAMILIES } from '../../constants/index.ts';
 import type { GotOptions } from './types.ts';
 
 export type AuthGotOptions = Pick<
@@ -42,24 +37,24 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
       options.headers.authorization = `Bearer ${appToken}`;
     } else if (
       options.hostType &&
-      FORGEJO_API_USING_HOST_TYPES.includes(options.hostType)
+      PLATFORM_FAMILIES.forgejo.apiUsingHostTypes.includes(options.hostType)
     ) {
       options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&
-      GITEA_API_USING_HOST_TYPES.includes(options.hostType)
+      PLATFORM_FAMILIES.gitea.apiUsingHostTypes.includes(options.hostType)
     ) {
       // Gitea v1.8.0 and later support `Bearer` as alternate to `token`
       // https://github.com/go-gitea/gitea/pull/5378
       options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&
-      GITHUB_API_USING_HOST_TYPES.includes(options.hostType)
+      PLATFORM_FAMILIES.github.apiUsingHostTypes.includes(options.hostType)
     ) {
       options.headers.authorization = `token ${options.token}`;
     } else if (
       options.hostType &&
-      GITLAB_API_USING_HOST_TYPES.includes(options.hostType)
+      PLATFORM_FAMILIES.gitlab.apiUsingHostTypes.includes(options.hostType)
     ) {
       // GitLab versions earlier than 12.2 only support authentication with
       // a personal access token, which is 20 characters long.

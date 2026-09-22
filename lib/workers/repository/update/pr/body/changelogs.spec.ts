@@ -19,6 +19,33 @@ describe('workers/repository/update/pr/body/changelogs', () => {
     expect(template.compile).not.toHaveBeenCalled();
   });
 
+  it('leaves an upgrade without its own release notes untitled', () => {
+    template.compile.mockImplementationOnce((_, config): string => {
+      const { upgrades } = config as BranchConfig;
+      return upgrades
+        .map((upgrade) => upgrade.releaseNotesSummaryTitle ?? 'none')
+        .join('\n')
+        .trim();
+    });
+
+    const res = getChangelogs({
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      baseBranch: 'base',
+      upgrades: [
+        {
+          manager: 'some-manager',
+          depName: 'dep-1',
+          branchName: 'some-branch',
+          hasReleaseNotes: false,
+        },
+      ],
+      hasReleaseNotes: true,
+    });
+
+    expect(res).toContain('none');
+  });
+
   it('returns release notes', () => {
     template.compile.mockImplementationOnce((_, config): string => {
       // ts can't infere correct type here

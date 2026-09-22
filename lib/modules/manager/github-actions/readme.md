@@ -240,8 +240,6 @@ steps:
       runtime: 'node@24.1.0'
 ```
 
-The following Actions have support for their `with:` blocks:
-
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
 
 <sup>1</sup> Default for the datasource used.

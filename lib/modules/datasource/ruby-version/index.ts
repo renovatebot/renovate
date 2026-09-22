@@ -79,6 +79,7 @@ export class RubyVersionDatasource extends Datasource {
     return this.cached(
       {
         key: 'all',
+        cacheable: true,
         fallback: true,
       },
       () => this.fetchReleases(config),
