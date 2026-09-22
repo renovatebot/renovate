@@ -51,7 +51,7 @@ export async function postprocessRelease(
 
   try {
     const result = await ds.postprocessRelease(
-      { packageName, registryUrl },
+      { packageName, registryUrl, currentValue: config.currentValue },
       release,
     );
 

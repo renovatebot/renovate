@@ -6938,6 +6938,49 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('does not update a gomod pseudo-version to an older hotfix release', async () => {
+      config.manager = 'gomod';
+      config.datasource = GoDatasource.id;
+      config.versioning = 'loose';
+      config.currentValue = 'v1.7.1-0.20260618125644-2bf15250d004';
+      config.currentDigest = '2bf15250d004';
+      config.packageName = 'github.com/foo/bar';
+      config.digestOneAndOnly = true;
+
+      // v1.7.1 is a hotfix of v1.7.0 tagged before the pinned commit, which it does not contain
+      httpMock
+        .scope('https://proxy.golang.org/github.com/foo/bar')
+        .get('/@v/list')
+        .reply(
+          200,
+          'v1.7.0 2026-05-01T06:17:31Z\nv1.7.1 2026-06-05T21:39:16Z\n',
+        )
+        .get('/@latest')
+        .reply(200, { Version: 'v1.7.1' })
+        .get('/v2/@v/list')
+        .reply(404);
+      // the GitHub release times and the tag commits cannot be read, so the release time from the proxy decides
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .twice()
+        .reply(404)
+        .get('/repos/foo/bar/commits?per_page=1')
+        .reply(200, [{ sha: 'b45ce6270ea49a2c6db6e75f52b3e97b7bf24931' }]);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([
+        {
+          newDigest: 'b45ce6270ea49a2c6db6e75f52b3e97b7bf24931',
+          newValue: 'v1.7.1-0.20260618125644-2bf15250d004',
+          updateType: 'digest',
+        },
+      ]);
+    });
+
     // gomod pseudo-version updates are relabelled to `updateType=digest` after filterInternalChecks()
     // has already age-checked them under the version-derived updateType, so digest-scoped rules must be re-applied
     it('applies digest-scoped minimumReleaseAge packageRules to gomod pseudo-version updates', async () => {
