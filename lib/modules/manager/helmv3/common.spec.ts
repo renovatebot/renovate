@@ -38,4 +38,18 @@ describe('modules/manager/helmv3/common', () => {
       expect.anything(),
     );
   });
+
+  it('should generate a login command with a token as the password', async () => {
+    const repositoryRule: RepositoryRule = {
+      name: 'test-repo',
+      repository: 'example.com/repo',
+      hostRule: {
+        hostType: 'docker',
+        token: 'testtoken',
+      },
+    };
+    await expect(generateLoginCmd(repositoryRule)).resolves.toEqual(
+      "helm registry login --username '' --password testtoken example.com",
+    );
+  });
 });
