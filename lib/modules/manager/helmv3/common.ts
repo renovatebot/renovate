@@ -6,9 +6,12 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { ExtraEnv } from '../../../util/exec/types.ts';
 import { privateCacheDir } from '../../../util/fs/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { ecrRegex, getECRAuthToken } from '../../datasource/docker/ecr.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { removeOCIPrefix } from './oci.ts';
 import type { RepositoryRule } from './types.ts';
 
 export async function generateLoginCmd(
@@ -47,6 +50,22 @@ export async function generateLoginCmd(
     return cmd;
   }
   return null;
+}
+
+export async function generateRegistryLoginCmd(
+  name: string,
+  registry: string,
+): Promise<string | null> {
+  const repository = removeOCIPrefix(registry);
+  const repositoryRule: RepositoryRule = {
+    name,
+    repository,
+    hostRule: hostRules.find({
+      url: `https://${repository}`,
+      hostType: DockerDatasource.id,
+    }),
+  };
+  return generateLoginCmd(repositoryRule);
 }
 
 export function generateHelmEnvs(helmConstraint?: string): ExtraEnv {

@@ -16,7 +16,6 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as yaml from '../../../util/yaml.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
@@ -25,8 +24,8 @@ import {
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
-import { generateHelmEnvs, generateLoginCmd } from './common.ts';
-import { isOCIRegistry, removeOCIPrefix } from './oci.ts';
+import { generateHelmEnvs, generateRegistryLoginCmd } from './common.ts';
+import { isOCIRegistry } from './oci.ts';
 import type { ChartDefinition, Repository, RepositoryRule } from './types.ts';
 import {
   aliasRecordToRepositories,
@@ -40,23 +39,13 @@ async function helmCommands(
   repositories: Repository[],
 ): Promise<void> {
   const cmd: string[] = [];
-  // get OCI registries and detect host rules
-  const registries: RepositoryRule[] = repositories
-    .filter(isOCIRegistry)
-    .map((value) => {
-      return {
-        ...value,
-        repository: removeOCIPrefix(value.repository),
-        hostRule: hostRules.find({
-          url: value.repository.replace('oci://', 'https://'), //TODO we need to replace this, as oci:// will not be accepted as protocol
-          hostType: DockerDatasource.id,
-        }),
-      };
-    });
-
-  // if credentials for the registry have been found, log into it
-  await pMap(registries, async (value) => {
-    const loginCmd = await generateLoginCmd(value);
+  // get OCI registries and log into them if credentials have been found
+  const ociRepositories = repositories.filter(isOCIRegistry);
+  await pMap(ociRepositories, async (value) => {
+    const loginCmd = await generateRegistryLoginCmd(
+      value.name,
+      value.repository,
+    );
     if (loginCmd) {
       cmd.push(loginCmd);
     }
