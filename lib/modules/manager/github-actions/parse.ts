@@ -1,5 +1,12 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import type {
+  ActionReference,
+  CommentData,
+  DockerReference,
+  ParsedUsesLine,
+  RepositoryReference,
+} from './types.ts';
 
 function splitFirstFrom(
   str: string,
@@ -36,76 +43,6 @@ export function parseQuote(input: string): QuotedValue {
   }
 
   return { value: trimmed, quote: '' };
-}
-
-/**
- * Docker container:
- * - `docker://image:tag`
- * - `docker://image@digest`
- * - `docker://image:tag@digest`
- */
-export interface DockerReference {
-  kind: 'docker';
-  image: string;
-  tag?: string;
-  digest?: string;
-  originalRef: string;
-}
-
-/**
- * Local file or directory:
- * - `./path/to/action`
- * - `./.github/workflows/main.yml`
- */
-export interface LocalReference {
-  kind: 'local';
-  path: string;
-}
-
-/**
- * Repository:
- * - `owner/repo[/path]@ref`
- * - `https://host/owner/repo[/path]@ref`
- */
-export interface RepositoryReference {
-  kind: 'repository';
-
-  hostname: string;
-  isExplicitHostname: boolean;
-
-  owner: string;
-  repo: string;
-  path?: string;
-
-  ref: string;
-}
-
-export type ActionReference =
-  | DockerReference
-  | LocalReference
-  | RepositoryReference;
-
-export interface ParsedUsesLine {
-  /** The whitespace before "uses:" */
-  indentation: string;
-
-  /** The `uses:` (and optional `-`) part */
-  usesPrefix: string;
-
-  /** The raw value part, potentially quoted (e.g. `actions/checkout@v2`) */
-  replaceString: string;
-
-  /** Whitespace between value and `#` */
-  commentPrecedingWhitespace: string;
-
-  /** The full comment including `#` */
-  commentString: string;
-
-  actionRef: ActionReference | null;
-  commentData: CommentData;
-
-  /** The quote char used (' or " or empty) */
-  quote: string;
 }
 
 const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
@@ -190,14 +127,6 @@ export function parseActionReference(uses: string): ActionReference | null {
   }
 
   return parseRepositoryReference(uses);
-}
-
-export interface CommentData {
-  pinnedVersion?: string;
-  ref?: string;
-  ratchetExclude?: boolean;
-  matchedString?: string;
-  index?: number;
 }
 
 const pinTokenRe = regEx(

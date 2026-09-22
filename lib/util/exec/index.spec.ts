@@ -1,11 +1,20 @@
+// oxlint-disable renovate/prefer-stub-env -- these tests assert on the *whole*
+// env handed to the child process, so they need `process.env` to hold exactly
+// the fixture and nothing else. `vi.stubEnv()` cannot express that: it refuses
+// to delete `PROD`, `DEV` and `SSR`, setting them to '' instead, and those
+// would then show up in the `exposeAllEnv` expectations. Nothing here stubs,
+// so the two styles are not mixed.
 import { mockDeep } from 'vitest-mock-extended';
 import { exec as cpExec, envMock } from '~test/exec-util.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoGlobalConfig } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
+import * as _datasource from '../../modules/datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
+import * as memCache from '../cache/memory/index.ts';
 import { setCustomEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
 import * as dockerModule from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs } from './hermit.ts';
@@ -26,6 +35,7 @@ vi.mock('./hermit.ts', async () => ({
   getHermitEnvs: vi.fn(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
+const datasource = vi.mocked(_datasource);
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -64,6 +74,7 @@ describe('util/exec/index', () => {
 
   afterEach(() => {
     process.env = processEnvOrig;
+    memCache.reset();
   });
 
   const sideCarName = dockerModule.sideCarName;
@@ -965,7 +976,7 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
-    setCustomEnv(adminConfig.customEnvVariables ?? {});
+    setCustomEnv(coerceObject(adminConfig.customEnvVariables));
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
@@ -1069,14 +1080,13 @@ describe('util/exec/index', () => {
     process.env = processEnv;
     const stdout = 'out';
     const stderr = 'err';
-    cpExec.mockImplementation(
-      (): Promise<ExecResult> =>
-        // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
-        Promise.resolve({
-          stdout,
-          stderr,
-          exitCode: 10,
-        }),
+    cpExec.mockImplementation((): Promise<ExecResult> =>
+      // NOTE that this only makes sense as a return value when `ignoreFailure=true` is set
+      Promise.resolve({
+        stdout,
+        stderr,
+        exitCode: 10,
+      }),
     );
     GlobalConfig.set({ ...globalConfig });
     const promise = exec([
@@ -1190,6 +1200,49 @@ describe('util/exec/index', () => {
     process.env.CONTAINERBASE = 'true';
     await exec('foobar', { preCommands: ['install-pip foobar'] });
     expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
+  });
+
+  it('only installs a tool once per run for binarySource=install', async () => {
+    process.env = processEnv;
+    memCache.init();
+    datasource.getPkgReleases.mockResolvedValue({
+      releases: [{ version: '1.2.3' }],
+    });
+    const actualCmds: string[] = [];
+    cpExec.mockImplementation((execCmd) => {
+      actualCmds.push(asRawCommand(execCmd));
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints = [{ toolName: 'npm' as const }];
+    await exec('foobar', { toolConstraints });
+    await exec('foobar', { toolConstraints });
+
+    expect(actualCmds).toEqual([`install-tool npm 1.2.3`, `foobar`, `foobar`]);
+  });
+
+  it('installs a tool on every exec for binarySource=docker', async () => {
+    process.env = processEnv;
+    memCache.init();
+    datasource.getPkgReleases.mockResolvedValue({
+      releases: [{ version: '1.2.3' }],
+    });
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+    const toolConstraints = [{ toolName: 'npm' as const }];
+    await exec('foobar', { docker, toolConstraints });
+    await exec('foobar', { docker, toolConstraints });
+
+    const dockerRunCmds = cpExec.mock.calls
+      .map((call) => asRawCommand(call[0]))
+      .filter((cmd) => cmd.startsWith('docker run'));
+    expect(dockerRunCmds).toHaveLength(2);
+    expect(dockerRunCmds.every((cmd) => cmd.includes('install-tool npm'))).toBe(
+      true,
+    );
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {

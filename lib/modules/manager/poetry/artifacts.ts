@@ -1,24 +1,16 @@
-import {
-  isNonEmptyArray,
-  isNonEmptyObject,
-  isNumber,
-  isString,
-} from '@sindresorhus/is';
+import { isNonEmptyArray, isNumber, isString } from '@sindresorhus/is';
 import { Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import type { HostRule } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
-  deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
-import { find } from '../../../util/host-rules.ts';
 import { toMs } from '../../../util/pretty-time.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
@@ -26,10 +18,13 @@ import {
   massage as massageToml,
   parse as parseToml,
 } from '../../../util/toml.ts';
-import { parseUrl } from '../../../util/url.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
-import { getGoogleAuthHostRule } from '../../datasource/util.ts';
+import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 import type { PoetryFile, PoetrySource } from './types.ts';
 
@@ -71,9 +66,11 @@ export function getPoetryRequirement(
 ): undefined | string | null {
   // Read Poetry version from first line of poetry.lock
   const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = regEx(/by Poetry ([\d\\.]+)/).exec(firstLine);
-  if (poetryVersionMatch?.[1]) {
-    const poetryVersion = poetryVersionMatch[1];
+  const poetryVersionMatch = regEx(/by Poetry (?<version>[\d\\.]+)/).exec(
+    firstLine,
+  );
+  if (poetryVersionMatch?.groups?.version) {
+    const poetryVersion = poetryVersionMatch.groups.version;
     logger.debug(
       `Using poetry version ${poetryVersion} from poetry.lock header`,
     );
@@ -118,7 +115,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
     return [];
   }
 
-  const sources = pyprojectFile.tool?.poetry?.source ?? [];
+  const sources = coerceArray(pyprojectFile.tool?.poetry?.source);
   const sourceArray: PoetrySource[] = [];
   for (const source of sources) {
     if (source.name && source.url) {
@@ -126,30 +123,6 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
     }
   }
   return sourceArray;
-}
-
-async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
-  const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  const hostRule = isNonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
-  if (hostRule && Object.keys(hostRule).length !== 0) {
-    return hostRule;
-  }
-
-  const parsedUrl = parseUrl(url);
-  if (!parsedUrl) {
-    logger.once.debug(`Failed to parse URL ${url}`);
-    return {};
-  }
-
-  if (parsedUrl.hostname.endsWith('.pkg.dev')) {
-    const hostRule = await getGoogleAuthHostRule();
-    if (hostRule && Object.keys(hostRule).length !== 0) {
-      return hostRule;
-    }
-    logger.once.debug(`Could not get Google access token (url=${url})`);
-  }
-
-  return {};
 }
 
 async function getSourceCredentialVars(
@@ -160,9 +133,9 @@ async function getSourceCredentialVars(
   const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = await getMatchingHostRule(source.url);
+    const matchingHostRule = await findPypiIndexCredentials(source.url);
     const formattedSourceName = source.name
-      .replace(regEx(/(\.|-)+/g), '_')
+      .replace(regEx(/(?:\.|-)+/g), '_')
       .toUpperCase();
     if (matchingHostRule.username) {
       envVars[`POETRY_HTTP_BASIC_${formattedSourceName}_USERNAME`] =
@@ -201,87 +174,78 @@ export async function updateArtifacts({
       return null;
     }
   }
+  // a const, so the closure below keeps the narrowing to string
+  const lockFileContent = existingLockFileContent;
   logger.debug(`Updating ${lockFileName}`);
+  const cmd: string[] = [];
+  if (isLockFileMaintenance) {
+    cmd.push('poetry update --lock --no-interaction');
+  } else {
+    cmd.push(
+      `poetry update --lock --no-interaction ${updatedDeps
+        .map((dep) => dep.depName)
+        .filter(isString)
+        .map((dep) => quote(dep))
+        .join(' ')}`,
+    );
+  }
+
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    const cmd: string[] = [];
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-      cmd.push('poetry update --lock --no-interaction');
-    } else {
-      cmd.push(
-        `poetry update --lock --no-interaction ${updatedDeps
-          .map((dep) => dep.depName)
-          .filter(isString)
-          .map((dep) => quote(dep))
-          .join(' ')}`,
-      );
-    }
-    const pythonConstraint =
-      config?.constraints?.python ??
-      getPythonConstraint(newPackageFileContent, existingLockFileContent);
-    const poetryConstraint =
-      config.constraints?.poetry ??
-      getPoetryRequirement(newPackageFileContent, existingLockFileContent);
-    const extraEnv: NodeJS.ProcessEnv = {
-      ...(await getSourceCredentialVars(
-        newPackageFileContent,
-        packageFileName,
-      )),
-      PIP_CACHE_DIR: await ensureCacheDir('pip'),
-    };
-
-    if (config.minimumReleaseAge) {
-      const ageMs = toMs(config.minimumReleaseAge);
-      if (isNumber(ageMs)) {
-        const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
-        extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
-      } else {
-        logger.debug(
-          { minimumReleaseAge: config.minimumReleaseAge },
-          'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      deleteLockFile: isLockFileMaintenance,
+      run: async () => {
+        const pythonConstraint = await resolveToolConstraint(
+          config,
+          'python',
+          () => getPythonConstraint(newPackageFileContent, lockFileContent),
         );
-      }
-    }
+        const poetryConstraint = await resolveToolConstraint(
+          config,
+          'poetry',
+          () => getPoetryRequirement(newPackageFileContent, lockFileContent),
+        );
+        const extraEnv: NodeJS.ProcessEnv = {
+          ...(await getSourceCredentialVars(
+            newPackageFileContent,
+            packageFileName,
+          )),
+          PIP_CACHE_DIR: await ensureCacheDir('pip'),
+        };
 
-    const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
-      extraEnv,
-      docker: {},
-      toolConstraints: [
-        { toolName: 'python', constraint: pythonConstraint },
-        { toolName: 'poetry', constraint: poetryConstraint },
-      ],
-    };
-    await gitExec(cmd, execOptions);
-    const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
-    if (existingLockFileContent === newPoetryLockContent) {
-      logger.debug(`${lockFileName} is unchanged`);
-      return null;
-    }
-    logger.debug(`Returning updated ${lockFileName}`);
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newPoetryLockContent,
-        },
+        if (config.minimumReleaseAge) {
+          const ageMs = toMs(config.minimumReleaseAge);
+          if (isNumber(ageMs)) {
+            const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
+            extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
+          } else {
+            logger.debug(
+              { minimumReleaseAge: config.minimumReleaseAge },
+              'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
+            );
+          }
+        }
+
+        const execOptions: ExecOptions = {
+          cwdFile: packageFileName,
+          extraEnv,
+          docker: {},
+          toolConstraints: [
+            { toolName: 'python', constraint: pythonConstraint },
+            { toolName: 'poetry', constraint: poetryConstraint },
+          ],
+        };
+        await gitExec(cmd, execOptions);
       },
-    ];
+    });
   } catch (err) {
-    // istanbul ignore if
+    /* v8 ignore if -- defensive rethrow, not reproduced in the poetry specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.debug({ err }, `Failed to update ${lockFileName} file`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

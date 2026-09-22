@@ -1,4 +1,5 @@
 import { fakeSha, logger, scm } from '~test/util.ts';
+import { hashMap } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
@@ -13,6 +14,7 @@ import {
   update,
 } from './extract-update.ts';
 import * as _fetch from './fetch.ts';
+import * as _write from './write.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 
@@ -36,6 +38,7 @@ vi.mock('../../../util/cache/repository/index.ts');
 const branchify = vi.mocked(_branchify);
 const repositoryCache = vi.mocked(_repositoryCache);
 const fetch = vi.mocked(_fetch);
+const write = vi.mocked(_write);
 
 describe('workers/repository/process/extract-update', () => {
   const branchSha = fakeSha('123test');
@@ -75,7 +78,6 @@ describe('workers/repository/process/extract-update', () => {
         ],
         packageFiles: undefined,
       });
-      await expect(update(config, res.branches)).resolves.not.toThrow();
     });
 
     it('runs with baseBranchPatterns', async () => {
@@ -95,6 +97,37 @@ describe('workers/repository/process/extract-update', () => {
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toBeUndefined();
+    });
+
+    it('leaves the cache alone when not overwriting it', async () => {
+      const config = { repoIsOnboarded: true };
+      const cache = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+
+      await extract(config, false);
+
+      expect(cache.scan).toEqual({});
+    });
+
+    it('keeps cached scans for branches that are still configured', async () => {
+      const config = {
+        baseBranch: 'master',
+        baseBranches: ['master'],
+        repoIsOnboarded: true,
+      };
+      const cache = {
+        scan: {
+          master: { sha: 'old' },
+          stale: { sha: 'old' },
+        },
+      };
+      repositoryCache.getCache.mockReturnValueOnce(cache as never);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+
+      await extract(config);
+
+      expect(Object.keys(cache.scan)).toEqual(['master']);
     });
 
     it('uses repository cache', async () => {
@@ -434,6 +467,29 @@ describe('workers/repository/process/extract-update', () => {
     });
   });
 
+  describe('update()', () => {
+    it('writes the updates', async () => {
+      const config = {};
+      const branches = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          baseBranch: 'base',
+          upgrades: [],
+        },
+      ];
+      write.writeUpdates.mockResolvedValueOnce('automerged');
+
+      const res = await update(config, branches);
+
+      expect(res).toBe('automerged');
+      expect(write.writeUpdates).toHaveBeenCalledExactlyOnceWith(
+        config,
+        branches,
+      );
+    });
+  });
+
   describe('isCacheExtractValid()', () => {
     let cachedExtract: BaseBranchCache;
 
@@ -511,6 +567,12 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.extractionFingerprints = { npm: 'old-fingerprint' };
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
+    it('valid if fingerprints are unchanged', () => {
+      cachedExtract.configHash = 'hash';
+      cachedExtract.extractionFingerprints = { npm: hashMap.get('npm')! };
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
     });
 
     it('valid cache and config', () => {

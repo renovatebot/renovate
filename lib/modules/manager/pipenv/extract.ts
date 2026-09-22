@@ -100,6 +100,7 @@ function extractFromSection(
       }
       if (sources && isObject(requirements) && requirements.index) {
         const source = sources.find((item) => item.name === requirements.index);
+        // v8 ignore else -- needs a requirement naming an index that is not declared
         if (source) {
           dep.registryUrls = [source.url];
         }
@@ -112,9 +113,7 @@ function extractFromSection(
 
 function isPipRequirements(
   section?:
-    | Record<string, PipRequirement>
-    | Record<string, string>
-    | PipSource[],
+    Record<string, PipRequirement> | Record<string, string> | PipSource[],
 ): section is Record<string, PipRequirement> {
   return (
     !isArray(section) &&

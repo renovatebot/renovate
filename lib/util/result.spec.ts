@@ -661,11 +661,13 @@ describe('util/result', () => {
         .transform((x) => x.toUpperCase())
         .nullish();
 
-      expect(await AsyncResult.ok('foo').parse(schema)).toEqual(
+      await expect(AsyncResult.ok('foo').parse(schema)).resolves.toEqual(
         Result.ok('FOO'),
       );
 
-      expect(await AsyncResult.ok(42).parse(schema).unwrap()).toMatchObject({
+      await expect(
+        AsyncResult.ok(42).parse(schema).unwrap(),
+      ).resolves.toMatchObject({
         err: expect.objectContaining({
           issues: expect.arrayContaining([
             expect.objectContaining({

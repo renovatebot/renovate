@@ -2,6 +2,7 @@ import {
   DescribeDBEngineVersionsCommand,
   RDSClient,
 } from '@aws-sdk/client-rds';
+import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Lazy } from '../../../util/lazy.ts';
 import { Datasource } from '../datasource.ts';
@@ -26,7 +27,7 @@ export class AwsRdsDatasource extends Datasource {
       Filters: JSON.parse(serializedFilter),
     });
     const response = await this.rds.getValue().send(cmd);
-    const versions = response.DBEngineVersions ?? [];
+    const versions = coerceArray(response.DBEngineVersions);
     return {
       releases: versions
         .filter((version) => version.EngineVersion)

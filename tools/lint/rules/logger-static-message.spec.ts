@@ -22,10 +22,8 @@ ruleTester.run('logger-static-message', rule, {
     // not a logger call
     'other.warn(`Fetching ${url}`);',
     `logger.warn();`,
-    // error-ish value under the err key is fine
-    `logger.error({ err }, 'Failed');`,
-    // non-error-ish value under the error key is fine
-    `logger.error({ error: 'string' }, 'Failed');`,
+    // metadata keys are checked by logger-err-key, not here
+    `logger.error({ error: err }, 'Failed');`,
     // computed member calls are ignored
     `logger['warn']('Static message');`,
   ],
@@ -55,28 +53,8 @@ ruleTester.run('logger-static-message', rule, {
       errors: [{ messageId: 'staticMessage' }],
     },
     {
-      code: `logger.error({ error: err }, 'Failed');`,
-      errors: [{ messageId: 'errKey' }],
-    },
-    {
-      code: `logger.error({ error: new SomeError('x') }, 'Failed');`,
-      errors: [{ messageId: 'errKey' }],
-    },
-    {
-      code: `logger.error({ error: res.parseError }, 'Failed');`,
-      errors: [{ messageId: 'errKey' }],
-    },
-    {
-      code: `logger.error({ error: err as Error }, 'Failed');`,
-      errors: [{ messageId: 'errKey' }],
-    },
-    {
-      code: `logger.error({ 'error': err }, 'Failed');`,
-      errors: [{ messageId: 'errKey' }],
-    },
-    {
-      code: 'logger.error({ error: err }, `Failed ${url}`);',
-      errors: [{ messageId: 'errKey' }, { messageId: 'staticMessage' }],
+      code: 'logger.error({ err }, `Failed ${url}`);',
+      errors: [{ messageId: 'staticMessage' }],
     },
   ],
 });

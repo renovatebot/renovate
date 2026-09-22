@@ -22,6 +22,23 @@ When a lock file is present:
 
 - Dependencies will have their `lockedVersion` extracted from the lock file
 - Renovate can update lock files when dependencies change
+- Fuzzy selectors such as `latest`, `lts`, `25`, `25.1`, and `temurin-25` are
+  resolved against their locked version and updated in `mise.lock` only
+- `latest` remains unbounded; partial selectors remain restricted to their
+  major/minor range; `lts` is supported for the core Node.js and Java tools
+- Concrete versions such as `25.0.3` retain Renovate's normal source-file
+  update behavior
+- To keep concrete versions pinned, set `updatePinnedDependencies` to `false`
+  in the `mise` manager configuration
+
+  ```json
+  {
+    "mise": {
+      "updatePinnedDependencies": false
+    }
+  }
+  ```
+
 - Lock file maintenance is supported via the `lockFileMaintenance` option. When the `mise` version Renovate runs supports it (see [safe mode](#trust-model-for-lock-file-updates) for how the version is detected), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
 
 Renovate recognizes environment-specific lock files:
@@ -71,6 +88,18 @@ erlang = ["23.3", "22.0"]
 
 Renovate will update `"23.3"` (the primary version) but will not touch `"22.0"` (the fallback version).
 
+The same applies when the array items are inline tables:
+
+```toml
+[tools]
+rust = [
+  { version = "1.98.1", components = "clippy,rustfmt" },
+  { version = "nightly-2026-07-12", profile = "minimal" },
+]
+```
+
+Renovate will update `"1.98.1"` and read backend options such as `version_prefix` or `tag_regex` from that first item only.
+
 #### Why can Renovate only update primary versions?
 
 To maintain consistency and reliability, Renovate opts to only manage the _first_ listed version.
@@ -109,6 +138,7 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
 - [`gem`](https://mise.jdx.dev/dev-tools/backends/gem.html)
 - [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
+- [`gitlab`](https://mise.jdx.dev/dev-tools/backends/gitlab.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)

@@ -36,10 +36,7 @@ function replaceAsString(
   parsedContents: NpmPackage,
   fileContent: string,
   depType:
-    | NpmDepType
-    | 'dependenciesMeta'
-    | 'packageManager'
-    | 'pnpm.overrides',
+    NpmDepType | 'dependenciesMeta' | 'packageManager' | 'pnpm.overrides',
   depName: string,
   oldValue: string,
   newValue: string,

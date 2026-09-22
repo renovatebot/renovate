@@ -7,8 +7,8 @@ import type {
   PackageFileContent,
   RangeConfig,
 } from '../types.ts';
-import type { CabalDependency } from './extract.ts';
 import { extractNamesAndRanges, findDepends } from './extract.ts';
+import type { CabalDependency } from './types.ts';
 
 export const defaultConfig = {
   managerFilePatterns: ['/\\.cabal$/'],
