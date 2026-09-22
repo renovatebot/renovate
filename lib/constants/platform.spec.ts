@@ -155,6 +155,34 @@ describe('constants/platform', () => {
       },
     );
 
+    it.each`
+      family                | segments                                  | count
+      ${'azure'}            | ${['org', 'project', 'repo']}             | ${3}
+      ${'azure'}            | ${['org', 'project', '_git', 'repo']}     | ${4}
+      ${'azure'}            | ${['org', 'project', '_git', 'r', 'sub']} | ${4}
+      ${'bitbucket'}        | ${['workspace', 'repo']}                  | ${2}
+      ${'bitbucket-server'} | ${['scm', 'key', 'repo']}                 | ${null}
+      ${'forgejo'}          | ${['owner', 'repo']}                      | ${2}
+      ${'gitea'}            | ${['owner', 'repo']}                      | ${2}
+      ${'github'}           | ${['owner', 'repo']}                      | ${2}
+      ${'gitlab'}           | ${['group', 'subgroup', 'repo']}          | ${null}
+    `(
+      'counts $count repository segments for $family $segments',
+      ({
+        family,
+        segments,
+        count,
+      }: {
+        family: PlatformFamilyId;
+        segments: string[];
+        count: number | null;
+      }) => {
+        expect(PLATFORM_FAMILIES[family].repositorySegmentCount(segments)).toBe(
+          count,
+        );
+      },
+    );
+
     it('has pairwise disjoint host types', () => {
       const seen = new Set<string>();
       for (const { apiUsingHostTypes } of Object.values(PLATFORM_FAMILIES)) {

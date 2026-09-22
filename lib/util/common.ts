@@ -147,39 +147,25 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
 /**
  * Splits host-stripped path segments into the repository and whatever follows it.
  *
- * Only platforms whose URL layout fixes the boundary are resolved. GitHub repos are
- * always `owner/repo`. Azure DevOps repos are `org/project/repo`, optionally spelled
- * `org/project/_git/repo`. Elsewhere — GitLab most notably — a project slug may span
- * any number of nested group segments, so the boundary is not knowable from the URL
- * and `null` is returned for the caller to resolve however its ecosystem does.
+ * Returns `null` when the platform's URL layout does not fix where the repository
+ * ends - GitLab's nested groups most notably - leaving the caller to apply whatever
+ * rule its own ecosystem defines.
  */
 export function splitRepositoryPath(
-  platform: ReturnType<typeof detectPlatform>,
+  platform: PlatformFamilyId | null,
   segments: string[],
 ): { repository: string[]; subpath: string[] } | null {
-  const boundary = repositoryBoundary(platform, segments);
-  if (boundary === null || segments.length < boundary) {
+  if (!platform) {
+    return null;
+  }
+
+  const count = PLATFORM_FAMILIES[platform].repositorySegmentCount(segments);
+  if (count === null || segments.length < count) {
     return null;
   }
 
   return {
-    repository: segments.slice(0, boundary),
-    subpath: segments.slice(boundary),
+    repository: segments.slice(0, count),
+    subpath: segments.slice(count),
   };
-}
-
-function repositoryBoundary(
-  platform: ReturnType<typeof detectPlatform>,
-  segments: string[],
-): number | null {
-  if (platform === 'github') {
-    return 2;
-  }
-
-  if (platform === 'azure') {
-    const gitSegment = segments.indexOf('_git');
-    return gitSegment === -1 ? 3 : gitSegment + 2;
-  }
-
-  return null;
 }

@@ -1,4 +1,5 @@
 import { isTruthy } from '@sindresorhus/is';
+import type { PlatformFamilyId } from '../../../constants/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform, splitRepositoryPath } from '../../../util/common.ts';
@@ -75,14 +76,13 @@ const virtualFileRegex = regEx(/\.(?:prompt|instructions|chatmode|agent)\.md$/);
 /**
  * Resolve the repository path from the host-stripped path segments.
  *
- * Where the platform's URL layout fixes the repository boundary, it decides. It does
- * not on GitLab and other hosts that allow nested groups, so the project slug can span
- * 3+ segments and the virtual-package subpath, if any, begins at a primitive directory
- * or virtual file (index >= 2). Returns `null` when there is no `owner/repo` (fewer
- * than two segments).
+ * The platform decides wherever its URL layout fixes the boundary. Where it does not -
+ * GitLab's nested groups let a project slug span 3+ segments - apm's own rule applies,
+ * and the virtual-package subpath begins at a primitive directory or virtual file
+ * (index >= 2). Returns `null` when there is no `owner/repo` (fewer than two segments).
  */
 function resolveRepoPath(
-  platform: ReturnType<typeof detectPlatform>,
+  platform: PlatformFamilyId | null,
   segments: string[],
 ): string | null {
   if (segments.length < 2) {

@@ -62,6 +62,13 @@ export interface PlatformFamily {
 
   /** Web UI path from a repository root to a directory at the default branch. */
   webDirPath: string;
+
+  /**
+   * How many of the host-stripped path segments name the repository, so that a
+   * consumer can tell a repository apart from a path within it. `null` when the
+   * family's URL layout does not fix it and only the caller's ecosystem can say.
+   */
+  repositorySegmentCount: (segments: string[]) => number | null;
 }
 
 /**
@@ -79,6 +86,12 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'azure-tags',
     apiBaseUrl: null,
     webDirPath: 'tree/HEAD',
+    // `org/project/repo`, which the web UI and the clone URL both spell
+    // `org/project/_git/repo`.
+    repositorySegmentCount: (segments: string[]) => {
+      const gitSegment = segments.indexOf('_git');
+      return gitSegment === -1 ? 3 : gitSegment + 2;
+    },
   },
   'bitbucket-server': {
     apiUsingHostTypes: [
@@ -91,6 +104,9 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'bitbucket-server-tags',
     apiBaseUrl: (baseUrl: string) => `${baseUrl}rest/api/1.0/`,
     webDirPath: 'browse',
+    // Data Center serves a repository as both `projects/<key>/repos/<slug>` and
+    // `scm/<key>/<slug>`, so the count depends on which one a caller holds.
+    repositorySegmentCount: () => null,
   },
   bitbucket: {
     apiUsingHostTypes: ['bitbucket', 'bitbucket-changelog', 'bitbucket-tags'],
@@ -99,6 +115,7 @@ export const PLATFORM_FAMILIES = {
     // Bitbucket Cloud serves every instance from one API host.
     apiBaseUrl: (_baseUrl: string) => 'https://api.bitbucket.org/',
     webDirPath: 'src/HEAD',
+    repositorySegmentCount: () => 2,
   },
   forgejo: {
     apiUsingHostTypes: [
@@ -111,6 +128,7 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'forgejo-tags',
     apiBaseUrl: (baseUrl: string) => `${baseUrl}api/v1/`,
     webDirPath: 'tree/HEAD',
+    repositorySegmentCount: () => 2,
   },
   gitea: {
     apiUsingHostTypes: [
@@ -123,6 +141,7 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'gitea-tags',
     apiBaseUrl: (baseUrl: string) => `${baseUrl}api/v1/`,
     webDirPath: 'tree/HEAD',
+    repositorySegmentCount: () => 2,
   },
   github: {
     apiUsingHostTypes: [
@@ -147,6 +166,7 @@ export const PLATFORM_FAMILIES = {
         ? 'https://api.github.com/'
         : `${baseUrl}api/v3/`,
     webDirPath: 'tree/HEAD',
+    repositorySegmentCount: () => 2,
   },
   gitlab: {
     apiUsingHostTypes: [
@@ -161,5 +181,7 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'gitlab-tags',
     apiBaseUrl: (baseUrl: string) => `${baseUrl}api/v4/`,
     webDirPath: 'tree/HEAD',
+    // A project slug may sit under any number of nested groups.
+    repositorySegmentCount: () => null,
   },
 } satisfies Record<PlatformFamilyId, PlatformFamily>;

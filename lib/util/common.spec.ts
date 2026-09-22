@@ -316,13 +316,14 @@ describe('util/common', () => {
 
   describe('splitRepositoryPath()', () => {
     it.each`
-      platform    | segments                                          | repository                            | subpath
-      ${'github'} | ${['owner', 'repo']}                              | ${['owner', 'repo']}                  | ${[]}
-      ${'github'} | ${['owner', 'repo', 'packages', 'ui']}            | ${['owner', 'repo']}                  | ${['packages', 'ui']}
-      ${'azure'}  | ${['org', 'project', '_git', 'repo']}             | ${['org', 'project', '_git', 'repo']} | ${[]}
-      ${'azure'}  | ${['org', 'project', '_git', 'repo', 'packages']} | ${['org', 'project', '_git', 'repo']} | ${['packages']}
-      ${'azure'}  | ${['org', 'project', 'repo']}                     | ${['org', 'project', 'repo']}         | ${[]}
-      ${'azure'}  | ${['org', 'project', 'repo', 'packages', 'ui']}   | ${['org', 'project', 'repo']}         | ${['packages', 'ui']}
+      platform       | segments                                          | repository                            | subpath
+      ${'github'}    | ${['owner', 'repo']}                              | ${['owner', 'repo']}                  | ${[]}
+      ${'github'}    | ${['owner', 'repo', 'packages', 'ui']}            | ${['owner', 'repo']}                  | ${['packages', 'ui']}
+      ${'azure'}     | ${['org', 'project', '_git', 'repo']}             | ${['org', 'project', '_git', 'repo']} | ${[]}
+      ${'azure'}     | ${['org', 'project', '_git', 'repo', 'packages']} | ${['org', 'project', '_git', 'repo']} | ${['packages']}
+      ${'azure'}     | ${['org', 'project', 'repo']}                     | ${['org', 'project', 'repo']}         | ${[]}
+      ${'azure'}     | ${['org', 'project', 'repo', 'packages', 'ui']}   | ${['org', 'project', 'repo']}         | ${['packages', 'ui']}
+      ${'bitbucket'} | ${['workspace', 'repo']}                          | ${['workspace', 'repo']}              | ${[]}
     `(
       '$platform $segments -> $repository + $subpath',
       ({ platform, segments, repository, subpath }) => {
@@ -334,13 +335,12 @@ describe('util/common', () => {
     );
 
     it.each`
-      platform       | segments
-      ${'gitlab'}    | ${['group', 'subgroup', 'repo']}
-      ${'bitbucket'} | ${['owner', 'repo']}
-      ${null}        | ${['owner', 'repo']}
-      ${'github'}    | ${['owner']}
-      ${'azure'}     | ${['org', 'project']}
-      ${'azure'}     | ${['org', 'project', '_git']}
+      platform    | segments
+      ${'gitlab'} | ${['group', 'subgroup', 'repo']}
+      ${null}     | ${['owner', 'repo']}
+      ${'github'} | ${['owner']}
+      ${'azure'}  | ${['org', 'project']}
+      ${'azure'}  | ${['org', 'project', '_git']}
     `('returns null for $platform $segments', ({ platform, segments }) => {
       expect(splitRepositoryPath(platform, segments)).toBeNull();
     });
