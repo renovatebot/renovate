@@ -36,6 +36,15 @@ export interface ExtractConfig extends CustomExtractConfig {
   repository?: string;
   currentDigest?: string;
   newDigest?: string | null;
+  /**
+   * Whether vulnerability remediation is active for this repository, regardless
+   * of where the vulnerability data comes from.
+   *
+   * Managers may use this to surface dependencies which are useless for routine
+   * updates, but which a vulnerability fix needs to be able to match, e.g.
+   * transitive dependencies which only exist in a lock file.
+   */
+  hasVulnerabilityAlertsRules?: boolean;
 }
 
 /**
@@ -317,6 +326,30 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
   /** Updated lockfile content that is not yet present on disk. */
   newLockFileContent?: string;
   config: UpdateArtifactsConfig;
+}
+
+/**
+ * Input of the `updateLockFile()` skeleton shared by lock file managers.
+ */
+export interface UpdateLockFileConfig {
+  /** The lock file which the update regenerates. */
+  lockFileName: string;
+
+  /**
+   * Content of the lock file before the update, null when it did not exist.
+   * Pass a Buffer for lock files which may be binary, the new content is then
+   * compared and returned as bytes as well.
+   */
+  existingLockFileContent: string | Buffer | null;
+
+  /** Package file to rewrite before the update runs. */
+  packageFile?: { path: string; contents: string };
+
+  /** Whether to delete the lock file first, i.e. for lock file maintenance. */
+  deleteLockFile?: boolean;
+
+  /** Runs the package manager command which regenerates the lock file. */
+  run: () => Promise<unknown>;
 }
 
 export interface UpdateDependencyConfig<T = Record<string, any>> {

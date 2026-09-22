@@ -1,0 +1,274 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
+import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as hostRules from '../../../../../../util/host-rules.ts';
+import type { Timestamp } from '../../../../../../util/timestamp.ts';
+import type { BranchUpgradeConfig } from '../../../../../types.ts';
+import { getChangeLogJSON } from '../index.ts';
+import { GitLabChangeLogSource } from './source.ts';
+
+const upgrade = partial<BranchUpgradeConfig>({
+  manager: 'some-manager',
+  branchName: '',
+  packageName: 'renovate',
+  versioning: semverVersioning.id,
+  currentVersion: '5.2.0',
+  newVersion: '5.7.0',
+  sourceUrl: 'https://gitlab.com/meno/dropzone/',
+  releases: [
+    // TODO: test gitRef
+    { version: '5.2.0' },
+    {
+      version: '5.4.0',
+      releaseTimestamp: '2018-08-24T14:23:00.000Z' as Timestamp,
+    },
+    { version: '5.5.0', gitRef: 'eba303e91c930292198b2fc57040145682162a1b' },
+    {
+      version: '5.6.0',
+      releaseTimestamp: '2020-02-13T15:37:00.000Z' as Timestamp,
+    },
+    { version: '5.6.1' },
+  ],
+});
+
+const matchHost = 'https://gitlab.com/';
+
+const changelogSource = new GitLabChangeLogSource();
+
+function expectedChangeLog({ baseUrl = 'https://gitlab.com/' } = {}) {
+  return {
+    hasReleaseNotes: false,
+    project: {
+      apiBaseUrl: `${baseUrl}api/v4/`,
+      baseUrl,
+      packageName: 'renovate',
+      repository: 'meno/dropzone',
+      sourceUrl: `${baseUrl}meno/dropzone/`,
+      type: 'gitlab',
+    },
+    versions: [
+      { version: '5.6.1' },
+      { version: '5.6.0' },
+      { version: '5.5.0' },
+      { version: '5.4.0' },
+    ],
+  };
+}
+
+describe('workers/repository/update/pr/changelog/gitlab/source', () => {
+  afterEach(() => {
+    // FIXME: add missing http mocks
+    httpMock.clear(false);
+  });
+
+  describe('getChangeLogJSON', () => {
+    beforeEach(() => {
+      hostRules.clear();
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost,
+        token: 'abc',
+      });
+    });
+
+    it('returns null if @types', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          currentVersion: undefined,
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null if currentVersion equals newVersion', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          currentVersion: '1.0.0',
+          newVersion: '1.0.0',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('skips invalid repos', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://gitlab.com/help',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('works without GitLab', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+        }),
+      ).resolves.toMatchObject(expectedChangeLog());
+    });
+
+    it('uses GitLab tags', async () => {
+      httpMock
+        .scope(matchHost)
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
+        .reply(200, [
+          { name: 'v5.2.0', commit: { id: 'aaa520', created_at: '' } },
+          { name: 'v5.4.0', commit: { id: 'aaa540', created_at: '' } },
+          { name: 'v5.5.0', commit: { id: 'aaa550', created_at: '' } },
+          { name: 'v5.6.0', commit: { id: 'aaa560', created_at: '' } },
+          { name: 'v5.6.1', commit: { id: 'aaa561', created_at: '' } },
+          { name: 'v5.7.0', commit: { id: 'aaa570', created_at: '' } },
+        ])
+        .persist()
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
+        .reply(200, []);
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+        }),
+      ).resolves.toMatchObject({
+        ...expectedChangeLog(),
+        hasReleaseNotes: true,
+      });
+    });
+
+    it('handles empty GitLab tags response', async () => {
+      httpMock
+        .scope(matchHost)
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
+        .reply(200, []);
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+        }),
+      ).resolves.toMatchObject(expectedChangeLog());
+    });
+
+    it('uses GitLab tags with error', async () => {
+      httpMock
+        .scope(matchHost)
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
+        .replyWithError('Unknown GitLab Repo')
+        .persist()
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
+        .reply(200, []);
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+        }),
+      ).resolves.toMatchObject(expectedChangeLog());
+    });
+
+    it('handles no sourceUrl', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: undefined,
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('handles invalid sourceUrl', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'http://example.com',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('handles no releases', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          releases: [],
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('handles not enough releases', async () => {
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          releases: [{ version: '0.9.0' }],
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'https://gitlab-enterprise.example.com/',
+        token: 'abc',
+      });
+      vi.stubEnv('GITHUB_ENDPOINT', '');
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
+        }),
+      ).resolves.toMatchObject(
+        expectedChangeLog({
+          baseUrl: 'https://gitlab-enterprise.example.com/',
+        }),
+      );
+    });
+
+    it('supports self-hosted gitlab changelog', async () => {
+      httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'https://git.test.com/',
+        token: 'abc',
+      });
+      vi.stubEnv('GITHUB_ENDPOINT', '');
+      await expect(
+        getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://git.test.com/meno/dropzone/',
+        }),
+      ).resolves.toMatchObject(
+        expectedChangeLog({ baseUrl: 'https://git.test.com/' }),
+      );
+    });
+  });
+
+  describe('hasValidRepository', () => {
+    it('handles invalid repository', () => {
+      expect(changelogSource.hasValidRepository('foo')).toBeFalse();
+    });
+
+    it('handles valid repository', () => {
+      expect(changelogSource.hasValidRepository('some/repo')).toBeTrue();
+      expect(changelogSource.hasValidRepository('some/repo/name')).toBeTrue();
+    });
+  });
+
+  describe('getAllTags', () => {
+    it('handles endpoint', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get('/api/v4/projects/some%2Frepo/repository/tags?per_page=100')
+        .reply(200, [
+          { name: 'v5.2.0', commit: { id: 'aaa520', created_at: '' } },
+          { name: 'v5.4.0', commit: { id: 'aaa540', created_at: '' } },
+          { name: 'v5.5.0', commit: { id: 'aaa550', created_at: '' } },
+        ]);
+      await expect(
+        changelogSource.getAllTags('https://git.test.com/', 'some/repo'),
+      ).resolves.toEqual(['v5.2.0', 'v5.4.0', 'v5.5.0']);
+    });
+  });
+});

@@ -60,6 +60,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -254,15 +255,10 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+  return await getRepoFile(gitlabApi, repo, fileName, branchOrTag, {
     cacheProvider: memCacheProvider,
   });
-  const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
-  return str;
 }
 
 export async function getJsonFile(

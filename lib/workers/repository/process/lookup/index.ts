@@ -18,7 +18,7 @@ import {
   supportsDigests,
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
-import { isPseudoVersion } from '../../../../modules/versioning/go-mod-directive/index.ts';
+import { isUntaggedPseudoVersion } from '../../../../modules/versioning/gomod/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
@@ -451,14 +451,12 @@ export async function lookupUpdates(
           allReleaseVersions,
         );
 
-        // An update between two pseudo-versions of the same package changes the
-        // commit and nothing else, so it is a digest update - see #29034
+        // An update between two pseudo-versions of an untagged module changes
+        // the commit and nothing else, so it is a digest update - see #29034
         if (
           config.manager === 'gomod' &&
-          compareValue &&
-          isPseudoVersion(compareValue) &&
-          update.newValue &&
-          isPseudoVersion(update.newValue) &&
+          isUntaggedPseudoVersion(compareValue) &&
+          isUntaggedPseudoVersion(update.newValue) &&
           config.currentDigest !== update.newDigest
         ) {
           update.updateType = 'digest';
