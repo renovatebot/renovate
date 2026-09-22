@@ -1,4 +1,6 @@
-![Renovate banner](./assets/images/mend-renovate-cli-banner.jpg){ loading=lazy }
+<object class="renovate-banner" type="image/svg+xml" data="./assets/images/mend-renovate-call-to-action.svg" width="756" height="250" loading="lazy">
+Renovate banner
+</object>
 
 # Renovate documentation
 

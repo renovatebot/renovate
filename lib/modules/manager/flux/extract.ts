@@ -494,6 +494,7 @@ function resolveResourceManifest(
       case 'Kustomization': {
         for (const image of coerceArray(resource.spec.images)) {
           const dep = extractImage(image, registryAliases);
+          // v8 ignore else -- the schema rejects an image without a name
           if (dep) {
             deps.push(dep);
           }

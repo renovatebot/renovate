@@ -93,9 +93,7 @@ async function getSubProjectList(
     const projectRegex = regEx(/project '(?<name>.+?)'/g);
     const matches = subprojectsMatch.groups.subprojects.matchAll(projectRegex);
     for (const match of matches) {
-      if (match?.groups?.name) {
-        subprojects.push(match.groups.name);
-      }
+      subprojects.push(match.groups!.name);
     }
   }
 
