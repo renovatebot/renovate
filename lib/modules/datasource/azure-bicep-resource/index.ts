@@ -54,6 +54,7 @@ export class AzureBicepResourceDatasource extends Datasource {
       {
         key: `getReleases-${config.packageName}`,
         fallback: true,
+        cacheable: true,
       },
       () => this.fetchReleases(config),
     );
@@ -72,6 +73,7 @@ export class AzureBicepResourceDatasource extends Datasource {
       {
         key: 'getResourceVersionIndex',
         ttlMinutes: 24 * 60,
+        cacheable: true,
       },
       () => this.fetchResourceVersionIndex(),
     );

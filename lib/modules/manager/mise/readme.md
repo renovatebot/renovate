@@ -88,6 +88,18 @@ erlang = ["23.3", "22.0"]
 
 Renovate will update `"23.3"` (the primary version) but will not touch `"22.0"` (the fallback version).
 
+The same applies when the array items are inline tables:
+
+```toml
+[tools]
+rust = [
+  { version = "1.98.1", components = "clippy,rustfmt" },
+  { version = "nightly-2026-07-12", profile = "minimal" },
+]
+```
+
+Renovate will update `"1.98.1"` and read backend options such as `version_prefix` or `tag_regex` from that first item only.
+
 #### Why can Renovate only update primary versions?
 
 To maintain consistency and reliability, Renovate opts to only manage the _first_ listed version.

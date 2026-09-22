@@ -1,13 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
-import {
-  BITBUCKET_API_USING_HOST_TYPES,
-  BITBUCKET_SERVER_API_USING_HOST_TYPES,
-  FORGEJO_API_USING_HOST_TYPES,
-  GITEA_API_USING_HOST_TYPES,
-  GITHUB_API_USING_HOST_TYPES,
-  GITLAB_API_USING_HOST_TYPES,
-} from '../../constants/index.ts';
+import { PLATFORM_FAMILIES } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import { hasProxy } from '../../proxy.ts';
 import type { CombinedHostRule, HostRule } from '../../types/index.ts';
@@ -56,7 +49,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `github` hostType
   if (
     hostType &&
-    GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.github.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'github'
   ) {
     res = {
@@ -98,7 +91,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `gitlab` hostType
   if (
     hostType &&
-    GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.gitlab.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'gitlab'
   ) {
     res = {
@@ -113,7 +106,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `bitbucket` hostType
   if (
     hostType &&
-    BITBUCKET_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.bitbucket.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'bitbucket'
   ) {
     res = {
@@ -128,7 +121,9 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `bitbucket-server` hostType
   if (
     hostType &&
-    BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES['bitbucket-server'].apiUsingHostTypes.includes(
+      hostType,
+    ) &&
     hostType !== 'bitbucket-server'
   ) {
     res = {
@@ -143,7 +138,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `forgejo` hostType
   if (
     hostType &&
-    FORGEJO_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.forgejo.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'forgejo'
   ) {
     res = {
@@ -158,7 +153,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `gitea` hostType
   if (
     hostType &&
-    GITEA_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.gitea.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'gitea'
   ) {
     res = {

@@ -31,6 +31,7 @@ function getUrlFragments(rule: RecordFragment): StringFragment[] {
   const urlsRecord = rule.children.urls;
   if (urlsRecord?.type === 'array') {
     for (const urlRecord of urlsRecord.children) {
+      // v8 ignore else -- type narrowing only
       if (urlRecord.type === 'string') {
         urls.push(urlRecord);
       }
@@ -138,6 +139,7 @@ export async function updateArtifacts(
     const { managerData } = upgrade;
     const idx = managerData?.idx as number;
 
+    // v8 ignore else -- only http rules reach updateArtifacts
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
       const rule = findCodeFragment(newContents, [idx]);
       /* v8 ignore next -- used only for type narrowing */
@@ -162,6 +164,7 @@ export async function updateArtifacts(
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
       if (!hash) {
+        // v8 ignore else -- the empty case already continued above
         if (urlFragments.length >= 1) {
           artifactErrors.push({
             fileName: path,
