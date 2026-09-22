@@ -60,10 +60,7 @@ export function extractPackageFile(
     Object.values(coerceObject(config[pipelineKey]))
       .filter((step) => isString(step?.image))
       .map((step) =>
-        getDep(step.image, {
-          registryAliases: extractConfig.registryAliases,
-          depType: 'docker',
-        }),
+        getDep(step.image, { registryAliases: extractConfig.registryAliases }),
       ),
   );
 
