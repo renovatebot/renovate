@@ -2,7 +2,12 @@ import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
-import { detectPlatform, getInheritedOrGlobal, parseJson } from './common.ts';
+import {
+  detectPlatform,
+  getInheritedOrGlobal,
+  parseJson,
+  splitRepositoryPath,
+} from './common.ts';
 import * as hostRules from './host-rules.ts';
 
 const validJsonString = `
@@ -296,6 +301,38 @@ describe('util/common', () => {
         });
         expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
       });
+    });
+  });
+
+  describe('splitRepositoryPath()', () => {
+    it.each`
+      platform    | segments                                          | repository                            | subpath
+      ${'github'} | ${['owner', 'repo']}                              | ${['owner', 'repo']}                  | ${[]}
+      ${'github'} | ${['owner', 'repo', 'packages', 'ui']}            | ${['owner', 'repo']}                  | ${['packages', 'ui']}
+      ${'azure'}  | ${['org', 'project', '_git', 'repo']}             | ${['org', 'project', '_git', 'repo']} | ${[]}
+      ${'azure'}  | ${['org', 'project', '_git', 'repo', 'packages']} | ${['org', 'project', '_git', 'repo']} | ${['packages']}
+      ${'azure'}  | ${['org', 'project', 'repo']}                     | ${['org', 'project', 'repo']}         | ${[]}
+      ${'azure'}  | ${['org', 'project', 'repo', 'packages', 'ui']}   | ${['org', 'project', 'repo']}         | ${['packages', 'ui']}
+    `(
+      '$platform $segments -> $repository + $subpath',
+      ({ platform, segments, repository, subpath }) => {
+        expect(splitRepositoryPath(platform, segments)).toEqual({
+          repository,
+          subpath,
+        });
+      },
+    );
+
+    it.each`
+      platform       | segments
+      ${'gitlab'}    | ${['group', 'subgroup', 'repo']}
+      ${'bitbucket'} | ${['owner', 'repo']}
+      ${null}        | ${['owner', 'repo']}
+      ${'github'}    | ${['owner']}
+      ${'azure'}     | ${['org', 'project']}
+      ${'azure'}     | ${['org', 'project', '_git']}
+    `('returns null for $platform $segments', ({ platform, segments }) => {
+      expect(splitRepositoryPath(platform, segments)).toBeNull();
     });
   });
 });

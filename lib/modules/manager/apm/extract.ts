@@ -1,7 +1,7 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { detectPlatform } from '../../../util/common.ts';
+import { detectPlatform, splitRepositoryPath } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -75,29 +75,22 @@ const virtualFileRegex = regEx(/\.(?:prompt|instructions|chatmode|agent)\.md$/);
 /**
  * Resolve the repository path from the host-stripped path segments.
  *
- * GitHub repos are always `owner/repo`. GitLab (and other hosts) allow nested
- * groups, so the project slug can span 3+ segments; the virtual-package subpath,
- * if any, begins at a primitive directory or virtual file (index >= 2). Returns
- * `null` when there is no `owner/repo` (fewer than two segments).
+ * Where the platform's URL layout fixes the repository boundary, it decides. It does
+ * not on GitLab and other hosts that allow nested groups, so the project slug can span
+ * 3+ segments and the virtual-package subpath, if any, begins at a primitive directory
+ * or virtual file (index >= 2). Returns `null` when there is no `owner/repo` (fewer
+ * than two segments).
  */
 function resolveRepoPath(
-  platform: string | null,
+  platform: ReturnType<typeof detectPlatform>,
   segments: string[],
 ): string | null {
   if (segments.length < 2) {
     return null;
   }
-  if (platform === 'github') {
-    return segments.slice(0, 2).join('/');
-  }
-  // Azure DevOps paths are `org/project[/team-project]/_git/repo`, so `_git` marks the
-  // repository boundary exactly: the segment after it is the last one belonging to the
-  // repository, and anything beyond is a virtual-package subpath.
-  if (platform === 'azure') {
-    const gitSegment = segments.indexOf('_git');
-    if (gitSegment !== -1 && segments.length > gitSegment + 1) {
-      return segments.slice(0, gitSegment + 2).join('/');
-    }
+  const split = splitRepositoryPath(platform, segments);
+  if (split) {
+    return split.repository.join('/');
   }
   let boundary = segments.length;
   for (let i = 2; i < segments.length; i++) {
