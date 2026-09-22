@@ -34,6 +34,7 @@ describe('modules/manager/gomod/integration', () => {
       const extracted = extractPackageFile(goMod);
       expect(extracted).not.toBeNull();
       expect(extracted?.deps).toHaveLength(2);
+      // the extract worker is bypassed, so fill in `packageName` as it would
       extracted!.deps.forEach(normalizeDepNames);
 
       const dep = extracted!.deps.find(
