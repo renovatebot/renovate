@@ -3002,6 +3002,33 @@ When set to `timestamp-optional`, Renovate will treat a release without a releas
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## `minimumReleaseAgeBuffer`
+
+Use this option to extend the time Renovate waits before suggesting an update, on top of [`minimumReleaseAge`](#minimumreleaseage).
+
+Some projects publish a set of related packages, where companion packages (like platform-specific binaries) are published _after_ the main package.
+For example, `@biomejs/biome@2.5.10` may be published some minutes before `@biomejs/cli-linux-x64@2.5.10`.
+If your package manager enforces its own release age cooldown, like pnpm's `minimumReleaseAge` setting or npm's `--before` flag, Renovate may suggest the main package as soon as it passes `minimumReleaseAge`, while a companion package published later is still within the package manager's cooldown.
+The package manager then refuses to update the lock file, and the update fails with an artifact error.
+
+`minimumReleaseAgeBuffer` avoids this by letting Renovate wait longer than the package manager's cooldown.
+Renovate defers the update until `minimumReleaseAge` _plus_ the buffer duration has passed, while the package manager keeps using the plain `minimumReleaseAge` cutoff.
+This way, packages published up to the buffer time after the suggested release have also passed the package manager's cooldown.
+
+By default, Renovate uses a buffer of 30 minutes.
+Set `minimumReleaseAgeBuffer` to `null` to disable the buffer.
+
+For example, with the following configuration Renovate waits 3 days plus 1 hour before suggesting an update, while the package manager's cooldown stays at 3 days:
+
+```json
+{
+  "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBuffer": "1 hour"
+}
+```
+
+This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
+
 ## `minor`
 
 Add to this object if you wish to define rules that apply only to minor updates.
@@ -4745,6 +4772,10 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
+
+In some situations managers can not derive which registry a given dependency comes from.
+In that case, managers skip it with `skipReason: unknown-registry` rather than look it up somewhere which may hold the wrong versions.
+When specifying `registryUrls` alongside a dependency with `skipReason: unknown-registry`, Renovate will use the configured `registryUrls`.
 
 ## `replacement`
 
