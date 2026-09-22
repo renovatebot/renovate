@@ -45,7 +45,11 @@ function getFilteredManagerConfig(
     npmrc: config.npmrc,
     npmrcMerge: config.npmrcMerge,
     enabled: config.enabled,
-    hasVulnerabilityAlertsRules: config.hasVulnerabilityAlertsRules,
+    // Omitted when false, so repos with no vulnerability alerts keep the config
+    // hash they already have, and do not re-extract once on upgrade
+    ...(config.hasVulnerabilityAlertsRules && {
+      hasVulnerabilityAlertsRules: true,
+    }),
     ignorePaths: coerceArray(config.ignorePaths),
     includePaths: coerceArray(config.includePaths),
     skipInstalls: config.skipInstalls,

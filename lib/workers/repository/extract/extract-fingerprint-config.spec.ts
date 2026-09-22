@@ -50,7 +50,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'npm',
       npmrc: null,
       npmrcMerge: false,
-      hasVulnerabilityAlertsRules: false,
       registryAliases: {
         notStable: 'http://some.link.2',
         stable: 'http://some.link',
@@ -71,7 +70,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'regex',
       npmrc: null,
       npmrcMerge: false,
-      hasVulnerabilityAlertsRules: false,
       registryAliases: {
         stable: 'http://some.link',
       },
@@ -103,7 +101,6 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'npm',
       npmrc: 'some-string',
       npmrcMerge: true,
-      hasVulnerabilityAlertsRules: false,
       registryAliases: {},
       skipInstalls: null,
     });
@@ -123,12 +120,38 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'dockerfile',
       npmrc: 'some-string',
       npmrcMerge: true,
-      hasVulnerabilityAlertsRules: false,
       registryAliases: {},
       skipInstalls: null,
     });
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex'),
     ).toBeUndefined();
+  });
+
+  describe('hasVulnerabilityAlertsRules', () => {
+    it('is omitted when no vulnerability alerts are configured', () => {
+      const config = mergeChildConfig(getConfig(), {
+        enabledManagers: ['npm'],
+      });
+
+      const fingerprintConfig = generateFingerprintConfig(config);
+
+      expect(fingerprintConfig.managers[0]).not.toHaveProperty(
+        'hasVulnerabilityAlertsRules',
+      );
+    });
+
+    it('is set for every manager when vulnerability alerts are configured', () => {
+      const config = mergeChildConfig(getConfig(), {
+        enabledManagers: ['npm', 'dockerfile'],
+        osvVulnerabilityAlerts: true,
+      });
+
+      const fingerprintConfig = generateFingerprintConfig(config);
+
+      expect(fingerprintConfig.managers).toSatisfyAll(
+        (manager) => manager.hasVulnerabilityAlertsRules === true,
+      );
+    });
   });
 });
