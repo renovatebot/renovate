@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import { MaybeTimestamp, Timestamp } from '../../../util/timestamp.ts';
 
 // https://go.dev/ref/mod#goproxy-protocol
 export const VersionInfo = z.object({
@@ -15,3 +15,10 @@ export const VersionInfo = z.object({
 });
 
 export type VersionInfo = z.infer<typeof VersionInfo>;
+
+/**
+ * The publication time of each version of a module, as served by a given Go proxy.
+ */
+export const VersionTimestamps = z.record(z.string(), Timestamp).catch({});
+
+export type VersionTimestamps = z.infer<typeof VersionTimestamps>;

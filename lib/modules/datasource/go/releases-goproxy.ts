@@ -37,6 +37,7 @@ import {
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { getDirectReleases } from './releases-direct.ts';
 import { VersionInfo } from './schema.ts';
+import { GoVersionTimestampCache } from './timestamp-cache.ts';
 
 /**
  * The host type of requests to a Go module proxy. It is the id of the former
@@ -437,6 +438,8 @@ async function getVersionsWithInfo(
         );
       });
 
+      const timestamps = await GoVersionTimestampCache.init(baseUrl, pkg);
+
       releases = await p.map(filteredReleases, async (info) => {
         const { version, newDigest, releaseTimestamp } = info;
 
@@ -444,13 +447,24 @@ async function getVersionsWithInfo(
           return { version, newDigest, releaseTimestamp };
         }
 
+        const cachedTimestamp = timestamps.get(version);
+        if (cachedTimestamp) {
+          return { version, releaseTimestamp: cachedTimestamp };
+        }
+
         try {
-          return await versionInfo(baseUrl, pkg, version);
+          const release = await versionInfo(baseUrl, pkg, version);
+          if (release.releaseTimestamp) {
+            timestamps.set(version, release.releaseTimestamp);
+          }
+          return release;
         } catch (err) {
           logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
           return { version };
         }
       });
+
+      await timestamps.save();
 
       if (constraintsFiltering === 'strict') {
         releases = await p.map(releases, async (rel) => {

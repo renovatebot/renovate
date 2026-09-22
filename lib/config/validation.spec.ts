@@ -2595,6 +2595,41 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('reports nested `hostRules[].allowInternal` as a configuration error', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            hostRules: [
+              {
+                matchHost: 'http://10.1.2.3',
+                allowInternal: true,
+              },
+            ],
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `The "allowInternal" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+      ]);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "hostRules `allowInternal` is only allowed in the self-hosted administrator's own configuration.",
+        },
+      ]);
+    });
+
     it('reports nested `hostRules[].headers` with values not in `allowedHeaders` as a configuration error', async () => {
       GlobalConfig.set({ allowedHeaders: [] });
 

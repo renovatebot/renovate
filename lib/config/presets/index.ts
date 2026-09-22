@@ -46,7 +46,7 @@ interface PresetSource {
   repoHosted: boolean;
 }
 
-const presetSources: Record<string, PresetSource> = {
+export const presetSources: Record<string, PresetSource> = {
   forgejo: { load: () => import('./forgejo/index.ts'), repoHosted: true },
   gitea: { load: () => import('./gitea/index.ts'), repoHosted: true },
   github: { load: () => import('./github/index.ts'), repoHosted: true },

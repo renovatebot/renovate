@@ -1,6 +1,6 @@
 import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
-import type { Repo } from './schema.ts';
+import type { PRMergeMethod, Repo } from './schema.ts';
 import {
   getMergeMethod,
   getRepoUrl,
@@ -59,7 +59,37 @@ describe('modules/platform/gitea/utils', () => {
     ${'rebase'}       | ${'rebase-merge'}
     ${'squash'}       | ${'squash'}
   `('getMergeMethod("$value") == "$expected"', ({ value, expected }) => {
-    expect(getMergeMethod(value)).toBe(expected);
+    expect(getMergeMethod(value, new Set())).toBe(expected);
+  });
+
+  describe('getMergeMethod("fast-forward") with allowedMergeMethods', () => {
+    it('returns "fast-forward-only" when repo allows only fast-forward-only', () => {
+      const allowedMergeMethods = new Set<PRMergeMethod>(['fast-forward-only']);
+      expect(getMergeMethod('fast-forward', allowedMergeMethods)).toBe(
+        'fast-forward-only',
+      );
+    });
+
+    it('returns "rebase" when repo allows only rebase', () => {
+      const allowedMergeMethods = new Set<PRMergeMethod>(['rebase']);
+      expect(getMergeMethod('fast-forward', allowedMergeMethods)).toBe(
+        'rebase',
+      );
+    });
+
+    it('prefers "fast-forward-only" when repo allows both', () => {
+      const allowedMergeMethods = new Set<PRMergeMethod>([
+        'fast-forward-only',
+        'rebase',
+      ]);
+      expect(getMergeMethod('fast-forward', allowedMergeMethods)).toBe(
+        'fast-forward-only',
+      );
+    });
+
+    it('returns "rebase" when allowedMergeMethods is empty', () => {
+      expect(getMergeMethod('fast-forward', new Set())).toBe('rebase');
+    });
   });
 
   describe('usableRepo', () => {

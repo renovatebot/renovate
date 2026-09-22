@@ -20,7 +20,7 @@ const replaceRegex = regEx(
 
 export const excludeBlockStartRegex = regEx(/^(?<keyword>exclude)\s+\(\s*$/);
 
-export const endBlockRegex = regEx(/^\s+\)\s*$/);
+export const endBlockRegex = regEx(/^\s*\)\s*$/);
 
 const toolRegex = regEx(/^(?<keyword>tool)?\s+(?<module>[^\s]+\/?[^\s]+)\s*$/);
 

@@ -65,6 +65,7 @@ export class CdnjsDatasource extends Datasource {
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
         key: `getReleases:${library}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),
@@ -94,6 +95,7 @@ export class CdnjsDatasource extends Datasource {
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
         key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getDigest(config, newValue),

@@ -29,14 +29,17 @@ export function getGoTagDatasource(
     },
     [ForgejoTagsDatasource.id]: {
       api: new ForgejoTagsDatasource(),
-      getSourceUrl: ForgejoTagsDatasource.getSourceUrl,
+      // `GiteaDatasource.getSourceUrl()` reads `defaultRegistryUrls` off the
+      // class it is called on, so the reference has to stay bound to it.
+      getSourceUrl:
+        ForgejoTagsDatasource.getSourceUrl.bind(ForgejoTagsDatasource),
     },
     [GitTagsDatasource.id]: {
       api: new GitTagsDatasource(),
     },
     [GiteaTagsDatasource.id]: {
       api: new GiteaTagsDatasource(),
-      getSourceUrl: GiteaTagsDatasource.getSourceUrl,
+      getSourceUrl: GiteaTagsDatasource.getSourceUrl.bind(GiteaTagsDatasource),
     },
     [GithubTagsDatasource.id]: {
       api: new GithubTagsDatasource(),

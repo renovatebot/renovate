@@ -204,6 +204,58 @@ describe('util/package-rules/index', () => {
     expect(res.skipStage).toBeUndefined();
   });
 
+  it('unsets skipReason=unknown-registry if a rule gives it a registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('unsets skipReason=unknown-registry if config gives it a default registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      defaultRegistryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+      packageRules: [],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('keeps skipReason=unknown-registry when enabled=true gives it no registry', async () => {
+    // the dependency is wanted, but there is still nowhere to look it up
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          enabled: true,
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBe('unknown-registry');
+    expect(res.skipStage).toBe('extract');
+  });
+
   it('does not set skipReason=package-rules if the last packageRule has force.enabled=true', async () => {
     const dep: any = {
       depName: 'foo',
