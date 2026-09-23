@@ -98,13 +98,12 @@ describe('modules/manager/batect-wrapper/artifacts', () => {
       const artifact: UpdateArtifact = {
         packageFileName: 'batect',
         updatedDeps: [
-          // with a grouped, unrelated dependency first, `config.newVersion`
-          // is the unrelated dependency's, not batect's
+          // an unrelated, grouped dependency sorts first
           { depName: 'some-other-dep', newVersion: '9.9.9' },
           { depName: 'batect/batect', newVersion: defaultTo },
         ],
         newPackageFileContent: 'not used',
-        config: { newVersion: '9.9.9' },
+        config: {},
       };
       const result = await updateArtifacts(artifact);
 
