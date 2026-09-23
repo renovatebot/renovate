@@ -349,6 +349,9 @@ export const CATEGORY_RANKS: CategoryRank[] = [
   // platforms) matter most to a reader unfamiliar with Renovate's own
   // internals, so they lead the changelog.
   { pattern: /^(?:manager|datasource|versioning|platform)\//, rank: 0 },
+  // Documentation changes: not code, but still worth a reader's attention —
+  // ranked just above the dependency updates noise below it.
+  { pattern: /^docs$/, rank: 1.5 },
   // High-volume, low-signal dependency bumps: still worth listing, but
   // shouldn't crowd out everything else.
   { pattern: /^deps$/, rank: 2 },
@@ -374,6 +377,7 @@ export const COLLAPSED_SCOPES = new Set(['deps']);
  * well as a heading. Any other scope falls back to its raw name. */
 const FLAT_SCOPE_LABELS: Record<string, string> = {
   deps: 'Dependency updates',
+  docs: 'Documentation',
 };
 
 // A commit scope's category can be written singular or plural
@@ -476,6 +480,9 @@ export async function resolveModuleLabels(
  *   module entry nested under a `CategoryGroup`; a bare category with no
  *   module name (`datasource` on its own) becomes a "General" entry in
  *   that same category, rather than a second, colliding group.
+ * - An unscoped `docs:` commit is treated as if scoped `docs`, joining any
+ *   explicitly `docs`-scoped commits in their own "Documentation" group,
+ *   rather than falling into "Other".
  * - Everything else becomes its own `FlatGroup`, with the scope-less group
  *   labelled "Other" — however few commits it has, so a scope stays
  *   scannable as its own heading.
@@ -496,11 +503,18 @@ export function groupByModule(
 
   const byScope = new Map<string | undefined, ParsedCommit[]>();
   for (const commit of commits) {
-    const existing = byScope.get(commit.scope);
+    // An unscoped `docs:` commit (no `docs(scope):`) would otherwise fall
+    // into the catch-all "Other" group below; file it alongside any
+    // explicitly `docs`-scoped commits instead, under its own heading.
+    const scope =
+      commit.scope === undefined && commit.type === 'docs'
+        ? 'docs'
+        : commit.scope;
+    const existing = byScope.get(scope);
     if (existing) {
       existing.push(commit);
     } else {
-      byScope.set(commit.scope, [commit]);
+      byScope.set(scope, [commit]);
     }
   }
 

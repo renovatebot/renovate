@@ -350,7 +350,7 @@ describe('tools/release-notes/module-changelog', () => {
 
     it('sorts deps after non-module scopes, and Other last', () => {
       const commits: ParsedCommit[] = [
-        { type: 'docs', scope: undefined, subject: 'a' },
+        { type: 'fix', scope: undefined, subject: 'a' },
         { type: 'chore', scope: 'deps', subject: 'b' },
         { type: 'fix', scope: 'workers/repository', subject: 'c' },
       ];
@@ -361,6 +361,33 @@ describe('tools/release-notes/module-changelog', () => {
         'deps',
         undefined,
       ]);
+    });
+
+    it('files an unscoped docs: commit under "docs", just above deps', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'docs', scope: undefined, subject: 'a' },
+        { type: 'chore', scope: 'deps', subject: 'b' },
+        { type: 'fix', scope: 'workers/repository', subject: 'c' },
+      ];
+
+      const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+      expect(groups.map((g) => g.scope)).toEqual([
+        'workers/repository',
+        'docs',
+        'deps',
+      ]);
+    });
+
+    it('joins an unscoped docs: commit with an explicitly docs-scoped one', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'docs', scope: undefined, subject: 'a' },
+        { type: 'fix', scope: 'docs', subject: 'b' },
+      ];
+
+      const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+      expect(groups).toHaveLength(1);
+      expect(groups[0].label).toBe('Documentation');
+      expect(groups[0].commits).toHaveLength(2);
     });
 
     it('labels the deps group "Dependency updates"', () => {
@@ -499,13 +526,25 @@ describe('tools/release-notes/module-changelog', () => {
 
     it('renders a flat group as an h3 heading, commits as a list', () => {
       const groups = groupByModule(
+        [{ type: 'fix', scope: undefined, subject: 'add warning' }],
+        [{ type: 'fix', section: 'Bug Fixes' }],
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups, repo)).toBe(
+        ['### Other', '', '- fix: add warning'].join('\n'),
+      );
+    });
+
+    it('renders an unscoped docs: commit under a "Documentation" heading', () => {
+      const groups = groupByModule(
         [{ type: 'docs', scope: undefined, subject: 'add warning' }],
         [{ type: 'docs', section: 'Documentation' }],
         new Map(),
       );
 
       expect(renderModuleChangelog(groups, repo)).toBe(
-        ['### Other', '', '- docs: add warning'].join('\n'),
+        ['### Documentation', '', '- docs: add warning'].join('\n'),
       );
     });
 
@@ -528,7 +567,7 @@ describe('tools/release-notes/module-changelog', () => {
           '',
           '- fix: a',
           '',
-          '### Other',
+          '### Documentation',
           '',
           '- docs: b',
         ].join('\n'),
