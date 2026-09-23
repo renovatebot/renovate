@@ -10,9 +10,9 @@ describe('modules/datasource/julia-general-metadata/index', () => {
   describe('getReleases', () => {
     it('returns null for empty body', async () => {
       httpMock.scope(baseUrl).get('/Example/versions.json').reply(200, {});
-      expect(
-        await getPkgReleases({ datasource, packageName: 'Example' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'Example' }),
+      ).resolves.toBeNull();
     });
 
     it('returns null for malformed body', async () => {
@@ -20,16 +20,16 @@ describe('modules/datasource/julia-general-metadata/index', () => {
         .scope(baseUrl)
         .get('/Example/versions.json')
         .reply(200, { '0.1.0': 'not-an-object' });
-      expect(
-        await getPkgReleases({ datasource, packageName: 'Example' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'Example' }),
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/Example/versions.json').reply(404);
-      expect(
-        await getPkgReleases({ datasource, packageName: 'Example' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'Example' }),
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -44,9 +44,9 @@ describe('modules/datasource/julia-general-metadata/index', () => {
         .scope(baseUrl)
         .get('/Example/versions.json')
         .replyWithError('some error');
-      expect(
-        await getPkgReleases({ datasource, packageName: 'Example' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'Example' }),
+      ).resolves.toBeNull();
     });
 
     it('returns releases with timestamps and yanked flag', async () => {

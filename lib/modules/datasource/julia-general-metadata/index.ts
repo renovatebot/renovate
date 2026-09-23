@@ -1,4 +1,4 @@
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -73,6 +73,7 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
         namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
         key: `getReleases:${config.packageName}`,
         fallback: true,
+        cacheable: true,
       },
       () => this._getReleases(config),
     );
