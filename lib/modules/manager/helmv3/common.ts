@@ -1,3 +1,4 @@
+import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 
@@ -5,9 +6,12 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { ExtraEnv } from '../../../util/exec/types.ts';
 import { privateCacheDir } from '../../../util/fs/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { ecrRegex, getECRAuthToken } from '../../datasource/docker/ecr.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { removeOCIPrefix } from './oci.ts';
 import type { RepositoryRule } from './types.ts';
 
 export async function generateLoginCmd(
@@ -15,7 +19,7 @@ export async function generateLoginCmd(
 ): Promise<string | null> {
   logger.trace({ repositoryRule }, 'Generating Helm registry login command');
   const { hostRule, repository } = repositoryRule;
-  const { username, password } = hostRule;
+  const { username, password, token } = hostRule;
   const loginCMD = 'helm registry login';
   if (username !== 'AWS' && ecrRegex.test(repository)) {
     logger.trace({ repository }, `Using ecr auth for Helm registry`);
@@ -41,21 +45,57 @@ export async function generateLoginCmd(
     const cmd = `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
     )} ${quote(hostPart)}`;
-    logger.trace({ cmd }, 'Generated Helm registry login command');
+    // the command carries the password, so log the target host only
+    logger.trace({ host: hostPart }, 'Generated Helm registry login command');
     return cmd;
+  }
+  if (token) {
+    const hostPart = repository.split('/')[0];
+    return `${loginCMD} --username '' --password ${quote(token)} ${quote(hostPart)}`;
   }
   return null;
 }
 
-export function generateHelmEnvs(): ExtraEnv {
-  return {
-    HELM_EXPERIMENTAL_OCI: '1',
-    // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-    HELM_REGISTRY_CONFIG: `${upath.join(privateCacheDir(), 'registry.json')}`,
-    HELM_REPOSITORY_CONFIG: `${upath.join(
-      privateCacheDir(),
-      'repositories.yaml',
-    )}`,
-    HELM_REPOSITORY_CACHE: `${upath.join(privateCacheDir(), 'repositories')}`,
+export async function generateRegistryLoginCmd(
+  name: string,
+  registry: string,
+): Promise<string | null> {
+  const repository = removeOCIPrefix(registry);
+  const repositoryRule: RepositoryRule = {
+    name,
+    repository,
+    hostRule: hostRules.find({
+      url: `https://${repository}`,
+      hostType: DockerDatasource.id,
+    }),
   };
+  return generateLoginCmd(repositoryRule);
+}
+
+export function generateHelmEnvs(helmConstraint?: string): ExtraEnv {
+  const envs: ExtraEnv = {};
+
+  // Helm >= 3.8 ignores HELM_EXPERIMENTAL_OCI, so it's harmless to set it
+  // when the constraint is unknown. Dropping it for an unconstrained helm
+  // could break helm < 3.8 users, so only omit it once the constraint
+  // proves helm >= 3.8.
+  if (!helmConstraint || !semver.intersects(helmConstraint, '>=3.8.0')) {
+    envs.HELM_EXPERIMENTAL_OCI = '1';
+  }
+
+  // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
+  envs.HELM_REGISTRY_CONFIG = `${upath.join(
+    privateCacheDir(),
+    'registry.json',
+  )}`;
+  envs.HELM_REPOSITORY_CONFIG = `${upath.join(
+    privateCacheDir(),
+    'repositories.yaml',
+  )}`;
+  envs.HELM_REPOSITORY_CACHE = `${upath.join(
+    privateCacheDir(),
+    'repositories',
+  )}`;
+
+  return envs;
 }

@@ -51,6 +51,8 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'bash',
           depType: 'install',
           replaceString: 'bash=5.2.37-r2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -83,6 +85,45 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'bash',
           depType: 'install',
           replaceString: 'bash=5.2.37-r2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
+        },
+      ]);
+    });
+
+    it('extracts deb deps from a RUN instruction', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM debian:trixie
+          RUN apt-get update \\
+            && apt-get install -y --no-install-recommends curl=8.14.1-2 \\
+            && rm -rf /var/lib/apt/lists/*
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'trixie',
+          datasource: 'docker',
+          depName: 'debian',
+          depType: 'final',
+          packageName: 'debian',
+          replaceString: 'debian:trixie',
+          versioning: 'debian',
+        },
+        {
+          autoReplaceStringTemplate: 'curl={{{newValue}}}',
+          currentValue: '8.14.1-2',
+          datasource: 'deb',
+          depName: 'curl',
+          depType: 'install',
+          replaceString: 'curl=8.14.1-2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -130,6 +171,21 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'install',
         },
       ]);
+    });
+
+    it('keeps the reason a package was already skipped for', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21
+          RUN apk add bash
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'bash',
+        skipReason: 'unspecified-version',
+      });
     });
 
     it('handles naked dep', () => {

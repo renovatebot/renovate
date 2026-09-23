@@ -189,16 +189,40 @@ export async function updateLockFile({
 
   await run();
 
-  const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  // A Buffer as the existing content means the lock file may be binary, so the
+  // new content is read and compared as bytes as well.
+  const newLockFileContent = await readLockFile(
+    lockFileName,
+    Buffer.isBuffer(existingLockFileContent),
+  );
   if (!newLockFileContent) {
     logger.debug(`No ${lockFileName} found`);
     return null;
   }
 
-  if (existingLockFileContent === newLockFileContent) {
+  if (isSameContent(existingLockFileContent, newLockFileContent)) {
     logger.debug(`${lockFileName} is unchanged`);
     return null;
   }
 
   return [fileAddition(lockFileName, newLockFileContent)];
+}
+
+function readLockFile(
+  lockFileName: string,
+  asBuffer: boolean,
+): Promise<string | Buffer | null> {
+  return asBuffer
+    ? readLocalFile(lockFileName)
+    : readLocalFile(lockFileName, 'utf8');
+}
+
+function isSameContent(
+  before: string | Buffer | null,
+  after: string | Buffer,
+): boolean {
+  if (Buffer.isBuffer(before) && Buffer.isBuffer(after)) {
+    return before.equals(after);
+  }
+  return before === after;
 }

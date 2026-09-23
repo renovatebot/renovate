@@ -12,8 +12,6 @@ export class GitlabReleasesDatasource extends Datasource {
     return ['https://gitlab.com'];
   }
 
-  static readonly registryStrategy = 'first';
-
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `released_at` field in the results.';

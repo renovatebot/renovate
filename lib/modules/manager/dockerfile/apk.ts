@@ -1,12 +1,9 @@
-import { split } from 'shlex';
 import { logger } from '../../../logger/index.ts';
-import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { ApkDatasource } from '../../datasource/apk/index.ts';
 import { api as apkVersioning } from '../../versioning/apk/index.ts';
 import type { PackageDependency } from '../types.ts';
-
-/** Shell operators which start a new command */
-const commandSeparators = ['&&', '||', ';', '|', '&', '(', ')', '{', '}'];
+import { parseRunCommands } from './run-command.ts';
 
 /**
  * `apk` options which consume the following argument, so that the argument is
@@ -143,15 +140,6 @@ function extractApkAddArgs(tokens: string[]): PackageDependency[] {
 }
 
 /**
- * The `RUN` keyword and its flags, e.g. `RUN --mount=type=cache,target=/x `.
- *
- * Stripping these leaves the shell command that the instruction runs.
- */
-const runPrefixRegex = regEx(
-  /^[ \t]*(?:ONBUILD[ \t]+)?RUN[ \t]+(?:--[a-z]\S*[ \t]+)*/i,
-);
-
-/**
  * Extracts APK packages pinned by `apk add` in a `RUN` instruction, e.g.
  *
  * ```dockerfile
@@ -167,73 +155,7 @@ export function extractApkDeps(
   instruction: string,
   escapeChar: string,
 ): PackageDependency[] {
-  // A `#` line inside a line continuation is a Dockerfile comment, and is
-  // dropped before the shell ever sees it
-  const joined = instruction
-    .split(newlineRegex)
-    .filter((line) => !regEx(/^[ \t]*#/).test(line))
-    .join('\n')
-    .replace(regEx(`${escapeChar}[ \\t]*\\r?\\n`, 'g'), ' ');
-
-  const runPrefix = runPrefixRegex.exec(joined)?.[0];
-  if (!runPrefix) {
-    return [];
-  }
-
-  const command = joined.slice(runPrefix.length);
-  if (!command.includes('apk')) {
-    return [];
-  }
-
-  let tokens: string[];
-  try {
-    tokens = split(command);
-  } catch (err) {
-    logger.debug({ err, command }, 'Failed to tokenize Dockerfile RUN command');
-    return [];
-  }
-
-  const deps: PackageDependency[] = [];
-  // Split the shell command into the individual commands it runs, so that only
-  // the arguments of an `apk` invocation are considered
-  let current: string[] = [];
-  for (const token of tokens) {
-    if (token.startsWith('#')) {
-      // the rest of the command is a shell comment
-      break;
-    }
-    if (commandSeparators.includes(token)) {
-      deps.push(...extractApkCommand(current));
-      current = [];
-      continue;
-    }
-    // e.g. the `{1..10};` of `for iter in {1..10}; do apk add ...`, which shlex
-    // keeps as one token because no whitespace precedes the `;`
-    if (token.endsWith(';')) {
-      current.push(token.slice(0, -1));
-      deps.push(...extractApkCommand(current));
-      current = [];
-      continue;
-    }
-    current.push(token);
-  }
-  deps.push(...extractApkCommand(current));
-
-  return deps;
-}
-
-/**
- * Finds the `apk` invocation in the tokens of a shell command, wherever it
- * sits - so it's found whether it's prefixed by a shell keyword
- * (`do`/`then`/...), a variable assignment (`DEBUG=1 apk add ...`), or a
- * wrapper program (`sudo`/`chroot /mnt`/`timeout 30`/...).
- */
-function extractApkCommand(tokens: string[]): PackageDependency[] {
-  const index = tokens.findIndex(
-    (token) => token === 'apk' || token.endsWith('/apk'),
+  return parseRunCommands(instruction, escapeChar, ['apk']).flatMap(
+    extractApkAddArgs,
   );
-  if (index === -1) {
-    return [];
-  }
-  return extractApkAddArgs(tokens.slice(index + 1));
 }

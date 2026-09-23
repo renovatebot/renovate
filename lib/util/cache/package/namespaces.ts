@@ -37,6 +37,7 @@ export const packageCacheNamespaces = [
   'datasource-conda',
   'datasource-cpan',
   'datasource-crate-metadata',
+  'datasource-crate-registry-api',
   'datasource-crate',
   'datasource-deb',
   'datasource-deno',

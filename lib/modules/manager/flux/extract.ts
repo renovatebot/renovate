@@ -28,6 +28,7 @@ import {
   isOCIRegistry,
   removeOCIPrefix,
 } from '../helmv3/oci.ts';
+import { isLocalChartPath } from '../helmv3/utils.ts';
 import { extractImage } from '../kustomize/extract.ts';
 import type {
   ExtractConfig,
@@ -317,7 +318,7 @@ function resolveResourceManifest(
             datasource: HelmDatasource.id,
           };
 
-          if (depName.startsWith('./')) {
+          if (isLocalChartPath(depName)) {
             dep.skipReason = 'local-chart';
             delete dep.datasource;
           } else {
