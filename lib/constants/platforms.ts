@@ -100,12 +100,14 @@ export const PLATFORM_FAMILIES = {
     repositoryPath: (segments: string[]) => {
       const gitSegment = segments.indexOf('_git');
       if (gitSegment === -1) {
+        // Without `_git` there is nothing to tell a legacy collection segment
+        // apart from the repository, so only `org/project/repo` can be read.
         return segments.length >= 3
           ? `${segments[0]}/${segments[1]}/_git/${segments[2]}`
           : null;
       }
       // `_git` always follows at least the organization and the project, and a
-      // team project may sit between them.
+      // legacy collection segment may sit between them.
       return gitSegment >= 2 && segments.length > gitSegment + 1
         ? segments.slice(0, gitSegment + 2).join('/')
         : null;

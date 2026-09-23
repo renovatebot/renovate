@@ -83,16 +83,13 @@ const virtualFileRegex = regEx(/\.(?:prompt|instructions|chatmode|agent)\.md$/);
  */
 function resolveRepoPath(
   platform: PlatformFamilyId | null,
-  host: string,
+  url: string,
   segments: string[],
 ): string | null {
   if (segments.length < 2) {
     return null;
   }
-  const repositoryPath = getRepositoryPath(
-    platform,
-    `https://${host}/${segments.join('/')}`,
-  );
+  const repositoryPath = getRepositoryPath(platform, url);
   if (repositoryPath) {
     return repositoryPath;
   }
@@ -192,12 +189,12 @@ export function parseApmDependency(
   const segments = pathPart.split('/').filter(isTruthy);
   const hasHost = (segments[0] ?? '').includes('.');
   const host = hasHost ? segments[0] : 'github.com';
-  const platform = detectPlatform(`https://${host}`);
-  const repoPath = resolveRepoPath(
-    platform,
-    host,
-    hasHost ? segments.slice(1) : segments,
-  );
+  const repoSegments = hasHost ? segments.slice(1) : segments;
+  // `detectPlatform` reads the hostname only, so one url serves both it and the
+  // repository lookup.
+  const url = `https://${host}/${repoSegments.join('/')}`;
+  const platform = detectPlatform(url);
+  const repoPath = resolveRepoPath(platform, url, repoSegments);
 
   if (!repoPath) {
     logger.debug({ entry }, 'apm: could not determine owner/repo');
