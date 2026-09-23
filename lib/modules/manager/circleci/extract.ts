@@ -1,4 +1,6 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { Result } from '../../../util/result.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { OrbDatasource } from '../../datasource/orb/index.ts';
@@ -17,7 +19,7 @@ function extractDefinition(
   registryAliases: Record<string, string>,
 ): void {
   for (const [key, orb] of Object.entries(definition.orbs)) {
-    if (typeof orb === 'string') {
+    if (isString(orb)) {
       const [packageName, currentValue] = orb.split('@');
 
       deps.push({
@@ -49,7 +51,10 @@ export function extractPackageFile(
   config?: ExtractConfig,
 ): PackageFileContent | null {
   const { val: parsed, err } = Result.wrap(() =>
-    CircleCiFile.parse(parseSingleYaml(content)),
+    // Parse as YAML 1.1 so anchor merge keys (`<<`) work, matching CircleCI's
+    // own behavior. Under YAML 1.2 a mapping with multiple `<<` keys is
+    // rejected as a duplicate key, which causes the whole file to be skipped.
+    CircleCiFile.parse(parseSingleYaml(content, { version: '1.1' })),
   ).unwrap();
 
   if (err) {
@@ -57,7 +62,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const registryAliases = config?.registryAliases ?? {};
+  const registryAliases = coerceObject(config?.registryAliases);
   const deps: PackageDependency[] = [];
   extractDefinition(deps, parsed, registryAliases);
 

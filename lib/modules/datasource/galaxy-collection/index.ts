@@ -1,6 +1,5 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -43,7 +42,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The `sourceUrl` is determined from the `repository` field in the results.';
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -109,13 +108,12 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
         key: `getReleases:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
@@ -125,23 +123,22 @@ export class GalaxyCollectionDatasource extends Datasource {
       return ensureTrailingSlash(
         joinUrlParts(registryUrl, 'api/v3/collections', namespace, projectName),
       );
-    } else {
-      const repository =
-        repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
-      return ensureTrailingSlash(
-        joinUrlParts(
-          registryUrl,
-          'v3/plugin/ansible/content',
-          repository,
-          'collections/index',
-          namespace,
-          projectName,
-        ),
-      );
     }
+    const repository =
+      repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
+    return ensureTrailingSlash(
+      joinUrlParts(
+        registryUrl,
+        'v3/plugin/ansible/content',
+        repository,
+        'collections/index',
+        namespace,
+        projectName,
+      ),
+    );
   }
 
-  private async _getVersionDetails(
+  private async fetchVersionDetails(
     packageName: string,
     versionsUrl: string,
     basicRelease: Release,
@@ -174,13 +171,12 @@ export class GalaxyCollectionDatasource extends Datasource {
     versionsUrl: string,
     basicRelease: Release,
   ): Promise<Release> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
         key: `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
         ttlMinutes: 10080, // 1 week
       },
-      () => this._getVersionDetails(packageName, versionsUrl, basicRelease),
+      () => this.fetchVersionDetails(packageName, versionsUrl, basicRelease),
     );
   }
 }

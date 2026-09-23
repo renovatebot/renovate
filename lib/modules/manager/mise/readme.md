@@ -11,6 +11,66 @@ Renovate supports all standard mise configuration file patterns:
 - Environment-specific variants (e.g., `mise.production.toml`, `.mise.dev.toml`)
 - Local variants (e.g., `mise.local.toml`, `.mise.local.toml`)
 
+### Supported tool locations
+
+Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#tools-dev-tools) and [`tasks.*.tools`](https://mise.jdx.dev/tasks/task-configuration.html#tools) keys.
+
+### Lock file support
+
+Renovate supports mise lock files (`mise.lock`).
+When a lock file is present:
+
+- Dependencies will have their `lockedVersion` extracted from the lock file
+- Renovate can update lock files when dependencies change
+- Fuzzy selectors such as `latest`, `lts`, `25`, `25.1`, and `temurin-25` are
+  resolved against their locked version and updated in `mise.lock` only
+- `latest` remains unbounded; partial selectors remain restricted to their
+  major/minor range; `lts` is supported for the core Node.js and Java tools
+- Concrete versions such as `25.0.3` retain Renovate's normal source-file
+  update behavior
+- To keep concrete versions pinned, set `updatePinnedDependencies` to `false`
+  in the `mise` manager configuration
+
+  ```json
+  {
+    "mise": {
+      "updatePinnedDependencies": false
+    }
+  }
+  ```
+
+- Lock file maintenance is supported via the `lockFileMaintenance` option. When the `mise` version Renovate runs supports it (see [safe mode](#trust-model-for-lock-file-updates) for how the version is detected), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
+
+Renovate recognizes environment-specific lock files:
+
+- `mise.lock` - default lock file
+- `mise.local.lock` - local configuration lock file, typically ignored alongside `mise.local.toml`
+- `mise.{env}.lock` - environment-specific lock files (e.g., `mise.production.lock`)
+- `mise.{env}.local.lock` - environment-specific local lock files, typically ignored alongside `mise.{env}.local.toml`
+
+For more information about mise lock files, see the [mise lock file documentation](https://mise.jdx.dev/dev-tools/mise-lock.html).
+
+### Trust model for lock file updates
+
+Running `mise lock` can execute repository-defined behavior, so Renovate treats mise lockfile refreshes as an unsafe execution.
+
+Self-hosted administrators must explicitly allow this path by including `mise` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
+
+Because mise lock can execute repository-defined scripts, Renovate treats lockfile refreshes as an unsafe execution and attempts to run mise in [safe mode](https://mise.jdx.dev/configuration/settings.html#safe).
+
+If mise does not support safe mode or version detection fails, Renovate blocks all mise operations.
+
+#### Allowing Unsafe Executions
+
+Self-hosted administrators can permit these operations by adding "mise" to the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) configuration.
+
+Once allowed, Renovate runs mise trust before mise lock when a mise.lock file is present. This exposes the trust step in execution logs and defers trust rules to mise.
+
+In particular:
+
+- an existing `mise.lock` is required
+- self-hosted administrators decide whether this unsafe execution is acceptable for their environment
+
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
@@ -27,6 +87,18 @@ erlang = ["23.3", "22.0"]
 ```
 
 Renovate will update `"23.3"` (the primary version) but will not touch `"22.0"` (the fallback version).
+
+The same applies when the array items are inline tables:
+
+```toml
+[tools]
+rust = [
+  { version = "1.98.1", components = "clippy,rustfmt" },
+  { version = "nightly-2026-07-12", profile = "minimal" },
+]
+```
+
+Renovate will update `"1.98.1"` and read backend options such as `version_prefix` or `tag_regex` from that first item only.
 
 #### Why can Renovate only update primary versions?
 
@@ -66,9 +138,11 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
 - [`gem`](https://mise.jdx.dev/dev-tools/backends/gem.html)
 - [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
+- [`gitlab`](https://mise.jdx.dev/dev-tools/backends/gitlab.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
+- [`pypi`](https://mise.jdx.dev/dev-tools/backends/pypi.html)
 - [`spm`](https://mise.jdx.dev/dev-tools/backends/spm.html)
 - [`ubi`](https://mise.jdx.dev/dev-tools/backends/ubi.html)
 - [`vfox`](https://mise.jdx.dev/dev-tools/backends/vfox.html)
@@ -113,4 +187,3 @@ Renovate's `mise` manager does not support the following tool syntax:
 ### Supported default registry tool short names
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->

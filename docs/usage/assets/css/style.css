@@ -1,3 +1,29 @@
+/* Mend.io brand palette, used in place of Material's stock indigo theme */
+[data-md-color-primary='custom'] {
+  --md-primary-fg-color: #073c8c;
+  --md-primary-fg-color--light: #308be3;
+  --md-primary-fg-color--dark: #073c8c;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #e8effa;
+}
+
+[data-md-color-accent='custom'] {
+  --md-accent-fg-color: #308be3;
+  --md-accent-fg-color--transparent: #308be31a;
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--light: #e8effa;
+}
+
+/*
+ * Text links inherit --md-primary-fg-color (#073c8c), which is navy-on-white
+ * in light mode but reads as low-contrast navy-on-near-black in dark mode.
+ * Material does the same lightening for its own dark primaries (e.g. indigo),
+ * so mirror that here with a lighter brand blue for dark mode only.
+ */
+[data-md-color-scheme='slate'][data-md-color-primary='custom'] {
+  --md-typeset-a-color: #5aa9f5;
+}
+
 .md-header .md-header__button.md-logo {
   padding: 0;
 }
@@ -12,4 +38,16 @@
 .md-typeset .parents {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+}
+
+/** don't show the client-side rendered version number for Renovate (but keep the stars + forks) */
+.md-source__fact .md-source__fact--version {
+  display: none;
+}
+
+/** Material only makes img/svg/video responsive by default, not object */
+.md-typeset object.renovate-banner {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 756 / 250;
 }

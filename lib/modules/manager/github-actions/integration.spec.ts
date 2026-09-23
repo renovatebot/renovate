@@ -4,13 +4,24 @@ import { getConfig } from '../../../config/defaults.ts';
 import { Result } from '../../../util/result.ts';
 import * as lookup from '../../../workers/repository/process/lookup/index.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
+import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
+vi.mock('../../../util/fs/index.ts');
+
 describe('modules/manager/github-actions/integration', () => {
   const getGithubTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
   const getGithubDigest = vi.spyOn(GithubTagsDatasource.prototype, 'getDigest');
+  const getGithubReleaseAttachments = vi.spyOn(
+    GithubReleaseAttachmentsDatasource.prototype,
+    'getReleases',
+  );
+  const getGithubReleaseAttachmentDigest = vi.spyOn(
+    GithubReleaseAttachmentsDatasource.prototype,
+    'getDigest',
+  );
 
   let baseConfig: LookupUpdateConfig;
 
@@ -30,6 +41,51 @@ describe('modules/manager/github-actions/integration', () => {
     };
   }
 
+  it('updates the mise version and checksum together', async () => {
+    const currentDigest =
+      '429f71e7e989908bf975aafac9066329c16e2d8fc7cd8e74fdf21dd6300ffe7c';
+    const newDigest =
+      'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180';
+    const workflow = codeBlock`
+      on: push
+      jobs:
+        test:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: jdx/mise-action@v4
+              with:
+                version: v2026.7.7
+                sha256: ${currentDigest}
+    `;
+
+    const extracted = await extractPackageFile(
+      workflow,
+      '.github/workflows/test.yml',
+      {},
+    );
+    const dep = extracted!.deps.find(
+      (dependency) => dependency.depType === 'uses-with',
+    );
+    getGithubReleaseAttachments.mockResolvedValueOnce({
+      releases: [{ version: 'v2026.7.7' }, { version: 'v2026.7.12' }],
+    });
+    getGithubReleaseAttachmentDigest.mockImplementation((_config, newValue) =>
+      Promise.resolve(newValue === 'v2026.7.12' ? newDigest : currentDigest),
+    );
+
+    const { updates } = await Result.wrap(
+      lookup.lookupUpdates(makeConfig(dep!)),
+    ).unwrapOrThrow();
+
+    expect(updates).toEqual([
+      expect.objectContaining({
+        newDigest,
+        newValue: 'v2026.7.12',
+        updateType: 'patch',
+      }),
+    ]);
+  });
+
   it('proposes major update when using tagged major, if a major is available', async () => {
     const workflow = codeBlock`
       on: push
@@ -40,7 +96,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v1
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -94,7 +150,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v1
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -145,7 +201,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v1.2
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -210,7 +266,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v4.0.0
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -259,7 +315,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning.yml',
       {},
@@ -319,7 +375,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning.yml',
       {},
@@ -393,7 +449,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@e06108dd0aef18192324c70427afc47652e63a82 # v7.5.0
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning-semver.yml',
       {},
@@ -466,7 +522,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7.5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-another.yml',
       {},
@@ -529,7 +585,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v4
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -564,7 +620,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@e06108dd0aef18192324c70427afc47652e63a82 # v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning-best-practices.yml',
       {},
@@ -624,7 +680,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning.yml',
       {},
@@ -659,7 +715,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -709,7 +765,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -740,7 +796,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -787,7 +843,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7.5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -836,7 +892,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/setup-node@v2
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -897,6 +953,69 @@ describe('modules/manager/github-actions/integration', () => {
             updateType: 'major',
           },
         ],
+      },
+    ]);
+  });
+
+  it('proposes minor and major updates for semver tag', async () => {
+    const workflow = codeBlock`
+      on: push
+      jobs:
+        build:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+            - uses: codecov/codecov-action@v5.5.3
+    `;
+
+    const extracted = await extractPackageFile(
+      workflow,
+      '.github/workflows/ci-another.yml',
+      {},
+    );
+    expect(extracted).not.toBeNull();
+
+    const dep = extracted!.deps.find(
+      (d) => d.depName === 'codecov/codecov-action',
+    );
+    expect(dep).toBeDefined();
+
+    getGithubTags.mockResolvedValueOnce({
+      releases: [
+        { version: 'v6.0.0' },
+        { version: 'v6' },
+        { version: 'v5.5.4' },
+        { version: 'v5' },
+        { version: 'v5.5.3' },
+      ],
+    });
+
+    const { updates } = await Result.wrap(
+      lookup.lookupUpdates(makeConfig(dep!)),
+    ).unwrapOrThrow();
+
+    expect(updates).toEqual([
+      {
+        bucket: 'non-major',
+        hasAttestation: undefined,
+        isBreaking: false,
+        newMajor: 5,
+        newMinor: 5,
+        newPatch: 4,
+        newValue: 'v5.5.4',
+        newVersion: 'v5.5.4',
+        updateType: 'patch',
+      },
+      {
+        bucket: 'major',
+        hasAttestation: undefined,
+        isBreaking: false,
+        newMajor: 6,
+        newMinor: 0,
+        newPatch: 0,
+        newValue: 'v6.0.0',
+        newVersion: 'v6.0.0',
+        updateType: 'major',
       },
     ]);
   });

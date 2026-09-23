@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
 
 const VersionField = z

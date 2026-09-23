@@ -309,6 +309,23 @@ describe('modules/manager/deno/schema', () => {
   });
 
   describe('DenoDependency', () => {
+    // https://github.com/renovatebot/renovate/discussions/43015
+    it('parses npm package names containing dots', () => {
+      expect(
+        DenoDependency.parse({
+          depValue: 'npm:discord.js@14.26.3',
+          depType: 'imports',
+        }),
+      ).toEqual({
+        currentRawValue: 'npm:discord.js@14.26.3',
+        currentValue: '14.26.3',
+        datasource: 'npm',
+        depName: 'discord.js',
+        depType: 'imports',
+        versioning: 'deno',
+      });
+    });
+
     it('invalid npm package names', () => {
       expect(
         DenoDependency.parse({
@@ -344,6 +361,22 @@ describe('modules/manager/deno/schema', () => {
       ).toEqual({
         datasource: 'jsr',
         skipReason: 'invalid-name',
+        versioning: 'deno',
+      });
+    });
+
+    it('jsr package under a short scope', () => {
+      expect(
+        DenoDependency.parse({
+          depValue: 'jsr:@db/sqlite@^0.13.0',
+          depType: 'imports',
+        }),
+      ).toEqual({
+        currentRawValue: 'jsr:@db/sqlite@^0.13.0',
+        currentValue: '^0.13.0',
+        datasource: 'jsr',
+        depName: '@db/sqlite',
+        depType: 'imports',
         versioning: 'deno',
       });
     });
@@ -553,6 +586,25 @@ describe('modules/manager/deno/schema', () => {
 
       expect(result.fileName).toBe('deno.json');
       expect(result.content.dependencies).toEqual([]);
+    });
+
+    it('parses deno.json with compilerOptions lacking dependency fields', () => {
+      const result = DenoExtract.parse({
+        content: JSON.stringify({
+          compilerOptions: {
+            lib: ['deno.ns', 'deno.window'],
+            strict: true,
+          },
+          imports: {
+            dep1: 'npm:package@1.0.0',
+          },
+        }),
+        fileName: 'deno.json',
+      });
+
+      expect(result.content.dependencies).toEqual([
+        expect.objectContaining({ depName: 'package', depType: 'imports' }),
+      ]);
     });
 
     it('parses deno.json with workspace', () => {

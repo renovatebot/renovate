@@ -12,6 +12,7 @@ import type {
   RepoCacheData,
 } from '../../../util/cache/repository/types.ts';
 import {
+  getUpdateSummary,
   runBranchSummary,
   runRenovateRepoStats,
 } from './repository-statistics.ts';
@@ -172,6 +173,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
             currentValue: '1.2.3',
             sourceUrl: 'someUrl',
             depType: 'dependencies',
+            updateType: 'patch',
           },
         ]),
       });
@@ -185,7 +187,247 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
       runBranchSummary(config);
 
-      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Branch summary',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'branches info extended',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Updates summary',
+      );
+    });
+  });
+
+  describe('getUpdateSummary', () => {
+    it('returns empty array for no branches', () => {
+      expect(getUpdateSummary([])).toEqual([]);
+    });
+
+    it('groups by baseBranch and counts updateTypes from upgrades', () => {
+      const branches: BranchCache[] = [
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'major',
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'major',
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'pin',
+            }),
+          ],
+        }),
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [
+            partial<BranchUpgradeCache>({
+              manager: 'dockerfile',
+              updateType: 'patch',
+            }),
+          ],
+        }),
+        partial<BranchCache>({
+          baseBranch: 'next',
+          upgrades: [
+            partial<BranchUpgradeCache>({
+              manager: 'gomod',
+              updateType: 'replacement',
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'gomod',
+              updateType: 'pin',
+            }),
+          ],
+        }),
+      ];
+
+      expect(getUpdateSummary(branches)).toEqual([
+        {
+          baseBranch: 'main',
+          total: 4,
+          vulnerabilityAlert: 0,
+          updates: { major: 2, pin: 1, patch: 1 },
+          managers: {
+            npm: {
+              total: 3,
+              vulnerabilityAlert: 0,
+              updates: { major: 2, pin: 1 },
+            },
+            dockerfile: {
+              total: 1,
+              vulnerabilityAlert: 0,
+              updates: { patch: 1 },
+            },
+          },
+        },
+        {
+          baseBranch: 'next',
+          total: 2,
+          vulnerabilityAlert: 0,
+          updates: { replacement: 1, pin: 1 },
+          managers: {
+            gomod: {
+              total: 2,
+              vulnerabilityAlert: 0,
+              updates: { replacement: 1, pin: 1 },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('ignores upgrades without an updateType', () => {
+      const branches: BranchCache[] = [
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [
+            partial<BranchUpgradeCache>({}),
+            partial<BranchUpgradeCache>({}),
+          ],
+        }),
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [partial<BranchUpgradeCache>({})],
+        }),
+      ];
+
+      expect(getUpdateSummary(branches)).toEqual([
+        {
+          baseBranch: 'main',
+          total: 0,
+          vulnerabilityAlert: 0,
+          updates: {},
+          managers: {},
+        },
+      ]);
+
+      // and logs to inform the user
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.toBeObject(),
+        'Found an upgrade without an updateType, which should not be possible',
+      );
+    });
+
+    it('treats missing baseBranch as the default branch (empty string)', () => {
+      const branches: BranchCache[] = [
+        partial<BranchCache>({
+          upgrades: [
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'minor',
+            }),
+          ],
+        }),
+      ];
+
+      expect(getUpdateSummary(branches)).toEqual([
+        {
+          baseBranch: '',
+          total: 1,
+          vulnerabilityAlert: 0,
+          updates: { minor: 1 },
+          managers: {
+            npm: {
+              total: 1,
+              vulnerabilityAlert: 0,
+              updates: { minor: 1 },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('treats missing manager as empty string', () => {
+      const branches: BranchCache[] = [
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [partial<BranchUpgradeCache>({ updateType: 'minor' })],
+        }),
+      ];
+
+      expect(getUpdateSummary(branches)).toEqual([
+        {
+          baseBranch: 'main',
+          total: 1,
+          vulnerabilityAlert: 0,
+          updates: { minor: 1 },
+          managers: {
+            '': {
+              total: 1,
+              vulnerabilityAlert: 0,
+              updates: { minor: 1 },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('counts vulnerability alerts in their own top-level field and also in their updateType bucket', () => {
+      const branches: BranchCache[] = [
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'patch',
+              isVulnerabilityAlert: true,
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'major',
+              isVulnerabilityAlert: true,
+            }),
+            partial<BranchUpgradeCache>({
+              manager: 'npm',
+              updateType: 'major',
+            }),
+          ],
+        }),
+      ];
+
+      expect(getUpdateSummary(branches)).toEqual([
+        {
+          baseBranch: 'main',
+          total: 3,
+          vulnerabilityAlert: 2,
+          updates: { major: 2, patch: 1 },
+          managers: {
+            npm: {
+              total: 3,
+              vulnerabilityAlert: 2,
+              updates: { major: 2, patch: 1 },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('keeps a base branch entry even when it has no counted upgrades', () => {
+      const branches: BranchCache[] = [
+        partial<BranchCache>({
+          baseBranch: 'main',
+          upgrades: [],
+        }),
+      ];
+
+      expect(getUpdateSummary(branches)).toEqual([
+        {
+          baseBranch: 'main',
+          total: 0,
+          vulnerabilityAlert: 0,
+          updates: {},
+          managers: {},
+        },
+      ]);
     });
   });
 });

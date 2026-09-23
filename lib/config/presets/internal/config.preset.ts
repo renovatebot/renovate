@@ -38,8 +38,10 @@ export const presets: Record<string, Preset> = {
       'helpers:forgejoDigestChangelogs',
       'helpers:giteaDigestChangelogs',
       'helpers:githubDigestChangelogs',
+      'helpers:gitlabDigestChangelogs',
       'helpers:goXPackagesChangelogLink',
       'helpers:goXPackagesNameLink',
+      'helpers:renovateChangelog',
     ],
   },
   semverAllMonthly: {

@@ -51,6 +51,20 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getMeta(rec, false)).toBe(' (repository=a/b) [test]');
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'branch' },
+    ])('ignores a non-string value for the $field meta field', ({ field }) => {
+      const rec = partial<BunyanRecord>({
+        [field]: { count: 1 },
+      });
+      expect(prettyStdout.getMeta(rec)).toBeEmptyString();
+    });
   });
 
   describe('getDetails(rec)', () => {
@@ -71,6 +85,26 @@ describe('logger/pretty-stdout', () => {
       });
       expect(prettyStdout.getDetails(rec)).toBeEmptyString();
     });
+
+    it.each([
+      { field: 'repository' },
+      { field: 'baseBranch' },
+      { field: 'packageFile' },
+      { field: 'depType' },
+      { field: 'dependency' },
+      { field: 'branch' },
+    ])(
+      'expands the $field meta field when its value is not a string',
+      ({ field }) => {
+        const rec = partial<BunyanRecord>({
+          v: 0,
+          [field]: { count: 1 },
+        });
+        expect(prettyStdout.getDetails(rec)).toBe(
+          `       "${field}": {"count": 1}\n`,
+        );
+      },
+    );
 
     it('supports a config', () => {
       const rec = partial<BunyanRecord>({
@@ -94,14 +128,14 @@ describe('logger/pretty-stdout', () => {
         },
       });
       expect(prettyStdout.getDetails(rec)).toBe(
-        prettyStdout.indent(
+        `${prettyStdout.indent(
           codeBlock`
             "err": {"message": "something broke"}
             Error: something broke
                 at foo (file.js:1:1)
           `,
           true,
-        ) + '\n',
+        )}\n`,
       );
     });
 
@@ -113,26 +147,18 @@ describe('logger/pretty-stdout', () => {
         },
       });
       expect(prettyStdout.getDetails(rec)).toBe(
-        prettyStdout.indent(
+        `${prettyStdout.indent(
           codeBlock`
             Error: oops
                 at bar (file.js:2:2)
           `,
           true,
-        ) + '\n',
+        )}\n`,
       );
     });
   });
 
   describe('formatRecord(rec)', () => {
-    beforeEach(() => {
-      process.env.FORCE_COLOR = '1';
-    });
-
-    afterEach(() => {
-      delete process.env.FORCE_COLOR;
-    });
-
     it('formats record', () => {
       const rec: BunyanRecord = {
         level: 10,
@@ -143,9 +169,13 @@ describe('logger/pretty-stdout', () => {
           d: ['e', 'f'],
         },
       };
+      // The colorized level strings are built once, when the module is
+      // imported, so whether they carry ANSI codes depends on the colour
+      // support of the surrounding environment. Derive the expectation the
+      // same way instead of assuming an uncoloured terminal.
       expect(prettyStdout.formatRecord(rec)).toEqual(
         [
-          `TRACE: test message`,
+          `${util.styleText('gray', 'TRACE')}: test message`,
           `       "config": {"a": "b", "d": ["e", "f"]}`,
           ``,
         ].join('\n'),
@@ -163,25 +193,21 @@ describe('logger/pretty-stdout', () => {
         },
       });
       expect(prettyStdout.formatRecord(rec, false)).toEqual(
-        codeBlock`
+        `${codeBlock`
           TRACE: test message
                  "config": {"a": "b", "d": ["e", "f"]}
-        ` + '\n',
+        `}\n`,
       );
     });
   });
 
-  describe('RenovateStream', () => {
-    it('writes formatted data to destination', () => {
-      const chunks: string[] = [];
-      const destination = partial<NodeJS.WritableStream>({
-        write: (chunk: string) => {
-          chunks.push(chunk);
-          return true;
-        },
-      });
+  describe('PrettyStdoutStream', () => {
+    it('writes formatted data to stdout', () => {
+      const stdoutSpy = vi
+        .spyOn(process.stdout, 'write')
+        .mockImplementation(() => true);
 
-      const stream = new prettyStdout.RenovateStream(destination);
+      const stream = new prettyStdout.PrettyStdoutStream();
       const rec: BunyanRecord = {
         level: 10,
         msg: 'test message',
@@ -189,28 +215,8 @@ describe('logger/pretty-stdout', () => {
       };
 
       stream.write(rec);
-      expect(chunks).toHaveLength(1);
-      expect(chunks[0]).toContain('test message');
-    });
-
-    it('writes without colors when colorize is false', () => {
-      const chunks: string[] = [];
-      const destination = partial<NodeJS.WritableStream>({
-        write: (chunk: string) => {
-          chunks.push(chunk);
-          return true;
-        },
-      });
-
-      const stream = new prettyStdout.RenovateStream(destination, false);
-      const rec: BunyanRecord = {
-        level: 10,
-        msg: 'test message',
-        v: 0,
-      };
-
-      stream.write(rec);
-      expect(chunks).toEqual(['TRACE: test message\n']);
+      expect(stdoutSpy).toHaveBeenCalledOnce();
+      expect(stdoutSpy.mock.calls[0][0]).toContain('test message');
     });
   });
 });

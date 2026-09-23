@@ -1,4 +1,4 @@
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -24,15 +24,15 @@ export class BitbucketServerTagsDatasource extends Datasource {
 
   override http = new BitbucketServerHttp(BitbucketServerTagsDatasource.id);
 
-  static readonly sourceUrlSupport = 'package';
-  static readonly sourceUrlNote =
-    'The source URL is determined by using the `packageName` and `registryUrl`.';
-
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketServerTagsDatasource.id}`;
 
   constructor() {
     super(BitbucketServerTagsDatasource.id);
   }
+
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static getRegistryURL(registryUrl: string): string {
     return registryUrl?.replace(regEx(/\/rest\/api\/1.0$/), '');

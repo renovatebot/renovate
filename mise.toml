@@ -1,3 +1,14 @@
 [tools]
-node = "24.15.0"
-pnpm = "10.33.1"
+node = "24.21.0"
+pnpm = "11.27.0"
+uv   = "0.12.18"
+
+[hooks]
+postinstall = '''
+pnpm install
+uv sync
+'''
+
+[settings]
+# needed for hooks
+experimental = true

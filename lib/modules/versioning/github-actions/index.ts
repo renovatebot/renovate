@@ -8,12 +8,12 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'github-actions';
 export const displayName = 'GitHub Actions';
 export const urls = [
-  'https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-release-management-for-your-custom-actions',
+  '[GitHub Actions - Using release management for custom actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-release-management-for-your-custom-actions)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
 
-const floatingMinorTagRegex = regEx(/^\d+(\.\d+)?$/);
+const floatingMinorTagRegex = regEx(/^\d+(?:\.\d+)?$/);
 const majorOnlyRegex = regEx(/^\d+$/);
 
 function massageValue(input: string): string {
@@ -27,7 +27,12 @@ function parseVersion(input: string): SemVer | null {
     return v;
   }
   // Handle major.minor-prerelease format (e.g. v2.2-rc.1) by normalizing to major.minor.0-prerelease
-  return semver.parse(stripped.replace(regEx(/^(\d+\.\d+)(-.+)$/), '$1.0$2'));
+  return semver.parse(
+    stripped.replace(
+      regEx(/^(?<majorMinor>\d+\.\d+)(?<prerelease>-.+)$/),
+      '$<majorMinor>.0$<prerelease>',
+    ),
+  );
 }
 
 interface Range {
@@ -122,7 +127,11 @@ function sortVersions(x: string, y: string): number {
   if (!a || !b) {
     return 0;
   }
-  return semver.compare(a, b);
+  const cmp = semver.compare(a, b);
+  if (cmp === 0) {
+    return x.localeCompare(y, undefined, { numeric: true });
+  }
+  return cmp;
 }
 
 function equals(x: string, y: string): boolean {
@@ -271,6 +280,7 @@ function getNewValue({
 
   // Check if currentValue is a full version (has patch component)
   const currentParsed = parseVersion(currentValue);
+  // v8 ignore if -- currentValue can't fail both parseRange and parseVersion
   if (currentParsed) {
     // currentValue is a full version, return full newVersion
     return newVersion;

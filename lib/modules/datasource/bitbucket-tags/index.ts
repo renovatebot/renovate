@@ -4,38 +4,36 @@ import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { RepoInfo } from '../../platform/bitbucket/schema.ts';
-import type { PagedResult } from '../../platform/bitbucket/types.ts';
 import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
-import type { BitbucketCommit, BitbucketTag } from './types.ts';
+import { BitbucketCommits, BitbucketTag, BitbucketTags } from './schema.ts';
 
 export class BitbucketTagsDatasource extends Datasource {
   static readonly id = 'bitbucket-tags';
 
   bitbucketHttp = new BitbucketHttp(BitbucketTagsDatasource.id);
 
-  static readonly customRegistrySupport = true;
-
-  static readonly registryStrategy = 'first';
-
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
-
-  static readonly releaseTimestampSupport = true;
-  static readonly releaseTimestampNote =
-    'The release timestamp is determined from the `date` field in the results.';
-  static readonly sourceUrlSupport = 'package';
-  static readonly sourceUrlNote =
-    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
   constructor() {
     super(BitbucketTagsDatasource.id);
   }
+
+  override readonly defaultRegistryUrls =
+    BitbucketTagsDatasource.defaultRegistryUrls;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `date` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static getRegistryURL(registryUrl?: string): string {
     // fallback to default API endpoint if custom not provided
@@ -65,13 +63,8 @@ export class BitbucketTagsDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
     const bitbucketTags = (
-      await this.bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketTag>>(
-        url,
-        {
-          paginate: true,
-        },
-      )
-    ).body.values;
+      await this.bitbucketHttp.getJson(url, { paginate: true }, BitbucketTags)
+    ).body;
 
     const dependency: ReleaseResult = {
       sourceUrl: BitbucketTagsDatasource.getSourceUrl(repo, registryUrl),
@@ -109,9 +102,8 @@ export class BitbucketTagsDatasource extends Datasource {
   ): Promise<string | null> {
     const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
 
-    const bitbucketTag = (
-      await this.bitbucketHttp.getJsonUnchecked<BitbucketTag>(url)
-    ).body;
+    const bitbucketTag = (await this.bitbucketHttp.getJson(url, BitbucketTag))
+      .body;
 
     return bitbucketTag.target?.hash ?? null;
   }
@@ -175,16 +167,14 @@ export class BitbucketTagsDatasource extends Datasource {
 
     const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
     const bitbucketCommits = (
-      await this.bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketCommit>>(
-        url,
-      )
+      await this.bitbucketHttp.getJson(url, BitbucketCommits)
     ).body;
 
-    if (bitbucketCommits.values.length === 0) {
+    if (bitbucketCommits.length === 0) {
       return null;
     }
 
-    return bitbucketCommits.values[0].hash;
+    return bitbucketCommits[0].hash;
   }
 
   override getDigest(

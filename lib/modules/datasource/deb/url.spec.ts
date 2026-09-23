@@ -37,6 +37,10 @@ describe('modules/datasource/deb/url', () => {
         'Missing required query parameter',
       );
     });
+
+    it('returns empty array for invalid registry URL', () => {
+      expect(constructComponentUrls('not-a-valid-url')).toEqual([]);
+    });
   });
 
   describe('checkIfModified', () => {

@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
+import { PLATFORM_FAMILIES } from '../constants/index.ts';
 import { detectPlatform, getInheritedOrGlobal, parseJson } from './common.ts';
 import * as hostRules from './host-rules.ts';
 
@@ -53,6 +54,7 @@ describe('util/common', () => {
       ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
       ${'https://bitbucket.example.com/some-org/some-repo'}                  | ${'bitbucket-server'}
       ${'https://gitea.com/semantic-release/gitlab'}                         | ${'gitea'}
+      ${'https://gitea.example.com/semantic-release/gitlab'}                 | ${'gitea'}
       ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'forgejo'}
       ${'https://codeberg.org/forgejo/forgejo'}                              | ${'forgejo'}
       ${'https://codefloe.com/some-org/some-repo'}                           | ${'forgejo'}
@@ -62,6 +64,14 @@ describe('util/common', () => {
       ${'https://gitlab-enterprise.example.com/chalk/chalk'}                 | ${'gitlab'}
     `('("$url") === $hostType', ({ url, hostType }) => {
       expect(detectPlatform(url)).toBe(hostType);
+    });
+
+    it.each(
+      Object.entries(PLATFORM_FAMILIES).flatMap(([family, { knownHosts }]) =>
+        knownHosts.map((host) => ({ family, host })),
+      ),
+    )('knows $host as $family', ({ family, host }) => {
+      expect(detectPlatform(`https://${host}/some-org/some-repo`)).toBe(family);
     });
 
     it('uses host rules', () => {
@@ -147,7 +157,9 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid json', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow(
+        "JSON5: invalid character '\\\"' at 7:3",
+      );
     });
 
     it('catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse', () => {
@@ -185,7 +197,9 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid jsonc', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow(
+        'Parse error: Expected comma on line 6 column 47',
+      );
     });
   });
 
@@ -237,7 +251,7 @@ describe('util/common', () => {
     // is not possiblle as config validation will error out: only for coverage
     it('handles undefined inherited values', () => {
       InheritConfig.set({
-        configFileNames: undefined as never,
+        configFileNames: undefined,
       });
       GlobalConfig.set({
         configFileNames: ['global'],

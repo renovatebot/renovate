@@ -1,6 +1,12 @@
 import { isNonEmptyArray, isNullOrUndefined } from '@sindresorhus/is';
 import { parsePreset } from '../../../config/presets/parse.ts';
+import type { ParsedPreset } from '../../../config/presets/types.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { getToolConfig } from '../../../util/exec/containerbase.ts';
+import { isToolName } from '../../../util/exec/types.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -11,6 +17,7 @@ const supportedPresetSources: Record<string, string> = {
   github: GithubTagsDatasource.id,
   gitlab: GitlabTagsDatasource.id,
   gitea: GiteaTagsDatasource.id,
+  forgejo: ForgejoTagsDatasource.id,
 };
 
 export function extractPackageFile(
@@ -26,14 +33,33 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
 
-  for (const preset of config.data.extends ?? []) {
-    const parsedPreset = parsePreset(preset);
+  for (const preset of coerceArray(config.data.extends)) {
+    if (preset.includes('{{')) {
+      // templated presets are only resolvable at runtime
+      continue;
+    }
+
+    let parsedPreset: ParsedPreset;
+    try {
+      parsedPreset = parsePreset(preset);
+    } catch (err) {
+      logger.debug({ preset, err }, 'Failed to parse preset');
+      deps.push({
+        depName: preset,
+        skipReason: 'invalid-value',
+      });
+      continue;
+    }
     const datasource = supportedPresetSources[parsedPreset.presetSource];
 
     if (isNullOrUndefined(datasource)) {
       if (parsedPreset.presetSource !== 'internal') {
         deps.push({
-          depName: parsedPreset.repo,
+          // relative references have no repository of their own
+          depName:
+            parsedPreset.presetSource === 'relative'
+              ? preset
+              : parsedPreset.repo,
           skipReason: 'unsupported-datasource',
         });
       }
@@ -53,6 +79,54 @@ export function extractPackageFile(
       datasource,
       currentValue: parsedPreset.tag,
     });
+  }
+
+  for (const [constraint, value] of Object.entries(
+    coerceObject(config.data.constraints),
+  )) {
+    if (isToolName(constraint)) {
+      const toolConfig = getToolConfig(constraint);
+      deps.push({
+        ...toolConfig,
+        depName: constraint,
+        currentValue: value,
+        depType: 'tool-constraint',
+        commitMessageTopic: '{{{depName}}} tool constraint',
+      });
+    } else {
+      deps.push({
+        depName: constraint,
+        currentValue: value,
+        skipReason: 'unsupported',
+        depType: 'constraint',
+        commitMessageTopic: '{{{depName}}} constraint',
+      });
+    }
+  }
+
+  for (const packageRule of coerceArray(config.data.packageRules)) {
+    for (const [constraint, value] of Object.entries(
+      coerceObject(packageRule.constraints),
+    )) {
+      if (isToolName(constraint)) {
+        const toolConfig = getToolConfig(constraint);
+        deps.push({
+          ...toolConfig,
+          depName: constraint,
+          currentValue: value,
+          depType: 'tool-constraint',
+          commitMessageTopic: '{{{depName}}} tool constraint',
+        });
+      } else {
+        deps.push({
+          depName: constraint,
+          currentValue: value,
+          skipReason: 'unsupported',
+          depType: 'constraint',
+          commitMessageTopic: '{{{depName}}} constraint',
+        });
+      }
+    }
   }
 
   return isNonEmptyArray(deps) ? { deps } : null;

@@ -6,17 +6,23 @@ vi.mock('../../../util/fs/index.ts');
 describe('modules/manager/bun/extract', () => {
   describe('extractAllPackageFiles()', () => {
     it('ignores non-bun files', async () => {
-      expect(await extractAllPackageFiles({}, ['package.json'])).toEqual([]);
+      await expect(
+        extractAllPackageFiles({}, ['package.json']),
+      ).resolves.toEqual([]);
     });
 
     describe('when using the .lockb lockfile format', () => {
       it('ignores missing package.json file', async () => {
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
+        await expect(
+          extractAllPackageFiles({}, ['bun.lockb']),
+        ).resolves.toEqual([]);
       });
 
       it('ignores invalid package.json file', async () => {
         vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
+        await expect(
+          extractAllPackageFiles({}, ['bun.lockb']),
+        ).resolves.toEqual([]);
       });
 
       it('handles null response', async () => {
@@ -29,7 +35,9 @@ describe('modules/manager/bun/extract', () => {
             _from: 1,
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
+        await expect(
+          extractAllPackageFiles({}, ['bun.lockb']),
+        ).resolves.toEqual([]);
       });
 
       it('parses valid package.json file', async () => {
@@ -70,12 +78,16 @@ describe('modules/manager/bun/extract', () => {
 
     describe('when using the .lock lockfile format', () => {
       it('ignores missing package.json file', async () => {
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
+        await expect(extractAllPackageFiles({}, ['bun.lock'])).resolves.toEqual(
+          [],
+        );
       });
 
       it('ignores invalid package.json file', async () => {
         vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
+        await expect(extractAllPackageFiles({}, ['bun.lock'])).resolves.toEqual(
+          [],
+        );
       });
 
       it('handles null response', async () => {
@@ -103,7 +115,9 @@ describe('modules/manager/bun/extract', () => {
             },
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toMatchObject([
+        await expect(
+          extractAllPackageFiles({}, ['bun.lock']),
+        ).resolves.toMatchObject([
           {
             deps: [
               {
@@ -173,6 +187,50 @@ describe('modules/manager/bun/extract', () => {
           lockFiles: ['bun.lock'],
         },
       ]);
+    });
+
+    it('adds nothing when no file matches the declared workspaces', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: ['packages/*'],
+        }),
+      );
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([{ packageFile: 'package.json' }]);
+    });
+
+    it('skips a workspace package file that yields nothing', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: ['packages/*'],
+          }),
+        )
+        // the workspace package file cannot be read
+        .mockResolvedValueOnce(null);
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([{ packageFile: 'package.json' }]);
     });
 
     it('skips workspace processing when workspaces is not a valid array', async () => {

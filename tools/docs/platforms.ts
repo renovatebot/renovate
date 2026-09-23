@@ -26,9 +26,8 @@ export async function generatePlatforms(
       md += '\n\n';
 
       md += codeBlock`
-        <!-- prettier-ignore -->
         !!! warning "This feature is flagged as experimental"
-            Experimental features might be changed or even removed at any time.
+          Experimental features might be changed or even removed at any time.
       `;
       md += '\n\n';
 

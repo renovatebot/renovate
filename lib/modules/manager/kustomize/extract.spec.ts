@@ -267,6 +267,11 @@ describe('modules/manager/kustomize/extract', () => {
   });
 
   describe('image extraction', () => {
+    it('should return null for image with name only (no newTag/newName/digest)', () => {
+      const pkg = extractImage({ name: 'foo' });
+      expect(pkg).toBeNull();
+    });
+
     it('should return null on a null input', () => {
       const pkg = extractImage({
         name: '',
@@ -591,6 +596,20 @@ describe('modules/manager/kustomize/extract', () => {
       const content = codeBlock`
       apiVersion: kustomize.config.k8s.io/v1beta1
       kind: Kustomization
+      `;
+      expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
+    });
+
+    it('skips components, images and helm charts that yield nothing', () => {
+      const content = codeBlock`
+        apiVersion: kustomize.config.k8s.io/v1beta1
+        kind: Kustomization
+        components:
+          - ./local-component
+        images:
+          - name: ''
+        helmCharts:
+          - name: ''
       `;
       expect(extractPackageFile(content, 'kustomization.yaml', {})).toBeNull();
     });
@@ -1108,7 +1127,7 @@ describe('modules/manager/kustomize/extract', () => {
         const sample: any = {
           currentValue: version,
         };
-        if (regEx(/(?:github\.com)(:|\/)/).test(url)) {
+        if (regEx(/(?:github\.com)(?::|\/)/).test(url)) {
           sample.depName = project;
           sample.datasource = GithubTagsDatasource.id;
         } else {

@@ -7,6 +7,7 @@ export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['helmfile.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://helmfile.readthedocs.io';
 export const categories: Category[] = ['cd', 'helm', 'kubernetes'];

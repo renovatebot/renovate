@@ -7,7 +7,7 @@ import * as packageCache from './index.ts';
 import { resolveTtlValues } from './ttl.ts';
 import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 
-interface CachedOptions {
+export interface CachedOptions {
   /**
    * The cache namespace.
    */
@@ -30,6 +30,12 @@ interface CachedOptions {
    * @default true
    */
   cacheable?: boolean;
+
+  /**
+   * Whether a cache result is safe to use and store for this call.
+   * @default value !== undefined
+   */
+  shouldCacheResult?: (value: unknown) => boolean;
 
   /**
    * Enable extended hard TTL for graceful degradation.
@@ -58,11 +64,17 @@ export async function withCache<T>(
     fallback = false,
   } = options;
 
-  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages', false);
+  const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
   const isCacheable = cachePrivatePackages || cacheable;
   if (!isCacheable) {
     return fn();
   }
+
+  function defaultShouldCacheResult(_value: unknown): boolean {
+    return true;
+  }
+  const shouldCacheResult =
+    options.shouldCacheResult ?? defaultShouldCacheResult;
 
   // istanbul ignore if -- TODO: add test #40625
   if (!namespace || !key) {
@@ -95,7 +107,7 @@ export async function withCache<T>(
     const hardTtlMinutes = fallback ? resolvedHardTtl : softTtlMinutes;
 
     let fallbackValue: unknown;
-    if (cachedRecord) {
+    if (cachedRecord && shouldCacheResult(cachedRecord.value)) {
       const now = DateTime.local();
       const cachedAt = DateTime.fromISO(cachedRecord.cachedAt);
 
@@ -124,7 +136,7 @@ export async function withCache<T>(
       throw err;
     }
 
-    if (!isUndefined(newValue)) {
+    if (!isUndefined(newValue) && shouldCacheResult(newValue)) {
       const newRecord: CachedRecord = {
         cachedAt: DateTime.local().toISO(),
         value: newValue,

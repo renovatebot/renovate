@@ -1,4 +1,8 @@
+import type { Category } from '../../../constants/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+
+export const categories: Category[] = ['helm', 'kubernetes'];
+
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -6,6 +10,7 @@ export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['vendir.lock.yml'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const displayName = 'vendir';
 export const url = 'https://carvel.dev/vendir/docs/latest';

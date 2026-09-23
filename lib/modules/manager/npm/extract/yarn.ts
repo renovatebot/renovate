@@ -36,7 +36,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
             const { selector } = structUtils.parseRange(range);
 
             logger.trace({ entry, version: val.version });
-            lockedVersions[packageName + '@' + selector] = parsed[key].version;
+            lockedVersions[`${packageName}@${selector}`] = parsed[key].version;
           } catch (err) {
             logger.debug(
               { entry, err },
@@ -120,7 +120,8 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   if (lockfileVersion && lockfileVersion >= 8) {
     // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
     return '^3.0.0';
-  } else if (lockfileVersion && lockfileVersion >= 6) {
+  }
+  if (lockfileVersion && lockfileVersion >= 6) {
     // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
     return '^2.2.0';
   }

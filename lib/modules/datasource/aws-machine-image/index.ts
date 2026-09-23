@@ -1,7 +1,8 @@
 import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { coerceArray } from '../../../util/array.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -49,9 +50,19 @@ export class AwsMachineImageDatasource extends Datasource {
 
   private getEC2Client(config: AwsClientConfig): EC2Client {
     const { profile, region } = config;
+    const { password, token, username } = hostRules.find({
+      hostType: AwsMachineImageDatasource.id,
+    });
     return new EC2Client({
       region,
-      credentials: fromNodeProviderChain({ profile }),
+      credentials:
+        username && password
+          ? {
+              accessKeyId: username,
+              secretAccessKey: password,
+              sessionToken: token,
+            }
+          : fromNodeProviderChain({ profile }),
     });
   }
 
@@ -77,37 +88,36 @@ export class AwsMachineImageDatasource extends Datasource {
     return [filters, config];
   }
 
-  private async _getSortedAwsMachineImages(
+  private async fetchSortedAwsMachineImages(
     serializedAmiFilter: string,
   ): Promise<Image[]> {
     const [amiFilter, clientConfig] = this.loadConfig(serializedAmiFilter);
     const amiFilterCmd = this.getAmiFilterCommand(amiFilter);
     const ec2Client = this.getEC2Client(clientConfig);
     const matchingImages = await ec2Client.send(amiFilterCmd);
-    matchingImages.Images = matchingImages.Images ?? [];
+    matchingImages.Images = coerceArray(matchingImages.Images);
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate
         ? Date.parse(image1.CreationDate)
-        : /* v8 ignore next */ 0; // TODO: add date coersion util
+        : /* v8 ignore next -- AWS SDK types CreationDate as optional, but EC2 always returns it for images */ 0; // TODO: add date coersion util
 
       const ts2 = image2.CreationDate
         ? Date.parse(image2.CreationDate)
-        : /* v8 ignore next */ 0; // TODO: add date coersion util
+        : /* v8 ignore next -- AWS SDK types CreationDate as optional, but EC2 always returns it for images */ 0; // TODO: add date coersion util
       return ts1 - ts2;
     });
   }
 
   getSortedAwsMachineImages(serializedAmiFilter: string): Promise<Image[]> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getSortedAwsMachineImages:${serializedAmiFilter}`,
       },
-      () => this._getSortedAwsMachineImages(serializedAmiFilter),
+      () => this.fetchSortedAwsMachineImages(serializedAmiFilter),
     );
   }
 
-  private async _getDigest(
+  private async fetchDigest(
     { packageName: serializedAmiFilter }: GetReleasesConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -129,54 +139,47 @@ export class AwsMachineImageDatasource extends Datasource {
       return null;
     }
 
-    const res = await this.getReleases({ packageName: serializedAmiFilter });
-    return res?.releases?.[0]?.newDigest ?? /* v8 ignore next */ null; // TODO: needs test
+    return images.at(-1)!.Name ?? null;
   }
 
   override getDigest(
     config: GetReleasesConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getDigest:${config.packageName}:${newValue ?? ''}`,
         fallback: true,
       },
-      () => this._getDigest(config, newValue),
+      () => this.fetchDigest(config, newValue),
     );
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    const latestImage = images[images.length - 1];
-    if (!latestImage?.ImageId) {
+    if (!images.length || !images.at(-1)!.ImageId) {
       return null;
     }
     return {
-      releases: [
-        {
-          version: latestImage.ImageId,
-          releaseTimestamp: asTimestamp(latestImage.CreationDate),
-          isDeprecated:
-            Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
-            this.now,
-          newDigest: latestImage.Name,
-        },
-      ],
+      releases: images.map((image) => ({
+        version: image.ImageId!,
+        releaseTimestamp: asTimestamp(image.CreationDate),
+        isDeprecated:
+          Date.parse(image.DeprecationTime ?? this.now.toString()) < this.now,
+        newDigest: image.Name,
+      })),
     };
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsMachineImageDatasource.id}`,
         key: `getReleases:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

@@ -4,10 +4,10 @@ describe('util/memoize', () => {
   let calledTimes = 0;
 
   it('works', () => {
-    const fn = (): number => {
+    function fn(): number {
       calledTimes += 1;
       return calledTimes;
-    };
+    }
     const memFn = memoize(fn);
 
     expect(memFn()).toBe(1);

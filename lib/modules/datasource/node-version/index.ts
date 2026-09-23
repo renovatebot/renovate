@@ -1,11 +1,10 @@
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/node/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
-import type { NodeRelease } from './types.ts';
+import { NodeReleases } from './schema.ts';
 
 export class NodeVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -27,10 +26,10 @@ export class NodeVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/nodejs/node';
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -41,13 +40,12 @@ export class NodeVersionDatasource extends Datasource {
       releases: [],
     };
     try {
-      const resp = (
-        await this.http.getJsonUnchecked<NodeRelease[]>(
-          joinUrlParts(registryUrl, 'index.json'),
-        )
-      ).body;
+      const resp = await this.http.getJson(
+        joinUrlParts(registryUrl, 'index.json'),
+        NodeReleases,
+      );
       result.releases.push(
-        ...resp.map(({ version, date, lts }) => ({
+        ...resp.body.map(({ version, date, lts }) => ({
           version,
           releaseTimestamp: asTimestamp(date),
           isStable: lts !== false,
@@ -61,14 +59,13 @@ export class NodeVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         // TODO: types (#22198)
         key: `${config.registryUrl}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

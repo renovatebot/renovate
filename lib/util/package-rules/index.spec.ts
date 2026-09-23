@@ -1,4 +1,5 @@
 import { hostRules } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
@@ -14,6 +15,10 @@ type TestConfig = PackageRuleInputConfig & {
 };
 
 describe('util/package-rules/index', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   const config1: TestConfig = {
     foo: 'bar',
 
@@ -62,7 +67,7 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    expect(await applyPackageRules(config)).toEqual({
+    await expect(applyPackageRules(config)).resolves.toEqual({
       ...config,
       labels: ['bump'],
     });
@@ -197,6 +202,58 @@ describe('util/package-rules/index', () => {
     expect(res.enabled).toBeTrue();
     expect(res.skipReason).toBeUndefined();
     expect(res.skipStage).toBeUndefined();
+  });
+
+  it('unsets skipReason=unknown-registry if a rule gives it a registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('unsets skipReason=unknown-registry if config gives it a default registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      defaultRegistryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+      packageRules: [],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('keeps skipReason=unknown-registry when enabled=true gives it no registry', async () => {
+    // the dependency is wanted, but there is still nowhere to look it up
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          enabled: true,
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBe('unknown-registry');
+    expect(res.skipStage).toBe('extract');
   });
 
   it('does not set skipReason=package-rules if the last packageRule has force.enabled=true', async () => {
@@ -766,7 +823,7 @@ describe('util/package-rules/index', () => {
         {
           matchSourceUrls: [
             'https://github.com/foo/bar',
-            'https://github.com/facebook/react',
+            'https://github.com/react/react',
           ],
           // @ts-expect-error -- testing
           x: 1,
@@ -777,7 +834,7 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       packageName: 'a',
       updateType: 'patch' as UpdateType,
-      sourceUrl: 'https://github.com/facebook/react-native',
+      sourceUrl: 'https://github.com/react/react-native',
     };
     const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -860,6 +917,10 @@ describe('util/package-rules/index', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add(hostRule);
+    });
+
+    afterEach(() => {
+      GlobalConfig.reset();
     });
 
     it('matches matchConfidence', async () => {
@@ -945,6 +1006,67 @@ describe('util/package-rules/index', () => {
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
       );
     });
+
+    it('does not throw when unauthenticated on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+          },
+        ],
+      };
+      hostRules.clear();
+
+      await expect(applyPackageRules(config)).resolves.not.toThrow();
+    });
+
+    it('does not apply the packageRule on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+            // @ts-expect-error -- testing
+            x: 1,
+          },
+        ],
+      };
+      hostRules.clear();
+
+      const res = await applyPackageRules(config);
+      expect(res.x).toBeUndefined();
+    });
+
+    it('uses productLinks.documentation in error message URL', async () => {
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://custom.example.com/' },
+      });
+      hostRules.clear();
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+            // @ts-expect-error -- testing
+            x: 1,
+          },
+        ],
+      };
+
+      await expect(applyPackageRules(config)).rejects.toMatchObject({
+        validationMessage:
+          'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://custom.example.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
+      });
+    });
   });
 
   it('filters naked depType', async () => {
@@ -998,27 +1120,21 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^1.0.0',
-        currentVersion: '1.0.3',
-      },
+      packageName: 'test',
+      currentValue: '^1.0.0',
+      currentVersion: '1.0.3',
     });
     expect(res1.x).toBeDefined();
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^1.0.0',
-      },
+      packageName: 'test',
+      currentValue: '^1.0.0',
     });
     expect(res2.x).toBeUndefined();
     const res3 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        lockedVersion: '^1.0.0',
-      },
+      packageName: 'test',
+      lockedVersion: '^1.0.0',
     });
     expect(res3.x).toBeUndefined();
   });
@@ -1037,11 +1153,9 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '2.4.6',
-        currentVersion: '2.4.6',
-      },
+      packageName: 'test',
+      currentValue: '2.4.6',
+      currentVersion: '2.4.6',
     });
     expect(res1.x).toBeDefined();
   });
@@ -1060,18 +1174,14 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^2.0.0',
-      },
+      packageName: 'test',
+      currentValue: '^2.0.0',
     });
     expect(res1.x).toBeDefined();
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '~2.0.0',
-      },
+      packageName: 'test',
+      currentValue: '~2.0.0',
     });
     expect(res2.x).toBeUndefined();
   });
@@ -1089,11 +1199,9 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     expect(res1.x).toBeDefined();
   });
@@ -1111,19 +1219,15 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '5.6.0',
-        currentVersion: '5.6.0',
-      },
+      packageName: 'test',
+      currentValue: '5.6.0',
+      currentVersion: '5.6.0',
     });
     expect(res1.x).toBeDefined();
     expect(res2.x).toBeUndefined();
@@ -1142,19 +1246,15 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '5.6.0',
-        currentVersion: '5.6.0',
-      },
+      packageName: 'test',
+      currentValue: '5.6.0',
+      currentVersion: '5.6.0',
     });
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBeDefined();
@@ -1231,9 +1331,9 @@ describe('util/package-rules/index', () => {
   });
 
   it('empty rules', async () => {
-    expect(
-      await applyPackageRules({ ...config1, packageRules: null as never }),
-    ).toEqual({
+    await expect(
+      applyPackageRules({ ...config1, packageRules: null as never }),
+    ).resolves.toEqual({
       foo: 'bar',
       packageRules: null,
     });
@@ -1524,5 +1624,57 @@ describe('util/package-rules/index', () => {
     };
     const res = await applyPackageRules(config);
     expect(res.sourceUrl).toBe('https://github.com/hashicorp/aws');
+  });
+
+  describe('packageRules array handling', () => {
+    it('returns the input packageRules array without re-cloning it', async () => {
+      const config: TestConfig = {
+        packageName: 'a',
+        packageRules: [
+          {
+            matchPackageNames: ['a'],
+            // @ts-expect-error -- testing
+            x: 2,
+          },
+        ],
+      };
+      const res = await applyPackageRules(config);
+      expect(res.x).toBe(2);
+      expect(res.packageRules).toBe(config.packageRules);
+    });
+
+    it('does not add a packageRules key when the input has none', async () => {
+      const config: PackageRuleInputConfig = { packageName: 'a' };
+      const res = await applyPackageRules(config);
+      expect(res.packageRules).toBeUndefined();
+    });
+
+    it('keeps an empty packageRules array', async () => {
+      const config: PackageRuleInputConfig = {
+        packageName: 'a',
+        packageRules: [],
+      };
+      const res = await applyPackageRules(config);
+      expect(res.packageRules).toBe(config.packageRules);
+    });
+
+    it('appends nested packageRules carried by an applied rule', async () => {
+      const nestedRule = {
+        matchPackageNames: ['b'],
+        y: 3,
+      };
+      const config: TestConfig = {
+        packageName: 'a',
+        packageRules: [
+          {
+            matchPackageNames: ['a'],
+            packageRules: [nestedRule],
+          },
+        ],
+      };
+      const res = await applyPackageRules(config);
+      expect(res.packageRules).toHaveLength(2);
+      expect(res.packageRules![1]).toEqual(nestedRule);
+    });
   });
 });

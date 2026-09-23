@@ -12,8 +12,8 @@ import {
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
 export const urls = [
-  'https://changelogs.ubuntu.com/meta-release',
-  'https://debian.pages.debian.net/distro-info-data/ubuntu.csv',
+  '[Ubuntu meta-release](https://changelogs.ubuntu.com/meta-release)',
+  '[Ubuntu distro info data](https://debian.pages.debian.net/distro-info-data/ubuntu.csv)',
 ];
 export const supportsRanges = false;
 
@@ -23,7 +23,9 @@ const di = new DistroInfo('data/ubuntu-distro-info.json');
 
 function isValid(input: string): boolean {
   if (
-    regEx(/^(0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](\.[0-9]{1,2})?$/).test(input)
+    regEx(/^(?:0[4-5]|[6-9]|[1-9][0-9])\.[0-9][0-9](?:\.[0-9]{1,2})?$/).test(
+      input,
+    )
   ) {
     return true;
   }

@@ -33,25 +33,24 @@ export function extractPackageFile(
           ).exec(internalLine);
           if (middleLineMatch?.groups) {
             currentFrom += middleLineMatch.groups.currentFrom;
-            replaceString += '\n' + middleLineMatch.groups.replaceString;
+            replaceString += `\n${middleLineMatch.groups.replaceString}`;
           } else {
             const finalLineMatch = regEx(
               /^(?<replaceString>\s*(?<currentFrom>[^\s'"]+)['"])$/,
             ).exec(internalLine);
             if (finalLineMatch?.groups) {
               currentFrom += finalLineMatch.groups.currentFrom;
-              replaceString += '\n' + finalLineMatch.groups.replaceString;
+              replaceString += `\n${finalLineMatch.groups.replaceString}`;
 
               const dep = getDep(currentFrom, true, config.registryAliases);
               dep.depType = 'docker';
               dep.replaceString = replaceString;
-              if (dep.autoReplaceStringTemplate) {
-                const d = '@{{newDigest}}';
-                const c = firstLineMatch.groups.leading.length + 1;
-                const nd = `\\\n${' '.repeat(c)}${d}`;
-                const replaced = dep.autoReplaceStringTemplate.replace(d, nd);
-                dep.autoReplaceStringTemplate = `"${replaced}"`;
-              }
+              const d = '@{{newDigest}}';
+              const c = firstLineMatch.groups.leading.length + 1;
+              const nd = `\\\n${' '.repeat(c)}${d}`;
+              // getDep always set it, see second parameter
+              const replaced = dep.autoReplaceStringTemplate!.replace(d, nd);
+              dep.autoReplaceStringTemplate = `"${replaced}"`;
               deps.push(dep);
             }
             break;

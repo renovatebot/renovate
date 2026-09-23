@@ -128,7 +128,34 @@ export interface PostprocessReleaseConfig {
 
 export type PostprocessReleaseResult = Release | 'reject';
 
-export type RegistryStrategy = 'first' | 'hunt' | 'merge';
+export type RegistryStrategy =
+  /**
+   * Only the first registry URL is queried.
+   *
+   * If multiple URLs are configured a warning is logged and the rest are ignored. Returns whatever the first registry returns, including `null`.
+   */
+  | 'first'
+  /**
+   * Registries are tried in order, returning the first non-null result.
+   *
+   * `null` results and non-fatal errors (HTTP 401/403/404 and generic errors) are skipped and the next registry is tried.
+   * An `ExternalHostError` aborts immediately (unless the cause is `HOST_DISABLED`, which returns `null`).
+   *
+   * Returns `null` when all registries are exhausted without a result.
+   *
+   * The default when `registryStrategy` is `undefined`.
+   */
+  | 'hunt'
+  /**
+   * All registries are queried.
+   *
+   * Releases are merged and deduplicated by version; tags are merged with later registries' values taking precedence for duplicate keys.
+   *
+   * An `ExternalHostError` aborts immediately.
+   *
+   * Returns `null` when all registries fail.
+   */
+  | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
@@ -140,9 +167,8 @@ export interface DatasourceApi extends ModuleApi {
 
   /**
    * Strategy to use when multiple registryUrls are available to the datasource.
-   * - `first`: only the first registryUrl will be tried and others ignored
-   * - `hunt`: registryUrls will be tried in order until one returns a result
-   * - `merge`: all registryUrls will be tried and the results merged if more than one returns a result
+   *
+   * @see RegistryStrategy
    */
   registryStrategy?: RegistryStrategy | undefined;
 

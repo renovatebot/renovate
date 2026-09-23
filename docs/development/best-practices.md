@@ -31,6 +31,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 - Always add unit tests for full code coverage
   - Only use [`v8` comments](https://github.com/AriPerkkio/ast-v8-to-istanbul?tab=readme-ov-file#ignore-hints) for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `v8` comments
+  - Do not add a line count after `next`, for example `next 3`, because V8 does not honor the count and always exempts only the next code block
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
 - Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
@@ -163,12 +164,16 @@ It is OK to not inline metadata if it's complex, but in that case first think wh
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a static `msg` component, so they can be automatically grouped or associated.
 
+When logging an error object, always put it under the `err` metadata key, at any log level.
+Bunyan only applies the error serializer (stack handling, redaction) to the `err` key, and a single key keeps error logs searchable.
+
 Good:
 
 ```ts
 logger.debug({ config }, 'Full config');
 logger.debug(`Generated branchName: ${branchName}`);
 logger.warn({ presetName }, 'Failed to look up preset');
+logger.debug({ packageFile, err: parsed.error }, 'Failed to parse file');
 ```
 
 Avoid:
@@ -176,6 +181,7 @@ Avoid:
 ```ts
 logger.debug({ branchName }, 'Generated branchName');
 logger.warn(`Failed to look up preset ${presetName}`);
+logger.debug({ packageFile, error: parsed.error }, 'Failed to parse file');
 ```
 
 ## Array constructor
@@ -286,19 +292,33 @@ if (end) {
   - For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
 - Prefer `vi.spyOn` for mocking single functions, or mock entire modules
   - Avoid overwriting functions, for example: (`func = vi.fn();`)
+- Use plain `vi.mock('./module.ts', ()=>({ defaut: vi.fn(), some: vi.fn() }))` when only a few exports are touched, and stub them explicitly
+- Use `vi.mock('./module.ts', () => mockDeep())` only when the module is pulled in transitively and hand-stubbing every export is impractical
+  - `mockDeep` returns a mock for any property access, so typos in mocked names won't fail the test
 - Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
-- Avoid `toMatchSnapshot`, only use it for:
-  - huge strings like the Renovate PR body text
-  - huge complex objects where you only need to test parts
+- Do not use snapshot matchers (`toMatchSnapshot`, `toMatchInlineSnapshot`, `toThrowErrorMatchingSnapshot`), write explicit assertions instead
+  - For huge strings like the Renovate PR body text, assert on the sections the test is about with `toContain`, `toStartWith` or `toEndWith`; compare the whole string with `toBe` only when producing exactly that text is the point of the test
+  - For huge complex objects where you only need to test parts, use `toMatchObject`
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
   - Use `partial<T>()` from `test/util` if only a partial object is required
+  - Use `fakeSha(seed)` from `test/util` to generate deterministic, valid `LongCommitSha` values in tests
 
 ## Fixtures
 
 Where possible, reduce the test fixture to a size where an inline `codeBlock` is possible to use instead of a separate fixture file.
 Inline `codeBlock`s improve performance plus are more readable.
+
+```ts
+import { codeBlock } from 'common-tags';
+
+const input = codeBlock`
+  line one
+  line two
+`;
+// → 'line one\nline two'
+```
 
 Use the `Fixture` class if loading fixtures from files.
 For example:
@@ -330,7 +350,22 @@ Declare types and function prototypes with [JSDoc](https://jsdoc.app/index.html)
 
 ## regex
 
-Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing multiple groups, for example: `(?<groupName>CapturedGroup)`.
+Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing groups.
+Prefer named groups even for a single capture — positional references (`match[1]`) break silently when the pattern changes.
+Non-capturing groups (`(?:...)`) are always fine and encouraged when the captured value is not needed.
+
+Always use the `regEx()` utility from `lib/util/regex.ts` instead of the `RegExp` constructor or regex literals.
+It transparently uses the RE2 engine when available for safer, denial-of-service-resistant matching.
+
+```ts
+import { regEx } from '~/lib/util/regex';
+
+const pattern = regEx(/^(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?$/);
+const match = pattern.exec(version);
+if (match?.groups) {
+  const { major, minor, patch } = match.groups;
+}
+```
 
 ## Windows
 
