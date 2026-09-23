@@ -16,11 +16,15 @@ export class DotnetVersionDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = [
-    'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [
+      'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
+    ];
+  }
 
   override releaseTimestampSupport = true;
   override releaseTimestampNote =
@@ -37,7 +41,7 @@ export class DotnetVersionDatasource extends Datasource {
     }
 
     try {
-      const registryUrl = this.defaultRegistryUrls[0];
+      const registryUrl = this.getDefaultRegistryUrls('')[0];
       const { body: urls } = await this.http.getJson(
         registryUrl,
         ReleasesIndex,

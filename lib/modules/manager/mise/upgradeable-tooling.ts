@@ -138,12 +138,13 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
         /^oracle-graalvm-(?<version>\d\S+)/,
       ).exec(version)?.groups;
       if (oracleGraalvmJdkMatches) {
-        return {
+        const result = {
           datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
           currentValue: oracleGraalvmJdkMatches.version,
           ...shortJavaVersioning(oracleGraalvmJdkMatches.version),
+          packageName: 'oracle-graalvm-jdk',
         };
+        return result;
       }
 
       return undefined;
