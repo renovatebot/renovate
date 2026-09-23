@@ -243,7 +243,7 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('falls back to the primitive-directory boundary for Azure pins without _git', () => {
+    it('inserts _git for Azure pins which leave it out', () => {
       const content = codeBlock`
         dependencies:
           apm:
@@ -252,7 +252,7 @@ describe('modules/manager/apm/extract', () => {
       expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
         {
           depName: 'dev.azure.com/org/project/repo/instructions/security',
-          packageName: 'https://dev.azure.com/org/project/repo',
+          packageName: 'https://dev.azure.com/org/project/_git/repo',
           datasource: GitTagsDatasource.id,
           currentValue: 'v1.0.0',
         },

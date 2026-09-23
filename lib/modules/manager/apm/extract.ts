@@ -2,7 +2,7 @@ import { isTruthy } from '@sindresorhus/is';
 import type { PlatformFamilyId } from '../../../constants/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { detectPlatform, splitRepositoryPath } from '../../../util/common.ts';
+import { detectPlatform, getRepositoryPath } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -83,14 +83,18 @@ const virtualFileRegex = regEx(/\.(?:prompt|instructions|chatmode|agent)\.md$/);
  */
 function resolveRepoPath(
   platform: PlatformFamilyId | null,
+  host: string,
   segments: string[],
 ): string | null {
   if (segments.length < 2) {
     return null;
   }
-  const split = splitRepositoryPath(platform, segments);
-  if (split) {
-    return split.repository.join('/');
+  const repositoryPath = getRepositoryPath(
+    platform,
+    `https://${host}/${segments.join('/')}`,
+  );
+  if (repositoryPath) {
+    return repositoryPath;
   }
   let boundary = segments.length;
   for (let i = 2; i < segments.length; i++) {
@@ -191,6 +195,7 @@ export function parseApmDependency(
   const platform = detectPlatform(`https://${host}`);
   const repoPath = resolveRepoPath(
     platform,
+    host,
     hasHost ? segments.slice(1) : segments,
   );
 

@@ -64,11 +64,20 @@ export interface PlatformFamily {
   webDirPath: string;
 
   /**
-   * How many of the host-stripped path segments name the repository, so that a
-   * consumer can tell a repository apart from a path within it. `null` when the
-   * family's URL layout does not fix it and only the caller's ecosystem can say.
+   * The repository path within the host, given the host-stripped path segments,
+   * so that a consumer can tell a repository apart from a path inside it. Spelled
+   * the way the family's own git URLs spell it, which for Azure DevOps means the
+   * `_git` segment is inserted when the caller left it out.
+   *
+   * `null` when the family's URL layout does not fix where the repository ends
+   * and only the caller's own ecosystem can say.
    */
-  repositorySegmentCount: (segments: string[]) => number | null;
+  repositoryPath: (segments: string[]) => string | null;
+}
+
+/** `owner/repo`, the layout of every family which does not nest. */
+function ownerRepo(segments: string[]): string | null {
+  return segments.length >= 2 ? segments.slice(0, 2).join('/') : null;
 }
 
 /**
@@ -88,9 +97,18 @@ export const PLATFORM_FAMILIES = {
     webDirPath: 'tree/HEAD',
     // `org/project/repo`, which the web UI and the clone URL both spell
     // `org/project/_git/repo`.
-    repositorySegmentCount: (segments: string[]) => {
+    repositoryPath: (segments: string[]) => {
       const gitSegment = segments.indexOf('_git');
-      return gitSegment === -1 ? 3 : gitSegment + 2;
+      if (gitSegment === -1) {
+        return segments.length >= 3
+          ? `${segments[0]}/${segments[1]}/_git/${segments[2]}`
+          : null;
+      }
+      // `_git` always follows at least the organization and the project, and a
+      // team project may sit between them.
+      return gitSegment >= 2 && segments.length > gitSegment + 1
+        ? segments.slice(0, gitSegment + 2).join('/')
+        : null;
     },
   },
   'bitbucket-server': {
@@ -105,8 +123,8 @@ export const PLATFORM_FAMILIES = {
     apiBaseUrl: (baseUrl: string) => `${baseUrl}rest/api/1.0/`,
     webDirPath: 'browse',
     // Data Center serves a repository as both `projects/<key>/repos/<slug>` and
-    // `scm/<key>/<slug>`, so the count depends on which one a caller holds.
-    repositorySegmentCount: () => null,
+    // `scm/<key>/<slug>`, so the layout depends on which one a caller holds.
+    repositoryPath: () => null,
   },
   bitbucket: {
     apiUsingHostTypes: ['bitbucket', 'bitbucket-changelog', 'bitbucket-tags'],
@@ -115,7 +133,7 @@ export const PLATFORM_FAMILIES = {
     // Bitbucket Cloud serves every instance from one API host.
     apiBaseUrl: (_baseUrl: string) => 'https://api.bitbucket.org/',
     webDirPath: 'src/HEAD',
-    repositorySegmentCount: () => 2,
+    repositoryPath: ownerRepo,
   },
   forgejo: {
     apiUsingHostTypes: [
@@ -128,7 +146,7 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'forgejo-tags',
     apiBaseUrl: (baseUrl: string) => `${baseUrl}api/v1/`,
     webDirPath: 'tree/HEAD',
-    repositorySegmentCount: () => 2,
+    repositoryPath: ownerRepo,
   },
   gitea: {
     apiUsingHostTypes: [
@@ -141,7 +159,7 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'gitea-tags',
     apiBaseUrl: (baseUrl: string) => `${baseUrl}api/v1/`,
     webDirPath: 'tree/HEAD',
-    repositorySegmentCount: () => 2,
+    repositoryPath: ownerRepo,
   },
   github: {
     apiUsingHostTypes: [
@@ -166,7 +184,7 @@ export const PLATFORM_FAMILIES = {
         ? 'https://api.github.com/'
         : `${baseUrl}api/v3/`,
     webDirPath: 'tree/HEAD',
-    repositorySegmentCount: () => 2,
+    repositoryPath: ownerRepo,
   },
   gitlab: {
     apiUsingHostTypes: [
@@ -182,6 +200,6 @@ export const PLATFORM_FAMILIES = {
     apiBaseUrl: (baseUrl: string) => `${baseUrl}api/v4/`,
     webDirPath: 'tree/HEAD',
     // A project slug may sit under any number of nested groups.
-    repositorySegmentCount: () => null,
+    repositoryPath: () => null,
   },
 } satisfies Record<PlatformFamilyId, PlatformFamily>;

@@ -1,4 +1,4 @@
-import { isNumber } from '@sindresorhus/is';
+import { isNumber, isTruthy } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { parse as jsoncWeaverParse } from 'jsonc-weaver';
 import type { JsonValue } from 'type-fest';
@@ -9,6 +9,7 @@ import type { PlatformFamilyId } from '../constants/index.ts';
 import { PLATFORM_FAMILIES } from '../constants/index.ts';
 import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
+import { coerceArray } from './array.ts';
 import * as hostRules from './host-rules.ts';
 import { coerceObject } from './object.ts';
 import { parseUrl } from './url.ts';
@@ -145,27 +146,23 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
 }
 
 /**
- * Splits host-stripped path segments into the repository and whatever follows it.
+ * The repository path within a URL's host, or `null` when the platform's own layout
+ * does not fix where the repository ends - GitLab's nested groups most notably -
+ * leaving the caller to apply whatever rule its ecosystem defines.
  *
- * Returns `null` when the platform's URL layout does not fix where the repository
- * ends - GitLab's nested groups most notably - leaving the caller to apply whatever
- * rule its own ecosystem defines.
+ * `parseGitUrl` cannot answer this: it reads the last path segment as the repository
+ * name, so a URL which continues past the repository is misread rather than split.
  */
-export function splitRepositoryPath(
+export function getRepositoryPath(
   platform: PlatformFamilyId | null,
-  segments: string[],
-): { repository: string[]; subpath: string[] } | null {
+  url: string,
+): string | null {
   if (!platform) {
     return null;
   }
 
-  const count = PLATFORM_FAMILIES[platform].repositorySegmentCount(segments);
-  if (count === null || segments.length < count) {
-    return null;
-  }
+  const { pathname } = coerceObject(parseUrl(url));
+  const segments = coerceArray(pathname?.split('/')).filter(isTruthy);
 
-  return {
-    repository: segments.slice(0, count),
-    subpath: segments.slice(count),
-  };
+  return PLATFORM_FAMILIES[platform].repositoryPath(segments);
 }

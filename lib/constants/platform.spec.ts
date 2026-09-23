@@ -156,30 +156,33 @@ describe('constants/platform', () => {
     );
 
     it.each`
-      family                | segments                                  | count
-      ${'azure'}            | ${['org', 'project', 'repo']}             | ${3}
-      ${'azure'}            | ${['org', 'project', '_git', 'repo']}     | ${4}
-      ${'azure'}            | ${['org', 'project', '_git', 'r', 'sub']} | ${4}
-      ${'bitbucket'}        | ${['workspace', 'repo']}                  | ${2}
+      family                | segments                                  | path
+      ${'azure'}            | ${['org', 'project', 'repo']}             | ${'org/project/_git/repo'}
+      ${'azure'}            | ${['org', 'project', '_git', 'repo']}     | ${'org/project/_git/repo'}
+      ${'azure'}            | ${['org', 'project', '_git', 'r', 'sub']} | ${'org/project/_git/r'}
+      ${'azure'}            | ${['org', 'project']}                     | ${null}
+      ${'azure'}            | ${['org', 'project', '_git']}             | ${null}
+      ${'azure'}            | ${['_git', 'repo']}                       | ${null}
+      ${'azure'}            | ${['org', 'proj', 'team', '_git', 'r']}   | ${'org/proj/team/_git/r'}
+      ${'bitbucket'}        | ${['workspace', 'repo']}                  | ${'workspace/repo'}
       ${'bitbucket-server'} | ${['scm', 'key', 'repo']}                 | ${null}
-      ${'forgejo'}          | ${['owner', 'repo']}                      | ${2}
-      ${'gitea'}            | ${['owner', 'repo']}                      | ${2}
-      ${'github'}           | ${['owner', 'repo']}                      | ${2}
+      ${'forgejo'}          | ${['owner', 'repo']}                      | ${'owner/repo'}
+      ${'gitea'}            | ${['owner', 'repo']}                      | ${'owner/repo'}
+      ${'github'}           | ${['owner', 'repo', 'packages', 'ui']}    | ${'owner/repo'}
+      ${'github'}           | ${['owner']}                              | ${null}
       ${'gitlab'}           | ${['group', 'subgroup', 'repo']}          | ${null}
     `(
-      'counts $count repository segments for $family $segments',
+      'reads $path as the $family repository in $segments',
       ({
         family,
         segments,
-        count,
+        path,
       }: {
         family: PlatformFamilyId;
         segments: string[];
-        count: number | null;
+        path: string | null;
       }) => {
-        expect(PLATFORM_FAMILIES[family].repositorySegmentCount(segments)).toBe(
-          count,
-        );
+        expect(PLATFORM_FAMILIES[family].repositoryPath(segments)).toBe(path);
       },
     );
 

@@ -2,12 +2,13 @@ import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
+import type { PlatformFamilyId } from '../constants/index.ts';
 import { PLATFORM_FAMILIES } from '../constants/index.ts';
 import {
   detectPlatform,
   getInheritedOrGlobal,
+  getRepositoryPath,
   parseJson,
-  splitRepositoryPath,
 } from './common.ts';
 import * as hostRules from './host-rules.ts';
 
@@ -314,35 +315,32 @@ describe('util/common', () => {
     });
   });
 
-  describe('splitRepositoryPath()', () => {
+  describe('getRepositoryPath()', () => {
     it.each`
-      platform       | segments                                          | repository                            | subpath
-      ${'github'}    | ${['owner', 'repo']}                              | ${['owner', 'repo']}                  | ${[]}
-      ${'github'}    | ${['owner', 'repo', 'packages', 'ui']}            | ${['owner', 'repo']}                  | ${['packages', 'ui']}
-      ${'azure'}     | ${['org', 'project', '_git', 'repo']}             | ${['org', 'project', '_git', 'repo']} | ${[]}
-      ${'azure'}     | ${['org', 'project', '_git', 'repo', 'packages']} | ${['org', 'project', '_git', 'repo']} | ${['packages']}
-      ${'azure'}     | ${['org', 'project', 'repo']}                     | ${['org', 'project', 'repo']}         | ${[]}
-      ${'azure'}     | ${['org', 'project', 'repo', 'packages', 'ui']}   | ${['org', 'project', 'repo']}         | ${['packages', 'ui']}
-      ${'bitbucket'} | ${['workspace', 'repo']}                          | ${['workspace', 'repo']}              | ${[]}
+      platform    | url                                                          | path
+      ${'github'} | ${'https://github.com/owner/repo'}                           | ${'owner/repo'}
+      ${'github'} | ${'https://github.com/owner/repo/packages/ui'}               | ${'owner/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/_git/repo'}             | ${'org/project/_git/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/_git/repo/packages/ui'} | ${'org/project/_git/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/repo'}                  | ${'org/project/_git/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/repo/packages/ui'}      | ${'org/project/_git/repo'}
+      ${'gitlab'} | ${'https://gitlab.com/group/subgroup/repo'}                  | ${null}
+      ${'github'} | ${'https://github.com/owner'}                                | ${null}
+      ${'github'} | ${'not a url'}                                               | ${null}
+      ${null}     | ${'https://github.com/owner/repo'}                           | ${null}
     `(
-      '$platform $segments -> $repository + $subpath',
-      ({ platform, segments, repository, subpath }) => {
-        expect(splitRepositoryPath(platform, segments)).toEqual({
-          repository,
-          subpath,
-        });
+      'reads $path from $url',
+      ({
+        platform,
+        url,
+        path,
+      }: {
+        platform: PlatformFamilyId | null;
+        url: string;
+        path: string | null;
+      }) => {
+        expect(getRepositoryPath(platform, url)).toBe(path);
       },
     );
-
-    it.each`
-      platform    | segments
-      ${'gitlab'} | ${['group', 'subgroup', 'repo']}
-      ${null}     | ${['owner', 'repo']}
-      ${'github'} | ${['owner']}
-      ${'azure'}  | ${['org', 'project']}
-      ${'azure'}  | ${['org', 'project', '_git']}
-    `('returns null for $platform $segments', ({ platform, segments }) => {
-      expect(splitRepositoryPath(platform, segments)).toBeNull();
-    });
   });
 });
