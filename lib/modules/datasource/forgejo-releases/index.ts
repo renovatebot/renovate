@@ -12,8 +12,9 @@ export class ForgejoReleasesDatasource extends GiteaReleasesDatasource {
 
   static override readonly defaultRegistryUrls = ['https://code.forgejo.org'];
 
-  override readonly defaultRegistryUrls =
-    ForgejoReleasesDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ForgejoReleasesDatasource.defaultRegistryUrls;
+  }
 
   protected override readonly cacheNamespace: PackageCacheNamespace =
     'datasource-forgejo-releases';
