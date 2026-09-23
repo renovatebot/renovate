@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getQueryString, isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -25,8 +24,9 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     super(TerraformModuleDatasource.id);
   }
 
-  override readonly defaultRegistryUrls =
-    TerraformModuleDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return TerraformModuleDatasource.defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 
@@ -44,7 +44,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
    * registry-specific module endpoint, while other registries use the generic
    * Module Registry Protocol versions endpoint.
    */
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -84,13 +84,12 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${TerraformModuleDatasource.id}`,
         key: TerraformModuleDatasource.getCacheKey(config),
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 

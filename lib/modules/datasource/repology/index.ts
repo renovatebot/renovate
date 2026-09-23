@@ -51,7 +51,9 @@ function findPackageInResponse(
 export class RepologyDatasource extends Datasource {
   static readonly id = 'repology';
 
-  override readonly defaultRegistryUrls = ['https://repology.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://repology.org/'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -133,6 +135,7 @@ export class RepologyDatasource extends Datasource {
           pkgType,
         );
 
+        // v8 ignore else -- the resolver either returns a body or throws
         if (response) {
           const pkg = findPackageInResponse(response, repoName, pkgName, [
             pkgType,

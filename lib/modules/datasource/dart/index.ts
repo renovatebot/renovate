@@ -14,9 +14,13 @@ export class DartDatasource extends Datasource {
     super(DartDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://pub.dartlang.org/'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -47,6 +51,9 @@ export class DartDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
 
+    // `body` is only still null if the request above threw, and
+    // `handleGenericErrors()` always rethrows
+    // v8 ignore else -- unreachable
     if (body) {
       const { versions, latest } = body;
       const releases = versions

@@ -97,7 +97,9 @@ function releasesCDNUrl(packageName: string, registryUrl: string): string {
 export class PodDatasource extends Datasource {
   static readonly id = 'pod';
 
-  override readonly defaultRegistryUrls = ['https://cdn.cocoapods.org'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://cdn.cocoapods.org'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -130,6 +132,7 @@ export class PodDatasource extends Datasource {
   ): Promise<T | null> {
     try {
       const resp = await this.githubHttp.getJsonUnchecked<T>(url);
+      // v8 ignore else -- an empty json body throws before it gets here
       if (resp?.body) {
         return resp.body;
       }
@@ -218,7 +221,7 @@ export class PodDatasource extends Datasource {
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(baseUrl)) {
-      [baseUrl] = this.defaultRegistryUrls;
+      [baseUrl] = this.getDefaultRegistryUrls('');
     }
 
     let result: ReleaseResult | null = null;

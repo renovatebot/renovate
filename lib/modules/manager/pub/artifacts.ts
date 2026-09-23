@@ -4,16 +4,17 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  getSiblingFileName,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
 } from '../types.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 import { parsePubspec, parsePubspecLock } from './utils.ts';
 
 const SDK_NAMES = ['dart', 'flutter'];
@@ -41,23 +42,21 @@ export async function updateArtifacts({
   }
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-
     const isFlutter = newPackageFileContent.includes('sdk: flutter');
     const toolName = isFlutter ? 'flutter' : 'dart';
     const cmd = getExecCommand(toolName, updatedDeps, isLockFileMaintenance);
 
-    let constraint = config.constraints?.[toolName];
-    if (!constraint) {
+    const constraint = await resolveToolConstraint(config, toolName, () => {
       const pubspec = parsePubspec(packageFileName, newPackageFileContent);
       const pubspecToolName = isFlutter ? 'flutter' : 'sdk';
-      constraint = pubspec?.environment[pubspecToolName];
-
-      if (!constraint) {
-        const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
-        constraint = pubspecLock?.sdks[toolName];
+      const pubspecConstraint = pubspec?.environment[pubspecToolName];
+      if (pubspecConstraint) {
+        return pubspecConstraint;
       }
-    }
+
+      const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
+      return pubspecLock?.sdks[toolName];
+    });
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -70,34 +69,19 @@ export async function updateArtifacts({
       ],
     };
 
-    await exec(cmd, execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (oldLockFileContent === newLockFileContent) {
-      return null;
-    }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
-    ];
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent: oldLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: () => exec(cmd, execOptions),
+    });
   } catch (err) {
-    // istanbul ignore if
+    /* v8 ignore if -- defensive rethrow, not reproduced in the pub specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }
 

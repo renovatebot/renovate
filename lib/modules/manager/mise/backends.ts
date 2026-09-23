@@ -10,6 +10,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
@@ -138,6 +139,30 @@ export function createGithubToolConfig(
 }
 
 /**
+ * Create a tooling config for gitlab backend
+ * @link https://mise.jdx.dev/dev-tools/backends/gitlab.html
+ */
+export function createGitlabToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const prefix = toolOptions.version_prefix;
+
+  if (isNonEmptyString(prefix)) {
+    extractVersion = `^${RegExp.escape(prefix)}(?<version>.+)`;
+  }
+
+  return {
+    packageName: name,
+    datasource: GitlabReleasesDatasource.id,
+    currentValue: version,
+    ...(extractVersion && { extractVersion }),
+  };
+}
+
+/**
  * Create a tooling config for go backend
  * @link https://mise.jdx.dev/dev-tools/backends/go.html
  */
@@ -159,13 +184,16 @@ export function createNpmToolConfig(name: string): BackendToolingConfig {
   };
 }
 
-const pipxGitHubRegex = regEx(/^git\+https:\/\/github\.com\/(?<repo>.+)\.git$/);
+const pythonPackageGitHubRegex = regEx(
+  /^git\+https:\/\/github\.com\/(?<repo>.+)\.git$/,
+);
 
 /**
- * Create a tooling config for pipx backend
+ * Create a tooling config for the pipx and pypi backends, which share the same tool name syntax
  * @link https://mise.jdx.dev/dev-tools/backends/pipx.html
+ * @link https://mise.jdx.dev/dev-tools/backends/pypi.html
  */
-export function createPipxToolConfig(name: string): BackendToolingConfig {
+function createPythonPackageToolConfig(name: string): BackendToolingConfig {
   const isGitSyntax = name.startsWith('git+');
   // Does not support zip file url
   // Avoid type narrowing to prevent type error
@@ -178,7 +206,7 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
   if (isGitSyntax || name.includes('/')) {
     let repoName: string | undefined;
     if (isGitSyntax) {
-      repoName = pipxGitHubRegex.exec(name)?.groups?.repo;
+      repoName = pythonPackageGitHubRegex.exec(name)?.groups?.repo;
       // If the url is not a github repo, treat the version as a git ref
       if (isUndefined(repoName)) {
         return {
@@ -200,6 +228,22 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
     packageName: normalizePythonDepName(name),
     datasource: PypiDatasource.id,
   };
+}
+
+/**
+ * Create a tooling config for pipx backend
+ * @link https://mise.jdx.dev/dev-tools/backends/pipx.html
+ */
+export function createPipxToolConfig(name: string): BackendToolingConfig {
+  return createPythonPackageToolConfig(name);
+}
+
+/**
+ * Create a tooling config for pypi backend
+ * @link https://mise.jdx.dev/dev-tools/backends/pypi.html
+ */
+export function createPypiToolConfig(name: string): BackendToolingConfig {
+  return createPythonPackageToolConfig(name);
 }
 
 const spmGitHubRegex = regEx(/^https:\/\/github.com\/(?<repo>.+).git$/);

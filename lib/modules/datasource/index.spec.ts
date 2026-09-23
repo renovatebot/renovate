@@ -10,7 +10,6 @@ import {
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import * as _packageCache from '../../util/cache/package/index.ts';
-import { loadModules } from '../../util/modules.ts';
 import datasources from './api.ts';
 import { getDefaultVersioning } from './common.ts';
 import { Datasource } from './datasource.ts';
@@ -22,7 +21,6 @@ import {
   supportsDigests,
 } from './index.ts';
 import type {
-  DatasourceApi,
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
@@ -42,7 +40,9 @@ const defaultRegistriesMock: RegistriesMock = {
 
 class DummyDatasource extends Datasource {
   override defaultVersioning = 'python';
-  override defaultRegistryUrls = ['https://reg1.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] | undefined {
+    return ['https://reg1.com'];
+  }
   private registriesMock: RegistriesMock;
 
   constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -62,9 +62,9 @@ class DummyDatasource extends Datasource {
 }
 
 class DummyDatasource2 extends Datasource {
-  override defaultRegistryUrls = function () {
+  override getDefaultRegistryUrls(_packageName: string) {
     return ['https://reg1.com'];
-  };
+  }
   private registriesMock: RegistriesMock;
 
   constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -84,10 +84,12 @@ class DummyDatasource2 extends Datasource {
 }
 
 class DummyDatasource3 extends Datasource {
-  override customRegistrySupport = false;
-  override defaultRegistryUrls = function () {
+  override supportsCustomRegistry(_packageName: string) {
+    return false;
+  }
+  override getDefaultRegistryUrls(_packageName: string): string[] | undefined {
     return ['https://reg1.com'];
-  };
+  }
   private registriesMock: RegistriesMock;
 
   constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -107,7 +109,9 @@ class DummyDatasource3 extends Datasource {
 }
 
 class DummyDatasource4 extends DummyDatasource3 {
-  override defaultRegistryUrls = undefined as never;
+  override getDefaultRegistryUrls(_packageName: string): string[] | undefined {
+    return undefined;
+  }
 }
 
 class DummyDatasource5 extends Datasource {
@@ -147,6 +151,51 @@ vi.mock('../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/index', () => {
+  it('preserves representative function-only registry defaults', () => {
+    const expected = {
+      docker: ['https://index.docker.io'],
+      maven: ['https://repo.maven.apache.org/maven2'],
+      'dotnet-version': [
+        'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
+      ],
+      'python-version': ['https://www.python.org/api/v2/downloads/release'],
+      'terraform-provider': [
+        'https://registry.terraform.io',
+        'https://releases.hashicorp.com',
+      ],
+      'bitbucket-tags': ['https://bitbucket.org'],
+      'gitea-tags': ['https://gitea.com'],
+      'gitea-releases': ['https://gitea.com'],
+      'forgejo-tags': ['https://code.forgejo.org'],
+      'forgejo-releases': ['https://code.forgejo.org'],
+    };
+    for (const [id, urls] of Object.entries(expected)) {
+      const definition = getDatasources().get(id);
+      expect(definition).toBeDefined();
+      expect(definition!.getDefaultRegistryUrls('example')).toEqual(urls);
+    }
+  });
+
+  it('selects Java registry defaults and custom support by package', () => {
+    const java = getDatasources().get('java-version')!;
+    expect(java.getDefaultRegistryUrls('java-jdk')).toEqual([
+      'https://api.adoptium.net/',
+    ]);
+    expect(java.supportsCustomRegistry('java-jdk')).toBe(false);
+    expect(java.getDefaultRegistryUrls('oracle-graalvm-jdk')).toEqual([
+      'https://mise-java.jdx.dev/',
+    ]);
+    expect(java.supportsCustomRegistry('oracle-graalvm-jdk')).toBe(true);
+  });
+
+  it('invokes accessors for every registered datasource', () => {
+    for (const [id, definition] of getDatasources()) {
+      const urls = definition.getDefaultRegistryUrls(id);
+      expect(urls === undefined || Array.isArray(urls)).toBe(true);
+      expect(typeof definition.supportsCustomRegistry(id)).toBe('boolean');
+    }
+  });
+
   afterEach(() => {
     datasources.delete(datasource);
   });
@@ -172,39 +221,46 @@ describe('modules/datasource/index', () => {
       expect(getDatasourceList()).toEqual(managerList);
     });
 
-    it('validates datasource', async () => {
-      function validateDatasource(
-        module: DatasourceApi,
-        name: string,
-      ): boolean {
-        if (!module.getReleases) {
-          return false;
+    it('has consistent metadata', () => {
+      // Fields whose contract (DatasourceApi) requires them to be instance
+      // fields. Declaring one as a class `static` only is invisible to the
+      // registry (registry-URL resolution, caching) and to the docs
+      // generator, both of which read instances.
+      const metadataNames = [
+        'customRegistrySupport',
+        'registryStrategy',
+        'defaultRegistryUrls',
+        'defaultVersioning',
+        'defaultConfig',
+        'releaseTimestampSupport',
+        'releaseTimestampNote',
+        'sourceUrlSupport',
+        'sourceUrlNote',
+        'caching',
+      ];
+
+      for (const [name, ds] of getDatasources()) {
+        expect(ds.id).toBe(name);
+        expect(isFunction(ds.getReleases)).toBeTrue();
+
+        const ownInstanceProps = Object.getOwnPropertyNames(ds);
+        const ownStaticProps = Object.getOwnPropertyNames(ds.constructor);
+        for (const metadataName of metadataNames) {
+          const accessorName =
+            metadataName === 'defaultRegistryUrls'
+              ? 'getDefaultRegistryUrls'
+              : undefined;
+          const isStaticOnly =
+            ownStaticProps.includes(metadataName) &&
+            !ownInstanceProps.includes(metadataName) &&
+            !(accessorName && isFunction(ds[accessorName]));
+          expect(isStaticOnly).toBeFalse();
         }
-        return module.id === name;
-      }
 
-      function filterClassBasedDatasources(name: string): boolean {
-        return !(getDatasources().get(name) instanceof Datasource);
-      }
-
-      const dss = new Map(getDatasources());
-
-      for (const ds of dss.values()) {
-        if (ds instanceof Datasource) {
-          dss.delete(ds.id);
-        }
-      }
-
-      const loadedDs = await loadModules(
-        import.meta.dirname,
-        validateDatasource,
-        filterClassBasedDatasources,
-      );
-      expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
-
-      for (const dsName of dss.keys()) {
-        const ds = dss.get(dsName)!;
-        expect(validateDatasource(ds, dsName)).toBeTrue();
+        expect(!ds.releaseTimestampNote || ds.releaseTimestampSupport).toBe(
+          true,
+        );
+        expect(!ds.sourceUrlNote || ds.sourceUrlSupport !== 'none').toBe(true);
       }
     });
 
@@ -238,7 +294,9 @@ describe('modules/datasource/index', () => {
 
     it('ignores and warns for disabled custom registryUrls', async () => {
       class TestDatasource extends DummyDatasource {
-        override readonly customRegistrySupport = false;
+        override supportsCustomRegistry(_packageName: string) {
+          return false;
+        }
       }
       datasources.set(datasource, new TestDatasource());
       const registryUrls = ['https://foo.bar'];
@@ -409,6 +467,40 @@ describe('modules/datasource/index', () => {
       });
     });
 
+    it('supports datasource objects with function-only registry accessors', async () => {
+      datasources.set(datasource, {
+        id: datasource,
+        supportsCustomRegistry: () => true,
+        releaseTimestampSupport: false,
+        sourceUrlSupport: 'none',
+        getDefaultRegistryUrls: () => ['https://function-registry.com'],
+        getReleases: ({ registryUrl }) =>
+          Promise.resolve(
+            registryUrl === 'https://function-registry.com'
+              ? { releases: [{ version: '2.0.0' }] }
+              : null,
+          ),
+        postprocessRelease: (_config, release) => Promise.resolve(release),
+      });
+      const res = await getPkgReleases({ datasource, packageName });
+      expect(res).toMatchObject({ releases: [{ version: '2.0.0' }] });
+    });
+
+    it('handles datasource objects without default registries', async () => {
+      datasources.set(datasource, {
+        id: datasource,
+        supportsCustomRegistry: () => true,
+        releaseTimestampSupport: false,
+        sourceUrlSupport: 'none',
+        getDefaultRegistryUrls: () => undefined,
+        getReleases: vi.fn(),
+        postprocessRelease: (_config, release) => Promise.resolve(release),
+      });
+      await expect(
+        getPkgReleases({ datasource, packageName }),
+      ).resolves.toBeNull();
+    });
+
     // for coverage
     it('undefined defaultRegistryUrls with customRegistrySupport works', async () => {
       datasources.set(datasource, new DummyDatasource4());
@@ -563,10 +655,9 @@ describe('modules/datasource/index', () => {
         class MergeRegistriesDatasource extends DummyDatasource {
           override readonly registryStrategy = 'merge';
           override caching = true;
-          override readonly defaultRegistryUrls = [
-            'https://reg1.com',
-            'https://reg2.com',
-          ];
+          override getDefaultRegistryUrls(_packageName: string) {
+            return ['https://reg1.com', 'https://reg2.com'];
+          }
         }
 
         const registries: RegistriesMock = {

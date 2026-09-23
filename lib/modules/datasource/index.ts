@@ -1,10 +1,5 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import {
-  isFunction,
-  isNonEmptyArray,
-  isString,
-  isTruthy,
-} from '@sindresorhus/is';
+import { isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_BLOCKED, HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -238,11 +233,13 @@ async function mergeRegistries(
       // Merge the tags from the two results
       let tags = combinedRes.tags;
       if (tags) {
+        // v8 ignore else -- needs merged registries where only one carries tags
         if (res.tags) {
           // Both results had tags, so we need to compare them
           for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
+            // v8 ignore else -- needs a merged registry whose tag is not a version
             if (isString(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
                 isString(existingTag) &&
@@ -318,11 +315,16 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 
 function resolveRegistryUrls(
   datasource: DatasourceApi,
+  packageName: string,
   defaultRegistryUrls: string[] | undefined,
   registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined,
 ): string[] {
-  if (!datasource.customRegistrySupport) {
+  const customRegistrySupport = datasource.supportsCustomRegistry(packageName);
+  const datasourceDefaultRegistryUrls =
+    datasource.getDefaultRegistryUrls(packageName);
+
+  if (!customRegistrySupport) {
     if (
       isNonEmptyArray(registryUrls) ||
       isNonEmptyArray(defaultRegistryUrls) ||
@@ -338,9 +340,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return isFunction(datasource.defaultRegistryUrls)
-      ? datasource.defaultRegistryUrls()
-      : coerceArray(datasource.defaultRegistryUrls);
+    return coerceArray(datasourceDefaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
   let resolvedUrls: string[] = [];
@@ -349,11 +349,8 @@ function resolveRegistryUrls(
   } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isFunction(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls];
+  } else if (isNonEmptyArray(datasourceDefaultRegistryUrls)) {
+    resolvedUrls = [...datasourceDefaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   }
   return massageRegistryUrls(resolvedUrls);
@@ -385,6 +382,7 @@ async function fetchReleases(
     if (isString(config.npmrc)) {
       setNpmrc(config.npmrc);
     }
+    // v8 ignore else -- npm lookups here never arrive with explicit registryUrls
     if (!isNonEmptyArray(registryUrls)) {
       registryUrls = [resolveRegistryUrl(config.packageName)];
     }
@@ -397,6 +395,7 @@ async function fetchReleases(
   }
   registryUrls = resolveRegistryUrls(
     datasource,
+    config.packageName,
     config.defaultRegistryUrls,
     registryUrls,
     config.additionalRegistryUrls,
@@ -410,7 +409,8 @@ async function fetchReleases(
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {
         dep = await huntRegistries(config, datasource, registryUrls);
-      } else if (registryStrategy === 'merge') {
+      } else {
+        // `merge` is the only remaining strategy
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
@@ -540,6 +540,7 @@ function getDigestConfig(
     config.registryUrl ??
     resolveRegistryUrls(
       datasource,
+      packageName,
       config.defaultRegistryUrls,
       config.registryUrls,
       config.additionalRegistryUrls,

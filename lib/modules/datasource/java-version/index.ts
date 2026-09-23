@@ -1,9 +1,9 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
 import { datasource, parsePackage } from './common.ts';
+import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
 
 export class JavaVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -12,19 +12,39 @@ export class JavaVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = false;
-
-  override readonly defaultRegistryUrls = [adoptiumRegistryUrl];
-
   override readonly caching = true;
 
-  private async _getReleases({
+  override getDefaultRegistryUrls(packageName: string): string[] {
+    return packageName.includes('oracle-graalvm')
+      ? [graalvmRegistryUrl]
+      : [adoptiumRegistryUrl];
+  }
+
+  override supportsCustomRegistry(packageName: string): boolean {
+    return packageName.includes('oracle-graalvm');
+  }
+
+  private async fetchReleases({
+    registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const pkgConfig = parsePackage(packageName);
-    logger.trace({ packageName, pkgConfig }, 'fetching java release');
+    logger.trace(
+      { registryUrl, packageName, pkgConfig },
+      'fetching java release',
+    );
 
     try {
+      if (pkgConfig.vendor === 'oracle-graalvm') {
+        const effectiveRegistryUrl = registryUrl ?? graalvmRegistryUrl;
+        return await getGraalvmReleases(
+          this.http,
+          pkgConfig,
+          effectiveRegistryUrl,
+        );
+      }
+
+      // Default to Adoptium
       return await getAdoptiumReleases(this.http, pkgConfig);
     } catch (err) {
       this.handleGenericErrors(err);
@@ -32,13 +52,13 @@ export class JavaVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         key: `${config.registryUrl}:${config.packageName}`,
+        cacheable: true,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }
