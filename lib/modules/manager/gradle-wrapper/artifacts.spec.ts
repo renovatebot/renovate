@@ -13,6 +13,8 @@ import type {
 } from '../../../config/types.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
+import { generateBranchConfig } from '../../../workers/repository/updates/generate.ts';
+import type { BranchUpgradeConfig } from '../../../workers/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
@@ -391,6 +393,52 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
         },
       ]);
+    });
+
+    it('uses the Gradle version to pick the Java toolchain', async () => {
+      // with two grouped changes the config.currentValue is the first one
+      const config: BranchUpgradeConfig[] = [
+        {
+          branchName: 'all',
+          manager: 'some-manager',
+          currentVersion: '1.0',
+          newVersion: '1.1',
+        },
+        {
+          branchName: 'all',
+          manager: 'gradle-wrapper',
+          currentVersion: '9.0.0',
+        },
+      ];
+      const branchConfig = generateBranchConfig(config);
+
+      const execSnapshots = mockExecAll();
+
+      // setup install-tool
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      vi.mocked(getPkgReleases).mockReset();
+      vi.mocked(getPkgReleases).mockResolvedValueOnce({
+        releases: [
+          { version: '8.0.1' },
+          { version: '11.0.1' },
+          { version: '17.0.0' },
+          { version: '21.0.1' },
+          { version: '25.0.0' },
+        ],
+      });
+
+      await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        newPackageFileContent:
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-9.7.1-bin.zip',
+        updatedDeps: [{ depName: 'gradle', currentValue: '9.6.0' }],
+        config: branchConfig,
+      });
+
+      const javaTool = execSnapshots.find((s) =>
+        s.cmd.startsWith('install-tool java'),
+      );
+      expect(javaTool?.cmd).toBe('install-tool java 25.0.0');
     });
 
     it('distributionSha256Sum 404', async () => {
