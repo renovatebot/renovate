@@ -1297,10 +1297,11 @@ Default is no limit.
 
 Gitea and Forgejo work out whether a PR is mergeable in the background after a branch is pushed.
 Until that is done, they reject automerge requests with `405`.
-Renovate tries to enable platform automerge up to this many times and waits `250 * attempt * attempt` milliseconds after each `405`.
+Renovate tries to enable platform automerge up to this many times, retrying requests rejected with `405` and waiting `250 * attempt * attempt` milliseconds between attempts.
 Renovate always makes at least one attempt, even if this is set to `0`.
 
-With the default of `5`, Renovate waits at most 7.5 seconds.
+With the default of `5`, Renovate makes up to five requests with a total delay of at most 7.5 seconds between them, excluding the time taken by the requests.
+This applies when creating a PR and after Renovate pushes an update to an existing PR branch.
 
 ## `presetCachePersistence`
 

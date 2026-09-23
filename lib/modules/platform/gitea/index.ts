@@ -218,7 +218,10 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
 
     const unsupportedReason = checkNativeAutomerge(defaults.version);
     if (unsupportedReason !== null) {
-      logger.debug({ prNumber }, unsupportedReason);
+      logger.debug(
+        { prNumber, version: defaults.version, reason: unsupportedReason },
+        `${name}-native automerge: skipped on unsupported version`,
+      );
       return;
     }
 
@@ -227,14 +230,16 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       GlobalConfig.get('prMergeabilityCheckAttempts'),
       1,
     );
+    const mergeMethod =
+      getMergeMethod(
+        platformPrOptions.automergeStrategy,
+        config.allowedMergeMethods,
+      ) ?? config.mergeMethod;
+
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
         await helper.mergePR(http, config.repository, prNumber, {
-          Do:
-            getMergeMethod(
-              platformPrOptions.automergeStrategy,
-              config.allowedMergeMethods,
-            ) ?? config.mergeMethod,
+          Do: mergeMethod,
           merge_when_checks_succeed: true,
           // `delete_branch_after_merge` is required to not have undesired
           // behavior when renovate finds existing branches on next run.
@@ -264,8 +269,12 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           return;
         }
 
-        logger.debug({ prNumber, attempt }, 'PR not yet mergeable, retrying');
-        await setTimeout(AUTOMERGE_RETRY_DELAY_MS * attempt ** 2);
+        const delay = AUTOMERGE_RETRY_DELAY_MS * attempt ** 2;
+        logger.debug(
+          { prNumber, attempt, delay },
+          'PR not yet mergeable, waiting before retrying',
+        );
+        await setTimeout(delay);
       }
     }
   }
@@ -804,8 +813,6 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       platformPrOptions,
     }: ReattemptPlatformAutomergeConfig): Promise<void> {
       await tryPrAutomerge(number, platformPrOptions);
-
-      logger.debug({ prNumber: number }, 'PR platform automerge re-attempted');
     },
 
     async mergePr({ id: prNumber, strategy }: MergePRConfig): Promise<boolean> {

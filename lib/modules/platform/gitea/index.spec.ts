@@ -1937,8 +1937,13 @@ describe('modules/platform/gitea/index', () => {
       });
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        expect.objectContaining({ prNumber: 42 }),
-        'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
+        {
+          prNumber: 42,
+          version: '1.10.0',
+          reason:
+            'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
+        },
+        'Gitea-native automerge: skipped on unsupported version',
       );
     });
 
@@ -2078,6 +2083,14 @@ describe('modules/platform/gitea/index', () => {
       expect(setTimeout).toHaveBeenNthCalledWith(1, 250);
       expect(setTimeout).toHaveBeenNthCalledWith(2, 1000);
       expect(logger.logger.debug).toHaveBeenCalledWith(
+        { prNumber: 42, attempt: 1, delay: 250 },
+        'PR not yet mergeable, waiting before retrying',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { prNumber: 42, attempt: 2, delay: 1000 },
+        'PR not yet mergeable, waiting before retrying',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         { prNumber: 42 },
         'Gitea-native automerge: success',
       );
@@ -2104,6 +2117,10 @@ describe('modules/platform/gitea/index', () => {
 
       expect(res).toMatchObject({ number: 42, title: 'pr-title' });
       expect(setTimeout).toHaveBeenCalledExactlyOnceWith(250);
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.objectContaining({ prNumber: 42, attempt: 2 }),
+        'PR not yet mergeable, waiting before retrying',
+      );
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42, platform: 'gitea' }),
         'Platform-native automerge: fail',
@@ -2135,6 +2152,10 @@ describe('modules/platform/gitea/index', () => {
       expect(setTimeout).toHaveBeenNthCalledWith(2, 1000);
       expect(setTimeout).toHaveBeenNthCalledWith(3, 2250);
       expect(setTimeout).toHaveBeenNthCalledWith(4, 4000);
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.objectContaining({ prNumber: 42, attempt: 5 }),
+        'PR not yet mergeable, waiting before retrying',
+      );
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42, platform: 'gitea' }),
         'Platform-native automerge: fail',
@@ -2161,6 +2182,10 @@ describe('modules/platform/gitea/index', () => {
 
       expect(res).toMatchObject({ number: 42, title: 'pr-title' });
       expect(setTimeout).not.toHaveBeenCalled();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'PR not yet mergeable, waiting before retrying',
+      );
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42, platform: 'gitea' }),
         'Platform-native automerge: fail',
@@ -2217,10 +2242,6 @@ describe('modules/platform/gitea/index', () => {
         { prNumber: 1 },
         'Gitea-native automerge: success',
       );
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        { prNumber: 1 },
-        'PR platform automerge re-attempted',
-      );
     });
 
     it('does nothing when platform automerge is disabled', async () => {
@@ -2249,8 +2270,13 @@ describe('modules/platform/gitea/index', () => {
 
       expect(setTimeout).not.toHaveBeenCalled();
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { prNumber: 1 },
-        'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
+        {
+          prNumber: 1,
+          version: '1.10.0',
+          reason:
+            'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
+        },
+        'Gitea-native automerge: skipped on unsupported version',
       );
     });
 
@@ -2269,6 +2295,10 @@ describe('modules/platform/gitea/index', () => {
 
       expect(setTimeout).not.toHaveBeenCalled();
       expect(logger.logger.warn).not.toHaveBeenCalled();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'PR not yet mergeable, waiting before retrying',
+      );
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { prNumber: 1 },
         'Gitea-native automerge: already scheduled',
