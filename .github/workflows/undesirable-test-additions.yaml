@@ -32,7 +32,7 @@ jobs:
           echo "Base branch ref for this PR is: $BASE_BRANCH_REF"
 
           echo "### Calculating diff for '*.spec.ts' files..."
-          git diff $BASE_BRANCH_REF -- '*.spec.ts' > diff_spec_ts.txt
+          git diff $BASE_BRANCH_REF...HEAD -- '*.spec.ts' > diff_spec_ts.txt
 
           echo "### Counting additions and deletions of snapshots..."
           ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -c -E '\.toMatch(Snapshot|InlineSnapshot)\(' || true)
@@ -46,7 +46,7 @@ jobs:
           fi
 
           echo "### Calculating file changes in '__fixtures__' directories..."
-          git diff --name-status $BASE_BRANCH_REF > diff_name_status.txt
+          git diff --name-status $BASE_BRANCH_REF...HEAD > diff_name_status.txt
 
           echo "### Processing added files in '__fixtures__' directories..."
           ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
