@@ -144,6 +144,27 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         'PersonalAccessTokenCredentialHandler',
       );
     });
+
+    it('should normalize self-hosted collection endpoint for nested base paths', () => {
+      hostRules.add({
+        hostType: 'azure',
+        token: '123test',
+        matchHost: 'https://example.local/custom/base/MyCollection',
+      });
+      azure.setEndpoint('https://example.local/custom/base/MyCollection');
+
+      const res = azure.azureObj();
+
+      delete res.rest.client.userAgent;
+      delete res.vsoClient.restClient.client.userAgent;
+
+      expect(res).toMatchObject({
+        serverUrl: 'https://example.local/custom/base',
+        authHandler: {
+          token: '123test',
+        },
+      });
+    });
   });
 
   describe('isHosted', () => {

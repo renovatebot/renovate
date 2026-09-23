@@ -17,6 +17,26 @@ import { isProbablyJwt } from '../../../util/http/jwt.ts';
 
 const hostType = 'azure';
 let endpoint: string;
+let hostRuleEndpoint: string;
+
+function normalizeApiEndpoint(value: string): string {
+  try {
+    const endpointUrl = new URL(value);
+    const pathSegments = endpointUrl.pathname.split('/').filter(Boolean);
+
+    // Azure DevOps Server endpoints can include a collection as the last
+    // path segment (for example /tfs/<collection> or /custom/base/<collection>),
+    // while _apis/Location and _apis/git are hosted one level above.
+    if (pathSegments.length >= 2) {
+      pathSegments.pop();
+      endpointUrl.pathname = `/${pathSegments.join('/')}`;
+      return endpointUrl.href.replace(/\/$/, '');
+    }
+  } catch {
+    // Return the original endpoint for unexpected URL formats.
+  }
+  return value;
+}
 
 function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {
@@ -32,7 +52,12 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
 }
 
 export function azureObj(credentials?: HostRule): azure.WebApi {
-  const config = credentials ?? hostRules.find({ hostType, url: endpoint });
+  const config =
+    credentials ??
+    hostRules.find({
+      hostType,
+      url: hostRuleEndpoint ?? endpoint,
+    });
   if (!config.token && !(config.username && config.password)) {
     throw new Error(`No config found for azure`);
   }
@@ -101,5 +126,6 @@ export async function isHosted(): Promise<boolean> {
 }
 
 export function setEndpoint(e: string): void {
-  endpoint = e;
+  hostRuleEndpoint = e;
+  endpoint = normalizeApiEndpoint(e);
 }
