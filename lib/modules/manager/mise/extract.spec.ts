@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { extractPackageFile } from './index.ts';
+import { extractPackageFile, updateLockedDependency } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -1415,6 +1415,73 @@ describe('modules/manager/mise/extract', () => {
         lockedVersion: '20.11.0',
       });
       expect(result?.deps[1]).not.toHaveProperty('lockedVersion');
+    });
+
+    it('matches the primary selector when lockfile versions are ordered differently', async () => {
+      const lockFileContent = codeBlock`
+        lockfile_version = 2
+
+        [[tools.node]]
+        version = "20.20.2"
+        specifiers = ["20"]
+
+        [[tools.node]]
+        version = "22.23.2"
+        specifiers = ["22"]
+
+        [[tools.node]]
+        version = "24.21.0"
+        specifiers = ["24"]
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = ["24", "22", "20"]
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'node',
+          currentValue: '24',
+          lockedVersion: '24.21.0',
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+      ]);
+      expect(
+        updateLockedDependency({
+          packageFile: 'mise.toml',
+          packageFileContent: content,
+          lockFile: 'mise.lock',
+          lockFileContent,
+          depName: 'node',
+          currentVersion: result?.deps[0].lockedVersion ?? '',
+          newVersion: 'v24.22.0',
+        }),
+      ).toEqual({
+        status: 'updated',
+        files: {
+          'mise.toml': content,
+          'mise.lock': lockFileContent.replace('24.21.0', '24.22.0'),
+        },
+      });
+    });
+
+    it('does not use another selector when the configured version is not locked', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [[tools.node]]
+        version = "20.20.2"
+        specifiers = ["20"]
+      `);
+
+      const result = await extractPackageFile(
+        '[tools]\nnode = "24"',
+        'mise.toml',
+      );
+
+      expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
     });
 
     it('extracts first lockedVersion when multiple versions exist', async () => {
