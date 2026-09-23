@@ -10,31 +10,35 @@ import { DeploymentFlags } from 'azure-devops-node-api/interfaces/common/VSSInte
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { isProbablyJwt } from '../../../util/http/jwt.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 
 const hostType = 'azure';
 let endpoint: string;
 let hostRuleEndpoint: string;
 
 function normalizeApiEndpoint(value: string): string {
-  try {
-    const endpointUrl = new URL(value);
-    const pathSegments = endpointUrl.pathname.split('/').filter(Boolean);
-
-    // Azure DevOps Server endpoints can include a collection as the last
-    // path segment (for example /tfs/<collection> or /custom/base/<collection>),
-    // while _apis/Location and _apis/git are hosted one level above.
-    if (pathSegments.length >= 2) {
-      pathSegments.pop();
-      endpointUrl.pathname = `/${pathSegments.join('/')}`;
-      return endpointUrl.href.replace(/\/$/, '');
-    }
-  } catch {
-    // Return the original endpoint for unexpected URL formats.
+  const endpointUrl = parseUrl(value);
+  if (!endpointUrl) {
+    return value;
   }
+
+  const pathSegments = endpointUrl.pathname.split('/').filter(isTruthy);
+
+  // Azure DevOps Server endpoints can include a collection as the last
+  // path segment (for example /tfs/<collection> or /custom/base/<collection>),
+  // while _apis/Location and _apis/git are hosted one level above.
+  if (pathSegments.length >= 2) {
+    pathSegments.pop();
+    endpointUrl.pathname = `/${pathSegments.join('/')}`;
+    return endpointUrl.href.replace(regEx(/\/$/), '');
+  }
+
   return value;
 }
 
