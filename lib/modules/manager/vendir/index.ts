@@ -10,6 +10,7 @@ export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['vendir.lock.yml'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const displayName = 'vendir';
 export const url = 'https://carvel.dev/vendir/docs/latest';

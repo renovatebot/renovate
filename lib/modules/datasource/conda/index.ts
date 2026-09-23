@@ -1,7 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { Timestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
@@ -9,7 +8,7 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import * as prefixDev from './prefix-dev.ts';
-import type { CondaPackage } from './types.ts';
+import { CondaPackage } from './schema.ts';
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -26,11 +25,14 @@ export class CondaDatasource extends Datasource {
 
   override readonly caching = true;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `upload_time` field of the files of a version when using the Anaconda.org API, or from the `createdAt` field of the variants of a version when using prefix.dev. All files of a version are assumed to be published at roughly the same time.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `dev_url` field in the results.';
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -59,10 +61,8 @@ export class CondaDatasource extends Datasource {
       releases: [],
     };
 
-    let response: { body: CondaPackage };
-
     try {
-      response = await this.http.getJsonUnchecked(url);
+      const response = await this.http.getJson(url, CondaPackage);
 
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;
@@ -73,7 +73,7 @@ export class CondaDatasource extends Datasource {
         releaseDate[file.version] ??= Timestamp.parse(file.upload_time);
       }
 
-      response.body.versions.forEach((version: string) => {
+      coerceArray(response.body.versions).forEach((version: string) => {
         const thisRelease: Release = {
           version,
           releaseTimestamp: releaseDate[version],
@@ -81,10 +81,8 @@ export class CondaDatasource extends Datasource {
         result.releases.push(thisRelease);
       });
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+        throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }
@@ -93,14 +91,13 @@ export class CondaDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         // TODO: types (#22198)
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

@@ -1,17 +1,17 @@
 [[tool.poetry.source]]
 name = "one"
-url = "some.url"
+url = "https://some.url"
 
 [[tool.poetry.source]]
 name = "two"
-url = "another.url"
+url = "https://another.url"
 
 [[tool.poetry.source]]
-url = "missingname.url"
+url = "https://missingname.url"
 
 [[tool.poetry.source]]
 name = "four-oh.four"
-url = "last.url"
+url = "https://last.url"
 
 [[tool.poetry.source]]
 name = "five"

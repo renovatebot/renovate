@@ -1,8 +1,9 @@
 // TODO fix mocks
-import _timers from 'timers/promises';
+import _timers from 'node:timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { fakeSha, git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -11,17 +12,16 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
+  REPOSITORY_PENDING_DELETION,
 } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { toBase64 } from '../../../util/string.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
 vi.mock('timers/promises');
 vi.mock('../utils/pr-body.ts', { spy: true });
@@ -30,25 +30,25 @@ const timers = vi.mocked(_timers);
 
 const gitlabApiHost = 'https://gitlab.com';
 
+const branchSha = fakeSha('branchSha');
+
 describe('modules/platform/gitlab/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
-    git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
-    );
-    hostRules.find.mockReturnValue({
+    git.getBranchCommit.mockReturnValue(branchSha);
+    hostRules.add({
       token: '123test',
     });
-    delete process.env.GITLAB_IGNORE_REPO_URL;
-    delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS;
-    delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
-    delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
-    delete process.env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
-    delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
-    delete process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE;
-    delete process.env.RENOVATE_X_PLATFORM_VERSION;
+    vi.stubEnv('GITLAB_IGNORE_REPO_URL', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', undefined);
+    vi.stubEnv('RENOVATE_X_PLATFORM_VERSION', undefined);
 
     gitlab.resetPlatform();
     memCache.init();
@@ -76,7 +76,9 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
+      await expect(gitlab.initPlatform({})).rejects.toThrow(
+        'Init: You must configure a GitLab personal access token',
+      );
     });
 
     it('should throw if endpoint is not a valid URL', async () => {
@@ -106,12 +108,15 @@ describe('modules/platform/gitlab/index', () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
         version: '13.3.6-ee',
       });
-      expect(
-        await gitlab.initPlatform({
+      await expect(
+        gitlab.initPlatform({
           token: 'some-token',
           endpoint: undefined,
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://gitlab.com/api/v4/',
+        gitAuthor: 'Renovate Bot <a@b.com>',
+      });
     });
 
     it('should accept custom endpoint', async () => {
@@ -127,25 +132,28 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, {
           version: '13.3.6-ee',
         });
-      expect(
-        await gitlab.initPlatform({
+      await expect(
+        gitlab.initPlatform({
           endpoint,
           token: 'some-token',
         }),
-      ).toMatchSnapshot();
+      ).resolves.toEqual({
+        endpoint: 'https://gitlab.renovatebot.com/',
+        gitAuthor: 'Renovate Bot <a@b.com>',
+      });
     });
 
     it('should reuse existing gitAuthor', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
         version: '13.3.6-ee',
       });
-      expect(
-        await gitlab.initPlatform({
+      await expect(
+        gitlab.initPlatform({
           token: 'some-token',
           endpoint: undefined,
           gitAuthor: 'somebody',
         }),
-      ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
+      ).resolves.toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
     });
   });
 
@@ -202,6 +210,25 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const repos = await gitlab.getRepos({ includeMirrors: true });
       expect(repos).toEqual(['a/b', 'c/d', 'c/f']);
+    });
+
+    it('should exclude repos that are marked for deletion', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false',
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'c/d',
+            marked_for_deletion_at: '2026-09-10',
+          },
+        ]);
+      const repos = await gitlab.getRepos();
+      expect(repos).toEqual(['a/b']);
     });
 
     it('should encode the requested topics into the URL', async () => {
@@ -319,11 +346,11 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, okReturn);
-      expect(
-        await gitlab.initRepo({
+      await expect(
+        gitlab.initRepo({
           repository: 'some/repo/project',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -354,6 +381,18 @@ describe('modules/platform/gitlab/index', () => {
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
     });
 
+    it('should throw an error if repository is marked for deletion', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo')
+        .reply(200, { marked_for_deletion_at: '2026-09-10' });
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+        }),
+      ).rejects.toThrow(REPOSITORY_PENDING_DELETION);
+    });
+
     it('should throw an error if repository is a mirror', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -375,11 +414,11 @@ describe('modules/platform/gitlab/index', () => {
           mirror: true,
         });
       GlobalConfig.set({ includeMirrors: true });
-      expect(
-        await gitlab.initRepo({
+      await expect(
+        gitlab.initRepo({
           repository: 'some/repo',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -442,11 +481,11 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           http_url_to_repo: null,
         });
-      expect(
-        await gitlab.initRepo({
+      await expect(
+        gitlab.initRepo({
           repository: 'some/repo/project',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         defaultBranch: 'master',
         isFork: false,
         repoFingerprint: expect.any(String),
@@ -467,7 +506,9 @@ describe('modules/platform/gitlab/index', () => {
         gitUrl: 'ssh',
       });
 
-      expect(git.initRepo.mock.calls).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toMatchObject([
+        [{ url: 'ssh://git@gitlab.com/some%2Frepo%2Fproject.git' }],
+      ]);
     });
 
     it('should throw if ssh_url_to_repo is not present but gitUrl is set to ssh', async () => {
@@ -487,7 +528,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
-      process.env.GITLAB_IGNORE_REPO_URL = 'true';
+      vi.stubEnv('GITLAB_IGNORE_REPO_URL', 'true');
       const selfHostedUrl = 'http://mycompany.com/gitlab';
       httpMock
         .scope(selfHostedUrl)
@@ -514,7 +555,13 @@ describe('modules/platform/gitlab/index', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
       });
-      expect(git.initRepo.mock.calls).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toMatchObject([
+        [
+          {
+            url: 'http://oauth2:123test@mycompany.com/gitlab/some/repo/project.git',
+          },
+        ],
+      ]);
     });
   });
 
@@ -530,7 +577,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'merge',
         },
       );
-      expect(await gitlab.getBranchForceRebase()).toBeFalse();
+      await expect(gitlab.getBranchForceRebase()).resolves.toBeFalse();
     });
 
     it('should return true for merge_method=ff', async () => {
@@ -544,10 +591,12 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'ff',
         },
       );
-      expect(await gitlab.getBranchForceRebase()).toBeTrue();
+      await expect(gitlab.getBranchForceRebase()).resolves.toBeTrue();
     });
+  });
 
-    it('should return false when merge trains are enabled', async () => {
+  describe('isBranchMergeQueueEnabled', () => {
+    it('should return true when merge trains are enabled', async () => {
       await initRepo(
         {
           repository: 'some/repo/project',
@@ -555,11 +604,27 @@ describe('modules/platform/gitlab/index', () => {
         {
           default_branch: 'master',
           http_url_to_repo: null,
-          merge_method: 'ff',
           merge_trains_enabled: true,
         },
       );
-      expect(await gitlab.getBranchForceRebase()).toBeFalse();
+      await expect(
+        gitlab.isBranchMergeQueueEnabled('master'),
+      ).resolves.toBeTrue();
+    });
+
+    it('should return false when merge trains are disabled', async () => {
+      await initRepo(
+        {
+          repository: 'some/repo/project',
+        },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+        },
+      );
+      await expect(
+        gitlab.isBranchMergeQueueEnabled('master'),
+      ).resolves.toBeFalse();
     });
   });
 
@@ -590,6 +655,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -612,7 +678,13 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 91,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'some change',
+      });
     });
 
     it('should strip draft prefix from title', async () => {
@@ -629,6 +701,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -651,7 +724,11 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 91,
+        title: 'some change',
+      });
     });
 
     it('should strip deprecated draft prefix from title', async () => {
@@ -668,6 +745,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -690,7 +768,11 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 91,
+        title: 'some change',
+      });
     });
   });
 
@@ -699,7 +781,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
         .get(
@@ -714,7 +796,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
         .get(
@@ -728,6 +810,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -761,7 +844,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { context: 'renovate/stability-days', status: 'success' },
@@ -779,7 +862,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'renovate/stability-days', status: 'success' },
@@ -797,7 +880,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
         .get(
@@ -811,6 +894,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -840,7 +924,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'renovate/stability-days', status: 'success' },
@@ -857,6 +941,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -890,7 +975,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'renovate/stability-days', status: 'success' },
@@ -907,6 +992,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -940,7 +1026,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { status: 'success' },
@@ -958,7 +1044,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'failed', allow_failure: true }])
         .get(
@@ -973,7 +1059,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'success' }, { status: 'skipped' }])
         .get(
@@ -988,7 +1074,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'skipped' }])
         .get(
@@ -1003,7 +1089,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'skipped' }, { status: 'failed' }])
         .get(
@@ -1018,7 +1104,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { status: 'success' },
@@ -1037,7 +1123,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'success' }, { status: 'foo' }])
         .get(
@@ -1063,7 +1149,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatusCheck(
@@ -1077,7 +1163,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ name: 'context-1', status: 'pending' }]);
       const res = await gitlab.getBranchStatusCheck(
@@ -1091,7 +1177,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'context-1', status: 'pending' },
@@ -1109,7 +1195,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'context-1', status: 'pending' },
@@ -1145,17 +1231,13 @@ describe('modules/platform/gitlab/index', () => {
     it('should log message that failed to retrieve commit pipeline', async () => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, {});
 
       timers.setTimeout.mockImplementation(() => {
@@ -1177,17 +1259,13 @@ describe('modules/platform/gitlab/index', () => {
     it.each(states)('sets branch status %s', async (state) => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1205,12 +1283,10 @@ describe('modules/platform/gitlab/index', () => {
     it.each(states)(
       'skips setting branch status %s when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is set and no pipeline is found',
       async (state) => {
-        process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE = 'true';
+        vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', 'true');
         const scope = await initRepo();
         scope
-          .get(
-            '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          )
+          .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
           .times(3)
           .reply(200, {});
 
@@ -1231,20 +1307,16 @@ describe('modules/platform/gitlab/index', () => {
     );
 
     it('does not skip setting branch status when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is not true', async () => {
-      process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE = 'false';
+      vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', 'false');
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1264,11 +1336,11 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('sets branch status when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is true and pipeline is found', async () => {
-      process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE = 'true';
+      vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', 'true');
       const scope = await initRepo();
       scope
         .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          `/api/v4/projects/some%2Frepo/statuses/${branchSha}`,
           (body: any): boolean => {
             expect(body.pipeline_id).toBe(123);
             return true;
@@ -1276,12 +1348,10 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, { last_pipeline: { id: 123 } });
 
       await expect(
@@ -1302,17 +1372,13 @@ describe('modules/platform/gitlab/index', () => {
     it('waits for 1000ms by default', async () => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1332,7 +1398,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          `/api/v4/projects/some%2Frepo/statuses/${branchSha}`,
           (body: any): boolean => {
             expect(body.pipeline_id).toBe(123);
             return true;
@@ -1340,16 +1406,12 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, {})
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, { last_pipeline: { id: 123 } });
 
       await expect(
@@ -1366,21 +1428,17 @@ describe('modules/platform/gitlab/index', () => {
     it('waits for RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY ms when set', async () => {
       const delay = 5000;
       const retry = 2;
-      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY = String(delay);
+      vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY', String(delay));
 
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1411,21 +1469,17 @@ describe('modules/platform/gitlab/index', () => {
     it('do RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS attemps when set', async () => {
       const delay = 1000;
       const retry = 5;
-      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS = `${retry}`;
+      vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS', `${retry}`);
 
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(retry + 1)
         .reply(200, {});
 
@@ -1439,6 +1493,56 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
+    });
+
+    it('ignores status transition error', async () => {
+      const scope = await initRepo();
+      scope
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
+        .times(3)
+        .reply(200, {})
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
+        .reply(400, {
+          message: 'Cannot transition status via :enqueue from :pending',
+        });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Ignoring status transition error',
+      );
+    });
+
+    it('handles non-string error message', async () => {
+      const scope = await initRepo();
+      scope
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
+        .times(3)
+        .reply(200, {})
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
+        .reply(400, { message: { base: ['Some validation error'] } });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Failed to set branch status',
+      );
     });
   });
 
@@ -2034,6 +2138,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2058,6 +2163,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'merged',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2083,6 +2189,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2109,6 +2216,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2134,6 +2242,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'Draft: branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2159,6 +2268,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'WIP: branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2188,13 +2298,13 @@ describe('modules/platform/gitlab/index', () => {
             updated_at: '2025-05-19T12:00:00.000Z',
           },
         ]);
-      expect(
-        await gitlab.findPr({
+      await expect(
+        gitlab.findPr({
           branchName: 'branch',
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 1,
         sourceBranch: 'branch',
         state: 'open',
@@ -2238,8 +2348,8 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('createPr(branchName, title, body)', () => {
     beforeEach(() => {
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
-      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '2');
+      vi.stubEnv('RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY', '100');
     });
 
     it('returns the PR', async () => {
@@ -2393,8 +2503,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2404,7 +2514,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2447,8 +2557,8 @@ describe('modules/platform/gitlab/index', () => {
           { auto_merge: true },
         )
         .reply(201);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2458,7 +2568,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2496,8 +2606,8 @@ describe('modules/platform/gitlab/index', () => {
         })
         .put('/api/v4/projects/some%2Frepo/merge_requests/12345/merge')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2507,7 +2617,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2551,8 +2661,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345')
         .reply(202);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2562,7 +2672,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2599,7 +2709,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '3');
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2662,7 +2772,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, reply_body)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '3');
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2724,7 +2834,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '3');
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2935,8 +3045,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2947,7 +3057,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -2983,8 +3093,8 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005',
         )
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -2995,7 +3105,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3045,8 +3155,8 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005',
         )
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3057,7 +3167,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3118,8 +3228,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3130,7 +3240,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3201,8 +3311,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3213,7 +3323,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3255,8 +3365,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [
           { name: 'renovateIgnoreApprovals', approvals_required: 0 },
         ]);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3267,7 +3377,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3309,8 +3419,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .replyWithError('Unknown');
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3321,7 +3431,7 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3342,13 +3452,14 @@ describe('modules/platform/gitlab/index', () => {
           iid: 12345,
           title: 'some title',
           source_branch: 'some-branch',
+          detailed_merge_status: 'mergeable',
           target_branch: 'master',
           description: 'the-body',
         })
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3358,7 +3469,7 @@ describe('modules/platform/gitlab/index', () => {
             autoApprove: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3367,7 +3478,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('auto-approve with different user', async () => {
       await initPlatform('13.3.6-ee');
-      process.env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN = 'some-token';
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN', 'some-token');
       httpMock
         .scope(gitlabApiHost)
         .get(
@@ -3386,8 +3497,8 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/v4/projects/undefined/merge_requests/12345/approve')
         .matchHeader('Authorization', 'Bearer some-token')
         .reply(200);
-      expect(
-        await gitlab.createPr({
+      await expect(
+        gitlab.createPr({
           sourceBranch: 'some-branch',
           targetBranch: 'master',
           prTitle: 'some-title',
@@ -3397,7 +3508,7 @@ describe('modules/platform/gitlab/index', () => {
             autoApprove: true,
           },
         }),
-      ).toMatchObject({
+      ).resolves.toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
@@ -3459,7 +3570,13 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'merged',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeFalse();
     });
 
@@ -3483,8 +3600,11 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
-      expect(pr?.title).toBe('do something');
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 12345,
+        title: 'do something',
+      });
     });
 
     it('removes deprecated draft prefix from returned title', async () => {
@@ -3507,8 +3627,11 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
-      expect(pr?.title).toBe('do something');
+      expect(pr).toMatchObject({
+        isDraft: true,
+        number: 12345,
+        title: 'do something',
+      });
     });
 
     it('returns the mergeable PR', async () => {
@@ -3532,7 +3655,13 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeTrue();
     });
 
@@ -3560,7 +3689,13 @@ describe('modules/platform/gitlab/index', () => {
           ],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeTrue();
     });
 
@@ -3621,6 +3756,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             state: 'opened',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
@@ -3632,6 +3768,7 @@ describe('modules/platform/gitlab/index', () => {
           source_branch: 'branch-a',
           target_branch: 'master',
           title: 'title',
+          detailed_merge_status: 'mergeable',
           description: 'body',
           state: 'opened',
         });
@@ -3654,6 +3791,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'Draft: foo',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             state: 'opened',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
@@ -3665,6 +3803,7 @@ describe('modules/platform/gitlab/index', () => {
           source_branch: 'branch-a',
           target_branch: 'master',
           title: 'Draft: title',
+          detailed_merge_status: 'mergeable',
           description: 'body',
           state: 'opened',
         });
@@ -3688,6 +3827,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'WIP: foo',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3698,6 +3838,7 @@ describe('modules/platform/gitlab/index', () => {
           source_branch: 'branch-a',
           target_branch: 'master',
           title: 'WIP: title',
+          detailed_merge_status: 'mergeable',
           description: 'body',
           state: 'opened',
         });
@@ -3721,6 +3862,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3732,6 +3874,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'branch a pr',
           description: 'body',
           state: 'opened',
+          detailed_merge_status: 'mergeable',
           target_branch: 'branch-new',
           created_at: '2025-05-19T12:00:00.000Z',
         });
@@ -3760,6 +3903,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3771,6 +3915,7 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'branch-b',
           title: 'title',
           description: 'body',
+          detailed_merge_status: 'mergeable',
           state: 'opened',
           created_at: '2025-05-19T12:00:00.000Z',
         })
@@ -3803,6 +3948,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3814,6 +3960,7 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'branch-b',
           title: 'title',
           description: 'a merge requbody',
+          detailed_merge_status: 'mergeable',
           state: 'closed',
           created_at: '2025-05-19T12:00:00.000Z',
         });
@@ -3842,6 +3989,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3853,6 +4001,7 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'branch-b',
           title: 'title',
           description: 'body',
+          detailed_merge_status: 'mergeable',
           state: 'opened',
           created_at: '2025-05-19T12:00:00.000Z',
         });
@@ -3921,17 +4070,130 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
+  describe('isPrInMergeQueue', () => {
+    async function initRepoWithMergeTrains(): Promise<httpMock.Scope> {
+      return await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+          merge_trains_enabled: true,
+        },
+      );
+    }
+
+    it('returns false if merge trains are disabled', async () => {
+      await initRepo();
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+    });
+
+    it('returns true if the MR is waiting on the merge train', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(200, { status: 'idle' });
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeTrue();
+    });
+
+    it('returns false if the MR was already merged by the merge train', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(200, { status: 'merged' });
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+    });
+
+    it('returns false and logs if the response is malformed', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(200, { status: 'unknown' });
+
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to fetch merge train status',
+      );
+    });
+
+    it('returns false if the MR is not on the merge train', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(404);
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+      expect(logger.logger.debug).not.toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to fetch merge train status',
+      );
+    });
+
+    it('returns false and logs on other errors', async () => {
+      const scope = await initRepoWithMergeTrains();
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(500);
+      await expect(gitlab.isPrInMergeQueue(1)).resolves.toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to fetch merge train status',
+      );
+    });
+  });
+
   describe('mergePr(pr)', () => {
     it('merges the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
         .put('/api/v4/projects/undefined/merge_requests/1/merge')
         .reply(200);
-      expect(
-        await gitlab.mergePr({
+      await expect(
+        gitlab.mergePr({
           id: 1,
         }),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
+    });
+
+    it('adds the MR to the merge train when merge trains are enabled', async () => {
+      const scope = await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+          merge_trains_enabled: true,
+        },
+      );
+      scope
+        .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(201);
+      await expect(
+        gitlab.mergePr({
+          id: 1,
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('returns false if adding the MR to the merge train fails', async () => {
+      const scope = await initRepo(
+        { repository: 'some/repo' },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+          merge_trains_enabled: true,
+        },
+      );
+      scope
+        .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/1')
+        .reply(403);
+      await expect(
+        gitlab.mergePr({
+          id: 1,
+        }),
+      ).resolves.toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Failed to add MR to the merge train',
+      );
     });
   });
 
@@ -3992,7 +4254,23 @@ These updates have all been created already. To force a retry/rebase of any, cli
 
     it('returns updated pr body', async () => {
       await initFakePlatform('13.4.0');
-      expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
+      const body = gitlab.massageMarkdown(prBody);
+      // PR wording and links become MR wording and links
+      expect(body).toContain('Merge Requests are the best, here are some MRs.');
+      expect(body).not.toContain('Pull Requests');
+      expect(body).not.toContain('PRs');
+      expect(body).toContain(
+        '- [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (`gh-got`, `gl-got`, `got`)',
+      );
+      expect(body).not.toContain('../pull/2433');
+      // the rest is left alone
+      expect(body).toStartWith(
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5',
+      );
+      expect(body).toContain('## Open');
+      expect(body).toContain(
+        'These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.',
+      );
       expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
         expect.any(String),
         expect.any(Number),
@@ -4133,7 +4411,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .reply(200, {
           content: toBase64('!@#'),
         });
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -4143,7 +4423,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .replyWithError('some error');
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 
@@ -4193,17 +4475,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .reply(200, [{ username: 'maria' }, { username: 'jimmy' }])
         .get('/api/v4/groups/group-b/members')
         .reply(200, [{ username: 'john' }]);
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'u@email.com',
-        '@group-a',
-        '@group-b',
-      ]);
-      expect(expandedGroupMembers).toEqual([
-        'u@email.com',
-        'maria',
-        'jimmy',
-        'john',
-      ]);
+      await expect(
+        gitlab.expandGroupMembers?.(['u@email.com', '@group-a', '@group-b']),
+      ).resolves.toEqual(['u@email.com', 'maria', 'jimmy', 'john']);
     });
 
     it('users are not expanded when 404', async () => {
@@ -4211,8 +4485,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/john/members')
         .reply(404, { message: '404 Group Not Found' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.(['john']);
-      expect(expandedGroupMembers).toEqual(['john']);
+      await expect(gitlab.expandGroupMembers?.(['john'])).resolves.toEqual([
+        'john',
+      ]);
     });
 
     it('users are not expanded when non 404', async () => {
@@ -4220,10 +4495,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/group/members')
         .reply(403, { message: '403 Authorization' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@group',
+      await expect(gitlab.expandGroupMembers?.(['@group'])).resolves.toEqual([
+        'group',
       ]);
-      expect(expandedGroupMembers).toEqual(['group']);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
@@ -4236,17 +4510,67 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/group-c/members')
         .reply(200, []);
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@group-c',
-      ]);
-      expect(expandedGroupMembers).toEqual([]);
+      await expect(gitlab.expandGroupMembers?.(['@group-c'])).resolves.toEqual(
+        [],
+      );
     });
 
     it('includes email in final result', async () => {
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'u@email.com',
-      ]);
-      expect(expandedGroupMembers).toEqual(['u@email.com']);
+      await expect(
+        gitlab.expandGroupMembers?.(['u@email.com']),
+      ).resolves.toEqual(['u@email.com']);
+    });
+
+    it('expands a role handle into members holding exactly that role', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(200, [
+          { username: 'dev-one', access_level: 30 },
+          { username: 'maintainer', access_level: 40 },
+          { username: 'dev-two', access_level: 30 },
+          { username: 'owner', access_level: 50 },
+        ]);
+      await expect(
+        gitlab.expandGroupMembers?.(['@@developer']),
+      ).resolves.toEqual(['dev-one', 'dev-two']);
+    });
+
+    it('resolves roles, groups, emails and users together', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(200, [
+          { username: 'alice', access_level: 40 },
+          { username: 'bob', access_level: 30 },
+        ])
+        .get('/api/v4/groups/group-a/members')
+        .reply(200, [{ username: 'maria' }])
+        .get('/api/v4/groups/john/members')
+        .reply(404, { message: '404 Group Not Found' });
+      await expect(
+        gitlab.expandGroupMembers?.([
+          '@@maintainer',
+          '@group-a',
+          'u@email.com',
+          'john',
+        ]),
+      ).resolves.toEqual(['alice', 'u@email.com', 'maria', 'john']);
+    });
+
+    it('swallows role member fetch errors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(403, { message: '403 Authorization' });
+      await expect(
+        gitlab.expandGroupMembers?.(['@@developer']),
+      ).resolves.toEqual([]);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Unable to fetch role members',
+      );
     });
   });
 });

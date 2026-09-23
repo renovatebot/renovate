@@ -13,13 +13,7 @@ import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
 
 type JsonSchemaBasicType =
-  | 'string'
-  | 'number'
-  | 'integer'
-  | 'boolean'
-  | 'object'
-  | 'array'
-  | 'null';
+  'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
 /* These are sorted in priority order, but editors may not suggest in that order */
@@ -33,6 +27,18 @@ const presetsToSuggest = [
   'security:minimumReleaseAgeNpm',
   'security:only-security-updates',
 ];
+
+function getOptionDocsUrl(option: RenovateOptions): string {
+  const parent = option.parents?.find((parent) => parent !== '.');
+  const anchor = parent
+    ? `${parent}${option.name}`.toLowerCase()
+    : option.name.toLowerCase();
+  const page = option.globalOnly
+    ? 'self-hosted-configuration'
+    : 'configuration-options';
+
+  return `https://docs.renovatebot.com/${page}/#${anchor}`;
+}
 
 /**
  * When suggesting presets in `extends`, suggest a number of values that users may want to use
@@ -59,8 +65,9 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     type?: JsonSchemaType;
   } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
-    temp.description = option.description;
-    temp.markdownDescription = option.description;
+    const docsUrl = getOptionDocsUrl(option);
+    temp.description = `${option.description}\nSee also: ${docsUrl}`;
+    temp.markdownDescription = `${option.description}\n\nSee also: [${option.name}](${docsUrl})`;
   }
   temp.type = option.type;
   if (option.type === 'array') {
@@ -102,7 +109,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         { type: 'string', pattern: '^regex:' },
       ];
     } else if (option.allowedValues) {
-      if (option.allowString) {
+      if (option.allowString || option.supportsTemplating) {
         temp.anyOf = [{ enum: option.allowedValues }, { type: 'string' }];
       } else {
         temp.enum = option.allowedValues;
@@ -126,6 +133,30 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     !option.freeChoice
   ) {
     temp.$ref = '#';
+  }
+
+  if (option.name === 'repositories') {
+    temp.items = {
+      oneOf: [
+        { type: 'string' },
+        {
+          allOf: [
+            {
+              type: 'object',
+              required: ['repository'],
+              properties: {
+                repository: {
+                  type: 'string',
+                  minLength: 1,
+                  description: 'Repository name (e.g. `owner/repo`).',
+                },
+              },
+            },
+            { $ref: '#' },
+          ],
+        },
+      ],
+    };
   }
 
   if (option.name === 'constraints') {
@@ -233,6 +264,23 @@ function addChildrenArrayInParents(
                     },
                   ],
                 },
+                overrideDescription: {
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        description:
+                          'Description which replaces the descriptions of any presets which this config extends',
+                      },
+                    },
+                    {
+                      type: 'string',
+                      description:
+                        'Description which replaces the descriptions of any presets which this config extends',
+                    },
+                  ],
+                },
               },
             },
           ],
@@ -257,6 +305,7 @@ function toRequiredPropertiesRule(
       properties,
       required,
     },
+    // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema if/then/else pattern
     then: {
       required: [option.name],
     },

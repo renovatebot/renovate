@@ -1,21 +1,25 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { MAVEN_REPO } from './common.ts';
+import { isMavenCentral } from './common.ts';
 import { CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
@@ -23,10 +27,6 @@ import type {
   MavenFetchResult,
   MavenFetchSuccess,
 } from './types.ts';
-
-function getHost(url: string): string | undefined {
-  return parseUrl(url)?.host;
-}
 
 function isTemporaryError(err: HttpError): boolean {
   if (err.code === 'ECONNRESET') {
@@ -126,7 +126,7 @@ export async function downloadHttpProtocol(
     }
   }
 
-  const fetchResult = await Result.wrap<HttpResponse, Error>(
+  const fetchResult = await Result.wrap<HttpResponse>(
     http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
@@ -150,8 +150,8 @@ export async function downloadHttpProtocol(
       }
 
       const failedUrl = url;
-      if (err.message === HOST_DISABLED) {
-        logger.trace({ failedUrl }, 'Host disabled');
+      if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+        logger.trace({ failedUrl }, refusedHostMessage(err));
         return Result.err({ type: 'host-disabled' });
       }
 
@@ -182,7 +182,8 @@ export async function downloadHttpProtocol(
 
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
-        if (getHost(url) === getHost(MAVEN_REPO)) {
+
+        if (isMavenCentral(url)) {
           const statusCode = err?.response?.statusCode;
           if (statusCode === 429) {
             if (packageCache.getCacheType() === 'redis') {
@@ -198,9 +199,8 @@ export async function downloadHttpProtocol(
             }
           }
           return Result.err({ type: 'maven-central-temporary-error', err });
-        } else {
-          return Result.err({ type: 'temporary-error' });
         }
+        return Result.err({ type: 'temporary-error' });
       }
 
       if (isConnectionError(err)) {
@@ -580,7 +580,7 @@ export async function getDependencyInfo(
           'groupId',
           'artifactId',
           'version',
-        ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+        ].map((k) => parent.valueWithPath(k)?.replace(regEx(/\s+/g), ''));
         if (parentGroupId && parentArtifactId && parentVersion) {
           const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
           const parentDependency = getDependencyParts(parentDisplayId);

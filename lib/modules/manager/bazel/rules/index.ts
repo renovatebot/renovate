@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { regEx } from '../../../../util/regex.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { Fragment, FragmentData, Target } from '../types.ts';

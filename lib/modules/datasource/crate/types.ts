@@ -27,10 +27,3 @@ export interface CrateRecord {
   rust_version?: string;
   pubtime?: string;
 }
-
-export interface CrateMetadata {
-  description: string | null;
-  documentation: string | null;
-  homepage: string | null;
-  repository: string | null;
-}

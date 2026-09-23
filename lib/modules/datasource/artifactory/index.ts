@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { parse } from '../../../util/html.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -26,7 +25,7 @@ export class ArtifactoryDatasource extends Datasource {
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -91,14 +90,12 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode === 404) {
-          logger.warn(
-            { registryUrl, packageName },
-            'artifactory: `Not Found` error',
-          );
-          return null;
-        }
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        logger.warn(
+          { registryUrl, packageName },
+          'artifactory: `Not Found` error',
+        );
+        return null;
       }
       this.handleGenericErrors(err);
     }
@@ -107,13 +104,12 @@ export class ArtifactoryDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

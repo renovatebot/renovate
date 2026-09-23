@@ -14,12 +14,6 @@ export function checkFileContainsDependency(
   return checkList.some((check) => content.includes(check));
 }
 
-const pathStringRegex = regEx(/(.|..)?(\/[^/])+/);
-export function checkIfStringIsPath(path: string): boolean {
-  const match = pathStringRegex.exec(path);
-  return !!match;
-}
-
 export function massageProviderLookupName(dep: PackageDependency): void {
   dep.packageName ??= dep.depName;
 

@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -28,7 +28,7 @@ function isPossibleChartRepo(url: string): boolean {
 }
 
 const githubRelease = regEx(
-  /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
+  /^(?<repoUrl>https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
 );
 
 function getSourceUrl(release: HelmRelease): string | undefined {
@@ -36,7 +36,7 @@ function getSourceUrl(release: HelmRelease): string | undefined {
   const [githubUrl] = release.urls;
   const releaseMatch = githubRelease.exec(githubUrl);
   if (releaseMatch) {
-    return releaseMatch[1];
+    return releaseMatch.groups!.repoUrl;
   }
 
   if (release.home && isPossibleChartRepo(release.home)) {
@@ -80,4 +80,4 @@ export const HelmRepository = z
   })
   .transform(({ entries }) => entries);
 
-export type HelmRepositoryData = z.infer<typeof HelmRepository>;
+export type HelmRepository = z.infer<typeof HelmRepository>;

@@ -4,10 +4,19 @@ import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
+import { coerceArray } from '../array.ts';
+import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
+import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
+  apm: {
+    datasource: 'github-releases',
+    packageName: 'microsoft/apm',
+    versioning: 'semver',
+    extractVersion: '^v(?<version>.*)$',
+  },
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
@@ -79,6 +88,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'fluxcd/flux2',
     versioning: 'semver',
   },
+  gh: {
+    datasource: 'github-releases',
+    packageName: 'cli/cli',
+    versioning: 'semver',
+  },
   gleam: {
     datasource: 'github-releases',
     packageName: 'gleam-lang/gleam',
@@ -135,6 +149,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     datasource: 'github-releases',
     packageName: 'containerbase/maven-prebuild',
     versioning: 'maven',
+  },
+  mise: {
+    datasource: 'github-releases',
+    packageName: 'jdx/mise',
+    versioning: 'npm',
   },
   nix: {
     datasource: 'github-releases',
@@ -198,9 +217,9 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     versioning: 'ruby',
   },
   rust: {
-    datasource: 'docker',
+    datasource: 'rust-version',
     packageName: 'rust',
-    versioning: 'semver',
+    versioning: 'rust-release-channel',
   },
   uv: {
     datasource: 'pypi',
@@ -284,10 +303,8 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (isString(latest)) {
-    if (versioningApi.isGreaterThan(version, latest)) {
-      return false;
-    }
+  if (isString(latest) && versioningApi.isGreaterThan(version, latest)) {
+    return false;
   }
   return true;
 }
@@ -308,7 +325,7 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint.replace(/^=+/, '').trim();
+        return constraint.replace(regEx(/^=+/), '').trim();
       }
     } else {
       logger.warn(
@@ -320,7 +337,7 @@ export async function resolveConstraint(
   }
 
   const pkgReleases = await getPkgReleases(toolConfig);
-  const releases = pkgReleases?.releases ?? [];
+  const releases = coerceArray(pkgReleases?.releases);
 
   if (!releases?.length) {
     logger.warn({ toolConfig }, 'No tool releases found.');
@@ -369,14 +386,25 @@ export async function resolveConstraint(
   return highestVersion;
 }
 
+// Docker execs run in a fresh `--rm` container each time, so `memoize` must
+// stay false there - only the persistent-host (binarySource=install) path
+// can safely skip a tool it has already installed this run.
 export async function generateInstallCommands(
   toolConstraints: Opt<ToolConstraint[]>,
+  memoize = false,
 ): Promise<string[]> {
   const installCommands: string[] = [];
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
       const { toolName } = toolConstraint;
+      if (memoize) {
+        const cacheKey = `containerbase-installed:${toolName}:${toolVersion}`;
+        if (memCache.get<boolean | undefined>(cacheKey)) {
+          continue;
+        }
+        memCache.set(cacheKey, true);
+      }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
     }

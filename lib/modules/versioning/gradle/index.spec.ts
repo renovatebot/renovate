@@ -79,6 +79,9 @@ describe('modules/versioning/gradle/index', () => {
       ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
       ${''}                        | ${''}                        | ${0}
       ${'384.vf35b_f26814ec'}      | ${'400.v35420b_922dcb_'}     | ${-1}
+      ${'2026051723231779060202'}  | ${'2026051723231779060202'}  | ${0}
+      ${'2026051723231779060202'}  | ${'2026051723231779060208'}  | ${-1}
+      ${'2026051723231779060208'}  | ${'2026051723231779060202'}  | ${1}
       ${'___'}                     | ${'...'}                     | ${0}
     `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(compare(a, b)).toEqual(expected);
@@ -233,6 +236,10 @@ describe('modules/versioning/gradle/index', () => {
         expect(api.getPatch(input)).toBe(patch);
       },
     );
+
+    it('has no major when the leading token is not a number', () => {
+      expect(api.getMajor('foo')).toBeNull();
+    });
   });
 
   describe('matches', () => {
@@ -259,6 +266,7 @@ describe('modules/versioning/gradle/index', () => {
       ${'99999999999'} | ${'+'}       | ${true}
       ${'1.2.3'}       | ${'[1.2.3]'} | ${true}
       ${'1.2.3'}       | ${'[1.2.4]'} | ${false}
+      ${'1'}           | ${'1..2-+'}  | ${false}
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
@@ -276,10 +284,32 @@ describe('modules/versioning/gradle/index', () => {
     });
   });
 
+  describe('isSame', () => {
+    it.each`
+      type       | a                               | b                               | expected
+      ${'major'} | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${false}
+      ${'major'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${true}
+      ${'minor'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${false}
+      ${'minor'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${true}
+      ${'minor'} | ${'1'}                          | ${'1.0'}                        | ${true}
+      ${'patch'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${false}
+      ${'major'} | ${'foobar'}                     | ${'foobar'}                     | ${true}
+      ${'major'} | ${'v'}                          | ${'v'}                          | ${true}
+      ${'major'} | ${'v'}                          | ${'v1'}                         | ${false}
+      ${'major'} | ${''}                           | ${'1'}                          | ${false}
+    `(
+      'isSame("$type", "$a", "$b") === $expected',
+      ({ type, a, b, expected }) => {
+        expect(api.isSame?.(type, a, b)).toBe(expected);
+      },
+    );
+  });
+
   describe('minSatisfyingVersion', () => {
     it.each`
-      versions                  | range    | expected
-      ${['0', '1.5', '1', '2']} | ${'1.+'} | ${'1'}
+      versions                         | range    | expected
+      ${['0', '1.5', '1', '2']}        | ${'1.+'} | ${'1'}
+      ${['0', '1.5', '1', '1.9', '2']} | ${'1.+'} | ${'1'}
     `(
       'minSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {
@@ -290,8 +320,9 @@ describe('modules/versioning/gradle/index', () => {
 
   describe('getSatisfyingVersion', () => {
     it.each`
-      versions                  | range    | expected
-      ${['0', '1', '1.5', '2']} | ${'1.+'} | ${'1.5'}
+      versions                         | range    | expected
+      ${['0', '1', '1.5', '2']}        | ${'1.+'} | ${'1.5'}
+      ${['0', '1', '1.5', '1.2', '2']} | ${'1.+'} | ${'1.5'}
     `(
       'getSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {

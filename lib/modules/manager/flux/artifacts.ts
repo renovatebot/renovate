@@ -1,8 +1,7 @@
-import { quote } from 'shlex';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { isSystemManifest } from './common.ts';
 import type { FluxManagerData } from './types.ts';
@@ -15,16 +14,15 @@ export async function updateArtifacts({
   if (!isSystemManifest(packageFileName) || !systemDep?.newVersion) {
     return null;
   }
-  const existingFileContent = await readLocalFile(packageFileName);
+  const existingFileContent = await readLocalFile(packageFileName, 'utf8');
   try {
     logger.debug(`Updating Flux system manifests`);
     const args: string[] = ['--export'];
     if (systemDep.managerData?.components) {
-      args.push('--components', quote(systemDep.managerData.components));
+      args.push('--components', systemDep.managerData.components);
     }
-    const cmd = `flux install ${args.join(' ')} > ${quote(packageFileName)}`;
+    const cmd = [{ command: ['flux', 'install', ...args] }];
     const execOptions: ExecOptions = {
-      shell: true,
       docker: {},
       toolConstraints: [
         {
@@ -35,8 +33,7 @@ export async function updateArtifacts({
     };
     const result = await exec(cmd, execOptions);
 
-    const newFileContent = await readLocalFile(packageFileName);
-    if (!newFileContent) {
+    if (!result.stdout) {
       logger.debug('Cannot read new flux file content');
       return [
         {
@@ -47,6 +44,8 @@ export async function updateArtifacts({
         },
       ];
     }
+    await writeLocalFile(packageFileName, result.stdout);
+    const newFileContent = result.stdout;
     if (newFileContent === existingFileContent) {
       logger.debug('Flux contents are unchanged');
       return null;

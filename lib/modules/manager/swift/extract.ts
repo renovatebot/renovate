@@ -10,7 +10,7 @@ import type { MatchResult } from './types.ts';
 
 const regExps = {
   wildcard: regEx(/^.*?/),
-  space: regEx(/(\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
+  space: regEx(/(?:\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
   depsKeyword: regEx(/dependencies/),
   colon: regEx(/:/),
   beginSection: regEx(/\[/),
@@ -148,6 +148,7 @@ function parseDependencyUrl(
   }
 
   const parsedUrl = parseUrl(normalizedUrl);
+  // v8 ignore if -- getHttpUrl always returns a parseable URL
   if (!parsedUrl) {
     return null;
   }
@@ -221,6 +222,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         if (deps.length) {
           break;
         }
+        // v8 ignore else -- this state is only re-entered at a deps boundary
         if (label === DEPS) {
           state = 'dependencies';
         }

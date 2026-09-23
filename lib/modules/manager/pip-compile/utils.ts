@@ -20,6 +20,7 @@ export function sortPackageFiles(
       const sortedLockFiles = [];
       // TODO(not7cd): this needs better test case
       for (const lockFile of packageFile.lockFiles!) {
+        // v8 ignore else -- every lock file of a package file is in the sorted list
         if (sorted.includes(lockFile)) {
           sortedLockFiles.push(lockFile);
         }
@@ -48,7 +49,7 @@ export function generateMermaidGraph(
     lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
   }
   const edges = depsBetweenFiles.map(({ sourceFile, outputFile, type }) => {
-    return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
+    return `  ${sourceFile} -${type === 'requirement' ? '' : '.'}-> ${outputFile}`;
   });
   return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }

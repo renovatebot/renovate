@@ -1,4 +1,5 @@
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
@@ -11,18 +12,16 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants.ts';
 import { getNodeToolConstraint } from './post-update/node-version.ts';
 import { processHostRules } from './post-update/rules.ts';
 import { lazyLoadPackageJson } from './post-update/utils.ts';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from './utils.ts';
+import { withNpmrcHostRules } from './utils.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
@@ -35,8 +34,10 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
   let res: UpdateArtifactsResult[] = [];
-  res.push((await handlePackageManagerUpdates(updateArtifactsConfig)) ?? {});
-  res.push((await updatePnpmWorkspace(updateArtifactsConfig)) ?? {});
+  res.push(
+    coerceObject(await handlePackageManagerUpdates(updateArtifactsConfig)),
+  );
+  res.push(coerceObject(await updatePnpmWorkspace(updateArtifactsConfig)));
 
   res = res.filter(isNonEmptyObject);
   if (res.length === 0) {
@@ -78,9 +79,8 @@ async function handlePackageManagerUpdates(
   // As it should not be regular practice to have different package managers in different workspaces
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
   const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${depName}@${newVersion}`;
+  const cmd = `corepack use ${quote(`${depName}@${newVersion}`)}`;
 
   const nodeConstraints = await getNodeToolConstraint(
     config,
@@ -106,41 +106,47 @@ async function handlePackageManagerUpdates(
       nodeConstraints,
       {
         toolName: 'corepack',
-        constraint: config.constraints?.corepack,
+        constraint: await resolveToolConstraint(config, 'corepack'),
       },
     ],
     docker: {},
   };
 
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
-  try {
-    await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-    const newPackageFileContent = await readLocalFile(packageFileName, 'utf8');
-    if (
-      !newPackageFileContent ||
-      existingPackageFileContent === newPackageFileContent
-    ) {
-      return null;
-    }
-    logger.debug('Returning updated package.json');
-    return {
-      file: {
-        type: 'addition',
-        path: packageFileName,
-        contents: newPackageFileContent,
-      },
-    };
-  } catch (err) {
-    logger.warn({ err }, 'Error updating package.json');
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-    return {
-      artifactError: {
-        fileName: packageFileName,
-        stderr: err.message,
-      },
-    };
-  }
+  return await withNpmrcHostRules(
+    pkgFileDir,
+    additionalNpmrcContent,
+    async () => {
+      try {
+        await exec(cmd, execOptions);
+        const newPackageFileContent = await readLocalFile(
+          packageFileName,
+          'utf8',
+        );
+        if (
+          !newPackageFileContent ||
+          existingPackageFileContent === newPackageFileContent
+        ) {
+          return null;
+        }
+        logger.debug('Returning updated package.json');
+        return {
+          file: {
+            type: 'addition',
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+        };
+      } catch (err) {
+        logger.warn({ err }, 'Error updating package.json');
+        return {
+          artifactError: {
+            fileName: packageFileName,
+            stderr: err.message,
+          },
+        };
+      }
+    },
+  );
 }
 
 /**
@@ -157,14 +163,14 @@ async function updatePnpmWorkspace(
     return null;
   }
 
-  const pnpmShrinkwrap = upgrades[0].managerData?.pnpmShrinkwrap;
-  if (!isString(pnpmShrinkwrap)) {
+  const pnpmLockFile = upgrades[0].managerData?.pnpmLockFile;
+  if (!isString(pnpmLockFile)) {
     logger.debug(
       'No pnpm shrinkwrap found, not attempting to update pnpm-workspace.yaml',
     );
     return null;
   }
-  const lockFileDir = upath.dirname(pnpmShrinkwrap);
+  const lockFileDir = upath.dirname(pnpmLockFile);
   const pnpmWorkspaceFilePath = upath.join(lockFileDir, 'pnpm-workspace.yaml');
 
   if (!(await localPathExists(pnpmWorkspaceFilePath))) {
@@ -188,6 +194,10 @@ async function updatePnpmWorkspace(
     let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
     // v8 ignore next -- TODO: add test #40625
     const newVersion = upgrade.newVersion ?? upgrade.newValue;
+    // For pnpm overrides with range selectors (e.g. "pkg@<=1.0.0"), depName contains
+    // the full key including the selector. Use packageName (bare package name) for
+    // minimumReleaseAgeExclude entries which require exact versions only.
+    const excludeDepName = upgrade.packageName ?? upgrade.depName;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
     if (excludeNode && !isSeq(excludeNode)) {
@@ -196,40 +206,46 @@ async function updatePnpmWorkspace(
 
     if (!excludeNode) {
       logger.debug('Adding new exclude block');
-      excludeNode = doc.createNode([]) as YAMLSeq;
-      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
-      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      excludeNode = doc.createNode([]);
+      const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
       excludeNode.items.push(newItem);
       doc.set('minimumReleaseAgeExclude', excludeNode);
       updated = true;
       continue;
     }
 
-    const { item: matchedItem, allExcluded } = getMatchedItem(
-      upgrade.depName!,
-      excludeNode.items,
-    );
+    const {
+      item: matchedItem,
+      allExcluded,
+      malformed,
+    } = getMatchedItem(excludeDepName!, excludeNode.items);
 
     if (allExcluded) {
-      continue;
-    }
-
-    if (isScalar<string>(matchedItem)) {
+      // still clean up any malformed entries even when a wildcard covers the package
+    } else if (malformed && isScalar<string>(matchedItem)) {
+      logger.debug(
+        { entry: matchedItem.value, excludeDepName, newVersion },
+        'Replacing malformed minimumReleaseAgeExclude entry',
+      );
+      matchedItem.value = `${excludeDepName}@${newVersion}`;
+      matchedItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
+      updated = true;
+    } else if (isScalar<string>(matchedItem)) {
       // if we have a comment before the list, which includes the dependency
-      if (excludeNode?.commentBefore?.includes(`${upgrade.depName}@`)) {
+      if (excludeNode?.commentBefore?.includes(`${excludeDepName}@`)) {
         // and it doesn't already have the version included in it
         if (
           !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
             excludeNode.commentBefore,
-            upgrade.depName,
+            excludeDepName,
             newVersion,
           )
         ) {
           // then append it
 
           // normalize value (no quote handling needed)
-          excludeNode.commentBefore =
-            excludeNode.commentBefore + ` || ${newVersion}`;
+          excludeNode.commentBefore = `${excludeNode.commentBefore} || ${newVersion}`;
           updated = true;
         }
       }
@@ -239,37 +255,51 @@ async function updatePnpmWorkspace(
         if (
           !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
             matchedItem.commentBefore,
-            upgrade.depName,
+            excludeDepName,
             newVersion,
           )
         ) {
           // normalize value (no quote handling needed)
-          matchedItem.commentBefore =
-            matchedItem.commentBefore + ` || ${newVersion}`;
+          matchedItem.commentBefore = `${matchedItem.commentBefore} || ${newVersion}`;
           updated = true;
         }
       } else {
-        matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+        matchedItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
         updated = true;
       }
 
       if (
         !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
           matchedItem.value,
-          upgrade.depName,
+          excludeDepName,
           newVersion,
         )
       ) {
-        matchedItem.value = matchedItem.value + ` || ${newVersion}`;
+        matchedItem.value = `${matchedItem.value} || ${newVersion}`;
         updated = true;
       }
     } else {
       // add new entry
-      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
-      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
 
       excludeNode.items.push(newItem);
       updated = true;
+    }
+
+    // Remove any malformed entries for the same package left over from the prior bug
+    for (let i = excludeNode.items.length - 1; i >= 0; i--) {
+      const item = excludeNode.items[i];
+      if (
+        item !== matchedItem &&
+        isScalar(item) &&
+        isString(item.value) &&
+        item.value.startsWith(`${excludeDepName}@`) &&
+        !isValidMinimumReleaseAgeExcludeEntry(item.value, excludeDepName!)
+      ) {
+        excludeNode.items.splice(i, 1);
+        updated = true;
+      }
     }
   }
 
@@ -295,7 +325,10 @@ function getMatchedItem(
 ): {
   item: Scalar | null;
   allExcluded: boolean;
+  malformed?: boolean;
 } {
+  let malformedItem: Scalar | null = null;
+
   for (const item of items) {
     /* v8 ignore if -- should not happen */
     if (!isScalar(item) || !isString(item.value)) {
@@ -303,10 +336,14 @@ function getMatchedItem(
     }
 
     if (item.value.startsWith(`${depName}@`)) {
-      return {
-        allExcluded: false,
-        item,
-      };
+      if (isValidMinimumReleaseAgeExcludeEntry(item.value, depName)) {
+        return {
+          allExcluded: false,
+          item,
+        };
+      }
+      malformedItem ??= item;
+      continue;
     }
 
     if (item.value === depName || matchRegexOrGlob(depName, item.value)) {
@@ -317,10 +354,26 @@ function getMatchedItem(
     }
   }
 
+  if (malformedItem) {
+    return {
+      allExcluded: false,
+      item: malformedItem,
+      malformed: true,
+    };
+  }
+
   return {
     item: null,
     allExcluded: false,
   };
+}
+
+/** pnpm requires package@version entries without range selectors or extra @ in the version part */
+function isValidMinimumReleaseAgeExcludeEntry(
+  value: string,
+  packageName: string,
+): boolean {
+  return !value.slice(`${packageName}@`.length).includes('@');
 }
 
 /** determine whether a comment or a list item contains the depName at a given newVersion */

@@ -13,7 +13,7 @@ vi.mock('../../../../util/fs/index.ts');
 describe('workers/repository/config-migration/branch/create', () => {
   const raw = Fixtures.getJsonc('./renovate.json');
   const indent = '  ';
-  const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
+  const renovateConfig = `${JSON.stringify(raw, undefined, indent)}\n`;
   const filename = 'renovate.json';
   const prettierSpy = vi.spyOn(MigratedDataFactory, 'applyPrettierFormatting');
 
@@ -119,6 +119,34 @@ describe('workers/repository/config-migration/branch/create', () => {
         force: true,
         prTitle: 'Migrate Renovate config',
       });
+    });
+
+    it('leaves a package.json that carries no renovate config alone', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        {
+          "dependencies": {
+            "xmldoc": "1.0.0"
+          }
+        }
+      `);
+      scm.getFileList.mockResolvedValueOnce([]);
+
+      await createConfigMigrationBranch(config, {
+        ...migratedConfigData,
+        filename: 'package.json',
+      });
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          files: expect.arrayContaining([
+            {
+              type: 'addition',
+              path: 'package.json',
+              contents: '{"dependencies":{"xmldoc":"1.0.0"}}',
+            },
+          ]),
+        }),
+      );
     });
 
     describe('applies the commitMessagePrefix value', () => {

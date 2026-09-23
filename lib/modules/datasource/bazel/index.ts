@@ -1,8 +1,8 @@
 import { isTruthy } from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
 import { id as bazelVersioningId } from '../../versioning/bazel-module/index.ts';
@@ -30,7 +30,7 @@ export class BazelDatasource extends Datasource {
     super(BazelDatasource.id);
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -49,7 +49,7 @@ export class BazelDatasource extends Datasource {
         if (!fileContent) {
           return null;
         }
-        metadata = BazelModuleMetadata.parse(JSON.parse(fileContent));
+        metadata = Json.pipe(BazelModuleMetadata).parse(fileContent);
       } else {
         const response = await this.http.getJson(url, BazelModuleMetadata);
         metadata = response.body;
@@ -82,13 +82,12 @@ export class BazelDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${BazelDatasource.id}`,
         key: `${config.registryUrl!}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }
