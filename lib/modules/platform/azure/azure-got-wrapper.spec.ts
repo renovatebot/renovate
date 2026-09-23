@@ -175,7 +175,9 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
     });
 
     it('should not normalize cloud endpoint with single path segment', () => {
-      const result = azure.normalizeApiEndpoint('https://dev.azure.com/organization');
+      const result = azure.normalizeApiEndpoint(
+        'https://dev.azure.com/organization'
+      );
 
       expect(result).toBe('https://dev.azure.com/organization');
     });
