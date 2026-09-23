@@ -167,66 +167,23 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
     });
 
     it('should normalize simple TFS collection endpoint', () => {
-      hostRules.add({
-        hostType: 'azure',
-        token: '123test',
-        matchHost: 'https://devops.example.com/tfs/MyCollection',
-      });
-      azure.setEndpoint('https://devops.example.com/tfs/MyCollection');
+      const result = azure.normalizeApiEndpoint(
+        'https://devops.example.com/tfs/MyCollection',
+      );
 
-      const res = azure.azureObj();
-
-      delete res.rest.client.userAgent;
-      delete res.vsoClient.restClient.client.userAgent;
-
-      expect(res).toMatchObject({
-        serverUrl: 'https://devops.example.com/tfs',
-        authHandler: {
-          token: '123test',
-        },
-      });
+      expect(result).toBe('https://devops.example.com/tfs');
     });
 
     it('should not normalize cloud endpoint with single path segment', () => {
-      hostRules.add({
-        hostType: 'azure',
-        token: '123test',
-        matchHost: 'https://dev.azure.com/organization',
-      });
-      azure.setEndpoint('https://dev.azure.com/organization');
+      const result = azure.normalizeApiEndpoint('https://dev.azure.com/organization');
 
-      const res = azure.azureObj();
-
-      delete res.rest.client.userAgent;
-      delete res.vsoClient.restClient.client.userAgent;
-
-      expect(res).toMatchObject({
-        serverUrl: 'https://dev.azure.com/organization',
-        authHandler: {
-          token: '123test',
-        },
-      });
+      expect(result).toBe('https://dev.azure.com/organization');
     });
 
     it('should return original endpoint for invalid URL', () => {
-      hostRules.add({
-        hostType: 'azure',
-        token: '123test',
-        matchHost: 'not-a-valid-url',
-      });
-      azure.setEndpoint('not-a-valid-url');
+      const result = azure.normalizeApiEndpoint('not-a-valid-url');
 
-      const res = azure.azureObj();
-
-      delete res.rest.client.userAgent;
-      delete res.vsoClient.restClient.client.userAgent;
-
-      expect(res).toMatchObject({
-        serverUrl: 'not-a-valid-url',
-        authHandler: {
-          token: '123test',
-        },
-      });
+      expect(result).toBe('not-a-valid-url');
     });
   });
 

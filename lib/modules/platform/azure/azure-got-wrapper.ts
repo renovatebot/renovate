@@ -23,7 +23,7 @@ const hostType = 'azure';
 let endpoint: string;
 let hostRuleEndpoint: string;
 
-function normalizeApiEndpoint(value: string): string {
+export function normalizeApiEndpoint(value: string): string {
   const endpointUrl = parseUrl(value);
   if (!endpointUrl) {
     return value;
