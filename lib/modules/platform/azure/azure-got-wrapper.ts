@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import * as azure from 'azure-devops-node-api';
 import {
   getBasicHandler,
@@ -10,7 +11,7 @@ import { DeploymentFlags } from 'azure-devops-node-api/interfaces/common/VSSInte
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
-import { isTruthy } from '@sindresorhus/is';
+
 import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
