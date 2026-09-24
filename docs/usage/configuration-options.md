@@ -3628,6 +3628,32 @@ The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+### `packageRules.matchIsBreaking`
+
+Use `matchIsBreaking` to match updates based on whether Renovate considers them breaking.
+Set it to `true` to match only breaking updates, or `false` to match only non-breaking updates.
+
+What counts as breaking depends on the versioning of the dependency:
+
+- Versionings with their own notion of breaking changes decide themselves, for example Cargo treats a minor bump of a `0.x` crate (`0.1.0` to `0.2.0`) as breaking
+- For all other versionings, an update is breaking if its `updateType` is `major`
+
+Rules with `matchIsBreaking` never match when there is no update to evaluate, for example for `lockFileMaintenance`.
+
+The following example automerges all non-breaking updates of packages in the `@myorg` scope:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["@myorg{/,}**"],
+      "matchIsBreaking": false,
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### `packageRules.matchJsonata`
 
 Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
