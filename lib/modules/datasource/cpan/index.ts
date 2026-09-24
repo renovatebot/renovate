@@ -13,9 +13,13 @@ export class CpanDatasource extends Datasource {
     super(CpanDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://fastapi.metacpan.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://fastapi.metacpan.org/'];
+  }
 
   override readonly defaultVersioning = perlVersioning.id;
 
@@ -27,7 +31,7 @@ export class CpanDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -72,6 +76,10 @@ export class CpanDatasource extends Datasource {
 
     let latestDistribution: string | null = null;
     let latestVersion: string | null = null;
+    // `releases` is only still null if the request above threw, and
+    // `handleGenericErrors()` always rethrows - the `releases.length` below
+    // would dereference null if the else were ever taken
+    // v8 ignore else -- unreachable
     if (releases) {
       for (const release of releases) {
         latestDistribution ??= release.distribution;
@@ -103,6 +111,7 @@ export class CpanDatasource extends Datasource {
       {
         namespace: `datasource-${CpanDatasource.id}`,
         key: `${config.packageName}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

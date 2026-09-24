@@ -14,14 +14,18 @@ export class JsrDatasource extends Datasource {
 
   // custom registry support is not yet supported
   // https://github.com/jsr-io/jsr/issues/203
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly registryStrategy = 'first';
   // https://jsr.io/docs/using-packages#semver-resolution
   override readonly defaultVersioning = semverId;
 
   // use npm compatible registry api url due to returns
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -35,7 +39,7 @@ export class JsrDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -75,6 +79,7 @@ export class JsrDatasource extends Datasource {
         namespace: `datasource-${JsrDatasource.id}`,
         // TODO: types (#22198)
         key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

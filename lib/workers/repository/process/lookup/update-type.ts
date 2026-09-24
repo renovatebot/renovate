@@ -1,34 +1,37 @@
-import type { UpdateType } from '../../../../config/types.ts';
-import type * as allVersioning from '../../../../modules/versioning/index.ts';
+import type { VersioningApi } from '../../../../modules/versioning/index.ts';
 
-export interface UpdateTypeConfig {
-  separateMajorMinor?: boolean;
-  separateMultipleMajor?: boolean;
-  separateMultipleMinor?: boolean;
-  separateMinorPatch?: boolean;
-}
+/** The subset of `UpdateType` which follows from comparing two versions. */
+export type ReleaseUpdateType = 'major' | 'minor' | 'patch';
 
-export function getUpdateType(
-  config: UpdateTypeConfig,
-  versioningApi: allVersioning.VersioningApi,
+/**
+ * Classify the step from `currentVersion` to `newVersion`.
+ *
+ * Versionings which implement `isSame()` decide for themselves which part of a version is the major and which the minor, because their numeric `getMajor()`/`getMinor()` cannot express it - `pvp` for instance treats the first two components together as the major, so `getMajor()` has to squash them into a float and reports `1.1` for both `1.1.0` and `1.10.0`. Every other versioning falls back to comparing those numbers.
+ */
+export function classifyRelease(
+  versioningApi: VersioningApi,
   currentVersion: string,
   newVersion: string,
-): UpdateType {
+): ReleaseUpdateType {
+  if (versioningApi.isSame) {
+    if (!versioningApi.isSame('major', newVersion, currentVersion)) {
+      return 'major';
+    }
+    if (!versioningApi.isSame('minor', newVersion, currentVersion)) {
+      return 'minor';
+    }
+    return 'patch';
+  }
+
   if (
-    versioningApi.isSame &&
-    !versioningApi.isSame('major', newVersion, currentVersion)
+    versioningApi.getMajor(newVersion) !==
+    versioningApi.getMajor(currentVersion)
   ) {
     return 'major';
   }
   if (
-    versioningApi.getMajor(newVersion)! >
-    versioningApi.getMajor(currentVersion)!
-  ) {
-    return 'major';
-  }
-  if (
-    versioningApi.getMinor(newVersion)! >
-    versioningApi.getMinor(currentVersion)!
+    versioningApi.getMinor(newVersion) !==
+    versioningApi.getMinor(currentVersion)
   ) {
     return 'minor';
   }

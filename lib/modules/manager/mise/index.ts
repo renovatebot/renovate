@@ -1,9 +1,11 @@
 import { deduplicateArray } from '../../../util/array.ts';
+import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -12,6 +14,7 @@ import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -44,17 +47,21 @@ const backendDatasources = {
     JavaVersionDatasource.id,
     NodeVersionDatasource.id,
     RubyVersionDatasource.id,
+    RustVersionDatasource.id,
   ],
   // Re-use the asdf datasources, as mise and asdf support the same plugins.
   asdf: asdfSupportedDatasources,
   aqua: [GithubTagsDatasource.id],
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
+  conda: [CondaDatasource.id],
   dotnet: [NugetDatasource.id],
   gem: [RubygemsDatasource.id],
   github: [GithubReleasesDatasource.id],
+  gitlab: [GitlabReleasesDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
+  pypi: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
   ubi: [GithubReleasesDatasource.id],
   // not supported

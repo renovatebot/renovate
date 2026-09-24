@@ -41,17 +41,17 @@ describe('modules/manager/deno/artifacts', () => {
     });
 
     it('skips if no updatedDeps and no lockFileMaintenance', async () => {
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips if no lock file in config', async () => {
       updateArtifact.updatedDeps = [{}];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips and returns an error if cannot read lock file', async () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           artifactError: {
             fileName: 'deno.lock',
@@ -69,7 +69,7 @@ describe('modules/manager/deno/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('returns updated lock content', async () => {
@@ -81,7 +81,7 @@ describe('modules/manager/deno/artifacts', () => {
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'deno.lock',
@@ -108,7 +108,7 @@ describe('modules/manager/deno/artifacts', () => {
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'sub/deno.lock',
@@ -121,7 +121,7 @@ describe('modules/manager/deno/artifacts', () => {
 
     it('supports lockFileMaintenance', async () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       // Second read is .npmrc
@@ -129,7 +129,7 @@ describe('modules/manager/deno/artifacts', () => {
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'deno.lock',
@@ -137,6 +137,28 @@ describe('modules/manager/deno/artifacts', () => {
             contents: newLock,
           },
         },
+      ]);
+    });
+
+    it('falls back to the extracted deno constraint', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      GlobalConfig.set({ localDir, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(Buffer.from('new') as never);
+
+      await updateArtifacts({
+        ...updateArtifact,
+        config: { extractedConstraints: { deno: '2.4.5' } },
+        updatedDeps: [{ lockFiles: ['deno.lock'] }],
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool deno 2.4.5' },
+        { cmd: 'deno install --frozen=false' },
       ]);
     });
 
@@ -167,9 +189,29 @@ describe('modules/manager/deno/artifacts', () => {
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll(execError);
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         { artifactError: { fileName: 'deno.lock', stderr: 'nope' } },
       ]);
+    });
+
+    it('restores .npmrc when the install fails', async () => {
+      const execError = new ExecError('nope', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: { encoding: 'utf8' },
+      });
+      updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
+      fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce('# dummy');
+      mockExecAll(execError);
+
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+        { artifactError: { fileName: 'deno.lock', stderr: 'nope' } },
+      ]);
+
+      expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
     });
   });
 
@@ -189,7 +231,7 @@ describe('modules/manager/deno/artifacts', () => {
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
-    expect(await updateArtifacts(updateArtifact)).toEqual([
+    await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
       {
         artifactError: {
           fileName: 'deno.lock',
@@ -215,7 +257,7 @@ describe('modules/manager/deno/artifacts', () => {
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
-    expect(await updateArtifacts(updateArtifact)).toEqual([
+    await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
       {
         artifactError: {
           fileName: 'deno.lock',
@@ -236,7 +278,7 @@ describe('modules/manager/deno/artifacts', () => {
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
     const execSnapshots = mockExecAll();
-    expect(await updateArtifacts(updateArtifact)).toEqual([
+    await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
       {
         file: {
           path: 'deno.lock',
@@ -280,7 +322,7 @@ describe('modules/manager/deno/artifacts', () => {
     it('should add private registries to deno install command allow-import option', async () => {
       const updateArtifact: UpdateArtifact = {
         config: {
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           lockFiles: ['deno.lock'],
         },
         newPackageFileContent: '',
@@ -299,7 +341,7 @@ describe('modules/manager/deno/artifacts', () => {
         matchHost: 'https://private-registry.example',
       });
       const execSnapshots = mockExecAll();
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'deno.lock',
@@ -311,6 +353,42 @@ describe('modules/manager/deno/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'deno install --frozen=false --allow-import=deno.land:443,esm.sh:443,jsr.io:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443,private-registry.example',
+        },
+      ]);
+    });
+
+    it('quotes the allow-import list when a hostRule resolvedHost contains shell metacharacters', async () => {
+      const updateArtifact: UpdateArtifact = {
+        config: {
+          isLockFileMaintenance: true,
+          lockFiles: ['deno.lock'],
+        },
+        newPackageFileContent: '',
+        packageFileName: '',
+        updatedDeps: [],
+      };
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const newLock = Buffer.from('new');
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+      // hostRules can be set via a repo's own committed config, not only by a
+      // trusted platform admin, so matchHost/resolvedHost aren't inherently
+      // trusted. A bare (schemeless) matchHost is preserved verbatim as
+      // resolvedHost when it doesn't parse as a URL.
+      hostRules.add({
+        token: 'some-token',
+        hostType: 'npm',
+        matchHost: 'x$(touch pwned)y',
+      });
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts(updateArtifact);
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: "deno install --frozen=false --allow-import='deno.land:443,esm.sh:443,jsr.io:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443,x$(touch pwned)y'",
         },
       ]);
     });

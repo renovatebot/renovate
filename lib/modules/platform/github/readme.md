@@ -12,7 +12,7 @@ When you use the app, Mend will:
 - maintain and update the Renovate version used
 
 If you self-host Renovate you must do the things listed above yourself.
-Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
+Self-hosting is meant for users with advanced use cases, or who want to be in full control of Renovate and the environment it runs in.
 We recommend most users install the Mend Renovate app.
 
 Read the [Security and Permissions](../../../security-and-permissions.md) page to learn about the Security and Permissions needed for the Mend Renovate app.
@@ -62,12 +62,12 @@ A fine-grained token must have these permissions:
 | `Pull requests`     | `Read and write` | _Repository_ or _Organization_ |
 | `Workflows`         | `Read and write` | _Repository_ or _Organization_ |
 
-!!! tip "Use a bot role account"
+!!! tip "Use a dedicated role account"
   Consider creating a GitHub App to use instead of using your own GitHub user account.
 
 ## Running as a GitHub App
 
-Instead of a bot account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
+Instead of a dedicated account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
 
 When creating the GitHub App give it the following permissions:
 
@@ -117,9 +117,9 @@ The GitHub App installation token is scoped at most to a single organization and
 
 The slug name of your app with `[bot]` appended
 
-**`gitAuthor:"Self-hosted Renovate Bot <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`** (optional, autodetected if not supplied)
+**`gitAuthor:"Self-hosted Renovate <123456+self-hosted-renovate[bot]@users.noreply.github.enterprise.com>"`** (optional, autodetected if not supplied)
 
-The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
+The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to Renovate.
 It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
 A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 

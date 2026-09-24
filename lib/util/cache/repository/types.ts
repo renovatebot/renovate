@@ -5,7 +5,6 @@ import type {
 } from '../../../config/types.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { RepoInitConfig } from '../../../workers/repository/init/types.ts';
-import type { ExtractResult } from '../../../workers/repository/process/extract-update.ts';
 import type { PrBlockedBy } from '../../../workers/types.ts';
 
 export interface BaseBranchCache {
@@ -49,7 +48,9 @@ export interface OnboardingBranchCache {
 export interface ReconfigureBranchCache {
   reconfigureBranchSha: string;
   isConfigValid: boolean;
-  extractResult?: ExtractResult;
+  extractionSucceeded?: boolean;
+  /** @deprecated Written by earlier versions, migrated to `extractionSucceeded` when the cache is read. */
+  extractResult?: unknown;
 }
 
 export interface PrCache {
@@ -132,6 +133,17 @@ export interface BranchCache {
   result?: string;
 }
 
+/**
+ * Repository cache shared by the platforms which speak the Gitea API.
+ */
+export interface GiteaLikePlatformCache {
+  /**
+   * To avoid circular dependency problem, we use `unknown` type here.
+   */
+  pullRequestsCache?: unknown;
+  orgs?: Record<string, boolean>;
+}
+
 export interface RepoCacheData {
   configFileName?: string;
   httpCache?: Record<string, unknown>;
@@ -142,13 +154,8 @@ export interface RepoCacheData {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    forgejo?: {
-      pullRequestsCache?: unknown;
-      orgs?: Record<string, boolean>;
-    };
-    gitea?: {
-      pullRequestsCache?: unknown;
-    };
+    forgejo?: GiteaLikePlatformCache;
+    gitea?: GiteaLikePlatformCache;
     github?: {
       /**
        * To avoid circular dependency problem, we use `unknown` type here.

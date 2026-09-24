@@ -54,11 +54,16 @@ export async function checkReconfigureBranch(
   const branchSha = getBranchCommit(reconfigureBranch)!;
   const cache = getCache();
   const reconfigureCache = cache.reconfigureBranchCache;
+  // migrate the extract result persisted by earlier versions
+  if (reconfigureCache?.extractResult) {
+    reconfigureCache.extractionSucceeded = true;
+    delete reconfigureCache.extractResult;
+  }
 
   // only use valid cached information
   if (
     reconfigureCache?.reconfigureBranchSha === branchSha &&
-    (!existingPr || reconfigureCache.extractResult)
+    (!existingPr || reconfigureCache.extractionSucceeded)
   ) {
     logger.debug('Skipping validation check as branch sha is unchanged');
     return;
@@ -94,7 +99,7 @@ export async function checkReconfigureBranch(
     return;
   }
 
-  let extractResult: ExtractResult | undefined;
+  let extractResult: ExtractResult;
   // Recompute config similar to repo config processing
   // Get non-global config from file config
   // Merge it with inherited and static repo config
@@ -124,29 +129,21 @@ export async function checkReconfigureBranch(
     return;
   }
 
-  let commentEnsured = false;
-  if (extractResult) {
-    commentEnsured = await ensureReconfigurePrComment(
-      newConfig,
-      extractResult.packageFiles,
-      extractResult.branches,
-      reconfigureBranch,
-      existingPr,
-    );
-  }
+  const commentEnsured = await ensureReconfigurePrComment(
+    newConfig,
+    extractResult.packageFiles,
+    extractResult.branches,
+    reconfigureBranch,
+    existingPr,
+  );
 
-  // if comment is not added or updated
-  // do not store extractResult in cache so that we re-process the reconfigure branch on next run and do not skip
-  // istanbul ignore if: should rarely happen
-  if (!commentEnsured) {
-    extractResult = undefined;
-  }
   await setBranchStatus(
     reconfigureBranch,
     'Validation Successful',
     'green',
     context,
   );
-  setReconfigureBranchCache(branchSha, true, extractResult);
+  // if comment is not added or updated, re-process the reconfigure branch on next run and do not skip
+  setReconfigureBranchCache(branchSha, true, commentEnsured);
   await scm.checkoutBranch(config.defaultBranch!); //being cautious
 }

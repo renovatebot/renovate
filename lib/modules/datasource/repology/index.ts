@@ -1,8 +1,12 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -47,7 +51,9 @@ function findPackageInResponse(
 export class RepologyDatasource extends Datasource {
   static readonly id = 'repology';
 
-  override readonly defaultRegistryUrls = ['https://repology.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://repology.org/'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -129,6 +135,7 @@ export class RepologyDatasource extends Datasource {
           pkgType,
         );
 
+        // v8 ignore else -- the resolver either returns a body or throws
         if (response) {
           const pkg = findPackageInResponse(response, repoName, pkgName, [
             pkgType,
@@ -199,7 +206,7 @@ export class RepologyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -228,8 +235,8 @@ export class RepologyDatasource extends Datasource {
       }));
       return { releases };
     } catch (err) {
-      if (err.message === HOST_DISABLED) {
-        logger.trace({ packageName, err }, 'Host disabled');
+      if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+        logger.trace({ packageName, err }, refusedHostMessage(err));
       } else {
         logger.once.warn(
           { packageName, err },

@@ -60,7 +60,9 @@ export class PackagistDatasource extends Datasource {
     super(PackagistDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://repo.packagist.org'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://repo.packagist.org'];
+  }
 
   override readonly defaultVersioning = composerVersioning.id;
 
@@ -246,7 +248,7 @@ export class PackagistDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
 
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

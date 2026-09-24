@@ -22,13 +22,9 @@ describe('modules/manager/cake/index', () => {
   });
 
   it('extracts', async () => {
-    expect(
-      await extractPackageFile(
-        Fixtures.get('build.cake'),
-        'build.cake',
-        config,
-      ),
-    ).toMatchObject({
+    await expect(
+      extractPackageFile(Fixtures.get('build.cake'), 'build.cake', config),
+    ).resolves.toMatchObject({
       deps: [
         { depName: 'Foo.Foo', currentValue: undefined },
         { depName: 'Bim.Bim', currentValue: '6.6.6' },
@@ -71,34 +67,34 @@ describe('modules/manager/cake/index', () => {
 
     RunTarget(target);
     `;
-    expect(await extractPackageFile(content, 'build.cs', config)).toMatchObject(
-      {
-        deps: [
-          {
-            depName: 'SingleTool.Install.First',
-            currentValue: '1.0.0',
-            datasource: 'nuget',
-            registryUrls: ['https://api.nuget.org/v3/index.json'],
-          },
-          {
-            depName: 'SingleTool.Install.Second',
-            currentValue: '1.2.0',
-            datasource: 'nuget',
-          },
-          {
-            depName: 'MultipleTools.Install.First',
-            currentValue: '2.0.0',
-            datasource: 'nuget',
-            registryUrls: ['https://api.nuget.org/v3/index.json'],
-          },
-          {
-            depName: 'MultipleTools.Install.Second',
-            currentValue: '2.1.1',
-            datasource: 'nuget',
-          },
-        ],
-      },
-    );
+    await expect(
+      extractPackageFile(content, 'build.cs', config),
+    ).resolves.toMatchObject({
+      deps: [
+        {
+          depName: 'SingleTool.Install.First',
+          currentValue: '1.0.0',
+          datasource: 'nuget',
+          registryUrls: ['https://api.nuget.org/v3/index.json'],
+        },
+        {
+          depName: 'SingleTool.Install.Second',
+          currentValue: '1.2.0',
+          datasource: 'nuget',
+        },
+        {
+          depName: 'MultipleTools.Install.First',
+          currentValue: '2.0.0',
+          datasource: 'nuget',
+          registryUrls: ['https://api.nuget.org/v3/index.json'],
+        },
+        {
+          depName: 'MultipleTools.Install.Second',
+          currentValue: '2.1.1',
+          datasource: 'nuget',
+        },
+      ],
+    });
   });
 
   it('skips invalid entries in InstallTools', async () => {
@@ -111,17 +107,17 @@ describe('modules/manager/cake/index', () => {
       "dotnet:?package=Good.Tool&version=1.2.3"
     );
     `;
-    expect(await extractPackageFile(content, 'build.cs', config)).toMatchObject(
-      {
-        deps: [
-          {
-            depName: 'Good.Tool',
-            currentValue: '1.2.3',
-            datasource: 'nuget',
-          },
-        ],
-      },
-    );
+    await expect(
+      extractPackageFile(content, 'build.cs', config),
+    ).resolves.toMatchObject({
+      deps: [
+        {
+          depName: 'Good.Tool',
+          currentValue: '1.2.3',
+          datasource: 'nuget',
+        },
+      ],
+    });
   });
 
   it('calls applyRegistries to honor nuget.config files if present for .cake files', async () => {

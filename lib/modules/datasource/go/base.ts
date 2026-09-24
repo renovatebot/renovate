@@ -125,7 +125,7 @@ export class BaseGoDatasource {
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const goModuleUrl = goModule.replace(/\.git(\/[a-z0-9/]*)?$/, '');
+    const goModuleUrl = goModule.replace(regEx(/\.git(?:\/[a-z0-9/]*)?$/), '');
     const pkgUrl = `https://${goModuleUrl}?go-get=1`;
     const { body: html } = await BaseGoDatasource.http.getText(pkgUrl);
 
@@ -141,6 +141,7 @@ export class BaseGoDatasource {
     }
 
     logger.trace({ goModule }, 'No go-source or go-import header found');
+    /* istanbul ignore next */
     return null;
   }
 
@@ -240,7 +241,6 @@ export class BaseGoDatasource {
         packageName,
       };
     }
-    /* istanbul ignore next */
     return null;
   }
 

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { createGunzip } from 'node:zlib';
+import { isNullOrUndefined } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import * as fs from '../../../../util/fs/index.ts';
@@ -17,13 +18,13 @@ export function formatRpmVersion(
   ver: RpmVersionValue,
   rel?: RpmVersionValue,
 ): string | null {
-  if (ver === undefined || ver === null) {
+  if (isNullOrUndefined(ver)) {
     return null;
   }
 
   const version = String(ver);
 
-  if (rel === undefined || rel === null) {
+  if (isNullOrUndefined(rel)) {
     return version;
   }
 
@@ -78,9 +79,9 @@ async function checkIfModified(
   }
 }
 
-async function downloadGzipFile(
+async function downloadFileToCache(
   url: string,
-  compressedFile: string,
+  cachePath: string,
   http: Http,
   lastDownloadTimestamp?: Date,
 ): Promise<boolean> {
@@ -96,10 +97,10 @@ async function downloadGzipFile(
   }
 
   const readStream = http.stream(url);
-  const writeStream = fs.createCacheWriteStream(compressedFile);
+  const writeStream = fs.createCacheWriteStream(cachePath);
   await fs.pipeline(readStream, writeStream);
 
-  const compressedStats = await fs.statCacheFile(compressedFile);
+  const compressedStats = await fs.statCacheFile(cachePath);
   if (!compressedStats || compressedStats.size === 0) {
     logger.debug(`Empty response body from getting ${url}.`);
     throw new Error(`Empty response body from getting ${url}.`);
@@ -108,44 +109,44 @@ async function downloadGzipFile(
   return true;
 }
 
-async function extractGzipFile(
+async function decompressFile(
   compressedFile: string,
-  extractedFile: string,
+  decompressedFile: string,
 ): Promise<void> {
   await fs.pipeline(
     fs.createCacheReadStream(compressedFile),
     createGunzip(),
-    fs.createCacheWriteStream(extractedFile),
+    fs.createCacheWriteStream(decompressedFile),
   );
 }
 
-export async function getCachedGunzippedFile(
+export async function getCachedDecompressedFile(
   http: Http,
   url: string,
   extension: 'xml',
 ): Promise<string> {
   const releaseLock = await acquireLock(
-    `gunzipped-file:${url}:${extension}`,
+    `decompressed-file:${url}:${extension}`,
     'datasource-rpm',
   );
 
   try {
     const cacheDir = await fs.ensureCacheDir(cacheSubDir);
     const urlHash = toSha256(url);
-    const extractedFile = upath.join(cacheDir, `${urlHash}.${extension}`);
-    let lastTimestamp = await getFileCreationTime(extractedFile);
+    const decompressedFile = upath.join(cacheDir, `${urlHash}.${extension}`);
+    let lastTimestamp = await getFileCreationTime(decompressedFile);
 
     const compressedFile = upath.join(
       cacheDir,
       `${randomUUID()}_${urlHash}.gz`,
     );
-    const extractedTempFile = upath.join(
+    const decompressedTempFile = upath.join(
       cacheDir,
       `${randomUUID()}_${urlHash}.${extension}`,
     );
 
     try {
-      const wasUpdated = await downloadGzipFile(
+      const wasUpdated = await downloadFileToCache(
         url,
         compressedFile,
         http,
@@ -154,17 +155,17 @@ export async function getCachedGunzippedFile(
 
       if (wasUpdated || !lastTimestamp) {
         try {
-          // Only replace the shared cache file after a successful extract.
-          await extractGzipFile(compressedFile, extractedTempFile);
-          await fs.renameCacheFile(extractedTempFile, extractedFile);
-          lastTimestamp = await getFileCreationTime(extractedFile);
+          // Only replace the shared cache file after a successful decompress.
+          await decompressFile(compressedFile, decompressedTempFile);
+          await fs.renameCacheFile(decompressedTempFile, decompressedFile);
+          lastTimestamp = await getFileCreationTime(decompressedFile);
         } catch (err) {
           logger.warn(
             {
               compressedFile,
               err,
               extension,
-              extractedFile,
+              decompressedFile,
               url,
             },
             'Failed to extract RPM metadata file from compressed file',
@@ -176,13 +177,13 @@ export async function getCachedGunzippedFile(
         throw new Error('Missing metadata in extracted RPM metadata file!');
       }
 
-      return extractedFile;
+      return decompressedFile;
     } finally {
       if (await fs.cachePathExists(compressedFile)) {
         await fs.rmCache(compressedFile);
       }
-      if (await fs.cachePathExists(extractedTempFile)) {
-        await fs.rmCache(extractedTempFile);
+      if (await fs.cachePathExists(decompressedTempFile)) {
+        await fs.rmCache(decompressedTempFile);
       }
     }
   } finally {

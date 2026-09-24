@@ -16,7 +16,9 @@ export class GitRefsDatasource extends GitDatasource {
     super(GitRefsDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
@@ -78,7 +80,7 @@ export class GitRefsDatasource extends GitDatasource {
   ): Promise<string | null> {
     const rawRefs: RawRefs[] | null = await this.getRawRefs({ packageName });
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!rawRefs) {
       return null;
     }

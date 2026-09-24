@@ -9,6 +9,7 @@ import { logger } from '../../../logger/index.ts';
 import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import { get } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { detectSemanticCommits } from '../../../util/git/semantic.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -24,6 +25,8 @@ function upper(str: string): string {
 
 export function sanitizeDepName(depName: string): string {
   return depName
+    .replace(regEx(/\$\{[^}]+\}\/?/g), '')
+    .replace(regEx(/[${}]/g), '')
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
@@ -96,9 +99,9 @@ export async function flattenUpdates(
         packageFile,
       ) as never;
       const packagePath = packageFile.packageFile?.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
+      // `split` always yields at least one element, so there is always a file
+      // name to drop here
+      packagePath.splice(-1, 1);
       if (packagePath.length > 0) {
         packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
@@ -209,7 +212,7 @@ export async function flattenUpdates(
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles ?? []) {
+        for (const lockFile of coerceArray(packageFileConfig.lockFiles)) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]

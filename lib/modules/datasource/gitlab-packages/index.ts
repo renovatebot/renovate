@@ -1,4 +1,3 @@
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -16,9 +15,13 @@ export class GitlabPackagesDatasource extends Datasource {
 
   override caching = true;
 
-  override customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override defaultRegistryUrls = ['https://gitlab.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://gitlab.com'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -45,11 +48,11 @@ export class GitlabPackagesDatasource extends Datasource {
     );
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -90,14 +93,13 @@ export class GitlabPackagesDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         // TODO: types (#22198)
         key: `${config.registryUrl}-${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }
