@@ -1,8 +1,9 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryDigestConfig,
   RegistryGetReleasesConfig,
@@ -20,10 +21,12 @@ import { getApiUrl, getCacheKey, getSourceUrl } from './util.ts';
  * `getReleases()` are the same for tags and releases, so they live here and a
  * subclass only fetches and maps the releases of its own endpoint.
  */
-export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
-  static readonly defaultRegistryUrls = ['https://gitea.com'];
+export abstract class GiteaDatasource extends RegistryDatasource<GiteaHttp> {
+  static readonly defaultRegistryUrls: NonEmptyArray<string> = [
+    'https://gitea.com',
+  ];
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return GiteaDatasource.defaultRegistryUrls;
   }
 

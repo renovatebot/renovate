@@ -1,6 +1,7 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as pvpVersioning from '../../versioning/pvp/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -8,7 +9,7 @@ import type {
 } from '../types.ts';
 import { HackagePackageMetadata } from './schema.ts';
 
-export class HackageDatasource extends Datasource {
+export class HackageDatasource extends RegistryDatasource {
   static readonly id = 'hackage';
 
   constructor() {
@@ -19,7 +20,7 @@ export class HackageDatasource extends Datasource {
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://hackage.haskell.org/'];
   }
 

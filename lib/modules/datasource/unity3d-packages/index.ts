@@ -1,16 +1,17 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as Unity3dPackagesVersioning from '../../versioning/unity3d-packages/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { UnityPackageReleasesJSON } from './schema.ts';
 
-export class Unity3dPackagesDatasource extends Datasource {
+export class Unity3dPackagesDatasource extends RegistryDatasource {
   static readonly id = 'unity3d-packages';
 
   static readonly defaultRegistryUrl = 'https://packages.unity.com';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [Unity3dPackagesDatasource.defaultRegistryUrl];
   }
 

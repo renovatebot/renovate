@@ -171,6 +171,14 @@ describe('modules/datasource/cdnjs/index', () => {
   });
 
   describe('getDigest', () => {
+    it('returns null without a new value', async () => {
+      const res = await getDigest({
+        datasource: CdnjsDatasource.id,
+        packageName: 'foo/bar',
+      });
+      expect(res).toBeNull();
+    });
+
     it('returs null for no result', async () => {
       httpMock
         .scope(baseUrl)

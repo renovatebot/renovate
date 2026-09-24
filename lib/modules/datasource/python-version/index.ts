@@ -1,8 +1,9 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
 import { EndoflifeDateDatasource } from '../endoflife-date/index.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
@@ -10,7 +11,7 @@ import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl, githubBaseUrl } from './common.ts';
 import { PythonRelease } from './schema.ts';
 
-export class PythonVersionDatasource extends Datasource {
+export class PythonVersionDatasource extends RegistryDatasource {
   static readonly id = datasource;
   pythonPrebuildDatasource: GithubReleasesDatasource;
   pythonEolDatasource: EndoflifeDateDatasource;
@@ -25,7 +26,7 @@ export class PythonVersionDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 

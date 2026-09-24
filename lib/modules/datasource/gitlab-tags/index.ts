@@ -1,8 +1,9 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryDigestConfig,
   RegistryGetReleasesConfig,
@@ -11,7 +12,7 @@ import type {
 import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util.ts';
 
-export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
+export class GitlabTagsDatasource extends RegistryDatasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
 
   override readonly releaseTimestampSupport = true;
@@ -25,7 +26,7 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
     super(GitlabTagsDatasource.id, new GitlabHttp(GitlabTagsDatasource.id));
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 

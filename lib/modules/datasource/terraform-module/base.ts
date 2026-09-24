@@ -2,13 +2,13 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import { ServiceDiscoveryResponse } from './schema.ts';
 
 const terraformId = 'terraform';
 
 // TODO: extract to a separate directory structure (#10532)
-export abstract class TerraformDatasource extends Datasource {
+export abstract class TerraformDatasource extends RegistryDatasource {
   static id = terraformId;
 
   static readonly terraformRegistryUrl = 'https://registry.terraform.io';
