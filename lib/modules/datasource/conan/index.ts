@@ -1,10 +1,11 @@
 import { isUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import * as allVersioning from '../../versioning/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryDigestConfig,
   RegistryGetReleasesConfig,
@@ -21,10 +22,10 @@ import {
   ConanRevisionJSON,
 } from './schema.ts';
 
-export class ConanDatasource extends Datasource {
+export class ConanDatasource extends RegistryDatasource {
   static readonly id = datasource;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 

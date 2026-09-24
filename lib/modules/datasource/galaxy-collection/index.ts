@@ -1,9 +1,10 @@
 import { isTruthy } from '@sindresorhus/is';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -20,7 +21,7 @@ const repositoryRegex = regEx(
   /^\S+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
 );
 
-export class GalaxyCollectionDatasource extends Datasource {
+export class GalaxyCollectionDatasource extends RegistryDatasource {
   static readonly id = 'galaxy-collection';
 
   constructor() {
@@ -33,7 +34,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://galaxy.ansible.com/api/'];
   }
 

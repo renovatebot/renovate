@@ -1,8 +1,9 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -10,7 +11,7 @@ import type {
 } from '../types.ts';
 import { GalaxyV1 } from './schema.ts';
 
-export class GalaxyDatasource extends Datasource {
+export class GalaxyDatasource extends RegistryDatasource {
   static readonly id = 'galaxy';
 
   constructor() {
@@ -21,7 +22,7 @@ export class GalaxyDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://galaxy.ansible.com/'];
   }
 

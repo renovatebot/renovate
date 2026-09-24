@@ -2,6 +2,7 @@ import type { ZodType, z } from 'zod/v4';
 import { ZodError } from 'zod/v4';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../types/index.ts';
 import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import type { CachedOptions } from '../../util/cache/package/with-cache.ts';
 import { withCache } from '../../util/cache/package/with-cache.ts';
@@ -10,11 +11,14 @@ import { Http, HttpError } from '../../util/http/index.ts';
 import type { HttpOptions } from '../../util/http/types.ts';
 import { coerceObject } from '../../util/object.ts';
 import type {
-  DatasourceApi,
   DigestConfig,
   GetReleasesConfig,
+  PlainDatasourceApi,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
+  RegistryDatasourceApi,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -29,13 +33,16 @@ import type {
 type JsonOptions<H extends Http> =
   H extends HttpBase<infer Opts, any> ? Opts : HttpOptions;
 
-export abstract class Datasource<
-  H extends Http = Http,
-> implements DatasourceApi {
+/**
+ * The part of a datasource that does not depend on whether it requires a
+ * registry URL. Extend {@link Datasource} or {@link RegistryDatasource}
+ * instead.
+ */
+abstract class DatasourceBase<H extends Http> {
   public readonly id: string;
 
   /**
-   * The package cache namespace used by {@link Datasource.cached}.
+   * The package cache namespace used by {@link DatasourceBase.cached}.
    * Defaults to `datasource-<id>`, which must be registered in
    * `packageCacheNamespaces`.
    */
@@ -56,10 +63,6 @@ export abstract class Datasource<
 
   defaultConfig: Record<string, unknown> | undefined;
 
-  getDefaultRegistryUrls(_packageName: string): string[] | undefined {
-    return undefined;
-  }
-
   supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
@@ -76,24 +79,6 @@ export abstract class Datasource<
 
   protected readonly http: H;
 
-  /**
-   * A datasource with a non-empty `defaultRegistryUrls` may declare its
-   * parameter as `RegistryGetReleasesConfig`: TypeScript's method parameter
-   * bivariance allows the narrower override, and the datasource index
-   * guarantees the value.
-   */
-  abstract getReleases(
-    getReleasesConfig: GetReleasesConfig,
-  ): Promise<ReleaseResult | null>;
-
-  /**
-   * A datasource with a non-empty `defaultRegistryUrls` may declare its
-   * parameter as `RegistryDigestConfig`: TypeScript's method parameter
-   * bivariance allows the narrower override, and the datasource index
-   * guarantees the value.
-   */
-  getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
-
   postprocessRelease?(
     config: PostprocessReleaseConfig,
     release: Release,
@@ -107,7 +92,7 @@ export abstract class Datasource<
    * Caches the result of `fn` in the datasource cache namespace.
    *
    * Same as {@link withCache}, except that `namespace` defaults to
-   * {@link Datasource.cacheNamespace}.
+   * {@link DatasourceBase.cacheNamespace}.
    */
   protected cached<T>(
     options: Omit<CachedOptions, 'namespace'> & {
@@ -125,9 +110,9 @@ export abstract class Datasource<
    * Requests `url` and returns the response body validated by `schema`.
    *
    * Every error, a response that fails validation included, goes through
-   * {@link Datasource.handleGenericErrors} and therefore fails the lookup.
+   * {@link DatasourceBase.handleGenericErrors} and therefore fails the lookup.
    * Use it when a malformed response must be treated as an error; use
-   * {@link Datasource.fetchJsonOrNull} when it should count as "no data from
+   * {@link DatasourceBase.fetchJsonOrNull} when it should count as "no data from
    * this registry" instead.
    */
   protected async fetchJson<Schema extends ZodType<any, any, any>>(
@@ -145,12 +130,12 @@ export abstract class Datasource<
   }
 
   /**
-   * Same as {@link Datasource.fetchJson}, except that a response which fails
+   * Same as {@link DatasourceBase.fetchJson}, except that a response which fails
    * schema validation is logged and reported as `null`.
    *
    * Use it when a malformed response means "no data from this registry"
    * rather than a failed lookup. Every other error still goes through
-   * {@link Datasource.handleGenericErrors}.
+   * {@link DatasourceBase.handleGenericErrors}.
    */
   protected async fetchJsonOrNull<Schema extends ZodType<any, any, any>>(
     url: string,
@@ -191,4 +176,49 @@ export abstract class Datasource<
 
     throw err;
   }
+}
+
+/**
+ * A datasource that may be queried without a registry URL, so `registryUrl`
+ * is optional in its `getReleases()` and `getDigest()` configs. Extend
+ * {@link RegistryDatasource} instead if every package has a default registry.
+ */
+export abstract class Datasource<H extends Http = Http>
+  extends DatasourceBase<H>
+  implements PlainDatasourceApi
+{
+  readonly registryUrlRequired = false;
+
+  getDefaultRegistryUrls(_packageName: string): string[] | undefined {
+    return undefined;
+  }
+
+  abstract getReleases(
+    getReleasesConfig: GetReleasesConfig,
+  ): Promise<ReleaseResult | null>;
+
+  getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
+}
+
+/**
+ * A datasource with a default registry for every package: the datasource
+ * index always resolves a registry URL before calling `getReleases()` and
+ * `getDigest()`.
+ */
+export abstract class RegistryDatasource<H extends Http = Http>
+  extends DatasourceBase<H>
+  implements RegistryDatasourceApi
+{
+  readonly registryUrlRequired = true;
+
+  abstract getDefaultRegistryUrls(packageName: string): NonEmptyArray<string>;
+
+  abstract getReleases(
+    getReleasesConfig: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null>;
+
+  getDigest?(
+    config: RegistryDigestConfig,
+    newValue?: string,
+  ): Promise<string | null>;
 }

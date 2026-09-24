@@ -1,14 +1,15 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as devboxVersioning from '../../versioning/devbox/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { DevboxResponse } from './schema.ts';
 
-export class DevboxDatasource extends Datasource {
+export class DevboxDatasource extends RegistryDatasource {
   static readonly id = datasource;
 
   constructor() {
@@ -22,7 +23,7 @@ export class DevboxDatasource extends Datasource {
 
   override readonly defaultVersioning = devboxVersioning.id;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 

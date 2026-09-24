@@ -1,18 +1,19 @@
 import { logger } from '../../../logger/index.ts';
-import { Datasource } from '../datasource.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
 import { datasource, parsePackage } from './common.ts';
 import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
 
-export class JavaVersionDatasource extends Datasource {
+export class JavaVersionDatasource extends RegistryDatasource {
   static readonly id = datasource;
 
   constructor() {
     super(datasource);
   }
 
-  override getDefaultRegistryUrls(packageName: string): string[] {
+  override getDefaultRegistryUrls(packageName: string): NonEmptyArray<string> {
     return packageName.includes('oracle-graalvm')
       ? [graalvmRegistryUrl]
       : [adoptiumRegistryUrl];
