@@ -1,9 +1,10 @@
 import { isEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { id as npmId } from '../../versioning/npm/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -11,7 +12,7 @@ import type {
 } from '../types.ts';
 import { DartResult } from './schema.ts';
 
-export class DartDatasource extends Datasource {
+export class DartDatasource extends RegistryDatasource {
   static readonly id = 'dart';
 
   constructor() {
@@ -22,7 +23,7 @@ export class DartDatasource extends Datasource {
     return true;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://pub.dartlang.org/'];
   }
 

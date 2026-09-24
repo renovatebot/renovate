@@ -2,6 +2,7 @@ import { isBoolean } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -16,7 +17,7 @@ import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as cargoVersioning from '../../versioning/cargo/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
@@ -42,14 +43,14 @@ type CloneResult =
       err?: undefined;
     };
 
-export class CrateDatasource extends Datasource {
+export class CrateDatasource extends RegistryDatasource {
   static readonly id = 'crate';
 
   constructor() {
     super(CrateDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['sparse+https://index.crates.io/'];
   }
 

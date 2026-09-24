@@ -1,14 +1,15 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, registryUrl } from './common.ts';
 import { EndoflifeDateVersions } from './schema.ts';
 
-export class EndoflifeDateDatasource extends Datasource {
+export class EndoflifeDateDatasource extends RegistryDatasource {
   static readonly id = datasource;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [registryUrl];
   }
   override readonly defaultVersioning = 'loose';

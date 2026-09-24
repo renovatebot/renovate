@@ -1,15 +1,16 @@
 import { isNull } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { defaultRegistryUrls } from './common.ts';
 import { JsrPackageMetadata } from './schema.ts';
 import { extractJsrPackageName } from './util.ts';
 
-export class JsrDatasource extends Datasource {
+export class JsrDatasource extends RegistryDatasource {
   static readonly id = 'jsr';
 
   // custom registry support is not yet supported
@@ -22,7 +23,7 @@ export class JsrDatasource extends Datasource {
   override readonly defaultVersioning = semverId;
 
   // use npm compatible registry api url due to returns
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return defaultRegistryUrls;
   }
 

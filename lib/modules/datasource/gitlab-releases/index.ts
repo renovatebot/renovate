@@ -1,7 +1,8 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -9,10 +10,10 @@ import type {
 } from '../types.ts';
 import { GitlabReleases } from './schema.ts';
 
-export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
+export class GitlabReleasesDatasource extends RegistryDatasource<GitlabHttp> {
   static readonly id = 'gitlab-releases';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://gitlab.com'];
   }
 

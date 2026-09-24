@@ -1,12 +1,13 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { defaultRegistryUrl } from './common.ts';
 import { getDependency } from './get.ts';
 
 export { setNpmrc } from './npmrc.ts';
 
-export class NpmDatasource extends Datasource {
+export class NpmDatasource extends RegistryDatasource {
   static readonly id = 'npm';
 
   override supportsCustomRegistry(_packageName: string): boolean {
@@ -15,7 +16,7 @@ export class NpmDatasource extends Datasource {
 
   override readonly defaultVersioning = npmVersioning.id;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 
