@@ -12,8 +12,9 @@ export class ForgejoTagsDatasource extends GiteaTagsDatasource {
 
   static override readonly defaultRegistryUrls = ['https://code.forgejo.org'];
 
-  override readonly defaultRegistryUrls =
-    ForgejoTagsDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ForgejoTagsDatasource.defaultRegistryUrls;
+  }
 
   protected override readonly cacheNamespace: PackageCacheNamespace =
     'datasource-forgejo-tags';

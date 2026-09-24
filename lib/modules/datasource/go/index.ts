@@ -37,7 +37,9 @@ export class GoDatasource extends Datasource {
     commitMessageTopic: 'module {{depName}}',
   };
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
