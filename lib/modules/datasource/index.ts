@@ -343,17 +343,19 @@ function resolveRegistryUrls(
     return coerceArray(datasourceDefaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
-  let resolvedUrls: string[] = [];
   if (isNonEmptyArray(customUrls)) {
-    resolvedUrls = [...customUrls];
-  } else if (isNonEmptyArray(defaultRegistryUrls)) {
-    resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isNonEmptyArray(datasourceDefaultRegistryUrls)) {
-    resolvedUrls = [...datasourceDefaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
+    return massageRegistryUrls(customUrls);
   }
-  return massageRegistryUrls(resolvedUrls);
+  const defaultUrls = isNonEmptyArray(defaultRegistryUrls)
+    ? defaultRegistryUrls
+    : datasourceDefaultRegistryUrls;
+  if (!isNonEmptyArray(defaultUrls)) {
+    return [];
+  }
+  return massageRegistryUrls([
+    ...defaultUrls,
+    ...coerceArray(additionalRegistryUrls),
+  ]);
 }
 
 function applyReplacements(
