@@ -2,7 +2,6 @@ import { isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { acquireLock } from '../../mutex.ts';
 import * as packageCache from './index.ts';
 import { resolveTtlValues } from './ttl.ts';
 import type { CachedRecord, PackageCacheNamespace } from './types.ts';
@@ -45,6 +44,12 @@ export interface CachedOptions {
   fallback?: boolean;
 }
 
+const activeLookups = new Map<string, Promise<unknown>>();
+
+function defaultShouldCacheResult(_value: unknown): boolean {
+  return true;
+}
+
 /**
  * Caches the result of an async function.
  *
@@ -70,9 +75,6 @@ export async function withCache<T>(
     return fn();
   }
 
-  function defaultShouldCacheResult(_value: unknown): boolean {
-    return true;
-  }
   const shouldCacheResult =
     options.shouldCacheResult ?? defaultShouldCacheResult;
 
@@ -83,10 +85,33 @@ export async function withCache<T>(
 
   const cacheKey = `cache-decorator:${key}`;
 
-  // prevent concurrent processing and cache writes
-  const releaseLock = await acquireLock(cacheKey, namespace);
+  // Let one caller fetch and update a cache key at a time. Every waiting
+  // caller re-evaluates the cache with its own options after the active lookup
+  // settles, including when the first result was not cached or failed.
+  const activeKey = JSON.stringify([namespace, cacheKey]);
+  for (;;) {
+    const active = activeLookups.get(activeKey);
+    if (!active) {
+      break;
+    }
+    try {
+      await active;
+    } catch {
+      // A different caller's failure does not decide this caller's result.
+    }
+  }
 
+  const promise = readOrFetch();
+  activeLookups.set(activeKey, promise);
   try {
+    return await promise;
+  } finally {
+    if (activeLookups.get(activeKey) === promise) {
+      activeLookups.delete(activeKey);
+    }
+  }
+
+  async function readOrFetch(): Promise<T> {
     const cachedRecord = await packageCache.get<CachedRecord>(
       namespace,
       cacheKey,
@@ -150,7 +175,5 @@ export async function withCache<T>(
     }
 
     return newValue;
-  } finally {
-    releaseLock();
   }
 }
