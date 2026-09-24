@@ -6,7 +6,7 @@ import { block } from './utils/output.ts';
 const maxOutputLength = 10_000;
 
 /**
- * Returns the output, or only its start and its end when it is longer than `maxOutputLength`.
+ * Returns the output, or only its start and its end with a truncation hint when it is longer than `maxOutputLength`.
  */
 function truncate(output: string): string {
   if (output.length <= maxOutputLength) {
@@ -14,7 +14,8 @@ function truncate(output: string): string {
   }
   // the start holds the check summary and the lint errors, the end the test summary
   const half = maxOutputLength / 2;
-  return `${output.slice(0, half)}\n[…]\n${output.slice(-half)}`;
+  const omitted = output.length - maxOutputLength;
+  return `${output.slice(0, half)}\n[… ${omitted} characters truncated, run \`pnpm check --all <files>\` on the affected files for the full output …]\n${output.slice(-half)}`;
 }
 
 const changedFiles = await getChangedFiles();

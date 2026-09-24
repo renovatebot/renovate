@@ -60,7 +60,7 @@ it('outputs block JSON with the check output when pnpm check --all fails', async
   });
 });
 
-it('keeps only the start and the end of a long check output', async () => {
+it('keeps only the start and the end of a long check output with a truncation hint', async () => {
   getChangedFiles.mockResolvedValue(['lib/foo.ts']);
   exec.mockResolvedValue({
     failed: true,
@@ -71,6 +71,6 @@ it('keeps only the start and the end of a long check output', async () => {
 
   const output = Json.pipe(BlockOutput).parse(consoleSpy.mock.calls[0][0]);
   expect(output.reason).toBe(
-    `${blockHeader}${'a'.repeat(5_000)}\n[…]\n${'b'.repeat(5_000)}`,
+    `${blockHeader}${'a'.repeat(5_000)}\n[… 2000 characters truncated, run \`pnpm check --all <files>\` on the affected files for the full output …]\n${'b'.repeat(5_000)}`,
   );
 });
