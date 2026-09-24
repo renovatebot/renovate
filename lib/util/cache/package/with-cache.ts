@@ -106,9 +106,7 @@ export async function withCache<T>(
   try {
     return await promise;
   } finally {
-    if (activeLookups.get(activeKey) === promise) {
-      activeLookups.delete(activeKey);
-    }
+    activeLookups.delete(activeKey);
   }
 
   async function readOrFetch(): Promise<T> {
