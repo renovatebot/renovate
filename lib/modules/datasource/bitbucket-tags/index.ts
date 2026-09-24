@@ -1,15 +1,18 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { RepoInfo } from '../../platform/bitbucket/schema.ts';
 import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
-import type { GitHostTag, RegistryGetReleasesConfig } from '../types.ts';
+import type { GetReleasesConfig, GitHostTag } from '../types.ts';
 import { BitbucketCommits, BitbucketTag, BitbucketTags } from './schema.ts';
 
 export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<BitbucketHttp> {
   static readonly id = 'bitbucket-tags';
 
-  static readonly defaultRegistryUrls = ['https://bitbucket.org'];
+  static readonly defaultRegistryUrls: NonEmptyArray<string> = [
+    'https://bitbucket.org',
+  ];
 
   constructor() {
     super(
@@ -18,7 +21,7 @@ export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<Bitbuck
     );
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return BitbucketTagsDatasource.defaultRegistryUrls;
   }
 
@@ -51,7 +54,7 @@ export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<Bitbuck
   // fetchTags fetches list of tags for the repository
   protected async fetchTags({
     packageName: repo,
-  }: RegistryGetReleasesConfig): Promise<GitHostTag[]> {
+  }: GetReleasesConfig): Promise<GitHostTag[]> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
     const bitbucketTags = (
       await this.http.getJson(url, { paginate: true }, BitbucketTags)

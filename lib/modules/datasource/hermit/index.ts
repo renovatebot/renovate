@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { GithubRestRelease } from '../../../util/github/types.ts';
 import { getApiBaseUrl } from '../../../util/github/url.ts';
@@ -8,7 +9,7 @@ import { streamToString } from '../../../util/streams.ts';
 import { coerceString } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { id } from '../../versioning/hermit/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import type { HermitSearchResult } from './types.ts';
 
@@ -17,7 +18,7 @@ import type { HermitSearchResult } from './types.ts';
  * repository. It expects the search manifest to come from an asset `index.json` from
  * a release named index.
  */
-export class HermitDatasource extends Datasource<GithubHttp> {
+export class HermitDatasource extends RegistryDatasource<GithubHttp> {
   static readonly id = 'hermit';
 
   override supportsCustomRegistry(_packageName: string): boolean {
@@ -26,7 +27,7 @@ export class HermitDatasource extends Datasource<GithubHttp> {
 
   override readonly defaultVersioning = id;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://github.com/cashapp/hermit-packages'];
   }
 

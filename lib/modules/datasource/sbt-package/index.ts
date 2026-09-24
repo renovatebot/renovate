@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http } from '../../../util/http/index.ts';
@@ -42,7 +43,7 @@ interface PomInfo {
 export class SbtPackageDatasource extends MavenDatasource {
   static override readonly id = 'sbt-package';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [MAVEN_REPO];
   }
 

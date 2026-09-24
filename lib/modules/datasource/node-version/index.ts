@@ -1,19 +1,20 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/node/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { NodeReleases } from './schema.ts';
 
-export class NodeVersionDatasource extends Datasource {
+export class NodeVersionDatasource extends RegistryDatasource {
   static readonly id = datasource;
 
   constructor() {
     super(datasource);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 
