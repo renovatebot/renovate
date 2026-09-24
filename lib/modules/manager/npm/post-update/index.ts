@@ -22,7 +22,7 @@ import { scm } from '../../../platform/scm.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
-  PackageFile,
+  NpmrcPackageFile,
   PostUpdateConfig,
   Upgrade,
 } from '../../types.ts';
@@ -93,7 +93,7 @@ export function determineLockFileDirs(
 
   function getPackageFile(
     fileName: string,
-  ): Partial<PackageFile<NpmManagerData>> {
+  ): Partial<NpmrcPackageFile<NpmManagerData>> {
     logger.trace(`Looking for packageFile: ${fileName}`);
 
     for (const packageFile of packageFiles.npm!) {

@@ -77,6 +77,18 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
   });
 }
 
+/**
+ * Checks whether a chart reference points at a chart in the repository instead
+ * of a remote registry.
+ *
+ * @param path chart reference to check
+ *
+ * @returns `true` if the reference is a relative or absolute local path
+ */
+export function isLocalChartPath(path: string): boolean {
+  return ['./', '../', '/'].some((localPrefix) => path.startsWith(localPrefix));
+}
+
 export function isAlias(repository: string): boolean {
   if (!repository) {
     return false;

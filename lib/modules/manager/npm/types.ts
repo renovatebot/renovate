@@ -86,11 +86,23 @@ export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
   parents?: string[];
   yarnZeroInstall?: boolean;
   workspacesPackages?: string[] | string;
+  npmrcFileName?: string | null;
+}
+
+/** the repository `.npmrc` after sanitizing */
+export interface SanitizedRepoNpmrc {
+  content: string;
+  detectedLineEnding: DetectedNpmrcLineEnding | null;
 }
 
 export interface NpmrcResult {
   npmrc: string | undefined;
   npmrcFileName: string | null;
+}
+
+export interface NpmrcConfig {
+  npmrc?: string;
+  npmrcMerge?: boolean;
 }
 
 export type NpmrcLineEnding = '\n' | '\r\n' | '\r' | '';
