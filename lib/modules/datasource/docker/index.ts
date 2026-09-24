@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -19,7 +20,7 @@ import {
   parseUrl,
 } from '../../../util/url.ts';
 import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryDigestConfig,
   RegistryGetReleasesConfig,
@@ -85,12 +86,12 @@ const defaultConfig = {
   },
 };
 
-export class DockerDatasource extends Datasource {
+export class DockerDatasource extends RegistryDatasource {
   static readonly id = dockerDatasourceId;
 
   override readonly defaultVersioning = dockerVersioningId;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [DOCKER_HUB];
   }
 

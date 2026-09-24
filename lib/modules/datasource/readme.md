@@ -10,6 +10,15 @@ Use the `java-version` datasource as a reference.
 Add the datasource to the API in [`api.ts`](api.ts) so that the new datasource is usable.
 If you find `Unused HTTP mocks` errors in the Vitest tests _and_ your mocked URLs are correct, make sure the datasource is correctly registered.
 
+## Choose a base class
+
+Extend `RegistryDatasource` if every package has a default registry, like `https://registry.npmjs.org` for `npm`.
+Implement `getDefaultRegistryUrls()` to return a non-empty array.
+The datasource index then always resolves a registry URL, so `getReleases` receives a `RegistryGetReleasesConfig` and `getDigest` a `RegistryDigestConfig`, both with a required `registryUrl`.
+
+Extend `Datasource` if the datasource can be queried without a registry URL, for example because the `packageName` is a full URL.
+`registryUrl` is optional in its `GetReleasesConfig` and `DigestConfig`.
+
 ## getReleases
 
 The minimum exported interface for a datasource is a function called `getReleases` that takes a lookup config as input.
@@ -17,7 +26,7 @@ The minimum exported interface for a datasource is a function called `getRelease
 The config has:
 
 - `packageName`: the package's full name including scope if present (e.g. `@foo/bar`)
-- `registryUrls`: an array of registry URLs to try
+- `registryUrl`: the registry URL to query, resolved from the configured and default registry URLs
 
 `getReleases` should return an object having:
 

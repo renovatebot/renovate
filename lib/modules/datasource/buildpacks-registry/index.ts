@@ -1,6 +1,7 @@
 import urlJoin from 'url-join';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -8,7 +9,7 @@ import type {
 } from '../types.ts';
 import { BuildpacksRegistryResponse } from './schema.ts';
 
-export class BuildpacksRegistryDatasource extends Datasource {
+export class BuildpacksRegistryDatasource extends RegistryDatasource {
   static readonly id = 'buildpacks-registry';
 
   constructor() {
@@ -19,7 +20,7 @@ export class BuildpacksRegistryDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://registry.buildpacks.io'];
   }
 

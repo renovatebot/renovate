@@ -1,15 +1,16 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as glasskubeVersioning from '../../versioning/glasskube/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   GlasskubePackageManifest,
   GlasskubePackageVersions,
 } from './schema.ts';
 
-export class GlasskubePackagesDatasource extends Datasource {
+export class GlasskubePackagesDatasource extends RegistryDatasource {
   static readonly id = 'glasskube-packages';
   static readonly defaultRegistryUrl =
     'https://packages.dl.glasskube.dev/packages';
@@ -18,7 +19,7 @@ export class GlasskubePackagesDatasource extends Datasource {
   }
   override defaultVersioning = glasskubeVersioning.id;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [GlasskubePackagesDatasource.defaultRegistryUrl];
   }
 
