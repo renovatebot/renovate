@@ -7,7 +7,7 @@ import type { RangeStrategy } from '../../../../types/index.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import type { LookupUpdateConfig } from './types.ts';
-import { getUpdateType } from './update-type.ts';
+import { classifyRelease } from './update-type.ts';
 
 export async function generateUpdate(
   config: LookupUpdateConfig,
@@ -51,13 +51,17 @@ export async function generateUpdate(
 
   if (currentValue) {
     try {
-      update.newValue = versioningApi.getNewValue({
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-        allVersions,
-      })!;
+      if (config.isLockfileOnly) {
+        update.newValue = currentValue;
+      } else {
+        update.newValue = versioningApi.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+          allVersions,
+        })!;
+      }
     } catch (err) {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
@@ -78,7 +82,7 @@ export async function generateUpdate(
   }
   update.updateType =
     update.updateType ??
-    getUpdateType(config, versioningApi, currentVersion, newVersion);
+    classifyRelease(versioningApi, currentVersion, newVersion);
   if (versioningApi.isBreaking) {
     // This versioning scheme has breaking awareness
     update.isBreaking = versioningApi.isBreaking(currentVersion, newVersion);
@@ -101,7 +105,10 @@ export async function generateUpdate(
   if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
-  if (rangeStrategy === 'update-lockfile' && currentValue === update.newValue) {
+  if (
+    (config.isLockfileOnly || rangeStrategy === 'update-lockfile') &&
+    currentValue === update.newValue
+  ) {
     update.isLockfileUpdate = true;
   }
   if (

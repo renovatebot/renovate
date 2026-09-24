@@ -1,4 +1,4 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -11,7 +11,7 @@ import type {
   ExtraEnv,
   ToolConstraint,
 } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
@@ -20,7 +20,11 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
 
 /**
@@ -126,11 +130,14 @@ async function getMiseLockToolConstraints(
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
+  newPackageFileContent,
+  newLockFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const lockFileName = getLockFileName(packageFileName);
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
+  const originalLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const currentLockFileContent = newLockFileContent ?? originalLockFileContent;
+  if (!currentLockFileContent) {
     logger.debug({ lockFileName }, 'No mise lock file found');
     return null;
   }
@@ -227,40 +234,22 @@ export async function updateArtifacts({
     : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
-    await exec(commands, execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (!newLockFileContent || existingLockFileContent === newLockFileContent) {
-      return null;
+    if (newLockFileContent) {
+      await writeLocalFile(lockFileName, newLockFileContent);
     }
-
-    logger.debug({ lockFileName }, 'Returning updated mise lock file');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
-    ];
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent: originalLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: () => exec(commands, execOptions),
+    });
   } catch (err) {
-    // istanbul ignore if: not worth testing
+    /* v8 ignore if -- defensive rethrow, not worth testing */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
 
-    const errorOutput = [err.stdout, err.stderr, err.message]
-      .filter(isString)
-      .join('\n');
-
     logger.warn({ err, lockFileName }, 'Error updating mise lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: errorOutput,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

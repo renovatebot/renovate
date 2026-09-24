@@ -1,4 +1,3 @@
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as p from '../../../util/promises.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -17,11 +16,15 @@ export class DotnetVersionDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = [
-    'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [
+      'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
+    ];
+  }
 
   override releaseTimestampSupport = true;
   override releaseTimestampNote =
@@ -30,7 +33,7 @@ export class DotnetVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL https://github.com/dotnet/sdk for the `dotnet-sdk` package and, the https://github.com/dotnet/runtime URL for the `dotnet-runtime` package.';
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (!(packageName === 'dotnet-sdk' || packageName === 'dotnet-runtime')) {
@@ -38,7 +41,7 @@ export class DotnetVersionDatasource extends Datasource {
     }
 
     try {
-      const registryUrl = this.defaultRegistryUrls[0];
+      const registryUrl = this.getDefaultRegistryUrls('')[0];
       const { body: urls } = await this.http.getJson(
         registryUrl,
         ReleasesIndex,
@@ -63,18 +66,18 @@ export class DotnetVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${DotnetVersionDatasource.id}`,
         key: config.packageName,
         ttlMinutes: 1440,
         fallback: true,
+        cacheable: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
-  private async _getChannelReleases(
+  private async fetchChannelReleases(
     releaseUrl: string,
     packageName: string,
   ): Promise<Release[]> {
@@ -92,13 +95,13 @@ export class DotnetVersionDatasource extends Datasource {
     releaseUrl: string,
     packageName: string,
   ): Promise<Release[]> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${DotnetVersionDatasource.id}`,
         key: `${releaseUrl}:${packageName}`,
         ttlMinutes: 1440,
+        cacheable: true,
       },
-      () => this._getChannelReleases(releaseUrl, packageName),
+      () => this.fetchChannelReleases(releaseUrl, packageName),
     );
   }
 }

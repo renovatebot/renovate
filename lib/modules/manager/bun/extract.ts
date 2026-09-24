@@ -11,7 +11,7 @@ import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
-import type { ExtractConfig, PackageFile } from '../types.ts';
+import type { ExtractConfig, NpmrcPackageFile } from '../types.ts';
 import { BunCatalogs } from './schema.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
@@ -22,7 +22,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 }
 
 interface ProcessResult {
-  packageFileResult: PackageFile;
+  packageFileResult: NpmrcPackageFile;
   packageJson: NpmPackage;
 }
 
@@ -63,8 +63,8 @@ async function processPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   matchedFiles: string[],
-): Promise<PackageFile[]> {
-  const packageFiles: PackageFile<NpmManagerData>[] = [];
+): Promise<NpmrcPackageFile[]> {
+  const packageFiles: NpmrcPackageFile<NpmManagerData>[] = [];
   const allLockFiles = matchedFiles.filter(
     (file) =>
       matchesFileName(file, 'bun.lock') || matchesFileName(file, 'bun.lockb'),
