@@ -26,8 +26,9 @@ export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
     );
   }
 
-  override readonly defaultRegistryUrls =
-    BitbucketTagsDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return BitbucketTagsDatasource.defaultRegistryUrls;
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
