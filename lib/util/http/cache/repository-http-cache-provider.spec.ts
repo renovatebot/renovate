@@ -88,6 +88,30 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     });
   });
 
+  it('ignores a cached entry whose response is invalid', async () => {
+    const scope = httpMock.scope('https://example.com');
+
+    scope.get('/foo/bar').reply(200, { msg: 'Hello, world!' }, { etag: '123' });
+    await http.getJsonUnchecked('https://example.com/foo/bar');
+
+    const cache = getCache();
+    cache.httpCache!['https://example.com/foo/bar'] = {
+      etag: '123',
+      httpResponse: { body: { msg: 'Hello, world!' } },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+
+    scope
+      .get('/foo/bar')
+      .matchHeader('if-none-match', (value) => value === undefined)
+      .reply(200, { msg: 'New response' });
+    const res = await http.getJsonUnchecked('https://example.com/foo/bar');
+    expect(res).toMatchObject({
+      statusCode: 200,
+      body: { msg: 'New response' },
+    });
+  });
+
   it('bypasses for statuses other than 200 and 304', async () => {
     const scope = httpMock.scope('https://example.com');
     scope.get('/foo/bar').reply(203);

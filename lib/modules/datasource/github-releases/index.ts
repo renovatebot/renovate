@@ -15,7 +15,9 @@ import type {
 export class GithubReleasesDatasource extends Datasource<GithubHttp> {
   static id = 'github-releases';
 
-  override readonly defaultRegistryUrls = ['https://github.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com'];
+  }
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
