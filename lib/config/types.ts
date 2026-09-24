@@ -597,6 +597,7 @@ export interface PackageRule
   matchDepNames?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
+  matchIsBreaking?: boolean;
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
@@ -798,6 +799,7 @@ export interface PackageRuleInputConfig extends RenovateConfig {
   updateType?: UpdateType;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
+  isBreaking?: boolean;
   sourceUrl?: string | null;
   categories?: string[];
   baseBranch?: string;
