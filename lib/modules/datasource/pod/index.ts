@@ -5,12 +5,13 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import { massageGithubUrl } from '../metadata.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 
@@ -94,10 +95,10 @@ function releasesCDNUrl(packageName: string, registryUrl: string): string {
   return `${registryUrl}/all_pods_versions_${shard}.txt`;
 }
 
-export class PodDatasource extends Datasource {
+export class PodDatasource extends RegistryDatasource {
   static readonly id = 'pod';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://cdn.cocoapods.org'];
   }
 

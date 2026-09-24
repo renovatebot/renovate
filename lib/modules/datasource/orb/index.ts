@@ -1,11 +1,12 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { OrbPackagesResponse } from './schema.ts';
 
-export class OrbDatasource extends Datasource {
+export class OrbDatasource extends RegistryDatasource {
   static readonly id = 'orb';
 
   constructor() {
@@ -16,7 +17,7 @@ export class OrbDatasource extends Datasource {
     return true;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://circleci.com/'];
   }
   override readonly registryStrategy = 'hunt';

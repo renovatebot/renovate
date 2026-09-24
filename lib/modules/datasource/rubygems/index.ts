@@ -1,11 +1,12 @@
 import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
 import { AsyncResult, Result } from '../../../util/result.ts';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as rubyVersioning from '../../versioning/ruby/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { getV1Releases } from './common.ts';
 import { MetadataCache } from './metadata-cache.ts';
@@ -25,7 +26,7 @@ function unlessServerSide<
   return cb();
 }
 
-export class RubygemsDatasource extends Datasource {
+export class RubygemsDatasource extends RegistryDatasource {
   static readonly id = 'rubygems';
 
   private metadataCache: MetadataCache;
@@ -36,7 +37,7 @@ export class RubygemsDatasource extends Datasource {
     this.metadataCache = new MetadataCache(this.http);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://rubygems.org'];
   }
 

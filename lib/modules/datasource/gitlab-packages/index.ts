@@ -1,21 +1,22 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
 import type { GitlabPackage } from './types.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
-export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
+export class GitlabPackagesDatasource extends RegistryDatasource<GitlabHttp> {
   static readonly id = datasource;
 
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://gitlab.com'];
   }
 

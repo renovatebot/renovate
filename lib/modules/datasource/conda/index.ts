@@ -1,10 +1,11 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { Timestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -14,7 +15,7 @@ import { datasource, defaultRegistryUrl } from './common.ts';
 import * as prefixDev from './prefix-dev.ts';
 import { CondaPackage } from './schema.ts';
 
-export class CondaDatasource extends Datasource {
+export class CondaDatasource extends RegistryDatasource {
   static readonly id = datasource;
 
   constructor() {
@@ -27,7 +28,7 @@ export class CondaDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 

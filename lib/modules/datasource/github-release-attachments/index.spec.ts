@@ -109,6 +109,16 @@ describe('modules/datasource/github-release-attachments/index', () => {
       expect(digest).toEqual(currentDigest);
     });
 
+    it('returns null without a new value', async () => {
+      const digest = await getDigest({
+        datasource: GithubReleaseAttachmentsDatasource.id,
+        packageName,
+        currentValue,
+        currentDigest,
+      });
+      expect(digest).toBeNull();
+    });
+
     it('returns updated digest in new release', async () => {
       releaseMock.withDigestFileAsset(
         currentValue,

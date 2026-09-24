@@ -1,8 +1,9 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryDigestConfig,
   RegistryGetReleasesConfig,
@@ -11,7 +12,7 @@ import type {
 } from '../types.ts';
 import { CdnjsAPISriResponse, CdnjsAPIVersionResponse } from './schema.ts';
 
-export class CdnjsDatasource extends Datasource {
+export class CdnjsDatasource extends RegistryDatasource {
   static readonly id = 'cdnjs';
 
   constructor() {
@@ -22,7 +23,7 @@ export class CdnjsDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://api.cdnjs.com/'];
   }
 
@@ -93,8 +94,11 @@ export class CdnjsDatasource extends Datasource {
 
   override getDigest(
     config: RegistryDigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
+    if (!newValue) {
+      return Promise.resolve(null);
+    }
     return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,

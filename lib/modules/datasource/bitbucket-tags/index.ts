@@ -1,10 +1,11 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { RepoInfo } from '../../platform/bitbucket/schema.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryDigestConfig,
   RegistryGetReleasesConfig,
@@ -12,10 +13,12 @@ import type {
 } from '../types.ts';
 import { BitbucketCommits, BitbucketTag, BitbucketTags } from './schema.ts';
 
-export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
+export class BitbucketTagsDatasource extends RegistryDatasource<BitbucketHttp> {
   static readonly id = 'bitbucket-tags';
 
-  static readonly defaultRegistryUrls = ['https://bitbucket.org'];
+  static readonly defaultRegistryUrls: NonEmptyArray<string> = [
+    'https://bitbucket.org',
+  ];
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
@@ -26,7 +29,7 @@ export class BitbucketTagsDatasource extends Datasource<BitbucketHttp> {
     );
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return BitbucketTagsDatasource.defaultRegistryUrls;
   }
 

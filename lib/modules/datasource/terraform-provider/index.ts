@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -29,7 +30,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   static readonly hashicorpReleaseUrl = 'https://releases.hashicorp.com';
 
-  private static readonly defaultRegistryUrls = [
+  private static readonly defaultRegistryUrls: NonEmptyArray<string> = [
     TerraformProviderDatasource.terraformRegistryUrl,
     TerraformProviderDatasource.hashicorpReleaseUrl,
   ];
@@ -44,7 +45,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     super(TerraformProviderDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return TerraformProviderDatasource.defaultRegistryUrls;
   }
 
