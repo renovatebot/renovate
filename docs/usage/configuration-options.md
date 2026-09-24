@@ -3643,6 +3643,7 @@ $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
 $detectPlatform(sourceUrl) = 'github'
+$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://registry.example.com/**"])
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
@@ -3650,6 +3651,7 @@ $detectPlatform(sourceUrl) = 'github'
 Renovate provides the following custom JSONata functions:
 
 - `$detectPlatform(url)` - Takes a URL string and returns the detected platform (`azure`, `bitbucket`, `bitbucket-server`, `forgejo`, `gitea`, `github`, `gitlab`) or `null`.
+- `$matchRegexOrGlob(input, patterns)` - Returns `true` if `input` matches `patterns`, using Renovate's [string pattern matching](./string-pattern-matching.md) syntax. `input` can be a string or an array of strings, in which case any matching element returns `true`. `patterns` is an array of strings, or a single string. Returns `false` if `input` is missing. Use this to combine conditions on different fields with `or`, which separate `match*` options can't do because they are combined with `and`.
 
 ### `packageRules.matchManagers`
 
