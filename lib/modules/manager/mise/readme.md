@@ -142,6 +142,7 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`gitlab`](https://mise.jdx.dev/dev-tools/backends/gitlab.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
+- [`packslip`](https://mise.jdx.dev/dev-tools/backends/packslip.html) (GitHub-hosted projects only)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
 - [`pypi`](https://mise.jdx.dev/dev-tools/backends/pypi.html)
 - [`spm`](https://mise.jdx.dev/dev-tools/backends/spm.html)

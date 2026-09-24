@@ -151,6 +151,35 @@ export function createGithubToolConfig(
 }
 
 /**
+ * Create a tooling config for Packslip projects hosted on GitHub.
+ * @link https://mise.jdx.dev/dev-tools/backends/packslip.html
+ */
+export function createPackslipToolConfig(
+  name: string,
+  version: string,
+): BackendToolingConfig | null {
+  const hasGithubHost = name.startsWith('github.com/');
+  const project = hasGithubHost ? name.slice('github.com/'.length) : name;
+  const [owner, repository, ...rest] = project.split('/');
+  if (
+    !owner ||
+    !repository ||
+    (!hasGithubHost && rest.length > 0) ||
+    owner.includes('.')
+  ) {
+    return null;
+  }
+
+  return {
+    packageName: `${owner}/${repository}`,
+    datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    // Packslip's version is release-shaped; GitHub release tags may use `v`.
+    extractVersion: '^v?(?<version>.+)',
+  };
+}
+
+/**
  * Create a tooling config for gitlab backend
  * @link https://mise.jdx.dev/dev-tools/backends/gitlab.html
  */

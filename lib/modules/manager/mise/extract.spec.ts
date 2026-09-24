@@ -54,6 +54,76 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it.each(['packslip:github.com/grafana/flint', 'packslip:grafana/flint'])(
+      'extracts tools - Packslip GitHub project: %s',
+      async (toolName) => {
+        const content = codeBlock`
+      [tools]
+      "${toolName}" = "0.22.13"
+    `;
+
+        const result = await extractPackageFile(content, miseFilename);
+
+        expect(result).toMatchObject({
+          deps: [
+            {
+              currentValue: '0.22.13',
+              datasource: 'github-releases',
+              depName: toolName,
+              extractVersion: '^v?(?<version>.+)',
+              packageName: 'grafana/flint',
+            },
+          ],
+        });
+      },
+    );
+
+    it('extracts Packslip GitHub monorepo tools using their repository releases', async () => {
+      const content = codeBlock`
+      [tools]
+      "packslip:github.com/grafana/flint/tools/flint" = "0.22.13"
+    `;
+
+      const result = await extractPackageFile(content, miseFilename);
+
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '0.22.13',
+            datasource: 'github-releases',
+            depName: 'packslip:github.com/grafana/flint/tools/flint',
+            extractVersion: '^v?(?<version>.+)',
+            packageName: 'grafana/flint',
+          },
+        ],
+      });
+    });
+
+    it.each([
+      'packslip:github.com',
+      'packslip:github.com/grafana',
+      'packslip:example.com/flint',
+    ])(
+      'does not infer a GitHub release source for Packslip project: %s',
+      async (toolName) => {
+        const content = codeBlock`
+      [tools]
+      "${toolName}" = "1.0.0"
+    `;
+
+        const result = await extractPackageFile(content, miseFilename);
+
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: toolName,
+              skipReason: 'unsupported-datasource',
+            },
+          ],
+        });
+      },
+    );
+
     it('extracts tools - mise registry tools', async () => {
       const content = codeBlock`
       [tools]

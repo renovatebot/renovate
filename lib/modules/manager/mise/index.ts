@@ -60,6 +60,7 @@ const backendDatasources = {
   gitlab: [GitlabReleasesDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
+  packslip: [GithubReleasesDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   pypi: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
