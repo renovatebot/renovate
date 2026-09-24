@@ -98,10 +98,53 @@ describe('util/cache/repository/http-cache', () => {
           httpResponse,
         },
       },
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
+        },
+      },
     };
 
     cleanupHttpCache(cache);
 
     expect(cache).toEqual({});
+  });
+
+  it('should clean up the HEAD items like the GET items', () => {
+    const now = DateTime.now();
+    const expiredItemTimestamp = now.minus({ days: 91 }).toISO();
+    const cache = {
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: expiredItemTimestamp,
+          etag: 'abc',
+          httpResponse,
+        },
+        'http://example.com/bar': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {},
+        },
+        'http://example.com/baz': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
+        },
+      },
+    };
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCacheHead: {
+        'http://example.com/baz': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
+        },
+      },
+    });
   });
 });
