@@ -171,7 +171,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       .commit('platform api commit');
 
     await repo.checkout(defaultBranch);
-  });
+  }, 30000);
 
   afterAll(async () => {
     setCustomEnv({});

@@ -343,13 +343,18 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 
 function resolveRegistryUrls(
   datasource: DatasourceApi,
+  packageName: string,
   {
     defaultRegistryUrls,
     registryUrls,
     additionalRegistryUrls,
   }: RegistryUrlsConfig,
 ): string[] {
-  if (!datasource.customRegistrySupport) {
+  const customRegistrySupport = datasource.supportsCustomRegistry(packageName);
+  const datasourceDefaultRegistryUrls =
+    datasource.getDefaultRegistryUrls(packageName);
+
+  if (!customRegistrySupport) {
     if (
       isNonEmptyArray(registryUrls) ||
       isNonEmptyArray(defaultRegistryUrls) ||
@@ -365,7 +370,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return coerceArray(datasource.defaultRegistryUrls);
+    return coerceArray(datasourceDefaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
   if (isNonEmptyArray(customUrls)) {
@@ -373,7 +378,7 @@ function resolveRegistryUrls(
   }
   const defaultUrls = isNonEmptyArray(defaultRegistryUrls)
     ? defaultRegistryUrls
-    : datasource.defaultRegistryUrls;
+    : datasourceDefaultRegistryUrls;
   if (!isNonEmptyArray(defaultUrls)) {
     return [];
   }
@@ -423,7 +428,11 @@ async function fetchReleases(
     logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
-  const registryUrls = resolveRegistryUrls(datasource, registryUrlsConfig);
+  const registryUrls = resolveRegistryUrls(
+    datasource,
+    config.packageName,
+    registryUrlsConfig,
+  );
   let dep: ReleaseResult | null = null;
   const registryStrategy =
     config.registryStrategy ?? datasource.registryStrategy;
@@ -561,7 +570,8 @@ function getDigestConfig(
   const packageName = config.replacementName ?? config.packageName;
   // Prefer registryUrl from getReleases() lookup if it has been passed
   const registryUrl =
-    config.registryUrl ?? resolveRegistryUrls(datasource, config)[0];
+    config.registryUrl ??
+    resolveRegistryUrls(datasource, packageName, config)[0];
   return { lookupName, packageName, registryUrl, currentValue, currentDigest };
 }
 

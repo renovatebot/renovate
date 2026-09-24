@@ -23,9 +23,13 @@ export class DartVersionDatasource extends Datasource {
     super(DartVersionDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://storage.googleapis.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://storage.googleapis.com'];
+  }
 
   override readonly caching = true;
 

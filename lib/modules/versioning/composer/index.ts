@@ -275,7 +275,7 @@ function getNewValue({
   if (isVersion(currentValue)) {
     newValue = newVersion;
   } else if (regEx(/^[~^](?:0\.[1-9][0-9]*)$/).test(currentValue)) {
-    const operator = currentValue.substring(0, 1);
+    const operator = currentValue.at(0)!;
     // handle ~0.4 case first
     if (toMajor === 0) {
       // TODO: types (#22198)
@@ -286,14 +286,14 @@ function getNewValue({
     }
   } else if (regEx(/^[~^](?:[0-9]*)$/).test(currentValue)) {
     // handle ~4 case
-    const operator = currentValue.substring(0, 1);
+    const operator = currentValue.at(0)!;
     // TODO: types (#22198)
     newValue = `${operator}${toMajor!}`;
   } else if (
     toMajor &&
     regEx(/^[~^](?:[0-9]*(?:\.[0-9]*)?)$/).test(currentValue)
   ) {
-    const operator = currentValue.substring(0, 1);
+    const operator = currentValue.at(0)!;
     if (rangeStrategy === 'bump') {
       newValue = `${operator}${newVersion}`;
     } else if ((isNumber(currentMajor) && toMajor > currentMajor) || !toMinor) {
