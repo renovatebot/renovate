@@ -11,7 +11,9 @@ export class GitRefsDatasource extends GitDatasource {
 
   protected override readonly refTypes = ['tags', 'heads'];
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

@@ -31,8 +31,9 @@ export function getGoTagDatasource(
       api: new ForgejoTagsDatasource(),
       // `GiteaDatasource.getSourceUrl()` reads `defaultRegistryUrls` off the
       // class it is called on, so the reference has to stay bound to it.
-      getSourceUrl:
-        ForgejoTagsDatasource.getSourceUrl.bind(ForgejoTagsDatasource),
+      getSourceUrl: ForgejoTagsDatasource.getSourceUrl.bind(
+        ForgejoTagsDatasource,
+      ),
     },
     [GitTagsDatasource.id]: {
       api: new GitTagsDatasource(),

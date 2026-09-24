@@ -29,10 +29,14 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   static readonly hashicorpReleaseUrl = 'https://releases.hashicorp.com';
 
-  static readonly defaultRegistryUrls = [
+  private static readonly defaultRegistryUrls = [
     TerraformProviderDatasource.terraformRegistryUrl,
     TerraformProviderDatasource.hashicorpReleaseUrl,
   ];
+
+  static getDefaultRegistryUrls(): string[] {
+    return TerraformProviderDatasource.defaultRegistryUrls;
+  }
 
   static repositoryRegex = regEx(/^hashicorp\/(?<packageName>\S+)$/);
 
@@ -40,8 +44,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     super(TerraformProviderDatasource.id);
   }
 
-  override readonly defaultRegistryUrls =
-    TerraformProviderDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return TerraformProviderDatasource.defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 
