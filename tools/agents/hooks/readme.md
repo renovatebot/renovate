@@ -29,4 +29,4 @@ Blocks tool invocations that use forbidden package managers or test runners (e.g
 
 Runs when Claude Code is about to stop.
 
-Executes `pnpm check --all` against all files changed since the base branch. If the check fails, the stop is blocked and Claude is prompted to fix the issues before finishing.
+Executes `pnpm check --all` against all files changed since the base branch. If the check fails, the stop is blocked and Claude is prompted to fix the issues before finishing. The block reason includes the check output, cut down to its start and its end when it is long, so Claude sees which checks failed and why.
