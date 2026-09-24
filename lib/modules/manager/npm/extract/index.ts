@@ -15,8 +15,8 @@ import { NpmDatasource } from '../../../datasource/npm/index.ts';
 
 import type {
   ExtractConfig,
-  PackageFile,
-  PackageFileContent,
+  NpmrcPackageFile,
+  NpmrcPackageFileContent,
 } from '../../types.ts';
 import { resolveNpmrc } from '../npmrc.ts';
 import { PnpmWorkspaceFile, type YarnConfig } from '../schema.ts';
@@ -47,7 +47,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig,
-): Promise<PackageFileContent<NpmManagerData> | null> {
+): Promise<NpmrcPackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
   let packageJson: NpmPackage;
@@ -231,8 +231,8 @@ export async function extractPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
-): Promise<PackageFile<NpmManagerData>[]> {
-  const npmFiles: PackageFile<NpmManagerData>[] = [];
+): Promise<NpmrcPackageFile<NpmManagerData>[]> {
+  const npmFiles: NpmrcPackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {

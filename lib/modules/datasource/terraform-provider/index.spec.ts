@@ -14,8 +14,8 @@ const telmateProxmoxVersions = Fixtures.get(
 
 const openTofuRegistryUrl = TerraformProviderDatasource.openTofuRegistryUrl;
 const terraformProviderDatasource = new TerraformProviderDatasource();
-const primaryUrl = terraformProviderDatasource.defaultRegistryUrls[0];
-const secondaryUrl = terraformProviderDatasource.defaultRegistryUrls[1];
+const primaryUrl = terraformProviderDatasource.getDefaultRegistryUrls('')[0];
+const secondaryUrl = terraformProviderDatasource.getDefaultRegistryUrls('')[1];
 
 type MockVariant = 'empty' | '404' | 'error';
 
@@ -393,7 +393,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(200, serviceDiscoveryResult);
 
       const result = terraformProviderDatasource.getBuilds(
-        terraformProviderDatasource.defaultRegistryUrls[0],
+        terraformProviderDatasource.getDefaultRegistryUrls('')[0],
         'hashicorp/azurerm',
         '2.50.0',
       );
@@ -402,7 +402,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
     it('returns null for non hashicorp dependency and releases.hashicorp.com registryUrl', async () => {
       const result = await terraformProviderDatasource.getBuilds(
-        terraformProviderDatasource.defaultRegistryUrls[1],
+        terraformProviderDatasource.getDefaultRegistryUrls('')[1],
         'test/azurerm',
         '2.50.0',
       );
@@ -470,7 +470,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const result = terraformProviderDatasource.getBuilds(
-        terraformProviderDatasource.defaultRegistryUrls[0],
+        terraformProviderDatasource.getDefaultRegistryUrls('')[0],
         'Telmate/proxmox',
         '2.8.0',
       );
@@ -513,7 +513,7 @@ describe('modules/datasource/terraform-provider/index', () => {
           download_url: 'https://downloads.example.com/proxmox',
         });
       const res = await terraformProviderDatasource.getBuilds(
-        terraformProviderDatasource.defaultRegistryUrls[0],
+        terraformProviderDatasource.getDefaultRegistryUrls('')[0],
         'Telmate/proxmox',
         '2.6.1',
       );
@@ -588,7 +588,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         .get('/v1/providers/Telmate/proxmox/2.6.1/download/windows/amd64')
         .reply(404);
       const res = terraformProviderDatasource.getBuilds(
-        terraformProviderDatasource.defaultRegistryUrls[0],
+        terraformProviderDatasource.getDefaultRegistryUrls('')[0],
         'Telmate/proxmox',
         '2.6.1',
       );

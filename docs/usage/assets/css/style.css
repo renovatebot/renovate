@@ -51,3 +51,19 @@
   height: auto;
   aspect-ratio: 756 / 250;
 }
+
+/*
+ * The banner is an <object> so its embedded links stay clickable, which
+ * rules out Material's img#only-light/#only-dark convention (that only
+ * targets <img> elements). Swap between two <object>s on the same
+ * data-md-color-scheme attribute that the rest of this file already uses.
+ */
+.md-typeset object.renovate-banner-dark {
+  display: none;
+}
+[data-md-color-scheme='slate'] .md-typeset object.renovate-banner-light {
+  display: none;
+}
+[data-md-color-scheme='slate'] .md-typeset object.renovate-banner-dark {
+  display: block;
+}

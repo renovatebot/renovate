@@ -19,7 +19,7 @@ export async function generateLoginCmd(
 ): Promise<string | null> {
   logger.trace({ repositoryRule }, 'Generating Helm registry login command');
   const { hostRule, repository } = repositoryRule;
-  const { username, password } = hostRule;
+  const { username, password, token } = hostRule;
   const loginCMD = 'helm registry login';
   if (username !== 'AWS' && ecrRegex.test(repository)) {
     logger.trace({ repository }, `Using ecr auth for Helm registry`);
@@ -48,6 +48,10 @@ export async function generateLoginCmd(
     // the command carries the password, so log the target host only
     logger.trace({ host: hostPart }, 'Generated Helm registry login command');
     return cmd;
+  }
+  if (token) {
+    const hostPart = repository.split('/')[0];
+    return `${loginCMD} --username '' --password ${quote(token)} ${quote(hostPart)}`;
   }
   return null;
 }
