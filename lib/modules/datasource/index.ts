@@ -315,11 +315,16 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 
 function resolveRegistryUrls(
   datasource: DatasourceApi,
+  packageName: string,
   defaultRegistryUrls: string[] | undefined,
   registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined,
 ): string[] {
-  if (!datasource.customRegistrySupport) {
+  const customRegistrySupport = datasource.supportsCustomRegistry(packageName);
+  const datasourceDefaultRegistryUrls =
+    datasource.getDefaultRegistryUrls(packageName);
+
+  if (!customRegistrySupport) {
     if (
       isNonEmptyArray(registryUrls) ||
       isNonEmptyArray(defaultRegistryUrls) ||
@@ -335,7 +340,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return coerceArray(datasource.defaultRegistryUrls);
+    return coerceArray(datasourceDefaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
   if (isNonEmptyArray(customUrls)) {
@@ -343,7 +348,7 @@ function resolveRegistryUrls(
   }
   const defaultUrls = isNonEmptyArray(defaultRegistryUrls)
     ? defaultRegistryUrls
-    : datasource.defaultRegistryUrls;
+    : datasourceDefaultRegistryUrls;
   if (!isNonEmptyArray(defaultUrls)) {
     return [];
   }
@@ -392,6 +397,7 @@ async function fetchReleases(
   }
   registryUrls = resolveRegistryUrls(
     datasource,
+    config.packageName,
     config.defaultRegistryUrls,
     registryUrls,
     config.additionalRegistryUrls,
@@ -536,6 +542,7 @@ function getDigestConfig(
     config.registryUrl ??
     resolveRegistryUrls(
       datasource,
+      packageName,
       config.defaultRegistryUrls,
       config.registryUrls,
       config.additionalRegistryUrls,

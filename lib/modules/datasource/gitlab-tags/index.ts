@@ -28,7 +28,9 @@ export class GitlabTagsDatasource extends Datasource {
     this.http = new GitlabHttp(GitlabTagsDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   private async fetchReleases({
     registryUrl,

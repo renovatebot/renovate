@@ -17,6 +17,7 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
+  createCondaToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
@@ -218,6 +219,8 @@ function getToolConfig(
       );
     case 'cargo':
       return createCargoToolConfig(toolName, version);
+    case 'conda':
+      return createCondaToolConfig(toolName);
     case 'dotnet':
       return createDotnetToolConfig(toolName);
     case 'gem':

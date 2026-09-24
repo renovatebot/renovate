@@ -136,6 +136,7 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`asdf`](https://mise.jdx.dev/dev-tools/backends/asdf.html)
 - [`aqua`](https://mise.jdx.dev/dev-tools/backends/aqua.html)
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
+- [`conda`](https://mise.jdx.dev/dev-tools/backends/conda.html)
 - [`gem`](https://mise.jdx.dev/dev-tools/backends/gem.html)
 - [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
 - [`gitlab`](https://mise.jdx.dev/dev-tools/backends/gitlab.html)
