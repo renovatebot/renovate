@@ -2,13 +2,14 @@ import { isNumber, isObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import * as p from '../../../util/promises.ts';
 import { parseUrl, replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
 import * as composerVersioning from '../../versioning/composer/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import type { RegistryFile } from './schema.ts';
 import {
@@ -53,14 +54,14 @@ function isTransientPackagistError(err: PackagistLookupError): boolean {
   return false;
 }
 
-export class PackagistDatasource extends Datasource {
+export class PackagistDatasource extends RegistryDatasource {
   static readonly id = 'packagist';
 
   constructor() {
     super(PackagistDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://repo.packagist.org'];
   }
 

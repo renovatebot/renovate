@@ -1,12 +1,13 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as perlVersioning from '../../versioning/perl/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { MetaCpanApiFileSearchResponse } from './schema.ts';
 import type { CpanRelease } from './types.ts';
 
-export class CpanDatasource extends Datasource {
+export class CpanDatasource extends RegistryDatasource {
   static readonly id = 'cpan';
 
   constructor() {
@@ -17,7 +18,7 @@ export class CpanDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://fastapi.metacpan.org/'];
   }
 

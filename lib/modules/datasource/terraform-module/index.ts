@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { getQueryString, isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -16,7 +17,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   static readonly terraformCloudUrl = 'https://app.terraform.io';
 
-  static readonly defaultRegistryUrls = [
+  static readonly defaultRegistryUrls: NonEmptyArray<string> = [
     TerraformModuleDatasource.terraformRegistryUrl,
   ];
 
@@ -24,7 +25,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     super(TerraformModuleDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return TerraformModuleDatasource.defaultRegistryUrls;
   }
 

@@ -1,11 +1,12 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { ElmPackageReleases } from './schema.ts';
 
-export class ElmPackageDatasource extends Datasource {
+export class ElmPackageDatasource extends RegistryDatasource {
   static readonly id = 'elm-package';
 
   constructor() {
@@ -16,7 +17,7 @@ export class ElmPackageDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://package.elm-lang.org'];
   }
 

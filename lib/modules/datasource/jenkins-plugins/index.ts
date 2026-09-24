@@ -1,10 +1,11 @@
 import { type ZodType } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { clone } from '../../../util/clone.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -15,7 +16,7 @@ import {
   JenkinsPluginsVersionsResponse,
 } from './schema.ts';
 
-export class JenkinsPluginsDatasource extends Datasource {
+export class JenkinsPluginsDatasource extends RegistryDatasource {
   static readonly id = 'jenkins-plugins';
 
   constructor() {
@@ -26,7 +27,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     return true;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://updates.jenkins.io'];
   }
 

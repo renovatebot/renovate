@@ -2,7 +2,7 @@ import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
 } from '../../config/types.ts';
-import type { ModuleApi } from '../../types/index.ts';
+import type { ModuleApi, NonEmptyArray } from '../../types/index.ts';
 import type {
   AdditionalConstraintName,
   ConstraintName,
@@ -32,9 +32,8 @@ export interface DigestConfig {
 }
 
 /**
- * `DigestConfig` as received by datasources that declare
- * `defaultRegistryUrls`: the datasource index always resolves a registry
- * URL for them before calling `getDigest()`.
+ * `DigestConfig` as received by a `RegistryDatasourceApi`: the datasource
+ * index always resolves a registry URL for it before calling `getDigest()`.
  */
 export interface RegistryDigestConfig extends DigestConfig {
   registryUrl: string;
@@ -67,9 +66,8 @@ export interface GetReleasesConfig {
 }
 
 /**
- * `GetReleasesConfig` as received by datasources that declare
- * `defaultRegistryUrls`: the datasource index always resolves a registry
- * URL for them before calling `getReleases()`.
+ * `GetReleasesConfig` as received by a `RegistryDatasourceApi`: the datasource
+ * index always resolves a registry URL for it before calling `getReleases()`.
  */
 export interface RegistryGetReleasesConfig extends GetReleasesConfig {
   registryUrl: string;
@@ -189,29 +187,12 @@ export type RegistryStrategy =
    */
   | 'merge';
 export type SourceUrlSupport = 'package' | 'release' | 'none';
-export interface DatasourceApi extends ModuleApi {
+/**
+ * The members of a datasource that do not depend on whether it requires a
+ * registry URL.
+ */
+export interface DatasourceApiBase extends ModuleApi {
   id: string;
-  /**
-   * A datasource with a non-empty `defaultRegistryUrls` may declare its
-   * parameter as `RegistryDigestConfig`: TypeScript's method parameter
-   * bivariance allows the narrower override, and the datasource index
-   * guarantees the value.
-   *
-   * `newValue` may be `undefined`, for example when only the digest of the
-   * current value is being resolved. Implementations must handle that case
-   * explicitly, for example by resolving the digest of a default branch or
-   * by returning `null`.
-   */
-  getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
-  /**
-   * A datasource with a non-empty `defaultRegistryUrls` may declare its
-   * parameter as `RegistryGetReleasesConfig`: TypeScript's method parameter
-   * bivariance allows the narrower override, and the datasource index
-   * guarantees the value.
-   */
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
-  /** Return registry URLs for package-specific datasource defaults. */
-  getDefaultRegistryUrls(packageName: string): string[] | undefined;
   /** Return whether custom registry URLs are supported for this package. */
   supportsCustomRegistry(packageName: string): boolean;
   defaultVersioning?: string | undefined;
@@ -272,3 +253,52 @@ export interface DatasourceApi extends ModuleApi {
     release: Release,
   ): Promise<PostprocessReleaseResult>;
 }
+
+// `getReleases` and `getDigest` are function-typed properties, not methods:
+// TypeScript checks method parameters bivariantly, which would let a datasource
+// narrow its config to `RegistryGetReleasesConfig` without a guaranteed
+// registry URL. Properties are checked contravariantly, so registering such a
+// datasource as a `DatasourceApi` fails to compile.
+
+/** A datasource that can be queried without a registry URL. */
+export interface PlainDatasourceApi extends DatasourceApiBase {
+  readonly registryUrlRequired: false;
+  /** Return registry URLs for package-specific datasource defaults. */
+  getDefaultRegistryUrls(packageName: string): string[] | undefined;
+  getReleases: (config: GetReleasesConfig) => Promise<ReleaseResult | null>;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
+  getDigest?: (
+    config: DigestConfig,
+    newValue?: string,
+  ) => Promise<string | null>;
+}
+
+/**
+ * A datasource with a default registry for every package: the datasource
+ * index always passes it a registry URL.
+ */
+export interface RegistryDatasourceApi extends DatasourceApiBase {
+  readonly registryUrlRequired: true;
+  /** Return registry URLs for package-specific datasource defaults. */
+  getDefaultRegistryUrls(packageName: string): NonEmptyArray<string>;
+  getReleases: (
+    config: RegistryGetReleasesConfig,
+  ) => Promise<ReleaseResult | null>;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
+  getDigest?: (
+    config: RegistryDigestConfig,
+    newValue?: string,
+  ) => Promise<string | null>;
+}
+
+export type DatasourceApi = PlainDatasourceApi | RegistryDatasourceApi;

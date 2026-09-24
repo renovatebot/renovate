@@ -1,5 +1,6 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as p from '../../../util/promises.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -11,7 +12,7 @@ import {
   ReleasesIndex,
 } from './schema.ts';
 
-export class DotnetVersionDatasource extends Datasource {
+export class DotnetVersionDatasource extends RegistryDatasource {
   static readonly id = 'dotnet-version';
 
   constructor() {
@@ -22,7 +23,7 @@ export class DotnetVersionDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [
       'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
     ];
