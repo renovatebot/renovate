@@ -12,7 +12,9 @@ import { GitlabReleases } from './schema.ts';
 export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-releases';
 
-  override readonly defaultRegistryUrls = ['https://gitlab.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://gitlab.com'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

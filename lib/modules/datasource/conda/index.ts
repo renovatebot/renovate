@@ -21,11 +21,15 @@ export class CondaDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'hunt';
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
