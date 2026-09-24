@@ -10,7 +10,10 @@ export class GitTagsDatasource extends GitDatasource {
 
   protected override readonly refTypes = ['tags'];
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
+
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';

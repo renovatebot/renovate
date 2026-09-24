@@ -9,9 +9,6 @@ import { Releases } from './schema.ts';
 export class GiteaReleasesDatasource extends GiteaDatasource {
   static readonly id: DatasourceName = 'gitea-releases';
 
-  override readonly defaultRegistryUrls =
-    GiteaReleasesDatasource.defaultRegistryUrls;
-
   protected readonly cacheNamespace: PackageCacheNamespace =
     'datasource-gitea-releases';
 

@@ -23,7 +23,9 @@ export class Unity3dDatasource extends Datasource {
 
   static readonly id = 'unity3d';
 
-  override readonly defaultRegistryUrls = [Unity3dDatasource.streams.lts];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [Unity3dDatasource.streams.lts];
+  }
 
   override readonly defaultVersioning = Unity3dVersioning.id;
 

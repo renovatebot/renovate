@@ -17,6 +17,7 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
+  createCondaToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
@@ -24,6 +25,7 @@ import {
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
+  createPypiToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
@@ -217,6 +219,8 @@ function getToolConfig(
       );
     case 'cargo':
       return createCargoToolConfig(toolName, version);
+    case 'conda':
+      return createCondaToolConfig(toolName);
     case 'dotnet':
       return createDotnetToolConfig(toolName);
     case 'gem':
@@ -231,6 +235,8 @@ function getToolConfig(
       return createNpmToolConfig(toolName);
     case 'pipx':
       return createPipxToolConfig(toolName);
+    case 'pypi':
+      return createPypiToolConfig(toolName);
     case 'spm':
       return createSpmToolConfig(toolName);
     case 'ubi':

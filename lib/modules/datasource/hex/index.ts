@@ -112,7 +112,9 @@ export class HexDatasource extends Datasource {
     super(HexDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = hexVersioning.id;
 

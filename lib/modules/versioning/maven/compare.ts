@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isBigint, isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import type { Range, Token } from './types.ts';
 
@@ -48,7 +48,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val, 10),
+        val: BigInt(val),
         isTransition: transition,
       });
     } else {
@@ -96,7 +96,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
 function isNull(token: Token): boolean {
   const val = token.val;
   return (
-    val === 0 ||
+    val === 0n ||
     val === '' ||
     val === 'final' ||
     val === 'ga' ||
@@ -132,7 +132,7 @@ function nullFor(token: Token): Token {
     ? {
         prefix: token.prefix,
         type: TYPE_NUMBER,
-        val: 0,
+        val: 0n,
       }
     : {
         prefix: token.prefix,
@@ -466,8 +466,8 @@ function coerceRangeValue(prev: string, next: string): string {
 function incrementRangeValue(value: string): string {
   const tokens = tokenize(value);
   const lastToken = tokens.at(-1)!;
-  if (typeof lastToken.val === 'number') {
-    lastToken.val += 1;
+  if (isBigint(lastToken.val)) {
+    lastToken.val += 1n;
     return coerceRangeValue(value, tokensToStr(tokens));
   }
   return value;
@@ -552,7 +552,7 @@ function autoExtendMavenRange(
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
       const lastToken = tokens.at(-1)!;
-      if (typeof lastToken.val === 'number') {
+      if (isBigint(lastToken.val)) {
         interval.rightValue = coerceRangeValue(rightValue, newValue);
       } else {
         interval.rightValue = newValue;

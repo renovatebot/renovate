@@ -12,9 +12,13 @@ import type { GitlabPackage } from './types.ts';
 export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   static readonly id = datasource;
 
-  override customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

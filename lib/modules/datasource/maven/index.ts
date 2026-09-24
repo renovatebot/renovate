@@ -70,7 +70,9 @@ export class MavenDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
@@ -158,7 +160,7 @@ export class MavenDatasource extends Datasource {
       }
     }
 
-    if (!this.defaultRegistryUrls.includes(registryUrl)) {
+    if (!this.getDefaultRegistryUrls('').includes(registryUrl)) {
       result.isPrivate = true;
     }
 
