@@ -2144,6 +2144,47 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if matchIsBreaking is combined with a pre-lookup option', async () => {
+      const config = partial<AllConfig>({
+        packageRules: [
+          {
+            matchIsBreaking: false,
+            separateMajorMinor: false,
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'packageRules[0]: packageRules cannot combine both matchIsBreaking and separateMajorMinor. Rule: {"matchIsBreaking":false,"separateMajorMinor":false}',
+        },
+      ]);
+    });
+
+    it('accepts matchIsBreaking as a packageRules selector', async () => {
+      const config = partial<AllConfig>({
+        packageRules: [
+          {
+            matchIsBreaking: false,
+            automerge: true,
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
     it('warns when registryUrls is set at the top level of repo config', async () => {
       const config = {
         registryUrls: ['https://registry.npmjs.org'],

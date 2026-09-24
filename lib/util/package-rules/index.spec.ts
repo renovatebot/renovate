@@ -726,6 +726,34 @@ describe('util/package-rules/index', () => {
     expect(res.y).toBeUndefined();
   });
 
+  it('filters isBreaking', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchIsBreaking: true,
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+        {
+          matchIsBreaking: false,
+          // @ts-expect-error -- testing
+          y: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'minor' as UpdateType,
+      isBreaking: true,
+    };
+
+    const res = await applyPackageRules({ ...config, ...dep });
+
+    expect(res.x).toBe(1);
+    expect(res.y).toBeUndefined();
+  });
+
   it('matches matchSourceUrls with glob', async () => {
     const config: TestConfig = {
       packageRules: [
