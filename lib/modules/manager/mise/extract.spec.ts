@@ -557,6 +557,24 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts conda backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "conda:ripgrep" = "13.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'conda:ripgrep',
+            currentValue: '13.0.0',
+            packageName: 'ripgrep',
+            datasource: 'conda',
+          },
+        ],
+      });
+    });
+
     it('extracts dotnet backend tool', async () => {
       const content = codeBlock`
       [tools]
