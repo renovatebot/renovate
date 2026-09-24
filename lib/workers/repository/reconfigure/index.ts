@@ -54,8 +54,11 @@ export async function checkReconfigureBranch(
   const branchSha = getBranchCommit(reconfigureBranch)!;
   const cache = getCache();
   const reconfigureCache = cache.reconfigureBranchCache;
-  // remove the extract result persisted by earlier versions
-  delete reconfigureCache?.extractResult;
+  // migrate the extract result persisted by earlier versions
+  if (reconfigureCache?.extractResult) {
+    reconfigureCache.extractionSucceeded = true;
+    delete reconfigureCache.extractResult;
+  }
 
   // only use valid cached information
   if (

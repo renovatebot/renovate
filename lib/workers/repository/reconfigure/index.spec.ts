@@ -96,7 +96,7 @@ describe('workers/repository/reconfigure/index', () => {
     ).not.toHaveBeenCalledExactlyOnceWith();
   });
 
-  it('removes the extract result persisted by earlier versions', async () => {
+  it('migrates the extract result persisted by earlier versions', async () => {
     const repoCache = {
       reconfigureBranchCache: {
         reconfigureBranchSha,
@@ -105,13 +105,13 @@ describe('workers/repository/reconfigure/index', () => {
       },
     };
     cache.getCache.mockReturnValue(repoCache);
-    platform.findPr.mockResolvedValueOnce(null);
 
     await checkReconfigureBranch(config, repoConfig);
 
     expect(repoCache.reconfigureBranchCache).toEqual({
       reconfigureBranchSha,
       isConfigValid: true,
+      extractionSucceeded: true,
     });
     expect(validate.validateReconfigureBranch).not.toHaveBeenCalled();
   });

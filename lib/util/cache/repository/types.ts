@@ -49,7 +49,7 @@ export interface ReconfigureBranchCache {
   reconfigureBranchSha: string;
   isConfigValid: boolean;
   extractionSucceeded?: boolean;
-  /** @deprecated Written by earlier versions, removed when the cache is read. */
+  /** @deprecated Written by earlier versions, migrated to `extractionSucceeded` when the cache is read. */
   extractResult?: unknown;
 }
 
