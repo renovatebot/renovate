@@ -17,7 +17,9 @@ export const cacheNamespace = 'datasource-github-releases';
 export class GithubReleasesDatasource extends Datasource<GithubHttp> {
   static readonly id = 'github-releases';
 
-  override readonly defaultRegistryUrls = ['https://github.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com'];
+  }
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure

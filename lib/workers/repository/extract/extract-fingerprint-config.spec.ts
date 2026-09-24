@@ -127,4 +127,31 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       fingerprintConfig.managers.find((manager) => manager.manager === 'regex'),
     ).toBeUndefined();
   });
+
+  describe('hasVulnerabilityAlertsRules', () => {
+    it('is omitted when no vulnerability alerts are configured', () => {
+      const config = mergeChildConfig(getConfig(), {
+        enabledManagers: ['npm'],
+      });
+
+      const fingerprintConfig = generateFingerprintConfig(config);
+
+      expect(fingerprintConfig.managers[0]).not.toHaveProperty(
+        'hasVulnerabilityAlertsRules',
+      );
+    });
+
+    it('is set for every manager when vulnerability alerts are configured', () => {
+      const config = mergeChildConfig(getConfig(), {
+        enabledManagers: ['npm', 'dockerfile'],
+        osvVulnerabilityAlerts: true,
+      });
+
+      const fingerprintConfig = generateFingerprintConfig(config);
+
+      expect(fingerprintConfig.managers).toSatisfyAll(
+        (manager) => manager.hasVulnerabilityAlertsRules === true,
+      );
+    });
+  });
 });
