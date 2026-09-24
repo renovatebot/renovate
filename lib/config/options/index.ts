@@ -1821,6 +1821,16 @@ const options: Readonly<RenovateOptions>[] = [
     patternMatch: true,
   },
   {
+    name: 'matchIsBreaking',
+    description:
+      'Matches only if the update is considered breaking (e.g. major, or minor for 0.x in ecosystems like Cargo) when `true`, or non-breaking when `false`. Valid only within a `packageRules` object.',
+    type: 'boolean',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchFileNames',
     description:
       'List of patterns to match against package and lock file paths. Valid only within a `packageRules` object.',
