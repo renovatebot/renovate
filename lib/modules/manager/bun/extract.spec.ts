@@ -373,6 +373,25 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
 
+    it('keeps valid catalog entries when some values are malformed', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'my-monorepo',
+          catalog: { react: '^19.0.0', broken: 42 },
+          catalogs: { testing: { jest: '30.0.0' }, invalid: 'not-an-object' },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      expect(packageFiles).toHaveLength(1);
+      expect(packageFiles[0].deps).toMatchObject([
+        { depType: 'bun.catalog.default', depName: 'react' },
+        { depType: 'bun.catalog.testing', depName: 'jest' },
+      ]);
+      expect(packageFiles[0].deps).toHaveLength(2);
+    });
+
     it('extracts top-level catalogs from root package.json', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.readLocalFile.mockResolvedValueOnce(

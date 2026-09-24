@@ -10,16 +10,22 @@ import {
 import { updateDependency as npmUpdateDependency } from '../npm/update/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
-const bunCatalogRe = regEx(`^${BUN_CATALOG_DEPENDENCY}\\.(?<catalogName>.+)$`);
+const bunCatalogRe = regEx(
+  `^${RegExp.escape(BUN_CATALOG_DEPENDENCY)}\\.(?<catalogName>.+)$`,
+);
 
-function getCatalog(scope: unknown, catalogName: string): unknown {
+/**
+ * The `default` catalog is either the top-level `catalog` field or a catalog
+ * named `default` under `catalogs`.
+ */
+function getCatalogs(scope: unknown, catalogName: string): unknown[] {
   if (!isPlainObject(scope)) {
-    return null;
+    return [];
   }
-  if (catalogName === 'default') {
-    return scope.catalog;
-  }
-  return isPlainObject(scope.catalogs) ? scope.catalogs[catalogName] : null;
+  const named = isPlainObject(scope.catalogs)
+    ? scope.catalogs[catalogName]
+    : null;
+  return catalogName === 'default' ? [scope.catalog, named] : [named];
 }
 
 /**
@@ -32,9 +38,10 @@ function findCatalogWithDep(
   depName: string,
 ): Record<PropertyKey, unknown> | null {
   for (const scope of [parsedContents, parsedContents.workspaces]) {
-    const catalog = getCatalog(scope, catalogName);
-    if (isPlainObject(catalog) && depName in catalog) {
-      return catalog;
+    for (const catalog of getCatalogs(scope, catalogName)) {
+      if (isPlainObject(catalog) && depName in catalog) {
+        return catalog;
+      }
     }
   }
   return null;

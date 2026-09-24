@@ -288,6 +288,36 @@ describe('modules/manager/bun/update', () => {
       expect(result).toBe('{ "dependencies": { "dep1": "2.0.0" } }');
     });
 
+    it('does not treat depTypes that only resemble bun catalogs as catalogs', () => {
+      const result = updateDependency({
+        fileContent: '{ "catalog": { "dep1": "1.0.0" } }',
+        packageFile: 'package.json',
+        upgrade: {
+          depType: 'bunXcatalog.default',
+          depName: 'dep1',
+          newValue: '2.0.0',
+        },
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('updates a catalog named `default` under `catalogs`', () => {
+      const result = updateDependency({
+        fileContent: '{ "catalogs": { "default": { "react": "^18.0.0" } } }',
+        packageFile: 'package.json',
+        upgrade: {
+          depType: 'bun.catalog.default',
+          depName: 'react',
+          newValue: '^19.0.0',
+        },
+      });
+
+      expect(result).toBe(
+        '{ "catalogs": { "default": { "react": "^19.0.0" } } }',
+      );
+    });
+
     it('updates git version tag in catalog entry', () => {
       const result = updateDependency({
         fileContent: '{ "catalog": { "my-lib": "github:user/my-lib#v1.0.0" } }',
