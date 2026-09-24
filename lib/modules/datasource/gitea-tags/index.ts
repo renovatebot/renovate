@@ -9,9 +9,6 @@ import { getApiUrl, getSourceUrl } from './util.ts';
 export class GiteaTagsDatasource extends GiteaDatasource {
   static readonly id: DatasourceName = 'gitea-tags';
 
-  override readonly defaultRegistryUrls =
-    GiteaTagsDatasource.defaultRegistryUrls;
-
   protected readonly cacheNamespace: PackageCacheNamespace =
     'datasource-gitea-tags';
 

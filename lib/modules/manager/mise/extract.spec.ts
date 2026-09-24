@@ -557,6 +557,24 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts conda backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "conda:ripgrep" = "13.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'conda:ripgrep',
+            currentValue: '13.0.0',
+            packageName: 'ripgrep',
+            datasource: 'conda',
+          },
+        ],
+      });
+    });
+
     it('extracts dotnet backend tool', async () => {
       const content = codeBlock`
       [tools]
@@ -653,6 +671,38 @@ describe('modules/manager/mise/extract', () => {
           },
           {
             depName: 'pipx:git+https://github.com/psf/black.git',
+            currentValue: '24.4.1',
+            packageName: 'psf/black',
+            datasource: 'github-tags',
+          },
+        ],
+      });
+    });
+
+    it('extracts pypi backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "pypi:yamllint" = "1.35.0"
+      "pypi:psf/black" = "24.4.1"
+      "pypi:git+https://github.com/psf/black.git" = "24.4.1"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'pypi:yamllint',
+            currentValue: '1.35.0',
+            packageName: 'yamllint',
+            datasource: 'pypi',
+          },
+          {
+            depName: 'pypi:psf/black',
+            currentValue: '24.4.1',
+            packageName: 'psf/black',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'pypi:git+https://github.com/psf/black.git',
             currentValue: '24.4.1',
             packageName: 'psf/black',
             datasource: 'github-tags',
@@ -1082,6 +1132,7 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            packageName: 'oracle-graalvm-jdk',
           },
         ],
       });

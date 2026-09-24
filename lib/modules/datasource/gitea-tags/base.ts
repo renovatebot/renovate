@@ -23,8 +23,9 @@ import { getApiUrl, getCacheKey, getSourceUrl } from './util.ts';
 export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
   static readonly defaultRegistryUrls = ['https://gitea.com'];
 
-  /** Mirrors the static field, because the registry reads the instance. */
-  abstract override readonly defaultRegistryUrls: string[];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return GiteaDatasource.defaultRegistryUrls;
+  }
 
   protected abstract override readonly cacheNamespace: PackageCacheNamespace;
 
@@ -63,7 +64,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
 
   /** Falls back to the default registry URL when none is configured. */
   protected getRegistryUrl(registryUrl?: string): string {
-    return registryUrl ?? this.defaultRegistryUrls[0];
+    return registryUrl ?? this.getDefaultRegistryUrls('')[0];
   }
 
   /**
@@ -74,7 +75,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
   protected isPublicRegistry(registryUrl: string): boolean {
     return (
       parseUrl(registryUrl)?.hostname ===
-      parseUrl(this.defaultRegistryUrls[0])?.hostname
+      parseUrl(this.getDefaultRegistryUrls('')[0])?.hostname
     );
   }
 
