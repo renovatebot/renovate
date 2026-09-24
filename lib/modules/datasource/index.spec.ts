@@ -453,6 +453,7 @@ describe('modules/datasource/index', () => {
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
+        registryStrategy: 'first',
         getDefaultRegistryUrls: () => ['https://function-registry.com'],
         getReleases: ({ registryUrl }) =>
           Promise.resolve(
@@ -472,6 +473,7 @@ describe('modules/datasource/index', () => {
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
+        registryStrategy: 'first',
         getDefaultRegistryUrls: () => undefined,
         getReleases: vi.fn(),
         postprocessRelease: (_config, release) => Promise.resolve(release),
