@@ -9,15 +9,15 @@ import { Registry } from './schema.ts';
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
-  override readonly defaultRegistryUrls = [
-    'https://packages.typst.org/preview/index.json',
-  ];
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
+
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://packages.typst.org/preview/index.json'];
+  }
 
   override defaultVersioning = semver;
-
-  // `getReleases` always reads from `defaultRegistryUrls`, so a custom registry
-  // URL would be silently ignored.
-  override readonly customRegistrySupport = false;
 
   constructor() {
     super(TypstDatasource.id);
@@ -28,7 +28,7 @@ export class TypstDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [, pkg] = packageName.split('/');
 
-    const [registryUrl] = this.defaultRegistryUrls;
+    const [registryUrl] = this.getDefaultRegistryUrls('');
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: 'datasource-typst:cache-provider',
