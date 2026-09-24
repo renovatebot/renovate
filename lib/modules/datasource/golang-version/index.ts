@@ -1,4 +1,5 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -6,7 +7,7 @@ import {
   isVersion,
   id as semverVersioningId,
 } from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -24,14 +25,14 @@ const releaseVersionRegex = regEx(
 );
 const releaseFutureRegex = regEx(`Future:\\s+true`);
 
-export class GolangVersionDatasource extends Datasource {
+export class GolangVersionDatasource extends RegistryDatasource {
   static readonly id = 'golang-version';
 
   constructor() {
     super(GolangVersionDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://raw.githubusercontent.com/golang/website'];
   }
 

@@ -1,10 +1,11 @@
 import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { queryReleases } from '../../../util/github/graphql/index.ts';
 import { findCommitOfTag } from '../../../util/github/tags.ts';
 import { getSourceUrl } from '../../../util/github/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryDigestConfig,
   RegistryGetReleasesConfig,
@@ -12,10 +13,10 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 
-export class GithubReleasesDatasource extends Datasource<GithubHttp> {
+export class GithubReleasesDatasource extends RegistryDatasource<GithubHttp> {
   static id = 'github-releases';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://github.com'];
   }
 
@@ -53,12 +54,15 @@ export class GithubReleasesDatasource extends Datasource<GithubHttp> {
       currentDigest,
       registryUrl,
     }: RegistryDigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
     logger.debug(
       { repo, currentValue, currentDigest, registryUrl, newValue },
       'getDigest',
     );
+    if (!newValue) {
+      return Promise.resolve(null);
+    }
 
     return findCommitOfTag(registryUrl, repo, newValue, this.http);
   }

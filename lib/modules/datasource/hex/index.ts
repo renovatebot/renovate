@@ -2,11 +2,12 @@ import { verify as verifySignature } from 'node:crypto';
 import { promisify } from 'node:util';
 import { gunzip } from 'node:zlib';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as hexVersioning from '../../versioning/hex/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
   RegistryGetReleasesConfig,
   Release,
@@ -105,14 +106,14 @@ function mapV2Releases(pkg: Package): Release[] {
   return releases;
 }
 
-export class HexDatasource extends Datasource {
+export class HexDatasource extends RegistryDatasource {
   static readonly id = 'hex';
 
   constructor() {
     super(HexDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 

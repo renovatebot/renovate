@@ -1,5 +1,6 @@
 import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
@@ -7,11 +8,11 @@ import { fromBase64 } from '../../../util/string.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { GithubContentResponse } from '../../platform/github/schema.ts';
 import semver from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { BitriseStepFile } from './schema.ts';
 
-export class BitriseDatasource extends Datasource<GithubHttp> {
+export class BitriseDatasource extends RegistryDatasource<GithubHttp> {
   static readonly id = 'bitrise';
 
   constructor() {
@@ -22,7 +23,7 @@ export class BitriseDatasource extends Datasource<GithubHttp> {
     return true;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://github.com/bitrise-io/bitrise-steplib.git'];
   }
 

@@ -1,13 +1,14 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as semanticVersioning from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { Release } from '../index.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
@@ -15,7 +16,7 @@ import {
   DenoAPIModuleVersionResponse,
 } from './schema.ts';
 
-export class DenoDatasource extends Datasource {
+export class DenoDatasource extends RegistryDatasource {
   static readonly id = 'deno';
 
   override supportsCustomRegistry(_packageName: string): boolean {
@@ -24,7 +25,7 @@ export class DenoDatasource extends Datasource {
 
   override readonly defaultVersioning = semanticVersioning.id;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://apiland.deno.dev'];
   }
 

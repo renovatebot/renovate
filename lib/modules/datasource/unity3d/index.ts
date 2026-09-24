@@ -1,10 +1,11 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as Unity3dVersioning from '../../versioning/unity3d/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { UnityReleasesJSON } from './schema.ts';
 
-export class Unity3dDatasource extends Datasource {
+export class Unity3dDatasource extends RegistryDatasource {
   static readonly baseUrl =
     'https://services.api.unity.com/unity/editor/release/v1/releases';
   static readonly homepage = 'https://unity.com/';
@@ -23,7 +24,7 @@ export class Unity3dDatasource extends Datasource {
 
   static readonly id = 'unity3d';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [Unity3dDatasource.streams.lts];
   }
 
