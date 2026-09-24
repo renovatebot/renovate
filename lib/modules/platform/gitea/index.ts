@@ -560,14 +560,11 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         return toRenovatePR(pr, null);
       }
       const prList = await platform.getPrList();
-      const sameRepoPrList = prList.filter(
+      const pr = findPrInList(
+        prList,
+        { branchName, prTitle: title, state },
         (p) => p.sourceRepo === config.repository,
       );
-      const pr = findPrInList(sameRepoPrList, {
-        branchName,
-        prTitle: title,
-        state,
-      });
 
       if (pr) {
         logger.debug(`Found PR #${pr.number}`);

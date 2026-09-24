@@ -1022,10 +1022,11 @@ export async function findPr({
   const prList = await getPrList();
   // PRs opened from a fork have a different sourceRepo, only allow those when
   // renovate is authenticated with a fork token for this run.
-  const sameRepoPrList = config.forkToken
-    ? prList
-    : prList.filter((p) => looseEquals(config.repository, p.sourceRepo));
-  const pr = findPrInList(sameRepoPrList, { branchName, prTitle, state });
+  const pr = findPrInList(
+    prList,
+    { branchName, prTitle, state },
+    (p) => !!config.forkToken || looseEquals(config.repository, p.sourceRepo),
+  );
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }

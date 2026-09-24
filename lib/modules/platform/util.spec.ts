@@ -1,12 +1,7 @@
 import { partial } from '~test/util.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import type { Pr } from './types.ts';
-import {
-  findPrInList,
-  getNewBranchName,
-  matchesState,
-  repoFingerprint,
-} from './util.ts';
+import { findPrInList, getNewBranchName, repoFingerprint } from './util.ts';
 
 describe('modules/platform/util', () => {
   beforeEach(() => hostRules.clear());
@@ -33,28 +28,6 @@ describe('modules/platform/util', () => {
     it('should be the same', () => {
       const res = getNewBranchName('refs/heads/testBB');
       expect(res).toBe(`refs/heads/testBB`);
-    });
-  });
-
-  describe('matchesState', () => {
-    it.each`
-      actual      | expected   | result
-      ${'open'}   | ${'all'}   | ${true}
-      ${'closed'} | ${'all'}   | ${true}
-      ${'closed'} | ${'!open'} | ${true}
-      ${'merged'} | ${'!open'} | ${true}
-      ${'open'}   | ${'!open'} | ${false}
-      ${'open'}   | ${'open'}  | ${true}
-      ${'closed'} | ${'open'}  | ${false}
-    `(
-      'matchesState("$actual", "$expected") === $result',
-      ({ actual, expected, result }) => {
-        expect(matchesState(actual, expected)).toBe(result);
-      },
-    );
-
-    it('defaults expected to "all"', () => {
-      expect(matchesState('open')).toBeTrue();
     });
   });
 
@@ -106,6 +79,64 @@ describe('modules/platform/util', () => {
     it('returns undefined when branch does not match', () => {
       const res = findPrInList(prs, { branchName: 'renovate/missing-branch' });
       expect(res).toBeUndefined();
+    });
+
+    it.each`
+      actual      | filterState | expected
+      ${'open'}   | ${'all'}    | ${1}
+      ${'closed'} | ${'all'}    | ${1}
+      ${'merged'} | ${'all'}    | ${1}
+      ${'open'}   | ${'open'}   | ${1}
+      ${'closed'} | ${'open'}   | ${undefined}
+      ${'merged'} | ${'open'}   | ${undefined}
+      ${'open'}   | ${'closed'} | ${undefined}
+      ${'closed'} | ${'closed'} | ${1}
+      ${'merged'} | ${'closed'} | ${undefined}
+      ${'open'}   | ${'!open'}  | ${undefined}
+      ${'closed'} | ${'!open'}  | ${1}
+      ${'merged'} | ${'!open'}  | ${1}
+    `(
+      'PR with state "$actual" filtered by "$filterState" === $expected',
+      ({ actual, filterState, expected }) => {
+        const pr = [
+          partial<Pr>({
+            number: 1,
+            sourceBranch: 'renovate/some-branch',
+            title: 'Update dependency foo',
+            state: actual,
+          }),
+        ];
+
+        const res = findPrInList(pr, {
+          branchName: 'renovate/some-branch',
+          state: filterState,
+        });
+
+        expect(res?.number).toBe(expected);
+      },
+    );
+
+    it('finds a PR when state filter is omitted', () => {
+      const res = findPrInList(prs, { branchName: 'renovate/some-branch' });
+      expect(res?.number).toBe(1);
+    });
+
+    it('returns undefined when extraFilter rejects the match', () => {
+      const res = findPrInList(
+        prs,
+        { branchName: 'renovate/some-branch' },
+        () => false,
+      );
+      expect(res).toBeUndefined();
+    });
+
+    it('returns the PR when extraFilter accepts the match', () => {
+      const res = findPrInList(
+        prs,
+        { branchName: 'renovate/some-branch' },
+        () => true,
+      );
+      expect(res?.number).toBe(1);
     });
   });
 });

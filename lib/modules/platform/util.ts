@@ -23,9 +23,9 @@ export function getNewBranchName(branchName?: string): string | undefined {
  * matches everything, a leading `!` negates an exact match, and anything else
  * requires an exact match.
  */
-export function matchesState(
+function matchesState(
   actual: string,
-  expected: FindPRConfig['state'] = 'all',
+  expected: FindPRConfig['state'],
 ): boolean {
   if (!expected || expected === 'all') {
     return true;
@@ -41,16 +41,18 @@ export function matchesState(
  * the same core filter shared by most platforms: exact branch name match,
  * case-insensitive title match (when `prTitle` is set), and `matchesState`.
  * Callers with platform-specific extra conditions (e.g. source repo checks)
- * should apply those separately rather than using this helper.
+ * pass them as `extraFilter`, which is applied in the same pass.
  */
 export function findPrInList<T extends Pr>(
   prs: T[],
   { branchName, prTitle, state }: FindPRConfig,
+  extraFilter?: (pr: T) => boolean,
 ): T | undefined {
   return prs.find(
     (p) =>
       p.sourceBranch === branchName &&
       (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-      matchesState(p.state, state),
+      matchesState(p.state, state) &&
+      (!extraFilter || extraFilter(p)),
   );
 }
