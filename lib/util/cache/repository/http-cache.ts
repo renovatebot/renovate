@@ -2,6 +2,10 @@ import { isTruthy } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
+import {
+  persistedResponseHeaders,
+  pickHeaders,
+} from '../../http/cache/persisted-headers.ts';
 import { HttpCache } from '../../http/cache/schema.ts';
 import type { RepoCacheData } from './types.ts';
 
@@ -42,6 +46,13 @@ export function cleanupHttpCache(cacheData: RepoCacheData): void {
     if (expiry < now) {
       logger.debug(`http cache: removing expired cache for ${url}`);
       delete httpCache[url];
+      continue;
     }
+    // validated above, so the item has the shape of the parsed data
+    const entry = item as NonNullable<HttpCache>;
+    entry.httpResponse.headers = pickHeaders(
+      entry.httpResponse.headers,
+      persistedResponseHeaders,
+    );
   }
 }

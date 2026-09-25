@@ -37,6 +37,29 @@ describe('util/http/cache/memory-http-cache-provider', () => {
     });
   });
 
+  it('keeps all headers of cached responses', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/foo/bar')
+      .reply(
+        200,
+        { msg: 'Hello, world!' },
+        { 'docker-content-digest': 'sha256:abc', 'set-cookie': 'session=x' },
+      );
+
+    await http.getJsonUnchecked('https://example.com/foo/bar', {
+      cacheProvider: memCacheProvider,
+    });
+    const res = await http.getJsonUnchecked('https://example.com/foo/bar', {
+      cacheProvider: memCacheProvider,
+    });
+
+    expect(res.headers).toMatchObject({
+      'docker-content-digest': 'sha256:abc',
+      'set-cookie': ['session=x'],
+    });
+  });
+
   it('does not allow cached responses to be mutated', async () => {
     httpMock
       .scope('https://example.com')

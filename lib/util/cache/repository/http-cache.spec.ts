@@ -147,4 +147,59 @@ describe('util/cache/repository/http-cache', () => {
       },
     });
   });
+
+  it('should keep only the persisted headers of GET and HEAD items', () => {
+    const now = DateTime.now();
+    const cache = {
+      httpCache: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {
+            statusCode: 200,
+            headers: {
+              etag: 'abc',
+              'set-cookie': ['session=secret'],
+              'x-session-token': 'also-secret',
+            },
+            body: 'body',
+          },
+        },
+      },
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {
+            statusCode: 200,
+            headers: { etag: 'abc', 'x-session-token': 'also-secret' },
+            body: '',
+          },
+        },
+      },
+    };
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCache: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {
+            statusCode: 200,
+            headers: { etag: 'abc' },
+            body: 'body',
+          },
+        },
+      },
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: { statusCode: 200, headers: { etag: 'abc' }, body: '' },
+        },
+      },
+    });
+  });
 });
