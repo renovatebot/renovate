@@ -455,9 +455,7 @@ export async function lookupUpdates(
         // commit and nothing else, so it is a digest update - see #29034
         if (
           config.manager === 'gomod' &&
-          compareValue &&
           isPseudoVersion(compareValue) &&
-          update.newValue &&
           isPseudoVersion(update.newValue) &&
           config.currentDigest !== update.newDigest
         ) {

@@ -88,7 +88,6 @@ export function updateDependency({
       // has no data and newValue may equal currentValue. In that case, fall
       // through to the bare hash path so that gomodTidy can resolve it.
       if (
-        upgrade.newValue &&
         isPseudoVersion(upgrade.newValue) &&
         upgrade.newValue !== upgrade.currentValue
       ) {
