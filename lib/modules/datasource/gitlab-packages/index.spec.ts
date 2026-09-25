@@ -60,6 +60,40 @@ describe('modules/datasource/gitlab-packages/index', () => {
       });
     });
 
+    it('returns package from custom registry with api path', async () => {
+      const body = [
+        {
+          version: '1.0.0',
+          created_at: '2020-03-04T12:01:37.000-06:00',
+          name: 'mypkg',
+        },
+      ];
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/user%2Fproject1/packages')
+        .query({
+          package_name: 'mypkg',
+          per_page: '100',
+        })
+        .reply(200, body);
+
+      const res = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        packageName: 'user/project1:mypkg',
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.company.com/api/v4',
+        releases: [
+          {
+            releaseTimestamp: '2020-03-04T18:01:37.000Z',
+            version: '1.0.0',
+          },
+        ],
+      });
+    });
+
     it('returns conan package from custom registry', async () => {
       const body = [
         {
