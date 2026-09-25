@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "example",
+  "version-semver": "1.0.0",
+  "dependencies": [
+    "bare-port",
+    {
+      "name": "zlib",
+      "version>=": "1.2.13"
+    },
+    {
+      "name": "feature-gated",
+      "features": ["one", "two"],
+      "default-features": false
+    },
+    {
+      "name": "openssl",
+      "version>=": "3.0.0",
+      "platform": "linux",
+      "host": true
+    }
+  ],
+  "overrides": [
+    {
+      "name": "fmt",
+      "version": "9.1.0"
+    },
+    {
+      "name": "boost",
+      "version-semver": "1.81.0",
+      "port-version": 2
+    },
+    {
+      "name": "ffmpeg",
+      "version-date": "2023-01-15"
+    },
+    {
+      "name": "legacy",
+      "version-string": "rolling"
+    },
+    {
+      "name": "zero-port",
+      "version": "1.0.0",
+      "port-version": 0
+    }
+  ]
+}
