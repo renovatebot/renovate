@@ -1,6 +1,9 @@
-import { fakeSha, logger, partial, scm } from '~test/util.ts';
+import { fakeSha, fs, logger, partial, scm } from '~test/util.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
-import type { PackageFile } from '../../../modules/manager/types.ts';
+import type {
+  NpmrcPackageFile,
+  PackageFile,
+} from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type {
   BaseBranchCache,
@@ -40,6 +43,7 @@ vi.mock('./vulnerabilities.ts', () => {
 vi.mock('../updates/branchify.ts');
 vi.mock('../extract/index.ts');
 vi.mock('../../../util/cache/repository/index.ts');
+vi.mock('../../../util/fs/index.ts');
 
 const branchify = vi.mocked(_branchify);
 const extractAll = vi.mocked(_extractAll);
@@ -625,6 +629,188 @@ describe('workers/repository/process/extract-update', () => {
         expect(
           (await extract(config)).npm[0].deps[0].skipReason,
         ).toBeUndefined();
+      });
+    });
+
+    describe('npmrc', () => {
+      const configNpmrc = '//registry.npmjs.org/:_authToken=secret';
+      const repoNpmrc = {
+        fileName: '.npmrc',
+        content: 'registry=https://reg.example.com/\n',
+        detectedLineEnding: '\n',
+      };
+
+      it('caches package files without their npmrc', async () => {
+        const cache: { scan: Record<string, BaseBranchCache> } = { scan: {} };
+        repositoryCache.getCache.mockReturnValueOnce(cache);
+        scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+        scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+        const gradleFile = { packageFile: 'build.gradle', deps: [] };
+        const npmFile: NpmrcPackageFile = {
+          packageFile: 'package.json',
+          npmrc: `${configNpmrc}\n${repoNpmrc.content}`,
+          managerData: { npmrcFileName: '.npmrc', repoNpmrc },
+          deps: [],
+        };
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: { npm: [npmFile], gradle: [gradleFile] },
+          extractionFingerprints: {},
+        });
+        const config = {
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+          npmrc: configNpmrc,
+        };
+
+        const res = await extract(config);
+
+        expect((res.npm[0] as NpmrcPackageFile).npmrc).toBe(
+          `${configNpmrc}\n${repoNpmrc.content}`,
+        );
+        expect(cache.scan.master.packageFiles.npm[0]).toEqual({
+          packageFile: 'package.json',
+          managerData: { npmrcFileName: '.npmrc', repoNpmrc },
+          deps: [],
+        });
+        expect(cache.scan.master.packageFiles.gradle[0]).toEqual(gradleFile);
+        expect(cache.scan.master.packageFiles.gradle[0]).not.toBe(gradleFile);
+        expect(JSON.stringify(cache)).not.toContain('secret');
+      });
+
+      it('rebuilds the npmrc when using the cached extract', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              packageFile: 'package.json',
+              managerData: { npmrcFileName: '.npmrc', repoNpmrc },
+              deps: [],
+            },
+            {
+              packageFile: 'other/package.json',
+              managerData: { npmrcFileName: null },
+              deps: [],
+            },
+            { packageFile: 'pnpm-workspace.yaml', deps: [] },
+          ],
+          gradle: [{ packageFile: 'build.gradle', deps: [] }],
+        };
+        const config = {
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+          npmrc: configNpmrc,
+          npmrcMerge: true,
+        };
+        repositoryCache.getCache.mockReturnValueOnce({
+          scan: {
+            master: {
+              revision: EXTRACT_CACHE_REVISION,
+              sha: branchSha,
+              configHash: fingerprint(generateFingerprintConfig(config)),
+              extractionFingerprints: {},
+              packageFiles,
+            },
+          },
+        });
+        scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+
+        const res = await extract(config);
+
+        expect(scm.checkoutBranch).not.toHaveBeenCalled();
+        const [first, second, workspace] = res.npm as NpmrcPackageFile[];
+        expect(first.npmrc).toBe(`${configNpmrc}\n${repoNpmrc.content}`);
+        expect(second.npmrc).toBe(configNpmrc);
+        // a package file extracted without npmrc, such as a pnpm-workspace.yaml, stays without one
+        expect(workspace).not.toHaveProperty('npmrc');
+        expect(res.gradle[0]).toEqual(packageFiles.gradle[0]);
+        expect(res.gradle[0]).not.toBe(packageFiles.gradle[0]);
+        // the cached object stays without it
+        expect(JSON.stringify(packageFiles)).not.toContain('secret');
+      });
+
+      it('caches the extract without a repository npmrc that has credentials', async () => {
+        const cache: { scan: Record<string, BaseBranchCache> } = {
+          scan: { master: partial<BaseBranchCache>({ sha: 'old' }) },
+        };
+        repositoryCache.getCache.mockReturnValueOnce(cache);
+        scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+        scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+        const bunFile: NpmrcPackageFile = {
+          packageFile: 'package.json',
+          npmrc: '//reg.example.com/:_authToken=repo-secret\n',
+          managerData: {
+            repoNpmrc: {
+              fileName: '.npmrc',
+              content: '//reg.example.com/:_authToken=repo-secret\n',
+              detectedLineEnding: '\n',
+            },
+          },
+          deps: [],
+        };
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: { bun: [bunFile] },
+          extractionFingerprints: {},
+        });
+        const config = { repoIsOnboarded: true, baseBranch: 'master' };
+
+        const res = await extract(config);
+
+        expect(res.bun[0]).toBe(bunFile);
+        expect(cache.scan.master.packageFiles.bun[0]).toEqual({
+          packageFile: 'package.json',
+          managerData: { uncachedNpmrcFileName: '.npmrc' },
+          deps: [],
+        });
+        expect(JSON.stringify(cache)).not.toContain('secret');
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { npmrcFileName: '.npmrc' },
+          'A repository .npmrc contains credentials, which are not cached: configure them through hostRules or the npmrc option instead',
+        );
+      });
+
+      it('reads a repository npmrc with credentials from disk again when using the cached extract', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              packageFile: 'package.json',
+              managerData: {
+                npmrcFileName: '.npmrc',
+                uncachedNpmrcFileName: '.npmrc',
+              },
+              deps: [],
+            },
+          ],
+        };
+        const config = {
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+          npmrc: configNpmrc,
+          npmrcMerge: true,
+        };
+        repositoryCache.getCache.mockReturnValueOnce({
+          scan: {
+            master: {
+              revision: EXTRACT_CACHE_REVISION,
+              sha: branchSha,
+              configHash: fingerprint(generateFingerprintConfig(config)),
+              extractionFingerprints: {},
+              packageFiles,
+            },
+          },
+        });
+        scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+        scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+        fs.readLocalFile.mockResolvedValueOnce(
+          '//reg.example.com/:_authToken=repo-secret\n',
+        );
+
+        const res = await extract(config);
+
+        expect(scm.checkoutBranch).toHaveBeenCalledWith('master');
+        expect((res.npm[0] as NpmrcPackageFile).npmrc).toBe(
+          `${configNpmrc}\n//reg.example.com/:_authToken=repo-secret\n`,
+        );
+        // the cached object stays without it
+        expect(JSON.stringify(packageFiles)).not.toContain('secret');
       });
     });
 
