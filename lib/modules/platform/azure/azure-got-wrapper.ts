@@ -67,7 +67,8 @@ export function azureObj(credentials?: HostRule): azure.WebApi {
     throw new Error(`No config found for azure`);
   }
   const authHandler = getAuthenticationHandler(config);
-  return new azure.WebApi(endpoint, authHandler, {
+  const normalizedEndpoint = normalizeApiEndpoint(endpoint);
+  return new azure.WebApi(normalizedEndpoint, authHandler, {
     allowRetries: true,
     maxRetries: 2,
   });
@@ -132,5 +133,5 @@ export async function isHosted(): Promise<boolean> {
 
 export function setEndpoint(e: string): void {
   hostRuleEndpoint = e;
-  endpoint = normalizeApiEndpoint(e);
+  endpoint = e;
 }
