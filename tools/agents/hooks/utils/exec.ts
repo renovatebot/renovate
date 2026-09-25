@@ -1,10 +1,10 @@
-import type { Options } from 'execa';
+import type { TextOptions } from '../../../utils/exec.ts';
 import { exec as execBase } from '../../../utils/exec.ts';
 
 export async function exec(
   cmd: string,
   args: string[] = [],
-  opts: Options = {},
+  opts: TextOptions = {},
 ): ReturnType<typeof execBase> {
   return await execBase(cmd, args, {
     stdout: process.stderr,

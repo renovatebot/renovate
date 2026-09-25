@@ -54,7 +54,7 @@ async function build(): Promise<void> {
   } else if (res.timedOut) {
     logger.error({ res }, 'Process timed out');
     process.exit(-1);
-  } else if (res.killed) {
+  } else if (res.isTerminated) {
     logger.error({ res }, 'Process was killed');
     process.exit(-1);
   } else if (res.failed) {

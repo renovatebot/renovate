@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import type { ExecaChildProcess, ExecaReturnValue } from 'execa';
+import type { Result, ResultPromise } from 'execa';
 import { execa } from 'execa';
 import fs from 'fs-extra';
 import { init, logger } from '../lib/logger/index.ts';
@@ -58,7 +58,7 @@ program
     if (opts.strict) {
       mkdocsArgs.push('--strict');
     }
-    function spawnServe(): ExecaChildProcess {
+    function spawnServe(): ResultPromise {
       return execa('uv', mkdocsArgs, {
         cwd: 'tools/mkdocs',
         stdio: 'inherit',
@@ -74,7 +74,7 @@ program
       return;
     }
 
-    let activeChild: ExecaChildProcess | null = null;
+    let activeChild: ResultPromise | null = null;
     let shouldRestart = false;
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -111,24 +111,24 @@ async function prepareDocs(opts: any): Promise<void> {
   }
 }
 
-function checkResult(res: ExecaReturnValue): void {
+function checkResult(res: Result<{ stdio: 'inherit' }>): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);
   } else if (res.exitCode) {
-    logger.error(`Error occured:\n${res.stderr || res.stdout}`);
+    logger.error('Error occured');
     process.exit(res.exitCode);
   } else if (res.timedOut) {
     logger.error({ res }, 'Process timed out');
     process.exit(-1);
-  } else if (res.killed) {
+  } else if (res.isTerminated) {
     logger.error({ res }, 'Process was killed');
     process.exit(-1);
   } else if (res.failed) {
     logger.error({ res }, 'Process call failed');
     process.exit(-1);
   } else {
-    logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
+    logger.debug('Build completed');
   }
 }
 
