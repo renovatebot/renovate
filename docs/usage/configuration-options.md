@@ -2440,6 +2440,8 @@ If the value starts with `http(s)` then it will only match against URLs which st
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
 
+A base URL ending in `/` (e.g. `https://gitlab.com/api/v4/projects/1/`) matches that path and everything below it, also when the URL has no trailing `/`, but not a sibling path like `https://gitlab.com/api/v4/projects/10`.
+
 The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
 
 ```json

@@ -526,7 +526,11 @@ export class CrateDatasource extends Datasource {
     const git = createSimpleGit({
       config: { maxConcurrentProcesses: 1 },
       ...(isHttpUrl(registryFetchUrl) && {
-        authentication: { hostTypes: [CrateDatasource.id] },
+        // the URL as well, for the credentials registered from it, which only apply to this registry
+        authentication: {
+          hostTypes: [CrateDatasource.id],
+          url: registryFetchUrl,
+        },
       }),
     });
 

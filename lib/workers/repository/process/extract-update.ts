@@ -1,17 +1,27 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isTruthy } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
+import {
+  getDatasourceFor,
+  getDatasourceHostType,
+} from '../../../modules/datasource/common.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { scm } from '../../../modules/platform/scm.ts';
-import { isNotNullOrUndefined } from '../../../util/array.ts';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token.ts';
 import { clone } from '../../../util/clone.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
+import { detachUrlCredentials } from '../../../util/host-rules.ts';
+import { coerceObject } from '../../../util/object.ts';
+import {
+  containsUrlCredentials,
+  hasUrlCredentials,
+} from '../../../util/url.ts';
 import type { BranchConfig } from '../../types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import { extractAllDependencies } from '../extract/index.ts';
@@ -127,6 +137,12 @@ export function isCacheExtractValid(
     );
     return false;
   }
+  if (containsUrlCredentials(getRegistryUrls(cachedExtract.packageFiles))) {
+    logger.debug(
+      'Cached extract has registry URLs with credentials, so cannot be used',
+    );
+    return false;
+  }
   logger.debug(
     `Cached extract for sha=${baseBranchSha} is valid and can be used`,
   );
@@ -163,8 +179,19 @@ export async function extract(
     );
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
+    const hasRegistryUrlCredentials = containsUrlCredentials(
+      getRegistryUrls(packageFiles),
+    );
+    // before caching, as the host rules for the credentials are registered for this run only
+    detachRegistryUrlCredentials(packageFiles);
 
-    if (overwriteCache) {
+    if (overwriteCache && hasRegistryUrlCredentials) {
+      logger.once.warn(
+        { baseBranch },
+        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+      );
+      delete cache.scan[baseBranch!];
+    } else if (overwriteCache) {
       // TODO: fix types (#22198)
       cache.scan[baseBranch!] = {
         revision: EXTRACT_CACHE_REVISION,
@@ -193,6 +220,91 @@ export async function extract(
   logger.trace({ config: packageFiles }, 'packageFiles');
   ensureGithubToken(packageFiles);
   return packageFiles;
+}
+
+/**
+ * Returns the registry URLs of all package files and their deps.
+ */
+function getRegistryUrls(
+  packageFiles: Record<string, PackageFile[]> | undefined,
+): string[] {
+  return Object.values(coerceObject(packageFiles))
+    .flat()
+    .flatMap((file) => [
+      ...coerceArray(file.registryUrls),
+      ...coerceArray(file.additionalRegistryUrls),
+      ...file.deps.flatMap((dep) => coerceArray(dep.registryUrls)),
+    ]);
+}
+
+/**
+ * Returns the host types the known datasources among `datasources` request with, such as `custom` for `custom.<name>`.
+ */
+function datasourceHostTypes(datasources: (string | undefined)[]): string[] {
+  const hostTypes = datasources
+    .filter(isTruthy)
+    .map((datasource) => getDatasourceHostType(datasource))
+    .filter(isTruthy);
+  return [...new Set(hostTypes)];
+}
+
+/**
+ * Returns the datasources of `deps` which support custom registry URLs for their package.
+ */
+function customRegistryDatasources(
+  deps: Pick<
+    PackageFile['deps'][number],
+    'datasource' | 'packageName' | 'depName'
+  >[],
+): string[] {
+  return deps
+    .filter(({ datasource, packageName, depName }) =>
+      getDatasourceFor(datasource ?? '')?.supportsCustomRegistry(
+        packageName ?? depName ?? '',
+      ),
+    )
+    .map(({ datasource }) => datasource!);
+}
+
+/**
+ * Moves the credentials of every extracted registry URL into host rules for the current run, for the datasources which support custom registry URLs; the URLs of other datasources lose their credentials.
+ *
+ * @returns whether a registry URL of a datasource which supports custom registry URLs held credentials according to `hasUrlCredentials()`
+ */
+function detachRegistryUrlCredentials(
+  packageFiles: Record<string, PackageFile[]>,
+): boolean {
+  let hadCredentials = false;
+
+  function detach(url: string, hostTypes: string[]): string {
+    hadCredentials ||= hostTypes.length > 0 && hasUrlCredentials(url);
+    return detachUrlCredentials(url, hostTypes);
+  }
+
+  // `extractAllDependencies` may have yielded nothing
+  for (const files of Object.values(coerceObject(packageFiles))) {
+    for (const file of files) {
+      // the URLs of a package file are requested with the datasources of its dependencies
+      const hostTypes = datasourceHostTypes(
+        customRegistryDatasources([
+          { datasource: file.datasource },
+          ...file.deps,
+        ]),
+      );
+      file.registryUrls = file.registryUrls?.map((url) =>
+        detach(url, hostTypes),
+      );
+      file.additionalRegistryUrls = file.additionalRegistryUrls?.map((url) =>
+        detach(url, hostTypes),
+      );
+      for (const dep of file.deps) {
+        dep.registryUrls = dep.registryUrls?.map((url) =>
+          detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
+        );
+      }
+    }
+  }
+  return hadCredentials;
 }
 
 async function fetchVulnerabilities(
