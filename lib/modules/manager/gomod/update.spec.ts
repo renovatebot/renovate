@@ -672,6 +672,33 @@ describe('modules/manager/gomod/update', () => {
       `);
     });
 
+    it('should pin a release to the head of the branch it follows', () => {
+      const fileContent = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        require github.com/foo/bar v1.2.3 // renovate: branch=main
+      `;
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade: {
+          depName: 'github.com/foo/bar',
+          managerData: { lineNumber: 2 },
+          updateType: 'pinDigest',
+          currentValue: 'main',
+          newValue: 'main',
+          newDigest: '0123456789ab0123456789ab0123456789ab0123',
+          depType: 'require',
+        },
+      });
+      // `go get` turns the commit into a pseudo-version and keeps the comment
+      expect(res).toBe(codeBlock`
+        module github.com/renovate-tests/gomod
+
+        require github.com/foo/bar 0123456789ab // renovate: branch=main
+      `);
+    });
+
     it('should keep the note of an indirect dependency', () => {
       const fileContent = codeBlock`
         module github.com/renovate-tests/gomod

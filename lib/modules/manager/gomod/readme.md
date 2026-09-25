@@ -136,5 +136,7 @@ require github.com/example/module v1.4.1-0.20260717141412-a3b45fcdf451 // renova
 Renovate then only proposes digest updates to the newest commit of that branch, and `go get` turns the commit into a new pseudo-version.
 Go keeps the comment, also when it marks the dependency as indirect with `// indirect; renovate: branch=main`.
 
-The comment is only read on pseudo-versions.
+If the line holds a release, such as `v1.4.0 // renovate: branch=main`, Renovate first pins it to the newest commit of the branch.
+To go back to releases, remove the comment.
+
 Renovate can resolve the branch for modules hosted on GitHub, on GitLab and in plain Git repositories.

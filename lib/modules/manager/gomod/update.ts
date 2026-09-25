@@ -3,6 +3,9 @@ import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
+// Length of the commit hash at the end of a pseudo-version
+const pseudoVersionRevisionLength = 12;
+
 function getNameWithNoVersion(name: string): string {
   // remove version suffixes like /v1 or /v2
   let nameNoVersion = name.replace(regEx(/\/v\d+$/), '');
@@ -79,7 +82,7 @@ export function updateDependency({
       return null;
     }
     let newLine: string;
-    if (upgrade.updateType === 'digest') {
+    if (upgrade.updateType === 'digest' || upgrade.updateType === 'pinDigest') {
       // Since the 2024 goproxy datasource changes, newValue and newDigest are
       // both extracted from the same proxy version string and always reference
       // the same commit, so newValue can be written directly for pseudo-versions.
@@ -101,12 +104,13 @@ export function updateDependency({
         );
       } else {
         // Fallback for private modules where the proxy could not resolve a new
-        // pseudo-version, or non-pseudo-version digest updates.
+        // pseudo-version, non-pseudo-version digest updates, and a release
+        // pinned to the branch it follows.
         // Writes the bare hash so that postUpdateOptions like gomodTidy can
         // normalize it into a valid pseudo-version via `go get`.
         const newDigestRightSized = upgrade.newDigest!.substring(
           0,
-          upgrade.currentDigest!.length,
+          upgrade.currentDigest?.length ?? pseudoVersionRevisionLength,
         );
         if (lineToChange.includes(newDigestRightSized)) {
           return fileContent;

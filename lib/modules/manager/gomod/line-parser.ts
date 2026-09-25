@@ -53,11 +53,12 @@ const followBranchRegex = regEx(
 );
 
 /**
- * A pseudo-version marked with `// renovate: branch=<name>` follows the
- * commits of that branch, like a `@<sha> # <branch>` pin in GitHub Actions.
- * The branch becomes the value, which the default `semver` versioning of the
- * `go` datasource does not read as a version, so the lookup only proposes
- * digest updates and never switches to a release.
+ * A dependency marked with `// renovate: branch=<name>` follows the commits of
+ * that branch, like a `@<sha> # <branch>` pin in GitHub Actions. The branch
+ * becomes the value, which the default `semver` versioning of the `go`
+ * datasource does not read as a version, so the lookup only proposes digest
+ * updates and never switches to a release. A release has no commit yet, so it
+ * is pinned to the head of the branch first.
  */
 function followBranch(
   dep: PackageDependency,
@@ -66,10 +67,14 @@ function followBranch(
   const branch = comment
     ? followBranchRegex.exec(comment)?.groups?.branch
     : undefined;
-  if (branch && dep.currentDigest && !dep.skipReason) {
-    dep.currentValue = branch;
-    delete dep.versioning;
+  if (!branch || dep.skipReason) {
+    return;
   }
+  if (!dep.currentDigest) {
+    dep.pinDigests = true;
+  }
+  dep.currentValue = branch;
+  delete dep.versioning;
 }
 
 export function parseLine(input: string): PackageDependency | null {
