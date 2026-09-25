@@ -373,6 +373,11 @@ export function categoryRank(scope: string): number {
 /** Scopes rendered as a collapsed `<details>` block, for verbosity. */
 export const COLLAPSED_SCOPES = new Set(['deps']);
 
+/** Within the `deps` group, commit types whose change is visible to a
+ * Renovate user (a new capability, a behaviour fix, or a build/release
+ * change) as opposed to pure internal bookkeeping (`chore`, `ci`, ...). */
+export const USER_FACING_DEPENDENCY_TYPES = new Set(['feat', 'fix', 'build']);
+
 /** Display labels for flat (non-module) scopes whose raw name doesn't read
  * well as a heading. Any other scope falls back to its raw name. */
 const FLAT_SCOPE_LABELS: Record<string, string> = {
@@ -479,7 +484,11 @@ export async function resolveModuleLabels(
  *   singular or plural, with or without a specific module name) becomes a
  *   module entry nested under a `CategoryGroup`; a bare category with no
  *   module name (`datasource` on its own) becomes a "General" entry in
- *   that same category, rather than a second, colliding group.
+ *   that same category, rather than a second, colliding group. The same
+ *   module scoped under its singular and plural category alias (
+ *   `manager/pep621` and `managers/pep621`) merges into that one entry
+ *   too, rather than showing up as two separate, identically-labelled
+ *   bullets.
  * - An unscoped `docs:` commit is treated as if scoped `docs`, joining any
  *   explicitly `docs`-scoped commits in their own "Documentation" group,
  *   rather than falling into "Other".
@@ -518,7 +527,12 @@ export function groupByModule(
     }
   }
 
-  const modulesByCategory = new Map<string, ModuleEntry[]>();
+  // Keyed by module name (the empty string for a bare category, i.e.
+  // "General") so that `manager/pep621` and `managers/pep621` — the same
+  // module, written with the singular vs. plural category alias — land in
+  // one entry instead of two duplicate-looking bullets in the same
+  // category section.
+  const modulesByCategory = new Map<string, Map<string, ModuleEntry>>();
   const flat: FlatGroup[] = [];
 
   for (const [scope, rawCommits] of byScope) {
@@ -532,16 +546,21 @@ export function groupByModule(
 
     const parsed = scope ? parseModuleScope(scope) : undefined;
     if (scope && parsed) {
-      const entry: ModuleEntry = {
-        scope,
-        label: parsed.name ? (labels.get(scope) ?? scope) : 'General',
-        commits: groupCommits,
-      };
-      const existing = modulesByCategory.get(parsed.category);
+      const nameKey = parsed.name ?? '';
+      const entries =
+        modulesByCategory.get(parsed.category) ??
+        new Map<string, ModuleEntry>();
+      modulesByCategory.set(parsed.category, entries);
+
+      const existing = entries.get(nameKey);
       if (existing) {
-        existing.push(entry);
+        existing.commits.push(...groupCommits);
       } else {
-        modulesByCategory.set(parsed.category, [entry]);
+        entries.set(nameKey, {
+          scope,
+          label: parsed.name ? (labels.get(scope) ?? scope) : 'General',
+          commits: groupCommits,
+        });
       }
       continue;
     }
@@ -556,8 +575,28 @@ export function groupByModule(
   }
 
   const categoryGroups: CategoryGroup[] = [];
-  for (const [category, modules] of modulesByCategory) {
-    modules.sort((a, b) => a.label.localeCompare(b.label));
+  for (const [category, entries] of modulesByCategory) {
+    const modules = Array.from(entries.values());
+    for (const module of modules) {
+      // Re-sort: a module merged from more than one raw scope alias is the
+      // concatenation of two already-sorted lists, which isn't sorted as
+      // a whole.
+      module.commits.sort(
+        (a, b) => typeRank(types, a.type) - typeRank(types, b.type),
+      );
+    }
+    // "General" (a bare category scope with no specific module) is a
+    // catch-all, not a module in its own right — keep it last regardless
+    // of where it'd otherwise fall alphabetically.
+    modules.sort((a, b) => {
+      if (a.label === 'General') {
+        return b.label === 'General' ? 0 : 1;
+      }
+      if (b.label === 'General') {
+        return -1;
+      }
+      return a.label.localeCompare(b.label);
+    });
     categoryGroups.push({ kind: 'category', category, modules });
   }
   categoryGroups.sort((a, b) => a.category.localeCompare(b.category));
@@ -598,6 +637,26 @@ function renderCommitLine(commit: ParsedCommit, repo: string): string {
   return `- ${commit.type}: ${commit.subject}${renderReleaseLink(commit, repo)}`;
 }
 
+/** Render `commits` as a collapsed `<details>` block with the given
+ * `<summary>` text, or nothing at all if there are no commits to show. */
+function renderDetails(
+  summary: string,
+  commits: ParsedCommit[],
+  repo: string,
+): string[] {
+  if (commits.length === 0) {
+    return [];
+  }
+  return [
+    '<details>',
+    `<summary>${summary}</summary>`,
+    '',
+    ...commits.map((commit) => renderCommitLine(commit, repo)),
+    '',
+    '</details>',
+  ];
+}
+
 /**
  * Render module groups as `###` headings over a Markdown list, linking each
  * commit to the release it shipped in (when known), for example:
@@ -614,10 +673,16 @@ function renderCommitLine(commit: ParsedCommit, repo: string): string {
  * ### Dependency updates
  *
  * <details>
- * <summary>2 updates</summary>
+ * <summary>1 user-facing updates</summary>
+ *
+ * - build: update dependency bar to v4.5.6 ([44.61.4](...))
+ *
+ * </details>
+ *
+ * <details>
+ * <summary>1 other updates</summary>
  *
  * - chore: update dependency foo to v1.2.3 ([44.61.3](...))
- * - build: update dependency bar to v4.5.6 ([44.61.4](...))
  *
  * </details>
  *
@@ -658,6 +723,31 @@ export function renderModuleChangelog(
     }
 
     lines.push(`### ${group.label}`, '');
+
+    if (group.scope === 'deps') {
+      // Split into what a Renovate user would actually care about
+      // (`feat`/`fix`/`build`) versus internal bookkeeping (mostly
+      // `chore`), each in its own collapsed block, rather than one long
+      // undifferentiated list.
+      const userFacing = group.commits.filter((commit) =>
+        USER_FACING_DEPENDENCY_TYPES.has(commit.type),
+      );
+      const other = group.commits.filter(
+        (commit) => !USER_FACING_DEPENDENCY_TYPES.has(commit.type),
+      );
+      const blocks = [
+        renderDetails(
+          `${userFacing.length} user-facing updates`,
+          userFacing,
+          repo,
+        ),
+        renderDetails(`${other.length} other updates`, other, repo),
+      ].filter((block) => block.length > 0);
+      lines.push(blocks.map((block) => block.join('\n')).join('\n\n'));
+      sections.push(lines.join('\n'));
+      continue;
+    }
+
     const collapse =
       group.scope !== undefined && COLLAPSED_SCOPES.has(group.scope);
 

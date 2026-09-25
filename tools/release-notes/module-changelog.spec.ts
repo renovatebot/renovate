@@ -277,6 +277,29 @@ describe('tools/release-notes/module-changelog', () => {
       ]);
     });
 
+    it('merges the singular and plural category alias of the same module into one entry', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'manager/pep621', subject: 'a' },
+        { type: 'feat', scope: 'managers/pep621', subject: 'b' },
+      ];
+      const labels = new Map([
+        ['manager/pep621', 'PEP 621'],
+        ['managers/pep621', 'PEP 621'],
+      ]);
+
+      const [group] = groupByModule(commits, types, labels) as [CategoryGroup];
+      expect(group.modules).toEqual([
+        {
+          scope: 'manager/pep621',
+          label: 'PEP 621',
+          commits: [
+            { type: 'feat', scope: 'managers/pep621', subject: 'b' },
+            { type: 'fix', scope: 'manager/pep621', subject: 'a' },
+          ],
+        },
+      ]);
+    });
+
     it('routes a bare category scope into that category as a "General" entry', () => {
       const commits: ParsedCommit[] = [
         { type: 'test', scope: 'datasource', subject: 'replace snapshots' },
@@ -606,7 +629,7 @@ describe('tools/release-notes/module-changelog', () => {
       );
     });
 
-    it('collapses a `deps` group behind a <details> block', () => {
+    it('splits a `deps` group into user-facing and other <details> blocks', () => {
       const groups = groupByModule(
         [
           { type: 'chore', scope: 'deps', subject: 'update foo' },
@@ -624,14 +647,63 @@ describe('tools/release-notes/module-changelog', () => {
           '### Dependency updates',
           '',
           '<details>',
-          '<summary>2 updates</summary>',
+          '<summary>1 user-facing updates</summary>',
+          '',
+          '- build: update bar',
+          '',
+          '</details>',
+          '',
+          '<details>',
+          '<summary>1 other updates</summary>',
           '',
           '- chore: update foo',
-          '- build: update bar',
           '',
           '</details>',
         ].join('\n'),
       );
+    });
+
+    it('omits an empty user-facing or other block rather than rendering an empty <details>', () => {
+      const groups = groupByModule(
+        [{ type: 'chore', scope: 'deps', subject: 'update foo' }],
+        [{ type: 'chore', section: 'Miscellaneous Chores' }],
+        new Map(),
+      );
+
+      expect(renderModuleChangelog(groups, repo)).toBe(
+        [
+          '### Dependency updates',
+          '',
+          '<details>',
+          '<summary>1 other updates</summary>',
+          '',
+          '- chore: update foo',
+          '',
+          '</details>',
+        ].join('\n'),
+      );
+    });
+
+    it('treats feat/fix/build as user-facing dependency updates', () => {
+      const groups = groupByModule(
+        [
+          { type: 'feat', scope: 'deps', subject: 'a' },
+          { type: 'fix', scope: 'deps', subject: 'b' },
+          { type: 'build', scope: 'deps', subject: 'c' },
+          { type: 'chore', scope: 'deps', subject: 'd' },
+          { type: 'ci', scope: 'deps', subject: 'e' },
+        ],
+        [
+          { type: 'feat', section: 'Features' },
+          { type: 'fix', section: 'Bug Fixes' },
+          { type: 'build', section: 'Build System' },
+        ],
+        new Map(),
+      );
+
+      const rendered = renderModuleChangelog(groups, repo);
+      expect(rendered).toContain('<summary>3 user-facing updates</summary>');
+      expect(rendered).toContain('<summary>2 other updates</summary>');
     });
 
     it('counts every folded-in commit in the <summary>, not just the displayed entries', () => {
@@ -661,13 +733,34 @@ describe('tools/release-notes/module-changelog', () => {
       );
 
       const rendered = renderModuleChangelog(groups, repo);
-      expect(rendered).toContain('<summary>3 updates</summary>');
+      expect(rendered).toContain('<summary>1 user-facing updates</summary>');
       // Only the final version survives as a displayed entry.
       expect(rendered).toContain(
         '- fix: update ghcr.io/renovatebot/base-image docker tag to v13.95.6 (3 updates)',
       );
       expect(rendered).not.toContain('v13.95.4');
       expect(rendered).not.toContain('v13.95.5');
+    });
+
+    it('sorts a "General" module last within its category, even alphabetically ahead', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'test', scope: 'datasource', subject: 'replace snapshots' },
+        { type: 'fix', scope: 'datasource/npm', subject: 'a' },
+      ];
+      const labels = new Map([['datasource/npm', 'npm']]);
+
+      const groups = groupByModule(commits, types, labels);
+      const rendered = renderModuleChangelog(groups, repo);
+      expect(rendered).toBe(
+        [
+          '### datasource',
+          '',
+          '- npm',
+          '  - fix: a',
+          '- General',
+          '  - test: replace snapshots',
+        ].join('\n'),
+      );
     });
   });
 
