@@ -37,7 +37,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types.ts';
-import { repoFingerprint } from '../util.ts';
+import { findPrInList, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as comments from './comments.ts';
 import { getRepoFile } from './files.ts';
@@ -328,17 +328,6 @@ export async function initRepo({
   return repoConfig;
 }
 
-/* v8 ignore next -- covered only through findPr callers, never invoked directly in specs */
-function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState.startsWith('!')) {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
 export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   return await BitbucketPrCache.getPrs(
@@ -374,12 +363,7 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-      matchesState(p.state, state),
-  );
+  const pr = findPrInList(prList, { branchName, prTitle, state });
 
   if (!pr) {
     return null;
