@@ -1,4 +1,4 @@
-import { Version, VersionSpec } from '@baszalmstra/rattler';
+import { Version, VersionSpec } from '@conda-org/rattler';
 import type { SemVer } from 'semver';
 
 import type { RangeStrategy } from '../../../types/versioning.ts';
