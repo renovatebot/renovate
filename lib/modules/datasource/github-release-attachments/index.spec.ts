@@ -97,6 +97,19 @@ describe('modules/datasource/github-release-attachments/index', () => {
       expect(digest).toBeNull();
     });
 
+    it('returns null when newValue is not provided', async () => {
+      const digest = await getDigest(
+        {
+          datasource: GithubReleaseAttachmentsDatasource.id,
+          packageName,
+          currentValue,
+          currentDigest,
+        },
+        undefined,
+      );
+      expect(digest).toBeNull();
+    });
+
     it('defaults to currentDigest when currentVersion is missing', async () => {
       const digest = await getDigest(
         {
@@ -107,16 +120,6 @@ describe('modules/datasource/github-release-attachments/index', () => {
         currentValue,
       );
       expect(digest).toEqual(currentDigest);
-    });
-
-    it('returns null without a new value', async () => {
-      const digest = await getDigest({
-        datasource: GithubReleaseAttachmentsDatasource.id,
-        packageName,
-        currentValue,
-        currentDigest,
-      });
-      expect(digest).toBeNull();
     });
 
     it('returns updated digest in new release', async () => {

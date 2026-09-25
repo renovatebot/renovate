@@ -47,7 +47,7 @@ export class GithubReleasesDatasource extends RegistryDatasource<GithubHttp> {
    * the artifact checksum computation separately. This data-source does not know about
    * specific artifacts being used, as that could vary per manager
    */
-  override getDigest(
+  override async getDigest(
     {
       packageName: repo,
       currentValue,
@@ -61,7 +61,7 @@ export class GithubReleasesDatasource extends RegistryDatasource<GithubHttp> {
       'getDigest',
     );
     if (!newValue) {
-      return Promise.resolve(null);
+      return null;
     }
 
     return findCommitOfTag(registryUrl, repo, newValue, this.http);
