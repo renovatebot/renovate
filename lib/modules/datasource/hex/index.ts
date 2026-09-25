@@ -126,7 +126,7 @@ export class HexDatasource extends RegistryDatasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `Github` field in the results.';
 
-  private async getReleasesViaJsonApi({
+  private getReleasesViaJsonApi({
     packageName,
     registryUrl,
   }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
@@ -138,21 +138,7 @@ export class HexDatasource extends RegistryDatasource {
       `/api/${organizationUrlPrefix}packages/${hexPackageName}`,
     );
 
-    const { val: result, err } = await this.http
-      .getJsonSafe(hexUrl, HexRelease)
-      .onError((err) => {
-        logger.warn(
-          { url: hexUrl, datasource: 'hex', packageName, err },
-          'Error fetching from url',
-        );
-      })
-      .unwrap();
-
-    if (err) {
-      this.handleGenericErrors(err);
-    }
-
-    return result;
+    return this.fetchJsonOrNull(hexUrl, HexRelease);
   }
 
   private async getReleasesViaV2Protocol({

@@ -1,6 +1,4 @@
 import urlJoin from 'url-join';
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
 import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { RegistryDatasource } from '../datasource.ts';
@@ -39,32 +37,21 @@ export class BuildpacksRegistryDatasource extends RegistryDatasource {
     const { packageName, registryUrl } = config;
     const url = urlJoin(registryUrl, 'api', 'v1', 'buildpacks', packageName);
 
-    const result = this.http
-      .getJsonSafe(url, BuildpacksRegistryResponse)
-      .transform(({ versions, latest }): ReleaseResult => {
-        const releases: Release[] = versions;
-
-        const res: ReleaseResult = { releases };
-
-        if (latest?.homepage) {
-          res.homepage = latest.homepage;
-        }
-
-        return res;
-      });
-
-    const { val, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'buildpacks: validation error');
+    const body = await this.fetchJsonOrNull(url, BuildpacksRegistryResponse);
+    if (!body) {
       return null;
     }
 
-    if (err) {
-      this.handleGenericErrors(err);
+    const { versions, latest } = body;
+    const releases: Release[] = versions;
+
+    const res: ReleaseResult = { releases };
+
+    if (latest?.homepage) {
+      res.homepage = latest.homepage;
     }
 
-    return val;
+    return res;
   }
 
   getReleases(

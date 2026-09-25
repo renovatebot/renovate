@@ -1,5 +1,3 @@
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
@@ -41,40 +39,27 @@ export class CdnjsDatasource extends RegistryDatasource {
 
     const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
 
-    const result = this.http
-      .getJsonSafe(
-        url,
-        { cacheProvider: memCacheProvider },
-        CdnjsAPIVersionResponse,
-      )
-      .transform(({ versions, homepage, repository }): ReleaseResult => {
-        const releases: Release[] = versions;
-
-        const res: ReleaseResult = { releases };
-
-        if (homepage) {
-          res.homepage = homepage;
-        }
-
-        if (repository) {
-          res.sourceUrl = repository;
-        }
-
-        return res;
-      });
-
-    const { val, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'cdnjs: validation error');
+    const body = await this.fetchJsonOrNull(url, CdnjsAPIVersionResponse, {
+      cacheProvider: memCacheProvider,
+    });
+    if (!body) {
       return null;
     }
 
-    if (err) {
-      this.handleGenericErrors(err);
+    const { versions, homepage, repository } = body;
+    const releases: Release[] = versions;
+
+    const res: ReleaseResult = { releases };
+
+    if (homepage) {
+      res.homepage = homepage;
     }
 
-    return val;
+    if (repository) {
+      res.sourceUrl = repository;
+    }
+
+    return res;
   }
 
   getReleases(
@@ -102,24 +87,9 @@ export class CdnjsDatasource extends RegistryDatasource {
 
     const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
 
-    const result = this.http
-      .getJsonSafe(url, CdnjsAPISriResponse)
-      .transform(({ sri }): string => {
-        return sri?.[assetName];
-      });
+    const body = await this.fetchJsonOrNull(url, CdnjsAPISriResponse);
 
-    const { val = null, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'cdnjs: validation error');
-      return null;
-    }
-
-    if (err) {
-      this.handleGenericErrors(err);
-    }
-
-    return val;
+    return body?.sri?.[assetName] ?? null;
   }
 
   override getDigest(

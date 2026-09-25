@@ -36,21 +36,17 @@ export class NodeVersionDatasource extends RegistryDatasource {
       registryUrl,
       releases: [],
     };
-    try {
-      const resp = await this.http.getJson(
-        joinUrlParts(registryUrl, 'index.json'),
-        NodeReleases,
-      );
-      result.releases.push(
-        ...resp.body.map(({ version, date, lts }) => ({
-          version,
-          releaseTimestamp: asTimestamp(date),
-          isStable: lts !== false,
-        })),
-      );
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(
+      joinUrlParts(registryUrl, 'index.json'),
+      NodeReleases,
+    );
+    result.releases.push(
+      ...body.map(({ version, date, lts }) => ({
+        version,
+        releaseTimestamp: asTimestamp(date),
+        isStable: lts !== false,
+      })),
+    );
 
     return result.releases.length ? result : null;
   }

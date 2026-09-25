@@ -46,13 +46,7 @@ export class GalaxyDatasource extends RegistryDatasource {
     const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
     const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 
-    let body: GalaxyV1 | null = null;
-    try {
-      const raw = await this.http.getJson(galaxyAPIUrl, GalaxyV1);
-      body = raw.body;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(galaxyAPIUrl, GalaxyV1);
 
     if (body.results.length > 1) {
       body.results = body.results.filter(

@@ -39,60 +39,50 @@ export class DartDatasource extends RegistryDatasource {
     packageName,
     registryUrl,
   }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
-    let result: ReleaseResult | null = null;
     const pkgUrl = `${ensureTrailingSlash(
       registryUrl,
     )}api/packages/${packageName}`;
 
-    let body: DartResult | null = null;
-    try {
-      const raw = await this.http.getJson(pkgUrl, DartResult);
-      body = raw.body;
-    } catch (err) {
-      this.handleGenericErrors(err);
+    const { versions, latest } = await this.fetchJson(pkgUrl, DartResult);
+    const releases = versions
+      ?.filter(({ retracted }) => !retracted)
+      ?.map(({ version, published, pubspec }) => {
+        const release: Release = {
+          version,
+          releaseTimestamp: asTimestamp(published),
+        };
+
+        const constraints: Partial<Record<ConstraintName, string[]>> = {};
+        if (isNonEmptyString(pubspec?.environment?.sdk)) {
+          constraints.dart = [pubspec.environment.sdk];
+        }
+        if (isNonEmptyString(pubspec?.environment?.flutter)) {
+          constraints.flutter = [pubspec.environment.flutter];
+        }
+        if (!isEmptyObject(constraints)) {
+          release.constraints = constraints;
+        }
+
+        return release;
+      });
+
+    if (!releases || !latest) {
+      return null;
     }
 
-    // `body` is only still null if the request above threw, and
-    // `handleGenericErrors()` always rethrows
-    // v8 ignore else -- unreachable
-    if (body) {
-      const { versions, latest } = body;
-      const releases = versions
-        ?.filter(({ retracted }) => !retracted)
-        ?.map(({ version, published, pubspec }) => {
-          const release: Release = {
-            version,
-            releaseTimestamp: asTimestamp(published),
-          };
+    const result: ReleaseResult = { releases };
 
-          const constraints: Partial<Record<ConstraintName, string[]>> = {};
-          if (isNonEmptyString(pubspec?.environment?.sdk)) {
-            constraints.dart = [pubspec.environment.sdk];
-          }
-          if (isNonEmptyString(pubspec?.environment?.flutter)) {
-            constraints.flutter = [pubspec.environment.flutter];
-          }
-          if (!isEmptyObject(constraints)) {
-            release.constraints = constraints;
-          }
+    const pubspec = latest.pubspec;
+    if (pubspec) {
+      if (pubspec.homepage) {
+        result.homepage = pubspec.homepage;
+      }
 
-          return release;
-        });
-      if (releases && latest) {
-        result = { releases };
-
-        const pubspec = latest.pubspec;
-        if (pubspec) {
-          if (pubspec.homepage) {
-            result.homepage = pubspec.homepage;
-          }
-
-          if (pubspec.repository) {
-            result.sourceUrl = pubspec.repository;
-          }
-        }
+      if (pubspec.repository) {
+        result.sourceUrl = pubspec.repository;
       }
     }
+
     return result;
   }
 }
