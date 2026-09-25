@@ -38,26 +38,20 @@ export class GitlabReleasesDatasource extends RegistryDatasource<GitlabHttp> {
     const urlEncodedRepo = encodeURIComponent(packageName);
     const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
 
-    try {
-      const gitlabReleasesResponse = (
-        await this.http.getJson(apiUrl, GitlabReleases)
-      ).body;
+    const gitlabReleasesResponse = await this.fetchJson(apiUrl, GitlabReleases);
 
-      return {
-        sourceUrl: `${registryUrl}/${packageName}`,
-        releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
-          const release: Release = {
-            registryUrl,
-            gitRef: tag_name,
-            version: tag_name,
-            releaseTimestamp: asTimestamp(released_at),
-          };
-          return release;
-        }),
-      };
-    } catch (e) {
-      this.handleGenericErrors(e);
-    }
+    return {
+      sourceUrl: `${registryUrl}/${packageName}`,
+      releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
+        const release: Release = {
+          registryUrl,
+          gitRef: tag_name,
+          version: tag_name,
+          releaseTimestamp: asTimestamp(released_at),
+        };
+        return release;
+      }),
+    };
   }
 
   getReleases(

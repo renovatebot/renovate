@@ -34,15 +34,11 @@ export class EndoflifeDateDatasource extends RegistryDatasource {
 
     const url = joinUrlParts(registryUrl, `${packageName}.json`);
 
-    try {
-      const response = await this.http.getJson(url, EndoflifeDateVersions);
+    const body = await this.fetchJson(url, EndoflifeDateVersions);
 
-      result.releases.push(...response.body);
+    result.releases.push(...body);
 
-      return result.releases.length ? result : null;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    return result.releases.length ? result : null;
   }
 
   getReleases(

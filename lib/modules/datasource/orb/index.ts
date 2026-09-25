@@ -34,29 +34,25 @@ export class OrbDatasource extends RegistryDatasource {
       registryUrl,
       'api/v3/orb/packages',
     )}?${getQueryString({ 'filter[name]': packageName })}`;
-    try {
-      const { body } = await this.http.getJson(url, OrbPackagesResponse);
-      const pkg = body.data[0];
-      if (!pkg) {
-        logger.debug({ packageName }, `Failed to look up orb ${packageName}`);
-        return null;
-      }
-
-      // The homepage fallback uses the requested packageName, which the schema
-      // has no access to, so it is built here rather than in the transform.
-      const homepage = pkg.homeUrl?.length
-        ? pkg.homeUrl
-        : `https://circleci.com/developer/orbs/orb/${packageName}`;
-      const dep = {
-        homepage,
-        isPrivate: pkg.isPrivate,
-        releases: pkg.releases,
-      };
-      logger.trace({ dep }, 'dep');
-      return dep;
-    } catch (err) {
-      this.handleGenericErrors(err);
+    const body = await this.fetchJson(url, OrbPackagesResponse);
+    const pkg = body.data[0];
+    if (!pkg) {
+      logger.debug({ packageName }, `Failed to look up orb ${packageName}`);
+      return null;
     }
+
+    // The homepage fallback uses the requested packageName, which the schema
+    // has no access to, so it is built here rather than in the transform.
+    const homepage = pkg.homeUrl?.length
+      ? pkg.homeUrl
+      : `https://circleci.com/developer/orbs/orb/${packageName}`;
+    const dep = {
+      homepage,
+      isPrivate: pkg.isPrivate,
+      releases: pkg.releases,
+    };
+    logger.trace({ dep }, 'dep');
+    return dep;
   }
 
   override getReleases(

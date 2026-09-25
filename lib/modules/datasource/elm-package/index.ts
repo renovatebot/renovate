@@ -1,5 +1,3 @@
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
 import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -45,28 +43,9 @@ export class ElmPackageDatasource extends RegistryDatasource {
       'releases.json',
     );
 
-    const { val: result, err } = await this.http
-      .getJsonSafe(pkgUrl, ElmPackageReleases)
-      .onError((err) => {
-        logger.debug(
-          {
-            url: pkgUrl,
-            datasource: ElmPackageDatasource.id,
-            packageName,
-            err,
-          },
-          'Error fetching elm package releases',
-        );
-      })
-      .unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'elm-package: validation error');
+    const result = await this.fetchJsonOrNull(pkgUrl, ElmPackageReleases);
+    if (!result) {
       return null;
-    }
-
-    if (err) {
-      this.handleGenericErrors(err);
     }
 
     // Elm packages must be published from GitHub - the package name IS the GitHub repo path

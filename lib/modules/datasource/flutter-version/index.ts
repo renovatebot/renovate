@@ -43,30 +43,25 @@ export class FlutterVersionDatasource extends RegistryDatasource {
       registryUrl,
       releases: [],
     };
-    try {
-      const resp = (
-        await this.http.getJson(
-          `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
-          FlutterResponse,
-        )
-      ).body;
-      result.releases = resp.releases
-        // The API response contains a stable version being released as a non-stable
-        // release. And so we filter out these releases here.
-        .filter(({ version, channel }) => {
-          if (stableVersionRegex.test(version)) {
-            return channel === 'stable';
-          }
-          return true;
-        })
-        .map(({ version, release_date, channel }) => ({
-          version,
-          releaseTimestamp: asTimestamp(release_date),
-          isStable: channel === 'stable',
-        }));
-      return result.releases.length ? result : null;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const resp = await this.fetchJson(
+      `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
+      FlutterResponse,
+    );
+    result.releases = resp.releases
+      // The API response contains a stable version being released as a non-stable
+      // release. And so we filter out these releases here.
+      .filter(({ version, channel }) => {
+        if (stableVersionRegex.test(version)) {
+          return channel === 'stable';
+        }
+        return true;
+      })
+      .map(({ version, release_date, channel }) => ({
+        version,
+        releaseTimestamp: asTimestamp(release_date),
+        isStable: channel === 'stable',
+      }));
+
+    return result.releases.length ? result : null;
   }
 }
