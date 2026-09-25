@@ -266,6 +266,12 @@ export interface PlainDatasourceApi extends DatasourceApiBase {
   /** Return registry URLs for package-specific datasource defaults. */
   getDefaultRegistryUrls(packageName: string): string[] | undefined;
   getReleases: (config: GetReleasesConfig) => Promise<ReleaseResult | null>;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
   getDigest?: (
     config: DigestConfig,
     newValue?: string,
@@ -283,6 +289,12 @@ export interface RegistryDatasourceApi extends DatasourceApiBase {
   getReleases: (
     config: RegistryGetReleasesConfig,
   ) => Promise<ReleaseResult | null>;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
   getDigest?: (
     config: RegistryDigestConfig,
     newValue?: string,

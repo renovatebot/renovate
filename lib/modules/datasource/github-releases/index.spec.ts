@@ -106,15 +106,6 @@ describe('modules/datasource/github-releases/index', () => {
       ]);
     });
 
-    it('returns null without a new value', async () => {
-      const digest = await getDigest({
-        datasource: GithubReleasesDatasource.id,
-        packageName,
-        currentValue,
-      });
-      expect(digest).toBeNull();
-    });
-
     it('should be independent of the current digest', async () => {
       const digest = await getDigest(
         {
@@ -159,6 +150,23 @@ describe('modules/datasource/github-releases/index', () => {
         'unknown-tag',
       );
       expect(digest).toBeNull();
+    });
+
+    it('returns null when newValue is not provided', async () => {
+      const queryTagsSpy = vi.spyOn(githubGraphql, 'queryTags');
+
+      const digest = await getDigest(
+        {
+          datasource: GithubReleasesDatasource.id,
+          packageName,
+          currentValue,
+          currentDigest,
+        },
+        undefined,
+      );
+
+      expect(digest).toBeNull();
+      expect(queryTagsSpy).not.toHaveBeenCalled();
     });
   });
 });
