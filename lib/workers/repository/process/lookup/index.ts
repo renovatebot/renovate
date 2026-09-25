@@ -19,6 +19,7 @@ import {
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
+import { isPseudoVersion } from '../../../../modules/versioning/gomod/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
@@ -451,11 +452,12 @@ export async function lookupUpdates(
           allReleaseVersions,
         );
 
-        // #29034
+        // An update between two pseudo-versions of the same module changes the
+        // commit and nothing else, so it is a digest update - see #29034
         if (
           config.manager === 'gomod' &&
-          compareValue?.startsWith('v0.0.0-') &&
-          update.newValue?.startsWith('v0.0.0-') &&
+          isPseudoVersion(compareValue) &&
+          isPseudoVersion(update.newValue) &&
           config.currentDigest !== update.newDigest
         ) {
           update.updateType = 'digest';
