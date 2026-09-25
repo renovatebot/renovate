@@ -45,7 +45,7 @@ export abstract class Datasource implements DatasourceApi {
 
   defaultVersioning?: string | undefined;
 
-  registryStrategy: RegistryStrategy | undefined = 'first';
+  registryStrategy: RegistryStrategy = 'first';
 
   releaseTimestampSupport = false;
   releaseTimestampNote?: string | undefined;
