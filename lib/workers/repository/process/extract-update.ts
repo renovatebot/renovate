@@ -7,6 +7,11 @@ import {
   getDatasourceHostType,
 } from '../../../modules/datasource/common.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
+import {
+  needsNpmrcFromDisk,
+  withNpmrc,
+  withoutNpmrc,
+} from '../../../modules/manager/npmrc.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
@@ -167,7 +172,15 @@ export async function extract(
     overwriteCache &&
     isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)
   ) {
-    packageFiles = clone(cachedExtract.packageFiles);
+    if (needsNpmrcFromDisk(cachedExtract.packageFiles)) {
+      // a repository `.npmrc` with credentials is not cached, so it is read from the base branch again
+      await instrument(
+        'checkoutBranch',
+        async () => await scm.checkoutBranch(baseBranch!),
+      );
+    }
+    // the merged `npmrc` is not cached, so it is rebuilt from the cached repository `.npmrc` and the config
+    packageFiles = await withNpmrc(clone(cachedExtract.packageFiles), config);
   } else {
     await instrument(
       'checkoutBranch',
@@ -182,7 +195,7 @@ export async function extract(
     const hasRegistryUrlCredentials = containsUrlCredentials(
       getRegistryUrls(packageFiles),
     );
-    // before caching, as the host rules for the credentials are registered for this run only
+    // before caching, as the host rules for the credentials are registered for this run only, and the cache keeps copies of the package files
     detachRegistryUrlCredentials(packageFiles);
 
     if (overwriteCache && hasRegistryUrlCredentials) {
@@ -198,7 +211,8 @@ export async function extract(
         sha: baseBranchSha!,
         configHash,
         extractionFingerprints,
-        packageFiles: clone(packageFiles),
+        // the merged `npmrc` carries the configured one, which may hold credentials
+        packageFiles: clone(withoutNpmrc(packageFiles)),
       };
     }
 
