@@ -1,5 +1,8 @@
+import { codeBlock } from 'common-tags';
 import { fakeSha, fs, logger, partial, scm } from '~test/util.ts';
+import { extractPackageFile as extractRegexPackageFile } from '../../../modules/manager/custom/regex/index.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
+import * as npmrc from '../../../modules/manager/npmrc.ts';
 import type {
   NpmrcPackageFile,
   PackageFile,
@@ -145,6 +148,118 @@ describe('workers/repository/process/extract-update', () => {
       expect(Object.keys(cache.scan)).toEqual(['master']);
     });
 
+    it('caches package files without URL credentials', async () => {
+      const config = { baseBranch: 'master', repoIsOnboarded: true };
+      const packageFiles: Record<string, PackageFile[]> = {
+        regex: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'foo',
+                registryUrls: [
+                  'https://oauth2accesstoken@region-docker.pkg.dev/p/',
+                ],
+                replaceString: 'foo 1.0.0 https://registry.example.com/',
+              },
+            ],
+          },
+        ],
+      };
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      const res = await extract(config);
+
+      expect(res).toBe(packageFiles);
+      expect(cache.scan?.master).toEqual({
+        revision: EXTRACT_CACHE_REVISION,
+        sha: branchSha,
+        configHash: fingerprint(generateFingerprintConfig(config)),
+        extractionFingerprints: {},
+        packageFiles,
+      });
+    });
+
+    it('does not cache package files with URL credentials', async () => {
+      const config = { baseBranch: 'master', repoIsOnboarded: true };
+      const packageFiles: Record<string, PackageFile[]> = {
+        regex: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'foo',
+                replaceString:
+                  'foo 1.0.0 https://user:token@registry.example.com/',
+              },
+            ],
+          },
+        ],
+      };
+      const cache: RepoCacheData = {
+        scan: { master: partial<BaseBranchCache>({ sha: 'old' }) },
+      };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      const res = await extract(config);
+
+      expect(res).toBe(packageFiles);
+      expect(cache.scan).toEqual({});
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { baseBranch: 'master' },
+        'The package files contain URLs with credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+      );
+    });
+
+    it('does not cache a regex manager extract with credentials in a matched URL', async () => {
+      const config = { baseBranch: 'master', repoIsOnboarded: true };
+      const content = codeBlock`
+        FROM alpine
+        # renovate: registry=https://user:token@registry.example.com/
+        ENV FOO_VERSION=1.0.0
+      `;
+      const regexPackageFile = await extractRegexPackageFile(
+        content,
+        'Dockerfile',
+        {
+          matchStrings: [
+            '# renovate: registry=(?<registryUrl>\\S+)\\s+ENV FOO_VERSION=(?<currentValue>\\S+)',
+          ],
+          depNameTemplate: 'foo',
+          datasourceTemplate: 'npm',
+          registryUrlTemplate: '{{{registryUrl}}}',
+        },
+      );
+      const packageFiles: Record<string, PackageFile[]> = {
+        regex: [{ ...regexPackageFile!, packageFile: 'Dockerfile' }],
+      };
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract(config);
+
+      expect(packageFiles.regex[0].deps[0].replaceString).toContain(
+        'https://user:token@registry.example.com/',
+      );
+      expect(cache.scan).toEqual({});
+    });
+
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const config = {
@@ -231,6 +346,7 @@ describe('workers/repository/process/extract-update', () => {
       scm.getBranchCommit.mockResolvedValueOnce(branchSha);
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       const registryUrl = 'https://user:pass@reg.example.com/npm';
+      const withoutNpmrc = vi.spyOn(npmrc, 'withoutNpmrc');
       extractAll.extractAllDependencies.mockResolvedValueOnce({
         packageFiles: {
           npm: [
@@ -279,10 +395,11 @@ describe('workers/repository/process/extract-update', () => {
       });
       expect(hostRules.find({ url: stripped })).toEqual({});
       expect(hostRules.getAll()).toBeEmptyArray();
+      expect(withoutNpmrc).toHaveBeenCalledOnce();
       expect(cache.scan).toEqual({});
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         { baseBranch: 'master' },
-        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+        'The package files contain URLs with credentials, so the extract result is not cached: configure the credentials through hostRules instead',
       );
     });
 
@@ -305,9 +422,11 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
       const config = { repoIsOnboarded: true, baseBranch: 'master' };
+      const withoutNpmrc = vi.spyOn(npmrc, 'withoutNpmrc');
 
       await extract(config);
 
+      expect(withoutNpmrc).toHaveBeenCalledOnce();
       expect(cache.scan?.master).toEqual({
         revision: EXTRACT_CACHE_REVISION,
         sha: branchSha,
@@ -490,7 +609,7 @@ describe('workers/repository/process/extract-update', () => {
       ).toEqual({});
     });
 
-    it('only strips the credentials of registry URLs for a datasource without custom registry support', async () => {
+    it('only strips the credentials of registry URLs for a datasource without custom registry support and caches the extract', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         gomod: [
           {
@@ -528,11 +647,8 @@ describe('workers/repository/process/extract-update', () => {
         }),
       ).toEqual({});
       expect(sanitize('secret-password-1234')).toBe('**redacted**');
-      expect(cache.scan).toEqual({});
-      expect(logger.logger.once.warn).toHaveBeenCalledWith(
-        { baseBranch: 'master' },
-        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
-      );
+      expect(cache.scan?.master?.packageFiles).toEqual(packageFiles);
+      expect(logger.logger.once.warn).not.toHaveBeenCalled();
     });
 
     it('registers the credentials of registry URLs for a datasource with custom registry support and does not cache the extract', async () => {
@@ -575,7 +691,7 @@ describe('workers/repository/process/extract-update', () => {
       expect(cache.scan).toEqual({});
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         { baseBranch: 'master' },
-        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+        'The package files contain URLs with credentials, so the extract result is not cached: configure the credentials through hostRules instead',
       );
     });
 
@@ -677,6 +793,30 @@ describe('workers/repository/process/extract-update', () => {
         expect(JSON.stringify(cache)).not.toContain('secret');
       });
 
+      it('caches package files whose npmrc holds a URL with credentials', async () => {
+        const cache: { scan: Record<string, BaseBranchCache> } = { scan: {} };
+        repositoryCache.getCache.mockReturnValueOnce(cache);
+        scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+        scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+        const npmFile: NpmrcPackageFile = {
+          packageFile: 'package.json',
+          npmrc: 'registry=https://user:secret@reg.example.com/\n',
+          deps: [],
+        };
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: { npm: [npmFile] },
+          extractionFingerprints: {},
+        });
+
+        await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+        expect(cache.scan.master.packageFiles.npm[0]).toEqual({
+          packageFile: 'package.json',
+          deps: [],
+        });
+        expect(JSON.stringify(cache)).not.toContain('secret');
+      });
+
       it('rebuilds the npmrc when using the cached extract', async () => {
         const packageFiles: Record<string, PackageFile[]> = {
           npm: [
@@ -765,6 +905,36 @@ describe('workers/repository/process/extract-update', () => {
           { npmrcFileName: '.npmrc' },
           'A repository .npmrc contains credentials, which are not cached: configure them through hostRules or the npmrc option instead',
         );
+      });
+
+      it('leaves the cache alone for a repository npmrc that has credentials when not overwriting it', async () => {
+        const cache: { scan: Record<string, BaseBranchCache> } = { scan: {} };
+        repositoryCache.getCache.mockReturnValueOnce(cache);
+        scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+        scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+        const bunFile: NpmrcPackageFile = {
+          packageFile: 'package.json',
+          npmrc: '//reg.example.com/:_authToken=repo-secret\n',
+          managerData: {
+            repoNpmrc: {
+              fileName: '.npmrc',
+              content: '//reg.example.com/:_authToken=repo-secret\n',
+              detectedLineEnding: '\n',
+            },
+          },
+          deps: [],
+        };
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: { bun: [bunFile] },
+          extractionFingerprints: {},
+        });
+        const config = { repoIsOnboarded: true, baseBranch: 'master' };
+
+        const res = await extract(config, false);
+
+        expect(res.bun[0]).toBe(bunFile);
+        expect(cache.scan).toEqual({});
+        expect(logger.logger.once.warn).not.toHaveBeenCalled();
       });
 
       it('reads a repository npmrc with credentials from disk again when using the cached extract', async () => {
@@ -1243,6 +1413,8 @@ describe('workers/repository/process/extract-update', () => {
       ${'registryUrls'}           | ${{ registryUrls, deps: [{ depName: 'foo' }] }}
       ${'additionalRegistryUrls'} | ${{ additionalRegistryUrls: registryUrls, deps: [] }}
       ${'dep registryUrls'}       | ${{ deps: [{ depName: 'foo' }, { depName: 'bar', registryUrls }] }}
+      ${'dep replaceString'}      | ${{ deps: [{ depName: 'foo', replaceString: `foo ${registryUrls[0]}` }] }}
+      ${'dep managerData'}        | ${{ deps: [{ depName: 'foo', managerData: { url: registryUrls[0] } }] }}
     `('invalid if $field hold URL credentials', ({ file }) => {
       cachedExtract.configHash = 'hash';
       cachedExtract.packageFiles = {
@@ -1252,11 +1424,31 @@ describe('workers/repository/process/extract-update', () => {
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Cached extract has registry URLs with credentials, so cannot be used',
+        'Cached extract has URLs with credentials, so cannot be used',
       );
     });
 
-    it('valid if registry URLs hold no credentials', () => {
+    it.each`
+      field             | dep
+      ${'registryUrl'}  | ${{ registryUrl: registryUrls[0] }}
+      ${'changelogUrl'} | ${{ changelogUrl: registryUrls[0] }}
+      ${'updates'}      | ${{ updates: [{ registryUrl: registryUrls[0] }] }}
+    `('invalid if dep $field holds URL credentials', ({ dep }) => {
+      cachedExtract.configHash = 'hash';
+      cachedExtract.packageFiles = {
+        npm: [
+          { packageFile: 'package.json', deps: [{ depName: 'foo', ...dep }] },
+        ],
+      };
+
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Cached extract has URLs with credentials, so cannot be used',
+      );
+    });
+
+    it('valid if URLs hold no credentials', () => {
       cachedExtract.configHash = 'hash';
       cachedExtract.packageFiles = {
         npm: [
@@ -1264,7 +1456,13 @@ describe('workers/repository/process/extract-update', () => {
             packageFile: 'package.json',
             registryUrls: ['https://reg.example.com/npm'],
             deps: [
-              { depName: 'foo', registryUrls: ['https://reg.example.com'] },
+              {
+                depName: 'foo',
+                registryUrls: [
+                  'https://oauth2accesstoken@region-docker.pkg.dev/p/',
+                ],
+                replaceString: 'foo https://reg.example.com/@scope',
+              },
             ],
           },
         ],

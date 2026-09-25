@@ -34,7 +34,7 @@ import {
   getDatasourceHostType,
   sortAndRemoveDuplicates,
 } from './common.ts';
-import { addMetaData } from './metadata.ts';
+import { addMetaData, stripMetadataUrlCredentials } from './metadata.ts';
 import { setNpmrc } from './npm/index.ts';
 import { resolveRegistryUrl } from './npm/npmrc.ts';
 import type {
@@ -148,6 +148,9 @@ async function getRegistryReleases(
   if (!res) {
     return null;
   }
+
+  // for the cached and the returned result alike
+  stripMetadataUrlCredentials(res);
 
   let cache = false;
   if (cacheForced) {
@@ -507,6 +510,8 @@ async function fetchReleases(
     return null;
   }
   addMetaData(dep, datasourceName, config.packageName);
+  // also for the results of a lookup without registry URL, which do not pass `getRegistryReleases()`
+  stripMetadataUrlCredentials(dep);
   dep = { ...dep, ...applyReplacements(config) };
   return dep;
 }
