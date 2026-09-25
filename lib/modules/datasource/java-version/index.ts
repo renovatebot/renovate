@@ -12,8 +12,6 @@ export class JavaVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly caching = true;
-
   override getDefaultRegistryUrls(packageName: string): string[] {
     return packageName.includes('oracle-graalvm')
       ? [graalvmRegistryUrl]
