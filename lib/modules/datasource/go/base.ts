@@ -1,7 +1,7 @@
 // TODO: types (#22198)
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { detectPlatform } from '../../../util/common.ts';
+import { detectPlatform, getRepositoryPath } from '../../../util/common.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -77,12 +77,11 @@ export class BaseGoDatasource {
     }
 
     if (goModule.startsWith('dev.azure.com/')) {
-      const split = goModule.split('/');
-      if ((split.length > 4 && split[3] === '_git') || split.length > 3) {
-        const packageName = `https://dev.azure.com/${split[1]}/${split[2]}/_git/${(split[3] === '_git' ? split[4] : split[3]).replace(regEx(/\.git$/), '')}`;
+      const repositoryPath = getRepositoryPath('azure', `https://${goModule}`);
+      if (repositoryPath) {
         return {
           datasource: GitTagsDatasource.id,
-          packageName,
+          packageName: `https://dev.azure.com/${repositoryPath.replace(regEx(/\.git$/), '')}`,
         };
       }
     }

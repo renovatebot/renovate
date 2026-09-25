@@ -1,7 +1,8 @@
 import { isTruthy } from '@sindresorhus/is';
+import type { PlatformFamilyId } from '../../../constants/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { detectPlatform } from '../../../util/common.ts';
+import { detectPlatform, getRepositoryPath } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -75,20 +76,22 @@ const virtualFileRegex = regEx(/\.(?:prompt|instructions|chatmode|agent)\.md$/);
 /**
  * Resolve the repository path from the host-stripped path segments.
  *
- * GitHub repos are always `owner/repo`. GitLab (and other hosts) allow nested
- * groups, so the project slug can span 3+ segments; the virtual-package subpath,
- * if any, begins at a primitive directory or virtual file (index >= 2). Returns
- * `null` when there is no `owner/repo` (fewer than two segments).
+ * The platform decides wherever its URL layout fixes the boundary. Where it does not -
+ * GitLab's nested groups let a project slug span 3+ segments - apm's own rule applies,
+ * and the virtual-package subpath begins at a primitive directory or virtual file
+ * (index >= 2). Returns `null` when there is no `owner/repo` (fewer than two segments).
  */
 function resolveRepoPath(
-  platform: string | null,
+  platform: PlatformFamilyId | null,
+  url: string,
   segments: string[],
 ): string | null {
   if (segments.length < 2) {
     return null;
   }
-  if (platform === 'github') {
-    return segments.slice(0, 2).join('/');
+  const repositoryPath = getRepositoryPath(platform, url);
+  if (repositoryPath) {
+    return repositoryPath;
   }
   let boundary = segments.length;
   for (let i = 2; i < segments.length; i++) {
@@ -186,11 +189,12 @@ export function parseApmDependency(
   const segments = pathPart.split('/').filter(isTruthy);
   const hasHost = (segments[0] ?? '').includes('.');
   const host = hasHost ? segments[0] : 'github.com';
-  const platform = detectPlatform(`https://${host}`);
-  const repoPath = resolveRepoPath(
-    platform,
-    hasHost ? segments.slice(1) : segments,
-  );
+  const repoSegments = hasHost ? segments.slice(1) : segments;
+  // `detectPlatform` reads the hostname only, so one url serves both it and the
+  // repository lookup.
+  const url = `https://${host}/${repoSegments.join('/')}`;
+  const platform = detectPlatform(url);
+  const repoPath = resolveRepoPath(platform, url, repoSegments);
 
   if (!repoPath) {
     logger.debug({ entry }, 'apm: could not determine owner/repo');

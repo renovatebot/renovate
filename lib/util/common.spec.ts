@@ -2,8 +2,14 @@ import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
+import type { PlatformFamilyId } from '../constants/index.ts';
 import { PLATFORM_FAMILIES } from '../constants/index.ts';
-import { detectPlatform, getInheritedOrGlobal, parseJson } from './common.ts';
+import {
+  detectPlatform,
+  getInheritedOrGlobal,
+  getRepositoryPath,
+  parseJson,
+} from './common.ts';
 import * as hostRules from './host-rules.ts';
 
 const validJsonString = `
@@ -307,5 +313,34 @@ describe('util/common', () => {
         expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
       });
     });
+  });
+
+  describe('getRepositoryPath()', () => {
+    it.each`
+      platform    | url                                                          | path
+      ${'github'} | ${'https://github.com/owner/repo'}                           | ${'owner/repo'}
+      ${'github'} | ${'https://github.com/owner/repo/packages/ui'}               | ${'owner/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/_git/repo'}             | ${'org/project/_git/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/_git/repo/packages/ui'} | ${'org/project/_git/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/repo'}                  | ${'org/project/_git/repo'}
+      ${'azure'}  | ${'https://dev.azure.com/org/project/repo/packages/ui'}      | ${'org/project/_git/repo'}
+      ${'gitlab'} | ${'https://gitlab.com/group/subgroup/repo'}                  | ${null}
+      ${'github'} | ${'https://github.com/owner'}                                | ${null}
+      ${'github'} | ${'not a url'}                                               | ${null}
+      ${null}     | ${'https://github.com/owner/repo'}                           | ${null}
+    `(
+      'reads $path from $url',
+      ({
+        platform,
+        url,
+        path,
+      }: {
+        platform: PlatformFamilyId | null;
+        url: string;
+        path: string | null;
+      }) => {
+        expect(getRepositoryPath(platform, url)).toBe(path);
+      },
+    );
   });
 });

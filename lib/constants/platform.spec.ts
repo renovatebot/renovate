@@ -155,6 +155,37 @@ describe('constants/platform', () => {
       },
     );
 
+    it.each`
+      family                | segments                                  | path
+      ${'azure'}            | ${['org', 'project', 'repo']}             | ${'org/project/_git/repo'}
+      ${'azure'}            | ${['org', 'project', '_git', 'repo']}     | ${'org/project/_git/repo'}
+      ${'azure'}            | ${['org', 'project', '_git', 'r', 'sub']} | ${'org/project/_git/r'}
+      ${'azure'}            | ${['org', 'project']}                     | ${null}
+      ${'azure'}            | ${['org', 'project', '_git']}             | ${null}
+      ${'azure'}            | ${['_git', 'repo']}                       | ${null}
+      ${'azure'}            | ${['org', 'proj', 'team', '_git', 'r']}   | ${'org/proj/team/_git/r'}
+      ${'bitbucket'}        | ${['workspace', 'repo']}                  | ${'workspace/repo'}
+      ${'bitbucket-server'} | ${['scm', 'key', 'repo']}                 | ${null}
+      ${'forgejo'}          | ${['owner', 'repo']}                      | ${'owner/repo'}
+      ${'gitea'}            | ${['owner', 'repo']}                      | ${'owner/repo'}
+      ${'github'}           | ${['owner', 'repo', 'packages', 'ui']}    | ${'owner/repo'}
+      ${'github'}           | ${['owner']}                              | ${null}
+      ${'gitlab'}           | ${['group', 'subgroup', 'repo']}          | ${null}
+    `(
+      'reads $path as the $family repository in $segments',
+      ({
+        family,
+        segments,
+        path,
+      }: {
+        family: PlatformFamilyId;
+        segments: string[];
+        path: string | null;
+      }) => {
+        expect(PLATFORM_FAMILIES[family].repositoryPath(segments)).toBe(path);
+      },
+    );
+
     it('has pairwise disjoint host types', () => {
       const seen = new Set<string>();
       for (const { apiUsingHostTypes } of Object.values(PLATFORM_FAMILIES)) {
