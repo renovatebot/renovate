@@ -1,26 +1,15 @@
-import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { queryReleases } from '../../../util/github/graphql/index.ts';
 import type {
   GithubDigestFile,
   GithubRestAsset,
   GithubRestRelease,
 } from '../../../util/github/types.ts';
-import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
+import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { hashStream } from '../../../util/hash.ts';
-import { GithubHttp } from '../../../util/http/github.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { RegistryDatasource } from '../datasource.ts';
-import type {
-  RegistryDigestConfig,
-  RegistryGetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../types.ts';
-
-export const cacheNamespace = 'datasource-github-releases';
+import { GithubReleasesDatasource } from '../github-releases/index.ts';
+import type { RegistryDigestConfig } from '../types.ts';
 
 function inferHashAlg(digest: string): string {
   switch (digest.length) {
@@ -32,26 +21,15 @@ function inferHashAlg(digest: string): string {
   }
 }
 
-export class GithubReleaseAttachmentsDatasource extends RegistryDatasource<GithubHttp> {
-  static readonly id = 'github-release-attachments';
+export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource {
+  static override readonly id = 'github-release-attachments';
 
-  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
-    return ['https://github.com'];
-  }
-
-  override readonly releaseTimestampSupport = true;
   // Note: not sure
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `releaseTimestamp` field in the results.';
-  override readonly sourceUrlSupport = 'package';
-  override readonly sourceUrlNote =
-    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(
-      GithubReleaseAttachmentsDatasource.id,
-      new GithubHttp(GithubReleaseAttachmentsDatasource.id),
-    );
+    super(GithubReleaseAttachmentsDatasource.id);
   }
 
   private async _findDigestFile(
@@ -261,32 +239,5 @@ export class GithubReleaseAttachmentsDatasource extends RegistryDatasource<Githu
       newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
     }
     return newDigest;
-  }
-
-  /**
-   * This function can be used to fetch releases with a customizable versioning
-   * (e.g. semver) and with releases.
-   *
-   * This function will:
-   *  - Fetch all releases
-   *  - Sanitize the versions if desired (e.g. strip out leading 'v')
-   *  - Return a dependency object containing sourceUrl string and releases array
-   */
-  async getReleases(config: RegistryGetReleasesConfig): Promise<ReleaseResult> {
-    const releasesResult = await queryReleases(config, this.http);
-    const releases = releasesResult.map((item) => {
-      const { version, releaseTimestamp, isStable } = item;
-      const result: Release = {
-        version,
-        gitRef: version,
-        releaseTimestamp,
-      };
-      if (isBoolean(isStable)) {
-        result.isStable = isStable;
-      }
-      return result;
-    });
-    const sourceUrl = getSourceUrl(config.packageName, config.registryUrl);
-    return { sourceUrl, releases };
   }
 }

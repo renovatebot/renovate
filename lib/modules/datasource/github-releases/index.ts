@@ -13,10 +13,8 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 
-export const cacheNamespace = 'datasource-github-releases';
-
 export class GithubReleasesDatasource extends RegistryDatasource<GithubHttp> {
-  static readonly id = 'github-releases';
+  static id = 'github-releases';
 
   override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://github.com'];
@@ -24,17 +22,19 @@ export class GithubReleasesDatasource extends RegistryDatasource<GithubHttp> {
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
-  override readonly releaseTimestampNote =
+  override readonly releaseTimestampNote: string =
     'The release timestamp is determined from the `releaseTimestamp` field from the response.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  constructor() {
-    super(
-      GithubReleasesDatasource.id,
-      new GithubHttp(GithubReleasesDatasource.id),
-    );
+  /**
+   * A subclass with a different `id` (currently only
+   * `GithubReleaseAttachmentsDatasource`) passes it through here so the base
+   * constructor builds its own `GithubHttp` client keyed to that `id`.
+   */
+  constructor(id: string = GithubReleasesDatasource.id) {
+    super(id, new GithubHttp(id));
   }
 
   /**
