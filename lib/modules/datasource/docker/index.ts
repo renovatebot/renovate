@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -19,10 +20,10 @@ import {
   parseUrl,
 } from '../../../util/url.ts';
 import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types.ts';
@@ -85,12 +86,12 @@ const defaultConfig = {
   },
 };
 
-export class DockerDatasource extends Datasource {
+export class DockerDatasource extends RegistryDatasource {
   static readonly id = dockerDatasourceId;
 
   override readonly defaultVersioning = dockerVersioningId;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [DOCKER_HUB];
   }
 
@@ -951,7 +952,12 @@ export class DockerDatasource extends Datasource {
    *  - Return the digest as a string
    */
   private async _getDigest(
-    { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
+    {
+      registryUrl,
+      lookupName,
+      packageName,
+      currentDigest,
+    }: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     let registryHost: string;
@@ -964,7 +970,7 @@ export class DockerDatasource extends Datasource {
       // Resolve values independently
       ({ registryHost, dockerRepository } = getRegistryRepository(
         packageName,
-        registryUrl!,
+        registryUrl,
       ));
     }
     logger.debug(
@@ -1129,13 +1135,13 @@ export class DockerDatasource extends Datasource {
   }
 
   override getDigest(
-    config: DigestConfig,
+    config: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     const newTag = newValue ?? 'latest';
     const { registryHost, dockerRepository } = getRegistryRepository(
       config.packageName,
-      config.registryUrl!,
+      config.registryUrl,
     );
     const digest = config.currentDigest ? `@${config.currentDigest}` : '';
     return withCache(
@@ -1233,10 +1239,10 @@ export class DockerDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
-      registryUrl!,
+      registryUrl,
     );
 
     type TagsResultType = AsyncResult<
@@ -1309,10 +1315,12 @@ export class DockerDatasource extends Datasource {
     return ret;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       config.packageName,
-      config.registryUrl!,
+      config.registryUrl,
     );
     return withCache(
       {

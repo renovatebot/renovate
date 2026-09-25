@@ -119,6 +119,7 @@ describe('modules/datasource/deno/index', () => {
       await expect(
         deno.getReleases({
           packageName: 'https://myexample.com/std',
+          registryUrl: deno.getDefaultRegistryUrls('')[0],
         }),
       ).resolves.toBeNull();
     });

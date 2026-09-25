@@ -1,14 +1,17 @@
 import urlJoin from 'url-join';
 import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { Result } from '../../../util/result.ts';
-import { Datasource } from '../datasource.ts';
-import { ReleasesConfig } from '../schema.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { BuildpacksRegistryResponse } from './schema.ts';
 
-export class BuildpacksRegistryDatasource extends Datasource {
+export class BuildpacksRegistryDatasource extends RegistryDatasource {
   static readonly id = 'buildpacks-registry';
 
   constructor() {
@@ -19,7 +22,7 @@ export class BuildpacksRegistryDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://registry.buildpacks.io'];
   }
 
@@ -31,20 +34,13 @@ export class BuildpacksRegistryDatasource extends Datasource {
     'The source URL is determined from the `source_code_url` field of the release object in the results.';
 
   private async _getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const result = Result.parse(config, ReleasesConfig)
-      .transform(({ packageName, registryUrl }) => {
-        const url = urlJoin(
-          registryUrl,
-          'api',
-          'v1',
-          'buildpacks',
-          packageName,
-        );
+    const { packageName, registryUrl } = config;
+    const url = urlJoin(registryUrl, 'api', 'v1', 'buildpacks', packageName);
 
-        return this.http.getJsonSafe(url, BuildpacksRegistryResponse);
-      })
+    const result = this.http
+      .getJsonSafe(url, BuildpacksRegistryResponse)
       .transform(({ versions, latest }): ReleaseResult => {
         const releases: Release[] = versions;
 
@@ -71,7 +67,9 @@ export class BuildpacksRegistryDatasource extends Datasource {
     return val;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${BuildpacksRegistryDatasource.id}`,

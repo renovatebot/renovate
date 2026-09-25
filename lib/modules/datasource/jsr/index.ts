@@ -1,15 +1,16 @@
 import { isNull } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { defaultRegistryUrls } from './common.ts';
 import { JsrPackageMetadata } from './schema.ts';
 import { extractJsrPackageName } from './util.ts';
 
-export class JsrDatasource extends Datasource {
+export class JsrDatasource extends RegistryDatasource {
   static readonly id = 'jsr';
 
   // custom registry support is not yet supported
@@ -22,7 +23,7 @@ export class JsrDatasource extends Datasource {
   override readonly defaultVersioning = semverId;
 
   // use npm compatible registry api url due to returns
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return defaultRegistryUrls;
   }
 
@@ -37,12 +38,7 @@ export class JsrDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const validJsrPackageName = extractJsrPackageName(packageName);
     if (isNull(validJsrPackageName)) {
       logger.debug(`Could not extract packageName: "${packageName}"`);
@@ -72,11 +68,12 @@ export class JsrDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${JsrDatasource.id}`,
-        // TODO: types (#22198)
         key: `getReleases:${config.registryUrl}:${config.packageName}`,
         cacheable: true,
         fallback: true,

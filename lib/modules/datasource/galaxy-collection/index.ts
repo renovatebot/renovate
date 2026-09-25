@@ -1,12 +1,17 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import {
   GalaxyV3,
   GalaxyV3DetailedVersion,
@@ -18,7 +23,7 @@ const repositoryRegex = regEx(
   /^\S+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
 );
 
-export class GalaxyCollectionDatasource extends Datasource {
+export class GalaxyCollectionDatasource extends RegistryDatasource {
   static readonly id = 'galaxy-collection';
 
   constructor() {
@@ -31,7 +36,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://galaxy.ansible.com/api/'];
   }
 
@@ -49,8 +54,8 @@ export class GalaxyCollectionDatasource extends Datasource {
   private async fetchReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const baseUrl = this.constructBaseUrl(registryUrl!, packageName);
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
+    const baseUrl = this.constructBaseUrl(registryUrl, packageName);
 
     const { val: baseProject, err: baseErr } = await this.http
       .getJsonSafe(baseUrl, GalaxyV3)
@@ -111,7 +116,9 @@ export class GalaxyCollectionDatasource extends Datasource {
     };
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `getReleases:${config.registryUrl}:${config.packageName}`,
