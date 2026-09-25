@@ -38,6 +38,11 @@ export interface FlatGroup {
   /** Commits in this group before `consolidateDependencyBumps` folded
    * repeated dependency bumps together; `>= commits.length`. */
   totalCommits: number;
+  /** Set when this group's heading was renamed away from its original
+   * scope (a lone docs-scoped section merged into "Documentation") —
+   * commit lines then carry the original scope inline (`docs(website):
+   * ...`) since the heading itself no longer shows it. */
+  scopeInCommits?: string;
 }
 
 /** Commits carrying a Conventional Commits `!` breaking-change marker,
@@ -623,6 +628,27 @@ export function groupByModule(
     groups.unshift({ kind: 'breaking', commits: breaking });
   }
 
+  // A whole changelog that boils down to a single, otherwise-unremarkable
+  // scope (e.g. `docs(website)`) reads oddly headed by that raw scope name.
+  // When every commit in it is a `docs:` commit, fold it into the same
+  // "Documentation" heading an unscoped `docs:` commit would get, keeping
+  // the original scope inline on each commit line since the heading can no
+  // longer show it.
+  const [onlyGroup] = groups;
+  if (
+    groups.length === 1 &&
+    onlyGroup.kind === 'flat' &&
+    onlyGroup.scope !== undefined &&
+    onlyGroup.scope !== 'docs' &&
+    onlyGroup.commits.every((commit) => commit.type === 'docs')
+  ) {
+    groups[0] = {
+      ...onlyGroup,
+      label: 'Documentation',
+      scopeInCommits: onlyGroup.scope,
+    };
+  }
+
   return groups;
 }
 
@@ -633,8 +659,13 @@ function renderReleaseLink(commit: ParsedCommit, repo: string): string {
   return ` ([${commit.release}](https://github.com/${repo}/releases/tag/${commit.release}))`;
 }
 
-function renderCommitLine(commit: ParsedCommit, repo: string): string {
-  return `- ${commit.type}: ${commit.subject}${renderReleaseLink(commit, repo)}`;
+function renderCommitLine(
+  commit: ParsedCommit,
+  repo: string,
+  scope?: string,
+): string {
+  const type = scope ? `${commit.type}(${scope})` : commit.type;
+  return `- ${type}: ${commit.subject}${renderReleaseLink(commit, repo)}`;
 }
 
 /** Render `commits` as a collapsed `<details>` block with the given
@@ -760,7 +791,7 @@ export function renderModuleChangelog(
     }
 
     for (const commit of group.commits) {
-      lines.push(renderCommitLine(commit, repo));
+      lines.push(renderCommitLine(commit, repo, group.scopeInCommits));
     }
 
     if (collapse) {

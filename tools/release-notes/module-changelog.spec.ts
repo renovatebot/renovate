@@ -762,6 +762,52 @@ describe('tools/release-notes/module-changelog', () => {
         ].join('\n'),
       );
     });
+
+    it('merges a lone docs-scoped section into "Documentation", keeping the scope inline', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'docs', scope: 'website', subject: 'a' },
+        { type: 'docs', scope: 'website', subject: 'b' },
+      ];
+
+      const groups = groupByModule(commits, types, new Map());
+      expect(renderModuleChangelog(groups, repo)).toBe(
+        [
+          '### Documentation',
+          '',
+          '- docs(website): a',
+          '- docs(website): b',
+        ].join('\n'),
+      );
+    });
+
+    it('does not merge a lone non-docs section, or a section mixing docs with other types', () => {
+      const onlyNonDocs = groupByModule(
+        [{ type: 'fix', scope: 'website', subject: 'a' }],
+        types,
+        new Map(),
+      );
+      expect(onlyNonDocs[0]).toMatchObject({ label: 'website' });
+
+      const mixed = groupByModule(
+        [
+          { type: 'docs', scope: 'website', subject: 'a' },
+          { type: 'fix', scope: 'website', subject: 'b' },
+        ],
+        types,
+        new Map(),
+      );
+      expect(mixed[0]).toMatchObject({ label: 'website' });
+    });
+
+    it('does not re-merge an already-unscoped "docs" group', () => {
+      const groups = groupByModule(
+        [{ type: 'docs', scope: undefined, subject: 'a' }],
+        types,
+        new Map(),
+      );
+      expect(groups[0]).toMatchObject({ label: 'Documentation' });
+      expect(groups[0]).not.toHaveProperty('scopeInCommits');
+    });
   });
 
   describe('consolidateDependencyBumps', () => {
