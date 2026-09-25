@@ -111,7 +111,12 @@ async function prepareDocs(opts: any): Promise<void> {
   }
 }
 
-function checkResult(res: Result<{ stdio: 'inherit' }>): void {
+function checkResult(
+  res: Pick<
+    Result,
+    'signal' | 'exitCode' | 'timedOut' | 'isTerminated' | 'failed'
+  >,
+): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);
