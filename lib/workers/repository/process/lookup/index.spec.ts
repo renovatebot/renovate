@@ -3604,6 +3604,31 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('skips an update which downgrades the current value', async () => {
+      // The package file pins a version the registry no longer serves, while the lockfile is behind it, so the update resolved from the lockfile would rewrite the package file downwards.
+      config.currentValue = '1.5.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'my-package';
+      config.datasource = CustomDatasource.id;
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.2.0' }],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toBeEmptyArray();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packageName: 'my-package',
+          compareValue: '1.5.0',
+        }),
+        'Unexpected downgrade detected: skipping',
+      );
+    });
+
     it('should upgrade to only one major', async () => {
       config.currentValue = '1.0.0';
       config.packageName = 'webpack';
