@@ -95,10 +95,11 @@ This provides reproducibility in the case that the upstream package updates unde
 
 The [`dockerfile` manager](../../manager/dockerfile/index.md) extracts these packages, allowing updates to them directly, without needing a Custom Manager.
 
-The `dockerfile` manager does not work out a `registryUrl` from your base image, so it skips these packages with `skipReason: unknown-registry` rather than look them up against a registry which may hold versions your image cannot install.
-Set the `registryUrls` which match your base image with a `packageRules` entry to have them looked up.
+The manager works the `registryUrl` out from the stage's base image, so any `apk` packages installed when using an `alpine:3.18` base image will use the Alpine 3.18 repositories.
+Read the [`dockerfile` manager](../../manager/dockerfile/index.md) docs for the images it recognises.
 
-<!-- TODO: #45706 auto-detect `registryUrl` -->
+If an image does not have a name that Renovate could derive the Alpine version from, for instance `node:22`, the `apk` packages will be skipped with `skipReason: unknown-registry` instead of performing an incorrect lookup.
+You will need to set the `registryUrls` yourself with a `packageRules` entry for an `unknown-registry`, or to use a mirror, or to build for another architecture:
 
 ```json title="Override apk registryUrl with a packageRules entry"
 {
