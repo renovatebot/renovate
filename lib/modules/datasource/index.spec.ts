@@ -493,6 +493,130 @@ describe('modules/datasource/index', () => {
         );
       });
 
+      it('caches the release metadata URLs without URL credentials', async () => {
+        class CachingDatasource extends DummyDatasource {
+          override caching = true;
+        }
+        datasources.set(
+          datasource,
+          new CachingDatasource({
+            'https://reg1.com': {
+              sourceUrl: 'https://user:secret@git.example.com/org/repo',
+              homepage: 'https://user:secret@example.com/home',
+              changelogUrl: 'https://user:secret@example.com/CHANGELOG.md',
+              dependencyUrl: 'https://user:secret@example.com/dep',
+              releases: [
+                {
+                  version: '1.2.3',
+                  changelogUrl: 'https://user:secret@example.com/1.2.3.md',
+                  sourceUrl: 'https://user:secret@git.example.com/org/fork',
+                  downloadUrl: 'https://user:secret@example.com/1.2.3.tgz',
+                  checksumUrl: 'https://user:secret@example.com/1.2.3.sha256',
+                  registryUrl: 'https://user:secret@mirror.example.com',
+                },
+                { version: '1.2.4' },
+              ],
+            },
+          }),
+        );
+        // the cached value as it is at the time it is cached, before the lookup adds its metadata
+        let cached: unknown;
+        packageCache.set.mockImplementationOnce((_namespace, _key, value) => {
+          cached = structuredClone(value);
+          return Promise.resolve();
+        });
+
+        await getPkgReleases({ datasource, packageName });
+
+        expect(packageCache.set).toHaveBeenCalledOnce();
+        expect(cached).toEqual({
+          sourceUrl: 'https://git.example.com/org/repo',
+          homepage: 'https://example.com/home',
+          changelogUrl: 'https://example.com/CHANGELOG.md',
+          dependencyUrl: 'https://example.com/dep',
+          registryUrl: 'https://reg1.com',
+          releases: [
+            {
+              version: '1.2.3',
+              changelogUrl: 'https://example.com/1.2.3.md',
+              sourceUrl: 'https://git.example.com/org/fork',
+              downloadUrl: 'https://example.com/1.2.3.tgz',
+              checksumUrl: 'https://example.com/1.2.3.sha256',
+              registryUrl: 'https://mirror.example.com',
+            },
+            { version: '1.2.4' },
+          ],
+        });
+      });
+
+      it('returns an uncached private result without URL credentials', async () => {
+        class CachingDatasource extends DummyDatasource {
+          override caching = true;
+        }
+        datasources.set(
+          datasource,
+          new CachingDatasource({
+            'https://reg1.com': {
+              isPrivate: true,
+              homepage: 'https://user:secret@example.com/home',
+              releases: [
+                {
+                  version: '1.2.3',
+                  downloadUrl: 'https://user:secret@example.com/1.2.3.tgz',
+                },
+              ],
+            },
+          }),
+        );
+
+        const res = await getPkgReleases({ datasource, packageName });
+
+        expect(packageCache.set).not.toHaveBeenCalled();
+        expect(res).toMatchObject({
+          homepage: 'https://example.com/home',
+          releases: [
+            {
+              version: '1.2.3',
+              downloadUrl: 'https://example.com/1.2.3.tgz',
+            },
+          ],
+        });
+      });
+
+      it('returns the result of a lookup without registry URL without URL credentials', async () => {
+        class NoRegistryDatasource extends Datasource {
+          constructor() {
+            super(datasource);
+          }
+
+          override getReleases(): Promise<ReleaseResult | null> {
+            return Promise.resolve({
+              releases: [
+                {
+                  version: '1.2.3',
+                  sourceUrl: 'https://user:secret@git.example.com/org/repo',
+                  changelogUrl: 'https://user:secret@example.com/1.2.3.md',
+                },
+              ],
+            });
+          }
+        }
+        datasources.set(datasource, new NoRegistryDatasource());
+
+        const res = await getPkgReleases({ datasource, packageName });
+
+        expect(res).toMatchObject({
+          releases: [
+            {
+              version: '1.2.3',
+              sourceUrl: 'https://git.example.com/org/repo',
+              changelogUrl: 'https://example.com/1.2.3.md',
+            },
+          ],
+        });
+        expect(res?.registryUrl).toBeUndefined();
+      });
+
       it('uses a separate cache key per detached URL credentials', async () => {
         GlobalConfig.set({ cachePrivatePackages: true });
         datasources.set(datasource, new DummyDatasource());

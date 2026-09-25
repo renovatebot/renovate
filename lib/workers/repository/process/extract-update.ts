@@ -14,7 +14,7 @@ import {
 } from '../../../modules/manager/npmrc.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { scm } from '../../../modules/platform/scm.ts';
-import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
+import { isNotNullOrUndefined } from '../../../util/array.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
@@ -142,10 +142,8 @@ export function isCacheExtractValid(
     );
     return false;
   }
-  if (containsUrlCredentials(getRegistryUrls(cachedExtract.packageFiles))) {
-    logger.debug(
-      'Cached extract has registry URLs with credentials, so cannot be used',
-    );
+  if (containsUrlCredentials(cachedExtract.packageFiles)) {
+    logger.debug('Cached extract has URLs with credentials, so cannot be used');
     return false;
   }
   logger.debug(
@@ -192,27 +190,34 @@ export async function extract(
     );
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
-    const hasRegistryUrlCredentials = containsUrlCredentials(
-      getRegistryUrls(packageFiles),
-    );
     // before caching, as the host rules for the credentials are registered for this run only, and the cache keeps copies of the package files
-    detachRegistryUrlCredentials(packageFiles);
+    const registryUrlsHadCredentials =
+      detachRegistryUrlCredentials(packageFiles);
+    // the merged `npmrc` carries the configured one, which may hold credentials
+    const cachedPackageFiles = overwriteCache
+      ? withoutNpmrc(packageFiles)
+      : undefined;
+    // the registry URLs held their credentials before they were detached, the other strings are checked on what would be cached
+    const hasUrlCredentials =
+      overwriteCache &&
+      (registryUrlsHadCredentials ||
+        containsUrlCredentials(cachedPackageFiles));
 
-    if (overwriteCache && hasRegistryUrlCredentials) {
+    if (hasUrlCredentials) {
       logger.once.warn(
         { baseBranch },
-        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+        'The package files contain URLs with credentials, so the extract result is not cached: configure the credentials through hostRules instead',
       );
       delete cache.scan[baseBranch!];
-    } else if (overwriteCache) {
+    } else if (cachedPackageFiles) {
       // TODO: fix types (#22198)
       cache.scan[baseBranch!] = {
         revision: EXTRACT_CACHE_REVISION,
         sha: baseBranchSha!,
         configHash,
         extractionFingerprints,
-        // the merged `npmrc` carries the configured one, which may hold credentials
-        packageFiles: clone(withoutNpmrc(packageFiles)),
+        // a deep copy, as `withoutNpmrc()` copies the package files shallowly and the lookup adds its results to the deps
+        packageFiles: clone(cachedPackageFiles),
       };
     }
 
@@ -234,21 +239,6 @@ export async function extract(
   logger.trace({ config: packageFiles }, 'packageFiles');
   ensureGithubToken(packageFiles);
   return packageFiles;
-}
-
-/**
- * Returns the registry URLs of all package files and their deps.
- */
-function getRegistryUrls(
-  packageFiles: Record<string, PackageFile[]> | undefined,
-): string[] {
-  return Object.values(coerceObject(packageFiles))
-    .flat()
-    .flatMap((file) => [
-      ...coerceArray(file.registryUrls),
-      ...coerceArray(file.additionalRegistryUrls),
-      ...file.deps.flatMap((dep) => coerceArray(dep.registryUrls)),
-    ]);
 }
 
 /**

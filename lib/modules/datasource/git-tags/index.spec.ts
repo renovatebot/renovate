@@ -3,6 +3,7 @@ import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { clearEnv } from '~test/util.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as git from '../../../util/git/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitTagsDatasource } from './index.ts';
@@ -93,6 +94,37 @@ describe('modules/datasource/git-tags/index', () => {
         ],
         sourceUrl: 'https://github.com/example/example',
       });
+    });
+
+    it('caches the source URL without the URL credentials of the package name', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+      const setWithRawTtl = vi.spyOn(packageCache, 'setWithRawTtl');
+      const credentialedPackageName =
+        'https://user:glpat-abcdefghijklmnop@gitlab.example.com/grp/mod.git';
+
+      const versions = await getPkgReleases({
+        datasource,
+        packageName: credentialedPackageName,
+      });
+
+      expect(versions?.sourceUrl).toBe('https://gitlab.example.com/grp/mod');
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        credentialedPackageName,
+      ]);
+      expect(setWithRawTtl).toHaveBeenCalledWith(
+        'datasource-git-tags',
+        expect.any(String),
+        {
+          cachedAt: expect.any(String),
+          value: expect.objectContaining({
+            sourceUrl: 'https://gitlab.example.com/grp/mod',
+          }),
+        },
+        expect.any(Number),
+      );
+      // the keys are sanitized by the package cache itself
+      const cachedValues = setWithRawTtl.mock.calls.map(([, , value]) => value);
+      expect(JSON.stringify(cachedValues)).not.toContain('glpat-');
     });
   });
 

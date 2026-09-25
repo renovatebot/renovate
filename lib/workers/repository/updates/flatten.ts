@@ -14,7 +14,7 @@ import { detectSemanticCommits } from '../../../util/git/semantic.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
-import { parseUrl } from '../../../util/url.ts';
+import { parseUrl, withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
@@ -24,7 +24,7 @@ function upper(str: string): string {
 }
 
 export function sanitizeDepName(depName: string): string {
-  return depName
+  return withoutUrlCredentials(depName)
     .replace(regEx(/\$\{[^}]+\}\/?/g), '')
     .replace(regEx(/[${}]/g), '')
     .replace('@types/', '')

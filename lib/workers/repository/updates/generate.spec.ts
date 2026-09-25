@@ -1145,6 +1145,126 @@ describe('workers/repository/updates/generate', () => {
       expect(res.commitMessage).toBe('update dependency some-dep to');
     });
 
+    describe('url userinfo in dependency names', () => {
+      it.each`
+        depName                                          | expected
+        ${'https://user:token@git.example.com/org/repo'} | ${'https://git.example.com/org/repo'}
+        ${'https://${USER}@git.example.com/org/repo'}    | ${'https://${USER}@git.example.com/org/repo'}
+        ${'ssh://git@git.example.com/org/repo'}          | ${'ssh://git@git.example.com/org/repo'}
+      `(
+        'uses $expected in commit message and PR title',
+        ({ depName, expected }: { depName: string; expected: string }) => {
+          const branch = [
+            {
+              ...requiredDefaultOptions,
+              manager: 'some-manager',
+              depName,
+              newValue: '1.2.0',
+              isSingleVersion: true,
+              newVersion: '1.2.0',
+              branchName: 'some-branch',
+            },
+          ] satisfies BranchUpgradeConfig[];
+
+          const res = generateBranchConfig(branch);
+
+          expect(res.commitMessage).toBe(
+            `Update dependency ${expected} to v1.2.0`,
+          );
+          expect(res.prTitle).toBe(`Update dependency ${expected} to v1.2.0`);
+        },
+      );
+
+      it('removes credentials from a lowercased commit message and manual PR title', () => {
+        const branch = [
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            depName: 'https://User:Token@git.example.com/org/repo',
+            semanticCommits: 'enabled',
+            semanticCommitType: 'chore',
+            prTitle: 'Upgrade {{depName}}',
+            newValue: '1.2.0',
+            isSingleVersion: true,
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+          },
+        ] satisfies BranchUpgradeConfig[];
+
+        const res = generateBranchConfig(branch);
+
+        expect(res.commitMessage).toBe(
+          'chore: update dependency https://git.example.com/org/repo to v1.2.0',
+        );
+        expect(res.prTitle).toBe('upgrade https://git.example.com/org/repo');
+      });
+
+      it('removes credentials from a group PR title and commit message', () => {
+        const group = {
+          commitMessageTopic: '{{{groupName}}}',
+          prTitle: 'Update {{{groupName}}} to {{{newValue}}}',
+        };
+        const branch = [
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            depName: 'https://user:token@git.example.com/org/repo',
+            groupName: 'https://user:token@git.example.com/org/repo',
+            groupSingleUpdates: true,
+            newValue: '1.2.0',
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+            group,
+          },
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            depName: 'https://user:token@git.example.com/org/other',
+            groupName: 'https://user:token@git.example.com/org/repo',
+            groupSingleUpdates: true,
+            newValue: '1.2.0',
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+            group,
+          },
+        ] satisfies BranchUpgradeConfig[];
+
+        const res = generateBranchConfig(branch);
+
+        expect(res.isGroup).toBeTrue();
+        expect(res.prTitle).toBe(
+          'Update https://git.example.com/org/repo to 1.2.0',
+        );
+        expect(res.commitMessage).not.toContain('token');
+        expect(res.commitMessage).toContain('https://git.example.com/org/repo');
+      });
+
+      it('removes credentials from the commit body table', () => {
+        const branch = [
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            commitBodyTable: true,
+            datasource: 'git-tags',
+            depName: 'repo',
+            packageName: 'https://user:token@git.example.com/org/repo',
+            currentValue: '1.0.0',
+            currentVersion: '1.0.0',
+            newValue: '1.2.0',
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+          },
+        ] satisfies BranchUpgradeConfig[];
+
+        const res = generateBranchConfig(branch);
+
+        expect(res.commitMessage).toContain(
+          '| https://git.example.com/org/repo |',
+        );
+        expect(res.commitMessage).not.toContain('token');
+      });
+    });
+
     it('handles @types specially', () => {
       const branch = [
         {

@@ -9,6 +9,7 @@ import { getDigest } from '../../../../modules/datasource/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
+import { withoutUrlCredentials } from '../../../../util/url.ts';
 import {
   missingReleaseTimestampWarning,
   resolveUpdateTypeConfig,
@@ -189,9 +190,10 @@ async function resolveUpdateDigest(
     // Only report a warning if there is a current digest.
     // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
     if (config.currentDigest) {
+      const packageName = withoutUrlCredentials(config.packageName);
       res.warnings.push({
-        message: `Could not determine new digest for update (${config.datasource} package ${config.packageName})`,
-        topic: config.packageName,
+        message: `Could not determine new digest for update (${config.datasource} package ${packageName})`,
+        topic: packageName,
       });
     }
   }

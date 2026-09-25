@@ -23,6 +23,20 @@ describe('workers/repository/updates/flatten', () => {
       );
     });
 
+    it.each`
+      depName                                                      | expected
+      ${'https://user:token@git.example.com/org/repo'}             | ${'https-git.example.com-org-repo'}
+      ${'https://glpat-0123456789abcdef@git.example.com/org/repo'} | ${'https-git.example.com-org-repo'}
+      ${'https://token@git.example.com/org/repo'}                  | ${'https-tokengit.example.com-org-repo'}
+      ${'https://${USER}@git.example.com/org/repo'}                | ${'https-git.example.com-org-repo'}
+      ${'ssh://git@git.example.com/org/repo'}                      | ${'ssh-gitgit.example.com-org-repo'}
+    `(
+      'sanitizes url userinfo of $depName',
+      ({ depName, expected }: { depName: string; expected: string }) => {
+        expect(sanitizeDepName(depName)).toBe(expected);
+      },
+    );
+
     it('strips shell-style variable placeholders', () => {
       expect(sanitizeDepName('${DEPENDENCY_PROXY}python')).toBe('python');
       expect(sanitizeDepName('${DEPENDENCY_PROXY:-}python')).toBe('python');
