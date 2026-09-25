@@ -43,6 +43,7 @@ import * as comments from './comments.ts';
 import { getRepoFile } from './files.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import {
+  BranchNames,
   RepoInfo,
   Repositories,
   UnresolvedPrTasks,
@@ -259,10 +260,22 @@ export async function initRepo({
       ).body.development?.name;
 
       if (developmentBranch) {
-        mainBranch = developmentBranch;
-        logger.debug(
-          `${developmentBranch} is BitBucket's development branch - using it as default branch`,
+        const { body: branchNames } = await bitbucketHttp.getJson(
+          `/2.0/repositories/${repository}/refs/branches?q=name="${developmentBranch}"`,
+          BranchNames,
         );
+
+        if (new Set(branchNames).has(developmentBranch)) {
+          mainBranch = developmentBranch;
+          logger.debug(
+            `${developmentBranch} is BitBucket's development branch - using it as default branch`,
+          );
+        } else {
+          logger.warn(
+            { developmentBranch, mainBranch },
+            `BitBucket's development branch does not exist as a branch - keeping default branch`,
+          );
+        }
       }
     }
 
