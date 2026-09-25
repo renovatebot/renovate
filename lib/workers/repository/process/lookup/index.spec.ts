@@ -6981,8 +6981,14 @@ describe('workers/repository/process/lookup/index', () => {
             version: '8.0.0',
           },
           {
+            changelogContent: 'intermediateContent',
+            changelogUrl: 'http://intermediateChangelogUrl',
+            version: '8.0.1',
+          },
+          {
             changelogContent: 'testContent',
             changelogUrl: 'http://testChangelogUrl',
+            name: 'RHSA-2026:66358',
             version: '8.1.0',
           },
         ],
@@ -6994,6 +7000,19 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         changelogContent: 'testContent',
+        changelogReleases: [
+          {
+            changelogContent: 'intermediateContent',
+            changelogUrl: 'http://intermediateChangelogUrl',
+            version: '8.0.1',
+          },
+          {
+            changelogContent: 'testContent',
+            changelogUrl: 'http://testChangelogUrl',
+            name: 'RHSA-2026:66358',
+            version: '8.1.0',
+          },
+        ],
         changelogUrl: 'http://testChangelogUrl',
         currentVersion: '8.0.0',
         fixedVersion: '8.0.0',
@@ -7042,6 +7061,13 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         changelogContent: 'testContent',
+        changelogReleases: [
+          {
+            changelogContent: 'testContent',
+            changelogUrl: 'http://testChangelogUrl',
+            version: '8.1.0',
+          },
+        ],
         changelogUrl: 'http://testChangelogUrl',
         currentVersion: '8.0.0',
         isSingleVersion: false,
@@ -7064,6 +7090,92 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'maven',
         warnings: [],
       });
+    });
+
+    it('preserves intermediate changelog content when the target release has none', async () => {
+      config.currentValue = '8.0.0';
+      config.packageName = 'node';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            changelogContent: 'intermediateContent',
+            changelogUrl: 'http://intermediateChangelogUrl',
+            version: '8.1.0',
+          },
+          {
+            version: '8.2.0',
+          },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toHaveLength(1);
+      expect(res.changelogReleases).toEqual([
+        {
+          changelogContent: 'intermediateContent',
+          changelogUrl: 'http://intermediateChangelogUrl',
+          version: '8.1.0',
+        },
+      ]);
+      expect(res.updates[0]).toMatchObject({
+        newValue: '8.2.0',
+        newVersion: '8.2.0',
+      });
+      expect(res.changelogContent).toBeUndefined();
+      expect(res.changelogUrl).toBeUndefined();
+    });
+
+    it('stores changelog releases once when generating multiple updates', async () => {
+      config.currentValue = '8.0.0';
+      config.packageName = 'node';
+      config.datasource = DockerDatasource.id;
+      config.separateMajorMinor = true;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            changelogContent: 'minorContent',
+            version: '8.1.0',
+          },
+          {
+            changelogContent: 'majorContent',
+            version: '9.0.0',
+          },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.changelogContent).toBe('minorContent');
+      expect(res.changelogReleases).toEqual([
+        {
+          changelogContent: 'minorContent',
+          version: '8.1.0',
+        },
+        {
+          changelogContent: 'majorContent',
+          version: '9.0.0',
+        },
+      ]);
+      expect(res.updates).toHaveLength(2);
+      expect(res.updates.map(({ newVersion }) => newVersion)).toEqual([
+        '8.1.0',
+        '9.0.0',
+      ]);
+      for (const update of res.updates) {
+        expect(update).not.toHaveProperty('changelogReleases');
+      }
     });
   });
 });

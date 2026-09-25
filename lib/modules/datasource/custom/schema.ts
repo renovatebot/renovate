@@ -6,10 +6,14 @@ export const ReleaseResultZod = z.object({
     z
       .object({
         version: z.string(),
+        name: z.string().optional(),
         isDeprecated: z.boolean().optional(),
         releaseTimestamp: MaybeTimestamp,
         sourceUrl: z.string().optional(),
         sourceDirectory: z.string().optional(),
+        // Release notes are cosmetic, so malformed content must not discard the
+        // whole lookup and block updates for the package.
+        changelogContent: z.string().optional().catch(undefined),
         changelogUrl: z.string().optional(),
         digest: z.string().optional(),
         isStable: z.boolean().optional(),

@@ -69,6 +69,14 @@ export interface GetPkgReleasesConfig {
 }
 
 export interface Release {
+  /** Optional human-readable release name/title, not a version identifier. */
+  name?: string;
+  /**
+   * Markdown for this release only, not cumulative history. Applicable entries
+   * are combined for the update range and take precedence over repository
+   * changelog retrieval; missing entries are not fetched separately.
+   * Omit this field from all releases to allow normal repository retrieval.
+   */
   changelogContent?: string;
   changelogUrl?: string;
   checksumUrl?: string;
@@ -90,6 +98,21 @@ export interface Release {
   currentAge?: string;
   isLatest?: boolean;
   attestation?: boolean;
+}
+
+/**
+ * The subset of {@link Release} needed to render embedded release notes.
+ *
+ * Carried on every update and branch config, so it deliberately omits the
+ * lookup-only fields of a full `Release`.
+ */
+export interface ChangelogRelease {
+  version: string;
+  name?: string;
+  changelogContent: string;
+  changelogUrl?: string;
+  releaseTimestamp?: Timestamp | null;
+  gitRef?: string;
 }
 
 export interface ReleaseTags {

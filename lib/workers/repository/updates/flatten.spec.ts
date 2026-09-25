@@ -285,6 +285,36 @@ describe('workers/repository/updates/flatten', () => {
       expect(res.find((update) => update.depName === 'foo')).toBeDefined();
     });
 
+    it('propagates dependency changelog releases to every update', async () => {
+      const changelogReleases = [
+        { changelogContent: 'minorContent', version: '1.1.0' },
+        { changelogContent: 'majorContent', version: '2.0.0' },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                changelogReleases,
+                depName: 'foo',
+                updates: [
+                  { newValue: '1.1.0', updateType: 'minor' },
+                  { newValue: '2.0.0', updateType: 'major' },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toHaveLength(2);
+      expect(res[0].changelogReleases).toEqual(changelogReleases);
+      expect(res[1].changelogReleases).toEqual(changelogReleases);
+    });
+
     it('when a skipReason is found on a dependency, it is filtered', async () => {
       const packageFiles = {
         npm: [

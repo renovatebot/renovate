@@ -635,6 +635,24 @@ export async function lookupUpdates(
       );
     }
 
+    const changelogReleases = dependency?.releases.flatMap((release) =>
+      isNonEmptyString(release.changelogContent)
+        ? [
+            {
+              version: release.version,
+              ...(release.name !== undefined && { name: release.name }),
+              changelogContent: release.changelogContent,
+              changelogUrl: release.changelogUrl,
+              releaseTimestamp: release.releaseTimestamp,
+              gitRef: release.gitRef,
+            },
+          ]
+        : [],
+    );
+    if (changelogReleases?.length) {
+      res.changelogReleases = changelogReleases;
+    }
+
     const release =
       res.updates.length > 0
         ? (dependency?.releases.find(
