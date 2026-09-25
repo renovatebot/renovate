@@ -1,11 +1,11 @@
 import { getSourceUrl as githubSourceUrl } from '../../../util/github/url.ts';
+import { getSourceUrl as gitlabSourceUrl } from '../../../util/gitlab/url.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
-import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util.ts';
 
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import type { DataSource, GoproxyItem } from './types.ts';
