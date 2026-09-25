@@ -22,13 +22,13 @@ export function formatRpmVersion(
     return null;
   }
 
-  const version = String(ver);
+  const version = `${ver}`;
 
   if (isNullOrUndefined(rel)) {
     return version;
   }
 
-  return `${version}-${String(rel)}`;
+  return `${version}-${rel}`;
 }
 
 export function buildReleaseResult(
@@ -123,7 +123,7 @@ async function decompressFile(
 export async function getCachedDecompressedFile(
   http: Http,
   url: string,
-  extension: 'xml',
+  extension: 'sqlite' | 'xml',
 ): Promise<string> {
   const releaseLock = await acquireLock(
     `decompressed-file:${url}:${extension}`,
