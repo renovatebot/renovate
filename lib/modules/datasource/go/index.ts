@@ -1,28 +1,20 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
-import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
-import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { Datasource } from '../datasource.ts';
-import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
-import { GitTagsDatasource } from '../git-tags/index.ts';
-import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
-import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import { isPublicGoPackage } from './common.ts';
+import { isPublicGoPackage, pseudoVersionRegex } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
-import { GoDirectDatasource } from './releases-direct.ts';
-import { GoProxyDatasource } from './releases-goproxy.ts';
+import { getGoproxyReleases, getReleasesCacheKey } from './releases-goproxy.ts';
+import { getGoTagDatasource } from './tag-datasources.ts';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
@@ -48,34 +40,14 @@ export class GoDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';
 
-  readonly goproxy = new GoProxyDatasource();
-  readonly direct = new GoDirectDatasource();
-
-  // Pseudo versions https://go.dev/ref/mod#pseudo-versions
-  static readonly pversionRegexp = regEx(
-    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
-  );
-
-  private _getReleases(
-    config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    return this.goproxy.getReleases(config);
-  }
-
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const constraintsFilteringKey =
-      config.constraintsFiltering && config.constraintsFiltering !== 'none'
-        ? `@@${config.constraintsFiltering}`
-        : '';
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GoDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.packageName}@@${constraintsFilteringKey}`,
+        key: `getReleases:${getReleasesCacheKey(config)}`,
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => getGoproxyReleases(config),
     );
   }
 
@@ -108,49 +80,29 @@ export class GoDatasource extends Datasource {
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
     // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      newValue &&
-      !GoDatasource.pversionRegexp.test(newValue) &&
-      newValue !== 'v0.0.0'
+      newValue && !pseudoVersionRegex.test(newValue) && newValue !== 'v0.0.0'
         ? newValue
         : undefined;
+
+    const tagDatasource = getGoTagDatasource(source.datasource);
+    /* v8 ignore next: can never happen, makes lint happy */
+    if (!tagDatasource) {
+      return null;
+    }
 
     // `getDatasource()` resolves a registry URL for every datasource except
     // `git-tags`, which ignores it.
     const sourceConfig = { ...source, registryUrl: source.registryUrl! };
 
-    switch (source.datasource) {
-      case ForgejoTagsDatasource.id: {
-        return this.direct.forgejo.getDigest(sourceConfig, tag);
-      }
-      case GitTagsDatasource.id: {
-        return this.direct.git.getDigest(sourceConfig, tag);
-      }
-      case GiteaTagsDatasource.id: {
-        return this.direct.gitea.getDigest(sourceConfig, tag);
-      }
-      case GithubTagsDatasource.id: {
-        return this.direct.github.getDigest(sourceConfig, tag);
-      }
-      case BitbucketTagsDatasource.id: {
-        return this.direct.bitbucket.getDigest(sourceConfig, tag);
-      }
-      case GitlabTagsDatasource.id: {
-        return this.direct.gitlab.getDigest(sourceConfig, tag);
-      }
-      /* v8 ignore next: can never happen, makes lint happy */
-      default: {
-        return null;
-      }
-    }
+    return tagDatasource.api.getDigest(sourceConfig, tag);
   }
 
   override getDigest(
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GoDatasource.id}`,
         key: `getDigest:${config.packageName}:${newValue}`,
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
