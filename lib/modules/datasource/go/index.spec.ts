@@ -11,6 +11,7 @@ const getReleasesDirectMock = vi.fn();
 const getDigestForgejoMock = vi.fn();
 const getDigestGiteaMock = vi.fn();
 const getDigestGithubMock = vi.fn();
+const getDigestGithubDigestMock = vi.fn();
 const getDigestGitlabMock = vi.fn();
 const getDigestGitMock = vi.fn();
 const getDigestBitbucketMock = vi.fn();
@@ -25,6 +26,9 @@ vi.mock('./releases-direct.ts', () => {
         gitea = { getDigest: (...args: any[]) => getDigestGiteaMock(...args) };
         github = {
           getDigest: (...args: any[]) => getDigestGithubMock(...args),
+        };
+        githubDigest = {
+          getDigest: (...args: any[]) => getDigestGithubDigestMock(...args),
         };
         gitlab = {
           getDigest: (...args: any[]) => getDigestGitlabMock(...args),
@@ -173,6 +177,44 @@ describe('modules/datasource/go/index', () => {
         },
         undefined,
       );
+    });
+
+    it('returns github branch digest', async () => {
+      httpMock
+        .scope('https://golang.org/')
+        .get('/x/text?go-get=1')
+        .reply(200, Fixtures.get('go-get-github.html'));
+      getDigestGithubMock.mockResolvedValueOnce(null);
+      getDigestGithubDigestMock.mockResolvedValueOnce(
+        'abcdefabcdefabcdefabcdef',
+      );
+      const res = await datasource.getDigest(
+        { packageName: 'golang.org/x/text' },
+        'main',
+      );
+      expect(res).toBe('abcdefabcdefabcdefabcdef');
+      expect(getDigestGithubDigestMock).toHaveBeenCalledExactlyOnceWith(
+        {
+          datasource: 'github-tags',
+          packageName: 'golang/text',
+          registryUrl: 'https://github.com',
+        },
+        'main',
+      );
+    });
+
+    it('does not look up a branch without a github ref', async () => {
+      httpMock
+        .scope('https://golang.org/')
+        .get('/x/text?go-get=1')
+        .reply(200, Fixtures.get('go-get-github.html'));
+      getDigestGithubMock.mockResolvedValueOnce(null);
+      const res = await datasource.getDigest(
+        { packageName: 'golang.org/x/text' },
+        'v0.0.0',
+      );
+      expect(res).toBeNull();
+      expect(getDigestGithubDigestMock).not.toHaveBeenCalled();
     });
 
     it('support bitbucket digest', async () => {

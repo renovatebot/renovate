@@ -88,6 +88,7 @@ export class GoDatasource extends Datasource {
    * This function will:
    *  - Determine the source URL for the module
    *  - Call the respective getDigest in github to retrieve the commit hash
+   *  - On GitHub, look up a ref which is not a tag as a branch
    */
   private async _getDigest(
     { packageName }: DigestConfig,
@@ -125,7 +126,12 @@ export class GoDatasource extends Datasource {
         return this.direct.gitea.getDigest(source, tag);
       }
       case GithubTagsDatasource.id: {
-        return this.direct.github.getDigest(source, tag);
+        const digest = await this.direct.github.getDigest(source, tag);
+        if (digest || !tag) {
+          return digest;
+        }
+        // `github-tags` only knows tags, so the ref may still name a branch
+        return this.direct.githubDigest.getDigest(source, tag);
       }
       case BitbucketTagsDatasource.id: {
         return this.direct.bitbucket.getDigest(source, tag);
