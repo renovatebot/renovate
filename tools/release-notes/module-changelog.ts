@@ -39,11 +39,6 @@ export interface FlatGroup {
   /** Commits in this group before `consolidateDependencyBumps` folded
    * repeated dependency bumps together; `>= commits.length`. */
   totalCommits: number;
-  /** Set when this group's heading was renamed away from its original
-   * scope (a lone docs-scoped section merged into "Documentation") —
-   * commit lines then carry the original scope inline (`docs(website):
-   * ...`) since the heading itself no longer shows it. */
-  scopeInCommits?: string;
 }
 
 /** Commits carrying a Conventional Commits `!` breaking-change marker,
@@ -532,7 +527,13 @@ export async function resolveModuleLabels(
  *   bullets.
  * - An unscoped `docs:` commit is treated as if scoped `docs`, joining any
  *   explicitly `docs`-scoped commits in their own "Documentation" group,
- *   rather than falling into "Other".
+ *   rather than falling into "Other". A named (non-module) scope whose
+ *   commits are *all* `docs:` (e.g. `docs(community-tools): ...`) joins
+ *   that same "Documentation" group too, rather than getting its own
+ *   raw-scope heading — its scope is kept inline per commit
+ *   (`docs(community-tools): ...`) since the shared heading can't show
+ *   it. A scope with a mix of `docs:` and other types keeps its own
+ *   heading.
  * - Everything else becomes its own `FlatGroup`, with the scope-less group
  *   labelled "Other" — however few commits it has, so a scope stays
  *   scannable as its own heading.
@@ -615,6 +616,44 @@ export function groupByModule(
     });
   }
 
+  // A named (non-module) scope whose commits are *all* `docs:` reads
+  // oddly headed by that raw scope name — e.g. "community-tools" — when a
+  // reader skimming for documentation changes would only think to look
+  // under "Documentation". Fold it into the same "Documentation" bucket
+  // an unscoped `docs:` commit already joins, keeping the original scope
+  // inline on each commit line (`docs(community-tools): ...`) since the
+  // shared heading can't show every merged-in scope at once.
+  let docsGroup = flat.find((group) => group.scope === 'docs');
+  for (let i = flat.length - 1; i >= 0; i--) {
+    const group = flat[i];
+    if (
+      group.scope === undefined ||
+      group.scope === 'docs' ||
+      !group.commits.every((commit) => commit.type === 'docs')
+    ) {
+      continue;
+    }
+
+    if (!docsGroup) {
+      docsGroup = {
+        kind: 'flat',
+        scope: 'docs',
+        label: 'Documentation',
+        commits: [],
+        totalCommits: 0,
+      };
+      flat.push(docsGroup);
+    }
+    docsGroup.commits.push(...group.commits);
+    docsGroup.totalCommits += group.totalCommits;
+    flat.splice(i, 1);
+  }
+  if (docsGroup) {
+    docsGroup.commits.sort(
+      (a, b) => typeRank(types, a.type) - typeRank(types, b.type),
+    );
+  }
+
   const categoryGroups: CategoryGroup[] = [];
   for (const [category, entries] of modulesByCategory) {
     const modules = Array.from(entries.values());
@@ -662,27 +701,6 @@ export function groupByModule(
   const groups: ModuleGroup[] = [...categoryGroups, ...flat];
   if (breaking.length > 0) {
     groups.unshift({ kind: 'breaking', commits: breaking });
-  }
-
-  // A whole changelog that boils down to a single, otherwise-unremarkable
-  // scope (e.g. `docs(website)`) reads oddly headed by that raw scope name.
-  // When every commit in it is a `docs:` commit, fold it into the same
-  // "Documentation" heading an unscoped `docs:` commit would get, keeping
-  // the original scope inline on each commit line since the heading can no
-  // longer show it.
-  const [onlyGroup] = groups;
-  if (
-    groups.length === 1 &&
-    onlyGroup.kind === 'flat' &&
-    onlyGroup.scope !== undefined &&
-    onlyGroup.scope !== 'docs' &&
-    onlyGroup.commits.every((commit) => commit.type === 'docs')
-  ) {
-    groups[0] = {
-      ...onlyGroup,
-      label: 'Documentation',
-      scopeInCommits: onlyGroup.scope,
-    };
   }
 
   return groups;
@@ -827,7 +845,15 @@ export function renderModuleChangelog(
     }
 
     for (const commit of group.commits) {
-      lines.push(renderCommitLine(commit, repo, group.scopeInCommits));
+      // The "Documentation" bucket (`group.scope === 'docs'`) can hold
+      // commits merged in from several different original scopes — show
+      // each one inline, since the shared heading can't. Every other flat
+      // group has a single scope already named by its own heading.
+      const inlineScope =
+        group.scope === 'docs' && commit.scope && commit.scope !== 'docs'
+          ? commit.scope
+          : undefined;
+      lines.push(renderCommitLine(commit, repo, inlineScope));
     }
 
     if (collapse) {

@@ -811,7 +811,7 @@ describe('tools/release-notes/module-changelog', () => {
       );
     });
 
-    it('merges a lone docs-scoped section into "Documentation", keeping the scope inline', () => {
+    it('merges an all-docs scoped section into "Documentation", keeping the scope inline', () => {
       const commits: ParsedCommit[] = [
         { type: 'docs', scope: 'website', subject: 'a' },
         { type: 'docs', scope: 'website', subject: 'b' },
@@ -828,7 +828,47 @@ describe('tools/release-notes/module-changelog', () => {
       );
     });
 
-    it('does not merge a lone non-docs section, or a section mixing docs with other types', () => {
+    it('merges an all-docs scoped section into "Documentation" alongside unrelated groups', () => {
+      // Regression: this used to only fire when the docs-only section was
+      // the *entire* changelog, so a real run with other groups present
+      // (managers, deps, ...) never merged a scope like
+      // `docs(community-tools): ...` at all.
+      const commits: ParsedCommit[] = [
+        { type: 'fix', scope: 'workers/repository', subject: 'a' },
+        {
+          type: 'docs',
+          scope: 'community-tools',
+          subject: 'remove duplicate trailing `.`',
+        },
+      ];
+
+      const groups = groupByModule(commits, types, new Map());
+      expect(renderModuleChangelog(groups, repo)).toBe(
+        [
+          '### workers/repository',
+          '',
+          '- fix: a',
+          '',
+          '### Documentation',
+          '',
+          '- docs(community-tools): remove duplicate trailing `.`',
+        ].join('\n'),
+      );
+    });
+
+    it('merges more than one all-docs scoped section into the same "Documentation" group', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'docs', scope: 'website', subject: 'a' },
+        { type: 'docs', scope: 'community-tools', subject: 'b' },
+      ];
+
+      const groups = groupByModule(commits, types, new Map()) as FlatGroup[];
+      expect(groups).toHaveLength(1);
+      expect(groups[0].label).toBe('Documentation');
+      expect(groups[0].commits).toHaveLength(2);
+    });
+
+    it('does not merge a section that is not all `docs:`, or a scope-less "Other" section', () => {
       const onlyNonDocs = groupByModule(
         [{ type: 'fix', scope: 'website', subject: 'a' }],
         types,
@@ -847,14 +887,19 @@ describe('tools/release-notes/module-changelog', () => {
       expect(mixed[0]).toMatchObject({ label: 'website' });
     });
 
-    it('does not re-merge an already-unscoped "docs" group', () => {
+    it('does not show an inline scope for an unscoped or already-`docs`-scoped commit', () => {
       const groups = groupByModule(
-        [{ type: 'docs', scope: undefined, subject: 'a' }],
+        [
+          { type: 'docs', scope: undefined, subject: 'a' },
+          { type: 'fix', scope: 'docs', subject: 'b' },
+        ],
         types,
         new Map(),
       );
       expect(groups[0]).toMatchObject({ label: 'Documentation' });
-      expect(groups[0]).not.toHaveProperty('scopeInCommits');
+      expect(renderModuleChangelog(groups, repo)).toBe(
+        ['### Documentation', '', '- fix: b', '- docs: a'].join('\n'),
+      );
     });
   });
 
