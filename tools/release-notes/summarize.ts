@@ -11,6 +11,7 @@ import {
   escapeMentions,
   filterHiddenDocsUpdates,
   filterHiddenScopes,
+  filterHiddenTypeScopes,
   filterHiddenTypes,
   groupByModule,
   parseCommitHeader,
@@ -115,11 +116,13 @@ async function summarize(
   const deduped = dedupeCommits(parsed);
   const commits = all
     ? deduped
-    : filterHiddenDocsUpdates(filterHiddenScopes(filterHiddenTypes(deduped)));
+    : filterHiddenDocsUpdates(
+        filterHiddenTypeScopes(filterHiddenScopes(filterHiddenTypes(deduped))),
+      );
   const hiddenCount = deduped.length - commits.length;
   if (hiddenCount > 0) {
     logger.info(
-      `Hid ${hiddenCount} test/style/ci/refactor/lint/docs-reference-bump commit(s); pass --all to include them.`,
+      `Hid ${hiddenCount} test/style/ci/refactor/lint/chore(renovate)/docs-reference-bump commit(s); pass --all to include them.`,
     );
   }
 
@@ -152,7 +155,7 @@ const program = new Command('node tools/release-notes/summarize.ts')
   )
   .option(
     '--all',
-    'Include test/style/ci/refactor, lint-scoped, and docs reference-bump commits, hidden by default',
+    'Include test/style/ci/refactor, lint-scoped, chore(renovate), and docs reference-bump commits, hidden by default',
     false,
   )
   .argument('<from>', 'tag/ref to compare from, for example 44.61.2')

@@ -11,6 +11,7 @@ import {
   escapeMentions,
   filterHiddenDocsUpdates,
   filterHiddenScopes,
+  filterHiddenTypeScopes,
   filterHiddenTypes,
   groupByModule,
   parseCommitHeader,
@@ -183,6 +184,34 @@ describe('tools/release-notes/module-changelog', () => {
       ];
 
       expect(filterHiddenScopes(commits, new Set())).toEqual(commits);
+    });
+  });
+
+  describe('filterHiddenTypeScopes', () => {
+    it('drops `chore(renovate)` commits by default', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'chore', scope: 'renovate', subject: 'a' },
+        { type: 'fix', scope: 'renovate', subject: 'b' },
+        { type: 'chore', scope: 'deps', subject: 'c' },
+      ];
+
+      expect(filterHiddenTypeScopes(commits)).toEqual([commits[1], commits[2]]);
+    });
+
+    it('keeps a hidden type::scope commit if it is a breaking change', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'chore', scope: 'renovate', subject: 'a', breaking: true },
+      ];
+
+      expect(filterHiddenTypeScopes(commits)).toEqual(commits);
+    });
+
+    it('keeps everything when given an empty set', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'chore', scope: 'renovate', subject: 'a' },
+      ];
+
+      expect(filterHiddenTypeScopes(commits, new Set())).toEqual(commits);
     });
   });
 

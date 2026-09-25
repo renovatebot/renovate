@@ -218,6 +218,31 @@ export function filterHiddenScopes(
   });
 }
 
+/**
+ * `type::scope` pairs hidden by default: internal bookkeeping that's
+ * neither a module change nor something a user needs to know about, even
+ * though `chore` and `renovate` aren't hidden on their own — a `chore`
+ * touching a real module, or a `feat`/`fix` in this repo's own
+ * `renovate.json5`, still shows.
+ */
+export const HIDDEN_TYPE_SCOPES = new Set(['chore::renovate']);
+
+/**
+ * Drop commits whose `type::scope` pair is in `hiddenTypeScopes`, unless
+ * they're a breaking change. Pass `new Set()` to disable filtering.
+ */
+export function filterHiddenTypeScopes(
+  commits: ParsedCommit[],
+  hiddenTypeScopes: ReadonlySet<string> = HIDDEN_TYPE_SCOPES,
+): ParsedCommit[] {
+  return commits.filter((commit) => {
+    if (commit.breaking) {
+      return true;
+    }
+    return !hiddenTypeScopes.has(`${commit.type}::${commit.scope ?? ''}`);
+  });
+}
+
 // Matches Renovate's own "docs: update references to X" / "docs: update
 // references to X to Y" commits — bumps of example version pins embedded in
 // the docs (see DEPENDENCY_UPDATE_RE below), not an actual documentation
