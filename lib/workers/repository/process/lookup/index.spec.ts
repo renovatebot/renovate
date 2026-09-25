@@ -6938,6 +6938,35 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('uses updateType=digest for pseudo-versions of a major version module', async () => {
+      config.manager = 'gomod';
+      config.datasource = GoDatasource.id;
+      config.currentValue = 'v2.0.0-20240506185236-b8a5c65736ae';
+      config.currentDigest = 'b8a5c65736ae';
+      config.packageName = 'github.com/foo/bar/v2';
+      config.digestOneAndOnly = true;
+
+      httpMock
+        .scope('https://proxy.golang.org/github.com/foo/bar/v2')
+        .get('/@v/list')
+        .reply(200, '')
+        .get('/@latest')
+        .reply(200, { Version: 'v2.0.0-20240509183442-62759503f434' });
+      httpMock.scope(githubApiHost).post('/graphql').reply(404);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([
+        {
+          newDigest: '62759503f434',
+          newValue: 'v2.0.0-20240509183442-62759503f434',
+          updateType: 'digest',
+        },
+      ]);
+    });
+
     // gomod pseudo-version updates are relabelled to `updateType=digest` after filterInternalChecks()
     // has already age-checked them under the version-derived updateType, so digest-scoped rules must be re-applied
     it('applies digest-scoped minimumReleaseAge packageRules to gomod pseudo-version updates', async () => {
