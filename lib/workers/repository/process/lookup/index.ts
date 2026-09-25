@@ -432,10 +432,10 @@ export async function lookupUpdates(
           );
         // `filterInternalChecks()` normally yields a release, falling back to
         // the newest pending one; only a datasource rejecting every candidate
-        // during postprocessing leaves none - see #40625
-        // istanbul ignore next
+        // during postprocessing leaves none. The other buckets and the digest
+        // update are still looked at.
         if (!release) {
-          return Result.ok(res);
+          continue;
         }
         const newVersion = release.version;
         const update = await generateUpdate(
