@@ -16,9 +16,17 @@ export function processSupersedesManagers(extracts: ExtractResults[]): void {
       continue;
     }
 
-    const primaryPackageFiles = primaryExtract.packageFiles.map(
-      ({ packageFile }) => packageFile,
-    );
+    const primaryPackageFiles = primaryExtract.packageFiles
+      // An entry the primary manager marked `cannotUpdate` is that manager
+      // saying it reported the file to be seen rather than to be acted on.
+      // Taking the file from a manager that can maintain it would leave nobody
+      // updating it, so such an entry supersedes nothing.
+      //
+      // Stated by the manager rather than inferred from its dependencies: an
+      // entry whose every dependency is skipped can mean "do not update these",
+      // which is the opposite request.
+      .filter(({ cannotUpdate }) => !cannotUpdate)
+      .map(({ packageFile }) => packageFile);
 
     for (const secondaryManager of secondaryManagers) {
       const secondaryExtract = extracts.find(
