@@ -106,6 +106,29 @@ describe('modules/datasource/git-refs/index', () => {
       const result = versions?.releases.map((x) => x.version).sort();
       expect(result).toHaveLength(6);
     });
+
+    it('takes the digest of a branch from its `refs/heads/` ref', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      const res = await new GitRefsDatasource().getReleases({ packageName });
+
+      // and not from `refs/for/master`, which the fixture lists first
+      expect(res?.releases).toContainEqual({
+        version: 'master',
+        gitRef: 'master',
+        newDigest: 'a9920c014aebc28dc1b23e7efcc006d0455cc710',
+      });
+    });
+
+    it('dedups a value that is both a branch and a tag', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      const res = await new GitRefsDatasource().getReleases({ packageName });
+
+      expect(
+        res?.releases.filter((release) => release.version === 'v1.0.0'),
+      ).toHaveLength(1);
+    });
   });
 
   describe('getDigest()', () => {
@@ -115,6 +138,16 @@ describe('modules/datasource/git-refs/index', () => {
       const digest = await new GitRefsDatasource().getDigest(
         { packageName: 'a tag to look up' },
         'v2.0.0',
+      );
+      expect(digest).toBeNull();
+    });
+
+    it('returns null if there are no refs', async () => {
+      gitMock.listRemote.mockResolvedValue('');
+
+      const digest = await new GitRefsDatasource().getDigest(
+        { packageName: 'a tag to look up' },
+        'v1.0.4',
       );
       expect(digest).toBeNull();
     });
