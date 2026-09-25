@@ -856,6 +856,24 @@ describe('modules/datasource/index', () => {
               expect.any(Number),
             );
           });
+
+          it('does not cache a HOST_BLOCKED result', async () => {
+            const registries: RegistriesMock = {
+              'https://reg1.com': () => {
+                throw new ExternalHostError(new Error(HOST_BLOCKED));
+              },
+            };
+            datasources.set(datasource, new CachingDatasource(registries));
+
+            const res = await getPkgReleases({
+              datasource,
+              packageName,
+              registryUrls: ['https://reg1.com'],
+            });
+
+            expect(res).toBeNull();
+            expect(packageCache.set).not.toHaveBeenCalled();
+          });
         });
 
         it('keeps merged results when a registry throws ExternalHostError', async () => {
