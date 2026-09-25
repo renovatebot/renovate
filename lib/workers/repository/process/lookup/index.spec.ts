@@ -4676,6 +4676,64 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toBeEmpty();
     });
 
+    it('ignores the latest tag if the datasource sets respectLatest=false', async () => {
+      config.currentValue = '8.2.0';
+      config.packageName = 'org.example:artifact';
+      config.versioning = mavenVersioningId;
+      config.datasource = MavenDatasource.id;
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '8.2.0' },
+          { version: '8.2.1-SNAPSHOT' },
+          { version: '9.0.0' },
+        ],
+        // stale tag, as commonly found in Maven registries
+        tags: { latest: '8.2.1-SNAPSHOT', release: '9.0.0' },
+        respectLatest: false,
+      });
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.respectLatest).toBeFalse();
+      expect(res.updates).toMatchObject([
+        {
+          bucket: 'major',
+          newValue: '9.0.0',
+          newVersion: '9.0.0',
+          updateType: 'major',
+        },
+      ]);
+    });
+
+    it('respects the latest tag if packageRules override the datasource respectLatest=false', async () => {
+      config.currentValue = '8.2.0';
+      config.packageName = 'org.example:artifact';
+      config.versioning = mavenVersioningId;
+      config.datasource = MavenDatasource.id;
+      config.packageRules = [
+        { matchDatasources: [MavenDatasource.id], respectLatest: true },
+      ];
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '8.2.0' },
+          { version: '8.2.1-SNAPSHOT' },
+          { version: '9.0.0' },
+        ],
+        tags: { latest: '8.2.1-SNAPSHOT', release: '9.0.0' },
+        respectLatest: false,
+      });
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toBeEmpty();
+    });
+
     it('applies versionCompatibility for maven', async () => {
       config.currentValue = '12.4.2.jre8';
       config.packageName = 'com.microsoft.sqlserver:mssql-jdbc';

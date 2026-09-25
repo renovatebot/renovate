@@ -204,6 +204,20 @@ export async function lookupUpdates(
       ]);
 
       const latestVersion = dependency.tags?.latest;
+      if (
+        dependency.respectLatest === false &&
+        config.respectLatest !== false
+      ) {
+        // The datasource has flagged its `latest` tag as unreliable, e.g. Maven
+        // registries where it only means "last published". Apply that to the
+        // config which `filterVersions()` reads, otherwise the tag would still
+        // hide newer releases. Package rules are reapplied right below, so a
+        // user can still opt back in with `respectLatest=true` there.
+        logger.debug(
+          `Ignoring latest tag for ${config.datasource} package ${config.packageName} because the datasource set respectLatest=false`,
+        );
+        config.respectLatest = false;
+      }
       // Filter out any results from datasource that don't comply with our versioning
       let allVersions = dependency.releases.filter((release) =>
         versioningApi.isVersion(release.version),
