@@ -1,8 +1,9 @@
 import readline from 'node:readline';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as fs from '../../../util/fs/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { packageKeys, requiredPackageKeys } from './common.ts';
 import { downloadAndExtractPackage } from './packages.ts';
 import {
@@ -12,7 +13,7 @@ import {
 import type { PackageDescription } from './types.ts';
 import { constructComponentUrls } from './url.ts';
 
-export class DebDatasource extends Datasource {
+export class DebDatasource extends RegistryDatasource {
   static readonly id = 'deb';
 
   constructor() {
@@ -48,7 +49,7 @@ export class DebDatasource extends Datasource {
    * - suite: stable, oldstable or other alias for a release, either this or release must be given like buster
    * - binaryArch: e.g. amd64 resolves to http://deb.debian.org/debian/dists/stable/non-free/binary-amd64/
    */
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [
       'https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
     ];
@@ -154,12 +155,7 @@ export class DebDatasource extends Datasource {
   private async fetchReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const componentUrls = constructComponentUrls(registryUrl);
     let aggregatedRelease: ReleaseResult | null = null;
 
@@ -194,7 +190,9 @@ export class DebDatasource extends Datasource {
     return aggregatedRelease;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}:${config.packageName}`,

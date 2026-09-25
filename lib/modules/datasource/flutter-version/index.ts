@@ -1,13 +1,14 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { FlutterResponse } from './schema.ts';
 
 export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 
-export class FlutterVersionDatasource extends Datasource {
+export class FlutterVersionDatasource extends RegistryDatasource {
   static readonly id = 'flutter-version';
 
   constructor() {
@@ -18,7 +19,7 @@ export class FlutterVersionDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://storage.googleapis.com'];
   }
 
@@ -35,11 +36,7 @@ export class FlutterVersionDatasource extends Datasource {
 
   async getReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const result: ReleaseResult = {
       homepage: 'https://flutter.dev',
       sourceUrl: 'https://github.com/flutter/flutter',

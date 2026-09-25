@@ -5,11 +5,12 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { type RepologyPackage, RepologyPackages } from './schema.ts';
 import type { RepologyPackageType } from './types.ts';
 
@@ -48,10 +49,10 @@ function findPackageInResponse(
   return packagesWithType.length > 0 ? packagesWithType : null;
 }
 
-export class RepologyDatasource extends Datasource {
+export class RepologyDatasource extends RegistryDatasource {
   static readonly id = 'repology';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://repology.org/'];
   }
 
@@ -205,11 +206,7 @@ export class RepologyDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     // Ensure lookup name contains both repository and package
     const [repoName, pkgName] = packageName.split('/', 2);
     if (!repoName || !pkgName) {

@@ -1,7 +1,8 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as nugetVersioning from '../../versioning/nuget/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { isCrossOriginPaginationAllowed } from '../util.ts';
 import { parseRegistryUrl } from './common.ts';
 import { NugetV2Api } from './v2.ts';
@@ -10,10 +11,10 @@ import { NugetV3Api } from './v3.ts';
 // https://api.nuget.org/v3/index.json is a default official nuget feed
 export const nugetOrg = 'https://api.nuget.org/v3/index.json';
 
-export class NugetDatasource extends Datasource {
+export class NugetDatasource extends RegistryDatasource {
   static readonly id = 'nuget';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [nugetOrg];
   }
 
@@ -39,12 +40,8 @@ export class NugetDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`nuget.getReleases(${packageName})`);
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
     const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
     if (protocolVersion === 2) {
       return this.v2Api.getReleases(

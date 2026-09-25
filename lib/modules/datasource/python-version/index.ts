@@ -1,16 +1,17 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
 import { EndoflifeDateDatasource } from '../endoflife-date/index.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl, githubBaseUrl } from './common.ts';
 import { PythonRelease } from './schema.ts';
 
-export class PythonVersionDatasource extends Datasource {
+export class PythonVersionDatasource extends RegistryDatasource {
   static readonly id = datasource;
   pythonPrebuildDatasource: GithubReleasesDatasource;
   pythonEolDatasource: EndoflifeDateDatasource;
@@ -25,7 +26,7 @@ export class PythonVersionDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [defaultRegistryUrl];
   }
 
@@ -47,11 +48,7 @@ export class PythonVersionDatasource extends Datasource {
 
   private async fetchReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const pythonPrebuildReleases = await this.getPrebuildReleases();
     const pythonPrebuildVersions = new Set<string>(
       pythonPrebuildReleases?.releases.map((release) => release.version),
@@ -98,7 +95,9 @@ export class PythonVersionDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}`,

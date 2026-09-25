@@ -1,5 +1,6 @@
 import { isBoolean, isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import {
   queryReleases,
   queryTags,
@@ -9,18 +10,18 @@ import { findCommitOfTag } from '../../../util/github/tags.ts';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types.ts';
 
-export class GithubTagsDatasource extends Datasource<GithubHttp> {
+export class GithubTagsDatasource extends RegistryDatasource<GithubHttp> {
   static readonly id = 'github-tags';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://github.com'];
   }
 
@@ -67,16 +68,16 @@ export class GithubTagsDatasource extends Datasource<GithubHttp> {
    * Returns the latest commit hash for the repository.
    */
   override getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: RegistryDigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     return newValue
-      ? findCommitOfTag(registryUrl, repo!, newValue, this.http)
-      : this.getCommit(registryUrl, repo!);
+      ? findCommitOfTag(registryUrl, repo, newValue, this.http)
+      : this.getCommit(registryUrl, repo);
   }
 
   override async getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult> {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);

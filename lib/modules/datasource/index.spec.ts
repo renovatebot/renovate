@@ -8,11 +8,12 @@ import {
   HOST_DISABLED,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../types/index.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import * as _packageCache from '../../util/cache/package/index.ts';
 import datasources from './api.ts';
 import { getDefaultVersioning } from './common.ts';
-import { Datasource } from './datasource.ts';
+import { Datasource, RegistryDatasource } from './datasource.ts';
 import {
   getDatasourceList,
   getDatasources,
@@ -24,6 +25,8 @@ import type {
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   ReleaseResult,
 } from './types.ts';
 
@@ -111,6 +114,26 @@ class DummyDatasource3 extends Datasource {
 class DummyDatasource4 extends DummyDatasource3 {
   override getDefaultRegistryUrls(_packageName: string): string[] | undefined {
     return undefined;
+  }
+}
+
+class DummyRegistryDatasource extends RegistryDatasource {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
+    return ['https://reg1.com'];
+  }
+
+  constructor() {
+    super(datasource);
+  }
+
+  override getReleases({
+    registryUrl,
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
+    return Promise.resolve({ releases: [{ version: '1.2.3', registryUrl }] });
+  }
+
+  override getDigest({ registryUrl }: RegistryDigestConfig): Promise<string> {
+    return Promise.resolve(registryUrl);
   }
 }
 
@@ -295,6 +318,54 @@ describe('modules/datasource/index', () => {
     });
   });
 
+  // The `@ts-expect-error` comments are the assertions here: `pnpm type-check`
+  // fails once a datasource that relies on a registry URL compiles without one.
+  describe('registry URL guarantee', () => {
+    it('rejects a plain datasource that requires a registry URL', () => {
+      class NarrowingDatasource extends Datasource {
+        constructor() {
+          super(datasource);
+        }
+
+        // Class methods are checked bivariantly, so this override compiles...
+        override getReleases({
+          registryUrl,
+        }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
+          return Promise.resolve({ releases: [{ version: registryUrl }] });
+        }
+      }
+
+      // ...but registering it does not, as it may be queried without a registry
+      // @ts-expect-error -- `registryUrl` is optional for a plain datasource
+      datasources.set(datasource, new NarrowingDatasource());
+
+      expect(getDatasources().get(datasource)).toBeInstanceOf(
+        NarrowingDatasource,
+      );
+    });
+
+    it('rejects a registry datasource without a default registry URL', () => {
+      class EmptyDefaultsDatasource extends RegistryDatasource {
+        constructor() {
+          super(datasource);
+        }
+
+        // @ts-expect-error -- a registry datasource needs a default registry URL
+        override getDefaultRegistryUrls(_packageName: string): string[] {
+          return [];
+        }
+
+        override getReleases(): Promise<ReleaseResult | null> {
+          return Promise.resolve(null);
+        }
+      }
+
+      expect(
+        new EmptyDefaultsDatasource().getDefaultRegistryUrls(packageName),
+      ).toBeEmptyArray();
+    });
+  });
+
   describe('Digest', () => {
     it('returns if digests are supported', () => {
       datasources.set(datasource, new DummyDatasource());
@@ -311,6 +382,14 @@ describe('modules/datasource/index', () => {
 
       expect(supportsDigests(datasource)).toBeTrue();
       await expect(getDigest({ datasource, packageName })).resolves.toBe('123');
+    });
+
+    it('passes the default registry URL to a registry datasource', async () => {
+      datasources.set(datasource, new DummyRegistryDatasource());
+
+      await expect(getDigest({ datasource, packageName })).resolves.toBe(
+        'https://reg1.com',
+      );
     });
 
     it('returns replacementName if defined', async () => {
@@ -423,6 +502,14 @@ describe('modules/datasource/index', () => {
       expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
     });
 
+    it('passes the default registry URL to a registry datasource', async () => {
+      datasources.set(datasource, new DummyRegistryDatasource());
+      const res = await getPkgReleases({ datasource, packageName });
+      expect(res).toMatchObject({
+        releases: [{ version: '1.2.3', registryUrl: 'https://reg1.com' }],
+      });
+    });
+
     it('defaultRegistryUrls function works', async () => {
       datasources.set(datasource, new DummyDatasource2());
       const res = await getPkgReleases({
@@ -450,6 +537,7 @@ describe('modules/datasource/index', () => {
     it('supports datasource objects with function-only registry accessors', async () => {
       datasources.set(datasource, {
         id: datasource,
+        registryUrlRequired: false,
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
@@ -470,6 +558,7 @@ describe('modules/datasource/index', () => {
     it('handles datasource objects without default registries', async () => {
       datasources.set(datasource, {
         id: datasource,
+        registryUrlRequired: false,
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',

@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { parse } from '../../../util/html.ts';
 import type { HttpError } from '../../../util/http/index.ts';
@@ -8,17 +9,17 @@ import {
   isVersion,
   id as rubyVersioningId,
 } from '../../versioning/ruby/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 
-export class RubyVersionDatasource extends Datasource {
+export class RubyVersionDatasource extends RegistryDatasource {
   static readonly id = 'ruby-version';
 
   constructor() {
     super(RubyVersionDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://www.ruby-lang.org/'];
   }
 
@@ -37,13 +38,12 @@ export class RubyVersionDatasource extends Datasource {
 
   private async fetchReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
       homepage: 'https://www.ruby-lang.org',
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
     };
-    // TODO: types (#22198)
     const rubyVersionsUrl = `${registryUrl}en/downloads/releases/`;
     try {
       const response = await this.http.getText(rubyVersionsUrl);
@@ -78,7 +78,9 @@ export class RubyVersionDatasource extends Datasource {
     return res;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: 'all',

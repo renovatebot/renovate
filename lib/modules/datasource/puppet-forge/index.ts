@@ -1,16 +1,17 @@
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { PUPPET_FORGE } from './common.ts';
 import { PuppetModule } from './schema.ts';
 
-export class PuppetForgeDatasource extends Datasource {
+export class PuppetForgeDatasource extends RegistryDatasource {
   static id = 'puppet-forge';
 
   constructor() {
     super(PuppetForgeDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [PUPPET_FORGE];
   }
 
@@ -21,7 +22,7 @@ export class PuppetForgeDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     // https://forgeapi.puppet.com
     const moduleSlug = packageName.replace('/', '-');
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
