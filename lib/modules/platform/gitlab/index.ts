@@ -8,6 +8,7 @@ import {
 import pMap from 'p-map';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -47,6 +48,7 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
+  GitlabMergeRequestCommentType,
   Issue,
   MergePRConfig,
   PlatformParams,
@@ -106,6 +108,7 @@ let config: {
 
 export function resetPlatform(): void {
   config = {} as any;
+  mergeRequestCommentType = 'note';
   draftPrefix = DRAFT_PREFIX;
   defaults.hostType = 'gitlab';
   defaults.endpoint = 'https://gitlab.com/api/v4/';
@@ -117,6 +120,7 @@ export const id = 'gitlab';
 
 let draftPrefix = DRAFT_PREFIX;
 let botUserName: string;
+let mergeRequestCommentType: GitlabMergeRequestCommentType = 'note';
 
 export async function initPlatform({
   endpoint,
@@ -375,6 +379,12 @@ export async function initRepo({
     repoFingerprint: repoFingerprint(res.body.id, defaults.endpoint),
   };
   return repoConfig;
+}
+
+export function configureRepo({
+  gitlabMergeRequestCommentType,
+}: RenovateConfig): void {
+  mergeRequestCommentType = gitlabMergeRequestCommentType ?? 'note';
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
@@ -1402,9 +1412,10 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
 }
 
 async function addComment(issueNo: number, body: string): Promise<void> {
-  // POST projects/:owner/:repo/merge_requests/:number/notes
+  const commentType =
+    mergeRequestCommentType === 'discussion' ? 'discussions' : 'notes';
   await gitlabApi.postJson(
-    `projects/${config.repository}/merge_requests/${issueNo}/notes`,
+    `projects/${config.repository}/merge_requests/${issueNo}/${commentType}`,
     {
       body: { body },
     },
