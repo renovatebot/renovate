@@ -24,9 +24,10 @@ const pseudoVersionRegex = regEx(
  * @see https://go.dev/ref/mod#pseudo-versions
  */
 export function isPseudoVersion(version: string | undefined): boolean {
-  return (
-    !!version && semver.isVersion(version) && pseudoVersionRegex.test(version)
-  );
+  if (!version) {
+    return false;
+  }
+  return semver.isVersion(version) && pseudoVersionRegex.test(version);
 }
 
 export const api: VersioningApi = { ...semver };
