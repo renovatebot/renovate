@@ -194,7 +194,11 @@ export async function updateArtifacts({
         {
           toolName: 'java',
           constraint: await resolveToolConstraint(config, 'java', () =>
-            getJavaConstraint(config.currentValue, gradlewFile),
+            getJavaConstraint(
+              updatedDeps.find((value) => value.depName === 'gradle')
+                ?.currentValue,
+              gradlewFile,
+            ),
           ),
         },
       ],
