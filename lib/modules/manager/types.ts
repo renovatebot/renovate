@@ -415,7 +415,7 @@ export interface DepTypeMetadata {
   description: string;
 }
 
-interface ManagerApiBase extends ModuleApi {
+export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
