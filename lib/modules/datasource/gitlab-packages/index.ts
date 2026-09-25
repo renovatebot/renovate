@@ -8,10 +8,8 @@ import type { GitlabPackage } from './types.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
-export class GitlabPackagesDatasource extends Datasource {
+export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   static readonly id = datasource;
-
-  protected override http: GitlabHttp;
 
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
@@ -26,8 +24,7 @@ export class GitlabPackagesDatasource extends Datasource {
     'The release timestamp is determined from the `created_at` field in the results.';
 
   constructor() {
-    super(datasource);
-    this.http = new GitlabHttp(datasource);
+    super(datasource, new GitlabHttp(datasource));
   }
 
   static getGitlabPackageApiUrl(

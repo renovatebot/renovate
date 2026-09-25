@@ -13,7 +13,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 
-export class GithubDigestDatasource extends Datasource {
+export class GithubDigestDatasource extends Datasource<GithubHttp> {
   static readonly id = 'github-digest';
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
@@ -31,11 +31,8 @@ export class GithubDigestDatasource extends Datasource {
 
   override readonly defaultVersioning = exactVersioning.id;
 
-  override http: GithubHttp;
-
   constructor() {
-    super(GithubDigestDatasource.id);
-    this.http = new GithubHttp(GithubDigestDatasource.id);
+    super(GithubDigestDatasource.id, new GithubHttp(GithubDigestDatasource.id));
   }
 
   private static getCacheKey(

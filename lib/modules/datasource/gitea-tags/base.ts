@@ -20,7 +20,7 @@ import { getApiUrl, getCacheKey, getSourceUrl } from './util.ts';
  * `getReleases()` are the same for tags and releases, so they live here and a
  * subclass only fetches and maps the releases of its own endpoint.
  */
-export abstract class GiteaDatasource extends Datasource {
+export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
   static readonly defaultRegistryUrls = ['https://gitea.com'];
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
@@ -28,8 +28,6 @@ export abstract class GiteaDatasource extends Datasource {
   }
 
   protected abstract override readonly cacheNamespace: PackageCacheNamespace;
-
-  override http = new GiteaHttp(this.id);
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote: string;
@@ -44,12 +42,15 @@ export abstract class GiteaDatasource extends Datasource {
    * @param endpoint describes the endpoint `getReleases()` reads: the
    * discriminator of its cache keys, and the field the release timestamp comes
    * from, which is rendered into the generated documentation.
+   * @param http lets a subclass for another Gitea-compatible host supply a
+   * client scoped to its own host type.
    */
   protected constructor(
     id: string,
     endpoint: { cacheKeyType: string; releaseTimestampField: string },
+    http: GiteaHttp = new GiteaHttp(id),
   ) {
-    super(id);
+    super(id, http);
     this.cacheKeyType = endpoint.cacheKeyType;
     this.releaseTimestampNote = `The release timestamp is determined from the \`${endpoint.releaseTimestampField}\` field in the results.`;
   }
