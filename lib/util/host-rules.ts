@@ -6,6 +6,8 @@ import {
   isUndefined,
 } from '@sindresorhus/is';
 import { GlobalConfig } from '../config/global.ts';
+import type { PlatformFamilyId } from '../constants/platforms.ts';
+import { PLATFORM_FAMILIES } from '../constants/platforms.ts';
 import { logger } from '../logger/index.ts';
 import type {
   CombinedHostRule,
@@ -13,14 +15,23 @@ import type {
   InternalHostGrant,
 } from '../types/index.ts';
 import { clone } from './clone.ts';
+import { toSha256 } from './hash.ts';
+import { regEx } from './regex.ts';
 import * as sanitize from './sanitize.ts';
 import { toBase64 } from './string.ts';
 import { matchRegexOrGlobList } from './string-match.ts';
 import {
+  decodeUserinfo,
+  ensureTrailingSlash,
+  isCredentialUserinfo,
   isHttpUrl,
+  isPlaceholderUsername,
+  isUserinfoPlaceholder,
   massageHostUrl,
   parseUrl,
   stripUrlCredentials,
+  trimTrailingSlash,
+  urlUserinfoRegex,
 } from './url.ts';
 
 /**
@@ -59,6 +70,23 @@ export interface CombinedHostRuleWithTrustedHeaders extends CombinedHostRule {
 }
 
 let hostRules: RegisteredHostRule[] = [];
+
+/**
+ * The credentials of a host rule registered by {@link detachUrlCredentials}.
+ */
+interface DetachedCredentials {
+  /** the URL the credentials apply to, without a trailing slash */
+  url: string;
+  username: string;
+  password: string;
+}
+
+let detachedCredentials: DetachedCredentials[] = [];
+
+/**
+ * The host rules registered by {@link detachUrlCredentials}.
+ */
+let detachedRules = new WeakSet<HostRule>();
 
 /**
  * Fields within `HostRule`s that must have their value registered for sanitising through `sanitize.addSecretForSanitizing()`.
@@ -186,7 +214,15 @@ function trustTierFor(options?: AddHostRuleOptions): HostRuleTrustTier {
   return 'untrusted';
 }
 
-export function add(params: HostRule, options?: AddHostRuleOptions): void {
+/**
+ * Registers a host rule, without registering its confidential fields for sanitizing.
+ *
+ * @returns the registered rule
+ */
+function register(
+  params: HostRule,
+  options?: AddHostRuleOptions,
+): RegisteredHostRule {
   let rule: RegisteredHostRule = {
     ...migrateRule(params),
     // set only from `options`, and assigned unconditionally so that it cannot be carried over from `params`: `HostRule` has no `trustTier` field, but configuration is parsed from JSON, so a repository could otherwise smuggle one in and have its rules treated as the administrator's
@@ -225,6 +261,12 @@ export function add(params: HostRule, options?: AddHostRuleOptions): void {
       }
     });
   }
+  hostRules.push(rule);
+  return rule;
+}
+
+export function add(params: HostRule, options?: AddHostRuleOptions): void {
+  const rule = register(params, options);
   confidentialFields.forEach((field) => {
     const secret = rule[field];
     if (isString(secret) && secret.length > 3) {
@@ -236,7 +278,358 @@ export function add(params: HostRule, options?: AddHostRuleOptions): void {
       toBase64(`${rule.username}:${rule.password}`),
     );
   }
-  hostRules.push(rule);
+}
+
+/**
+ * The platform host types whose host rules `findMatchingRule()` falls back to for the other host types of their family.
+ */
+const fallbackPlatformHostTypes = [
+  'bitbucket',
+  'bitbucket-server',
+  'forgejo',
+  'gitea',
+  'github',
+  'gitlab',
+] as const satisfies PlatformFamilyId[];
+
+/**
+ * Returns `hostTypes` and the platform host type each of them falls back to.
+ */
+function withFallbackHostTypes(hostTypes: string[]): string[] {
+  const platformHostTypes = fallbackPlatformHostTypes.filter((platform) =>
+    PLATFORM_FAMILIES[platform].apiUsingHostTypes.some((hostType) =>
+      hostTypes.includes(hostType),
+    ),
+  );
+  return [...hostTypes, ...platformHostTypes];
+}
+
+/**
+ * Whether a request of `url` with any `hostType` falls back to the `github` host rules: a request of the GitHub.com API, or of the host of the GitHub platform endpoint, such as GitHub Enterprise Server or GitHub Enterprise Cloud.
+ */
+export function usesGithubUrlFallback(url: string): boolean {
+  if (url.startsWith('https://api.github.com/')) {
+    return true;
+  }
+  const platformEndpoint = GlobalConfig.get('endpoint');
+  if (GlobalConfig.get('platform') !== 'github' || !platformEndpoint) {
+    return false;
+  }
+  const requestHost = parseUrl(url)?.hostname;
+  return !!requestHost && requestHost === parseUrl(platformEndpoint)?.hostname;
+}
+
+/**
+ * Whether `rule` was registered by {@link detachUrlCredentials}.
+ */
+function isDetached(rule: RegisteredHostRule): boolean {
+  return detachedRules.has(rule);
+}
+
+/**
+ * Returns the host rules other than those registered by {@link detachUrlCredentials}.
+ */
+function configuredRules(): RegisteredHostRule[] {
+  return hostRules.filter((rule) => !isDetached(rule));
+}
+
+/**
+ * Whether {@link find} matches `rule` for a search with `readOnly` whatever its `hostType`: when the rule sets `readOnly` to the same value.
+ */
+function matchesReadOnly(
+  rule: HostRule,
+  readOnly: boolean | undefined,
+): boolean {
+  return !isUndefined(rule.readOnly) && rule.readOnly === readOnly;
+}
+
+/**
+ * Whether `rule` applies to the scope `matchHost` of {@link detachUrlCredentials} requested with one of `hostTypes`: a detached rule only for the same `matchHost`, any other rule when it has no `hostType`, one of `hostTypes` or `readOnly: true`, and no `matchHost` or one which matches `matchHost` or lies within it.
+ */
+function appliesToScope(
+  rule: RegisteredHostRule,
+  matchHost: string,
+  hostTypes: string[],
+): boolean {
+  if (isDetached(rule)) {
+    return rule.matchHost === matchHost && hostTypes.includes(rule.hostType!);
+  }
+  // a rule for another `hostType`, such as the platform's for the same host, is not used for these requests
+  // unless it is one for read-only requests, which `find()` uses for the lookups whatever their `hostType`
+  if (
+    rule.hostType &&
+    !hostTypes.includes(rule.hostType) &&
+    !matchesReadOnly(rule, true)
+  ) {
+    return false;
+  }
+  return (
+    !rule.matchHost ||
+    matchesHost(matchHost, rule.matchHost) ||
+    matchesHost(rule.matchHost, matchHost)
+  );
+}
+
+/**
+ * Whether a host rule which {@link appliesToScope} `matchHost` requested with one of `hostTypes`, the platform host type they fall back to, or `github` when {@link usesGithubUrlFallback} for `matchHost`, supplies credentials.
+ */
+function hasConfiguredCredentials(
+  matchHost: string,
+  hostTypes: string[],
+): boolean {
+  const searchedHostTypes = withFallbackHostTypes(hostTypes);
+  if (usesGithubUrlFallback(matchHost)) {
+    searchedHostTypes.push('github');
+  }
+  return hostRules.some(
+    (rule) =>
+      appliesToScope(rule, matchHost, searchedHostTypes) &&
+      [rule.username, rule.password, rule.token].some(
+        (value) => !isUndefined(value),
+      ),
+  );
+}
+
+/**
+ * Returns `text` without the userinfo of the URL at its start, or `text` unchanged when that URL has none.
+ */
+function withoutLeadingUserinfo(text: string): string {
+  // only a userinfo at the start of `text` belongs to that URL, a later one is part of its path or query
+  const [match] = text.matchAll(urlUserinfoRegex);
+  if (match?.index !== 0) {
+    return text;
+  }
+  return `${match.groups!.scheme}://${text.slice(match[0].length)}`;
+}
+
+/**
+ * Returns `url` without its userinfo, spelled as given, or as the parser normalizes it when the two disagree.
+ */
+function withoutUserinfo(url: string, parsed: URL): string {
+  const stripped = withoutLeadingUserinfo(url);
+  const reparsed = parseUrl(stripped);
+  if (
+    reparsed?.host !== parsed.host ||
+    reparsed?.username ||
+    reparsed?.password
+  ) {
+    return stripUrlCredentials(parsed);
+  }
+  return stripped;
+}
+
+/**
+ * Returns the parsed `url` when it is an HTTP(S) URL with a userinfo other than a placeholder username alone, or `null`.
+ */
+function parseUserinfoUrl(url: string): URL | null {
+  if (!url.includes('@')) {
+    return null;
+  }
+  const parsed = parseUrl(url);
+  if (!parsed || !isHttpUrl(parsed) || (!parsed.username && !parsed.password)) {
+    return null;
+  }
+  // a rule for the placeholder would supply it as a credential and stop the lookup which resolves the real one
+  if (!parsed.password && isPlaceholderUsername(parsed.username)) {
+    return null;
+  }
+  return parsed;
+}
+
+/**
+ * Whether the password of `parsed` is a template placeholder, or the username when there is no password, as {@link isCredentialUserinfo} reads them.
+ */
+function hasTemplatePlaceholder(parsed: URL): boolean {
+  // the URL parser percent-encodes the braces of a placeholder, which `isUserinfoPlaceholder` decodes
+  // a placeholder username next to a literal password does not make that password a placeholder
+  return isUserinfoPlaceholder(parsed.password || parsed.username);
+}
+
+/**
+ * Whether the userinfo of `parsed` holds a credential according to {@link isCredentialUserinfo}.
+ */
+function hasCredentialUserinfo(parsed: URL): boolean {
+  const scheme = parsed.protocol.slice(0, -1);
+  const userinfo = parsed.password
+    ? `${parsed.username}:${parsed.password}`
+    : parsed.username;
+  return isCredentialUserinfo(
+    scheme,
+    userinfo,
+    `${parsed.host}${parsed.pathname}`,
+  );
+}
+
+/**
+ * The minimum length of a credential from a URL which is registered for sanitizing.
+ */
+const minSanitizedUrlSecretLength = 16;
+
+/**
+ * Registers each of `secrets` for sanitizing which is at least {@link minSanitizedUrlSecretLength} characters long.
+ */
+function addUrlSecretsForSanitizing(secrets: string[]): void {
+  for (const secret of secrets.filter(
+    (value) => value.length >= minSanitizedUrlSecretLength,
+  )) {
+    sanitize.addSecretForSanitizing(secret);
+  }
+}
+
+/**
+ * The prefix of a crate sparse registry URL such as `sparse+https://`, which is requested without it.
+ */
+const sparsePrefix = 'sparse+';
+
+/**
+ * Moves the `user:password@` userinfo of an HTTP(S) URL, or of the HTTP(S) URL of a `sparse+https://` one, into a host rule per host type in `hostTypes` for the path of that URL and every path below it, unless credentials for that host type are already supplied by a rule registered from URL credentials for exactly that path and host type, or by another rule for no host type, that host type or the platform host type it falls back to, which has no `matchHost` or one for that path, a path above or a path below it.
+ * The credentials are dropped when no host type is left.
+ *
+ * @param hostTypes the host types the URL is requested with
+ * @returns the URL with only its userinfo removed, or `url` unchanged when it carries none, only a placeholder username, a short username or a username equal to its first path segment
+ */
+export function detachUrlCredentials(url: string, hostTypes: string[]): string {
+  // the crate datasource requests a `sparse+https://` registry by its `https://` URL
+  if (url.startsWith(sparsePrefix)) {
+    return `${sparsePrefix}${detachUrlCredentials(url.slice(sparsePrefix.length), hostTypes)}`;
+  }
+  const parsed = parseUserinfoUrl(url);
+  if (!parsed) {
+    return url;
+  }
+  // textually, so that the URL is spelled as the same URL without credentials
+  const strippedUrl = withoutUserinfo(url, parsed);
+  // a `${USER}:${PASS}@` placeholder is not a credential either, the configured rules supply it
+  if (hasTemplatePlaceholder(parsed)) {
+    return strippedUrl;
+  }
+  if (!hasCredentialUserinfo(parsed)) {
+    return url;
+  }
+  const username = decodeUserinfo(parsed.username);
+  const password = decodeUserinfo(parsed.password);
+  // `token@host` is Basic auth with the token as the username
+  // a short credential is more likely a plain account name than a token, and would redact every occurrence of that name, such as in branch names
+  const secret = password || username;
+  // the path of the URL without its query, and every path below it, but no sibling path such as `/projects/10` next to `/projects/1`
+  const scopeUrl = trimTrailingSlash(`${parsed.origin}${parsed.pathname}`);
+  // a `matchHost` ending with a slash also matches the URL of that path itself
+  const matchHost = `${scopeUrl}/`;
+  // configured credentials for the path win over the ones embedded in a URL, so a repository cannot replace them
+  // a configured rule counts for the `hostType` it is used with by `find()`: without one, the same one, or the platform host type it falls back to
+  // a configured rule for a path below this one counts as well, as the rule registered here would override its token on the requests below that path
+  // this also keeps the credentials registered first for the same path and `hostType`, while those of a narrower path are registered next to them and win below it
+  const unsuppliedHostTypes = [...new Set(hostTypes)].filter(
+    (hostType) => !hasConfiguredCredentials(matchHost, [hostType]),
+  );
+  if (!unsuppliedHostTypes.length) {
+    // dropped, but still redacted wherever the URL is repeated
+    addUrlSecretsForSanitizing([secret]);
+    return strippedUrl;
+  }
+  // one rule per `hostType`, so that only the requests of those host types receive the credentials
+  // registered without `add()`, which would register a short password for sanitizing as well
+  for (const hostType of unsuppliedHostTypes) {
+    detachedRules.add(register({ hostType, matchHost, username, password }));
+  }
+  // the same credentials detached again for other host types keep a single entry, so that their hash does not change
+  const isKnown = detachedCredentials.some(
+    (credentials) =>
+      credentials.url === scopeUrl &&
+      credentials.username === username &&
+      credentials.password === password,
+  );
+  if (!isKnown) {
+    detachedCredentials.push({ url: scopeUrl, username, password });
+  }
+  const basicAuth = password ? toBase64(`${username}:${password}`) : '';
+  addUrlSecretsForSanitizing([secret, basicAuth]);
+  return strippedUrl;
+}
+
+/**
+ * Matches the characters which may follow a URL inside a text without extending its last path segment.
+ */
+const urlEndRegex = regEx(/^(?:[/?#:,\s]|$)/);
+
+/**
+ * Matches the scheme, host, numeric port and path of the URL at the start of a text, if any, which ends at its query, fragment, a comma, whitespace or a colon after the host.
+ */
+const leadingUrlRegex = regEx(
+  /^(?:[a-z][a-z\d+.-]*:\/\/[^/?#,\s:]*(?::\d+)?(?:\/[^?#,\s]*)?)?/i,
+);
+
+/**
+ * Returns `text` with the origin and path of the HTTP(S) URL at its start spelled as {@link detachUrlCredentials} scopes them, or `text` unchanged when there is no such URL or it has a userinfo.
+ */
+function withNormalizedLeadingUrl(text: string): string {
+  // the regex matches every text, an empty match when it does not start with a URL
+  const [leadingUrl] = leadingUrlRegex.exec(text)!;
+  const parsed = parseUrl(leadingUrl);
+  if (!parsed || !isHttpUrl(parsed) || parsed.username || parsed.password) {
+    return text;
+  }
+  const scopeUrl = trimTrailingSlash(`${parsed.origin}${parsed.pathname}`);
+  return `${scopeUrl}${text.slice(leadingUrl.length)}`;
+}
+
+/**
+ * Whether {@link detachUrlCredentials} registered any credentials.
+ */
+export function hasDetachedCredentials(): boolean {
+  return detachedCredentials.length > 0;
+}
+
+/**
+ * Returns the username and password which {@link detachUrlCredentials} registered for `url` requested with `hostType`, those of the longest matching path, or `null` when there are none.
+ */
+export function findDetachedCredentials({
+  hostType,
+  url,
+}: {
+  hostType: string;
+  url: string;
+}): Pick<HostRule, 'username' | 'password'> | null {
+  const rule = hostRules
+    .filter(
+      (rule) =>
+        isDetached(rule) &&
+        rule.hostType === hostType &&
+        matchesHost(url, rule.matchHost!),
+    )
+    .sort(fromShorterToLongerMatchHost)
+    .pop();
+  if (!rule) {
+    return null;
+  }
+  return { username: rule.username, password: rule.password };
+}
+
+/**
+ * Returns the SHA-256 of the credentials which {@link detachUrlCredentials} registered for the URL at the start of `text`, in any spelling of its origin and path and with or without its userinfo, or `null` when there are none.
+ */
+export function getDetachedCredentialsHash(text: string): string | null {
+  // a `sparse+https://` URL has the credentials of its `https://` URL
+  const urlText = text.startsWith(sparsePrefix)
+    ? text.slice(sparsePrefix.length)
+    : text;
+  // compared as given and without the userinfo of its URL: `find()` ignores that userinfo, while in a key such as `https://host:@scope/pkg` it is part of a package name
+  const normalizedTexts = [urlText, withoutLeadingUserinfo(urlText)].map(
+    withNormalizedLeadingUrl,
+  );
+  const credentials = detachedCredentials
+    .filter(({ url }) =>
+      normalizedTexts.some(
+        (normalizedText) =>
+          normalizedText.startsWith(url) &&
+          urlEndRegex.test(normalizedText.slice(url.length)),
+      ),
+    )
+    .map(({ username, password }) => [username, password]);
+  if (!credentials.length) {
+    return null;
+  }
+  return toSha256(JSON.stringify(credentials));
 }
 
 export interface HostRuleSearch {
@@ -245,7 +638,16 @@ export interface HostRuleSearch {
   readOnly?: boolean;
 }
 
-export function matchesHost(url: string, matchHost: string): boolean {
+export interface MatchesHostOptions {
+  /** match an HTTP(S) `url` by its prefix only, so that a `matchHost` ending with a slash does not match the URL of that path without the slash */
+  prefixOnly?: boolean;
+}
+
+export function matchesHost(
+  url: string,
+  matchHost: string,
+  { prefixOnly = false }: MatchesHostOptions = {},
+): boolean {
   const parsedUrl = parseUrl(url);
   if (!parsedUrl) {
     return false;
@@ -253,8 +655,15 @@ export function matchesHost(url: string, matchHost: string): boolean {
 
   const parsedMatchHost = parseUrl(matchHost);
   if (isHttpUrl(parsedUrl) && isHttpUrl(parsedMatchHost)) {
+    const { href } = parsedMatchHost!;
     // ignore any userinfo (`user:pass@`) on the searched URL, so a `matchHost` without credentials still matches
-    return stripUrlCredentials(parsedUrl).startsWith(parsedMatchHost!.href);
+    // a `matchHost` ending with a slash also matches the URL of that path itself, without the slash
+    return (
+      stripUrlCredentials(parsedUrl).startsWith(href) ||
+      (!prefixOnly &&
+        ensureTrailingSlash(`${parsedUrl.origin}${parsedUrl.pathname}`) ===
+          href)
+    );
   }
 
   const { hostname } = parsedUrl;
@@ -369,7 +778,7 @@ export function find(
     if (!isUndefined(rule.readOnly)) {
       readOnlyMatch = false;
       // v8 ignore else -- TODO: add test #40625
-      if (search.readOnly === rule.readOnly) {
+      if (matchesReadOnly(rule, search.readOnly)) {
         readOnlyMatch = true;
         hostTypeMatch = true; // When we match `readOnly`, we don't care about `hostType`
       }
@@ -471,8 +880,10 @@ export function find(
   return res;
 }
 
+// the functions below leave out the rules registered by `detachUrlCredentials()`, which apply only to the requests `find()` is searched for
+
 export function hosts({ hostType }: { hostType: string }): string[] {
-  return hostRules
+  return configuredRules()
     .filter((rule) => rule.hostType === hostType)
     .map((rule) => rule.resolvedHost)
     .filter(isTruthy);
@@ -480,7 +891,7 @@ export function hosts({ hostType }: { hostType: string }): string[] {
 
 export function hostType({ url }: { url: string }): string | null {
   return (
-    hostRules
+    configuredRules()
       .filter((rule) => rule.matchHost && matchesHost(url, rule.matchHost))
       .sort(fromShorterToLongerMatchHost)
       .map((rule) => rule.hostType)
@@ -490,18 +901,20 @@ export function hostType({ url }: { url: string }): string | null {
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
-  return hostRules.filter((rule) => rule.hostType === hostType);
+  return configuredRules().filter((rule) => rule.hostType === hostType);
 }
 
 /**
- * @returns a deep copy of all known host rules without any filtering
+ * @returns a deep copy of all host rules other than those registered by {@link detachUrlCredentials}
  */
 export function getAll(): HostRule[] {
-  return clone(hostRules);
+  return clone(configuredRules());
 }
 
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
+  detachedCredentials = [];
+  detachedRules = new WeakSet();
   sanitize.clearRepoSanitizedSecretsList();
 }

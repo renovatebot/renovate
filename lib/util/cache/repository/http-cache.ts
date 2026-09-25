@@ -7,6 +7,7 @@ import {
   pickHeaders,
 } from '../../http/cache/persisted-headers.ts';
 import { HttpCache } from '../../http/cache/schema.ts';
+import { hashUserinfoAndQuery } from '../sanitize-key.ts';
 import type { RepoCacheData } from './types.ts';
 
 export function cleanupHttpCache(cacheData: RepoCacheData): void {
@@ -34,6 +35,12 @@ export function cleanupHttpCache(cacheData: RepoCacheData): void {
       })),
     );
   for (const { httpCache, url, item } of entries) {
+    // an entry under a key with credentials or a query string is never read again, as the key is sanitized first
+    if (hashUserinfoAndQuery(url) !== url) {
+      logger.debug('http cache: removing an entry with an unsanitized key');
+      delete httpCache[url];
+      continue;
+    }
     const parsed = HttpCache.safeParse(item);
     if (!parsed.success || !parsed.data) {
       logger.debug(`http cache: removing invalid cache for ${url}`);

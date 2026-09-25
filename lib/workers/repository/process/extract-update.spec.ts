@@ -1,11 +1,16 @@
-import { fakeSha, logger, scm } from '~test/util.ts';
+import { fakeSha, logger, partial, scm } from '~test/util.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
-import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
+import type {
+  BaseBranchCache,
+  RepoCacheData,
+} from '../../../util/cache/repository/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { sanitize } from '../../../util/sanitize.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
-import * as _extractIndex from '../extract/index.ts';
+import * as _extractAll from '../extract/index.ts';
 import * as _branchify from '../updates/branchify.ts';
 import {
   EXTRACT_CACHE_REVISION,
@@ -37,7 +42,7 @@ vi.mock('../extract/index.ts');
 vi.mock('../../../util/cache/repository/index.ts');
 
 const branchify = vi.mocked(_branchify);
-const extractAllDependencies = vi.mocked(_extractIndex.extractAllDependencies);
+const extractAll = vi.mocked(_extractAll);
 const repositoryCache = vi.mocked(_repositoryCache);
 const fetch = vi.mocked(_fetch);
 const write = vi.mocked(_write);
@@ -60,6 +65,10 @@ describe('workers/repository/process/extract-update', () => {
   });
 
   describe('extract()', () => {
+    afterEach(() => {
+      hostRules.clear();
+    });
+
     it('runs with no baseBranchPatterns', async () => {
       const config = {
         repoIsOnboarded: true,
@@ -155,6 +164,417 @@ describe('workers/repository/process/extract-update', () => {
       expect(res).toEqual(packageFiles);
     });
 
+    it('extracts again when cached registry URLs hold credentials', async () => {
+      const registryUrl = 'https://user:pass@reg.example.com/npm';
+      const cachedPackageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            registryUrls: [registryUrl],
+            deps: [{ depName: 'foo' }],
+          },
+        ],
+      };
+      const config = {
+        repoIsOnboarded: true,
+        baseBranch: 'master',
+      };
+      const cache: RepoCacheData = {
+        scan: {
+          master: {
+            revision: EXTRACT_CACHE_REVISION,
+            sha: branchSha,
+            configHash: fingerprint(generateFingerprintConfig(config)),
+            extractionFingerprints: {},
+            packageFiles: cachedPackageFiles,
+          },
+        },
+      };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles: {
+          npm: [
+            {
+              packageFile: 'package.json',
+              registryUrls: [registryUrl],
+              deps: [{ depName: 'foo', datasource: 'npm' }],
+            },
+          ],
+        },
+        extractionFingerprints: {},
+      });
+
+      const res = await extract(config);
+
+      expect(scm.checkoutBranch).toHaveBeenCalledWith('master');
+      expect(res.npm[0].registryUrls).toEqual(['https://reg.example.com/npm']);
+      expect(
+        hostRules.find({ hostType: 'npm', url: 'https://reg.example.com/npm' }),
+      ).toMatchObject({
+        username: 'user',
+        password: 'pass',
+      });
+      expect(cache.scan).toEqual({});
+    });
+
+    it('does not cache a fresh extract whose registry URLs hold credentials', async () => {
+      const cache: RepoCacheData = {
+        scan: { master: partial<BaseBranchCache>({ sha: 'old' }) },
+      };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      const registryUrl = 'https://user:pass@reg.example.com/npm';
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles: {
+          npm: [
+            {
+              packageFile: 'package.json',
+              registryUrls: [registryUrl],
+              additionalRegistryUrls: [registryUrl],
+              deps: [
+                {
+                  depName: 'foo',
+                  datasource: 'npm',
+                  registryUrls: [registryUrl],
+                },
+                { depName: 'bar', datasource: 'npm' },
+              ],
+            },
+            { packageFile: 'other/package.json', deps: [] },
+          ],
+        },
+        extractionFingerprints: {},
+      });
+
+      const res = await extract({
+        repoIsOnboarded: true,
+        baseBranch: 'master',
+      });
+
+      const stripped = 'https://reg.example.com/npm';
+      expect(res).toEqual({
+        npm: [
+          {
+            packageFile: 'package.json',
+            registryUrls: [stripped],
+            additionalRegistryUrls: [stripped],
+            deps: [
+              { depName: 'foo', datasource: 'npm', registryUrls: [stripped] },
+              { depName: 'bar', datasource: 'npm' },
+            ],
+          },
+          { packageFile: 'other/package.json', deps: [] },
+        ],
+      });
+      expect(hostRules.find({ hostType: 'npm', url: stripped })).toMatchObject({
+        username: 'user',
+        password: 'pass',
+      });
+      expect(hostRules.find({ url: stripped })).toEqual({});
+      expect(hostRules.getAll()).toBeEmptyArray();
+      expect(cache.scan).toEqual({});
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { baseBranch: 'master' },
+        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+      );
+    });
+
+    it('caches a fresh extract whose registry URLs hold no credentials', async () => {
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            registryUrls: ['https://${USER}:${PASS}@reg.example.com/npm'],
+            deps: [{ depName: 'foo' }],
+          },
+        ],
+      };
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+      const config = { repoIsOnboarded: true, baseBranch: 'master' };
+
+      await extract(config);
+
+      expect(cache.scan?.master).toEqual({
+        revision: EXTRACT_CACHE_REVISION,
+        sha: branchSha,
+        configHash: fingerprint(generateFingerprintConfig(config)),
+        extractionFingerprints: {},
+        packageFiles: {
+          npm: [
+            {
+              packageFile: 'package.json',
+              registryUrls: ['https://reg.example.com/npm'],
+              deps: [{ depName: 'foo' }],
+            },
+          ],
+        },
+      });
+      expect(hostRules.getAll()).toBeEmptyArray();
+    });
+
+    it('keeps the credentials of a host rule for the host for its hostType only', async () => {
+      hostRules.add(
+        { hostType: 'maven', matchHost: 'reg.example.com', token: 'admin' },
+        { trusted: true },
+      );
+      const registryUrl = 'https://user:pass@reg.example.com/maven';
+      const packageFiles: Record<string, PackageFile[]> = {
+        gradle: [
+          {
+            packageFile: 'build.gradle',
+            registryUrls: [registryUrl],
+            deps: [
+              { depName: 'foo', datasource: 'npm' },
+              {
+                depName: 'bar',
+                datasource: 'maven',
+                registryUrls: [registryUrl],
+              },
+            ],
+          },
+        ],
+      };
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(JSON.stringify(packageFiles)).not.toContain('user:pass@');
+      expect(hostRules.getAll()).toHaveLength(1);
+      // the configured credentials win for their hostType, the npm deps get the ones from the URL
+      const maven = hostRules.find({
+        hostType: 'maven',
+        url: 'https://reg.example.com/maven',
+      });
+      expect(maven.token).toBe('admin');
+      expect(maven.username).toBeUndefined();
+      expect(
+        hostRules.find({
+          hostType: 'npm',
+          url: 'https://reg.example.com/maven',
+        }),
+      ).toMatchObject({ username: 'user', password: 'pass' });
+    });
+
+    it('keeps the credentials of a host rule without matchHost for the datasource of the URLs', async () => {
+      hostRules.add({ hostType: 'maven', token: 'admin' }, { trusted: true });
+      const registryUrl = 'https://user:pass@reg.example.com/maven';
+      const otherUrl = 'https://user:pass@other.example.com/maven';
+      const packageFiles: Record<string, PackageFile[]> = {
+        gradle: [
+          {
+            packageFile: 'build.gradle',
+            registryUrls: [registryUrl],
+            deps: [
+              { depName: 'foo', datasource: 'maven' },
+              { depName: 'bar', datasource: 'maven' },
+            ],
+          },
+          {
+            packageFile: 'other.gradle',
+            datasource: 'maven',
+            additionalRegistryUrls: [registryUrl],
+            deps: [],
+          },
+          {
+            packageFile: 'deps.gradle',
+            deps: [
+              {
+                depName: 'baz',
+                datasource: 'maven',
+                registryUrls: [registryUrl],
+              },
+              {
+                depName: 'qux',
+                datasource: 'npm',
+                registryUrls: [otherUrl],
+              },
+              { depName: 'quux', registryUrls: [otherUrl] },
+            ],
+          },
+        ],
+      };
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(JSON.stringify(packageFiles)).not.toContain('user:pass@');
+      expect(hostRules.getAll()).toMatchObject([
+        { hostType: 'maven', token: 'admin' },
+      ]);
+      const maven = hostRules.find({
+        hostType: 'maven',
+        url: 'https://reg.example.com/maven/foo',
+      });
+      expect(maven.token).toBe('admin');
+      expect(maven.username).toBeUndefined();
+      expect(
+        hostRules.find({
+          hostType: 'npm',
+          url: 'https://other.example.com/maven/foo',
+        }),
+      ).toMatchObject({ username: 'user', password: 'pass' });
+    });
+
+    it('registers the credentials for the host type a custom datasource requests with', async () => {
+      const registryUrl = 'https://user:pass@reg.example.com/custom';
+      const packageFiles: Record<string, PackageFile[]> = {
+        regex: [
+          {
+            packageFile: 'versions.txt',
+            registryUrls: [registryUrl],
+            deps: [
+              {
+                depName: 'foo',
+                datasource: 'custom.foo',
+                registryUrls: [registryUrl],
+              },
+              { depName: 'bar', datasource: 'does-not-exist' },
+            ],
+          },
+        ],
+      };
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(JSON.stringify(packageFiles)).not.toContain('user:pass@');
+      expect(
+        hostRules.find({
+          hostType: 'custom',
+          url: 'https://reg.example.com/custom/foo',
+        }),
+      ).toMatchObject({ username: 'user', password: 'pass' });
+      expect(
+        hostRules.find({
+          hostType: 'custom.foo',
+          url: 'https://reg.example.com/custom/foo',
+        }),
+      ).toEqual({});
+      expect(
+        hostRules.find({
+          hostType: 'does-not-exist',
+          url: 'https://reg.example.com/custom/foo',
+        }),
+      ).toEqual({});
+    });
+
+    it('only strips the credentials of registry URLs for a datasource without custom registry support', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            packageFile: 'go.mod',
+            deps: [
+              {
+                depName: 'git.example.com/org/mod',
+                datasource: 'go',
+                registryUrls: [
+                  'https://user:secret-password-1234@git.example.com/',
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(packageFiles.gomod[0].deps[0].registryUrls).toEqual([
+        'https://git.example.com/',
+      ]);
+      expect(
+        hostRules.find({
+          hostType: 'go',
+          url: 'https://git.example.com/org/mod',
+        }),
+      ).toEqual({});
+      expect(sanitize('secret-password-1234')).toBe('**redacted**');
+      expect(cache.scan).toEqual({});
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { baseBranch: 'master' },
+        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+      );
+    });
+
+    it('registers the credentials of registry URLs for a datasource with custom registry support and does not cache the extract', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'foo',
+                datasource: 'npm',
+                registryUrls: [
+                  'https://user:secret-password-5678@reg.example.com/npm',
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(packageFiles.npm[0].deps[0].registryUrls).toEqual([
+        'https://reg.example.com/npm',
+      ]);
+      expect(
+        hostRules.find({
+          hostType: 'npm',
+          url: 'https://reg.example.com/npm/foo',
+        }),
+      ).toMatchObject({ username: 'user', password: 'secret-password-5678' });
+      expect(cache.scan).toEqual({});
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { baseBranch: 'master' },
+        'The registry URLs contain credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+      );
+    });
+
     describe('cached package files', () => {
       const config = { repoIsOnboarded: true, baseBranch: 'master' };
       let cache: { scan: Record<string, BaseBranchCache> };
@@ -178,7 +598,7 @@ describe('workers/repository/process/extract-update', () => {
       }
 
       it('stores a copy of the extracted package files', async () => {
-        extractAllDependencies.mockResolvedValueOnce({
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
           packageFiles: createPackageFiles(),
           extractionFingerprints: {},
         });
@@ -627,6 +1047,43 @@ describe('workers/repository/process/extract-update', () => {
     it('valid if fingerprints are unchanged', () => {
       cachedExtract.configHash = 'hash';
       cachedExtract.extractionFingerprints = { npm: hashMap.get('npm')! };
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
+    });
+
+    const registryUrls = ['https://user:pass@reg.example.com/npm'];
+
+    it.each`
+      field                       | file
+      ${'registryUrls'}           | ${{ registryUrls, deps: [{ depName: 'foo' }] }}
+      ${'additionalRegistryUrls'} | ${{ additionalRegistryUrls: registryUrls, deps: [] }}
+      ${'dep registryUrls'}       | ${{ deps: [{ depName: 'foo' }, { depName: 'bar', registryUrls }] }}
+    `('invalid if $field hold URL credentials', ({ file }) => {
+      cachedExtract.configHash = 'hash';
+      cachedExtract.packageFiles = {
+        npm: [{ packageFile: 'package.json', ...file }],
+      };
+
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Cached extract has registry URLs with credentials, so cannot be used',
+      );
+    });
+
+    it('valid if registry URLs hold no credentials', () => {
+      cachedExtract.configHash = 'hash';
+      cachedExtract.packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            registryUrls: ['https://reg.example.com/npm'],
+            deps: [
+              { depName: 'foo', registryUrls: ['https://reg.example.com'] },
+            ],
+          },
+        ],
+      };
+
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
     });
 
