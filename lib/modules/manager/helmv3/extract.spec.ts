@@ -154,6 +154,43 @@ describe('modules/manager/helmv3/extract', () => {
       ]);
     });
 
+    it('resolves registryAliases for OCI chart dependencies', async () => {
+      const content = `
+      apiVersion: v2
+      name: example
+      version: 0.1.0
+      dependencies:
+        - name: mirrored
+          version: 1.0.0
+          repository: oci://mirror.example.com/charts.example.com/org
+        - name: direct
+          version: 2.0.0
+          repository: oci://registry.example.com/org
+      `;
+      const fileName = 'Chart.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          'mirror.example.com/charts.example.com': 'charts.example.com',
+        },
+      });
+      expect(result?.deps).toEqual([
+        {
+          currentValue: '1.0.0',
+          datasource: DockerDatasource.id,
+          depName: 'mirrored',
+          packageName: 'charts.example.com/org/mirrored',
+          pinDigests: false,
+        },
+        {
+          currentValue: '2.0.0',
+          datasource: DockerDatasource.id,
+          depName: 'direct',
+          packageName: 'registry.example.com/org/direct',
+          pinDigests: false,
+        },
+      ]);
+    });
+
     it("doesn't fail if Chart.yaml is invalid", async () => {
       const content = `
       Invalid Chart.yaml content.
