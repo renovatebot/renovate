@@ -83,6 +83,30 @@ If you have immortal PRs which you want to keep closed, then set `"recreateWhen"
 Avoid grouping major upgrades together unless they are related dependencies.
 Instead, set `"dependencyDashboardApproval": true` for major updates so that you have control about when they are created.
 
+## Abandoned PRs
+
+Renovate normally cleans up its own branches and PRs once it decides they are no longer needed, for example after you merge or close a PR.
+Depending on the state of the branch, Renovate either autocloses the PR and deletes the branch, or leaves the branch alone.
+
+If someone other than Renovate modified the branch, Renovate will not destroy that work by autoclosing the PR and deleting the branch.
+
+Instead, Renovate flags the PR as abandoned by:
+
+- Appending `- abandoned` to the PR title
+- Adding a comment to the PR explaining that autoclosing was skipped
+
+This tells you that Renovate no longer considers the branch or PR its own, and will not touch it again.
+
+### Recommended actions for abandoned PRs
+
+Renovate will not rebase, update, or close an abandoned PR again, so you need to deal with it manually:
+
+- If the changes are still wanted, review and merge the PR yourself
+- If the changes are no longer wanted, close the PR and delete the branch yourself
+- If you want Renovate to manage the update again, delete the branch so Renovate can recreate it on its next run, if still needed
+
+Related config option: [`pruneStaleBranches`](../configuration-options.md#prunestalebranches).
+
 ## Ignoring PRs
 
 Close a Renovate PR to ignore it.
