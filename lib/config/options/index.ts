@@ -3594,6 +3594,16 @@ const options: Readonly<RenovateOptions>[] = [
     experimentalIssues: [41485],
   },
   {
+    name: 'prMergeabilityCheckAttempts',
+    description:
+      'Number of times to try enabling platform automerge on a PR while the platform is still checking whether it is mergeable.',
+    type: 'integer',
+    default: 5,
+    globalOnly: true,
+    supportedPlatforms: ['forgejo', 'gitea'],
+    experimental: true,
+  },
+  {
     name: 'dockerMaxPages',
     description:
       'By default, Renovate fetches up to 20 pages of Docker tags from registries. But you can set your own limit with this config option.',

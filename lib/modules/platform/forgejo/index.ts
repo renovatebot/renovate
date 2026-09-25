@@ -58,6 +58,7 @@ export const {
   initPlatform,
   initRepo,
   mergePr,
+  reattemptPlatformAutomerge,
   setBranchStatus,
   updatePr,
 } = platform;
