@@ -644,6 +644,34 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain(`${upgrade.newValue} // indirect`);
     });
 
+    it('should keep the branch marker on a digest update', () => {
+      const fileContent = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        require github.com/foo/bar v1.2.4-0.20210101000000-abcdefabcdef // renovate: branch=main
+      `;
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade: {
+          depName: 'github.com/foo/bar',
+          managerData: { lineNumber: 2 },
+          updateType: 'digest',
+          currentValue: 'main',
+          newValue: 'main',
+          currentDigest: 'abcdefabcdef',
+          newDigest: '0123456789ab0123456789ab0123456789ab0123',
+          depType: 'require',
+        },
+      });
+      // `go get` turns the commit into a pseudo-version and keeps the comment
+      expect(res).toBe(codeBlock`
+        module github.com/renovate-tests/gomod
+
+        require github.com/foo/bar 0123456789ab // renovate: branch=main
+      `);
+    });
+
     it('should keep the note of an indirect dependency', () => {
       const fileContent = codeBlock`
         module github.com/renovate-tests/gomod

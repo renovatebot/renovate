@@ -121,3 +121,20 @@ If you add `gomodUpdateImportPaths` to `postUpdateOptions` then Renovate will al
 
 Ultimately: it is known and unavoidable that the majority of major Go upgrades won't be immediately mergeable.
 You might prefer to configure such major updates with `dependencyDashboardApproval=true` so that you can request them on demand, on supported platforms.
+
+### Following a branch
+
+A dependency pinned to a commit is written by Go as a [pseudo-version](https://go.dev/ref/mod#pseudo-versions).
+By default, Renovate treats it like any other version: once a release is tagged above it, Renovate proposes that release, and from then on the dependency follows releases.
+
+To keep following the commits of a branch instead, add a `renovate: branch=<name>` comment to the line:
+
+```gomod
+require github.com/example/module v1.4.1-0.20260717141412-a3b45fcdf451 // renovate: branch=main
+```
+
+Renovate then only proposes digest updates to the newest commit of that branch, and `go get` turns the commit into a new pseudo-version.
+Go keeps the comment, also when it marks the dependency as indirect with `// indirect; renovate: branch=main`.
+
+The comment is only read on pseudo-versions.
+Renovate can resolve the branch for modules hosted on GitHub, on GitLab and in plain Git repositories.
