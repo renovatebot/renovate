@@ -1,6 +1,7 @@
 export interface HelmDockerImageDependencyBasic {
   registry?: string;
-  repository: string;
+  name?: string;
+  repository?: string;
 }
 
 export interface HelmDockerImageDependencyTag extends HelmDockerImageDependencyBasic {
