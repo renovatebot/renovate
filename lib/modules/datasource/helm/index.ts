@@ -17,6 +17,7 @@ import * as helmVersioning from '../../versioning/helm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { HelmRepository } from './schema.ts';
+import { isPublicRepository } from './url.ts';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';
@@ -69,6 +70,7 @@ export class HelmDatasource extends Datasource {
       {
         namespace: `datasource-${HelmDatasource.id}`,
         key: `repository-data:${helmRepository}`,
+        cacheable: isPublicRepository(helmRepository),
       },
       () => this._getRepositoryData(helmRepository),
     );
