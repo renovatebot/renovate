@@ -287,7 +287,6 @@ export interface Platform {
    */
   isPrInMergeQueue?(number: number): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
-  addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
@@ -328,7 +327,6 @@ export interface Platform {
   tryReuseAutoclosedPr?(pr: Pr, newTitle: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
-  commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 

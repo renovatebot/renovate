@@ -644,13 +644,6 @@ describe('modules/platform/scm-manager/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
-    it('should Not implemented and return false', async () => {
-      const result = await scmPlatform.getRepoForceRebase();
-      expect(result).toBeFalse();
-    });
-  });
-
   describe('getRawFile', () => {
     it('should Not implemented and return null', async () => {
       const result = await scmPlatform.getRawFile('file');
