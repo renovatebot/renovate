@@ -104,15 +104,3 @@ Use `pnpm` for all commands (NOT npm/npx).
 - **Run from source:** `pnpm start` or `node lib/renovate.ts`
 
 Tests use Vitest (invoked via `pnpm vitest`). Test files use `.spec.ts` suffix and are co-located with source. Globals from `jest-extended` and `expect-more-jest` are available in tests.
-
-### Code conventions
-
-These add to [`docs/development/best-practices.md`](./docs/development/best-practices.md):
-
-- Spec files have exactly one root `describe`, named by the file path (e.g. `describe('workers/repository/process/extract-update', ...)`); nest any grouping inside it.
-- Write multi-line fixtures inline with the `codeBlock` helper and real indentation, not as joined arrays and not as new `__fixtures__` files.
-- Never put `await` inside a ternary or other conditional expression; use `if`/`else`, as V8 coverage misreports such constructs.
-- Prefer branch-free forms such as `.filter(isTruthy)` or `flatMap` over `if (!x) continue` in loops; each explicit branch needs its own test for full coverage.
-- Keep TSDoc to a factual statement of what a function does, without explanatory prose paragraphs.
-- Build strings with template literals rather than `+` in code you add or rewrite.
-- Do not remove existing `/* v8 ignore ... */` comments; document why the branch is unreachable instead. Before adding one, try to construct an input that reaches the branch, and prefer a real test.
