@@ -5868,6 +5868,26 @@ describe('modules/platform/github/index', () => {
       );
     });
 
+    it.each`
+      input                                                | expected
+      ${'> ℹ **Note**\n>\n> Some note text\n'}             | ${'> [!NOTE]\n> Some note text\n'}
+      ${'> ℹ️ **Note**\n> \n> Some note text\n'}           | ${'> [!NOTE]\n> Some note text\n'}
+      ${'> ⚠ **Warning**\n>\n> Some warning text\n'}       | ${'> [!WARNING]\n> Some warning text\n'}
+      ${'> ⚠️ **Warning**\n> \n> Some warning text\n'}     | ${'> [!WARNING]\n> Some warning text\n'}
+      ${'> 🛑 **Caution**\n>\n> Some caution text\n'}      | ${'> [!CAUTION]\n> Some caution text\n'}
+      ${'> ❗ **Important**\n> \n> Some important text\n'} | ${'> [!IMPORTANT]\n> Some important text\n'}
+    `('converts $input to GitHub alert syntax', ({ input, expected }) => {
+      expect(github.massageMarkdown(input)).toBe(expected);
+    });
+
+    it('converts the note added by smartTruncate() to GitHub alert syntax', () => {
+      const input = 'x'.repeat(github.maxBodyLength() + 1000);
+      const result = github.massageMarkdown(input);
+      expect(result).toContain(
+        '> [!NOTE]\n> This PR body was truncated due to platform limits.\n\n',
+      );
+    });
+
     it('returns not-updated pr body for GHE', async () => {
       const scope = httpMock
         .scope('https://github.company.com')
