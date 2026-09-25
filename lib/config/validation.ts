@@ -46,6 +46,7 @@ import {
 } from '../workers/repository/update/branch/schedule.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
+import { massageConfig } from './massage.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
@@ -1359,6 +1360,28 @@ async function validateGlobalConfig(
             subValidation.errors,
           )) {
             warnings.push(warning);
+          }
+        } else if (key === 'customPresets') {
+          for (const [presetName, preset] of Object.entries(val)) {
+            if (!isPlainObject(preset)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid \`${currentPath}.${presetName}\` configuration: preset must be an object.`,
+              });
+              continue;
+            }
+            const { migratedConfig } = migrateConfig(preset);
+            const subValidation = await validateConfig(
+              'repo',
+              massageConfig(migratedConfig),
+              true,
+              `${currentPath}.${presetName}`,
+            );
+            for (const warning of subValidation.warnings.concat(
+              subValidation.errors,
+            )) {
+              warnings.push(warning);
+            }
           }
         } else if (key === 'force') {
           // `force` is validated as a global config of its own, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
