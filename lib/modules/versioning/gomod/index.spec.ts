@@ -16,6 +16,7 @@ describe('modules/versioning/gomod/index', () => {
     ${'v1.2.3-pre'}                                        | ${false}
     ${'v2.0.0+incompatible'}                               | ${false}
     ${'v0.0.0'}                                            | ${false}
+    ${undefined}                                           | ${false}
   `('isPseudoVersion("$version") === $expected', ({ version, expected }) => {
     expect(isPseudoVersion(version)).toBe(expected);
   });
