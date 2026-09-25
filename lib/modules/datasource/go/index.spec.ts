@@ -2,7 +2,8 @@ import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
-import type { ReleaseResult } from '../index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
+import type { Release, ReleaseResult } from '../index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GoDatasource } from './index.ts';
 
@@ -39,8 +40,9 @@ vi.mock('./releases-direct.ts', () => {
 });
 
 const getReleasesProxyMock = vi.fn();
-vi.mock('./releases-goproxy.ts', () => {
+vi.mock('./releases-goproxy.ts', async (importOriginal) => {
   return {
+    ...(await importOriginal<typeof import('./releases-goproxy.ts')>()),
     GoProxyDatasource: vi.fn(
       class {
         getReleases = () => getReleasesProxyMock();
@@ -217,6 +219,117 @@ describe('modules/datasource/go/index', () => {
         );
         expect(res).toBeNull();
       });
+    });
+  });
+
+  describe('postprocessRelease', () => {
+    const pin = 'v2.7.1-0.20260618125644-2bf15250d004';
+
+    it.each`
+      currentValue | releaseTimestamp              | rejected
+      ${pin}       | ${'2026-06-05T21:39:16.000Z'} | ${true}
+      ${pin}       | ${'2026-06-18T12:56:44.000Z'} | ${false}
+      ${pin}       | ${'2026-07-17T14:01:16.000Z'} | ${false}
+      ${pin}       | ${undefined}                  | ${false}
+      ${'v2.7.0'}  | ${'2026-06-05T21:39:16.000Z'} | ${false}
+      ${undefined} | ${'2026-06-05T21:39:16.000Z'} | ${false}
+    `(
+      'rejects a release from $releaseTimestamp for $currentValue: $rejected',
+      async ({ currentValue, releaseTimestamp, rejected }) => {
+        const release: Release = {
+          version: 'v2.7.1',
+          releaseTimestamp: releaseTimestamp as Timestamp | undefined,
+        };
+        const res = await datasource.postprocessRelease(
+          {
+            packageName: 'github.com/foo/bar',
+            registryUrl: null,
+            currentValue,
+          },
+          release,
+        );
+        expect(res).toBe(rejected ? 'reject' : release);
+      },
+    );
+
+    it.each`
+      status        | releaseTimestamp              | rejected
+      ${'ahead'}    | ${'2026-06-05T21:39:16.000Z'} | ${false}
+      ${'diverged'} | ${'2026-07-06T01:23:10.000Z'} | ${true}
+    `(
+      'rejects a GitHub release from $releaseTimestamp which is $status of the pinned commit: $rejected',
+      async ({ status, releaseTimestamp, rejected }) => {
+        getDigestGithubMock.mockResolvedValueOnce('c5590db43374');
+        httpMock
+          .scope('https://api.github.com')
+          .get('/repos/foo/bar/compare/2bf15250d004...c5590db43374')
+          .reply(200, { status });
+        const release: Release = {
+          version: 'v2.7.2',
+          releaseTimestamp: releaseTimestamp as Timestamp,
+        };
+        const res = await datasource.postprocessRelease(
+          {
+            packageName: 'github.com/foo/bar',
+            registryUrl: null,
+            currentValue: pin,
+          },
+          release,
+        );
+        expect(res).toBe(rejected ? 'reject' : release);
+      },
+    );
+
+    it('falls back to the release time if GitHub cannot compare the commits', async () => {
+      getDigestGithubMock.mockResolvedValueOnce('c5590db43374');
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/foo/bar/compare/2bf15250d004...c5590db43374')
+        .reply(404);
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'github.com/foo/bar',
+          registryUrl: null,
+          currentValue: pin,
+        },
+        {
+          version: 'v2.7.1',
+          releaseTimestamp: '2026-06-05T21:39:16.000Z' as Timestamp,
+        },
+      );
+      expect(res).toBe('reject');
+    });
+
+    it('keeps a newer pseudo-version', async () => {
+      const release: Release = {
+        version: 'v2.7.1-0.20260620000000-0123456789ab',
+      };
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'github.com/foo/bar',
+          registryUrl: null,
+          currentValue: pin,
+        },
+        release,
+      );
+      expect(res).toBe(release);
+      expect(getDigestGithubMock).not.toHaveBeenCalled();
+    });
+
+    it('uses the release time on hosts which cannot compare commits', async () => {
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'bitbucket.org/foo/bar',
+          registryUrl: null,
+          currentValue: pin,
+        },
+        {
+          version: 'v2.7.1',
+          releaseTimestamp: '2026-06-05T21:39:16.000Z' as Timestamp,
+        },
+      );
+      expect(res).toBe('reject');
+      expect(getDigestBitbucketMock).not.toHaveBeenCalled();
     });
   });
 

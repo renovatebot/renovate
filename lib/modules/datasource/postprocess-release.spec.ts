@@ -158,6 +158,33 @@ describe('modules/datasource/postprocess-release', () => {
     expect(usedRegistryUrl).toBe('https://release-registry.example.com');
   });
 
+  it('passes the current value to `postprocessRelease` method', async () => {
+    const releaseOrig: Release = { version: '1.2.3' };
+    let usedCurrentValue: string | undefined;
+
+    class SomeDatasource extends DummyDatasource {
+      override postprocessRelease(
+        config: PostprocessReleaseConfig,
+        release: Release,
+      ): Promise<PostprocessReleaseResult> {
+        usedCurrentValue = config.currentValue;
+        return Promise.resolve(release);
+      }
+    }
+    getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
+
+    await postprocessRelease(
+      {
+        datasource: 'some-datasource',
+        packageName: 'some-package',
+        currentValue: '1.2.0',
+      },
+      releaseOrig,
+    );
+
+    expect(usedCurrentValue).toBe('1.2.0');
+  });
+
   it('falls back when error was thrown', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
 

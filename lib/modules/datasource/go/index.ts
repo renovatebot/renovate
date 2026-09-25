@@ -1,9 +1,13 @@
 import { isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
+import { containsCommit } from '../../../util/github/compare.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
 import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
@@ -16,13 +20,19 @@ import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
+  PostprocessReleaseConfig,
+  PostprocessReleaseResult,
+  Release,
   ReleaseResult,
 } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
 import { isPublicGoPackage } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
-import { GoProxyDatasource } from './releases-goproxy.ts';
+import {
+  GoProxyDatasource,
+  pseudoVersionToRelease,
+} from './releases-goproxy.ts';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
@@ -50,6 +60,7 @@ export class GoDatasource extends Datasource {
 
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
+  private readonly githubHttp = new GithubHttp(GithubTagsDatasource.id);
 
   // Pseudo versions https://go.dev/ref/mod#pseudo-versions
   static readonly pversionRegexp = regEx(
@@ -154,6 +165,84 @@ export class GoDatasource extends Datasource {
       () => this._getDigest(config, newValue),
     );
   }
+
+  /**
+   * Whether the commit of the release contains `commit`, if the source host of
+   * the module can tell.
+   */
+  private async releaseContainsCommit(
+    packageName: string,
+    version: string,
+    commit: string,
+  ): Promise<boolean | null> {
+    const source = await BaseGoDatasource.getDatasource(packageName);
+    if (source?.datasource !== GithubTagsDatasource.id) {
+      return null;
+    }
+    const releaseCommit = await this.getDigest({ packageName }, version);
+    if (!releaseCommit) {
+      return null;
+    }
+    try {
+      return await withCache(
+        {
+          namespace: `datasource-${GoDatasource.id}`,
+          key: `containsCommit:${source.packageName}:${commit}:${releaseCommit}`,
+          cacheable: isPublicGoPackage(packageName),
+        },
+        () =>
+          containsCommit(
+            this.githubHttp,
+            source.registryUrl,
+            source.packageName,
+            commit,
+            releaseCommit,
+          ),
+      );
+    } catch (err) {
+      logger.debug(
+        { err, packageName, version },
+        'Could not compare the release with the pinned commit',
+      );
+      return null;
+    }
+  }
+
+  /**
+   * A pseudo-version pins a commit, and Go names it after the latest release
+   * before that commit, so a release on another branch can sort higher without
+   * containing it, such as a hotfix. Updating to it would drop commits, so it
+   * is rejected - see #44184. Where the source host cannot compare commits, a
+   * release older than the pinned commit is rejected, as it cannot contain it.
+   */
+  override async postprocessRelease(
+    { packageName, currentValue }: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    const pinned = currentValue ? pseudoVersionToRelease(currentValue) : null;
+    // A newer pseudo-version is the newest commit of a module without releases
+    if (!pinned?.newDigest || pseudoVersionToRelease(release.version)) {
+      return release;
+    }
+    const containsPinned =
+      (await this.releaseContainsCommit(
+        packageName,
+        release.version,
+        pinned.newDigest,
+      )) ?? !isOlder(release.releaseTimestamp, pinned.releaseTimestamp);
+    return containsPinned ? release : 'reject';
+  }
+}
+
+function isOlder(
+  timestamp: Timestamp | null | undefined,
+  other: Timestamp | null | undefined,
+): boolean {
+  return (
+    !!timestamp &&
+    !!other &&
+    DateTime.fromISO(timestamp) < DateTime.fromISO(other)
+  );
 }
 
 const env = getEnv();

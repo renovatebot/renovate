@@ -124,6 +124,8 @@ export interface ReleaseResult {
 export interface PostprocessReleaseConfig {
   packageName: string;
   registryUrl: string | null;
+  /** The value the dependency is currently on, which the release would replace */
+  currentValue?: string;
 }
 
 export type PostprocessReleaseResult = Release | 'reject';
@@ -213,7 +215,9 @@ export interface DatasourceApi extends ModuleApi {
    * and `postprocessRelease` is called again.
    *
    * Rejection must happen only when the release will lead to downstream error,
-   * e.g. the release turned out to be yanked or doesn't exist for some reason.
+   * e.g. the release turned out to be yanked or doesn't exist for some reason,
+   * or when it cannot replace `currentValue` although it sorts higher, e.g. a
+   * Go release older than the commit a pseudo-version pins.
    *
    * In other cases, the original `Release` parameter should be returned.
    */

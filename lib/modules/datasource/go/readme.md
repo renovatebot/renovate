@@ -14,6 +14,10 @@ Go proxies return an empty list of versions when queried (`@v/list`) for a packa
 
 If the `@latest` endpoint returns a pseudo-version, and the release list is empty, then this datasource will return the latest pseudo-version as the only release/version for the package.
 
+A pseudo-version pins a commit, and Go names it after the latest release before that commit, so a release on another branch can sort higher without containing the commit, such as a hotfix of that release.
+When the current version is a pseudo-version, Renovate therefore skips releases that do not contain the pinned commit, and keeps updating the commit until a release contains it.
+For modules hosted on GitHub, Renovate compares the commits; on other hosts it skips releases that are older than the pinned commit.
+
 ## Checking for new major releases
 
 When a Go proxy is queried for `@v/list` it returns only versions for v0 or v1 of a package.
