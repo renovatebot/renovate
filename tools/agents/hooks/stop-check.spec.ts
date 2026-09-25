@@ -10,13 +10,30 @@ const { getChangedFiles } = vi.hoisted(() => ({
 }));
 vi.mock('./utils/git.ts', () => ({ getChangedFiles }));
 
+const { readStdin } = vi.hoisted(() => ({ readStdin: vi.fn() }));
+vi.mock('./utils/stdin.ts', () => ({ readStdin }));
+
 const consoleSpy = vi.spyOn(console, 'log');
 const stderrSpy = vi
   .spyOn(process.stderr, 'write')
   .mockImplementation(() => true);
 
+function makeInput(stopHookActive?: boolean): string {
+  return JSON.stringify({
+    session_id: 'test-session',
+    transcript_path: '/tmp/transcript.jsonl',
+    cwd: '/Users/test/renovate',
+    hook_event_name: 'Stop',
+    permission_mode: 'default',
+    ...(stopHookActive === undefined
+      ? {}
+      : { stop_hook_active: stopHookActive }),
+  });
+}
+
 beforeEach(() => {
   vi.resetModules();
+  readStdin.mockResolvedValue(makeInput());
 });
 
 it('runs pnpm check --all with changed files', async () => {
@@ -41,6 +58,31 @@ it('does not run pnpm check --all when no files changed', async () => {
 
   expect(exec).not.toHaveBeenCalled();
   expect(consoleSpy).not.toHaveBeenCalled();
+});
+
+it('does not run pnpm check --all when stop_hook_active is true', async () => {
+  readStdin.mockResolvedValue(makeInput(true));
+
+  await import('./stop-check.ts');
+
+  expect(getChangedFiles).not.toHaveBeenCalled();
+  expect(exec).not.toHaveBeenCalled();
+  expect(consoleSpy).not.toHaveBeenCalled();
+});
+
+it('still runs the check when the input does not parse as a Stop hook input', async () => {
+  readStdin.mockResolvedValue(JSON.stringify({ hook_event_name: 'Stop' }));
+  getChangedFiles.mockResolvedValue(['lib/foo.ts']);
+  exec.mockResolvedValue({ failed: false, all: 'Checks: ok' });
+
+  await import('./stop-check.ts');
+
+  expect(exec).toHaveBeenCalledWith('pnpm', ['check', '--all', 'lib/foo.ts'], {
+    stdout: 'pipe',
+    stderr: 'pipe',
+    all: true,
+    reject: false,
+  });
 });
 
 const blockHeader =
