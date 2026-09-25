@@ -10,11 +10,11 @@ function trimQuotes(str: string): string {
 }
 
 const requireRegex = regEx(
-  /^(?<keyword>require)?\s+(?<module>[^\s]+\/?[^\s]+)\s+(?<version>[^\s]+)(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
+  /^(?<keyword>require)?\s+(?<module>[^\s]+\/?[^\s]+)\s+(?<version>[^\s]+)(?:\s*\/\/\s*(?<comment>.*?)\s*)?$/,
 );
 
 const replaceRegex = regEx(
-  /^(?<keyword>replace)?\s+(?<module>[^\s]+\/?[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
+  /^(?<keyword>replace)?\s+(?<module>[^\s]+\/?[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>.*?)\s*)?$/,
 );
 
 export const excludeBlockStartRegex = regEx(/^(?<keyword>exclude)\s+\(\s*$/);
@@ -38,6 +38,14 @@ function extractDigest(input: string): string | undefined {
 
 function isPlaceholderPseudoVersion(version: string): boolean {
   return version === placeholderPseudoVersion;
+}
+
+/**
+ * Whether the comment marks the dependency as indirect, the same way Go reads
+ * it: `// indirect`, or `// indirect; <note>` when the line carries a note.
+ */
+function isIndirect(comment: string | undefined): boolean {
+  return comment === 'indirect' || !!comment?.startsWith('indirect;');
 }
 
 export function parseLine(input: string): PackageDependency | null {
@@ -107,7 +115,7 @@ export function parseLine(input: string): PackageDependency | null {
       dep.skipReason = 'invalid-version';
     }
 
-    if (comment === 'indirect') {
+    if (isIndirect(comment)) {
       dep.depType = 'indirect';
       dep.enabled = false;
     }
@@ -154,7 +162,7 @@ export function parseLine(input: string): PackageDependency | null {
       delete dep.currentValue;
     }
 
-    if (comment === 'indirect') {
+    if (isIndirect(comment)) {
       dep.depType = 'indirect';
       dep.enabled = false;
     }

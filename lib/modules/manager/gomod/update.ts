@@ -175,13 +175,6 @@ export function updateDependency({
       return fileContent;
     }
 
-    if (depType === 'indirect') {
-      newLine = newLine.replace(
-        regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
-        ' // indirect',
-      );
-    }
-
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
