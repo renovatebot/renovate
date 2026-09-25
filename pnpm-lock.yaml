@@ -43,15 +43,15 @@ importers:
       '@aws-sdk/credential-providers':
         specifier: 3.1117.0
         version: 3.1117.0
-      '@baszalmstra/rattler':
-        specifier: 0.2.1
-        version: 0.2.1
       '@breejs/later':
         specifier: 4.2.0
         version: 4.2.0
       '@cdktf/hcl2json':
         specifier: 0.21.0
         version: 0.21.0
+      '@conda-org/rattler':
+        specifier: 0.4.0
+        version: 0.4.0
       '@opentelemetry/api':
         specifier: 1.9.1
         version: 1.9.1
@@ -824,9 +824,6 @@ packages:
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
 
-  '@baszalmstra/rattler@0.2.1':
-    resolution: {integrity: sha512-HZ2xu6Nk+XzAeateyzDKYM47ySkjkuKtTNpKRAy+Y+YcRH1qHM2le4iLlG32wDddaHCLUsBsyBxirClOj1TLjw==}
-
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
@@ -903,6 +900,9 @@ packages:
     resolution: {integrity: sha512-yeJlba62xqmkgELUsn7356MEnzLLu/fw2x4lofFqGnXh6YysRdEs2BaLeLtg1+KU0AXvMeqQvTTp+3hBEBK+EA==}
     peerDependencies:
       commander: ~15.0.0
+
+  '@conda-org/rattler@0.4.0':
+    resolution: {integrity: sha512-F4k9bIL05i/slVUOWxN+8kCh7Rf2EoQfKcntN9Ef3pPJEiHb+d5Ff2FElUzv4un29UUM2yl2AGNY5z0EZmVqJQ==}
 
   '@containerbase/istanbul-reports-html@2.0.18':
     resolution: {integrity: sha512-b4u8n2mUS6V3NwQGq5U0hVq0+ZhE3q/l4ZGrN8GijFAN5OLtKk7zaIRdbbYZEi8b8U7cznFwRUCn0ew6pZGn+A==}
@@ -6260,8 +6260,6 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@baszalmstra/rattler@0.2.1': {}
-
   '@bcoe/v8-coverage@1.0.2': {}
 
   '@biomejs/biome@2.5.14':
@@ -6311,6 +6309,8 @@ snapshots:
   '@commander-js/extra-typings@15.0.0(commander@15.0.0)':
     dependencies:
       commander: 15.0.0
+
+  '@conda-org/rattler@0.4.0': {}
 
   '@containerbase/istanbul-reports-html@2.0.18':
     dependencies:
