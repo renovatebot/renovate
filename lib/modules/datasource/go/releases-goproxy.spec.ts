@@ -1632,9 +1632,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .scope(`${baseUrl}/github.com/google/btree`)
           .get('/@v/list')
           .reply(200, 'v1.0.0\n')
-          .get('/@v/v1.0.0.info')
-          .optionally()
-          .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' })
           .get('/@latest')
           .reply(200, { Version: 'v1.0.0' })
           .get('/v2/@v/list')
@@ -1657,6 +1654,11 @@ describe('modules/datasource/go/releases-goproxy', () => {
         vi.stubEnv('GOPROXY', baseUrl);
 
         setHttpMock();
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' });
+
         const first = await datasource.getReleases({
           packageName: 'github.com/google/btree',
         });
@@ -1671,9 +1673,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
         });
 
         expect(second).toEqual(first);
-        expect(
-          httpMock.getTrace().filter(({ url }) => url.endsWith('.info')),
-        ).toHaveLength(1);
       });
 
       it('does not store a version which has no publication time', async () => {

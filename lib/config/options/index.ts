@@ -704,7 +704,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.99.6',
+    default: 'ghcr.io/renovatebot/base-image:13.102.2',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1819,6 +1819,16 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     patternMatch: true,
+  },
+  {
+    name: 'matchIsBreaking',
+    description:
+      'Matches only if the update is considered breaking (e.g. major, or minor for 0.x in ecosystems like Cargo) when `true`, or non-breaking when `false`. Valid only within a `packageRules` object.',
+    type: 'boolean',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
   },
   {
     name: 'matchFileNames',

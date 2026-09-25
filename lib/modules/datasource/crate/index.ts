@@ -49,7 +49,9 @@ export class CrateDatasource extends Datasource {
     super(CrateDatasource.id);
   }
 
-  override defaultRegistryUrls = ['sparse+https://index.crates.io/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['sparse+https://index.crates.io/'];
+  }
 
   override defaultVersioning = cargoVersioning.id;
 

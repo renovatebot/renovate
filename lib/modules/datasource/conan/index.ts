@@ -24,9 +24,9 @@ import {
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
-
-  override readonly caching = true;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly registryStrategy = 'merge';
 

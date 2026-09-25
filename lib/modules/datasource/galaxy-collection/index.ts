@@ -25,11 +25,15 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'hunt';
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/api/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://galaxy.ansible.com/api/'];
+  }
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -110,7 +114,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${config.packageName}`,
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
       () => this.fetchReleases(config),

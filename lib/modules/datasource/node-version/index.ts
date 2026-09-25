@@ -13,11 +13,11 @@ export class NodeVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = versioning;
-
-  override readonly caching = true;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
