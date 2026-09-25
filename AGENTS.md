@@ -100,8 +100,19 @@ Two discussion categories are available:
 Use `pnpm` for all commands (NOT npm/npx).
 
 - **Install dependencies:** `pnpm install`
-- **Lint / Test / Autofix:** `pnpm check --all <optional path>`
-- **Full test suite:** `pnpm test` (runs lint + schema validation + all tests)
+- **Lint / Type-check / Test / Autofix:** `pnpm check --all <paths>` for the changed files, `pnpm check --all` without a path for a full verification. It already runs lint, prettier, type-check and the tests of those files, so do not run `pnpm type-check`, `tsc`, a separate lint or extra `pnpm vitest` runs next to it.
 - **Run from source:** `pnpm start` or `node lib/renovate.ts`
 
 Tests use Vitest (invoked via `pnpm vitest`). Test files use `.spec.ts` suffix and are co-located with source. Globals from `jest-extended` and `expect-more-jest` are available in tests.
+
+### Code conventions
+
+These add to [`docs/development/best-practices.md`](./docs/development/best-practices.md):
+
+- Spec files have exactly one root `describe`, named by the file path (e.g. `describe('workers/repository/process/extract-update', ...)`); nest any grouping inside it.
+- Write multi-line fixtures inline with the `codeBlock` helper and real indentation, not as joined arrays and not as new `__fixtures__` files.
+- Never put `await` inside a ternary or other conditional expression; use `if`/`else`, as V8 coverage misreports such constructs.
+- Prefer branch-free forms such as `.filter(isTruthy)` or `flatMap` over `if (!x) continue` in loops; each explicit branch needs its own test for full coverage.
+- Keep TSDoc to a factual statement of what a function does, without explanatory prose paragraphs.
+- Build strings with template literals rather than `+` in code you add or rewrite.
+- Do not remove existing `/* v8 ignore ... */` comments; document why the branch is unreachable instead. Before adding one, try to construct an input that reaches the branch, and prefer a real test.
