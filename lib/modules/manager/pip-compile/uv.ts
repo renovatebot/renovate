@@ -1,14 +1,9 @@
-import os from 'node:os';
 // eslint-disable-next-line renovate/prefer-fs-util -- The helpers do not support mkdtemp or setting permissions when creating a file. All paths below are scoped to privateCacheDir.
 import fs from 'fs-extra';
 import upath from 'upath';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  ensureDir,
-  privateCacheDir,
-  readSystemFile,
-} from '../../../util/fs/index.ts';
+import { ensureDir, privateCacheDir } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 
@@ -37,24 +32,6 @@ export async function execUv(
     return;
   }
 
-  // Self hosting users may have configured credentials for uv in their system netrc file before Renovate added
-  // support, so include those entries in our temporary netrc file so we don't break their existing setup
-  let existingNetrc = '';
-  try {
-    existingNetrc = await readSystemFile(
-      upath.join(os.homedir(), '.netrc'),
-      'utf8',
-    );
-  } catch (err) {
-    if (err.code !== 'ENOENT') {
-      throw err;
-    }
-  }
-
-  // uv uses the last entry for each host, so append Renovate's credentials.
-  // A blank line also terminates any trailing comment or macdef block.
-  const netrcContent = `${existingNetrc ? `${existingNetrc}\n\n` : ''}${[...entries.values()].join('\n')}\n`;
-
   // Index URL environment variables can be overridden by command-line flags,
   // and uv can persist their credentials when --emit-index-url is enabled.
   // The private cache is also mounted in Docker and cleared between repositories.
@@ -63,7 +40,7 @@ export async function execUv(
   const credentialsDir = await fs.mkdtemp(upath.join(cacheDir, 'uv-'));
   try {
     const netrc = upath.join(credentialsDir, '.netrc');
-    await fs.writeFile(netrc, netrcContent, {
+    await fs.writeFile(netrc, `${[...entries.values()].join('\n')}\n`, {
       mode: 0o600,
     });
     await exec(cmd, {
