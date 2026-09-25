@@ -16,6 +16,7 @@ import { Datasource } from './datasource.ts';
 import {
   getDatasourceList,
   getDatasources,
+  getDefaultConfig,
   getDigest,
   getPkgReleases,
   supportsDigests,
@@ -203,6 +204,31 @@ describe('modules/datasource/index', () => {
   describe('getDefaultVersioning()', () => {
     it('returns semver if undefined', () => {
       expect(getDefaultVersioning(undefined)).toBe('semver-coerced');
+    });
+  });
+
+  describe('getDefaultConfig()', () => {
+    it('returns the defaultConfig of a datasource', async () => {
+      class DummyDatasourceWithDefaultConfig extends DummyDatasource {
+        override defaultConfig = { commitMessageTopic: 'Dummy {{depName}}' };
+      }
+      datasources.set(datasource, new DummyDatasourceWithDefaultConfig());
+
+      await expect(getDefaultConfig(datasource)).resolves.toEqual({
+        commitMessageTopic: 'Dummy {{depName}}',
+      });
+    });
+
+    it('returns an empty object for a datasource without defaults', async () => {
+      datasources.set(datasource, new DummyDatasource());
+
+      await expect(getDefaultConfig(datasource)).resolves.toEqual({});
+    });
+
+    it('returns an empty object for an unknown datasource', async () => {
+      await expect(
+        getDefaultConfig('some-unknown-datasource'),
+      ).resolves.toEqual({});
     });
   });
 
