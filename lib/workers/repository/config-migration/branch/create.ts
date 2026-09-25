@@ -5,6 +5,7 @@ import { scm } from '../../../../modules/platform/scm.ts';
 import { parseJson } from '../../../../util/common.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
+import { compile } from '../../../../util/template/index.ts';
 import { getMigrationBranchName } from '../common.ts';
 import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
 import type { MigratedData } from './migrated-data.ts';
@@ -29,7 +30,16 @@ export async function createConfigMigrationBranch(
     configFileName,
   );
 
-  const commitMessage = commitMessageFactory.getCommitMessage();
+  let commitMessage = commitMessageFactory.getCommitMessage();
+  if (config.commitBody) {
+    commitMessage = `${commitMessage}\n\n${compile(
+      config.commitBody,
+      // only allow gitAuthor template value in the commitBody
+      { gitAuthor: config.gitAuthor },
+    )}`;
+
+    logger.trace(`config migration commitMessage: ${commitMessage}`);
+  }
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
