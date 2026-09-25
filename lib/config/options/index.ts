@@ -3401,6 +3401,16 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
+    name: 'allowedPrAuthors',
+    description:
+      'Additional GitHub usernames whose PRs Renovate may discover and manage.',
+    type: 'array',
+    subType: 'string',
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    default: [],
+  },
+  {
     name: 'allowedUnsafeExecutions',
     description: `List of possibly unsafe executions which are permitted to run. This enables global control over any implicit commands
         which are run as part of a renovate run. This is similar to \`allowedCommands\` but is specifically used to control executions

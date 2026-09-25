@@ -1,4 +1,5 @@
 import { isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global.ts';
 import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../../constants/error-messages.ts';
@@ -17,13 +18,35 @@ import { coerceRestPr } from './common.ts';
 import { prIsInMergeQueueQuery } from './graphql.ts';
 import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
 
-function getPrApiCache(): ApiCache<GhPr> {
+function isLegacyCacheCompatible(authorFilter: string[] | null): boolean {
+  return authorFilter === null || authorFilter.length <= 1;
+}
+
+function getPrApiCache(authorFilter?: string[] | null): ApiCache<GhPr> {
   const repoCache = getCache();
   if (!repoCache?.platform?.github?.pullRequestsCache) {
     logger.debug('PR cache: cached data not found, creating new cache');
     repoCache.platform ??= {};
     repoCache.platform.github ??= {};
     repoCache.platform.github.pullRequestsCache ??= { items: {} };
+  }
+
+  const pullRequestsCache = repoCache.platform.github
+    .pullRequestsCache as ApiPageCache<GhPr>;
+  if (authorFilter !== undefined) {
+    if (
+      pullRequestsCache.authorFilter === undefined &&
+      isLegacyCacheCompatible(authorFilter)
+    ) {
+      pullRequestsCache.authorFilter = authorFilter;
+    }
+    if (!dequal(pullRequestsCache.authorFilter, authorFilter)) {
+      logger.debug('PR cache: resetting because author filter changed');
+      repoCache.platform.github.pullRequestsCache = {
+        authorFilter,
+        items: {},
+      };
+    }
   }
 
   const prApiCache = new ApiCache<GhPr>(
@@ -62,9 +85,9 @@ function getPrApiCache(): ApiCache<GhPr> {
 export async function getPrCache(
   http: GithubHttp,
   repo: string,
-  username?: string,
+  authorFilter: string[] | null,
 ): Promise<Record<number, GhPr>> {
-  const prApiCache = getPrApiCache();
+  const prApiCache = getPrApiCache(authorFilter);
   const isInitial = isEmptyArray(prApiCache.getItems());
 
   // Snapshot before the loop — reconcile() updates lastModified as it
@@ -134,13 +157,15 @@ export async function getPrCache(
           }
         }
 
-        if (username) {
+        if (authorFilter !== null) {
           const filteredPage = page.filter(
-            (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
+            (ghPr) =>
+              ghPr.user?.login &&
+              authorFilter.includes(ghPr.user.login.toLowerCase()),
           );
 
           logger.debug(
-            `PR cache: Filtered ${page.length} PRs to ${filteredPage.length} (user=${username})`,
+            `PR cache: Filtered ${page.length} PRs to ${filteredPage.length} (authors=${authorFilter.join(',')})`,
           );
 
           page = filteredPage;
