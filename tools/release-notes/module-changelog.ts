@@ -20,8 +20,9 @@ export interface ModuleEntry {
   commits: ParsedCommit[];
 }
 
-/** A `manager`/`datasource`/`versioning`/`platform` scope, split into its
- * category and per-module entries, e.g. `manager` -> [`npm`, `cargo`, ...]. */
+/** A `manager`/`datasource`/`versioning`/`platform`/`preset` scope, split
+ * into its category and per-module entries, e.g. `manager` -> [`npm`,
+ * `cargo`, ...]. */
 export interface CategoryGroup {
   kind: 'category';
   category: string;
@@ -427,6 +428,8 @@ const CATEGORY_ALIASES: Record<string, string> = {
   versionings: 'versioning',
   platform: 'platform',
   platforms: 'platform',
+  preset: 'preset',
+  presets: 'preset',
 };
 
 const MODULE_SCOPE_RE = new RegExp(
@@ -470,11 +473,19 @@ function formatName(input: string): string {
  * index.ts` and uses its `displayName` export, matching what our own docs
  * generation (`tools/docs/`) already does. Falls back to a humanized module
  * name, or the raw scope, when there is no `displayName` to find.
+ *
+ * A `preset` isn't a `lib/modules/` module — there's no `index.ts` to
+ * import a `displayName` from — so its name is humanized directly, e.g.
+ * `presets/monorepo` -> "Monorepo presets".
  */
 async function resolveModuleLabel(scope: string): Promise<string> {
   const parsed = parseModuleScope(scope);
   if (!parsed?.name) {
     return scope;
+  }
+
+  if (parsed.category === 'preset') {
+    return `${formatName(parsed.name)} presets`;
   }
 
   try {
@@ -511,12 +522,12 @@ export async function resolveModuleLabels(
  *   leading `BreakingGroup`, in addition to (not instead of) its normal
  *   group below.
  * - A module scope (`manager/`, `datasource/`, `versioning/`, `platform/`,
- *   singular or plural, with or without a specific module name) becomes a
- *   module entry nested under a `CategoryGroup`; a bare category with no
- *   module name (`datasource` on its own) becomes a "General" entry in
- *   that same category, rather than a second, colliding group. The same
- *   module scoped under its singular and plural category alias (
- *   `manager/pep621` and `managers/pep621`) merges into that one entry
+ *   `preset/`, singular or plural, with or without a specific module name)
+ *   becomes a module entry nested under a `CategoryGroup`; a bare category
+ *   with no module name (`datasource` on its own) becomes a "General"
+ *   entry in that same category, rather than a second, colliding group.
+ *   The same module scoped under its singular and plural category alias
+ *   (`manager/pep621` and `managers/pep621`) merges into that one entry
  *   too, rather than showing up as two separate, identically-labelled
  *   bullets.
  * - An unscoped `docs:` commit is treated as if scoped `docs`, joining any

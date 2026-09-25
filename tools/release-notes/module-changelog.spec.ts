@@ -16,6 +16,7 @@ import {
   groupByModule,
   parseCommitHeader,
   renderModuleChangelog,
+  resolveModuleLabels,
   stripPrReference,
 } from './module-changelog.ts';
 
@@ -326,6 +327,24 @@ describe('tools/release-notes/module-changelog', () => {
             { type: 'fix', scope: 'manager/pep621', subject: 'a' },
           ],
         },
+      ]);
+    });
+
+    it('groups `preset/`- and `presets/`-scoped commits into one "preset" category', () => {
+      const commits: ParsedCommit[] = [
+        { type: 'feat', scope: 'presets/monorepo', subject: 'a' },
+        { type: 'feat', scope: 'presets/workarounds', subject: 'b' },
+      ];
+      const labels = new Map([
+        ['presets/monorepo', 'Monorepo presets'],
+        ['presets/workarounds', 'Workarounds presets'],
+      ]);
+
+      const [group] = groupByModule(commits, types, labels) as [CategoryGroup];
+      expect(group).toMatchObject({ kind: 'category', category: 'preset' });
+      expect(group.modules.map((m) => m.label)).toEqual([
+        'Monorepo presets',
+        'Workarounds presets',
       ]);
     });
 
@@ -959,6 +978,20 @@ describe('tools/release-notes/module-changelog', () => {
           subject: 'update dependency protobufjs@8.8.0 to v8.9.0 (2 updates)',
         },
       ]);
+    });
+  });
+
+  describe('resolveModuleLabels', () => {
+    it('humanizes a preset name with a "presets" suffix, without importing a module', async () => {
+      const labels = await resolveModuleLabels([
+        'presets/monorepo',
+        'presets/best-practices',
+      ]);
+
+      expect(labels.get('presets/monorepo')).toBe('Monorepo presets');
+      expect(labels.get('presets/best-practices')).toBe(
+        'Best Practices presets',
+      );
     });
   });
 
