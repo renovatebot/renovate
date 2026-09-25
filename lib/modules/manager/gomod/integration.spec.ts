@@ -3,6 +3,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import { normalizeDepNames } from '../../../workers/repository/extract/manager-files.ts';
 import { fetchUpdates } from '../../../workers/repository/process/fetch.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
 import type { PackageFile } from '../types.ts';
@@ -33,6 +34,8 @@ describe('modules/manager/gomod/integration', () => {
       const extracted = extractPackageFile(goMod);
       expect(extracted).not.toBeNull();
       expect(extracted?.deps).toHaveLength(2);
+      // the extract worker is bypassed, so fill in `packageName` as it would
+      extracted!.deps.forEach(normalizeDepNames);
 
       const dep = extracted!.deps.find(
         (d) => d.depName === 'github.com/renovate-tests/some-module',
