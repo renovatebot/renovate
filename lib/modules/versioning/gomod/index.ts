@@ -27,14 +27,6 @@ export function isPseudoVersion(version: string): boolean {
   return semver.isVersion(version) && pseudoVersionRegex.test(version);
 }
 
-/**
- * Whether the version is a `v0.0.0-` pseudo-version, which Go uses for a module
- * without any release tag, such as `v0.0.0-20191109021931-daa7c04131f5`.
- */
-export function isUntaggedPseudoVersion(version: string | undefined): boolean {
-  return !!version?.startsWith('v0.0.0-') && isPseudoVersion(version);
-}
-
 export const api: VersioningApi = { ...semver };
 
 export default api;
