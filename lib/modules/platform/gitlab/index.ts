@@ -654,13 +654,18 @@ async function tryPrAutomerge(
         250,
       );
 
+      let isPipelineOutdated = false;
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
+          sha?: string;
           merge_status?: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
           pipeline: {
+            sha?: string;
+            source?: string;
             status: string;
           };
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
@@ -683,16 +688,33 @@ async function tryPrAutomerge(
         const deprecated_merge_status_check =
           !use_detailed_merge_status && body.merge_status === desiredStatus;
 
-        // Only continue if the merge request can be merged and has a pipeline.
+        // Right after a push the MR can still point to the pipeline of the previous commit.
+        // Merged results pipelines run on a merge ref, so their sha legitimately differs.
+        isPipelineOutdated =
+          !!body.sha &&
+          !!body.pipeline?.sha &&
+          body.pipeline.sha !== body.sha &&
+          body.pipeline.source !== 'merge_request_event';
+
+        // Only continue if the merge request can be merged and has a pipeline for its latest commit.
         if (
           (detailed_merge_status_check || deprecated_merge_status_check) &&
           body.pipeline !== null &&
+          !isPipelineOutdated &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {
           break;
         }
         logger.debug(`PR not yet in mergeable state. Retrying ${attempt}`);
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
+      }
+
+      // Enabling auto-merge now could merge immediately without any pipeline for the latest commit.
+      if (isPipelineOutdated) {
+        logger.debug(
+          'Skipping platform automerge - MR pipeline is not for the latest commit',
+        );
+        return;
       }
 
       // The merge_trains endpoint's auto_merge parameter requires GitLab
