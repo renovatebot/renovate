@@ -56,9 +56,18 @@ export function findDependenciesInternal(
       let registry = currentItem.registry;
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
-      const tag = `${currentItem.tag ?? currentItem.version}`;
+      const rawTag = currentItem.tag ?? currentItem.version;
+      if (rawTag === '' || rawTag === null || rawTag === undefined) {
+        // An empty tag usually means the chart computes one at render time
+        // (commonly from `.Chart.AppVersion`). There is no value to update, and
+        // pinning a digest would write `@sha256:...` into the empty tag.
+        const dep = getDep(`${registry}${repository}`, false, registryAliases);
+        dep.skipReason = 'unspecified-version';
+        packageDependencies.push(dep);
+        return;
+      }
       packageDependencies.push(
-        getHelmDep(registry, repository, tag, registryAliases),
+        getHelmDep(registry, repository, `${rawTag}`, registryAliases),
       );
     } else if (matchesHelmValuesInlineImage(key, value)) {
       const dep = getDep(value, true, registryAliases);
