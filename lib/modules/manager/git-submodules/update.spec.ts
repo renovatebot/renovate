@@ -4,7 +4,7 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
-import { fs } from '~test/util.ts';
+import { clearEnv, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -23,8 +23,7 @@ const baseDir = `${import.meta.dirname}/__fixtures__`;
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
     GlobalConfig.set({ localDir: baseDir });
-    // clear environment variables
-    process.env = {};
+    clearEnv();
 
     createSimpleGit.mockReturnValue(gitMock);
   });

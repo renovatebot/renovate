@@ -25,10 +25,17 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result?.deps[0]?.currentValue).toBeString();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(true);
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.9',
+            depName: 'redis',
+            registryUrls: ['@placeholder'],
+            skipReason: 'placeholder-url',
+          },
+        ],
+      });
     });
 
     it('skips invalid registry urls', () => {
@@ -56,9 +63,11 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(true);
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis', skipReason: 'placeholder-url' },
+        { depName: 'postgresql', skipReason: 'invalid-url' },
+        { depName: 'broken', skipReason: 'no-repository' },
+      ]);
     });
 
     it('parses simple requirements.yaml correctly', () => {
@@ -84,11 +93,19 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).toMatchSnapshot({
+      expect(result).toEqual({
         datasource: 'helm',
         deps: [
-          { currentValue: '0.9.0', depName: 'redis' },
-          { currentValue: '0.8.1', depName: 'postgresql' },
+          {
+            currentValue: '0.9.0',
+            depName: 'redis',
+            registryUrls: ['https://charts.helm.sh/stable/'],
+          },
+          {
+            currentValue: '0.8.1',
+            depName: 'postgresql',
+            registryUrls: ['https://charts.helm.sh/stable/'],
+          },
         ],
       });
     });
@@ -133,9 +150,50 @@ describe('modules/manager/helm-requirements/extract', () => {
           longalias: 'https://registry.example.com/',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(false);
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.9.0',
+            depName: 'redis',
+            registryUrls: ['https://my-registry.gcr.io/'],
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+            registryUrls: ['https://registry.example.com/'],
+          },
+        ],
+      });
+    });
+
+    it('treats an alias as unresolved when registryAliases is missing', () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      dependencies:
+        - name: redis
+          version: 0.9.0
+          repository: '@placeholder'
+      `;
+      const fileName = 'requirements.yaml';
+      const result = extractPackageFile(content, fileName, {});
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.9.0',
+            depName: 'redis',
+            registryUrls: ['@placeholder'],
+            skipReason: 'placeholder-url',
+          },
+        ],
+      });
     });
 
     it('skips local dependencies', () => {
@@ -161,12 +219,10 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).toMatchSnapshot({
-        deps: [
-          { depName: 'redis' },
-          { depName: 'postgresql', skipReason: 'local-dependency' },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis' },
+        { depName: 'postgresql', skipReason: 'local-dependency' },
+      ]);
     });
 
     it('returns null if no dependencies', () => {

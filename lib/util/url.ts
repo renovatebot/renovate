@@ -24,7 +24,7 @@ export function ensurePathPrefix(url: string, prefix: string): string {
 }
 
 export function ensureTrailingSlash(url: string): string {
-  return url.replace(/\/?$/, '/'); // TODO #12875 adds slash at the front when re2 is used
+  return url.replace(regEx(/\/?$/), '/');
 }
 
 export function trimTrailingSlash(url: string): string {
@@ -32,7 +32,7 @@ export function trimTrailingSlash(url: string): string {
 }
 
 export function trimLeadingSlash(path: string): string {
-  return path.replace(/^\/+/, '');
+  return path.replace(regEx(/^\/+/), '');
 }
 
 export function trimSlashes(path: string): string {
@@ -165,6 +165,30 @@ export function parseUrl(url: URL | string | undefined | null): URL | null {
  */
 export function createURLFromHostOrURL(url: string): URL | null {
   return parseUrl(url) ?? parseUrl(`https://${url}`);
+}
+
+/**
+ * Removes the `user:password@` userinfo from a URL.
+ *
+ * Registries are sometimes configured with a URL that carries a placeholder such as `${USER}:${PASS}@`, and credentials embedded this way should not stop the URL from matching a plain `matchHost`.
+ *
+ * @returns the URL's `href` without userinfo, or `null` if `url` cannot be parsed
+ */
+export function stripUrlCredentials(url: URL): string;
+export function stripUrlCredentials(url: string | URL): string | null;
+export function stripUrlCredentials(url: string | URL): string | null {
+  const parsed = parseUrl(url);
+  if (!parsed) {
+    return null;
+  }
+  if (!parsed.username && !parsed.password) {
+    return parsed.href;
+  }
+  // clone rather than mutate: `parseUrl` returns the same instance it was given when `url` is already a `URL`
+  const stripped = new URL(parsed.href);
+  stripped.username = '';
+  stripped.password = '';
+  return stripped.href;
 }
 
 export type LinkHeaderLinks = _parseLinkHeader.Links;

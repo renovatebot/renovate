@@ -16,6 +16,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_PENDING_DELETION,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -59,6 +60,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -71,7 +73,7 @@ import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
 import { getRoleAccessLevel } from './roles.ts';
 import type { GitLabMergeRequest } from './schema.ts';
-import { LastPipelineId } from './schema.ts';
+import { LastPipelineId, MergeTrainCarStatus } from './schema.ts';
 import type {
   GitlabComment,
   GitlabIssue,
@@ -234,6 +236,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug(`Discovered ${repos.length} project(s)`);
     return repos
       .filter((repo) => !repo.mirror || config?.includeMirrors)
+      .filter((repo) => !repo.marked_for_deletion_at)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
@@ -252,15 +255,10 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+  return await getRepoFile(gitlabApi, repo, fileName, branchOrTag, {
     cacheProvider: memCacheProvider,
   });
-  const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
-  return str;
 }
 
 export async function getJsonFile(
@@ -295,6 +293,13 @@ export async function initRepo({
         'Repository is archived - throwing error to abort renovation',
       );
       throw new Error(REPOSITORY_ARCHIVED);
+    }
+
+    if (res.body.marked_for_deletion_at) {
+      logger.debug(
+        'Repository is marked for deletion - throwing error to abort renovation',
+      );
+      throw new Error(REPOSITORY_PENDING_DELETION);
     }
 
     if (res.body.mirror && GlobalConfig.get('includeMirrors') !== true) {
@@ -343,7 +348,13 @@ export async function initRepo({
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
+    if (
+      [
+        REPOSITORY_ARCHIVED,
+        REPOSITORY_EMPTY,
+        REPOSITORY_PENDING_DELETION,
+      ].includes(err.message)
+    ) {
       throw err;
     }
     if (err.statusCode === 403) {
@@ -367,14 +378,48 @@ export async function initRepo({
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
-  const forceRebase =
-    config?.mergeMethod !== 'merge' && !config.mergeTrainsEnabled;
+  const forceRebase = config?.mergeMethod !== 'merge';
   if (forceRebase) {
     logger.once.debug(
       `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
     );
   }
   return Promise.resolve(forceRebase);
+}
+
+/**
+ * Merge trains are GitLab's equivalent of a merge queue. They are enabled per
+ * project, so the branch name is not needed.
+ * https://docs.gitlab.com/ci/pipelines/merge_trains/
+ */
+export function isBranchMergeQueueEnabled(
+  _branchName: string,
+): Promise<boolean> {
+  return Promise.resolve(config.mergeTrainsEnabled);
+}
+
+/**
+ * GitLab answers with 404 if the MR is not on a merge train. A car that has
+ * already been merged is not waiting any more.
+ * https://docs.gitlab.com/api/merge_trains/#get-the-status-of-a-merge-request-on-a-merge-train
+ */
+export async function isPrInMergeQueue(id: number): Promise<boolean> {
+  if (!config.mergeTrainsEnabled) {
+    return false;
+  }
+  try {
+    const { body: status } = await gitlabApi.getJson(
+      `projects/${config.repository}/merge_trains/merge_requests/${id}`,
+      { memCache: false },
+      MergeTrainCarStatus,
+    );
+    return status !== 'merged';
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      logger.debug({ err }, 'Failed to fetch merge train status');
+    }
+    return false;
+  }
 }
 
 type BranchState =
@@ -743,7 +788,7 @@ export async function createPr({
         remove_source_branch: true,
         title,
         description,
-        labels: (labels ?? []).join(','),
+        labels: coerceArray(labels).join(','),
         squash: config.squash,
       },
     },
@@ -842,7 +887,27 @@ export async function reattemptPlatformAutomerge({
   logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }
 
+async function tryAddPrToMergeTrain(id: number): Promise<boolean> {
+  try {
+    // Without `auto_merge` the MR is added to the train immediately. The
+    // train merges it and removes the source branch on its own.
+    // https://docs.gitlab.com/api/merge_trains/#add-a-merge-request-to-a-merge-train
+    await gitlabApi.postJson(
+      `projects/${config.repository}/merge_trains/merge_requests/${id}`,
+    );
+    logger.debug(`MR !${id} added to the merge train`);
+    return true;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to add MR to the merge train');
+    return false;
+  }
+}
+
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
+  if (config.mergeTrainsEnabled) {
+    return tryAddPrToMergeTrain(id);
+  }
+
   try {
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${id}/merge`,
@@ -1167,7 +1232,7 @@ export async function ensureIssue({
             body: {
               title,
               description,
-              labels: (labels ?? issue.labels ?? []).join(','),
+              labels: coerceArray(labels ?? issue.labels).join(','),
               confidential: confidential ?? false,
             },
           },
@@ -1179,7 +1244,7 @@ export async function ensureIssue({
         body: {
           title,
           description,
-          labels: (labels ?? []).join(','),
+          labels: coerceArray(labels).join(','),
           confidential: confidential ?? false,
         },
       });

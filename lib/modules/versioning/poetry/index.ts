@@ -1,6 +1,7 @@
 import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
+import { coerceString } from '../../../util/string.ts';
 import { api as npm } from '../npm/index.ts';
 import { api as pep440 } from '../pep440/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
@@ -10,6 +11,7 @@ import {
   npm2poetry,
   poetry2npm,
   poetry2semver,
+  poetryRangePart2semver,
   semver2poetry,
 } from './transform.ts';
 
@@ -205,8 +207,8 @@ function getNewValue({
     ? VERSION_PATTERN.exec(currentVersion)?.groups
     : undefined;
   if (
-    (newVersionGroups?.release ?? '').split('.').length !== 3 &&
-    !(newVersionGroups?.pre && currentVersionGroups?.pre)
+    coerceString(newVersionGroups?.release).split('.').length !== 3 &&
+    !(currentVersionGroups?.pre && poetryRangePart2semver(newVersion) !== null)
   ) {
     logger.debug(
       'Cannot massage python version to npm - returning currentValue',

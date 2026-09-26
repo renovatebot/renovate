@@ -24,8 +24,7 @@ export class BitbucketPrCache {
     repoCache.platform.bitbucket ??= {};
 
     let pullRequestCache = repoCache.platform.bitbucket.pullRequestsCache as
-      | BitbucketPrCacheData
-      | undefined;
+      BitbucketPrCacheData | undefined;
     if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {

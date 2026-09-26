@@ -281,6 +281,22 @@ describe('modules/manager/github-actions/artifacts', () => {
       expect(execSnapshots).toHaveLength(2);
     });
 
+    it('runs for a reusable workflow call', async () => {
+      const execSnapshots = mockExecAll();
+      mockLockfileRegenerated();
+
+      // the lockfile records `OWNER/REPO@REF` pins, and a reusable workflow call is one
+      const res = await updateActionsLockfile(
+        makeConfig({
+          upgrades: [{ ...checkoutUpgrade, depType: 'workflow' }],
+        }),
+        packageFiles,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(1);
+      expect(execSnapshots).toHaveLength(2);
+    });
+
     it('runs for a `docker://` uses dep', async () => {
       const execSnapshots = mockExecAll();
       mockLockfileRegenerated();
@@ -630,6 +646,22 @@ describe('modules/manager/github-actions/artifacts', () => {
         makeConfig({
           constraints: { ...getConfig().constraints, gh: '2.62.0' },
         }),
+        packageFiles,
+      );
+
+      expect(execSnapshots.map((s) => s.cmd)).toContain(
+        'install-tool gh 2.62.0',
+      );
+    });
+
+    it('falls back to the extracted `gh` constraint', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(
+        makeConfig({ extractedConstraints: { gh: '2.62.0' } }),
         packageFiles,
       );
 

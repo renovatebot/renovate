@@ -14,9 +14,13 @@ export class FlutterVersionDatasource extends Datasource {
     super(FlutterVersionDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://storage.googleapis.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://storage.googleapis.com'];
+  }
 
   override readonly caching = true;
 
@@ -32,7 +36,7 @@ export class FlutterVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

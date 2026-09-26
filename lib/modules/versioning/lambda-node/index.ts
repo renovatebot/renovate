@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { api as nodeApi } from '../node/index.ts';
 import type { VersioningApi } from '../types.ts';
@@ -15,7 +16,7 @@ export function isStable(version: string): boolean {
     return false;
   }
 
-  if (typeof schedule.support === 'string') {
+  if (isString(schedule.support)) {
     return DateTime.local() < DateTime.fromISO(schedule.support);
   }
 

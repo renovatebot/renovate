@@ -1,8 +1,8 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
-import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { HOST_BLOCKED, HOST_DISABLED } from '../../constants/error-messages.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import {
   ATTR_RENOVATE_DATASOURCE,
@@ -19,6 +19,7 @@ import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
 import { DatasourceCacheStats } from '../../util/stats.ts';
+import { safeStringify } from '../../util/stringify.ts';
 import { trimTrailingSlash } from '../../util/url.ts';
 import * as versioning from '../versioning/index.ts';
 import datasources from './api.ts';
@@ -192,11 +193,15 @@ async function mergeRegistries(
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
+  let externalHostError: ExternalHostError | undefined;
   let singleRegistry = true;
   const releaseVersioning = versioning.get(config.versioning);
   for (const registryUrl of registryUrls) {
     try {
-      const res = await getRegistryReleases(datasource, config, registryUrl);
+      // Merging must not mutate responses shared by the package cache.
+      const res = clone(
+        await getRegistryReleases(datasource, config, registryUrl),
+      );
       if (!res) {
         continue;
       }
@@ -228,11 +233,13 @@ async function mergeRegistries(
       // Merge the tags from the two results
       let tags = combinedRes.tags;
       if (tags) {
+        // v8 ignore else -- needs merged registries where only one carries tags
         if (res.tags) {
           // Both results had tags, so we need to compare them
           for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
+            // v8 ignore else -- needs a merged registry whose tag is not a version
             if (isString(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
                 isString(existingTag) &&
@@ -263,7 +270,14 @@ async function mergeRegistries(
       delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
-        throw err;
+        // Don't abort the merge if another registry already returned releases;
+        // a single rate-limited registry shouldn't discard results we have
+        externalHostError = err;
+        logger.debug(
+          { err, registryUrl },
+          'datasource merge: external host error from registry; continuing so releases from other registries are not discarded',
+        );
+        continue;
       }
 
       lastErr = err;
@@ -272,6 +286,10 @@ async function mergeRegistries(
   }
 
   if (!combinedRes) {
+    if (externalHostError) {
+      throw externalHostError;
+    }
+
     if (lastErr) {
       throw lastErr;
     }
@@ -292,16 +310,21 @@ async function mergeRegistries(
 }
 
 function massageRegistryUrls(registryUrls: string[]): string[] {
-  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+  return registryUrls.filter(isTruthy).map(trimTrailingSlash);
 }
 
 function resolveRegistryUrls(
   datasource: DatasourceApi,
+  packageName: string,
   defaultRegistryUrls: string[] | undefined,
   registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined,
 ): string[] {
-  if (!datasource.customRegistrySupport) {
+  const customRegistrySupport = datasource.supportsCustomRegistry(packageName);
+  const datasourceDefaultRegistryUrls =
+    datasource.getDefaultRegistryUrls(packageName);
+
+  if (!customRegistrySupport) {
     if (
       isNonEmptyArray(registryUrls) ||
       isNonEmptyArray(defaultRegistryUrls) ||
@@ -317,23 +340,18 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return isFunction(datasource.defaultRegistryUrls)
-      ? datasource.defaultRegistryUrls()
-      : (datasource.defaultRegistryUrls ?? []);
+    return coerceArray(datasourceDefaultRegistryUrls);
   }
-  const customUrls = registryUrls?.filter(Boolean);
+  const customUrls = registryUrls?.filter(isTruthy);
   let resolvedUrls: string[] = [];
   if (isNonEmptyArray(customUrls)) {
     resolvedUrls = [...customUrls];
   } else if (isNonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (isFunction(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
+  } else if (isNonEmptyArray(datasourceDefaultRegistryUrls)) {
+    resolvedUrls = [...datasourceDefaultRegistryUrls];
+    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
   }
   return massageRegistryUrls(resolvedUrls);
 }
@@ -364,6 +382,7 @@ async function fetchReleases(
     if (isString(config.npmrc)) {
       setNpmrc(config.npmrc);
     }
+    // v8 ignore else -- npm lookups here never arrive with explicit registryUrls
     if (!isNonEmptyArray(registryUrls)) {
       registryUrls = [resolveRegistryUrl(config.packageName)];
     }
@@ -376,6 +395,7 @@ async function fetchReleases(
   }
   registryUrls = resolveRegistryUrls(
     datasource,
+    config.packageName,
     config.defaultRegistryUrls,
     registryUrls,
     config.additionalRegistryUrls,
@@ -389,7 +409,8 @@ async function fetchReleases(
         dep = await firstRegistry(config, datasource, registryUrls);
       } else if (registryStrategy === 'hunt') {
         dep = await huntRegistries(config, datasource, registryUrls);
-      } else if (registryStrategy === 'merge') {
+      } else {
+        // `merge` is the only remaining strategy
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
@@ -407,7 +428,10 @@ async function fetchReleases(
       );
     }
   } catch (err) {
-    if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
+    if (
+      [HOST_BLOCKED, HOST_DISABLED].includes(err.message) ||
+      [HOST_BLOCKED, HOST_DISABLED].includes(err.err?.message)
+    ) {
       return null;
     }
     if (err instanceof ExternalHostError) {
@@ -427,8 +451,8 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${String(
-    registryUrls,
+  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${safeStringify(
+    [registryUrls, config.defaultRegistryUrls, config.additionalRegistryUrls],
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
@@ -516,6 +540,7 @@ function getDigestConfig(
     config.registryUrl ??
     resolveRegistryUrls(
       datasource,
+      packageName,
       config.defaultRegistryUrls,
       config.registryUrls,
       config.additionalRegistryUrls,

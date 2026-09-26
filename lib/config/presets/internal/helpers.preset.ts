@@ -119,7 +119,7 @@ export const presets: Record<string, Preset> = {
     description: 'Pin `github-action` digests.',
     packageRules: [
       {
-        matchDepTypes: ['action'],
+        matchDepTypes: ['action', 'workflow'],
         pinDigests: true,
       },
     ],
@@ -130,7 +130,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
-        matchDepTypes: ['action'],
+        matchDepTypes: ['action', 'workflow'],
         versioning:
           'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
       },

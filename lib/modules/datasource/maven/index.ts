@@ -26,7 +26,7 @@ import {
 } from './util.ts';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!releases?.length) {
     return null;
   }
@@ -69,7 +69,9 @@ export class MavenDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
@@ -106,7 +108,7 @@ export class MavenDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -162,7 +164,7 @@ export class MavenDatasource extends Datasource {
       }
     }
 
-    if (!this.defaultRegistryUrls.includes(registryUrl)) {
+    if (!this.getDefaultRegistryUrls('').includes(registryUrl)) {
       result.isPrivate = true;
     }
 

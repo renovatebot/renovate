@@ -5,7 +5,7 @@ import { logger } from '../../../../logger/index.ts';
 import { extractPackageFile } from '../../../../modules/manager/index.ts';
 import type { PackageDependency } from '../../../../modules/manager/types.ts';
 import { writeLocalFile } from '../../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../util/string.ts';
 import { compile } from '../../../../util/template/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
@@ -300,7 +300,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentValue), autoReplaceRegExpFlag),
           newValue,
         );
       }
@@ -312,7 +312,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(depName), autoReplaceRegExpFlag),
           newName,
         );
       }
@@ -324,7 +324,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigest), autoReplaceRegExpFlag),
           newDigest,
         );
       } else if (
@@ -343,7 +343,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigestShort), autoReplaceRegExpFlag),
           newDigest,
         );
       }

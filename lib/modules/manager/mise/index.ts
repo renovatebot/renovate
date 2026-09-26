@@ -1,9 +1,11 @@
 import { deduplicateArray } from '../../../util/array.ts';
+import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -51,12 +53,15 @@ const backendDatasources = {
   asdf: asdfSupportedDatasources,
   aqua: [GithubTagsDatasource.id],
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
+  conda: [CondaDatasource.id],
   dotnet: [NugetDatasource.id],
   gem: [RubygemsDatasource.id],
   github: [GithubReleasesDatasource.id],
+  gitlab: [GitlabReleasesDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
+  pypi: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
   ubi: [GithubReleasesDatasource.id],
   // not supported

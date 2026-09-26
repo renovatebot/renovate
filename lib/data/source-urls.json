@@ -3,7 +3,7 @@
   "docker": {
     "adminer": "https://github.com/vrana/adminer",
     "amd64/registry": "https://github.com/distribution/distribution",
-    "amd64/traefik": "https://github.com/containous/traefik",
+    "amd64/traefik": "https://github.com/traefik/traefik",
     "confluentinc/ksqldb-cli": "https://github.com/confluentinc/ksql",
     "confluentinc/ksqldb-server": "https://github.com/confluentinc/ksql",
     "coredns/coredns": "https://github.com/coredns/coredns",
@@ -29,7 +29,7 @@
     "prom/blackbox-exporter": "https://github.com/prometheus/blackbox_exporter",
     "registry": "https://github.com/distribution/distribution",
     "timberio/vector": "https://github.com/vectordotdev/vector",
-    "traefik": "https://github.com/containous/traefik",
+    "traefik": "https://github.com/traefik/traefik",
     "xpkg.upbound.io/upbound/provider-gcp": "https://github.com/upbound/provider-gcp"
   },
   "helm": {

@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isNonEmptyObject } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { setUserConfigFileNames } from '../../../../config/app-strings.ts';
 import { setPrivateKeys } from '../../../../config/decrypt.ts';
 import * as defaultsParser from '../../../../config/defaults.ts';
@@ -53,7 +53,7 @@ export async function parseConfigs(
     isNonEmptyArray(fileConfig.extends) &&
     isNonEmptyArray(additionalFileConfig.extends)
   ) {
-    config.extends = [...fileConfig.extends, ...(config.extends ?? [])];
+    config.extends = [...fileConfig.extends, ...coerceArray(config.extends)];
   }
   config = mergeChildConfig(config, envConfig);
   config = mergeChildConfig(config, cliConfig);
@@ -123,15 +123,13 @@ export async function parseConfigs(
   // TODO #41551
   if (isNonEmptyArray(cliConfig.repositories)) {
     const existingRepos = [
-      ...(fileConfig.repositories ?? []),
-      ...(additionalFileConfig.repositories ?? []),
-      ...(envConfig.repositories ?? []),
+      ...coerceArray(fileConfig.repositories),
+      ...coerceArray(additionalFileConfig.repositories),
+      ...coerceArray(envConfig.repositories),
     ];
 
     if (isNonEmptyArray(existingRepos)) {
-      const allStrings = existingRepos.every(
-        (repo) => typeof repo === 'string',
-      );
+      const allStrings = existingRepos.every((repo) => isString(repo));
       let shouldWarn = true;
 
       if (allStrings) {

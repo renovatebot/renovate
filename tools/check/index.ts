@@ -1,20 +1,10 @@
 /**
  * Fast local CI check script
- *
- * Usage: pnpm check [options] [targets...]
- *
- * Arguments:
- *   targets           Files or directories to scope checks to
- *
- * Options:
- *   --all             Run fixers first, then all lint checks and tests
- *   --fix             Run fixers only (oxlint-fix, biome-fix, prettier-fix)
- *   --no-test         Skip tests
  */
 
 import { readdir } from 'node:fs/promises';
 import { extname } from 'node:path';
-import { parseArgs } from 'node:util';
+import { Command } from 'commander';
 import {
   getCoverageForDir,
   getCoverageForFiles,
@@ -186,21 +176,25 @@ async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
 }
 
 function parseCliArgs(): CliArgs {
-  const { values, positionals } = parseArgs({
-    options: {
-      all: { type: 'boolean', default: false },
-      fix: { type: 'boolean', default: false },
-      'no-test': { type: 'boolean', default: false },
-    },
-    allowPositionals: true,
-  });
+  let args: CliArgs | undefined;
 
-  return {
-    all: values.all ?? false,
-    fix: values.fix ?? false,
-    noTest: values['no-test'] ?? false,
-    targets: positionals,
-  };
+  new Command('pnpm check')
+    .description('Fast local CI check script')
+    .argument('[targets...]', 'files or directories to scope checks to')
+    .option('--all', 'run fixers first, then all lint checks and tests')
+    .option('--fix', 'run fixers only (oxlint-fix, biome-fix, prettier-fix)')
+    .option('--no-test', 'skip tests')
+    .action((targets, opts) => {
+      args = {
+        all: opts.all ?? false,
+        fix: opts.fix ?? false,
+        noTest: !opts.test,
+        targets,
+      };
+    })
+    .parse();
+
+  return args!;
 }
 
 async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {

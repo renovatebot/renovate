@@ -20,7 +20,7 @@ const python = lang.createLang('python');
 
 // Optimize regex memory usage when we don't need named groups
 function cleanupNamedGroups(regexSource: string): string {
-  return regexSource.replace(/\(\?<\w+>/g, '(?:');
+  return regexSource.replace(regEx(/\(\?<\w+>/g), '(?:');
 }
 
 const rangePattern = cleanupNamedGroups(RANGE_PATTERN);
@@ -72,15 +72,15 @@ function depSkipHandler(ctx: Context): Context {
 }
 
 const incompleteDepString = q
-  .str<Context>(new RegExp(cleanupNamedGroups(depPattern)))
+  .str<Context>(regEx(cleanupNamedGroups(depPattern)))
   .op(regEx(/^\+|\*$/));
 
 const depString = q
-  .str<Context>(new RegExp(cleanupNamedGroups(depPattern)), depStringHandler)
+  .str<Context>(regEx(cleanupNamedGroups(depPattern)), depStringHandler)
   .opt(
     q
       .opt(q.op<Context>(','))
-      .comment(/^#\s*renovate\s*:\s*ignore\s*$/, depSkipHandler),
+      .comment(regEx(/^#\s*renovate\s*:\s*ignore\s*$/), depSkipHandler),
   );
 
 const query = q.alt(incompleteDepString, depString);

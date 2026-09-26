@@ -18,7 +18,7 @@ import {
 
 export const DOCKER_PREFIX = regEx(/^docker:\/?\//);
 const dockerRef = regEx(
-  /^((?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)(?::\d{2,5}\/)?)?[a-z\d]+((\.|_|__|-+)[a-z\d]+)*(\/[a-z\d]+((\.|_|__|-+)[a-z\d]+)*)*(?::(\w[\w.-]{0,127})(?:@sha256:[A-Fa-f\d]{32,})?|@sha256:[A-Fa-f\d]{32,})$/,
+  /^(?:(?:(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)(?::\d{2,5}\/)?)?[a-z\d]+(?:(?:\.|_|__|-+)[a-z\d]+)*(?:\/[a-z\d]+(?:(?:\.|_|__|-+)[a-z\d]+)*)*(?::(?:\w[\w.-]{0,127})(?:@sha256:[A-Fa-f\d]{32,})?|@sha256:[A-Fa-f\d]{32,}))$/,
 );
 
 export function isDockerRef(ref: string): boolean {

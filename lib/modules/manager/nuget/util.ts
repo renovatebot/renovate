@@ -202,6 +202,7 @@ export function applyRegistries(
       }
     }
 
+    // v8 ignore else -- the loop above always finds at least one registry
     if (urls.length) {
       dep.registryUrls = urls;
     }
