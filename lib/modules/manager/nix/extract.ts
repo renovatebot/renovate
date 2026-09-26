@@ -43,7 +43,7 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes.root.inputs;
+  const rootInputs = flakeLock.nodes.root?.inputs;
 
   if (!rootInputs) {
     logger.debug(
@@ -53,16 +53,25 @@ export async function extractPackageFile(
     return null;
   }
 
-  for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
+  // collect all root input aliases, these are a map of input name -> alias, the alias is the item we want to
+  // update under nodes
+  const rootAliases = new Set<string>();
+  for (const input in rootInputs) {
+    rootAliases.add(rootInputs[input]);
+  }
+
+  Object.keys(flakeLock.nodes).forEach((depName) => {
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
-      continue;
+      return;
     }
 
     // skip all locked and transitivie nodes as they cannot be updated by regular means
-    if (!(depName in rootInputs)) {
-      continue;
+    if (!rootAliases.has(depName)) {
+      return;
     }
+
+    const flakeInput = flakeLock.nodes[depName];
 
     // flakeLocked example: { rev: '56a49ffef2908dad1e9a8adef1f18802bc760962', type: 'github' }
     const flakeLocked = flakeInput.locked;
@@ -74,7 +83,7 @@ export async function extractPackageFile(
         { flakeLockFile, flakeInput },
         `input is missing locked, skipping`,
       );
-      continue;
+      return;
     }
 
     if (flakeOriginal === undefined) {
@@ -82,7 +91,7 @@ export async function extractPackageFile(
         { flakeLockFile, flakeInput },
         `input is missing original, skipping`,
       );
-      continue;
+      return;
     }
 
     // indirect inputs cannot be reliably updated because they depend on the flake registry
@@ -91,7 +100,7 @@ export async function extractPackageFile(
         { flakeLockFile, flakeInput },
         `input is type indirect, skipping`,
       );
-      continue;
+      return;
     }
 
     // cannot update local path inputs
@@ -100,7 +109,7 @@ export async function extractPackageFile(
         { flakeLockFile, flakeInput },
         `input is type path, skipping`,
       );
-      continue;
+      return;
     }
 
     // if no rev is being tracked, we cannot update this input
@@ -109,7 +118,7 @@ export async function extractPackageFile(
         { flakeLockFile, flakeInput },
         `locked input is not tracking a rev, skipping`,
       );
-      continue;
+      return;
     }
 
     // if there's a new digest, set the corresponding digest in the lockfile so confirmations pass
@@ -196,7 +205,7 @@ export async function extractPackageFile(
     }
 
     deps.push(dep);
-  }
+  });
 
   if (deps.length) {
     return { deps };
