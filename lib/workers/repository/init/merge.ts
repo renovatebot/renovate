@@ -705,7 +705,6 @@ export async function mergeRenovateConfig(
     returnConfig,
     config,
   ));
-  returnConfig.renovateJsonPresent = true;
   // istanbul ignore if
   if (returnConfig.ignorePaths?.length) {
     logger.debug(

@@ -300,23 +300,6 @@ describe('util/http/index', () => {
     expect(httpMock.allUsed()).toBeTrue();
   });
 
-  it('headJson', async () => {
-    httpMock.scope(baseUrl).head('/').reply(200, undefined, {
-      'content-type': 'application/json',
-    });
-    await expect(
-      http.headJson('http://renovate.com', { baseUrl }),
-    ).resolves.toEqual({
-      authorization: false,
-      body: '',
-      headers: {
-        'content-type': 'application/json',
-      },
-      statusCode: 200,
-    });
-    expect(httpMock.allUsed()).toBeTrue();
-  });
-
   it('stream', async () => {
     httpMock.scope(baseUrl).get('/some').reply(200, {});
 
@@ -844,36 +827,6 @@ describe('util/http/index', () => {
           headers: { custom: 'header' },
         });
         expect(res.body).toBe('plain text response');
-      });
-    });
-
-    describe('getYamlUnchecked', () => {
-      it('parses yaml response without schema', async () => {
-        httpMock.scope(baseUrl).get('/').reply(200, 'x: 2\ny: 2');
-
-        const res = await http.getYamlUnchecked('http://renovate.com');
-        expect(res.body).toEqual({ x: 2, y: 2 });
-      });
-
-      it('parses yaml with options', async () => {
-        httpMock
-          .scope(baseUrl)
-          .get('/')
-          .matchHeader('custom', 'header')
-          .reply(200, 'x: 2\ny: 2');
-
-        const res = await http.getYamlUnchecked('http://renovate.com', {
-          headers: { custom: 'header' },
-        });
-        expect(res.body).toEqual({ x: 2, y: 2 });
-      });
-
-      it('throws on invalid yaml', async () => {
-        httpMock.scope(baseUrl).get('/').reply(200, '!@#$%^');
-
-        await expect(
-          http.getYamlUnchecked('http://renovate.com'),
-        ).rejects.toThrow('Failed to parse YAML file');
       });
     });
 

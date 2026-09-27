@@ -498,7 +498,7 @@ export async function ensurePr(
         );
       } else if (config.autoApprove) {
         logger.debug({ prTitle }, 'PR approval required');
-      } else if (!config.committedFiles && !config.rebaseRequested) {
+      } else if (!config.rebaseRequested) {
         logger.debug(
           {
             prTitle,

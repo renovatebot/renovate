@@ -149,7 +149,6 @@ describe('workers/repository/onboarding/branch/index', () => {
       const expectConfig = {
         ...config,
         onboardingBranch: 'test',
-        renovateJsonPresent: true,
         warnings: [],
       };
       delete expectConfig.env;
