@@ -5336,6 +5336,10 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
   In short: vulnerability alerts "skip the line".
 
+!!! note
+  Some managers disable certain dependencies by default, such as `indirect` Go modules or Gradle `strictly` constraints.
+  Renovate still raises vulnerability-fix PRs for those dependencies, unless you disable them yourself with a `packageRules` entry that sets `enabled=false`.
+
 If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set `prConcurrentLimit` or `branchConcurrentLimit` inside the `vulnerabilityAlerts` object.
 Vulnerability fixes get their _own_ budget, they do not take a share of the repository-wide one:
 

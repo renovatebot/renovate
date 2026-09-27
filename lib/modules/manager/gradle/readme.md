@@ -57,6 +57,7 @@ Renovate can only rewrite one version literal per dependency, so it picks a sing
 | anything + `reject` or `rejectAll` | nothing, skipped as `unsupported-version`     |
 
 `strictly` and `prefer` pin a version on purpose, so Renovate disables those dependencies by default and only updates them for [vulnerability alerts](../../../configuration-options.md#vulnerabilityalerts).
+If you disable them yourself with a package rule, Renovate skips their vulnerability fixes too.
 A `require` constraint means the same thing as a plain version declaration, so it is updated like any other dependency.
 
 To also receive regular updates for `strictly` and `prefer` constraints, opt in with a package rule:
