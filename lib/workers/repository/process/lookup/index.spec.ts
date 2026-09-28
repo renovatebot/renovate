@@ -115,7 +115,8 @@ describe('workers/repository/process/lookup/index', () => {
 
     it('returns invalid-config without warning if packageName is missing', async () => {
       config.datasource = NpmDatasource.id;
-      delete config.packageName;
+      // @ts-expect-error: testing missing packageName
+      config.packageName = undefined;
 
       const { skipReason, warnings } = await Result.wrap(
         lookup.lookupUpdates(config),
