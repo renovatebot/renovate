@@ -4836,6 +4836,26 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({ number: 2500, state: 'merged' });
     });
 
+    it('should refresh a cached PR', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls/2500').reply(200, {
+        number: 2500,
+        head: {
+          ref: 'renovate/jest-monorepo',
+          repo: { full_name: 'some/repo' },
+        },
+        title: 'chore(deps): update dependency jest to v23.6.0',
+        state: 'closed',
+        merged_at: DateTime.now().toISO(),
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      const pr = await github.getPr(2500, true);
+
+      expect(pr).toMatchObject({ number: 2500, state: 'merged' });
+    });
+
     it('should return null if no PR is returned from GitHub', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
