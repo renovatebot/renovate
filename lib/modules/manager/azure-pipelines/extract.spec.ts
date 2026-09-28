@@ -256,6 +256,21 @@ describe('modules/manager/azure-pipelines/extract', () => {
       ).toBeNull();
     });
 
+    it('should skip steps and containers that yield no dependency', () => {
+      const packageFile = codeBlock`
+        resources:
+          containers:
+          - container: linux
+        steps:
+        - task: NotAVersionedTask
+      `;
+      expect(
+        extractPackageFile(packageFile, azurePipelinesFilename, {
+          repository: 'repo',
+        }),
+      ).toBeNull();
+    });
+
     it('should extract deployment jobs runonce', () => {
       const packageFile = codeBlock`
         jobs:

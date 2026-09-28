@@ -36,7 +36,7 @@ function getPrimaryRepodataUrl(
   return joinUrlParts(registryUrlWithoutRepodata, href);
 }
 
-export async function fetchPrimaryGzipUrl(
+export async function fetchPrimaryUrl(
   http: Http,
   registryUrl: string,
 ): Promise<string> {

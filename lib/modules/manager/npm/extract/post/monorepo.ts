@@ -5,13 +5,13 @@ import {
   getSiblingFileName,
 } from '../../../../../util/fs/index.ts';
 import { coerceObject } from '../../../../../util/object.ts';
-import type { PackageFile } from '../../../types.ts';
+import type { NpmrcPackageFile } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { detectPnpmWorkspaces } from '../pnpm.ts';
 import { matchesAnyPattern } from '../utils.ts';
 
 export async function detectMonorepos(
-  packageFiles: Partial<PackageFile<NpmManagerData>>[],
+  packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[],
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting workspaces');

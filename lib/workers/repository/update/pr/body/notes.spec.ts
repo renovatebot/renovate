@@ -62,4 +62,24 @@ describe('workers/repository/update/pr/body/notes', () => {
       "Add the preset `:preserveSemverRanges` to your config if you don't want to pin your dependencies.",
     );
   });
+
+  it('skips an upgrade with no notes', () => {
+    const res = getPrNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      baseBranch: 'base',
+      upgrades: [{ manager: 'some-manager', branchName: 'branch' }],
+    });
+    expect(res).toBe('\n\n');
+  });
+
+  it('renders no extra notes when nothing applies', () => {
+    const res = getPrExtraNotes({
+      manager: 'some-manager',
+      branchName: 'branch',
+      baseBranch: 'base',
+      upgrades: [{ manager: 'some-manager', branchName: 'branch' }],
+    });
+    expect(res).toBe('');
+  });
 });

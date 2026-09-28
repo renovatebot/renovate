@@ -170,6 +170,25 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getConcurrentPrsCount(config, branches);
       expect(res).toBe(1);
     });
+
+    it('ignores a pr that is not open and the onboarding pr', async () => {
+      platform.getBranchPr.mockImplementation((branchName) =>
+        Promise.resolve(
+          partial<Pr>({
+            sourceBranch: branchName,
+            state: branchName === 'closed-branch' ? 'closed' : 'open',
+          }),
+        ),
+      );
+      const branches: BranchConfig[] = [
+        { branchName: 'closed-branch' },
+        { branchName: 'renovate/configure' },
+      ] as never;
+
+      const res = await limits.getConcurrentPrsCount(config, branches);
+
+      expect(res).toBe(0);
+    });
   });
 
   describe('getConcurrentBranchesCount()', () => {

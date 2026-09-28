@@ -416,6 +416,15 @@ export function setPlatformIgnoredAuthors(emails: string[] = []): void {
   platformIgnoredAuthors = emails;
 }
 
+/**
+ * Clears the in-memory `isBranchModified()` results.
+ *
+ * @internal Test helper, so read-only tests can share one `initRepo()`.
+ */
+export function clearBranchIsModifiedCache(): void {
+  config.branchIsModified = {};
+}
+
 export async function getSubmodules(): Promise<string[]> {
   try {
     return (

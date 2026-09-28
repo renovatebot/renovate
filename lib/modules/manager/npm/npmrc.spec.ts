@@ -1,7 +1,7 @@
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { resolveNpmrc } from './npmrc.ts';
+import { applyConfigNpmrc, resolveNpmrc } from './npmrc.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -526,6 +526,38 @@ describe('modules/manager/npm/npmrc', () => {
       expect(logger.debug).not.toHaveBeenCalledWith(
         { npmrcFileName: '.npmrc' },
         'Stripping .npmrc file of lines with variables',
+      );
+    });
+  });
+
+  describe('applyConfigNpmrc', () => {
+    const repoNpmrc = {
+      content: 'registry=https://reg.example.com/\n',
+      detectedLineEnding: '\n' as const,
+    };
+
+    it('returns the config npmrc when there is no repo npmrc', () => {
+      expect(applyConfigNpmrc({}, undefined)).toBeUndefined();
+      expect(applyConfigNpmrc({ npmrc: 'config' }, undefined)).toBe('config');
+    });
+
+    it('returns the repo npmrc when there is no config npmrc', () => {
+      expect(applyConfigNpmrc({}, repoNpmrc)).toBe(repoNpmrc.content);
+    });
+
+    it('merges both when npmrcMerge is set', () => {
+      expect(
+        applyConfigNpmrc({ npmrc: 'config', npmrcMerge: true }, repoNpmrc),
+      ).toBe(`config\n${repoNpmrc.content}`);
+    });
+
+    it('ignores the repo npmrc when npmrcMerge is not set', () => {
+      expect(applyConfigNpmrc({ npmrc: 'config' }, repoNpmrc, '.npmrc')).toBe(
+        'config',
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        { npmrcFileName: '.npmrc' },
+        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
       );
     });
   });

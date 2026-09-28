@@ -181,6 +181,17 @@ describe('workers/global/config/parse/file', () => {
       await fs.promises.unlink(configFile);
     });
 
+    it('skips an unreadable default config file', async () => {
+      fsPathExistsSpy.mockResolvedValueOnce(true as never);
+
+      const res = await file.getConfig({});
+
+      expect(res).toEqual({});
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Error reading or parsing file - skipping',
+      );
+    });
+
     it('exports env variables to environment from processEnv object', async () => {
       const configFile = upath.resolve(tmp.path, 'config2.js');
       const fileContent1 = codeBlock`

@@ -80,13 +80,11 @@ const CargoDep = z.union([
         return dep;
       },
     ),
-  z.string().transform(
-    (version): PackageDependency<CargoManagerData> => ({
-      currentValue: version,
-      managerData: { nestedVersion: false },
-      datasource: CrateDatasource.id,
-    }),
-  ),
+  z.string().transform((version): PackageDependency<CargoManagerData> => ({
+    currentValue: version,
+    managerData: { nestedVersion: false },
+    datasource: CrateDatasource.id,
+  })),
 ]);
 
 const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {

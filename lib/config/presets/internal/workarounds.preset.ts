@@ -260,10 +260,10 @@ export const presets: Record<string, Preset> = {
       },
       {
         description:
-          'Use partial semver versioning for partial mise Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
+          'Use partial semver versioning for partial mise and GitHub Actions Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
         matchCurrentValue: '/^\\d+(?:\\.\\d+)?$/',
         matchDatasources: ['java-version'],
-        matchManagers: ['mise'],
+        matchManagers: ['github-actions', 'mise'],
         versioning: 'semver-partial',
       },
       {

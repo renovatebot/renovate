@@ -578,8 +578,7 @@ export async function deleteLabel(
 
 export function ensureCommentRemoval(
   _ensureCommentRemoval:
-    | EnsureCommentRemovalConfigByTopic
-    | EnsureCommentRemovalConfigByContent,
+    EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   return Promise.resolve();
 }

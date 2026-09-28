@@ -99,9 +99,9 @@ export async function flattenUpdates(
         packageFile,
       ) as never;
       const packagePath = packageFile.packageFile?.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
+      // `split` always yields at least one element, so there is always a file
+      // name to drop here
+      packagePath.splice(-1, 1);
       if (packagePath.length > 0) {
         packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');

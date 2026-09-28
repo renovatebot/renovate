@@ -1,4 +1,3 @@
-import { isPlainObject } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { HttpCacheStats } from '../../stats.ts';
@@ -22,11 +21,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
-    // v8 ignore else -- TODO: add test #40625
-    if (isPlainObject(httpCache.httpResponse)) {
-      httpCache.httpResponse.cached = true;
-    }
-
+    httpCache.httpResponse.cached = true;
     return httpCache;
   }
 

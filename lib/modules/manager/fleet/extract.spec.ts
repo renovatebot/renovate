@@ -126,6 +126,52 @@ kind: Fleet
           },
         ]);
       });
+      it('should skip OCI charts without version', () => {
+        const result = extractPackageFile(
+          codeBlock`
+            defaultNamespace: external-dns
+            helm:
+              chart: oci://registry-1.docker.io/bitnamicharts/external-dns
+          `,
+          'fleet.yaml',
+          {},
+        );
+
+        expect(result?.deps).toEqual([
+          {
+            datasource: 'docker',
+            depName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            pinDigests: false,
+            skipReason: 'unspecified-version',
+          },
+        ]);
+      });
+
+      it('should not treat a repository qualified chart name as a local chart', () => {
+        const result = extractPackageFile(
+          codeBlock`
+            defaultNamespace: nginx
+            helm:
+              chart: bitnami/nginx
+              version: 15.0.0
+          `,
+          'fleet.yaml',
+          {},
+        );
+
+        expect(result?.deps).toEqual([
+          {
+            datasource: 'helm',
+            depName: 'bitnami/nginx',
+            depType: 'fleet',
+            packageName: 'bitnami/nginx',
+            skipReason: 'no-repository',
+          },
+        ]);
+      });
+
       it('should parse valid configuration with target customization', () => {
         const validFleetYamlWithCustom = codeBlock`
           # This should generate two dependencies with different versions

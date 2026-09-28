@@ -1,5 +1,7 @@
 import type { Stats } from 'node:fs';
+import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
 import type { MockInstance } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
@@ -21,7 +23,6 @@ import type { UpdateArtifactsConfig } from '../types.ts';
 import {
   addExtraEnvVariable,
   extractEnvironmentVariableName,
-  getMatchingHostRule,
 } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 import type { PipfileLock } from './types.ts';
@@ -39,8 +40,10 @@ vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/git/index.ts', () => mockDeep());
 vi.mock('../../../util/http/index.ts', () => mockDeep());
 vi.mock('../../datasource/index.ts', () => mockDeep());
+vi.mock('google-auth-library');
 
 const datasource = vi.mocked(_datasource);
+const googleAuth = vi.mocked(_googleAuth);
 const fsExtra = vi.mocked(_fsExtra);
 // vi.mocked() resolves stat() to its callback overload, so
 // mockResolvedValueOnce() would expect void; retype via the promise overload
@@ -765,6 +768,38 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted python constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    statMock.mockResolvedValueOnce(partial<Stats>());
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+
+    mockFiles({
+      '/Pipfile.lock': ['{}', 'new lock'],
+    });
+
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      }),
+    );
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: { ...config, extractedConstraints: { python: '== 3.9.*' } },
+      }),
+    ).resolves.not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.9.1' },
+      { cmd: 'install-tool pipenv 2013.6.12' },
+      { cmd: 'pipenv lock' },
+    ]);
+  });
+
   it('catches errors', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
     statMock.mockResolvedValueOnce(partial<Stats>());
@@ -1152,8 +1187,65 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
   });
 
-  it('returns no host rule on invalid url', () => {
-    expect(getMatchingHostRule('')).toBeNull();
+  it('passes Google Artifact Registry credential environment vars', async () => {
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
+
+    mockFiles({
+      '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],
+    });
+
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      }),
+    );
+
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // eslint-disable-next-line prefer-arrow-callback
+    googleAuth.mockImplementationOnce(function () {
+      return partial<InstanceType<typeof _googleAuth>>({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
+      });
+    });
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: codeBlock`
+          [[source]]
+          url = "https://$GAR_USERNAME:\${GAR_PASSWORD}@someregion-python.pkg.dev/some-project/some-repo/simple"
+          verify_ssl = true
+          name = "gar"
+
+          [packages]
+          requests = {version = "==0.21.0", index = "gar"}
+        `,
+        config: { ...config, constraints: { python: '== 3.8.*' } },
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          contents: 'New Pipfile.lock',
+          path: 'Pipfile.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          env: {
+            GAR_USERNAME: 'oauth2accesstoken',
+            GAR_PASSWORD: 'some-token',
+          },
+        },
+      },
+    ]);
   });
 
   it.each`

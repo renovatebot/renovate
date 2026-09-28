@@ -248,6 +248,17 @@ describe('modules/manager/npm/post-update/index', () => {
               dev: true,
               peerDependencies: { vue: '3.x' },
             },
+            // workspace pinning vue exactly, must stay: it is the link target
+            // of node_modules/@vue-repro/app
+            'packages/app': {
+              name: '@vue-repro/app',
+              version: '1.0.0',
+              dependencies: { vue: '3.5.39' },
+            },
+            'node_modules/@vue-repro/app': {
+              resolved: 'packages/app',
+              link: true,
+            },
           },
         }),
       );
@@ -291,6 +302,10 @@ describe('modules/manager/npm/post-update/index', () => {
       // packages without an exact pin on the updated dep stay
       expect(written.packages['node_modules/@vue/test-utils']).toBeDefined();
       expect(written.packages['node_modules/@vue/shared']).toBeDefined();
+      // workspaces stay even when they pin exactly, else npm fails with
+      // EMISSINGTARGET on the link entry referencing them
+      expect(written.packages['packages/app']).toBeDefined();
+      expect(written.packages['node_modules/@vue-repro/app']).toBeDefined();
     });
 
     it('writes .npmrc files', async () => {
@@ -643,9 +658,8 @@ describe('modules/manager/npm/post-update/index', () => {
       const npmrcFilename = 'packages/core/.npmrc';
       const originalNpmrc = 'package-lock=false\r\nkeep = true';
       const files = new Map<string, string>([[npmrcFilename, originalNpmrc]]);
-      fs.readLocalFile.mockImplementation(
-        (fileName): Promise<string | null> =>
-          Promise.resolve(files.get(fileName) ?? null),
+      fs.readLocalFile.mockImplementation((fileName): Promise<string | null> =>
+        Promise.resolve(files.get(fileName) ?? null),
       );
       fs.writeLocalFile.mockImplementation((fileName, content) => {
         files.set(fileName, content.toString());
@@ -696,9 +710,8 @@ describe('modules/manager/npm/post-update/index', () => {
       const npmrcFilename = '.npmrc';
       const originalNpmrc = 'package-lock=false';
       let npmrcOnDisk = originalNpmrc;
-      fs.readLocalFile.mockImplementation(
-        (fileName): Promise<string | null> =>
-          Promise.resolve(fileName === npmrcFilename ? npmrcOnDisk : null),
+      fs.readLocalFile.mockImplementation((fileName): Promise<string | null> =>
+        Promise.resolve(fileName === npmrcFilename ? npmrcOnDisk : null),
       );
       fs.writeLocalFile.mockImplementation((fileName, content) => {
         if (fileName === npmrcFilename) {

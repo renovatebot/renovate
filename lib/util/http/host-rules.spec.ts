@@ -386,7 +386,7 @@ describe('util/http/host-rules', () => {
         });
       }
 
-      // in the case a Datasource uses GitHub APIs, but doesn't have an explicit wiring in via GITHUB_API_USING_HOST_TYPES, we should also auto-detect
+      // in the case a Datasource uses GitHub APIs, but doesn't have an explicit wiring in via PLATFORM_FAMILIES.github.apiUsingHostTypes, we should also auto-detect
       // See #30490 #38725
       {
         const url =
@@ -581,7 +581,7 @@ describe('util/http/host-rules', () => {
     });
 
     it('fallback to github for non-listed hostType targeting GHE endpoint', () => {
-      // github-digest is NOT in GITHUB_API_USING_HOST_TYPES,
+      // github-digest is NOT in PLATFORM_FAMILIES.github.apiUsingHostTypes,
       // but should still get credentials when targeting the GHE endpoint
       const opts = { hostType: 'github-digest' };
       const hostRule = findMatchingRule(
@@ -812,6 +812,24 @@ describe('util/http/host-rules', () => {
       },
       hostType: 'gitea-tags',
       token: 'abc',
+    });
+  });
+
+  it('fallback to forgejo', () => {
+    hostRules.add({
+      hostType: 'forgejo',
+      password: 'password',
+    });
+
+    const opts = { ...options, hostType: 'forgejo-tags' };
+    const hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      password: 'password',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      hostType: 'forgejo-tags',
+      password: 'password',
+      username: undefined,
     });
   });
 

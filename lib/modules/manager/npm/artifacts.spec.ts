@@ -246,6 +246,31 @@ describe('modules/manager/npm/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted node and corepack constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
+      .mockResolvedValueOnce('{}') // for node constraints
+      .mockResolvedValue('some new content'); // for updated package.json
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: 'some content',
+      config: {
+        ...config,
+        extractedConstraints: { node: '20.1.0', corepack: '0.29.3' },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 20.1.0' },
+      { cmd: 'install-tool corepack 0.29.3' },
+      { cmd: 'corepack use pnpm@8.15.6' },
+    ]);
+  });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecSequence([new Error('exec error')]);
 

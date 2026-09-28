@@ -86,10 +86,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return;
     }
 
-    const httpResponse = copyResponse(
-      data.httpResponse as HttpResponse<unknown>,
-      false,
-    );
+    const httpResponse = copyResponse(data.httpResponse, false);
 
     const { data: body, error: err } = this.writeSchema.safeParse(
       httpResponse.body,

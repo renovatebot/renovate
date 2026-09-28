@@ -5,6 +5,7 @@ import { coerceArray } from '../../../../../util/array.ts';
 import type { ConstraintName } from '../../../../../util/exec/types.ts';
 import { isConstraintName } from '../../../../../util/exec/types.ts';
 import { regEx } from '../../../../../util/regex.ts';
+import { coerceString } from '../../../../../util/string.ts';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../../../datasource/npm/index.ts';
@@ -44,7 +45,7 @@ export function parseDepName(depType: string, key: string): string {
 
   const lastSegment = segments.at(-1);
   const [, depName] = coerceArray(
-    regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? ''),
+    regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(coerceString(lastSegment)),
   );
   return depName;
 }

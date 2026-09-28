@@ -85,8 +85,7 @@ function resolveVulnerabilityConcurrentLimit(
   // `branchConcurrentLimit`, even though both are valid nested options (see docs for `vulnerabilityAlerts`).
   // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
   const vulnerabilityAlerts = config.vulnerabilityAlerts as
-    | RenovateConfig
-    | undefined;
+    RenovateConfig | undefined;
   const vulnerabilityAlertsDefault = getDefault(
     getOptions().find((option) => option.name === 'vulnerabilityAlerts')!,
   ) as RenovateConfig;
@@ -282,8 +281,8 @@ function getBranchUpgradeTypes(branch: BranchConfig): Set<SummaryCategory> {
 // Sort: default branch (empty string) first, then named branches alphabetically.
 function sortBaseBranches(bases: Iterable<string>): string[] {
   return [...bases].sort((a, b) => {
+    // v8 ignore if -- base branches are unique Record keys, so never equal
     if (a === b) {
-      /* v8 ignore next -- base branches are unique Record keys; equal comparison cannot occur */
       return 0;
     }
     if (a === '') {
