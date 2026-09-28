@@ -63,6 +63,13 @@ I have verified these changes via:
 
 The public repository: <URL>
 
+A reproduction is compulsory: link a public repository above that reproduces the bug or shows the new behavior.
+If you are not adding a reproduction, state your reason here:
+
+<!-- Reason for not adding a reproduction -->
+
+PRs without a reproduction or a stated reason will not be reviewed and may be closed.
+
 <!-- If you have any suggestions about this PR template, edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
 
 <!-- Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again. This makes it harder for us to review your work because we don't know what has changed. -->
