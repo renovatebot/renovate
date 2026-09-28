@@ -2056,6 +2056,32 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
+    it('returns a branch error if a Poetry artifact timed out', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [
+          {
+            fileName: 'poetry.lock',
+            stderr: 'Poetry lockfile update timed out',
+            timedOut: true,
+          },
+        ],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      config.releaseTimestamp = new Date().toISOString() as Timestamp;
+
+      await expect(branchWorker.processBranch(config)).resolves.toMatchObject({
+        branchExists: false,
+        result: 'error',
+      });
+      expect(prWorker.ensurePr).not.toHaveBeenCalled();
+    });
+
     it('ensures PR and adds lock file error comment recreate closed', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({

@@ -82,6 +82,17 @@ function getSpawnStub(args: StubArgs): any {
     pid = 31415,
   } = args;
   const listeners: Events = {};
+  let complete = false;
+  let resolveResult!: (result: {
+    shortMessage?: string;
+    timedOut: boolean;
+  }) => void;
+  const subprocess = new Promise<{
+    shortMessage?: string;
+    timedOut: boolean;
+  }>((resolve) => {
+    resolveResult = resolve;
+  }) as any;
 
   // init listeners
   function on(name: string, cb: Listener) {
@@ -135,18 +146,35 @@ function getSpawnStub(args: StubArgs): any {
   // queue events and wait for event loop to clear
   setTimeout(() => {
     if (error) {
+      complete = true;
+      resolveResult({ timedOut: false });
       listeners.error?.(error);
+      return;
     }
+    if (exitSignal === 'SIGSTOP' && timeout) {
+      listeners.exit?.(exitCode, exitSignal);
+      return;
+    }
+    complete = true;
+    resolveResult({ timedOut: false });
     listeners.exit?.(exitCode, exitSignal);
   }, 0);
 
   if (timeout) {
     setTimeout(() => {
+      if (complete) {
+        return;
+      }
+      complete = true;
+      resolveResult({
+        shortMessage: `Command timed out after ${timeout} milliseconds: ${cmd}`,
+        timedOut: true,
+      });
       listeners.exit?.(null, 'SIGTERM');
     }, timeout);
   }
 
-  return {
+  Object.assign(subprocess, {
     nodeChildProcess: {
       on,
       spawnargs: cmd.split(regEx(/\s+/)),
@@ -158,7 +186,8 @@ function getSpawnStub(args: StubArgs): any {
       pid,
     },
     pid,
-  };
+  });
+  return subprocess;
 }
 
 function stringify(list: Buffer[]): string {
@@ -628,6 +657,21 @@ describe('util/exec/common', () => {
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
+        timedOut: undefined,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
+      });
+    });
+
+    it('process terminated with another signal', async () => {
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGINT';
+      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+      await expect(
+        exec(cmd, partial<RawExecOptions>({})),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
         message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
       });
     });
@@ -638,10 +682,17 @@ describe('util/exec/common', () => {
         cmd,
         exitCode: null,
         exitSignal: 'SIGSTOP',
-        timeout: 500,
+        timeout: 5,
       });
       execa.mockImplementationOnce((_cmd, _opts) => stub);
-      await expect(exec(cmd, partial<RawExecOptions>({}))).toReject();
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ timeout: 5 })),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: 'SIGTERM',
+        timedOut: true,
+        message: `Command timed out after 5 milliseconds: ${cmd}`,
+      });
     });
 
     it('process exits due to error', async () => {

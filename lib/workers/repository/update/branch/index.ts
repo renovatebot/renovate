@@ -707,6 +707,9 @@ export async function processBranch(
       removeMeta(['dep']);
 
       if (config.artifactErrors?.length) {
+        const artifactTimedOut = config.artifactErrors.some(
+          (error) => error.timedOut,
+        );
         if (config.releaseTimestamp) {
           logger.debug(`Branch timestamp: ${config.releaseTimestamp}`);
           const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
@@ -722,6 +725,9 @@ export async function processBranch(
             logger.debug(
               'PR is less than 2 hours old - raise error instead of PR',
             );
+            if (artifactTimedOut) {
+              return { branchExists, result: 'error', commitSha };
+            }
             throw new Error(MANAGER_LOCKFILE_ERROR);
           }
         } else {
