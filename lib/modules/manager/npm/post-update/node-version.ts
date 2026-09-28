@@ -1,3 +1,4 @@
+import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -34,6 +35,18 @@ async function getPackageJsonConstraint(
     if (semver.validRange(constraint)) {
       logger.debug(
         `Using node constraint "${constraint}" from package.json volta`,
+      );
+      return constraint;
+    }
+  }
+  if (pkgJson.devEngines?.runtime) {
+    const runtimes = isArray(pkgJson.devEngines.runtime)
+      ? pkgJson.devEngines.runtime
+      : [pkgJson.devEngines.runtime];
+    const constraint = runtimes.find((r) => r.name === 'node')?.version;
+    if (constraint && semver.validRange(constraint)) {
+      logger.debug(
+        `Using node constraint "${constraint}" from package.json devEngines`,
       );
       return constraint;
     }

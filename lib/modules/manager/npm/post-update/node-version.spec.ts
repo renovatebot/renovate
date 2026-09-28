@@ -116,6 +116,99 @@ describe('modules/manager/npm/post-update/node-version', () => {
       );
       expect(res).toBe('14.17.0');
     });
+
+    it('returns from package.json devEngines runtime object', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+    });
+
+    it('returns from package.json devEngines runtime array', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: {
+              runtime: [
+                { name: 'bun', version: '1.0.0' },
+                { name: 'node', version: '26.10.0' },
+              ],
+            },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+    });
+
+    it('falls back to engines when devEngines runtime has no node entry', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'bun', version: '1.0.0' } },
+            engines: { node: '^12.16.3' },
+          }),
+        ),
+      );
+      expect(res).toBe('^12.16.3');
+    });
+
+    it('prefers volta over devEngines runtime', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            volta: { node: '14.17.0' },
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('14.17.0');
+    });
+
+    it('ignores an invalid devEngines runtime version', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: 'latest' } },
+            engines: { node: '^12.16.3' },
+          }),
+        ),
+      );
+      expect(res).toBe('^12.16.3');
+    });
+
+    it('prefers devEngines runtime over engines', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+            engines: { node: '^12.16.3' },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+    });
   });
 
   describe('getNodeUpdate()', () => {
