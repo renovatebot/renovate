@@ -165,7 +165,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
       expect(res).toBe('^12.16.3');
     });
 
-    it('prefers volta over devEngines runtime', async () => {
+    it('prefers devEngines runtime over volta', async () => {
       const res = await getNodeConstraint(
         {},
         [],
@@ -177,7 +177,37 @@ describe('modules/manager/npm/post-update/node-version', () => {
           }),
         ),
       );
-      expect(res).toBe('14.17.0');
+      expect(res).toBe('26.10.0');
+    });
+
+    it('prefers devEngines runtime over .nvmrc', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('12.16.2\n');
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('prefers user constraints over devEngines runtime', async () => {
+      const res = await getNodeConstraint(
+        config,
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('^12.16.0');
     });
 
     it('ignores an invalid devEngines runtime version', async () => {

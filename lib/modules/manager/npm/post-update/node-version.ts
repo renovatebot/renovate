@@ -25,6 +25,21 @@ async function getNodeFile(filename: string): Promise<string | null> {
   return null;
 }
 
+async function getDevEnginesConstraint(
+  pkg: LazyPackageJson,
+): Promise<string | null> {
+  const runtime = (await pkg.getValue()).devEngines?.runtime;
+  const runtimes = isArray(runtime) ? runtime : [runtime];
+  const constraint = runtimes.find((r) => r?.name === 'node')?.version;
+  if (constraint && semver.validRange(constraint)) {
+    logger.debug(
+      `Using node constraint "${constraint}" from package.json devEngines`,
+    );
+    return constraint;
+  }
+  return null;
+}
+
 async function getPackageJsonConstraint(
   pkg: LazyPackageJson,
 ): Promise<string | null> {
@@ -35,18 +50,6 @@ async function getPackageJsonConstraint(
     if (semver.validRange(constraint)) {
       logger.debug(
         `Using node constraint "${constraint}" from package.json volta`,
-      );
-      return constraint;
-    }
-  }
-  if (pkgJson.devEngines?.runtime) {
-    const runtimes = isArray(pkgJson.devEngines.runtime)
-      ? pkgJson.devEngines.runtime
-      : [pkgJson.devEngines.runtime];
-    const constraint = runtimes.find((r) => r.name === 'node')?.version;
-    if (constraint && semver.validRange(constraint)) {
-      logger.debug(
-        `Using node constraint "${constraint}" from package.json devEngines`,
       );
       return constraint;
     }
@@ -77,6 +80,7 @@ export async function getNodeConstraint(
       config,
       'node',
       async () =>
+        (await getDevEnginesConstraint(pkg)) ??
         (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
         (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
         (await getPackageJsonConstraint(pkg)),
