@@ -49,7 +49,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types.ts';
-import { getNewBranchName, repoFingerprint } from '../util.ts';
+import { findPrInList, getNewBranchName, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { BbsPrCache } from './pr-cache.ts';
 import type {
@@ -381,31 +381,6 @@ export async function getPr(
 }
 
 // TODO: coverage (#40625)
-/* v8 ignore next -- covered only through findPr callers, direct coverage tracked in #40625 */
-function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState.startsWith('!')) {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
-// TODO: coverage (#40625)
-/* v8 ignore next -- covered only through findPr callers, direct coverage tracked in #40625 */
-function isRelevantPr(
-  branchName: string,
-  prTitle: string | null | undefined,
-  state: string,
-) {
-  return (p: Pr): boolean =>
-    p.sourceBranch === branchName &&
-    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-    matchesState(p.state, state);
-}
-
-// TODO: coverage (#40625)
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   return await BbsPrCache.getPrs(
@@ -455,7 +430,7 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  const pr = prList.find(isRelevantPr(branchName, prTitle, state));
+  const pr = findPrInList(prList, { branchName, prTitle, state });
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   } else {

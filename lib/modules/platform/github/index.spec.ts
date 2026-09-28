@@ -4045,6 +4045,46 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
 
+    it('finds PRs from forks when forkToken is set', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+      });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'forked/repo' } },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ]);
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'true',
+        forkCreation: true,
+      });
+
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: 'open',
+      });
+
+      expect(res).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch-a',
+        sourceRepo: 'forked/repo',
+      });
+    });
+
     it('skips PR with non-matching title', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

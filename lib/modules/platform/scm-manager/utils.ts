@@ -3,9 +3,8 @@ import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { GitUrlOption, Pr } from '../types.ts';
+import type { GitUrlOption } from '../types.ts';
 import type { PrMergeMethod, Repo } from './schema.ts';
-import type { PrFilterByState } from './types.ts';
 
 export function mapPrState(
   state: 'open' | 'closed' | undefined,
@@ -18,18 +17,6 @@ export function mapPrState(
     default:
       return undefined;
   }
-}
-
-export function matchPrState(pr: Pr, state: PrFilterByState): boolean {
-  if (state === 'all') {
-    return true;
-  }
-
-  if (state === '!open' && (pr.state === 'closed' || pr.state === 'merged')) {
-    return true;
-  }
-
-  return state === pr.state;
 }
 
 export function smartLinks(body: string): string {

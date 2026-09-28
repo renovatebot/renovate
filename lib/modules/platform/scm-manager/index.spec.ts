@@ -9,7 +9,11 @@ import { mapPrFromScmToRenovate } from './mapper.ts';
 import type { PullRequest, Repo, User } from './schema.ts';
 import type { PrFilterByState } from './types.ts';
 
-vi.mock('../util.ts');
+// only `repoFingerprint` needs mocking
+vi.mock('../util.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof util>()),
+  repoFingerprint: vi.fn(),
+}));
 vi.mock('../../../util/git/index.ts');
 
 const endpoint = 'https://localhost:8080/scm/';
