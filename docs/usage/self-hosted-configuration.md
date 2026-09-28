@@ -162,6 +162,26 @@ module.exports = {
 };
 ```
 
+## `allowedPrAuthors`
+
+Use `allowedPrAuthors` to let Renovate discover and manage GitHub pull requests created by trusted accounts in addition to the currently authenticated Renovate account.
+
+```json {configType=global}
+{
+  "allowedPrAuthors": ["old-renovate-bot", "another-renovate-app[bot]"]
+}
+```
+
+Matching is case-insensitive.
+Renovate always includes its current GitHub username, so you do not need to list it.
+
+Use this option when Renovate rotates between a known set of accounts and must continue managing their existing pull requests without treating pull requests from every author as its own.
+It applies to pull requests only.
+Issues such as the Dependency Dashboard are still only matched by the current account.
+Use [`gitIgnoredAuthors`](../configuration-options.md#gitignoredauthors) to configure which additional Git commit authors do not mark a Renovate branch as modified.
+
+Setting `ignorePrAuthor` to `true`, or using `forkToken`, takes precedence and fetches pull requests from all authors.
+
 ## `allowedUnsafeExecutions`
 
 This should be configured to a list of commands which are allowed to be run automatically as part of a dependency upgrade.

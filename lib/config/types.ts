@@ -229,6 +229,7 @@ export interface GlobalOnlyConfigLegacy {
  */
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
+  allowedPrAuthors?: string[];
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;

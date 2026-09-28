@@ -1961,7 +1961,7 @@ describe('modules/platform/github/index', () => {
         expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
       });
 
-      it('fetches all PRs when forkToken is set', async () => {
+      it('fetches all PRs when forkToken is set despite an author allowlist', async () => {
         const scope = httpMock.scope(githubApiHost);
         forkInitRepoMock(scope, 'some/repo', false);
         scope.get('/user').reply(200, {
@@ -1972,6 +1972,7 @@ describe('modules/platform/github/index', () => {
           default_branch: 'master',
         });
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ allowedPrAuthors: ['trusted-bot'] });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
@@ -1993,6 +1994,128 @@ describe('modules/platform/github/index', () => {
         initRepoMock(scope, 'some/repo');
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
         GlobalConfig.set({ ignorePrAuthor: true });
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(2);
+        expect(res).toMatchObject([
+          { number: 2, title: 'Other PR' },
+          { number: 1, title: 'Renovate PR' },
+        ]);
+      });
+
+      it('fetches PRs from configured additional authors', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ allowedPrAuthors: ['OTHER-USER'] });
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(2);
+        expect(res).toMatchObject([
+          { number: 2, title: 'Other PR' },
+          { number: 1, title: 'Renovate PR' },
+        ]);
+      });
+
+      it('does not fetch PRs from authors outside the allowlist', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ allowedPrAuthors: ['trusted-bot'] });
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+      });
+
+      it('resets the PR cache when the author allowlist changes', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ allowedPrAuthors: ['other-user'] });
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const firstResult = await github.getPrList();
+
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ allowedPrAuthors: [] });
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const secondResult = await github.getPrList();
+
+        expect(firstResult).toHaveLength(2);
+        expect(secondResult).toHaveLength(1);
+        expect(secondResult).toMatchObject([
+          { number: 1, title: 'Renovate PR' },
+        ]);
+      });
+
+      it('resets the PR cache when switching to all authors', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const firstResult = await github.getPrList();
+
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ ignorePrAuthor: true });
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+        const secondResult = await github.getPrList();
+
+        expect(firstResult).toHaveLength(1);
+        expect(secondResult).toHaveLength(2);
+      });
+
+      it('resets a cache stored without an author filter when an allowlist is configured', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const repoCache = repository.getCache();
+        repoCache.platform = {
+          github: {
+            pullRequestsCache: {
+              items: {
+                1: {
+                  number: 1,
+                  sourceBranch: 'renovate-branch',
+                  title: 'Renovate PR',
+                  state: 'open',
+                  updated_at: t1,
+                  node_id: '12345',
+                },
+              },
+            },
+          },
+        };
+
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ allowedPrAuthors: ['other-user'] });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
@@ -4943,6 +5066,34 @@ describe('modules/platform/github/index', () => {
         title: 'Some title',
         updated_at: '01-09-2022',
       });
+    });
+
+    it('returns a directly fetched PR from any author when an allowlist is configured', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [])
+        .get('/repos/some/repo/pulls/1234')
+        .reply(200, {
+          number: 1234,
+          state: 'open',
+          head: { ref: 'some/branch' },
+          title: 'Some title',
+          user: { login: 'other-user' },
+          updated_at: '01-09-2022',
+        });
+      GlobalConfig.set({ allowedPrAuthors: ['old-renovate-bot'] });
+      await github.initRepo({
+        repository: 'some/repo',
+        renovateUsername: 'renovate-bot',
+      });
+
+      const pr = await github.getPr(1234);
+
+      expect(pr).toMatchObject({ number: 1234, sourceBranch: 'some/branch' });
     });
   });
 

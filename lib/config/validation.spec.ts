@@ -79,6 +79,7 @@ describe('config/validation', () => {
 
     it('catches global options in repo config', async () => {
       const config = {
+        allowedPrAuthors: ['old-renovate-bot'],
         binarySource: 'something',
         username: 'user',
         ignorePrAuthor: true,
@@ -89,6 +90,9 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toMatchObject([
+        {
+          message: `The "allowedPrAuthors" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
         {
           message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },

@@ -15,6 +15,7 @@ export class GlobalConfig {
     'allowedCommands',
     'allowedEnv',
     'allowedHeaders',
+    'allowedPrAuthors',
     'allowedUnsafeExecutions',
     'autodiscoverRepoOrder',
     'autodiscoverRepoSort',
