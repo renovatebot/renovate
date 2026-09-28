@@ -627,7 +627,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.5.1',
       );
 
-      expect(res).toIncludeAllMembers([
+      expect(res?.hashes).toIncludeAllMembers([
         'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
         'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
         'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
@@ -663,7 +663,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.5.1',
       );
 
-      expect(res).toIncludeAllMembers([
+      expect(res?.hashes).toIncludeAllMembers([
         'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
         'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
       ]);
