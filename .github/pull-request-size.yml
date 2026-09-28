@@ -14,28 +14,28 @@ label_configs:
   - size: xs
     diff: 25 # Threshold for the total lines of code changed (additions + deletions)
     files: 1 # Threshold for the total number of files changed
-    labels: ['size/xs'] # Labels to be applied for this size
+    labels: ['size:xs'] # Labels to be applied for this size
 
   # Configuration for 'small' PRs
   - size: s
     diff: 150
     files: 10
-    labels: ['size/s']
+    labels: ['size:s']
 
   # Configuration for 'medium' PRs
   - size: m
     diff: 600
     files: 25
-    labels: ['size/m']
+    labels: ['size:m']
 
   # Configuration for 'large' PRs
   - size: l
     diff: 2500
     files: 50
-    labels: ['size/l']
+    labels: ['size:l']
 
   # Configuration for 'extra large' PRs
   - size: xl
     diff: 5000
     files: 100
-    labels: ['size/xl']
+    labels: ['size:xl']
