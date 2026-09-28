@@ -407,7 +407,7 @@ describe('workers/repository/process/fetch', () => {
 
       it('is merged from dep with packageFile and config', async () => {
         config.constraintsVersioning = { '%goMod': 'config-version' };
-        const packageFiles: any = {
+        const packageFiles: Record<string, PackageFile[]> = {
           maven: [
             {
               packageFile: 'pom.xml',
@@ -448,7 +448,7 @@ describe('workers/repository/process/fetch', () => {
       });
 
       it('is set from dep if only set on dep', async () => {
-        const packageFiles: any = {
+        const packageFiles: Record<string, PackageFile[]> = {
           maven: [
             {
               packageFile: 'pom.xml',

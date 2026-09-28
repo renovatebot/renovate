@@ -40,10 +40,12 @@ export function getManagerConfig(
  * The lookup config and the flattened branch upgrade are assembled separately, so both have to apply the datasource defaults themselves.
  */
 export async function applyDatasourceDefaultConfig<
-  T extends Record<string, any> & { datasource?: string },
+  T extends { datasource?: string },
 >(config: T): Promise<T> {
-  // TODO: fix types (#22198)
-  const defaultConfig = await getDefaultConfig(config.datasource!);
+  if (!config.datasource) {
+    return config;
+  }
+  const defaultConfig = await getDefaultConfig(config.datasource);
   return mergeChildConfig(config, defaultConfig);
 }
 
