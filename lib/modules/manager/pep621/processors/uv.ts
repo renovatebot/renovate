@@ -4,7 +4,6 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
-import { exec } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ToolConstraint,
@@ -302,7 +301,9 @@ function generateCMD(updatedDeps: Upgrade[]): string {
 }
 
 // PEP 508 normalised package / extra / group names.
-const PEP508_NAME_RE = regEx(/^[a-zA-Z0-9]([-a-zA-Z0-9._]*[a-zA-Z0-9])?$/);
+const PEP508_NAME_RE = regEx(
+  /^[a-zA-Z0-9](?<suffix>[-a-zA-Z0-9._]*[a-zA-Z0-9])?$/,
+);
 
 // Flags that take no value.
 const UV_EXPORT_BOOLEAN_FLAGS = new Set([
@@ -326,7 +327,7 @@ const UV_EXPORT_BOOLEAN_FLAGS = new Set([
 
 // Flags that take a value, mapped to a validation pattern for that value.
 const UV_EXPORT_VALUE_FLAGS: Record<string, RegExp> = {
-  '--python': regEx(/^\d+(\.\d+){1,2}$/),
+  '--python': regEx(/^\d+(?<versionSegment>\.\d+){1,2}$/),
   // Filenames only; no path separators or traversal.
   '--output-file': regEx(/^[-a-zA-Z0-9._]+$/),
   '--no-emit-package': PEP508_NAME_RE,
@@ -336,7 +337,7 @@ const UV_EXPORT_VALUE_FLAGS: Record<string, RegExp> = {
   '--no-group': PEP508_NAME_RE,
   '--package': PEP508_NAME_RE,
   '--index-strategy': regEx(
-    /^(first-index|unsafe-first-match|unsafe-best-match)$/,
+    /^(?<strategy>first-index|unsafe-first-match|unsafe-best-match)$/,
   ),
   '--format': regEx(/^requirements-txt$/),
 };
@@ -491,7 +492,6 @@ async function runUvExport(
     },
   };
 }
-
 
 async function getUvExtraIndexUrl(
   project: PyProject,
