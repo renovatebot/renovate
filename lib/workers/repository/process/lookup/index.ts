@@ -114,11 +114,16 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
-    if (
-      !isGetPkgReleasesConfig(config) ||
-      !getDatasourceFor(config.datasource)
-    ) {
+    if (!isGetPkgReleasesConfig(config)) {
       res.skipReason = 'invalid-config';
+      return Result.ok(res);
+    }
+    if (!getDatasourceFor(config.datasource)) {
+      res.skipReason = 'invalid-config';
+      res.warnings.push({
+        topic: config.packageName,
+        message: `Unknown datasource "${config.datasource}" for package ${config.packageName}`,
+      });
       return Result.ok(res);
     }
     let compareValue =
