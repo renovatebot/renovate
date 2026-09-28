@@ -1,5 +1,7 @@
 import { Buffer } from 'node:buffer';
 import type {
+  Comment,
+  CommentsForPullRequest,
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
 } from '@aws-sdk/client-codecommit';
@@ -11,7 +13,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
-import { coerceArray } from '../../../util/array.ts';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
 import { parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -33,6 +35,10 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { getNewBranchName, repoFingerprint } from '../util.ts';
+import {
+  ensureCommentRemovalWith,
+  ensureCommentWith,
+} from '../utils/comments.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as client from './codecommit-client.ts';
 import type { CodeCommitPr } from './types.ts';
@@ -607,78 +613,49 @@ export function setBranchStatus(_cfg: BranchStatusConfig): Promise<void> {
   return Promise.resolve();
 }
 
-export async function ensureComment({
-  number,
-  topic,
-  content,
-}: EnsureCommentConfig): Promise<boolean> {
+export async function ensureComment(
+  ensureConfig: EnsureCommentConfig,
+): Promise<boolean> {
+  const { number, topic } = ensureConfig;
   logger.debug(`ensureComment(${number}, ${topic!}, content)`);
-  const header = topic ? `### ${topic}\n\n` : '';
-  const body = `${header}${sanitize(content)}`;
-  let prCommentsResponse: GetCommentsForPullRequestOutput;
-  try {
-    prCommentsResponse = await client.getPrComments(`${number}`);
-  } catch (err) {
-    logger.debug({ err }, 'Unable to retrieve pr comments');
+
+  const threads = await getPrCommentThreads(number);
+  if (!threads) {
     return false;
   }
 
-  let commentId: string | undefined = undefined;
-  let commentNeedsUpdating = false;
+  // Only the first comment of a thread carries the topic header
+  const comments = threads
+    .map((thread) => thread?.comments?.[0])
+    .filter(isNotNullOrUndefined);
 
-  if (!prCommentsResponse?.commentsForPullRequestData) {
-    return false;
-  }
+  return await ensureCommentWith(
+    { ...ensureConfig, content: sanitize(ensureConfig.content) },
+    {
+      getComments: () => Promise.resolve(comments),
+      getBody: (comment) => comment.content,
+      addComment: async (body) => {
+        const prs = await getPrList();
+        const thisPr = prs.filter((item) => item.number === number);
 
-  for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
-    if (!commentObj?.comments) {
-      continue;
-    }
-    const firstCommentContent = commentObj.comments[0].content;
-    if (
-      (topic && firstCommentContent?.startsWith(header)) === true ||
-      (!topic && firstCommentContent === body)
-    ) {
-      commentId = commentObj.comments[0].commentId;
-      commentNeedsUpdating = firstCommentContent !== body;
-      break;
-    }
-  }
+        if (!thisPr[0].sourceCommit || !thisPr[0].destinationCommit) {
+          return false;
+        }
 
-  if (!commentId) {
-    const prs = await getPrList();
-    const thisPr = prs.filter((item) => item.number === number);
-
-    if (!thisPr[0].sourceCommit || !thisPr[0].destinationCommit) {
-      return false;
-    }
-
-    await client.createPrComment(
-      `${number}`,
-      config.repository,
-      body,
-      thisPr[0].destinationCommit,
-      thisPr[0].sourceCommit,
-    );
-    logger.info(
-      { repository: config.repository, prNo: number, topic },
-      'Comment added',
-    );
-  } else if (commentNeedsUpdating && commentId) {
-    await client.updateComment(commentId, body);
-
-    logger.debug(
-      { repository: config.repository, prNo: number, topic },
-      'Comment updated',
-    );
-  } else {
-    logger.debug(
-      { repository: config.repository, prNo: number, topic },
-      'Comment is already up-to-date',
-    );
-  }
-
-  return true;
+        await client.createPrComment(
+          `${number}`,
+          config.repository,
+          body,
+          thisPr[0].destinationCommit,
+          thisPr[0].sourceCommit,
+        );
+      },
+      editComment: async (comment, body) => {
+        // TODO #22198
+        await client.updateComment(comment.commentId!, body);
+      },
+    },
+  );
 }
 
 export async function ensureCommentRemoval(
@@ -689,48 +666,47 @@ export async function ensureCommentRemoval(
     removeConfig.type === 'by-topic'
       ? removeConfig.topic
       : removeConfig.content;
-  logger.debug(`Ensuring comment "${key}" in #${prNo} is removed`);
 
+  await ensureCommentRemovalWith(removeConfig, {
+    getComments: () => getPrCommentList(prNo),
+    getBody: (comment) => comment.content,
+    deleteComment: async (comment) => {
+      // TODO #22198
+      await client.deleteComment(comment.commentId!);
+      logger.debug(`comment "${key}" in PR #${prNo} was removed`);
+    },
+  });
+}
+
+async function getPrCommentThreads(
+  prNo: number,
+): Promise<CommentsForPullRequest[] | null> {
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
     prCommentsResponse = await client.getPrComments(`${prNo}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
-    return;
+    return null;
   }
 
   if (!prCommentsResponse?.commentsForPullRequestData) {
     logger.debug('commentsForPullRequestData not found');
-    return;
+    return null;
   }
 
-  let commentIdToRemove: string | undefined;
-  for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
+  return prCommentsResponse.commentsForPullRequestData;
+}
+
+async function getPrCommentList(prNo: number): Promise<Comment[]> {
+  const comments: Comment[] = [];
+  for (const commentObj of coerceArray(await getPrCommentThreads(prNo))) {
     if (!commentObj?.comments) {
       logger.debug(
         'comments object not found under commentsForPullRequestData',
       );
       continue;
     }
-
-    for (const comment of commentObj.comments) {
-      // v8 ignore else -- TODO: add test #40625
-      if (
-        (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
-          true ||
-        (removeConfig.type === 'by-content' &&
-          removeConfig.content === comment.content?.trim())
-      ) {
-        commentIdToRemove = comment.commentId;
-        break;
-      }
-    }
-    // v8 ignore else -- TODO: add test #40625
-    if (commentIdToRemove) {
-      await client.deleteComment(commentIdToRemove);
-      logger.debug(`comment "${key}" in PR #${prNo} was removed`);
-      break;
-    }
+    comments.push(...commentObj.comments);
   }
+  return comments;
 }
