@@ -4,6 +4,7 @@ import enforceTsExtension from './rules/enforce-ts-extension.ts';
 import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.ts';
 import loggerErrKey from './rules/logger-err-key.ts';
 import loggerStaticMessage from './rules/logger-static-message.ts';
+import noDevDependencyImport from './rules/no-dev-dependency-import.ts';
 import noExecShellOption from './rules/no-exec-shell-option.ts';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.ts';
 import noHostRulesMock from './rules/no-host-rules-mock.ts';
@@ -24,7 +25,9 @@ import preferJsonPipe from './rules/prefer-json-pipe.ts';
 import preferLuxon from './rules/prefer-luxon.ts';
 import preferNullishUtil from './rules/prefer-nullish-util.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
+import preferResolveToolConstraint from './rules/prefer-resolve-tool-constraint.ts';
 import preferStubEnv from './rules/prefer-stub-env.ts';
+import requireCacheable from './rules/require-cacheable.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
 import testRootDescribe from './rules/test-root-describe.ts';
 import typesLocation from './rules/types-location.ts';
@@ -44,6 +47,7 @@ export default definePlugin({
     'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-err-key': loggerErrKey,
     'logger-static-message': loggerStaticMessage,
+    'no-dev-dependency-import': noDevDependencyImport,
     'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-host-rules-mock': noHostRulesMock,
@@ -64,7 +68,9 @@ export default definePlugin({
     'prefer-is-object': preferIsObject,
     'prefer-nullish-util': preferNullishUtil,
     'prefer-partial-in-specs': preferPartialInSpecs,
+    'prefer-resolve-tool-constraint': preferResolveToolConstraint,
     'prefer-stub-env': preferStubEnv,
+    'require-cacheable': requireCacheable,
     'require-regex-util': requireRegexUtil,
     'test-root-describe': testRootDescribe,
     'types-location': typesLocation,

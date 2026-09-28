@@ -100,6 +100,7 @@ function extractFromSection(
       }
       if (sources && isObject(requirements) && requirements.index) {
         const source = sources.find((item) => item.name === requirements.index);
+        // v8 ignore else -- needs a requirement naming an index that is not declared
         if (source) {
           dep.registryUrls = [source.url];
         }

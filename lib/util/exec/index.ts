@@ -122,7 +122,7 @@ async function prepareRawExec(
   } else if (isDynamicInstall(opts.toolConstraints)) {
     logger.debug('Using containerbase dynamic installs');
     rawCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(await generateInstallCommands(opts.toolConstraints, true)),
       ...preCommands,
       ...rawCommands,
     ];

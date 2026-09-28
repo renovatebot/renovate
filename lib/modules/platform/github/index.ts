@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { MergeStrategy } from '../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -51,7 +52,7 @@ import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
-import { fromBase64, looseEquals } from '../../../util/string.ts';
+import { looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
@@ -78,6 +79,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
+import { getRepoFile } from './files.ts';
 import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
@@ -245,6 +247,7 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
+      // v8 ignore next -- TODO: coverage error #40625
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -422,17 +425,14 @@ export async function getRawFile(
     httpOptions.cacheProvider = repoCacheProvider;
   }
 
-  let url = `repos/${repo}/contents/${fileName}`;
-  if (branchOrTag) {
-    url += `?ref=${branchOrTag}`;
-  }
-  const res = await githubApi.getJsonUnchecked<{ content: string }>(
-    url,
+  return await getRepoFile(
+    githubApi,
+    // TODO #22198
+    repo!,
+    fileName,
+    branchOrTag,
     httpOptions,
   );
-  const buf = res.body.content;
-  const str = fromBase64(buf);
-  return str;
 }
 
 export async function getJsonFile(
@@ -2218,12 +2218,21 @@ export async function mergePr({
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
   const pr = await getPr(prNo);
+  if (await directMergePr(prNo, strategy)) {
+    return true;
+  }
   if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
-    // The PR is not merged directly but through the merge queue, so it must
-    // not be cached as merged nor may its branch be deleted yet
+    // The direct merge was refused - fall back to adding the PR to the merge
+    // queue, so it must not be cached as merged nor may its branch be deleted
     return tryEnqueuePr(pr);
   }
+  return false;
+}
 
+async function directMergePr(
+  prNo: number,
+  strategy?: MergeStrategy,
+): Promise<boolean> {
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;

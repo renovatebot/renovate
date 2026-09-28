@@ -25,6 +25,7 @@ The manager's `index.ts` file supports the following values or functions:
 | `knownDepTypes`               | yes      |       |
 | `supportsDynamicDepTypesNote` | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
+| `supportsNpmrc`               | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
 | `updateLockedDependency`      | yes      |       |
@@ -107,6 +108,11 @@ This should be placed in `dep-types.ts`.
 
 Set to `true` if this package manager needs to update lock files in addition to package files.
 
+### `supportsNpmrc` (optional)
+
+Set to `true` if the manager's returned values carry an `npmrc` resolved from the repository's `.npmrc` and the `npmrc` config.
+Only such a manager may return `NpmrcPackageFileContent` / `NpmrcPackageFile`, the types which have the `npmrc` field; this is checked at compile time.
+
 ### `updateArtifacts` (async, optional)
 
 Use `updateArtifacts` to run binaries that in turn will update files.
@@ -118,6 +124,21 @@ To _directly_ update dependencies in lock files: use `updateLockedDependency` in
 
 - after a dependency update (for a package file), or
 - during `lockfileMaintenance`
+
+#### Tool constraints
+
+When `updateArtifacts` runs a tool through `exec()`, resolve the tool's version constraint with `resolveToolConstraint()` from `lib/modules/manager/util.ts` instead of reading `config.constraints` yourself.
+The helper applies, in this order:
+
+1. the user's `constraints` config
+2. a value your manager derives from the updated package files, if you pass a callback
+3. the `extractedConstraints` that `extractPackageFile` collected on the base branch
+
+The third step matters during `lockFileMaintenance`.
+Managers like `pipenv` delete the lock file before they run the tool, so a callback that reads the lock file at that point finds nothing.
+The value collected during extraction keeps the tool version constrained in that case.
+
+The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints` or `config.extractedConstraints` in managers.
 
 ### `updateDependency` (optional)
 

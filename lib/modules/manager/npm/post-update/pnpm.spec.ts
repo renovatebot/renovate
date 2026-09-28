@@ -614,6 +614,54 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
+  it('falls back to the extracted pnpm constraint', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: {}, extractedConstraints: { pnpm: '6.0.0' } },
+      upgrades,
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool pnpm 6.0.0' },
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+      },
+    ]);
+  });
+
+  it('prefers the derived pnpm constraint over the extracted one', async () => {
+    GlobalConfig.set({
+      localDir: '',
+      cacheDir: '/tmp',
+      binarySource: 'install',
+    });
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{"packageManager":"pnpm@7.0.0"}');
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, constraints: {}, extractedConstraints: { pnpm: '6.0.0' } },
+      upgrades,
+    );
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0' },
+      { cmd: 'install-tool pnpm 7.0.0' },
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile',
+      },
+    ]);
+  });
+
   it('allows pnpmfile even if ignoring scripts', async () => {
     GlobalConfig.set({
       localDir: '',

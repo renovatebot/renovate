@@ -54,6 +54,20 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       ]);
     });
 
+    it('keeps a lone release when there is no earlier one to prepend', async () => {
+      const config = partial<BranchUpgradeConfig>({
+        datasource: 'some-datasource',
+        packageName: 'some-depname',
+        versioning: npmVersioning.id,
+        currentVersion: '1.0.0',
+        newVersion: '1.0.0',
+      });
+
+      const res = await releases.getInRangeReleases(config);
+
+      expect(res).toEqual([{ version: '1.0.0' }]);
+    });
+
     it('should contain currentVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',

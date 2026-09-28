@@ -14,6 +14,7 @@ import type { ExtractResult, WorkerExtractConfig } from '../../types.ts';
 import { getMatchingFiles } from './file-match.ts';
 import { getManagerPackageFiles } from './manager-files.ts';
 import { processSupersedesManagers } from './supersedes.ts';
+import { hasVulnerabilityAlertsRules } from './vulnerability-alerts.ts';
 
 export async function extractAllDependencies(
   config: RenovateConfig,
@@ -21,11 +22,16 @@ export async function extractAllDependencies(
   const managerList = getEnabledManagersList(config.enabledManagers);
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
+  const hasAlertRules = hasVulnerabilityAlertsRules(config);
 
   function tryConfig(managerConfig: ManagerConfig): void {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
-      extractList.push({ ...managerConfig, fileList: matchingFileList });
+      extractList.push({
+        ...managerConfig,
+        hasVulnerabilityAlertsRules: hasAlertRules,
+        fileList: matchingFileList,
+      });
     }
   }
 

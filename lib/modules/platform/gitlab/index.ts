@@ -16,6 +16,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_PENDING_DELETION,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -59,6 +60,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -234,6 +236,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug(`Discovered ${repos.length} project(s)`);
     return repos
       .filter((repo) => !repo.mirror || config?.includeMirrors)
+      .filter((repo) => !repo.marked_for_deletion_at)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
@@ -252,15 +255,10 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+  return await getRepoFile(gitlabApi, repo, fileName, branchOrTag, {
     cacheProvider: memCacheProvider,
   });
-  const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
-  return str;
 }
 
 export async function getJsonFile(
@@ -295,6 +293,13 @@ export async function initRepo({
         'Repository is archived - throwing error to abort renovation',
       );
       throw new Error(REPOSITORY_ARCHIVED);
+    }
+
+    if (res.body.marked_for_deletion_at) {
+      logger.debug(
+        'Repository is marked for deletion - throwing error to abort renovation',
+      );
+      throw new Error(REPOSITORY_PENDING_DELETION);
     }
 
     if (res.body.mirror && GlobalConfig.get('includeMirrors') !== true) {
@@ -343,7 +348,13 @@ export async function initRepo({
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    if ([REPOSITORY_ARCHIVED, REPOSITORY_EMPTY].includes(err.message)) {
+    if (
+      [
+        REPOSITORY_ARCHIVED,
+        REPOSITORY_EMPTY,
+        REPOSITORY_PENDING_DELETION,
+      ].includes(err.message)
+    ) {
       throw err;
     }
     if (err.statusCode === 403) {

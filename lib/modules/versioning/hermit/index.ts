@@ -80,11 +80,8 @@ export class HermitVersioning extends RegExpVersioningApi {
       prerelease,
       compatibility,
     } = groups;
-    const release = [];
-
-    if (major) {
-      release.push(Number.parseInt(major, 10));
-    }
+    // `major` is the only mandatory group in the version regex
+    const release = [Number.parseInt(major, 10)];
 
     if (minor) {
       release.push(Number.parseInt(minor, 10));

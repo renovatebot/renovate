@@ -12,6 +12,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
+  REPOSITORY_PENDING_DELETION,
 } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
@@ -211,6 +212,25 @@ describe('modules/platform/gitlab/index', () => {
       expect(repos).toEqual(['a/b', 'c/d', 'c/f']);
     });
 
+    it('should exclude repos that are marked for deletion', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false',
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'c/d',
+            marked_for_deletion_at: '2026-09-10',
+          },
+        ]);
+      const repos = await gitlab.getRepos();
+      expect(repos).toEqual(['a/b']);
+    });
+
     it('should encode the requested topics into the URL', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -359,6 +379,18 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
         }),
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
+    });
+
+    it('should throw an error if repository is marked for deletion', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo')
+        .reply(200, { marked_for_deletion_at: '2026-09-10' });
+      await expect(
+        gitlab.initRepo({
+          repository: 'some/repo',
+        }),
+      ).rejects.toThrow(REPOSITORY_PENDING_DELETION);
     });
 
     it('should throw an error if repository is a mirror', async () => {

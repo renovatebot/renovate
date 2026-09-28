@@ -57,6 +57,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:temporalio-interceptors-opentelemetry-to-v2",
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
@@ -64,6 +65,7 @@
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:wuchale-vite-plugin-to-wuchale",
+      "replacements:xlsx-to-scoped",
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
@@ -1212,6 +1214,18 @@
       }
     ]
   },
+  "temporalio-interceptors-opentelemetry-to-v2": {
+    "description": "`@temporalio/interceptors-opentelemetry` was replaced by `@temporalio/interceptors-opentelemetry-v2`, which supports OpenTelemetry v2.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.19.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@temporalio/interceptors-opentelemetry"],
+        "replacementName": "@temporalio/interceptors-opentelemetry-v2",
+        "replacementVersion": "1.19.0"
+      }
+    ]
+  },
   "terraform-provider-mrparkers-keycloak-to-keycloak-keycloak": {
     "description": "The Keycloak Terraform/OpenTofu provider was moved to `keycloak/keycloak`.",
     "packageRules": [
@@ -1332,6 +1346,18 @@
         "matchPackageNames": ["@wuchale/vite-plugin"],
         "replacementName": "wuchale",
         "replacementVersion": "0.22.0"
+      }
+    ]
+  },
+  "xlsx-to-scoped": {
+    "description": "The `xlsx` package is now published as `@e965/xlsx`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "0.18.5",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["xlsx"],
+        "replacementName": "@e965/xlsx",
+        "replacementVersion": "0.20.3"
       }
     ]
   },

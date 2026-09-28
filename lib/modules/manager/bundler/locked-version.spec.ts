@@ -85,6 +85,17 @@ describe('modules/manager/bundler/locked-version', () => {
     });
   });
 
+  it('skips gem lines that carry no version', () => {
+    const parsedLockEntries = extractLockFileEntries(codeBlock`
+      GEM
+        remote: https://rubygems.org/
+        specs:
+          rails-without-version
+          rake (13.0.6)
+    `);
+    expect(Object.fromEntries(parsedLockEntries)).toEqual({ rake: '13.0.6' });
+  });
+
   it('returns empty map for empty string', () => {
     const parsedLockEntries = extractLockFileEntries('');
     expect(parsedLockEntries.size).toBe(0);

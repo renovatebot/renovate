@@ -43,6 +43,8 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
+    'inheritConfigTrusted',
+    'internalHostAccess',
     /** NOTE that this is not a config option, but an internal variable **/
     'localDir',
     'migratePresets',

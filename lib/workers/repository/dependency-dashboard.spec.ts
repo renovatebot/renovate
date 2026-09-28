@@ -96,6 +96,24 @@ async function dryRun(
 
 describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
+    it('leaves the config alone when there is no dashboard issue', async () => {
+      const conf: RenovateConfig = { prCreation: 'approval' };
+      platform.findIssue.mockResolvedValueOnce(null);
+
+      await dependencyDashboard.readDashboardBody(conf);
+
+      expect(conf).toEqual({
+        dependencyDashboardAllAwaitingSchedule: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {},
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+      expect(conf.dependencyDashboardIssue).toBeUndefined();
+    });
+
     it('parses invalid dashboard body without throwing error', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
@@ -462,6 +480,27 @@ describe('workers/repository/dependency-dashboard', () => {
 
       // same with dry run
       await dryRun(branches, platform, 1, 0);
+    });
+
+    it('renders no header and no abandonment section when both are off', async () => {
+      const branches: BranchConfig[] = [];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardHeader = '';
+      config.dependencyDashboardReportAbandonment = false;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toStartWith(
+        'This repository currently has no open or pending branches.',
+      );
+      expect(body).not.toContain('Abandoned');
     });
 
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
@@ -2176,6 +2215,42 @@ None detected
       );
     });
 
+    it('groups two vulnerabilities for the same package together', async () => {
+      const fetchVulnerabilitiesMock = vi.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-29mw-wpgm-hmr9' },
+        },
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-rv95-896h-c2vc' },
+        },
+      ]);
+
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+          osvVulnerabilityAlerts: true,
+        },
+        packageFiles,
+      );
+
+      expect(result).toContain('<details><summary>express</summary>');
+      expect(result).toContain('GHSA-29mw-wpgm-hmr9');
+      expect(result).toContain('GHSA-rv95-896h-c2vc');
+    });
+
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
       const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
@@ -2227,6 +2302,29 @@ None detected
       // the vulnerability with a fixed version is left out
       expect(result).not.toContain('express');
       expect(result).not.toContain('GHSA-29mw-wpgm-hmr9');
+    });
+
+    it('returns a fallback message instead of throwing when the OSV database is unavailable', async () => {
+      createVulnerabilitiesMock.mockRejectedValueOnce(
+        new Error('Request failed with status code 404 (Not Found)'),
+      );
+
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+        },
+        packageFiles,
+      );
+
+      expect(result).toBe(
+        '## Vulnerabilities\n\n' +
+          'Renovate was unable to fetch CVE information from [osv.dev](https://osv.dev) this run.\n\n',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Unable to read vulnerability information',
+      );
     });
   });
 
@@ -2280,6 +2378,11 @@ None detected
         '<summary>View abandoned dependencies (1)</summary>',
       );
       expect(result).toContain('> ℹ️ **Note**');
+      // the note must stay outside the <details> block, otherwise GitHub
+      // renders it as plain text rather than a note alert
+      expect(result.indexOf('> ℹ️ **Note**')).toBeLessThan(
+        result.indexOf('<details>'),
+      );
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
       expect(result).toContain('abandonmentThreshold');

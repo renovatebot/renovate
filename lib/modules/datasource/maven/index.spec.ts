@@ -237,6 +237,31 @@ describe('modules/datasource/maven/index', () => {
     });
   });
 
+  it('keeps respectLatest when metadata has no latest tag', async () => {
+    mockGenericPackage({
+      meta: codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <metadata>
+          <groupId>org.example</groupId>
+          <artifactId>package</artifactId>
+          <versioning>
+            <release>2.0.0</release>
+            <versions>
+              <version>1.0.0</version>
+              <version>2.0.0</version>
+            </versions>
+            <lastUpdated>20210101000000</lastUpdated>
+          </versioning>
+        </metadata>
+      `,
+    });
+
+    const res = await get();
+
+    expect(res?.tags).toEqual({ release: '2.0.0' });
+    expect(res?.respectLatest).toBeUndefined();
+  });
+
   it('handles invalid snapshot', async () => {
     const meta = Fixtures.get('metadata-snapshot-version-invalid.xml');
     httpMock

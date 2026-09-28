@@ -121,6 +121,34 @@ describe('workers/repository/config-migration/branch/create', () => {
       });
     });
 
+    it('leaves a package.json that carries no renovate config alone', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        {
+          "dependencies": {
+            "xmldoc": "1.0.0"
+          }
+        }
+      `);
+      scm.getFileList.mockResolvedValueOnce([]);
+
+      await createConfigMigrationBranch(config, {
+        ...migratedConfigData,
+        filename: 'package.json',
+      });
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          files: expect.arrayContaining([
+            {
+              type: 'addition',
+              path: 'package.json',
+              contents: '{"dependencies":{"xmldoc":"1.0.0"}}',
+            },
+          ]),
+        }),
+      );
+    });
+
     describe('applies the commitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         config.commitMessagePrefix = 'PREFIX:';

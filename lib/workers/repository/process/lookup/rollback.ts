@@ -66,6 +66,9 @@ export function getRollbackUpdate(
     newVersion = newRelease?.version;
     registryUrl = newRelease?.registryUrl;
   }
+  // A real datasource always yields a release carrying a version here, so this
+  // only guards against malformed release data; `rollback.spec.ts` reaches it
+  // with a hand-built versioning api - see #40625
   // istanbul ignore if
   if (!newVersion) {
     logger.debug('No newVersion to roll back to');

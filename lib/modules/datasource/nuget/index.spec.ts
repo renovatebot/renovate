@@ -581,6 +581,69 @@ describe('modules/datasource/nuget/index', () => {
         );
         expect(res?.sourceUrl).toBeUndefined();
       });
+
+      it('silences 404 when the nupkg is not found', async () => {
+        const nugetIndex = codeBlock`
+          {
+            "version": "3.0.0",
+            "resources": [
+              {
+                "@id": "https://some-registry/v3/metadata",
+                "@type": "RegistrationsBaseUrl/3.0.0-beta",
+                "comment": "Get package metadata."
+              }
+            ]
+          }
+        `;
+        const nlogRegistration = codeBlock`
+          {
+            "count": 1,
+            "items": [
+              {
+                "@id": "https://some-registry/v3/metadata/nlog/4.7.3.json",
+                "lower": "4.7.3",
+                "upper": "4.7.3",
+                "count": 1,
+                "items": [
+                  {
+                    "@id": "foo",
+                    "catalogEntry": {
+                      "id": "NLog",
+                      "version": "4.7.3",
+                      "packageContent": "https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        `;
+        httpMock
+          .scope('https://some-registry')
+          .get('/v3/index.json')
+          .twice()
+          .reply(200, nugetIndex)
+          .get('/v3/metadata/nlog/index.json')
+          .reply(200, nlogRegistration)
+          .get('/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg')
+          .reply(404);
+        const res = await getPkgReleases({
+          datasource,
+          versioning,
+          packageName: 'NLog',
+          registryUrls: ['https://some-registry/v3/index.json'],
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            registryUrl: 'https://some-registry/v3/index.json',
+            pkgName: 'NLog',
+            pkgVersion: '4.7.3',
+          },
+          'package manifest (.nuspec) not found',
+        );
+        expect(res?.sourceUrl).toBeUndefined();
+      });
     });
 
     it('returns null for non 200 (v3v2)', async () => {

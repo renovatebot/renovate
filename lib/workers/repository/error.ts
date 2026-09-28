@@ -27,6 +27,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
   REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_PENDING_DELETION,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -73,6 +74,11 @@ export default async function handleError(
     }
     if (err.message === REPOSITORY_MIRRORED) {
       logger.info('Repository is a mirror - skipping');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === REPOSITORY_PENDING_DELETION) {
+      logger.info('Repository is pending deletion - skipping');
       delete config.branchList;
       return err.message;
     }
