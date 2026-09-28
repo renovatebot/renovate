@@ -7,6 +7,7 @@ import {
   mergeChildConfig,
   removeGlobalConfig,
 } from './index.ts';
+import type { RenovateConfig } from './types.ts';
 
 vi.mock('../modules/datasource/npm/index.ts');
 vi.mock('../../config.ts', () => ({ default: {} }));
@@ -198,13 +199,13 @@ describe('config/index', () => {
     });
 
     it('keeps the config as-is without a datasource', async () => {
-      vi.spyOn(datasource, 'getDefaultConfig').mockResolvedValueOnce({});
+      const getDefaultConfig = vi.spyOn(datasource, 'getDefaultConfig');
+      const config: RenovateConfig = { depName: 'dep' };
 
-      const res = await applyDatasourceDefaultConfig({
-        packageName: 'package',
-      });
+      const res = await applyDatasourceDefaultConfig(config);
 
-      expect(res).toEqual({ packageName: 'package' });
+      expect(res).toEqual({ depName: 'dep' });
+      expect(getDefaultConfig).not.toHaveBeenCalled();
     });
   });
 
