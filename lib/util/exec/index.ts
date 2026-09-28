@@ -196,7 +196,10 @@ export async function exec(
           },
         );
       }
-      if (err.signal === `SIGTERM`) {
+      if (
+        err.signal === 'SIGTERM' &&
+        !(err.timedOut && opts.abortOnTimeout === false)
+      ) {
         logger.debug(
           { err },
           'exec interrupted by SIGTERM - run needs to be aborted',

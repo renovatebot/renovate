@@ -17,6 +17,7 @@ import { setCustomEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import * as dockerModule from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
+import { ExecError } from './exec-error.ts';
 import { getHermitEnvs } from './hermit.ts';
 import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
@@ -1310,6 +1311,52 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it('lets an opted-in caller handle a command timeout', async () => {
+    const timeoutError = new ExecError('Command timed out', {
+      cmd: 'foobar',
+      stdout: '',
+      stderr: '',
+      options: {},
+      signal: 'SIGTERM',
+      timedOut: true,
+    });
+    cpExec.mockRejectedValueOnce(timeoutError);
+
+    await expect(exec('foobar', { abortOnTimeout: false })).rejects.toBe(
+      timeoutError,
+    );
+  });
+
+  it('still aborts a command timeout by default', async () => {
+    cpExec.mockRejectedValueOnce(
+      new ExecError('Command timed out', {
+        cmd: 'foobar',
+        stdout: '',
+        stderr: '',
+        options: {},
+        signal: 'SIGTERM',
+        timedOut: true,
+      }),
+    );
+
+    await expect(exec('foobar')).rejects.toThrow(TEMPORARY_ERROR);
+  });
+
+  it('still aborts an opted-in caller on an external SIGTERM', async () => {
+    const interruption = new ExecError('Interrupted', {
+      cmd: 'foobar',
+      stdout: '',
+      stderr: '',
+      options: {},
+      signal: 'SIGTERM',
+    });
+    cpExec.mockRejectedValueOnce(interruption);
+
+    await expect(exec('foobar', { abortOnTimeout: false })).rejects.toThrow(
+      TEMPORARY_ERROR,
+    );
   });
 
   describe('getToolSettingsOptions()', () => {

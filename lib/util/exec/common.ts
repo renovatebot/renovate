@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
-import { isNullOrUndefined } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { join, split } from 'shlex';
 import { instrument } from '../../instrumentation/index.ts';
@@ -142,9 +142,8 @@ export function exec(
       detached: process.platform !== 'win32',
       shell,
       extendEnv: false,
-      // Suppress execa's internal promise rejection (e.g., from timeout).
-      // We handle all exit scenarios via 'exit' and 'error' event listeners below,
-      // so the promise rejection would otherwise surface as an unhandledRejection.
+      // Keep command failures as results so timeout metadata remains available
+      // to the exit handler below.
       // TODO: Refactor to await execa result (#45650)
       reject: false,
     });
@@ -169,6 +168,25 @@ export function exec(
       }
       if (signal) {
         kill(cp, signal);
+        if (signal === 'SIGTERM') {
+          void subprocess.then((result) => {
+            const command = cp.spawnargs.join(' ');
+            const message =
+              result.timedOut &&
+              'shortMessage' in result &&
+              isString(result.shortMessage)
+                ? result.shortMessage
+                : `Command failed: ${command}\nInterrupted by ${signal}`;
+            reject(
+              new ExecError(message, {
+                ...rejectInfo(),
+                signal,
+                timedOut: result.timedOut,
+              }),
+            );
+          });
+          return;
+        }
         reject(
           new ExecError(
             `Command failed: ${cp.spawnargs.join(' ')}\nInterrupted by ${signal}`,
