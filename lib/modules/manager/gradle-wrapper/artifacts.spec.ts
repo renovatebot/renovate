@@ -40,7 +40,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 };
 
 const config: UpdateArtifactsConfig = {
-  newValue: '5.6.4',
+  newValue: '0', // should never be used over the gradle dependency version
 };
 
 const osPlatformSpy = vi.spyOn(os, 'platform');
@@ -136,11 +136,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const res = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '6.3' }],
         newPackageFileContent: Fixtures.get(
           'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
-        config: { ...config, newValue: '6.3' },
+        config: config,
       });
 
       expect(res).toEqual(
@@ -185,7 +185,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         // gradle-wrapper.properties
         newPackageFileContent:
           'distributionUrl=https\\://example.com/gradle.zip;touch pwned',
-        config: { ...config, newValue: '6.3' },
+        config: config,
       });
 
       expect(execSnapshots).toMatchObject([
@@ -218,7 +218,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         newPackageFileContent: Fixtures.get(
           'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
-        config: { ...config, newValue: '6.3' },
+        config: config,
       });
 
       expect(res).toBeNull();
@@ -257,7 +257,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       );
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '5.6.4' }],
         newPackageFileContent: '',
         config,
       });
@@ -395,7 +395,10 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ]);
     });
 
-    it('uses the Gradle version to pick the Java toolchain', async () => {
+    it('grouped config uses correct gradle and java version', async () => {
+      const oldVersion = '9.1.0';
+      const newVersion = '9.1.1';
+
       // with two grouped changes the config.currentValue is the first one
       const config: BranchUpgradeConfig[] = [
         {
@@ -403,11 +406,14 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           manager: 'some-manager',
           currentVersion: '1.0',
           newVersion: '1.1',
+          newValue: '^1.1',
         },
         {
           branchName: 'all',
           manager: 'gradle-wrapper',
-          currentVersion: '9.0.0',
+          currentVersion: oldVersion,
+          newVersion: newVersion,
+          newValue: newVersion,
         },
       ];
       const branchConfig = generateBranchConfig(config);
@@ -429,9 +435,10 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        newPackageFileContent:
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-9.7.1-bin.zip',
-        updatedDeps: [{ depName: 'gradle', currentValue: '9.6.0' }],
+        newPackageFileContent: '',
+        updatedDeps: [
+          { depName: 'gradle', currentValue: oldVersion, newValue: newVersion },
+        ],
         config: branchConfig,
       });
 
@@ -439,6 +446,12 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         s.cmd.startsWith('install-tool java'),
       );
       expect(javaTool?.cmd).toBe('install-tool java 25.0.0');
+      const gradleExec = execSnapshots.find((s) =>
+        s.cmd.startsWith('./gradlew'),
+      );
+      expect(gradleExec?.cmd).toBe(
+        `./gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-version ${newVersion}`,
+      );
     });
 
     it('distributionSha256Sum 404', async () => {
@@ -485,7 +498,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         newPackageFileContent: Fixtures.get(
           'expectedFiles/gradle/wrapper/gradle-wrapper.properties',
         ),
-        config: { ...config, newValue: '6.3' },
+        config: config,
       });
 
       expect(res).toEqual(
@@ -626,9 +639,9 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       const res = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
-        updatedDeps: [],
+        updatedDeps: [{ depName: 'gradle', newValue: '8.2' }],
         newPackageFileContent: '',
-        config: { ...config, newValue: '8.2' },
+        config: config,
       });
 
       expect(res).toStrictEqual(updatedArtifacts);
