@@ -254,8 +254,8 @@ describe('workers/global/index', () => {
     expect(GlobalConfig.get('internalHostAccess')).toBe('block');
   });
 
-  it("filters the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
-    // `allowedHeaders` has never exempted the self-hosted admin - `applyHostRule` filters by header name whoever set it - so we drop them here, with a WARN, rather than leave them to be discarded at request time
+  it("does not filter the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
+    // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator
     parseConfigs.mockResolvedValueOnce({
       enabled: true,
       repositories: ['a'],
@@ -271,17 +271,20 @@ describe('workers/global/index', () => {
     await expect(globalWorker.start()).resolves.toBe(0);
 
     expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
-      headers: { 'X-Allowed': 'yes' },
+      headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
       internalHostGrant: { implicit: true },
+      trustedHeaderNames: ['X-Allowed', 'Authorization'],
     });
-    expect(logger.logger.warn).toHaveBeenCalledWith(
-      { denied: ['Authorization'] },
-      "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+    const denialWarnings = logger.logger.warn.mock.calls.filter(
+      ([, message]) =>
+        message ===
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
     );
+    expect(denialWarnings).toHaveLength(0);
   });
 
-  it("honors a repositories[] entry's allowedHeaders override when filtering the admin's own hostRules", async () => {
-    // `GlobalConfig` still reflects the previous repository (or the global config) when the admin's hostRules are re-registered per repo, so the filter must use this repository's own `allowedHeaders` - including any `repositories[]` entry override - and must not carry an override over to the next repository
+  it("carries the admin's own hostRules headers over to every repository, regardless of a repositories[] entry's own allowedHeaders", async () => {
+    // `GlobalConfig` still reflects the previous repository (or the global config) when the admin's hostRules are re-registered per repo - this must not matter, as the admin's own headers are exempt from `allowedHeaders` altogether
     const headersSeenPerRepo: (string | undefined)[] = [];
     vi.mocked(repositoryWorker.renovateRepository).mockImplementation(() => {
       headersSeenPerRepo.push(
@@ -307,31 +310,7 @@ describe('workers/global/index', () => {
 
     await expect(globalWorker.start()).resolves.toBe(0);
 
-    expect(headersSeenPerRepo).toEqual(['from-admin', undefined]);
-  });
-
-  it('warns about disallowed admin hostRules headers once, not once per repository', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      enabled: true,
-      allowedHeaders: ['X-*'],
-      repositories: ['a', 'b', 'c'],
-      hostRules: [
-        {
-          matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin' },
-        },
-      ],
-    });
-
-    await expect(globalWorker.start()).resolves.toBe(0);
-
-    const denialWarnings = logger.logger.warn.mock.calls.filter(
-      ([, message]) =>
-        message ===
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-    );
-    // once from `setGlobalHostRules` during initialization, and not again for its second registration nor for any repository in the loop
-    expect(denialWarnings).toHaveLength(1);
+    expect(headersSeenPerRepo).toEqual(['from-admin', 'from-admin']);
   });
 
   it('processes repositories break', async () => {
