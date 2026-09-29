@@ -17,6 +17,7 @@ import type {
 } from '../types.ts';
 import { extractApkDeps } from './apk.ts';
 import { extractDebDeps } from './deb.ts';
+import type { GetDepOptions } from './types.ts';
 
 const variableMarker = '$';
 
@@ -167,10 +168,30 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
 const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 
+/**
+ * Extract a Docker dependency from an image reference.
+ */
 export function getDep(
   currentFrom: string | null | undefined,
-  specifyReplaceString = true,
-  registryAliases?: Record<string, string>,
+  options: GetDepOptions = {},
+): PackageDependency {
+  const dep = getDepFromImageRef(
+    currentFrom,
+    options.specifyReplaceString ?? true,
+    options.registryAliases,
+  );
+
+  if (options.depType) {
+    dep.depType = options.depType;
+  }
+
+  return dep;
+}
+
+function getDepFromImageRef(
+  currentFrom: string | null | undefined,
+  specifyReplaceString: boolean,
+  registryAliases: Record<string, string> | undefined,
 ): PackageDependency {
   if (
     !isString(currentFrom) ||
@@ -197,7 +218,11 @@ export function getDep(
     );
     // An empty alias value means "no registry prefix", i.e. Docker Hub.
     const valueWithSlash = value ? ensureTrailingSlash(value) : '';
-    const dep = getDep(`${valueWithSlash}${depName}`, false);
+    const dep = getDepFromImageRef(
+      `${valueWithSlash}${depName}`,
+      false,
+      undefined,
+    );
     // TODO: when the inner getDep strips a `library/` prefix (or similar)
     // the depName no longer starts with `valueWithSlash` and the alias-rooted
     // depName is not restored.
@@ -307,7 +332,9 @@ export function extractPackageFile(
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
-        const dep = getDep(syntaxImage, true, config.registryAliases);
+        const dep = getDep(syntaxImage, {
+          registryAliases: config.registryAliases,
+        });
         dep.depType = 'syntax';
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
@@ -384,7 +411,9 @@ export function extractPackageFile(
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug(`Skipping alias FROM image:${fromImage}`);
       } else {
-        const dep = getDep(fromImage, true, config.registryAliases);
+        const dep = getDep(fromImage, {
+          registryAliases: config.registryAliases,
+        });
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
         logger.trace(
           {
@@ -415,11 +444,9 @@ export function extractPackageFile(
           'Skipping index reference COPY --from',
         );
       } else {
-        const dep = getDep(
-          copyFromMatch.groups.image,
-          true,
-          config.registryAliases,
-        );
+        const dep = getDep(copyFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];
@@ -448,11 +475,9 @@ export function extractPackageFile(
           'Skipping alias RUN --mount=from',
         );
       } else {
-        const dep = getDep(
-          runMountFromMatch.groups.image,
-          true,
-          config.registryAliases,
-        );
+        const dep = getDep(runMountFromMatch.groups.image, {
+          registryAliases: config.registryAliases,
+        });
         const lineNumberRanges: number[][] = [
           [lineNumberInstrStart, lineNumber],
         ];

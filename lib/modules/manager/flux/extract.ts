@@ -418,8 +418,7 @@ function resolveResourceManifest(
         if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
           const combinedDep = getDep(
             `${container}@${resource.spec.ref.digest}`,
-            false,
-            registryAliases,
+            { specifyReplaceString: false, registryAliases },
           );
           // Set currentValue to the tag so the docker datasource can look up the image's new digest
           combinedDep.currentValue = resource.spec.ref.tag;
@@ -450,18 +449,16 @@ function resolveResourceManifest(
 
           deps.push(combinedDep);
         } else if (resource.spec.ref?.digest) {
-          const dep = getDep(
-            `${container}@${resource.spec.ref.digest}`,
-            false,
+          const dep = getDep(`${container}@${resource.spec.ref.digest}`, {
+            specifyReplaceString: false,
             registryAliases,
-          );
+          });
           deps.push(dep);
         } else if (resource.spec.ref?.tag) {
-          const dep = getDep(
-            `${container}:${resource.spec.ref.tag}`,
-            false,
+          const dep = getDep(`${container}:${resource.spec.ref.tag}`, {
+            specifyReplaceString: false,
             registryAliases,
-          );
+          });
           const refTagRange = extractOCIRefTagRange(
             (docs ??= parseAllDocuments(content, { strict: false })),
             content,
@@ -484,7 +481,10 @@ function resolveResourceManifest(
           }
           deps.push(dep);
         } else {
-          const dep = getDep(container, false, registryAliases);
+          const dep = getDep(container, {
+            specifyReplaceString: false,
+            registryAliases,
+          });
           dep.skipReason = 'unversioned-reference';
           deps.push(dep);
         }
