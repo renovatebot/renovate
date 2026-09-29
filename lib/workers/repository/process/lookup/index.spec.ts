@@ -113,15 +113,35 @@ describe('workers/repository/process/lookup/index', () => {
       expect(skipReason).toBe('invalid-value');
     });
 
-    it('returns null if unknown datasource', async () => {
+    it('returns invalid-config without warning if packageName is missing', async () => {
+      config.datasource = NpmDatasource.id;
+      // @ts-expect-error: testing missing packageName
+      config.packageName = undefined;
+
+      const { skipReason, warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(skipReason).toBe('invalid-config');
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('returns warning if unknown datasource', async () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
 
-      const { updates } = await Result.wrap(
+      const { updates, skipReason, warnings } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
       expect(updates).toBeEmptyArray();
+      expect(skipReason).toBe('invalid-config');
+      expect(warnings).toEqual([
+        {
+          topic: 'some-dep',
+          message: 'Unknown datasource "does not exist" for package some-dep',
+        },
+      ]);
     });
 
     it('handles error result from getPkgReleasesWithResult', async () => {
