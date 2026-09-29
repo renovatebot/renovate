@@ -1,5 +1,5 @@
 // TODO #22198
-import { isNonEmptyArray, isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import {
   applyDatasourceDefaultConfig,
   getManagerConfig,
@@ -62,12 +62,6 @@ async function lookup(
 
   dep.updates = [];
 
-  if (isString(dep.depName)) {
-    dep.depName = dep.depName.trim();
-  }
-
-  dep.packageName ??= dep.depName;
-
   // `unknown-registry` says the manager could not work out where to look, which
   // `applyPackageRules()` clears when config supplies a registry. Such a dep has
   // to reach the rules to be given one, so it is dropped afterwards rather than
@@ -95,7 +89,6 @@ async function lookup(
   depConfig = await applyDatasourceDefaultConfig(depConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
-  depConfig.packageName ??= depConfig.depName;
 
   if (mayBeGivenARegistry) {
     if (depConfig.skipReason === 'unknown-registry') {
