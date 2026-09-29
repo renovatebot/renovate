@@ -19,6 +19,10 @@ vi.mock('./extract-update.ts');
 
 const extract = vi.mocked(_extractUpdate).extract;
 
+const notFoundError = Object.assign(new Error('Not Found'), {
+  response: { statusCode: 404 },
+});
+
 let config: RenovateConfig;
 
 beforeEach(() => {
@@ -123,7 +127,7 @@ describe('workers/repository/process/index', () => {
 
     it('falls back gracefully when branch-specific config not found (useBaseBranchConfig=fallback)', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile.mockResolvedValue(null);
+      platform.getJsonFile.mockRejectedValue(notFoundError);
       config.baseBranchPatterns = ['main', 'dev'];
       config.defaultBranch = 'main';
       config.useBaseBranchConfig = 'fallback';
@@ -383,7 +387,21 @@ describe('workers/repository/process/index', () => {
         );
       });
 
-      it('falls back to default config when getJsonFile returns null', async () => {
+      it('falls back to default config when config file is not found (404)', async () => {
+        platform.getJsonFile.mockRejectedValueOnce(notFoundError);
+        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
+        expect(res.baseBranch).toBe('postgresql/v18/dev');
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { baseBranch: 'postgresql/v18/dev', configFileName: 'renovate.json' },
+          'No branch-specific config file found, falling back to default branch config',
+        );
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Applied branch-specific renovate config',
+        );
+      });
+
+      it('falls back to default config when config file is empty', async () => {
         platform.getJsonFile.mockResolvedValueOnce(null);
         const res = await getBaseBranchConfig('postgresql/v18/dev', config);
         expect(res.baseBranch).toBe('postgresql/v18/dev');

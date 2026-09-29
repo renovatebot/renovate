@@ -125,11 +125,18 @@ export async function getBaseBranchConfig(
         if (err instanceof ExternalHostError) {
           throw err;
         }
-        const error = new Error(CONFIG_VALIDATION);
-        error.validationSource = configFileName;
-        error.validationError = 'Error fetching config file';
-        error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
-        throw error;
+        if (err.response?.statusCode === 404) {
+          logger.debug(
+            { baseBranch, configFileName },
+            'No branch-specific config file found, falling back to default branch config',
+          );
+        } else {
+          const error = new Error(CONFIG_VALIDATION);
+          error.validationSource = configFileName;
+          error.validationError = 'Error fetching config file';
+          error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
+          throw error;
+        }
       }
 
       if (rawBranchConfig) {
