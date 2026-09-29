@@ -82,7 +82,7 @@ export async function extractPackageFile(
 
     const result: PackageDependency = {
       ...res,
-      ...parseRepository(dep.name, repository),
+      ...parseRepository(dep.name, repository, config.registryAliases),
     };
     return result;
   });

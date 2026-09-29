@@ -651,6 +651,34 @@ describe('modules/manager/nuget/extract', () => {
       });
     });
 
+    it('extracts msbuild-sdks from a global.json with no sdk version', async () => {
+      const contents = codeBlock`
+        {
+          "msbuild-sdks": {
+            "YoloDev.Sdk": "0.2.0"
+          }
+        }
+      `;
+      await expect(
+        extractPackageFile(contents, 'global.json', config),
+      ).resolves.toEqual({
+        deps: [
+          {
+            currentValue: '0.2.0',
+            datasource: 'nuget',
+            depName: 'YoloDev.Sdk',
+            depType: 'msbuild-sdk',
+          },
+        ],
+      });
+    });
+
+    it('handles an empty global.json', async () => {
+      await expect(
+        extractPackageFile('{}', 'global.json', config),
+      ).resolves.toBeNull();
+    });
+
     it('handles malformed global.json', async () => {
       const packageFile = 'msbuild-sdk-files/invalid-json/global.json';
       const contents = Fixtures.get(packageFile);

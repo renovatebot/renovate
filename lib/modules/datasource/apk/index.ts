@@ -9,7 +9,7 @@ import * as fs from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { id as looseVersioning } from '../../versioning/loose/index.ts';
+import { id as apkVersioning } from '../../versioning/apk/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { parseApkIndexFile } from './parser.ts';
@@ -46,7 +46,7 @@ function groupPackagesByName(
 export class ApkDatasource extends Datasource {
   static readonly id = apkDatasourceId;
 
-  override readonly defaultVersioning = looseVersioning;
+  override readonly defaultVersioning = apkVersioning;
 
   /**
    * Alpine APK repositories are laid out as
@@ -64,13 +64,17 @@ export class ApkDatasource extends Datasource {
    * - branch: latest-stable, v3.19, edge or any other Alpine branch
    * - components: comma separated list of components, e.g. main,community,testing
    */
-  override readonly defaultRegistryUrls = [
-    'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [
+      'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
+    ];
+  }
 
   override readonly defaultConfig = defaultConfig;
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'merge';
 

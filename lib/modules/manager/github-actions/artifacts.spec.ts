@@ -654,6 +654,22 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
     });
 
+    it('falls back to the extracted `gh` constraint', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(
+        makeConfig({ extractedConstraints: { gh: '2.62.0' } }),
+        packageFiles,
+      );
+
+      expect(execSnapshots.map((s) => s.cmd)).toContain(
+        'install-tool gh 2.62.0',
+      );
+    });
+
     it('passes a github.com token as `GH_TOKEN`', async () => {
       const execSnapshots = mockExecAll();
       hostRules.add({

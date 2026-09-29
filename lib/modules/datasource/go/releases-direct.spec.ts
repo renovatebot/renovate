@@ -1,5 +1,7 @@
+import type { MockInstance } from 'vitest';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { BaseGoDatasource } from './base.ts';
@@ -128,7 +130,10 @@ describe('modules/datasource/go/releases-direct', () => {
       httpMock
         .scope('https://gitlab.com/')
         .get('/api/v4/projects/golang%2Ftext/repository/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
+          { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
+        ]);
       const res = await datasource.getReleases({
         packageName: 'golang.org/x/text',
       });
@@ -238,7 +243,10 @@ describe('modules/datasource/go/releases-direct', () => {
       httpMock
         .scope('https://my.custom.domain/')
         .get('/api/v4/projects/golang%2Fmyrepo/repository/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
+          { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
+        ]);
       const res = await datasource.getReleases({
         packageName: 'my.custom.domain/golang/myrepo',
       });
@@ -340,7 +348,10 @@ describe('modules/datasource/go/releases-direct', () => {
         .get(
           '/api/v4/projects/group%2Fsubgroup%2Frepo/repository/tags?per_page=100',
         )
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
+          { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
+        ]);
       const res = await datasource.getReleases({
         packageName: 'gitlab.com/group/subgroup/repo',
       });
@@ -435,6 +446,40 @@ describe('modules/datasource/go/releases-direct', () => {
         { version: 'v2.0.0', gitRef: 'b/v2.0.0' },
         { version: 'v3.0.0', gitRef: 'b/v3.0.0' },
       ]);
+    });
+
+    describe('package cache', () => {
+      let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+      beforeEach(() => {
+        setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+        getDatasourceSpy.mockResolvedValueOnce({
+          datasource: 'github-tags',
+          packageName: 'golang/text',
+          registryUrl: 'https://github.com',
+        });
+        githubGetTags.mockResolvedValueOnce({
+          releases: [{ gitRef: 'v1.0.0', version: 'v1.0.0' }],
+        });
+      });
+
+      afterEach(() => {
+        setCache.mockRestore();
+      });
+
+      it('caches public modules', async () => {
+        await datasource.getReleases({ packageName: 'github.com/golang/text' });
+
+        expect(setCache).toHaveBeenCalledOnce();
+      });
+
+      it('does not cache modules matching GONOPROXY', async () => {
+        vi.stubEnv('GONOPROXY', 'github.com/golang/*');
+
+        await datasource.getReleases({ packageName: 'github.com/golang/text' });
+
+        expect(setCache).not.toHaveBeenCalled();
+      });
     });
   });
 });

@@ -91,9 +91,10 @@ function buildMinimumReleaseAgePreset(
       matchDatasources: [datasource],
       minimumReleaseAge,
     },
-    ...unsupportedUpdateTypeRules.map(
-      (rule): PackageRule => ({ ...rule, matchDatasources: [datasource] }),
-    ),
+    ...unsupportedUpdateTypeRules.map((rule): PackageRule => ({
+      ...rule,
+      matchDatasources: [datasource],
+    })),
   ];
 
   return { description, packageRules };

@@ -23,6 +23,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
+      'workarounds:groupings',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
@@ -132,6 +133,19 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
+      },
+    ],
+  },
+  groupings: {
+    description: 'Groupings for specific package updates.',
+    packageRules: [
+      {
+        description:
+          'Group commander major updates, they depend on each other.',
+        groupName: 'commander',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@commander-js/extra-typings', 'commander'],
+        matchUpdateTypes: ['major'],
       },
     ],
   },
@@ -246,10 +260,10 @@ export const presets: Record<string, Preset> = {
       },
       {
         description:
-          'Use partial semver versioning for partial mise Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
+          'Use partial semver versioning for partial mise and GitHub Actions Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
         matchCurrentValue: '/^\\d+(?:\\.\\d+)?$/',
         matchDatasources: ['java-version'],
-        matchManagers: ['mise'],
+        matchManagers: ['github-actions', 'mise'],
         versioning: 'semver-partial',
       },
       {

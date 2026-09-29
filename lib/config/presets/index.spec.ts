@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
 import {
   CONFIG_VALIDATION,
+  HOST_BLOCKED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
@@ -137,6 +138,30 @@ describe('config/presets/index', () => {
           ' Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
       );
       expect(e!.validationMessage).toBeUndefined();
+    });
+
+    it('throws if the preset host is blocked', async () => {
+      config.extends = ['http://10.1.2.3/preset.json'];
+      http.getPreset.mockRejectedValueOnce(new Error(HOST_BLOCKED));
+      let e: Error | undefined;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e!.validationError).toBe(
+        'Preset host is blocked by this Renovate instance (http://10.1.2.3/preset.json). If this is intended, ask your Renovate administrator to permit it with a `hostRules` entry setting `allowInternal=true`, scoped either by `hostType` (for example `preset` or `npm`) or by a URL-prefix `matchHost`',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          preset: 'http://10.1.2.3/preset.json',
+          documentationUrl: expect.stringContaining(
+            'self-hosted-configuration/#hostrulesallowinternal',
+          ),
+        },
+        'Preset host is blocked by this Renovate instance',
+      );
     });
 
     it('throws if invalid preset', async () => {

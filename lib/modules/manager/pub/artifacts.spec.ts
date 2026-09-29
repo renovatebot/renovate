@@ -362,4 +362,48 @@ describe('modules/manager/pub/artifacts', () => {
       { cmd: `dart pub upgrade ${depNamesWithSpace}` },
     ]);
   });
+
+  it('falls back to the extracted dart constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+
+    await pub.updateArtifacts({
+      ...updateArtifact,
+      newPackageFileContent: codeBlock`
+        dependencies:
+          dep1: ^1.0.0
+      `,
+      config: { ...config, extractedConstraints: { dart: '3.3.0' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dart 3.3.0' },
+      { cmd: `dart pub upgrade ${depNamesWithSpace}` },
+    ]);
+  });
+
+  it('prefers the pubspec constraint over the extracted one', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+
+    await pub.updateArtifacts({
+      ...updateArtifact,
+      newPackageFileContent: codeBlock`
+        environment:
+          sdk: 3.3.0
+      `,
+      config: { ...config, extractedConstraints: { dart: '2.0.0' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool dart 3.3.0' },
+      { cmd: `dart pub upgrade ${depNamesWithSpace}` },
+    ]);
+  });
 });

@@ -94,10 +94,28 @@ describe('util/http/gitlab', () => {
     expect(res.body).toHaveLength(1);
     expect(logger.logger.once.warn).toHaveBeenCalledWith(
       {
-        requestHost: 'gitlab.com',
-        paginationHost: 'other.host.com',
+        requestOrigin: 'https://gitlab.com',
+        paginationOrigin: 'https://other.host.com',
       },
-      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links.',
+      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
+    );
+  });
+
+  it('does not follow pagination links to a different protocol on the same host', async () => {
+    // Same host, but a different scheme still counts as a different origin
+    httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, ['a'], {
+      link: '<http://gitlab.com/api/v4/some-url&page=2>; rel="next", <http://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+    });
+    const res = await gitlabApi.getJsonUnchecked('some-url', {
+      paginate: true,
+    });
+    expect(res.body).toHaveLength(1);
+    expect(logger.logger.once.warn).toHaveBeenCalledWith(
+      {
+        requestOrigin: 'https://gitlab.com',
+        paginationOrigin: 'http://gitlab.com',
+      },
+      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
     );
   });
 

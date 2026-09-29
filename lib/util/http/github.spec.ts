@@ -69,16 +69,19 @@ describe('util/http/github', () => {
   describe('HTTP', () => {
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
-      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            accept: 'some-accept, application/vnd.github.v3+json',
+            authorization: 'Bearer 123test',
+          },
+        })
+        .get('/some-url')
+        .reply(200);
       await githubApi.get('/some-url', {
         headers: { accept: 'some-accept' },
       });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'some-accept, application/vnd.github.v3+json',
-      );
-      expect(req.headers.authorization).toBe('Bearer 123test');
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('supports different datasources', async () => {
@@ -88,11 +91,14 @@ describe('util/http/github', () => {
         hostType: GithubReleasesDatasource.id,
         token: 'def',
       });
-      httpMock.scope(githubApiHost).get('/some-url').reply(200);
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: { authorization: 'token def' },
+        })
+        .get('/some-url')
+        .reply(200);
       await githubApiDatasource.get('/some-url');
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.authorization).toBe('token def');
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('paginates', async () => {
@@ -204,10 +210,34 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd']);
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         {
-          requestHost: 'api.github.com',
-          paginationHost: 'attacker.example.com',
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'https://attacker.example.com',
         },
-        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
+    });
+
+    it('does not follow cursor pagination links to a different protocol on the same host', async () => {
+      // Same host, but a different scheme still counts as a different origin
+      const url = '/some-url?per_page=2';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&after=cursor-1>; rel="next"`,
+        })
+        .get(`${url}&after=cursor-1`)
+        .reply(200, ['c', 'd'], {
+          link: '<http://api.github.com/some-url?after=cursor-2>; rel="next"',
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'http://api.github.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
       );
     });
 
@@ -418,10 +448,27 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b']);
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         {
-          requestHost: 'api.github.com',
-          paginationHost: 'attacker.example.com',
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'https://attacker.example.com',
         },
-        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+      );
+    });
+
+    it('does not follow pagination links to a different protocol on the same host', async () => {
+      // Same host, but a different scheme still counts as a different origin
+      const url = '/some-url?per_page=2';
+      httpMock.scope(githubApiHost).get(url).reply(200, ['a', 'b'], {
+        link: `<http://api.github.com/some-url?per_page=2&page=2>; rel="next", <http://api.github.com/some-url?per_page=2&page=3>; rel="last"`,
+      });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestOrigin: 'https://api.github.com',
+          paginationOrigin: 'http://api.github.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
       );
     });
 
@@ -814,23 +861,21 @@ describe('util/http/github', () => {
         .post('/api/graphql')
         .reply(200, { data: { repository } });
       await githubApi.requestGraphql(graphqlQuery, { token: 'abc' });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
       httpMock
-        .scope(githubApiHost)
+        .scope(githubApiHost, {
+          reqheaders: { accept: 'application/vnd.github.v3+json' },
+        })
         .post('/graphql')
         .reply(200, { data: { repository: { testItem: 'XXX' } } });
       await githubApi.queryRepoField(graphqlQuery, 'testItem', {
         paginate: false,
       });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.accept).toBe('application/vnd.github.v3+json');
+      expect(httpMock.allUsed()).toBeTrue();
     });
 
     it('returns empty array for undefined data', async () => {

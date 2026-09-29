@@ -9,6 +9,8 @@ describe('util/cache/repository/http-cache', () => {
     GlobalConfig.reset();
   });
 
+  const httpResponse = { statusCode: 200, headers: {}, body: 'body' };
+
   it('should not throw if cache is not a valid HttpCache', () => {
     expect(() => cleanupHttpCache({})).not.toThrow();
   });
@@ -22,13 +24,13 @@ describe('util/cache/repository/http-cache', () => {
           timestamp: expiredItemTimestamp,
           etag: 'abc',
           lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
-          httpResponse: {},
+          httpResponse,
         },
         'http://example.com/bar': {
           timestamp: now.toISO(),
           etag: 'abc',
           lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
-          httpResponse: {},
+          httpResponse,
         },
       },
     };
@@ -40,8 +42,38 @@ describe('util/cache/repository/http-cache', () => {
         'http://example.com/bar': {
           timestamp: now.toISO(),
           etag: 'abc',
-          httpResponse: {},
+          httpResponse,
           lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
+        },
+      },
+    });
+  });
+
+  it('should remove invalid items from the cache', () => {
+    const now = DateTime.now();
+    const cache = {
+      httpCache: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {},
+        },
+        'http://example.com/bar': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
+        },
+      },
+    };
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCache: {
+        'http://example.com/bar': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
         },
       },
     });
@@ -57,13 +89,20 @@ describe('util/cache/repository/http-cache', () => {
           timestamp: now.toISO(),
           etag: 'abc',
           lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
-          httpResponse: {},
+          httpResponse,
         },
         'http://example.com/bar': {
           timestamp: now.toISO(),
           etag: 'abc',
           lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
-          httpResponse: {},
+          httpResponse,
+        },
+      },
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
         },
       },
     };
@@ -71,5 +110,41 @@ describe('util/cache/repository/http-cache', () => {
     cleanupHttpCache(cache);
 
     expect(cache).toEqual({});
+  });
+
+  it('should clean up the HEAD items like the GET items', () => {
+    const now = DateTime.now();
+    const expiredItemTimestamp = now.minus({ days: 91 }).toISO();
+    const cache = {
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: expiredItemTimestamp,
+          etag: 'abc',
+          httpResponse,
+        },
+        'http://example.com/bar': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {},
+        },
+        'http://example.com/baz': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
+        },
+      },
+    };
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCacheHead: {
+        'http://example.com/baz': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse,
+        },
+      },
+    });
   });
 });

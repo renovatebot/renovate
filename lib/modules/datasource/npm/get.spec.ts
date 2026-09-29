@@ -39,7 +39,7 @@ describe('modules/datasource/npm/get', () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope('https://test.org', {
           reqheaders: {
@@ -54,9 +54,6 @@ describe('modules/datasource/npm/get', () => {
       await expect(
         getDependency(http, registryUrl, '@myco/test'),
       ).resolves.toBeNull();
-
-      const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toBe('Bearer XXX');
     });
   });
 
@@ -74,7 +71,7 @@ describe('modules/datasource/npm/get', () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope('https://test.org', {
           reqheaders: {
@@ -88,9 +85,6 @@ describe('modules/datasource/npm/get', () => {
       await expect(
         getDependency(http, registryUrl, '@myco/test'),
       ).resolves.toBeNull();
-
-      const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toBe('Basic dGVzdDp0ZXN0');
     });
   });
 
@@ -103,7 +97,7 @@ describe('modules/datasource/npm/get', () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope('https://test.org', { badheaders: ['authorization'] })
         .get(getPath(npmrc))
@@ -113,9 +107,6 @@ describe('modules/datasource/npm/get', () => {
       await expect(
         getDependency(http, registryUrl, '@myco/test'),
       ).resolves.toBeNull();
-
-      const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toBeUndefined();
     });
   });
 
@@ -380,24 +371,6 @@ describe('modules/datasource/npm/get', () => {
       'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBeUndefined();
-
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "authorization": "Bearer XXX",
-            "connection": "close",
-            "host": "test.org",
-            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
-        },
-      ]
-    `);
   });
 
   it('handles missing dist-tags latest', async () => {
@@ -528,24 +501,6 @@ describe('modules/datasource/npm/get', () => {
       'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBe('packages/foo');
-
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "authorization": "Bearer XXX",
-            "connection": "close",
-            "host": "test.org",
-            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
-        },
-      ]
-    `);
   });
 
   it('handles full repository urls with release source directories', async () => {
@@ -596,24 +551,34 @@ describe('modules/datasource/npm/get', () => {
       'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBeUndefined();
+  });
 
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "authorization": "Bearer XXX",
-            "connection": "close",
-            "host": "test.org",
-            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+  it('extracts integrity and tarball', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        versions: {
+          '1.0.0': {
+            dist: {
+              integrity: 'sha512-abc',
+              tarball: 'https://test.org/react-1.0.0.tgz',
+            },
           },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
         },
-      ]
-    `);
+        'dist-tags': { latest: '1.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.releases[0]).toMatchObject({
+      version: '1.0.0',
+      newDigest: 'sha512-abc',
+      downloadUrl: 'https://test.org/react-1.0.0.tgz',
+    });
   });
 
   describe('cache', () => {
@@ -667,6 +632,7 @@ describe('modules/datasource/npm/get', () => {
                     url: 'https://example.com/attestations',
                     issuer: 'ignore me',
                   },
+                  integrity: 'sha512-abc',
                   tarball: 'https://example.com/some-package.tgz',
                 },
                 scripts: { test: 'vitest' },
@@ -721,6 +687,8 @@ describe('modules/datasource/npm/get', () => {
                     attestations: {
                       url: 'https://example.com/attestations',
                     },
+                    integrity: 'sha512-abc',
+                    tarball: 'https://example.com/some-package.tgz',
                   },
                 },
               },
