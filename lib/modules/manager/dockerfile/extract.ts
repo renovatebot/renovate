@@ -17,6 +17,16 @@ import type {
 } from '../types.ts';
 import { extractApkDeps } from './apk.ts';
 import { extractDebDeps } from './deb.ts';
+import { detectApkRegistryUrls } from './registry/apk.ts';
+import { detectDebRegistryUrls } from './registry/deb.ts';
+
+/**
+ * For a given stage of the `Dockerfile`, what `registryUrl`(s) have we detected.
+ */
+interface StageRegistryUrls {
+  apk?: string[];
+  deb?: string[];
+}
 
 const variableMarker = '$';
 
@@ -271,6 +281,8 @@ export function extractPackageFile(
   const stageNames: string[] = [];
   const args: Record<string, string> = {};
   const argsLines: Record<string, number[]> = {};
+  // For each stage of this Dockerifle, what `registryUrl`(s) have we detected
+  const stageRegistryUrls: Record<string, StageRegistryUrls> = {};
 
   let escapeChar = '\\\\';
   let lookForEscapeChar = true;
@@ -279,6 +291,8 @@ export function extractPackageFile(
   const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length;) {
+    let currentRegistryUrls: StageRegistryUrls = {};
+
     const lineNumberInstrStart = lineNumber;
     let instruction = lines[lineNumber];
 
@@ -381,8 +395,10 @@ export function extractPackageFile(
       }
       if (fromImage === 'scratch') {
         logger.debug('Skipping scratch');
+        currentRegistryUrls = {};
       } else if (fromImage && stageNames.includes(fromImage)) {
         logger.debug(`Skipping alias FROM image:${fromImage}`);
+        currentRegistryUrls = coerceObject(stageRegistryUrls[fromImage]);
       } else {
         const dep = getDep(fromImage, true, config.registryAliases);
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
@@ -395,6 +411,14 @@ export function extractPackageFile(
           'Dockerfile FROM',
         );
         deps.push(dep);
+        currentRegistryUrls = {
+          apk: detectApkRegistryUrls(dep),
+          deb: detectDebRegistryUrls(dep),
+        };
+      }
+
+      if (fromMatch.groups?.name) {
+        stageRegistryUrls[fromMatch.groups.name] = currentRegistryUrls;
       }
     }
 
@@ -469,19 +493,23 @@ export function extractPackageFile(
       }
     }
 
-    for (const dep of [
-      ...extractApkDeps(instruction, escapeChar),
-      ...extractDebDeps(instruction, escapeChar),
-    ]) {
-      dep.depType = 'install';
-      if (!dep.skipReason) {
-        // Renovate cannot tell which distribution release the base image
-        // installs from, so any repository it looked the package up against
-        // would offer versions the image cannot install
-        dep.skipReason = 'unknown-registry';
-        dep.skipStage = 'extract';
+    for (const [datasourceDeps, registryUrls] of [
+      [extractApkDeps(instruction, escapeChar), currentRegistryUrls.apk],
+      [extractDebDeps(instruction, escapeChar), currentRegistryUrls.deb],
+    ] as const) {
+      for (const dep of datasourceDeps) {
+        dep.depType = 'install';
+        if (registryUrls) {
+          dep.registryUrls = registryUrls;
+        } else if (!dep.skipReason) {
+          // Looking the package up against a registry which is not the one the
+          // image installs from offers versions the image cannot install, so
+          // the lookup is left to a `registryUrls` from the user's config
+          dep.skipReason = 'unknown-registry';
+          dep.skipStage = 'extract';
+        }
+        deps.push(dep);
       }
-      deps.push(dep);
     }
 
     lineNumber += 1;
