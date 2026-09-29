@@ -58,7 +58,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types.ts';
-import { repoFingerprint } from '../util.ts';
+import { findPrInList, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { getRepoFile } from './files.ts';
 import {
@@ -965,16 +965,6 @@ export function labelCharLimit(): number {
 
 // Branch
 
-function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === 'all') {
-    return true;
-  }
-  if (desiredState.startsWith('!')) {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
 export async function findPr({
   branchName,
   prTitle,
@@ -999,14 +989,7 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  return (
-    prList.find(
-      (p: { sourceBranch: string; title: string; state: string }) =>
-        p.sourceBranch === branchName &&
-        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-        matchesState(p.state, state),
-    ) ?? null
-  );
+  return findPrInList(prList, { branchName, prTitle, state }) ?? null;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.

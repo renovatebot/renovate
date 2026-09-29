@@ -23,7 +23,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types.ts';
-import { repoFingerprint } from '../util.ts';
+import { findPrInList, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { mapPrFromScmToRenovate } from './mapper.ts';
 import {
@@ -36,7 +36,7 @@ import {
   getRepoPr,
   updateScmPr,
 } from './scm-manager-helper.ts';
-import { getRepoUrl, mapPrState, matchPrState, smartLinks } from './utils.ts';
+import { getRepoUrl, mapPrState, smartLinks } from './utils.ts';
 
 interface SCMMRepoConfig {
   repository: string;
@@ -129,12 +129,7 @@ export async function findPr({
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   const inProgressPrs = await getPrList();
-  const result = inProgressPrs.find(
-    (pr) =>
-      branchName === pr.sourceBranch &&
-      (!prTitle || prTitle === pr.title) &&
-      matchPrState(pr, state),
-  );
+  const result = findPrInList(inProgressPrs, { branchName, prTitle, state });
 
   if (result) {
     logger.debug({ result }, `Found PR`);
