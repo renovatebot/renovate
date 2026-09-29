@@ -171,7 +171,7 @@ export async function getCachedDecompressedFile(
     const cacheDir = await fs.ensureCacheDir(cacheSubDir);
     const urlHash = toSha256(url);
     const decompressedFile = upath.join(cacheDir, `${urlHash}.${extension}`);
-    let lastTimestamp = await getFileCreationTime(decompressedFile);
+    const lastTimestamp = await getFileCreationTime(decompressedFile);
     const urlParsed = parseUrl(url);
 
     if (!urlParsed) {
@@ -200,7 +200,6 @@ export async function getCachedDecompressedFile(
           // Only replace the shared cache file after a successful decompress.
           await decompressFile(compressedFile, decompressedTempFile);
           await fs.renameCacheFile(decompressedTempFile, decompressedFile);
-          lastTimestamp = await getFileCreationTime(decompressedFile);
         } catch (err) {
           logger.warn(
             {
@@ -216,10 +215,6 @@ export async function getCachedDecompressedFile(
             throw err;
           }
         }
-      }
-
-      if (!lastTimestamp) {
-        throw new Error('Missing metadata in extracted RPM metadata file!');
       }
 
       return decompressedFile;
