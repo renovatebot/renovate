@@ -11,4 +11,4 @@ Renovate supports updating Haskell dependencies with these managers:
 - [`haskell-stack`](./modules/manager/haskell-stack/index.md) updates the commits of Git `extra-deps` in `stack.yaml` files
 
 Both managers are enabled by default.
-Read each manager's documentation to learn about its limitations.
+Read the documentation of each manager to learn about its limitations.

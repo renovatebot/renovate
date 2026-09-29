@@ -40,23 +40,14 @@ function getGitNames(
   }
 }
 
-function toCommitDep(
-  url: string,
-  sha: string,
-  commit: string,
-): PackageDependency {
+function toGitDep(url: string, commit: string): PackageDependency {
+  const sha = commit.toLowerCase();
   const dep: PackageDependency = {
     ...getGitNames(url),
     autoReplaceStringTemplate: '{{{newDigest}}}',
   };
   applyGitSource(dep, url, sha, undefined, undefined);
   dep.replaceString = commit;
-  return dep;
-}
-
-function toGitDep(url: string, commit: string): PackageDependency {
-  const sha = commit.toLowerCase();
-  const dep = toCommitDep(url, sha, commit);
   if (!isLongCommitSha(sha)) {
     dep.skipReason = 'unversioned-reference';
   }
@@ -90,7 +81,16 @@ const ArchiveExtraDep = z
   }));
 
 // Stack parses stack.yaml with the Haskell `yaml` package, which mostly follows
-// YAML 1.1, while this parser follows YAML 1.2.
+// YAML 1.1, while our follows YAML 1.2.
+// Here are some of the consequences, all of which should be rare:
+// - Stack supports merge keys, which we do not.
+//   In Renovate, these can be misparsed as objects with a key '<<'.
+// - Booleans/numbers are encoded differently in the two versions.
+//   Renovate shouldn't need to touch either of these data types.
+// - Stack allows duplicate keys and keeps the last value.
+//   We reject files containing these.
+// - Stack supports the !include directive.
+//   In Renovate, depending on location, it is sometimes a parse error, sometimes not.
 export const StackYaml = Yaml.pipe(
   z.object({
     'extra-deps': Nullish(

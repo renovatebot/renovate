@@ -6,16 +6,16 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  const deps = StackYaml.safeParse(content);
-  if (!deps.success) {
+  const parsed = StackYaml.safeParse(content);
+  if (!parsed.success) {
     logger.debug(
-      { packageFile, err: deps.error },
+      { packageFile, err: parsed.error },
       'Failed to parse stack.yaml',
     );
     return null;
   }
-  if (!deps.data.length) {
+  if (!parsed.data.length) {
     return null;
   }
-  return { deps: deps.data };
+  return { deps: parsed.data };
 }

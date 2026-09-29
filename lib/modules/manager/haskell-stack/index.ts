@@ -7,7 +7,7 @@ export const displayName = 'Haskell Stack';
 export const url = 'https://docs.haskellstack.org';
 
 export const defaultConfig = {
-  managerFilePatterns: ['/(^|/)stack\\.yaml$/'],
+  managerFilePatterns: ['/(^|/)stack(-[^/]+)?\\.yaml$/'],
 };
 
 export const categories: Category[] = ['haskell'];
