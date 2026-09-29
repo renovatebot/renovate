@@ -236,6 +236,11 @@ describe('modules/datasource/rpm/index', () => {
         compress: noCompress,
         contentType: 'text/xml',
       },
+      {
+        filename: 'somesha256-primary',
+        compress: noCompress,
+        contentType: 'text/xml',
+      },
     ])(
       'returns the correct releases from $filename',
       async ({ filename, contentType, compress }) => {
