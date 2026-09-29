@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import * as _datasourceCommon from '../../../../modules/datasource/common.ts';
 import { Datasource } from '../../../../modules/datasource/datasource.ts';
 import type {
@@ -19,6 +20,7 @@ import {
   filterInternalChecks,
   isMinimumConfidenceApplicable,
   isMinimumReleaseAgeApplicable,
+  resolveUpdateTypeConfig,
 } from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
@@ -290,6 +292,50 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         expect(res.release?.version).toBe('1.0.4');
       });
 
+      it('returns the latest release, if minimumReleaseAgeBehaviour is not set', async () => {
+        const releasesWithMissingReleaseTimestamp: Release[] = [
+          {
+            version: '1.0.1',
+            releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.2',
+            releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: '1.0.4',
+            // no releaseTimestamp
+          },
+        ];
+
+        config.internalChecksFilter = 'strict';
+        config.minimumReleaseAge = '100 days';
+        // minimumReleaseAgeBehaviour deliberately left unset
+        const res = await filterInternalChecks(
+          config,
+          versioning,
+          'patch',
+          releasesWithMissingReleaseTimestamp,
+        );
+        expect(res.pendingChecks).toBeFalse();
+        expect(res.pendingReleases).toHaveLength(0);
+        expect(res.release?.version).toBe('1.0.4');
+        // the release is not recorded against either behaviour, so neither is reported
+        expect(logger.logger.once.warn).not.toHaveBeenCalledWith(
+          expect.stringContaining(
+            'minimumReleaseAgeBehaviour=timestamp-optional',
+          ),
+        );
+        expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+          expect.objectContaining({ check: 'minimumReleaseAge' }),
+          expect.any(String),
+        );
+      });
+
       it('returns latest release, if minimumReleaseAgeBehaviour=timestamp-required but minimumReleaseAge=0 days', async () => {
         const releasesWithMissingReleaseTimestamp: Release[] = [
           {
@@ -449,6 +495,56 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         'patch',
       );
       expect(res).toEqual({ isPending: false });
+    });
+  });
+
+  describe('.resolveUpdateTypeConfig()', () => {
+    it('sets the updateType', async () => {
+      const res = await resolveUpdateTypeConfig({ depName: 'foo' }, 'digest');
+
+      expect(res).toEqual({ depName: 'foo', updateType: 'digest' });
+    });
+
+    it('merges the updateType-scoped sub-config', async () => {
+      const res = await resolveUpdateTypeConfig(
+        {
+          minimumReleaseAge: '1 day',
+          digest: { minimumReleaseAge: '3 days' },
+          patch: { minimumReleaseAge: '7 days' },
+        },
+        'digest',
+      );
+
+      expect(res).toMatchObject({
+        updateType: 'digest',
+        minimumReleaseAge: '3 days',
+      });
+    });
+
+    it('applies packageRules which match on updateType', async () => {
+      const res = await resolveUpdateTypeConfig(
+        {
+          minimumReleaseAge: '1 day',
+          packageRules: [
+            { matchUpdateTypes: ['digest'], minimumReleaseAge: '5 days' },
+            { matchUpdateTypes: ['patch'], minimumReleaseAge: '9 days' },
+          ],
+        },
+        'digest',
+      );
+
+      expect(res).toMatchObject({
+        updateType: 'digest',
+        minimumReleaseAge: '5 days',
+      });
+    });
+
+    it('does not mutate the input config', async () => {
+      const config = { minimumReleaseAge: '1 day' };
+
+      await resolveUpdateTypeConfig(config, 'digest');
+
+      expect(config).toEqual({ minimumReleaseAge: '1 day' });
     });
   });
 });

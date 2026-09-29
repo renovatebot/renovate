@@ -27,6 +27,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
@@ -409,8 +410,9 @@ async function executeWrapperCommand(
     toolConstraints: [
       {
         toolName: 'java',
-        constraint:
-          config.constraints?.java ?? getJavaConstraint(config.currentValue),
+        constraint: await resolveToolConstraint(config, 'java', () =>
+          getJavaConstraint(config.currentValue),
+        ),
       },
     ],
   };

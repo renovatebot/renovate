@@ -1,7 +1,11 @@
+import { Readable } from 'node:stream';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { HelmDatasource } from './index.ts';
 
@@ -261,6 +265,195 @@ describe('modules/datasource/helm/index', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('S3', () => {
+    const s3mock = mockClient(S3Client);
+
+    // The AWS SDK puts the error code in `name`, not `message`
+    function s3Error(
+      name: string,
+      message: string,
+      metadata?: { httpStatusCode: number },
+    ): Error {
+      const err = Object.assign(new Error(message), { $metadata: metadata });
+      err.name = name;
+      return err;
+    }
+
+    afterEach(() => {
+      s3mock.reset();
+      hostRules.clear();
+    });
+
+    it('returns releases from an S3 bucket', async () => {
+      s3mock
+        .on(GetObjectCommand, {
+          Bucket: 'chart-bucket',
+          Key: 'charts/index.yaml',
+        })
+        .resolvesOnce({ Body: Readable.from([indexYaml]) as never });
+
+      const res = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'ambassador',
+        registryUrls: ['s3://chart-bucket/charts'],
+      });
+
+      expect(res).toMatchObject({
+        homepage: 'https://www.getambassador.io/',
+        registryUrl: 's3://chart-bucket/charts',
+        sourceUrl: 'https://github.com/datawire/ambassador',
+        releases: expect.toBeArrayOfSize(27),
+      });
+    });
+
+    it('uses credentials from host rules', async () => {
+      hostRules.add({
+        hostType: HelmDatasource.id,
+        matchHost: 'chart-bucket',
+        username: 'some-access-key',
+        password: 'some-secret-key',
+        token: 'some-session-token',
+      });
+      s3mock
+        .on(GetObjectCommand, {
+          Bucket: 'chart-bucket',
+          Key: 'charts/index.yaml',
+        })
+        .resolvesOnce({ Body: Readable.from([indexYaml]) as never });
+
+      const res = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'ambassador',
+        registryUrls: ['s3://chart-bucket/charts'],
+      });
+
+      expect(res).toMatchObject({ registryUrl: 's3://chart-bucket/charts' });
+      const client = s3mock.call(0).thisValue as S3Client;
+      await expect(client.config.credentials()).resolves.toMatchObject({
+        accessKeyId: 'some-access-key',
+        secretAccessKey: 'some-secret-key',
+        sessionToken: 'some-session-token',
+      });
+    });
+
+    it('returns null when the S3 object is missing', async () => {
+      s3mock
+        .on(GetObjectCommand)
+        .rejectsOnce(s3Error('NoSuchKey', 'The specified key does not exist.'));
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null for an unsupported response body', async () => {
+      s3mock.on(GetObjectCommand).resolvesOnce({ Body: undefined });
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when the S3 object is not found', async () => {
+      s3mock.on(GetObjectCommand).rejectsOnce(s3Error('NotFound', 'Not Found'));
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when the S3 object is deleted', async () => {
+      s3mock.on(GetObjectCommand).resolvesOnce({ DeleteMarker: true });
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('throws for credentials errors', async () => {
+      s3mock
+        .on(GetObjectCommand)
+        .rejectsOnce(
+          s3Error(
+            'CredentialsProviderError',
+            'Could not load credentials from any providers',
+          ),
+        );
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws when the AWS region is missing', async () => {
+      s3mock
+        .on(GetObjectCommand)
+        .rejectsOnce(s3Error('Error', 'Region is missing'));
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws when the bucket rejects the credentials', async () => {
+      s3mock
+        .on(GetObjectCommand)
+        .rejectsOnce(
+          s3Error(
+            'InvalidAccessKeyId',
+            'The Access Key Id you provided does not exist in our records.',
+            { httpStatusCode: 403 },
+          ),
+        );
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for unknown S3 errors', async () => {
+      s3mock
+        .on(GetObjectCommand)
+        .rejectsOnce(s3Error('AggregateError', 'connect ECONNREFUSED'));
+
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'ambassador',
+          registryUrls: ['s3://chart-bucket/charts'],
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
   });
 });

@@ -233,6 +233,37 @@ describe('modules/manager/conan/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const updatedDeps = [
+      {
+        depName: 'dep',
+      },
+    ];
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
+
+    await conan.updateArtifacts({
+      packageFileName: 'conanfile.py',
+      updatedDeps,
+      newPackageFileContent: '',
+      config: {
+        ...config,
+        constraints: {},
+        extractedConstraints: { conan: '2.0.5', python: '3.11.9' },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.11.9' },
+      { cmd: 'install-tool conan 2.0.5' },
+      { cmd: 'conan lock create conanfile.py' },
+    ]);
+  });
+
   it('returns updated conan.lock when updateType are not empty', async () => {
     const updatedDeps = [
       {

@@ -1,10 +1,14 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import { dir as tmpDir } from 'tmp-promise';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { extractPackageFile } from '../../manager/pip_requirements/extract.ts';
 import { getPkgReleases } from '../index.ts';
 import { PypiDatasource } from './index.ts';
 
@@ -79,8 +83,68 @@ const baseUrl = 'https://pypi.org/pypi';
 const datasource = PypiDatasource.id;
 
 describe('modules/datasource/pypi/index', () => {
+  describe('registry caching', () => {
+    let cacheDir: Awaited<ReturnType<typeof tmpDir>>;
+
+    beforeEach(async () => {
+      memCache.init();
+      cacheDir = await tmpDir({ unsafeCleanup: true });
+      await packageCache.init({ cacheDir: cacheDir.path });
+    });
+
+    afterEach(async () => {
+      await packageCache.cleanup({});
+      memCache.reset();
+      await cacheDir.cleanup();
+    });
+
+    it('keeps merged PyPI releases within each requirements file registry set', async () => {
+      httpMock
+        .scope(PypiDatasource.defaultURL)
+        .get('/foo/json')
+        .reply(200, { releases: { '1.0.0': [{}] } });
+      httpMock
+        .scope('https://index-a.example/pypi')
+        .get('/foo/json')
+        .reply(200, { releases: { '2.0.0': [{}] } });
+      httpMock
+        .scope('https://index-b.example/pypi')
+        .get('/foo/json')
+        .reply(200, { releases: { '3.0.0': [{}] } });
+
+      const fileA = extractPackageFile(
+        '--extra-index-url https://index-a.example/pypi\nfoo==1.0.0\n',
+      )!;
+      const fileB = extractPackageFile(
+        '--extra-index-url https://index-b.example/pypi\nfoo==1.0.0\n',
+      )!;
+      const firstConfig = {
+        ...fileA,
+        datasource: 'pypi',
+        packageName: fileA.deps[0].packageName!,
+      };
+      const first = await getPkgReleases(firstConfig);
+      const second = await getPkgReleases({
+        ...fileB,
+        datasource: 'pypi',
+        packageName: fileB.deps[0].packageName!,
+      });
+
+      expect(first?.releases.map(({ version }) => version)).toEqual([
+        '1.0.0',
+        '2.0.0',
+      ]);
+      expect(second?.releases.map(({ version }) => version)).toEqual([
+        '1.0.0',
+        '3.0.0',
+      ]);
+      await expect(getPkgReleases(firstConfig)).resolves.toEqual(first);
+    });
+  });
+
   describe('getReleases', () => {
     beforeEach(() => {
+      hostRules.clear();
       vi.stubEnv('PIP_INDEX_URL', undefined);
     });
 
@@ -91,6 +155,19 @@ describe('modules/datasource/pypi/index', () => {
         getPkgReleases({
           datasource,
           packageName: 'something',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null if the response carries no releases', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/no-releases/json')
+        .reply(200, { info: { name: 'no-releases' } });
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'no-releases',
         }),
       ).resolves.toBeNull();
     });
@@ -346,6 +423,70 @@ describe('modules/datasource/pypi/index', () => {
       });
       expect(res).toMatchObject({ releases: azureCliMonitorReleases });
       expect(googleAuth).toHaveBeenCalledTimes(1);
+    });
+
+    it('prefers host rule credentials over Google Auth', async () => {
+      hostRules.add({
+        matchHost: 'someregion-python.pkg.dev',
+        username: 'user',
+        password: 'pass',
+      });
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .matchHeader('authorization', 'Basic dXNlcjpwYXNz')
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const res = await getPkgReleases({
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
+      expect(googleAuth).not.toHaveBeenCalled();
+    });
+
+    it('builds Basic auth from a username-only host rule', async () => {
+      hostRules.add({
+        matchHost: 'someregion-python.pkg.dev',
+        username: 'user',
+      });
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .matchHeader('authorization', 'Basic dXNlcjo=')
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const res = await getPkgReleases({
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
+      expect(googleAuth).not.toHaveBeenCalled();
+    });
+
+    it('builds Basic auth from a password-only host rule', async () => {
+      hostRules.add({
+        matchHost: 'someregion-python.pkg.dev',
+        password: 'pass',
+      });
+      httpMock
+        .scope('https://someregion-python.pkg.dev/some-project/some-repo/')
+        .get('/azure-cli-monitor/json')
+        .matchHeader('authorization', 'Basic OnBhc3M=')
+        .reply(200, Fixtures.get('azure-cli-monitor-updated.json'));
+      const res = await getPkgReleases({
+        registryUrls: [
+          'https://someregion-python.pkg.dev/some-project/some-repo',
+        ],
+        datasource,
+        packageName: 'azure-cli-monitor',
+      });
+      expect(res).toMatchObject({ releases: azureCliMonitorReleases });
+      expect(googleAuth).not.toHaveBeenCalled();
     });
 
     it('supports Google Auth not being configured', async () => {

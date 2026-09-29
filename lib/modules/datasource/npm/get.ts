@@ -1,6 +1,9 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -142,6 +145,14 @@ export async function getDependency(
         devDependencies: res.versions?.[version].devDependencies,
         attestation: isString(res.versions?.[version].dist?.attestations?.url),
       };
+
+      if (res.versions?.[version].dist?.integrity) {
+        release.newDigest = res.versions[version].dist.integrity;
+      }
+      if (res.versions?.[version].dist?.tarball) {
+        release.downloadUrl = res.versions[version].dist.tarball;
+      }
+
       const releaseTimestamp = asTimestamp(res.time?.[version]);
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
@@ -184,6 +195,7 @@ export async function getDependency(
     const ignoredStatusCodes = [401, 402, 403, 404];
     const ignoredResponseCodes = ['ENOTFOUND'];
     if (
+      actualError.message === HOST_BLOCKED ||
       actualError.message === HOST_DISABLED ||
       ignoredStatusCodes.includes(actualError.statusCode) ||
       ignoredResponseCodes.includes(actualError.code)

@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { MergeStrategy } from '../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -51,7 +52,7 @@ import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
-import { fromBase64, looseEquals } from '../../../util/string.ts';
+import { looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
@@ -78,15 +79,21 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
+import { getRepoFile } from './files.ts';
 import {
   enableAutoMergeMutation,
+  enqueuePullRequestMutation,
   getIssuesQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
-import { getPrCache, isPrInMergeQueue, updatePrCache } from './pr.ts';
+import {
+  isPrInMergeQueue as checkPrInMergeQueue,
+  getPrCache,
+  updatePrCache,
+} from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
@@ -99,6 +106,7 @@ import type {
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
+  GhEnqueuePullRequestResponse,
   GhPr,
   GhRepo,
   GhRestPr,
@@ -239,6 +247,7 @@ export async function initPlatform({
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
+      // v8 ignore next -- TODO: coverage error #40625
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -416,17 +425,14 @@ export async function getRawFile(
     httpOptions.cacheProvider = repoCacheProvider;
   }
 
-  let url = `repos/${repo}/contents/${fileName}`;
-  if (branchOrTag) {
-    url += `?ref=${branchOrTag}`;
-  }
-  const res = await githubApi.getJsonUnchecked<{ content: string }>(
-    url,
+  return await getRepoFile(
+    githubApi,
+    // TODO #22198
+    repo!,
+    fileName,
+    branchOrTag,
     httpOptions,
   );
-  const buf = res.body.content;
-  const str = fromBase64(buf);
-  return str;
 }
 
 export async function getJsonFile(
@@ -2010,7 +2016,9 @@ export async function createPr({
   return result;
 }
 
-async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
+export async function isBranchMergeQueueEnabled(
+  baseBranch: string,
+): Promise<boolean> {
   const cachedResult = config.mergeQueueEnabled[baseBranch];
   if (cachedResult !== undefined) {
     return cachedResult;
@@ -2063,11 +2071,20 @@ async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
   return result;
 }
 
+export function isPrInMergeQueue(prNo: number): Promise<boolean> {
+  return checkPrInMergeQueue(
+    githubApi,
+    config.repositoryOwner,
+    config.repositoryName,
+    prNo,
+  );
+}
+
 export async function assertPrNotInMergeQueue(
   branchName: string,
   baseBranch?: string,
 ): Promise<void> {
-  if (!(await isMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
+  if (!(await isBranchMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
     return;
   }
 
@@ -2076,14 +2093,7 @@ export async function assertPrNotInMergeQueue(
     return;
   }
 
-  if (
-    await isPrInMergeQueue(
-      githubApi,
-      config.repositoryOwner,
-      config.repositoryName,
-      pr.number,
-    )
-  ) {
+  if (await isPrInMergeQueue(pr.number)) {
     logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
     throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
   }
@@ -2165,12 +2175,64 @@ export async function reattemptPlatformAutomerge({
   }
 }
 
+async function tryEnqueuePr(pr: GhPr): Promise<boolean> {
+  const prNo = pr.number;
+  try {
+    const res = await githubApi.requestGraphql<GhEnqueuePullRequestResponse>(
+      enqueuePullRequestMutation,
+      {
+        variables: { pullRequestId: pr.node_id },
+        count: 1, // set count to one to bypass graphql check
+      },
+    );
+
+    if (res?.errors) {
+      // GitHub does not document the exact message, so match loosely.
+      // "enqueue" contains "queue", so both wordings are covered.
+      if (
+        res.errors.some((error) => regEx(/already.*queue/i).test(error.message))
+      ) {
+        logger.debug(`PR #${prNo} is already in the merge queue`);
+        return true;
+      }
+      logger.debug(
+        { prNumber: prNo, errors: res.errors },
+        'Failed to add PR to the merge queue',
+      );
+      return false;
+    }
+
+    logger.debug(`PR #${prNo} added to the merge queue`);
+    return true;
+  } catch (err) {
+    logger.warn({ prNumber: prNo, err }, 'Failed to add PR to the merge queue');
+    return false;
+  }
+}
+
 export async function mergePr({
   branchName,
   id: prNo,
   strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
+
+  const pr = await getPr(prNo);
+  if (await directMergePr(prNo, strategy)) {
+    return true;
+  }
+  if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
+    // The direct merge was refused - fall back to adding the PR to the merge
+    // queue, so it must not be cached as merged nor may its branch be deleted
+    return tryEnqueuePr(pr);
+  }
+  return false;
+}
+
+async function directMergePr(
+  prNo: number,
+  strategy?: MergeStrategy,
+): Promise<boolean> {
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;

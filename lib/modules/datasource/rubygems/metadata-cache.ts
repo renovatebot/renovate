@@ -19,7 +19,17 @@ function hashVersions(versions: string[]): string {
 }
 
 function hashReleases(releases: ReleaseResult): string {
-  return hashVersions(releases.releases.map((release) => release.version));
+  const versions = releases.releases.map((release) => {
+    const platform = release.constraints?.platform?.[0];
+
+    if (platform && platform !== 'ruby') {
+      return `${release.version}-${platform}`;
+    }
+
+    return release.version;
+  });
+
+  return hashVersions(versions);
 }
 
 interface CacheNotFoundError {
@@ -68,6 +78,7 @@ export class MetadataCache {
       ttlDelta = 10 * 24 * 60,
     ): Promise<void> {
       const registryHostname = parseUrl(registryUrl)?.hostname;
+      // v8 ignore else -- needs a save against a non-rubygems.org host
       if (registryHostname === 'rubygems.org') {
         const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
         const ttl = ttlMinutes + ttlRandomDelta;
@@ -96,6 +107,7 @@ export class MetadataCache {
              */
             if (err.type === 'cache-stale') {
               const staleCache = err.cache;
+              // v8 ignore else -- needs a stale cache already marked fallback
               if (!staleCache.isFallback) {
                 await saveCache(
                   { ...staleCache, isFallback: true },

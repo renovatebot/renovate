@@ -34,6 +34,7 @@ describe('util/host-rules', () => {
       timeout: true,
       abortOnError: true,
       abortIgnoreStatusCodes: true,
+      allowInternal: true,
       enabled: true,
       enableHttp2: true,
       concurrentRequestLimit: true,
@@ -184,6 +185,7 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Allowed': 'yes' },
+        trustedHeaderNames: [],
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { denied: ['Authorization'] },
@@ -202,23 +204,24 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({});
     });
 
-    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
-      // used when registering rules for a repository before `GlobalConfig` reflects it, i.e. a `repositories[]` entry's own `allowedHeaders` override
+    it('does not filter a trusted rule against allowedHeaders', () => {
+      // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - mirrors `allowedEnv`'s exemption of the admin's own `env`
+      GlobalConfig.reset();
+
       add(
         {
           matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
+          headers: { Authorization: 'from-admin' },
         },
-        { allowedHeaders: ['Authorization'] },
+        { trusted: true },
       );
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { Authorization: 'from-admin' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['Authorization'],
       });
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['X-Dropped'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -284,29 +287,6 @@ describe('util/host-rules', () => {
         "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
       );
     });
-
-    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
-      expect(
-        filterAllowedHeaders(
-          [
-            {
-              matchHost: 'registry.example.com',
-              headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
-            },
-          ],
-          ['Authorization'],
-        ),
-      ).toEqual([
-        {
-          matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin' },
-        },
-      ]);
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['X-Dropped'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
-    });
   });
 
   describe('find()', () => {
@@ -317,6 +297,21 @@ describe('util/host-rules', () => {
     it('warns and returns empty for bad search', () => {
       // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(find({ abc: 'def' } as any)).toEqual({});
+    });
+
+    it('returns a truly empty object for no match, not one with an undefined trustedHeaderNames', () => {
+      // `toEqual({})` alone would not catch this: it ignores `undefined`-valued properties, but callers elsewhere use `Object.keys(...).length`/`isNonEmptyObject` to detect an empty result
+      add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-From-Admin': 'yes' },
+        },
+        { trusted: true },
+      );
+
+      expect(
+        Object.keys(find({ url: 'https://unrelated.example.com' })),
+      ).toEqual([]);
     });
 
     it('needs exact host matches', () => {
@@ -502,6 +497,27 @@ describe('util/host-rules', () => {
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
 
+    it('matches a URL carrying user:pass@ against a matchHost without credentials', () => {
+      add({
+        matchHost: 'https://domain.com',
+        token: 'def',
+      });
+      expect(find({ url: 'https://user:pass@domain.com' }).token).toBe('def');
+    });
+
+    it('matches a URL carrying user:pass@ against a path-scoped matchHost', () => {
+      add({
+        matchHost: 'https://domain.com/simple/',
+        token: 'def',
+      });
+      expect(find({ url: 'https://user:pass@domain.com/simple/' }).token).toBe(
+        'def',
+      );
+      expect(
+        find({ url: 'https://user:pass@domain.com/other/' }).token,
+      ).toBeUndefined();
+    });
+
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,
@@ -562,6 +578,8 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         token: 'from-admin',
         headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-From-Admin'],
       });
     });
 
@@ -583,6 +601,8 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'from-admin' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Custom'],
       });
     });
 
@@ -601,6 +621,7 @@ describe('util/host-rules', () => {
       // both rules are untrusted, so the second masks the first rather than being applied over it
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Custom': 'from-repo' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -623,9 +644,13 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other': 'yes' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Other'],
       });
       expect(find({ url: 'https://trusted.example.com' })).toEqual({
         headers: { 'X-Api-Key': 'secret' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Api-Key'],
       });
     });
 
@@ -649,6 +674,8 @@ describe('util/host-rules', () => {
       // the repo's narrower rule masks its own broader one, but cannot mask the admin's
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other-Repo-Header': 'yes', 'X-From-Admin': 'yes' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-From-Admin'],
       });
     });
 
@@ -669,6 +696,74 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'from-repo', 'X-Other-Admin-Header': 'yes' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Other-Admin-Header'],
+      });
+    });
+
+    it('applies the headers of the three trust tiers in order', () => {
+      // the admin's own value must survive both of the tiers below theirs, and inherited config's must survive a repository's
+      add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-Custom': 'from-admin' },
+        },
+        { trusted: true },
+      );
+      add(
+        {
+          matchHost: 'https://registry.example.com/deeper',
+          headers: { 'X-Custom': 'from-inherited', 'X-Inherited': 'yes' },
+        },
+        { inherited: true },
+      );
+      add({
+        matchHost: 'https://registry.example.com/deeper/still',
+        headers: {
+          'X-Custom': 'from-repo',
+          'X-Inherited': 'from-repo',
+          'X-Repo': 'yes',
+        },
+      });
+
+      expect(
+        find({ url: 'https://registry.example.com/deeper/still/resource' })
+          .headers,
+      ).toEqual({
+        'X-Custom': 'from-admin',
+        'X-Inherited': 'yes',
+        'X-Repo': 'yes',
+      });
+    });
+
+    it('applies inherited headers over a repository rule when the admin sets none', () => {
+      add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-Custom': 'from-inherited' },
+        },
+        { inherited: true },
+      );
+      add({
+        matchHost: 'https://registry.example.com/deeper',
+        headers: { 'X-Custom': 'from-repo' },
+      });
+
+      expect(
+        find({ url: 'https://registry.example.com/deeper/resource' }).headers,
+      ).toEqual({ 'X-Custom': 'from-inherited' });
+    });
+
+    it('keeps `trustedHeaderNames` as an explicit key, set to `[]`, when only untrusted headers match', () => {
+      // an empty array, not an absent key, so that `findMatchingRule`'s hostType fallbacks - which combine results with `{ ...fallbackResult, ...res }` - have this result's `trustedHeaderNames` override a fallback's own, rather than a plain object spread letting the fallback's value show through underneath an unrelated `res.headers`; see "does not let a fallback hostType's trustedHeaderNames leak onto a rule's own untrusted headers" in `lib/util/http/host-rules.spec.ts` for that merge end-to-end
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-Custom': 'from-repo' },
+      });
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-Custom': 'from-repo' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -687,6 +782,336 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'yes' },
+        trustedHeaderNames: [],
+      });
+    });
+
+    describe('internalHostGrant', () => {
+      it('is absent when no trusted rule matches', () => {
+        add({ matchHost: 'registry.example.com', token: 'abc' });
+
+        expect(
+          find({ url: 'https://registry.example.com' }).internalHostGrant,
+        ).toBeUndefined();
+      });
+
+      it('is implicit for a host the admin named', () => {
+        add(
+          { matchHost: 'registry.example.com', token: 'abc' },
+          { trusted: true },
+        );
+
+        expect(find({ url: 'https://registry.example.com' })).toEqual({
+          token: 'abc',
+          internalHostGrant: { implicit: true },
+        });
+      });
+
+      it('is not implicit for a host-less trusted rule', () => {
+        add({ hostType: 'nuget', token: 'abc' }, { trusted: true });
+
+        expect(
+          find({ hostType: 'nuget', url: 'https://internal.example.com' })
+            .internalHostGrant,
+        ).toBeUndefined();
+      });
+
+      it('ignores allowInternal from untrusted config', () => {
+        add({ matchHost: 'internal.example.com', allowInternal: true });
+
+        expect(
+          find({ url: 'https://internal.example.com' }).internalHostGrant,
+        ).toBeUndefined();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Ignoring hostRules allowInternal for internal.example.com from untrusted config',
+        );
+      });
+
+      it('ignores allowInternal from an untrusted host-less rule', () => {
+        add({ hostType: 'nuget', allowInternal: true });
+
+        expect(
+          find({ hostType: 'nuget', url: 'https://internal.example.com' })
+            .internalHostGrant,
+        ).toBeUndefined();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Ignoring hostRules allowInternal for nuget from untrusted config',
+        );
+      });
+
+      it('takes explicit allowInternal from the admin, most specific rule winning', () => {
+        add(
+          { matchHost: 'example.com', allowInternal: true },
+          { trusted: true },
+        );
+        add(
+          { matchHost: 'https://secure.example.com', allowInternal: false },
+          { trusted: true },
+        );
+
+        expect(
+          find({ url: 'https://other.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: true, implicit: true });
+        expect(
+          find({ url: 'https://secure.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: false });
+      });
+
+      it('marks a grant scoped by hostType', () => {
+        add(
+          {
+            hostType: 'preset',
+            matchHost: 'presets.example.com',
+            allowInternal: true,
+          },
+          { trusted: true },
+        );
+
+        expect(
+          find({ hostType: 'preset', url: 'https://presets.example.com' })
+            .internalHostGrant,
+        ).toEqual({ explicit: true, scoped: true, implicit: true });
+      });
+
+      it('does not mark a bare-hostname grant as scoped', () => {
+        add(
+          { matchHost: 'internal.example.com', allowInternal: true },
+          { trusted: true },
+        );
+
+        expect(
+          find({ url: 'https://internal.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: true, implicit: true });
+      });
+
+      it('does not let a repository rule override the admin allowInternal', () => {
+        add(
+          { matchHost: 'https://internal.example.com', allowInternal: false },
+          { trusted: true },
+        );
+        add({
+          matchHost: 'https://internal.example.com/deeper/path',
+          allowInternal: true,
+        });
+
+        expect(
+          find({ url: 'https://internal.example.com/deeper/path/file' })
+            .internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: false });
+      });
+
+      it('is implicit for a host named by trusted inherited config', () => {
+        add(
+          { matchHost: 'registry.example.com', token: 'abc' },
+          { inherited: true },
+        );
+
+        expect(find({ url: 'https://registry.example.com' })).toEqual({
+          token: 'abc',
+          internalHostGrant: { implicit: true },
+        });
+      });
+
+      it('takes explicit allowInternal from trusted inherited config', () => {
+        add(
+          { matchHost: 'internal.example.com', allowInternal: true },
+          { inherited: true },
+        );
+
+        expect(
+          find({ url: 'https://internal.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: true, implicit: true });
+      });
+
+      it('marks a grant scoped by trusted inherited config', () => {
+        add(
+          {
+            hostType: 'preset',
+            matchHost: 'https://presets.example.com/renovate/',
+            allowInternal: true,
+          },
+          { inherited: true },
+        );
+
+        expect(
+          find({
+            hostType: 'preset',
+            url: 'https://presets.example.com/renovate/default',
+          }).internalHostGrant,
+        ).toEqual({ explicit: true, scoped: true, implicit: true });
+      });
+
+      it('does not let inherited config override the admin allowInternal', () => {
+        // the admin's decision stands even though the inherited rule out-specifies theirs
+        add(
+          { matchHost: 'https://internal.example.com', allowInternal: false },
+          { trusted: true },
+        );
+        add(
+          {
+            hostType: 'preset',
+            matchHost: 'https://internal.example.com/deeper/path',
+            allowInternal: true,
+          },
+          { inherited: true },
+        );
+
+        expect(
+          find({
+            hostType: 'preset',
+            url: 'https://internal.example.com/deeper/path/file',
+          }).internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: false });
+      });
+
+      it('does not let an inherited scoped grant fill in for a bare admin veto', () => {
+        // the admin's rule sets no scoped verdict of its own, so a scoped inherited grant must not be the one that answers for it - config-fetching requests consult `scoped` alone
+        add(
+          { matchHost: 'internal.example.com', allowInternal: false },
+          { trusted: true },
+        );
+        add(
+          {
+            matchHost: 'https://internal.example.com/presets/',
+            allowInternal: true,
+          },
+          { inherited: true },
+        );
+
+        expect(
+          find({ url: 'https://internal.example.com/presets/default' })
+            .internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: false });
+      });
+
+      it('does not let an inherited bare grant fill in for a scoped admin veto', () => {
+        add(
+          {
+            matchHost: 'https://internal.example.com/presets/',
+            allowInternal: false,
+          },
+          { trusted: true },
+        );
+        add(
+          { matchHost: 'internal.example.com', allowInternal: true },
+          { inherited: true },
+        );
+
+        expect(
+          find({ url: 'https://internal.example.com/presets/default' })
+            .internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: false });
+      });
+
+      it('does not leave an implicit grant behind for a host the admin vetoed', () => {
+        add(
+          { matchHost: 'internal.example.com', allowInternal: false },
+          { trusted: true },
+        );
+        add(
+          { matchHost: 'internal.example.com', token: 'abc' },
+          { inherited: true },
+        );
+
+        expect(
+          find({ url: 'https://internal.example.com' }).internalHostGrant,
+        ).toEqual({ explicit: false, scoped: false, implicit: false });
+      });
+
+      it('lets the admin mask their own allowInternal without vetoing', () => {
+        add(
+          { matchHost: 'example.com', allowInternal: false },
+          { trusted: true },
+        );
+        add(
+          { matchHost: 'https://example.com/ok/', allowInternal: true },
+          { trusted: true },
+        );
+
+        expect(
+          find({ url: 'https://example.com/ok/resource' }).internalHostGrant,
+        ).toEqual({ explicit: true, scoped: true, implicit: true });
+      });
+
+      it('takes a scoped grant from inherited config when no admin rule matches', () => {
+        add(
+          {
+            matchHost: 'https://internal.example.com/presets/',
+            allowInternal: true,
+          },
+          { inherited: true },
+        );
+
+        expect(
+          find({ url: 'https://internal.example.com/presets/default' })
+            .internalHostGrant,
+        ).toEqual({ explicit: true, scoped: true, implicit: true });
+      });
+    });
+
+    describe('enabled trust tiers', () => {
+      it('does not let a more specific repository rule re-enable a host the admin disabled', () => {
+        add(
+          { matchHost: 'bad.example.com', enabled: false },
+          { trusted: true },
+        );
+        add({ matchHost: 'https://bad.example.com/deeper', enabled: true });
+
+        expect(
+          find({ url: 'https://bad.example.com/deeper/path' }).enabled,
+        ).toBeFalse();
+      });
+
+      it('does not let a repository rule disable a host the admin enabled', () => {
+        add(
+          { matchHost: 'good.example.com', enabled: true },
+          { trusted: true },
+        );
+        add({ matchHost: 'https://good.example.com/deeper', enabled: false });
+
+        expect(
+          find({ url: 'https://good.example.com/deeper/path' }).enabled,
+        ).toBeTrue();
+      });
+
+      it('keeps repository rules able to disable a host of their own', () => {
+        add({ matchHost: 'flaky.example.com', enabled: false });
+
+        expect(find({ url: 'https://flaky.example.com' }).enabled).toBeFalse();
+      });
+
+      it('lets the most specific rule of a tier win', () => {
+        add({ matchHost: 'example.com', enabled: false });
+        add({ matchHost: 'https://ok.example.com', enabled: true });
+
+        expect(find({ url: 'https://ok.example.com' }).enabled).toBeTrue();
+      });
+
+      it('does not let inherited config re-enable a host the admin disabled', () => {
+        add(
+          { matchHost: 'bad.example.com', enabled: false },
+          { trusted: true },
+        );
+        add(
+          { matchHost: 'https://bad.example.com/deeper', enabled: true },
+          { inherited: true },
+        );
+
+        expect(
+          find({ url: 'https://bad.example.com/deeper/path' }).enabled,
+        ).toBeFalse();
+      });
+
+      it('does not let a repository rule re-enable a host inherited config disabled', () => {
+        add(
+          { matchHost: 'bad.example.com', enabled: false },
+          { inherited: true },
+        );
+        add({ matchHost: 'https://bad.example.com/deeper', enabled: true });
+
+        expect(
+          find({ url: 'https://bad.example.com/deeper/path' }).enabled,
+        ).toBeFalse();
       });
     });
 
@@ -704,6 +1129,7 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'longest' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -726,6 +1152,7 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'longest' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -746,7 +1173,10 @@ describe('util/host-rules', () => {
           url: 'https://registry.example.com/some/path/resource',
           hostType: NugetDatasource.id,
         }),
-      ).toEqual({ headers: { 'X-Custom': 'from-hostType-rule' } });
+      ).toEqual({
+        headers: { 'X-Custom': 'from-hostType-rule' },
+        trustedHeaderNames: [],
+      });
     });
 
     it('keeps the headers of an earlier matching rule when a later one sets none', () => {
@@ -762,6 +1192,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'yes' },
         timeout: 10000,
+        trustedHeaderNames: [],
       });
     });
 
@@ -846,6 +1277,7 @@ describe('util/host-rules', () => {
           resolvedHost: 'nuget.org',
           username: 'root',
           matchHost: 'nuget.org',
+          trustTier: 'untrusted',
         },
       ]);
     });

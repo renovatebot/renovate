@@ -22,9 +22,13 @@ export class CdnjsDatasource extends Datasource {
     super(CdnjsDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://api.cdnjs.com/'];
+  }
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
@@ -81,6 +85,7 @@ export class CdnjsDatasource extends Datasource {
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
         key: `getReleases:${library}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),
@@ -127,6 +132,7 @@ export class CdnjsDatasource extends Datasource {
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
         key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
+        cacheable: true,
         fallback: true,
       },
       () => this._getDigest(config, newValue),

@@ -26,6 +26,19 @@ describe('modules/manager/helmsman/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('resolves registryAliases for OCI charts', () => {
+      const result = extractPackageFile(multiDepFile, 'helmsman.yaml', {
+        registryAliases: { 'ghcr.io': 'ghcr.proxy.test' },
+      });
+      expect(result?.deps).toContainEqual({
+        currentValue: '6.4.0',
+        datasource: 'docker',
+        depName: 'podinfo',
+        packageName: 'ghcr.proxy.test/stefanprodan/charts/podinfo',
+        pinDigests: false,
+      });
+    });
+
     it('extract deps', () => {
       const fileName = 'helmsman.yaml';
       const result = extractPackageFile(multiDepFile, fileName, {});
@@ -75,6 +88,7 @@ describe('modules/manager/helmsman/extract', () => {
             datasource: 'docker',
             depName: 'podinfo',
             packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            pinDigests: false,
           },
           {
             datasource: 'helm',

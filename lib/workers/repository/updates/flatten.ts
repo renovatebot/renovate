@@ -1,12 +1,12 @@
 import { isUndefined } from '@sindresorhus/is';
 import {
+  applyDatasourceDefaultConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
-import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import { get } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -99,9 +99,9 @@ export async function flattenUpdates(
         packageFile,
       ) as never;
       const packagePath = packageFile.packageFile?.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
+      // `split` always yields at least one element, so there is always a file
+      // name to drop here
+      packagePath.splice(-1, 1);
       if (packagePath.length > 0) {
         packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
@@ -140,11 +140,7 @@ export async function flattenUpdates(
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
-            // apply config from datasource
-            const datasourceConfig = await getDefaultConfig(
-              depConfig.datasource!,
-            );
-            updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
+            updateConfig = await applyDatasourceDefaultConfig(updateConfig);
             updateConfig = await applyPackageRules(
               updateConfig,
               'datasource-merge',

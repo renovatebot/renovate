@@ -1,10 +1,12 @@
 import { setTimeout } from 'node:timers/promises';
 import { isString } from '@sindresorhus/is';
+import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type {
   GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
   GitPullRequestCompletionOptions,
+  GitPullRequestSearchCriteria,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -74,6 +76,13 @@ interface User {
   isRequired: boolean;
 }
 
+interface GetRepoPullRequestsOptions {
+  gitApi: IGitApi;
+  searchCriteria: GitPullRequestSearchCriteria;
+  skip: number;
+  top: number;
+}
+
 let config: Config = {} as any;
 let issueService: IssueService;
 let renovateUserId: string | undefined;
@@ -84,6 +93,23 @@ const defaults: {
 } = {
   hostType: 'azure',
 };
+
+function getRepoPullRequests({
+  gitApi,
+  searchCriteria,
+  skip,
+  top,
+}: GetRepoPullRequestsOptions): Promise<GitPullRequest[]> {
+  const maxCommentLength = 0;
+  return gitApi.getPullRequests(
+    config.repoId,
+    searchCriteria,
+    config.project,
+    maxCommentLength,
+    skip,
+    top,
+  );
+}
 
 export const id = 'azure';
 
@@ -281,20 +307,18 @@ export async function getPrList(): Promise<AzurePr[]> {
     let fetchedPrs: GitPullRequest[];
     let skip = 0;
     do {
-      fetchedPrs = await azureApiGit.getPullRequests(
-        config.repoId,
-        {
+      fetchedPrs = await getRepoPullRequests({
+        gitApi: azureApiGit,
+        searchCriteria: {
           status: PullRequestStatus.All,
           // fetch only prs directly created on the repo and not by forks
           sourceRepositoryId: config.repoId,
           ...(!config.ignorePrAuthor &&
             renovateUserId && { creatorId: renovateUserId }),
         },
-        config.project,
-        0,
         skip,
-        100,
-      );
+        top: 100,
+      });
       prs = prs.concat(fetchedPrs);
       skip += 100;
     } while (fetchedPrs.length > 0);
@@ -342,9 +366,9 @@ export async function findPr({
   try {
     if (includeOtherAuthors) {
       const azureApiGit = await azureApi.gitApi();
-      const [pr] = await azureApiGit.getPullRequests(
-        config.repoId,
-        {
+      const [pr] = await getRepoPullRequests({
+        gitApi: azureApiGit,
+        searchCriteria: {
           sourceRefName: getNewBranchName(branchName),
           sourceRepositoryId: config.repoId,
           status: PullRequestStatus.Active,
@@ -352,11 +376,9 @@ export async function findPr({
             targetRefName: getNewBranchName(targetBranch),
           }),
         },
-        config.project,
-        0,
-        0,
-        1,
-      );
+        skip: 0,
+        top: 1,
+      });
       return pr ? getRenovatePRFormat(pr) : null;
     }
 

@@ -190,6 +190,11 @@ terraform {
   source = "git::https://gitea.com/hashicorp/example?ref=v1.0.0"
 }
 
+# forgejo-tags
+terraform {
+  source = "git::https://codeberg.org/hashicorp/example?ref=v1.0.0"
+}
+
 # gittags fallback for bitbucket-server
 terraform {
   source = "git::https://bitbucket.example.com/hashicorp/example?ref=v1.0.0"

@@ -5,6 +5,7 @@ import { defaultRegistryUrl } from './common.ts';
 import {
   convertNpmrcToRules,
   getMatchHostFromNpmrcHost,
+  resolveRegistryUrl,
   setNpmrc,
 } from './npmrc.ts';
 
@@ -169,6 +170,11 @@ describe('modules/datasource/npm/npmrc', () => {
         }
       `);
     });
+  });
+
+  it('keeps the default registry for a package no rule matches', () => {
+    setNpmrc('@myco:registry=https://test.org');
+    expect(resolveRegistryUrl('@other/pkg')).toBe(defaultRegistryUrl);
   });
 
   it('sanitize _auth', () => {

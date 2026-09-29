@@ -411,6 +411,8 @@ describe('modules/versioning/nuget/index', () => {
       ${['5.0.17-preview.1', '5.0.17', '6.0.0-preview.1']}                        | ${'5.0.17'}                  | ${'5.0.17'}
       ${['4.0.0-preview.8', '5.0.17', '6.0.0-preview.1']}                         | ${'4.0.0-preview.8'}         | ${'6.0.0-preview.1'}
       ${['6.0.0-preview.4.21253.5', '6.0.0-preview.3.21201.13']}                  | ${'6.0.0-preview.4.21253.5'} | ${'6.0.0-preview.4.21253.5'}
+      ${['1.5', '1.1', '1.9']}                                                    | ${'[1,2)'}                   | ${'1.9'}
+      ${['2.0.0', '1.5.0', '3.0.0']}                                              | ${'1.0.0'}                   | ${'3.0.0'}
     `(
       'getSatisfyingVersion($versions, $range) === "$expected"',
       ({ versions, range, expected }) => {

@@ -311,6 +311,24 @@ function generateCacheNamespacesList(): string {
   return list;
 }
 
+function generateInheritConfigSupportList(): string {
+  const inheritable = options
+    .filter((option) => option.inheritConfigSupport)
+    .map((option) => {
+      const parent = option.parents?.find((p) => p !== '.');
+      return parent ? `${parent}.${option.name}` : option.name;
+    })
+    .sort((a, b) => a.localeCompare(b));
+
+  let list = '\n';
+  for (const fullName of inheritable) {
+    list += `- \`${fullName}\`\n`;
+  }
+  list += '\n';
+
+  return list;
+}
+
 function generateStatusCheckWhenTable(): string {
   const option = options.find((o) => o.name === 'statusCheckWhen');
   const defaults = coerceObject<Record<string, string>>(option?.default);
@@ -474,6 +492,14 @@ export async function generateConfig(
       content,
       generateCacheNamespacesList(),
       '<!-- Autogenerate cache-namespaces -->',
+    );
+  }
+
+  if (globalOnly) {
+    content = replaceContent(
+      content,
+      generateInheritConfigSupportList(),
+      '<!-- Autogenerate inheritConfigSupport-list -->',
     );
   }
 

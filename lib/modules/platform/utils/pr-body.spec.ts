@@ -17,7 +17,7 @@ describe('modules/platform/utils/pr-body', () => {
       expect(body).toContain('### Release Notes');
       expect(body).not.toContain('AWS ECR authentication support');
       expect(body).toContain(
-        '\n\n> ✂ **Note**\n> \n> PR body was truncated to here.\n',
+        '\n\n> ❗ **Important**\n> \n> ✂ PR body was truncated to here.\n',
       );
       // smart truncation keeps the tail after the release notes
       expect(body).toContain('### Configuration');
@@ -37,12 +37,12 @@ describe('modules/platform/utils/pr-body', () => {
       );
       // plain cut: the input is chopped mid-table and nothing after it is kept
       expect(body).toContain(
-        '| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final | minor |',
+        '| [renovate/renovate](https://togithub.com/renovatebot/renovate) | final |',
       );
       expect(body).not.toContain('### Release Notes');
       expect(body).not.toContain('### Configuration');
       expect(body).toEndWith(
-        '\n\n> ✂ **Note**\n> \n> PR body was truncated to here.\n',
+        '\n\n> ❗ **Important**\n> \n> ✂ PR body was truncated to here.\n',
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Truncating PR body due to platform limitation of 300 characters',

@@ -14,6 +14,7 @@ export {
 } from './update/index.ts';
 
 export const supportsLockFileMaintenance = true;
+export const supportsNpmrc = true;
 export const lockFileNames = [
   'package-lock.json',
   'pnpm-lock.yaml',
