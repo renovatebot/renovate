@@ -45,6 +45,7 @@ Who answers review comments:
 
 - [ ] @username will read and reply directly. **Name the account.**
 - [ ] An agent will draft replies and @username will read them before they are posted. **Name the account.**
+- [ ] An agent will draft replies and reply autonomously. **This is heavily discouraged, and we prefer that there are humans in the loop**
 - [ ] Nobody has explicitly committed to replying.
 
 ## Documentation (please check one with an [x])
