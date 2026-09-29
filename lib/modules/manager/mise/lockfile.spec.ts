@@ -56,6 +56,8 @@ describe('modules/manager/mise/lockfile', () => {
       ${'mise.local.lock'}                   | ${'.mise/locks/mise.local'}
       ${'mise.test.lock'}                    | ${'.mise/locks/mise.test'}
       ${'.config/mise/mise.test.local.lock'} | ${'.config/mise/locks/mise.test.local'}
+      ${'.config/mise.local.lock'}           | ${'.config/mise/locks/mise.local'}
+      ${'.mise/mise.local.lock'}             | ${'.mise/locks/mise.local'}
     `('returns $expected for $lockFileName', ({ lockFileName, expected }) => {
       expect(getSidecarDir(lockFileName)).toBe(expected);
     });
