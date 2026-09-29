@@ -228,6 +228,32 @@ describe('workers/global/index', () => {
     await expect(globalWorker.start()).resolves.toBe(0);
   });
 
+  it('exposes endpoint and internalHostAccess to the platform initialization', async () => {
+    // so a self-hosted Platform doesn't lead to an explicit allowlist when using `internalHostAccess=block`, or seeing a warning when using `internalHostAccess=warn`
+    let globalConfigDuringInit: Record<string, unknown> | undefined;
+    initPlatform.mockImplementation((input) => {
+      globalConfigDuringInit = { ...GlobalConfig.get() };
+      return Promise.resolve(input);
+    });
+    parseConfigs.mockResolvedValueOnce({
+      enabled: true,
+      repositories: [],
+      platform: 'gitea',
+      endpoint: 'https://gitea.internal/',
+      internalHostAccess: 'block',
+    });
+
+    await expect(globalWorker.start()).resolves.toBe(0);
+
+    expect(globalConfigDuringInit).toMatchObject({
+      platform: 'gitea',
+      endpoint: 'https://gitea.internal/',
+      internalHostAccess: 'block',
+    });
+    // still set for the preset validation and autodiscovery which follow initialization
+    expect(GlobalConfig.get('internalHostAccess')).toBe('block');
+  });
+
   it("filters the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
     // `allowedHeaders` has never exempted the self-hosted admin - `applyHostRule` filters by header name whoever set it - so we drop them here, with a WARN, rather than leave them to be discarded at request time
     parseConfigs.mockResolvedValueOnce({
