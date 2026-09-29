@@ -1,7 +1,11 @@
 import { regEx } from '../../../util/regex.ts';
 
-export const newBlockRegEx = regEx(/^\s*-\s*(?:(?<key>\w+):\s*(?<value>.*))$/);
-export const blockLineRegEx = regEx(/^\s*(?:(?<key>\w+):\s*(?<value>\S+))\s*$/);
+export const newBlockRegEx = regEx(
+  /^\s*-\s*(?:(?<key>\w+):\s*(?<value>.*?))(?:\s+#.*)?\s*$/,
+);
+export const blockLineRegEx = regEx(
+  /^\s*(?:(?<key>\w+):\s*(?<value>\S+))(?:\s+#.*)?\s*$/,
+);
 export const galaxyDepRegex = regEx(/[\w-]+\.[\w-]+/);
 export const dependencyRegex = regEx(/^dependencies:/);
 export const galaxyRegEx = regEx(
