@@ -47,7 +47,8 @@ export function getLockFileName(configPath: string): string {
 }
 
 /**
- * Get the locked version for a dependency from the parsed lock file.
+ * Get the locked version matching the configured selector. Lockfiles without
+ * specifier metadata retain the legacy first-entry lookup.
  *
  * Mise lock files use different key formats depending on whether a tool is in
  * the mise registry:
@@ -78,8 +79,24 @@ export function getLockFileName(configPath: string): string {
 export function getLockedVersion(
   lockFileData: MiseLockFile,
   depName: string,
+  currentValue: string,
 ): string | undefined {
-  return getLockedTool(lockFileData, depName)?.[0]?.version;
+  const lockedTools = getLockedTool(lockFileData, depName);
+  if (!lockedTools) {
+    return undefined;
+  }
+
+  const hasSpecifiers = lockedTools.some(
+    ({ specifiers }) => specifiers !== undefined,
+  );
+  if (!hasSpecifiers) {
+    return lockedTools[0]?.version;
+  }
+
+  const matchingTool = lockedTools.find(({ specifiers }) =>
+    specifiers?.includes(currentValue),
+  );
+  return matchingTool?.version;
 }
 
 /**

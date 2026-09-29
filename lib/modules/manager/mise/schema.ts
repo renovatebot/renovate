@@ -51,6 +51,7 @@ export type MiseFile = z.infer<typeof MiseFile>;
 
 const MiseLockTool = z.object({
   version: z.string(),
+  specifiers: z.array(z.string()).optional(),
   backend: z.string().optional(),
   options: z.record(z.string(), z.string()).optional(),
   platforms: z

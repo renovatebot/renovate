@@ -64,19 +64,45 @@ describe('modules/manager/mise/lockfile', () => {
       ${'unknown'}                       | ${undefined}
       ${'core:unknown'}                  | ${undefined}
     `('returns $expected for $depName', ({ depName, expected }) => {
-      expect(getLockedVersion(lockFileData, depName)).toBe(expected);
+      expect(getLockedVersion(lockFileData, depName, 'latest')).toBe(expected);
     });
 
     it('returns first version when multiple versions exist', () => {
-      expect(getLockedVersion(lockFileData, 'python')).toBe('3.10.17');
+      expect(getLockedVersion(lockFileData, 'python', '3.10')).toBe('3.10.17');
     });
 
     it('handles tools with bracket options in name', () => {
       // depName from extraction has brackets stripped by regex,
       // so we test the full backend-qualified name
       expect(
-        getLockedVersion(lockFileData, 'ubi:cargo-bins/cargo-binstall'),
+        getLockedVersion(lockFileData, 'ubi:cargo-bins/cargo-binstall', '1'),
       ).toBe('1.10.21');
     });
+
+    it.each`
+      depName        | currentValue | expected
+      ${'node'}      | ${'20'}      | ${'20.20.2'}
+      ${'node'}      | ${'24'}      | ${'24.21.0'}
+      ${'core:node'} | ${'24'}      | ${'24.21.0'}
+      ${'node'}      | ${'lts'}     | ${'24.21.0'}
+      ${'node'}      | ${'22'}      | ${undefined}
+    `(
+      'matches $depName selector $currentValue to $expected',
+      ({ depName, currentValue, expected }) => {
+        const lockFileData: MiseLockFile = {
+          tools: {
+            node: [
+              { version: '20.20.2', specifiers: ['20'] },
+              { version: '22.23.2' },
+              { version: '24.21.0', specifiers: ['24', 'lts'] },
+            ],
+          },
+        };
+
+        expect(getLockedVersion(lockFileData, depName, currentValue)).toBe(
+          expected,
+        );
+      },
+    );
   });
 });
