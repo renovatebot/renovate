@@ -179,18 +179,23 @@ export async function start(): Promise<number> {
       config = await getGlobalConfig();
 
       // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
+      // `platform`, `endpoint` and `internalHostAccess` are set here too, so that the platform's own initialization requests - which happen inside `globalInitialize()`, before the config below is set - are judged by the administrator's `internalHostAccess` setting, and are recognized as going to the platform endpoint
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
+        endpoint: config.endpoint,
+        internalHostAccess: config.internalHostAccess,
+        platform: config.platform,
         userAgent: config.userAgent,
       });
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
+      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used, now that platform initialization may have changed them
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
+        internalHostAccess: config.internalHostAccess,
         userAgent: config.userAgent,
       });
 
