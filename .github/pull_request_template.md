@@ -13,7 +13,7 @@
 Please select one of the following:
 
 - [ ] This closes an existing Issue, Closes: # <!-- NOTE that this should NOT be a Discussion -->
-- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation
+- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add a minimal reproduction repository as part of this PR.
 
 ## AI assistance disclosure
 
@@ -63,7 +63,8 @@ I have verified these changes via:
 
 The public repository: <URL>
 
-A reproduction is compulsory: link a public repository above that reproduces the bug or shows the new behavior.
+A reproduction is compulsory for PRs that do not close an Issue: link a public repository above that reproduces the bug or shows the new behavior.
+If this PR closes an Issue, confirm the fix against the Issue's reproduction.
 If you are not adding a reproduction, state your reason here:
 
 <!-- Reason for not adding a reproduction -->
