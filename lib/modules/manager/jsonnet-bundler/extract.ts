@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -52,7 +53,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
 
   const depName = upath.join(
     gitRemote.host,
-    gitRemote.pathname.replace(/\.git$/, ''),
+    gitRemote.pathname.replace(regEx(/\.git$/), ''),
     coerceString(dependency.source.git.subdir),
   );
 

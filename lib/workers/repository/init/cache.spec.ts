@@ -21,7 +21,7 @@ describe('workers/repository/init/cache', () => {
     });
 
     it('initializes', async () => {
-      expect(await initializeCaches(config)).toBeUndefined();
+      await expect(initializeCaches(config)).resolves.toBeUndefined();
     });
   });
 });

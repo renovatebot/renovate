@@ -221,7 +221,7 @@ Add a label `auto:retry-latest` to any Discussion where the user should retry th
 
 </details>
 
-Apply the `self-hosted` label when an issue is applicable only to users who self-administer their own bot.
+Apply the `self-hosted` label when an issue is applicable only to users who self-administer their own Renovate instance.
 
 ## Automated check for Issues with missing labels
 

@@ -1,5 +1,5 @@
 import { regEx } from '../../../util/regex.ts';
-import type { TerragruntDependencyTypes } from './common.ts';
+import type { TerragruntDependencyTypes } from './types.ts';
 
 export const keyValueExtractionRegex = regEx(
   /^\s*source\s+=\s+"(?<value>[^"]+)"/,

@@ -1,6 +1,7 @@
 // TODO: types (#22198)
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { isPseudoVersion } from '../../versioning/gomod/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
 function getNameWithNoVersion(name: string): string {
@@ -25,13 +26,13 @@ export function updateDependency({
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!currentName || !upgrade.managerData) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
-    /* v8 ignore next 4 -- hard to test */
+    /* v8 ignore next -- hard to test */
     if (lines.length <= upgrade.managerData.lineNumber) {
       logger.warn('go.mod current line no longer exists after update');
       return null;
@@ -52,7 +53,7 @@ export function updateDependency({
 
     if (depType === 'golang' || depType === 'toolchain') {
       updateLineExp = regEx(
-        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)([^\s]+|[\w]+)/,
+        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)(?:[^\s]+|[\w]+)/,
       );
     }
     if (depType === 'replace') {
@@ -87,7 +88,7 @@ export function updateDependency({
       // has no data and newValue may equal currentValue. In that case, fall
       // through to the bare hash path so that gomodTidy can resolve it.
       if (
-        upgrade.newValue?.startsWith('v0.0.0-') &&
+        isPseudoVersion(upgrade.newValue) &&
         upgrade.newValue !== upgrade.currentValue
       ) {
         logger.debug(

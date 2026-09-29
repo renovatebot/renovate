@@ -68,6 +68,13 @@ export function isArtifactoryServer<T = unknown>(
   return isString(res?.headers[JFROG_ARTIFACTORY_RES_HEADER]);
 }
 
+/**
+ * Whether the host is a Google Artifact Registry endpoint, which authenticates with a short-lived Google access token instead of static credentials.
+ */
+export function isGoogleArtifactRegistry(hostname: string): boolean {
+  return hostname.endsWith('.pkg.dev');
+}
+
 export async function getGoogleAuthHostRule(): Promise<HostRule | null> {
   try {
     const googleAuth: GoogleAuth = new GoogleAuth({

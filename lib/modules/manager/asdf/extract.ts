@@ -1,16 +1,16 @@
-import { isTruthy } from '@sindresorhus/is';
+import { isFunction, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { isSkipComment } from '../../../util/ignore.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { StaticTooling } from './upgradeable-tooling.ts';
+import type { StaticTooling } from './types.ts';
 import { upgradeableTooling } from './upgradeable-tooling.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`asdf.extractPackageFile()`);
 
   const regex = regEx(
-    /^(?<toolName>([\w_-]+)) +(?<version>[^\s#]+)(?: +[^\s#]+)* *(?: #(?<comment>.*))?$/gm,
+    /^(?<toolName>(?:[\w_-]+)) +(?<version>[^\s#]+)(?: +[^\s#]+)* *(?: #(?<comment>.*))?$/gm,
   );
 
   const deps: PackageDependency[] = [];
@@ -24,10 +24,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     const toolConfig = upgradeableTooling[depName];
     let toolDefinition: StaticTooling | undefined;
     if (toolConfig) {
-      toolDefinition =
-        typeof toolConfig.config === 'function'
-          ? toolConfig.config(version)
-          : toolConfig.config;
+      toolDefinition = isFunction(toolConfig.config)
+        ? toolConfig.config(version)
+        : toolConfig.config;
     }
 
     if (toolDefinition) {

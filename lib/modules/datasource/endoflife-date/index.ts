@@ -1,6 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -10,8 +9,9 @@ import { EndoflifeDateVersions } from './schema.ts';
 export class EndoflifeDateDatasource extends Datasource {
   static readonly id = datasource;
 
-  override readonly defaultRegistryUrls = [registryUrl];
-  override readonly caching = true;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [registryUrl];
+  }
   override readonly defaultVersioning = 'loose';
 
   override readonly releaseTimestampSupport = true;
@@ -22,7 +22,7 @@ export class EndoflifeDateDatasource extends Datasource {
     super(EndoflifeDateDatasource.id);
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -50,14 +50,13 @@ export class EndoflifeDateDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         // TODO: types (#22198)
         key: `${config.registryUrl!}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

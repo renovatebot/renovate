@@ -1,10 +1,13 @@
 import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { Result } from '../../../util/result.ts';
 import { fetchUpdates } from './fetch.ts';
 import * as lookup from './lookup/index.ts';
+import type { UpdateResult } from './lookup/types.ts';
 
 const lookupUpdates = vi.mocked(lookup).lookupUpdates;
 
@@ -82,6 +85,153 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
 
+    it('keeps skipping an unknown-registry dep which config gives no registry', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping an unknown-registry dep which only a rule enables', async () => {
+      // the rule says the dependency is wanted, but names no registry to look
+      // it up in, so there is still nothing Renovate can do with it
+      config.packageRules = [{ matchDatasources: ['apk'], enabled: true }];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('looks up an unknown-registry dep which config gives a registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipStage',
+      );
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        }),
+      );
+    });
+
+    it('looks up an unknown-registry dep which config gives a default registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.defaultRegistryUrls = [
+        'https://dl-cdn.alpinelinux.org/alpine?arch=x86_64',
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(lookupUpdates).toHaveBeenCalledOnce();
+    });
+
+    it('keeps skipping an unknown-registry dep which brought its own registry', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['git-refs'],
+          registryUrls: ['https://example.com'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        'pre-commit': [
+          {
+            packageFile: '.pre-commit-config.yaml',
+            deps: [
+              {
+                depName: 'some/repo',
+                datasource: 'git-refs',
+                skipReason: 'unknown-registry',
+                registryUrls: ['https://unknown-host.com'],
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles['pre-commit'][0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       // @ts-expect-error -- intentionally using invalid constraint names
@@ -95,7 +245,9 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toEqual({
         maven: [
@@ -130,7 +282,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
 
         await fetchUpdates(config, packageFiles);
 
@@ -154,7 +308,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
 
         await fetchUpdates(config, packageFiles);
 
@@ -175,7 +331,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
 
         await fetchUpdates(config, packageFiles);
 
@@ -198,7 +356,9 @@ describe('workers/repository/process/fetch', () => {
             },
           ],
         };
-        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
         await fetchUpdates(config, packageFiles);
         expect(lookupUpdates).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -226,7 +386,9 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
 
       await fetchUpdates(config, packageFiles);
 
@@ -257,6 +419,7 @@ describe('workers/repository/process/fetch', () => {
               { depName: ' ' },
               {},
               { depName: undefined },
+              // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid depName type to test invalid-name skip handling
               { depName: { oh: 'no' } as unknown as string },
             ],
           },
@@ -312,7 +475,9 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
       await fetchUpdates(config, packageFiles);
       expect(packageFiles.maven[0].deps[0].updates).toHaveLength(2);
     });

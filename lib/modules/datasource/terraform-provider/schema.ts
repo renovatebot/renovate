@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { regEx } from '../../../util/regex.ts';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
@@ -16,12 +16,10 @@ const ProviderVersion = z
       'published-at': MaybeTimestamp,
     }),
   })
-  .transform(
-    (resource): Release => ({
-      version: resource.attributes.version,
-      releaseTimestamp: resource.attributes['published-at'],
-    }),
-  );
+  .transform((resource): Release => ({
+    version: resource.attributes.version,
+    releaseTimestamp: resource.attributes['published-at'],
+  }));
 
 export const TerraformProviderV2Response = z
   .object({
@@ -30,12 +28,10 @@ export const TerraformProviderV2Response = z
     }),
     included: LooseArray(ProviderVersion).catch([]),
   })
-  .transform(
-    (response): ReleaseResult => ({
-      sourceUrl: response.data.attributes.source,
-      releases: response.included,
-    }),
-  );
+  .transform((response): ReleaseResult => ({
+    sourceUrl: response.data.attributes.source,
+    releases: response.included,
+  }));
 
 export type TerraformProviderV2Response = z.infer<
   typeof TerraformProviderV2Response
@@ -46,22 +42,18 @@ const OpenTofuProviderVersion = z
     id: z.string(),
     published: MaybeTimestamp,
   })
-  .transform(
-    (version): Release => ({
-      version: version.id.replace(regEx(/^v/), ''),
-      releaseTimestamp: version.published,
-    }),
-  );
+  .transform((version): Release => ({
+    version: version.id.replace(regEx(/^v/), ''),
+    releaseTimestamp: version.published,
+  }));
 
 export const OpenTofuProviderDocsResponse = z
   .object({
     versions: LooseArray(OpenTofuProviderVersion).catch([]),
   })
-  .transform(
-    (response): ReleaseResult => ({
-      releases: response.versions,
-    }),
-  );
+  .transform((response): ReleaseResult => ({
+    releases: response.versions,
+  }));
 
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse
@@ -141,4 +133,23 @@ export const TerraformRegistryBuildResponse = z.object({
 
 export type TerraformRegistryBuildResponse = z.infer<
   typeof TerraformRegistryBuildResponse
+>;
+
+// OpenTofuProviderPackagesResponse — per-platform download endpoint exposes a
+// `packages` map containing the `zh:`/`h1:` hashes for every platform.
+const OpenTofuProviderPackage = z.object({
+  hashes: LooseArray(z.string()).catch([]),
+});
+
+export const OpenTofuProviderPackagesResponse = z
+  .object({
+    packages: LooseRecord(OpenTofuProviderPackage).catch({}),
+  })
+  .transform(({ packages }): string[] | null => {
+    const allHashes = Object.values(packages).flatMap(({ hashes }) => hashes);
+    return allHashes.length ? allHashes : null;
+  });
+
+export type OpenTofuProviderPackagesResponse = z.infer<
+  typeof OpenTofuProviderPackagesResponse
 >;

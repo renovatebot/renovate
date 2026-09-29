@@ -1,4 +1,4 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
@@ -10,7 +10,7 @@ import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
-import type { ExtractConfig, PackageFile } from '../types.ts';
+import type { ExtractConfig, NpmrcPackageFile } from '../types.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
@@ -22,7 +22,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 export async function processPackageFile(
   packageFile: string,
   config: ExtractConfig,
-): Promise<PackageFile | null> {
+): Promise<NpmrcPackageFile | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
     logger.warn({ fileName: packageFile }, 'Could not read file content');
@@ -52,8 +52,8 @@ export async function processPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   matchedFiles: string[],
-): Promise<PackageFile[]> {
-  const packageFiles: PackageFile<NpmManagerData>[] = [];
+): Promise<NpmrcPackageFile[]> {
+  const packageFiles: NpmrcPackageFile<NpmManagerData>[] = [];
   const allLockFiles = matchedFiles.filter(
     (file) =>
       matchesFileName(file, 'bun.lock') || matchesFileName(file, 'bun.lockb'),
@@ -75,7 +75,7 @@ export async function extractAllPackageFiles(
     let workspaces = res?.managerData?.workspaces;
 
     // Check for nested packages property https://bun.com/docs/pm/catalogs#1-define-catalogs-in-root-package-json
-    if (typeof workspaces === 'object' && 'packages' in workspaces) {
+    if (isObject(workspaces) && 'packages' in workspaces) {
       workspaces = workspaces.packages;
     }
 

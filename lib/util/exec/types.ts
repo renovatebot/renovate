@@ -14,6 +14,9 @@ export interface ConstraintDefinition {
  */
 export const toolDefinitions = [
   {
+    name: 'apm',
+  },
+  {
     name: 'bazelisk',
   },
   {
@@ -54,6 +57,9 @@ export const toolDefinitions = [
   },
   {
     name: 'flux',
+  },
+  {
+    name: 'gh',
   },
   {
     name: 'gleam',
@@ -169,6 +175,12 @@ export function isToolName(value: unknown): value is ToolName {
  * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports, with optional description.
  */
 export const additionalConstraintDefinitions = [
+  {
+    name: 'ghActionsLock',
+    description: `Used in the \`github-actions\` manager to specify a release tag for the [\`github/gh-actions-lock\`](https://github.com/github/gh-actions-lock) \`gh\` CLI extension, which regenerates \`.github/workflows/actions.lock\`.
+
+Must be a full release tag, prefixed with \`v\`, such as \`v0.1.7\`. Set it to an empty string to always install the latest release.`,
+  },
   /**
    * @deprecated TODO remove in #42600
    */
@@ -302,7 +314,13 @@ export interface OutputWriters {
   stderr?: OutputWriter;
 }
 
-export interface RawExecOptions extends ExecaOptions {
+/** execa options producing text output, which excludes the binary encodings */
+type TextExecaOptions = Extract<
+  ExecaOptions,
+  { readonly encoding?: 'utf8' | 'utf16le' }
+>;
+
+export interface RawExecOptions extends TextExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
   outputListeners?: OutputListeners;

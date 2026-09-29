@@ -13,13 +13,7 @@ import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
 
 type JsonSchemaBasicType =
-  | 'string'
-  | 'number'
-  | 'integer'
-  | 'boolean'
-  | 'object'
-  | 'array'
-  | 'null';
+  'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
 /* These are sorted in priority order, but editors may not suggest in that order */
@@ -267,6 +261,23 @@ function addChildrenArrayInParents(
                       type: 'string',
                       description:
                         'A custom description for this configuration object',
+                    },
+                  ],
+                },
+                overrideDescription: {
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        description:
+                          'Description which replaces the descriptions of any presets which this config extends',
+                      },
+                    },
+                    {
+                      type: 'string',
+                      description:
+                        'Description which replaces the descriptions of any presets which this config extends',
                     },
                   ],
                 },

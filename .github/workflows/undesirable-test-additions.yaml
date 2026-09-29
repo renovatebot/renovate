@@ -2,7 +2,7 @@ name: Check for Undesirable Code
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [edited, opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -32,21 +32,25 @@ jobs:
           echo "Base branch ref for this PR is: $BASE_BRANCH_REF"
 
           echo "### Calculating diff for '*.spec.ts' files..."
-          git diff $BASE_BRANCH_REF -- '*.spec.ts' > diff_spec_ts.txt
+          git diff $BASE_BRANCH_REF...HEAD -- '*.spec.ts' > diff_spec_ts.txt
 
           echo "### Counting additions and deletions of snapshots..."
-          ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -c -E '\.toMatch(Snapshot|InlineSnapshot)\(' || true)
-          DELETED=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -c -E '\.toMatch(Snapshot|InlineSnapshot)\(' || true)
+          ADDED_LINES=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' || true)
+          DELETED_LINES=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' || true)
+          ADDED=$(echo "$ADDED_LINES" | grep -c . || echo 0)
+          DELETED=$(echo "$DELETED_LINES" | grep -c . || echo 0)
 
           if [ "$ADDED" -gt "$DELETED" ]; then
               echo "❌ Error: Snapshots have been added in this PR. Use toMatch instead."
+              echo "Added snapshot assertions:"
+              echo "$ADDED_LINES"
               exit 1
           else
               echo "✅ Snapshot code check passed."
           fi
 
           echo "### Calculating file changes in '__fixtures__' directories..."
-          git diff --name-status $BASE_BRANCH_REF > diff_name_status.txt
+          git diff --name-status $BASE_BRANCH_REF...HEAD > diff_name_status.txt
 
           echo "### Processing added files in '__fixtures__' directories..."
           ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
@@ -108,3 +112,43 @@ jobs:
           fi
 
           echo "🎉 All checks passed successfully."
+      - name: Check TODOs for references resolved by this PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const body = context.payload.pull_request.body ?? '';
+            const closingPattern = /\b(?:close[sd]?|fix(?:es|ed)?|resolve[sd]?):?\s+(?:https:\/\/github\.com\/renovatebot\/renovate\/(?:issues|discussions)\/|#)(?<referenceNumber>\d+)\b/gi;
+            const referenceNumbers = new Set();
+
+            for (const match of body.matchAll(closingPattern)) {
+              referenceNumbers.add(match.groups.referenceNumber);
+            }
+
+            if (referenceNumbers.size === 0) {
+              core.info('No issues or discussions are resolved by this pull request');
+              return;
+            }
+
+            const references = [...referenceNumbers].join('|');
+            const todoPattern = `TODO.*#(${references})([^0-9]|$)`;
+            const result = await exec.getExecOutput(
+              'git',
+              ['grep', '-n', '-E', todoPattern, '--', '.'],
+              { ignoreReturnCode: true, silent: true },
+            );
+
+            if (result.exitCode === 1) {
+              core.info(
+                'No TODOs reference issues or discussions resolved by this pull request',
+              );
+              return;
+            }
+
+            if (result.exitCode !== 0) {
+              core.setFailed(`git grep failed: ${result.stderr}`);
+              return;
+            }
+
+            core.setFailed(
+              `Remove or update TODOs that reference issues or discussions resolved by this pull request:\n${result.stdout}`,
+            );

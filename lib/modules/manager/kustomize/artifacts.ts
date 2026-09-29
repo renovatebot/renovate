@@ -9,13 +9,19 @@ import {
   deleteLocalFile,
   getSiblingFileName,
   localPathExists,
-  readLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { generateHelmEnvs } from '../helmv3/common.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { generateHelmEnvs } from './common.ts';
+import {
+  artifactError,
+  artifactErrorResult,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 import { parseKustomize } from './extract.ts';
 
 async function localExistingChartPath(
@@ -40,7 +46,7 @@ function helmRepositoryArgs(
       return `--repo ${quote(repository)} ${quote(depName)}`;
     case DockerDatasource.id:
       return quote(`oci://${repository}`);
-    /* v8 ignore next 2: should never happen */
+    /* v8 ignore next: should never happen */
     default:
       throw new Error(`Unknown datasource: ${datasource}`);
   }
@@ -116,11 +122,7 @@ export async function updateArtifacts({
     config.postUpdateOptions?.includes('kustomizeInflateHelmCharts') === true;
   if (isNullOrUndefined(project)) {
     return [
-      {
-        artifactError: {
-          stderr: 'Failed to parse new package file content',
-        },
-      },
+      artifactError(undefined, 'Failed to parse new package file content'),
     ];
   }
 
@@ -130,14 +132,15 @@ export async function updateArtifacts({
   );
 
   try {
+    const helmConstraint = await resolveToolConstraint(config, 'helm');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',
-      constraint: config.constraints?.helm,
+      constraint: helmConstraint,
     };
 
     const execOptions: ExecOptions = {
       docker: {},
-      extraEnv: generateHelmEnvs(config),
+      extraEnv: generateHelmEnvs(helmConstraint),
       toolConstraints: [helmToolConstraint],
     };
 
@@ -186,37 +189,13 @@ export async function updateArtifacts({
     }
 
     const status = await getRepoStatus();
-    const chartsAddition = status?.not_added ?? [];
-    const chartsDeletion = status?.deleted ?? [];
-
-    const fileChanges: UpdateArtifactsResult[] = [];
-
-    for (const file of chartsAddition) {
-      // only add artifacts in the chartHome path
-      if (!file.startsWith(chartHome)) {
-        continue;
-      }
-      fileChanges.push({
-        file: {
-          type: 'addition',
-          path: file,
-          contents: await readLocalFile(file),
-        },
-      });
-    }
-
-    for (const file of chartsDeletion) {
-      // only add artifacts in the chartHome path
-      if (!file.startsWith(chartHome)) {
-        continue;
-      }
-      fileChanges.push({
-        file: {
-          type: 'deletion',
-          path: file,
-        },
-      });
-    }
+    const fileChanges = fileChangesToArtifactResults(
+      await collectFileChanges(status, {
+        include: ['not_added', 'deleted'],
+        // only add artifacts in the chartHome path
+        filter: (file) => file.startsWith(chartHome),
+      }),
+    );
 
     return fileChanges.length > 0 ? fileChanges : null;
   } catch (err) {
@@ -224,12 +203,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to inflate helm chart');
-    return [
-      {
-        artifactError: {
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(undefined, err);
   }
 }

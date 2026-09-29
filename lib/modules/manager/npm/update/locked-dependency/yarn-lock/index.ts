@@ -78,7 +78,7 @@ export function updateLockedDependency(
         newVersion,
       );
     }
-    /* v8 ignore next 4 -- cannot test */
+    /* v8 ignore next -- cannot test */
     if (newLockFileContent === lockFileContent) {
       logger.debug('Failed to make any changes to lock file');
       return { status: 'update-failed' };

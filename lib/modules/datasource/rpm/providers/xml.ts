@@ -6,7 +6,7 @@ import type { ReleaseResult } from '../../types.ts';
 import {
   buildReleaseResult,
   formatRpmVersion,
-  getCachedGunzippedFile,
+  getCachedDecompressedFile,
 } from './common.ts';
 
 export class RpmXmlMetadataProvider {
@@ -17,12 +17,12 @@ export class RpmXmlMetadataProvider {
   }
 
   async getReleases(
-    primaryGzipUrl: string,
+    primaryUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    const primaryXmlFile = await getCachedGunzippedFile(
+    const primaryXmlFile = await getCachedDecompressedFile(
       this.http,
-      primaryGzipUrl,
+      primaryUrl,
       'xml',
     );
     const releases = new Set<string>();
@@ -75,7 +75,7 @@ export class RpmXmlMetadataProvider {
           return;
         }
         settled = true;
-        logger.debug(`SAX parsing error in ${primaryGzipUrl}: ${err.message}`);
+        logger.debug(`SAX parsing error in ${primaryUrl}: ${err.message}`);
         setImmediate(() => saxParser.removeAllListeners());
         reject(err);
       });
@@ -90,7 +90,7 @@ export class RpmXmlMetadataProvider {
     const result = buildReleaseResult(releases);
     if (!result) {
       logger.trace(
-        `No releases found for package ${packageName} in ${primaryGzipUrl}`,
+        `No releases found for package ${packageName} in ${primaryUrl}`,
       );
     }
 

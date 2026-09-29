@@ -1,9 +1,10 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
+import { coerceArray } from '../array.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
@@ -12,6 +13,7 @@ import {
   generateDockerCommand,
   removeDockerContainer,
 } from './docker/index.ts';
+import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
   CommandWithOptions,
@@ -71,15 +73,12 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd:
-    | string
-    | string[]
-    | CommandWithOptions[]
-    | (string | CommandWithOptions)[],
+    string | string[] | CommandWithOptions[] | (string | CommandWithOptions)[],
   opts: ExecOptions,
   sideCarImage: string,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const preCommands = opts.preCommands ?? [];
+  const preCommands = coerceArray(opts.preCommands);
   const customEnvVariables = getCustomEnv();
   const userConfiguredEnv = getUserEnv();
   const { containerbaseDir, binarySource } = GlobalConfig.get();
@@ -92,11 +91,12 @@ async function prepareRawExec(
 
   let rawOptions = getRawExecOptions(opts);
 
-  let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+  let rawCommands = isString(cmd) ? [cmd] : cmd;
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
     const extraEnv = {
+      ...hardcodedProcessEnv,
       ...opts.extraEnv,
       ...customEnvVariables,
       ...userConfiguredEnv,
@@ -104,6 +104,7 @@ async function prepareRawExec(
     const childEnv = getChildEnv(opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
+      ...coerceArray(docker.envVars),
       'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);
@@ -121,7 +122,7 @@ async function prepareRawExec(
   } else if (isDynamicInstall(opts.toolConstraints)) {
     logger.debug('Using containerbase dynamic installs');
     rawCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(await generateInstallCommands(opts.toolConstraints, true)),
       ...preCommands,
       ...rawCommands,
     ];
@@ -155,10 +156,7 @@ async function prepareRawExec(
 
 export async function exec(
   cmd:
-    | string
-    | string[]
-    | CommandWithOptions[]
-    | (string | CommandWithOptions)[],
+    string | string[] | CommandWithOptions[] | (string | CommandWithOptions)[],
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;

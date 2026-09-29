@@ -25,7 +25,7 @@ describe('util/cache/package/backend', () => {
   let sqliteBackend: ReturnType<typeof mockBackend>;
 
   beforeEach(() => {
-    delete process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE;
+    vi.stubEnv('RENOVATE_X_SQLITE_PACKAGE_CACHE', undefined);
     fileBackend = mockBackend();
     redisBackend = mockBackend();
     sqliteBackend = mockBackend();
@@ -46,7 +46,9 @@ describe('util/cache/package/backend', () => {
 
   it('returns undefined when not initialized', async () => {
     expect(backend.getCacheType()).toBeUndefined();
-    expect(await backend.get('_test-namespace', 'missing-key')).toBeUndefined();
+    await expect(
+      backend.get('_test-namespace', 'missing-key'),
+    ).resolves.toBeUndefined();
   });
 
   it('silently ignores set when not initialized', async () => {
@@ -77,7 +79,7 @@ describe('util/cache/package/backend', () => {
   });
 
   it('initializes sqlite backend', async () => {
-    process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE = 'true';
+    vi.stubEnv('RENOVATE_X_SQLITE_PACKAGE_CACHE', 'true');
 
     await backend.init({ cacheDir: 'some-dir' });
 
@@ -126,7 +128,9 @@ describe('util/cache/package/backend', () => {
     await backend.init({});
 
     expect(backend.getCacheType()).toBeUndefined();
-    expect(await backend.get('_test-namespace', 'key')).toBeUndefined();
+    await expect(
+      backend.get('_test-namespace', 'key'),
+    ).resolves.toBeUndefined();
   });
 
   it('destroys backend and clears state', async () => {

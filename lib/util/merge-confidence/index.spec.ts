@@ -69,66 +69,60 @@ describe('util/merge-confidence/index', () => {
 
     describe('getMergeConfidenceLevel()', () => {
       it('returns neutral if undefined updateType', async () => {
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             'npm',
             'renovate',
             '25.0.0',
             '25.0.0',
             undefined as never,
           ),
-        ).toBe('neutral');
+        ).resolves.toBe('neutral');
       });
 
       it('returns neutral if irrelevant updateType', async () => {
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             'npm',
             'renovate',
             '24.1.0',
             '25.0.0',
             'bump',
           ),
-        ).toBe('neutral');
+        ).resolves.toBe('neutral');
       });
 
       it('returns high if pinning', async () => {
-        expect(
-          await getMergeConfidenceLevel(
-            'npm',
-            'renovate',
-            '25.0.1',
-            '25.0.1',
-            'pin',
-          ),
-        ).toBe('high');
+        await expect(
+          getMergeConfidenceLevel('npm', 'renovate', '25.0.1', '25.0.1', 'pin'),
+        ).resolves.toBe('high');
       });
 
       it('returns undefined if no token', async () => {
         resetConfig();
         hostRules.clear();
 
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             'npm',
             'renovate',
             '24.2.0',
             '25.0.0',
             'major',
           ),
-        ).toBeUndefined();
+        ).resolves.toBeUndefined();
       });
 
       it('returns undefined if datasource is unsupported', async () => {
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             'not-npm',
             'renovate',
             '24.2.0',
             '25.0.0',
             'major',
           ),
-        ).toBeUndefined();
+        ).resolves.toBeUndefined();
       });
 
       it('returns valid confidence level', async () => {
@@ -143,15 +137,38 @@ describe('util/merge-confidence/index', () => {
           )
           .reply(200, { confidence: 'high' });
 
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             datasource,
             depName,
             currentVersion,
             newVersion,
             'major',
           ),
-        ).toBe('high');
+        ).resolves.toBe('high');
+      });
+
+      it('returns neutral if the API returns an unknown confidence level', async () => {
+        const datasource = 'npm';
+        const depName = 'renovate';
+        const currentVersion = '24.3.0';
+        const newVersion = '25.0.0';
+        httpMock
+          .scope(apiBaseUrl)
+          .get(
+            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`,
+          )
+          .reply(200, { confidence: 'not-a-confidence-level' });
+
+        await expect(
+          getMergeConfidenceLevel(
+            datasource,
+            depName,
+            currentVersion,
+            newVersion,
+            'major',
+          ),
+        ).resolves.toBe('neutral');
       });
 
       it('escapes a package name containing a forward slash', async () => {
@@ -167,15 +184,15 @@ describe('util/merge-confidence/index', () => {
           )
           .reply(200, { confidence: 'high' });
 
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             datasource,
             packageName,
             currentVersion,
             newVersion,
             'major',
           ),
-        ).toBe('high');
+        ).resolves.toBe('high');
       });
 
       it('escapes a partial Maven coordinate of groupId:artifactId from the packageName', async () => {
@@ -193,15 +210,15 @@ describe('util/merge-confidence/index', () => {
           )
           .reply(200, { confidence: 'high' });
 
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             datasource,
             packageName,
             currentVersion,
             newVersion,
             'major',
           ),
-        ).toBe('high');
+        ).resolves.toBe('high');
       });
 
       it('returns neutral on invalid merge confidence response from api', async () => {
@@ -216,15 +233,15 @@ describe('util/merge-confidence/index', () => {
           )
           .reply(200, { invalid: 'invalid' });
 
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             datasource,
             depName,
             currentVersion,
             newVersion,
             'minor',
           ),
-        ).toBe('neutral');
+        ).resolves.toBe('neutral');
       });
 
       it('returns neutral on non 403/5xx error from API', async () => {
@@ -239,15 +256,15 @@ describe('util/merge-confidence/index', () => {
           )
           .reply(400);
 
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             datasource,
             depName,
             currentVersion,
             newVersion,
             'minor',
           ),
-        ).toBe('neutral');
+        ).resolves.toBe('neutral');
 
         expect(logger.warn).toHaveBeenCalledWith(
           expect.anything(),
@@ -312,15 +329,15 @@ describe('util/merge-confidence/index', () => {
       });
 
       it('returns high if pinning digest', async () => {
-        expect(
-          await getMergeConfidenceLevel(
+        await expect(
+          getMergeConfidenceLevel(
             'npm',
             'renovate',
             '25.0.1',
             '25.0.1',
             'pinDigest',
           ),
-        ).toBe('high');
+        ).resolves.toBe('high');
       });
     });
 

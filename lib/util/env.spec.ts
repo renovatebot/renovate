@@ -1,15 +1,16 @@
+import { clearEnv } from '~test/util.ts';
 import * as memCache from './cache/memory/index.ts';
 import { getEnv, setCustomEnv, setUserEnv } from './env.ts';
 
 describe('util/env', () => {
   beforeEach(() => {
-    process.env = {};
+    clearEnv();
     memCache.init();
   });
 
   describe('getEnv', () => {
     it('return combined env', () => {
-      process.env.RENOVATE_MEND_HOSTED = 'true';
+      vi.stubEnv('RENOVATE_MEND_HOSTED', 'true');
       setUserEnv({
         SOME_KEY: 'SOME_VALUE',
       });
@@ -24,7 +25,7 @@ describe('util/env', () => {
     });
 
     it('maintains precendence', () => {
-      process.env.SOME_KEY = 'processEnvValue';
+      vi.stubEnv('SOME_KEY', 'processEnvValue');
       setUserEnv({
         SOME_KEY: 'userEnvValue',
       });
