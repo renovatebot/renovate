@@ -2004,24 +2004,31 @@ describe('modules/manager/mise/extract', () => {
         return res!.deps[0];
       }
 
-      it.each([
-        ' # v0.5.0',
-        ' # tag=v0.5.0',
-        ' # renovate: tag=v0.5.0',
-        ' # pin @v0.5.0',
-        ' # v0.5.0 trailing words',
-      ])('extracts version comment %s', async (comment) => {
-        const dep = await extractOne(gh, comment);
+      it('extracts a version comment', async () => {
+        const dep = await extractOne(gh, ' # v0.5.0');
         expect(dep).toMatchObject({
           datasource: 'github-tags',
           packageName: 'org/cfg',
           currentDigest: sha,
           currentValue: 'v0.5.0',
+          replaceString: `${gh}", # v0.5.0`,
           autoReplaceStringTemplate: `git::https://github.com/org/cfg.git//mise.toml?ref=${digestTpl}", # {{newValue}}`,
         });
         expect(dep.skipReason).toBeUndefined();
-        expect(dep.replaceString).toStartWith(`${gh}", #`);
-        expect(dep.replaceString).toEndWith('v0.5.0');
+      });
+
+      it.each([
+        ' # tag=v0.5.0',
+        ' # renovate: tag=v0.5.0',
+        ' # pin @v0.5.0',
+        ' # v0.5.0 trailing words',
+      ])('ignores unsupported comment %s', async (comment) => {
+        const dep = await extractOne(gh, comment);
+        expect(dep).toMatchObject({
+          currentDigest: sha,
+          skipReason: 'unversioned-reference',
+        });
+        expect(dep.currentValue).toBeUndefined();
       });
 
       it('extracts a version comment of the last entry without comma', async () => {

@@ -39,7 +39,7 @@ Renovate supports the remote forms of the top level [`include`](https://mise.jdx
   Entries without a `ref` are skipped, as mise then uses the default branch.
 - `oci::<registry>/<repo>[:tag][@sha256:<digest>]`: handled like a Docker image, using the `docker` datasource.
 
-A `ref` that is a full or short commit sha needs a trailing comment hint, like in the `github-actions` manager.
+A `ref` that is a full or short commit sha needs a trailing `# <version>` or `# <branch>` comment.
 Renovate updates the sha and the comment:
 
 ```toml
@@ -51,8 +51,7 @@ include = [
 ]
 ```
 
-- The hint is a version (`# v0.5.0`, `# tag=v0.5.0`, `# renovate: tag=v0.5.0`, `# pin @v0.5.0`) or a branch name (`# main`).
-  Text after the version is kept.
+- The comment must only contain the version (`# v0.5.0`) or the branch name (`# main`).
 - Branches use the `github-digest` datasource for GitHub and `git-refs` for other hosts.
 - Sha refs without a usable comment are skipped (`unversioned-reference`).
 - Comments of non-sha refs are ignored.

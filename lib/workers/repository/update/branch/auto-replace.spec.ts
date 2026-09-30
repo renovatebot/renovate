@@ -1502,12 +1502,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
         expectedComment: ' # v0.6.0',
       },
       {
-        description: 'version comment with extra words',
-        comment: ' # tag=v0.5.0 (stable)',
-        newValue: 'v0.6.0',
-        expectedComment: ' # v0.6.0 (stable)',
-      },
-      {
         description: 'branch digest bump keeping the comment',
         comment: ' # main',
         newValue: 'main',

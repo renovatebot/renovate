@@ -6,12 +6,7 @@ import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts'
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import * as exactVersioning from '../../versioning/exact/index.ts';
-import {
-  isSha,
-  isShortSha,
-  parseComment,
-  versionLikeRe,
-} from '../github-actions/parse.ts';
+import { isSha, isShortSha, versionLikeRe } from '../github-actions/parse.ts';
 import type { PackageDependency } from '../types.ts';
 
 // e.g. git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.2.0
@@ -22,21 +17,22 @@ const gitReferenceRegex = regEx(
 const refRegex = regEx(/(?:^|&)ref=(?<ref>[^&]+)/);
 const refValueRegex = regEx(/(?<prefix>[?&]ref=)[^&]+/);
 // the rest of the line after a reference string, e.g. `", # v1.0.0`
+// `=` is excluded so that `# tag=v1.0.0` style comments are not read as a branch
 const trailingCommentRegex = regEx(
-  /^(?<separator>["']\s*,?[ \t]*)#(?<comment>.*)$/,
+  /^(?<separator>["']\s*,?[ \t]*)#[ \t]*(?<value>[^\s#=]+)$/,
 );
 
 interface ReferenceComment {
   /** text between the reference string and the comment, e.g. `", ` */
   separator: string;
-  /** everything after the reference string up to the end of the hint token */
+  /** everything after the reference string, including the comment */
   replaceSuffix: string;
   /** the hint: a version (`v1.2.3`) or a branch (`main`) */
   value: string;
 }
 
 /**
- * Finds the trailing `#` comment of an array entry in the raw file.
+ * Finds the trailing `# <version>` or `# <branch>` comment of an entry in the raw file.
  * Only entries of multi-line arrays can carry a comment.
  */
 function findComment(
@@ -48,18 +44,14 @@ function findComment(
     const end = index + reference.length;
     const lineEnd = content.indexOf('\n', end);
     const rest = content.slice(end, lineEnd === -1 ? undefined : lineEnd);
-    const groups = trailingCommentRegex.exec(rest.trimEnd())?.groups;
+    const suffix = rest.trimEnd();
+    const groups = trailingCommentRegex.exec(suffix)?.groups;
     if (groups) {
-      const data = parseComment(groups.comment);
-      const value = data.pinnedVersion ?? data.ref;
-      if (value && data.index !== undefined && data.matchedString) {
-        const tokenEnd = data.index + data.matchedString.length;
-        return {
-          separator: groups.separator,
-          replaceSuffix: `${groups.separator}#${groups.comment.slice(0, tokenEnd)}`,
-          value,
-        };
-      }
+      return {
+        separator: groups.separator,
+        replaceSuffix: suffix,
+        value: groups.value,
+      };
     }
     index = content.indexOf(reference, end);
   }
