@@ -268,9 +268,8 @@ export function getExtractedConstraints(
 
   // devEngines.runtime takes precedence over engines and packageManager
   const runtime = devEngines?.runtime;
-  for (const { name, version } of isArray(runtime)
-    ? runtime
-    : [runtime].filter(isTruthy)) {
+  const runtimes = (isArray(runtime) ? runtime : [runtime]).filter(isTruthy);
+  for (const { name, version } of runtimes) {
     if (
       isConstraintName(name) &&
       constraints.includes(name) &&

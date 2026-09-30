@@ -52,6 +52,14 @@ describe('modules/manager/npm/extract/common/dependency', () => {
         }),
       ).toEqual({});
     });
+
+    it('ignores null devEngines.runtime array entries', () => {
+      expect(
+        getExtractedConstraints([], {
+          runtime: [null as never, { name: 'bun', version: '1.2.0' }],
+        }),
+      ).toEqual({ bun: '1.2.0' });
+    });
   });
 
   describe('parseDepName', () => {
