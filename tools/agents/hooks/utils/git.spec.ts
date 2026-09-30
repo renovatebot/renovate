@@ -1,4 +1,9 @@
-import { getBaseRef, getChangedFiles, getRepoRoot } from './git.ts';
+import {
+  getBaseRef,
+  getChangedFiles,
+  getDeletedFiles,
+  getRepoRoot,
+} from './git.ts';
 
 const mockGit = vi.hoisted(() => {
   const obj = {
@@ -76,6 +81,29 @@ describe('tools/agents/hooks/utils/git', () => {
       mockGit.diff.mockResolvedValueOnce('');
 
       const result = await getChangedFiles('abc1234');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getDeletedFiles', () => {
+    it('returns the files deleted since the base ref', async () => {
+      mockGit.diff.mockResolvedValueOnce('lib/foo.ts\nlib/bar.ts\n');
+
+      const result = await getDeletedFiles('abc1234');
+
+      expect(mockGit.diff).toHaveBeenCalledWith([
+        '--name-only',
+        '--diff-filter=D',
+        'abc1234',
+      ]);
+      expect(result).toEqual(['lib/foo.ts', 'lib/bar.ts']);
+    });
+
+    it('returns empty array when no files were deleted', async () => {
+      mockGit.diff.mockResolvedValueOnce('');
+
+      const result = await getDeletedFiles('abc1234');
 
       expect(result).toEqual([]);
     });

@@ -5,11 +5,16 @@ import { BlockOutput } from './utils/schemas.ts';
 const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
 vi.mock('./utils/exec.ts', () => ({ exec }));
 
-const { getBaseRef, getChangedFiles } = vi.hoisted(() => ({
+const { getBaseRef, getChangedFiles, getDeletedFiles } = vi.hoisted(() => ({
   getBaseRef: vi.fn<() => Promise<string>>(),
   getChangedFiles: vi.fn<(baseRef: string) => Promise<string[]>>(),
+  getDeletedFiles: vi.fn<(baseRef: string) => Promise<string[]>>(),
 }));
-vi.mock('./utils/git.ts', () => ({ getBaseRef, getChangedFiles }));
+vi.mock('./utils/git.ts', () => ({
+  getBaseRef,
+  getChangedFiles,
+  getDeletedFiles,
+}));
 
 const { readStdin } = vi.hoisted(() => ({ readStdin: vi.fn() }));
 vi.mock('./utils/stdin.ts', () => ({ readStdin }));
@@ -79,6 +84,7 @@ describe('tools/agents/hooks/stop-check', () => {
     });
     readStdin.mockResolvedValue(makeInput());
     getBaseRef.mockResolvedValue('abc1234');
+    getDeletedFiles.mockResolvedValue([]);
   });
 
   it('runs pnpm check --all with the coverage directory and the changed files', async () => {
@@ -177,6 +183,23 @@ describe('tools/agents/hooks/stop-check', () => {
       );
     },
   );
+
+  it('runs pnpm check --all again when a file was deleted since the last passed check', async () => {
+    getChangedFiles.mockResolvedValue(['lib/foo.ts']);
+    exec.mockResolvedValue({ failed: false, all: 'Checks: ok' });
+    await runHook();
+    exec.mockClear();
+    getDeletedFiles.mockResolvedValue(['lib/old.ts']);
+
+    await runHook();
+
+    expect(getDeletedFiles).toHaveBeenCalledWith('abc1234');
+    expect(exec).toHaveBeenCalledWith(
+      'pnpm',
+      [...checkArgs, 'lib/foo.ts'],
+      execOptions,
+    );
+  });
 
   it('stores the fingerprint of the files as they are after the check', async () => {
     getChangedFiles.mockResolvedValue(['lib/foo.ts']);

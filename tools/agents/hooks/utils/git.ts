@@ -65,3 +65,14 @@ export async function getChangedFiles(baseRef: string): Promise<string[]> {
     .split('\n')
     .filter((f) => f.length > 0);
 }
+
+/**
+ * Returns the files deleted since `baseRef`.
+ */
+export async function getDeletedFiles(baseRef: string): Promise<string[]> {
+  const out = await git.diff(['--name-only', '--diff-filter=D', baseRef]);
+  return out
+    .trim()
+    .split('\n')
+    .filter((f) => f.length > 0);
+}

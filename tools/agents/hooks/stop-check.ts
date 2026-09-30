@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { coerceString } from '../../../lib/util/string.ts';
 import { exec } from './utils/exec.ts';
-import { getBaseRef, getChangedFiles } from './utils/git.ts';
+import { getBaseRef, getChangedFiles, getDeletedFiles } from './utils/git.ts';
 import { block } from './utils/output.ts';
 import { StopHookInput } from './utils/schemas.ts';
 import { readStdin } from './utils/stdin.ts';
@@ -27,11 +27,12 @@ function truncate(output: string): string {
 }
 
 /**
- * Returns a SHA-256 hash of the base ref and the paths and contents of the files, or `null` when a file cannot be read.
+ * Returns a SHA-256 hash of the base ref, the paths and contents of the files and the deleted paths, or `null` when a file cannot be read.
  */
 async function getFingerprint(
   baseRef: string,
   files: string[],
+  deletedFiles: string[],
 ): Promise<string | null> {
   const hash = createHash('sha256');
   hash.update(`${baseRef}\0`);
@@ -43,6 +44,9 @@ async function getFingerprint(
     }
   } catch {
     return null;
+  }
+  for (const file of deletedFiles) {
+    hash.update(`deleted\0${file}\0`);
   }
   return hash.digest('hex');
 }
@@ -59,10 +63,14 @@ async function readFingerprint(): Promise<string | null> {
 }
 
 /**
- * Returns whether the base ref and the files are unchanged since the last successful check.
+ * Returns whether the base ref, the files and the deleted paths are unchanged since the last successful check.
  */
-async function isChecked(baseRef: string, files: string[]): Promise<boolean> {
-  const fingerprint = await getFingerprint(baseRef, files);
+async function isChecked(
+  baseRef: string,
+  files: string[],
+  deletedFiles: string[],
+): Promise<boolean> {
+  const fingerprint = await getFingerprint(baseRef, files, deletedFiles);
   if (!fingerprint) {
     return false;
   }
@@ -70,13 +78,14 @@ async function isChecked(baseRef: string, files: string[]): Promise<boolean> {
 }
 
 /**
- * Stores the fingerprint of the base ref and the files, when the files can be read.
+ * Stores the fingerprint of the base ref, the files and the deleted paths, when the files can be read.
  */
 async function storeFingerprint(
   baseRef: string,
   files: string[],
+  deletedFiles: string[],
 ): Promise<void> {
-  const fingerprint = await getFingerprint(baseRef, files);
+  const fingerprint = await getFingerprint(baseRef, files, deletedFiles);
   if (!fingerprint) {
     return;
   }
@@ -87,7 +96,11 @@ async function storeFingerprint(
 /**
  * Runs `pnpm check --all` on the files and blocks the stop when it fails, or stores their fingerprint when it passes.
  */
-async function check(baseRef: string, files: string[]): Promise<void> {
+async function check(
+  baseRef: string,
+  files: string[],
+  deletedFiles: string[],
+): Promise<void> {
   const result = await exec(
     'pnpm',
     ['check', '--all', `--coverage-dir=${coverageDir}`, ...files],
@@ -107,7 +120,7 @@ async function check(baseRef: string, files: string[]): Promise<void> {
     return;
   }
   // the fixers of the check may have changed the files, so fingerprint the checked state
-  await storeFingerprint(baseRef, files);
+  await storeFingerprint(baseRef, files, deletedFiles);
 }
 
 const raw = await readStdin();
@@ -121,9 +134,10 @@ if (!input.success || !input.data.stop_hook_active) {
   const changedFiles = await getChangedFiles(baseRef);
 
   if (changedFiles.length > 0) {
-    const checked = await isChecked(baseRef, changedFiles);
+    const deletedFiles = await getDeletedFiles(baseRef);
+    const checked = await isChecked(baseRef, changedFiles, deletedFiles);
     if (!checked) {
-      await check(baseRef, changedFiles);
+      await check(baseRef, changedFiles, deletedFiles);
     }
   }
 }
