@@ -13,7 +13,7 @@ describe('util/fs/util', () => {
   const localDir = upath.resolve('/foo');
   const cacheDir = upath.resolve('/bar');
 
-  beforeAll(() => {
+  beforeEach(() => {
     GlobalConfig.set({ localDir, cacheDir });
   });
 
