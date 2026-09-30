@@ -66,6 +66,7 @@ describe('tools/agents/hooks/utils/git', () => {
   describe('getChangedFiles', () => {
     it('returns the files changed since the base ref', async () => {
       mockGit.diff.mockResolvedValueOnce('lib/foo.ts\nlib/bar.ts\n');
+      mockGit.raw.mockResolvedValueOnce('');
 
       const result = await getChangedFiles('abc1234');
 
@@ -74,11 +75,44 @@ describe('tools/agents/hooks/utils/git', () => {
         '--diff-filter=ACMR',
         'abc1234',
       ]);
+      expect(mockGit.raw).toHaveBeenCalledWith([
+        'ls-files',
+        '--others',
+        '--exclude-standard',
+      ]);
       expect(result).toEqual(['lib/foo.ts', 'lib/bar.ts']);
+    });
+
+    it('includes untracked files', async () => {
+      mockGit.diff.mockResolvedValueOnce('lib/foo.ts\n');
+      mockGit.raw.mockResolvedValueOnce('lib/new.ts\nlib/new.spec.ts\n');
+
+      const result = await getChangedFiles('abc1234');
+
+      expect(result).toEqual(['lib/foo.ts', 'lib/new.ts', 'lib/new.spec.ts']);
+    });
+
+    it('returns only untracked files when nothing else changed', async () => {
+      mockGit.diff.mockResolvedValueOnce('');
+      mockGit.raw.mockResolvedValueOnce('lib/new.ts\n');
+
+      const result = await getChangedFiles('abc1234');
+
+      expect(result).toEqual(['lib/new.ts']);
+    });
+
+    it('removes duplicates', async () => {
+      mockGit.diff.mockResolvedValueOnce('lib/foo.ts\nlib/bar.ts\n');
+      mockGit.raw.mockResolvedValueOnce('lib/bar.ts\nlib/new.ts\n');
+
+      const result = await getChangedFiles('abc1234');
+
+      expect(result).toEqual(['lib/foo.ts', 'lib/bar.ts', 'lib/new.ts']);
     });
 
     it('returns empty array when no files changed', async () => {
       mockGit.diff.mockResolvedValueOnce('');
+      mockGit.raw.mockResolvedValueOnce('');
 
       const result = await getChangedFiles('abc1234');
 

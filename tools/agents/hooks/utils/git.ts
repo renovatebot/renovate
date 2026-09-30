@@ -56,14 +56,17 @@ export async function getBaseRef(): Promise<string> {
 }
 
 /**
- * Returns the files added, copied, modified or renamed since `baseRef`.
+ * Returns the files added, copied, modified or renamed since `baseRef`, and the untracked files that are not ignored.
  */
 export async function getChangedFiles(baseRef: string): Promise<string[]> {
-  const out = await git.diff(['--name-only', '--diff-filter=ACMR', baseRef]);
-  return out
-    .trim()
-    .split('\n')
-    .filter((f) => f.length > 0);
+  const diff = await git.diff(['--name-only', '--diff-filter=ACMR', baseRef]);
+  const untracked = await git.raw([
+    'ls-files',
+    '--others',
+    '--exclude-standard',
+  ]);
+  const files = `${diff}\n${untracked}`.split('\n').filter((f) => f.length > 0);
+  return [...new Set(files)];
 }
 
 /**
