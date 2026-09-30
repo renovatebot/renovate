@@ -44,10 +44,6 @@ describe('workers/global/initialize', () => {
   });
 
   describe('setGlobalHostRules', () => {
-    beforeEach(() => {
-      hostRules.clear();
-    });
-
     it('should have run before initPlatform', async () => {
       const hostRule = {
         hostType: 'github',

@@ -17,8 +17,6 @@ describe('util/http/host-rules', () => {
   beforeEach(() => {
     vi.stubEnv('HTTP_PROXY', undefined);
 
-    // clean up hostRules
-    hostRules.clear();
     hostRules.add({
       hostType: 'github',
       token: 'token',

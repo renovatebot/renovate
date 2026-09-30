@@ -68,7 +68,6 @@ describe('modules/platform/azure/index', () => {
     git = await vi.importMock('../../../util/git/index.ts');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    hostRules.clear();
     hostRules.add({ token: 'token' });
     azureHelper.getPolicyEvaluations.mockResolvedValue([]);
     azureApi.getAuthenticatedUserId.mockResolvedValue('renovate-user-id');

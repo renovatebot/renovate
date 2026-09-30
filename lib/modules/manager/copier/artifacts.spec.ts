@@ -44,7 +44,6 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 describe('modules/manager/copier/artifacts', () => {
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
-    hostRules.clear();
 
     // Mock git repo status
     git.getRepoStatus.mockResolvedValue(

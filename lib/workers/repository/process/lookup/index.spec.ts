@@ -97,10 +97,6 @@ describe('workers/repository/process/lookup/index', () => {
     );
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   describe('.lookupUpdates()', () => {
     it('returns null if invalid currentValue', async () => {
       // @ts-expect-error: testing invalid currentValue
