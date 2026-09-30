@@ -5,6 +5,11 @@ export const knownDepTypes = [
     depType: 'tools',
     description: 'A tool defined under the top-level `[tools]` table',
   },
+  {
+    depType: 'include',
+    description:
+      'A remote configuration file (`git::` or `oci::`) referenced in the top-level `include` array',
+  },
 ] as const satisfies readonly DepTypeMetadata[];
 
 export const supportsDynamicDepTypesNote =

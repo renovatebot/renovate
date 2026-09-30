@@ -15,6 +15,18 @@ Renovate supports all standard mise configuration file patterns:
 
 Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#tools-dev-tools) and [`tasks.*.tools`](https://mise.jdx.dev/tasks/task-configuration.html#tools) keys.
 
+### Remote `include` support
+
+Renovate supports the remote forms of the top level [`include`](https://mise.jdx.dev/configuration.html#include) key:
+
+- `git::<https|ssh>://<host>/<repo>.git//<path>?ref=<ref>`: the `ref` is looked up as a Git tag.
+  GitHub and Bitbucket Cloud repositories use the `github-tags` and `bitbucket-tags` datasources, other hosts use `git-tags`.
+  Entries without a `ref` are skipped, as mise then uses the default branch.
+- `oci::<registry>/<repo>[:tag][@sha256:<digest>]`: handled like a Docker image, using the `docker` datasource.
+
+Renovate does not fetch the included files, so the tools they define are not updated.
+`include` entries are not locked by `mise.lock`.
+
 ### Lock file support
 
 Renovate supports mise lock files (`mise.lock`).

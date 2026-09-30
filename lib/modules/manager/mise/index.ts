@@ -1,6 +1,8 @@
 import { deduplicateArray } from '../../../util/array.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
+import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
@@ -64,6 +66,13 @@ const backendDatasources = {
   pypi: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
   ubi: [GithubReleasesDatasource.id],
+  // remote `include` entries
+  include: [
+    BitbucketTagsDatasource.id,
+    DockerDatasource.id,
+    GitTagsDatasource.id,
+    GithubTagsDatasource.id,
+  ],
   // not supported
   vfox: [],
 };

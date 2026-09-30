@@ -4,6 +4,7 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
 import { doAutoReplace } from './auto-replace.ts';
 
@@ -1450,6 +1451,48 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
       expect(res).toBe('[ { "version": "27.0.0.0", "package": "foo" } ]');
     });
+
+    it.each([
+      {
+        description: 'git tag',
+        include:
+          'git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.2.0',
+        newValue: 'v1.3.0',
+        newDigest: undefined,
+        expected:
+          'git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.3.0',
+      },
+      {
+        description: 'oci tag',
+        include: 'oci::ghcr.io/org/base:1.0',
+        newValue: '1.1',
+        newDigest: undefined,
+        expected: 'oci::ghcr.io/org/base:1.1',
+      },
+      {
+        description: 'oci tag and digest',
+        include: `oci::ghcr.io/org/base:1.0@sha256:${'a'.repeat(64)}`,
+        newValue: '1.1',
+        newDigest: `sha256:${'b'.repeat(64)}`,
+        expected: `oci::ghcr.io/org/base:1.1@sha256:${'b'.repeat(64)}`,
+      },
+    ])(
+      'mise include: updates $description',
+      async ({ include, newValue, newDigest, expected }) => {
+        const content = `include = ["${include}"]\n\n[tools]\nnode = "1.0"\n`;
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps.find((d) => d.depType === 'include')!;
+        Object.assign(upgrade, dep, {
+          newValue,
+          newDigest,
+          depIndex: extracted!.deps.indexOf(dep),
+        });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(content.replace(include, expected));
+      },
+    );
 
     it('jsonata: rebases when autoReplaceStringTemplate fails to compile', async () => {
       const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';

@@ -1841,4 +1841,179 @@ describe('modules/manager/mise/extract', () => {
       },
     );
   });
+
+  describe('include', () => {
+    const sha = 'a'.repeat(64);
+
+    it.each([
+      {
+        description: 'github git',
+        include: 'git::https://github.com/org/cfg.git//mise.toml?ref=v1.2.0',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          currentValue: 'v1.2.0',
+          replaceString:
+            'git::https://github.com/org/cfg.git//mise.toml?ref=v1.2.0',
+          autoReplaceStringTemplate:
+            'git::https://github.com/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'github git over ssh with sha ref',
+        include:
+          'git::ssh://git@github.com/org/cfg.git//base/tools.toml?ref=0123456789abcdef0123456789abcdef01234567',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          currentValue: '0123456789abcdef0123456789abcdef01234567',
+          replaceString:
+            'git::ssh://git@github.com/org/cfg.git//base/tools.toml?ref=0123456789abcdef0123456789abcdef01234567',
+          autoReplaceStringTemplate:
+            'git::ssh://git@github.com/org/cfg.git//base/tools.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'gitlab https',
+        include: 'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
+        expected: {
+          depName: 'gitlab.com/group/sub/cfg',
+          packageName: 'https://gitlab.com/group/sub/cfg.git',
+          datasource: 'git-tags',
+          currentValue: '1.0',
+          replaceString:
+            'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
+          autoReplaceStringTemplate:
+            'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'gitlab ssh',
+        include: 'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
+        expected: {
+          depName: 'gitlab.com/group/cfg',
+          packageName: 'ssh://git@gitlab.com/group/cfg.git',
+          datasource: 'git-tags',
+          currentValue: 'main',
+          replaceString:
+            'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
+          autoReplaceStringTemplate:
+            'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'bitbucket',
+        include: 'git::https://bitbucket.org/org/cfg.git//mise.toml?ref=v2',
+        expected: {
+          depName: 'bitbucket.org/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'bitbucket-tags',
+          currentValue: 'v2',
+          replaceString:
+            'git::https://bitbucket.org/org/cfg.git//mise.toml?ref=v2',
+          autoReplaceStringTemplate:
+            'git::https://bitbucket.org/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'git without ref',
+        include: 'git::https://github.com/org/cfg.git//mise.toml',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'git without path and ref',
+        include: 'git::https://gitlab.com/org/cfg.git?depth=1',
+        expected: {
+          depName: 'gitlab.com/org/cfg',
+          packageName: 'https://gitlab.com/org/cfg.git',
+          datasource: 'git-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'oci tag',
+        include: 'oci::ghcr.io/org/base:1.0',
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentValue: '1.0',
+          replaceString: 'ghcr.io/org/base:1.0',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'oci digest',
+        include: `oci::ghcr.io/org/base@sha256:${sha}`,
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentDigest: `sha256:${sha}`,
+          replaceString: `ghcr.io/org/base@sha256:${sha}`,
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'oci tag and digest',
+        include: `oci::ghcr.io/org/base:1.0@sha256:${sha}`,
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentValue: '1.0',
+          currentDigest: `sha256:${sha}`,
+          replaceString: `ghcr.io/org/base:1.0@sha256:${sha}`,
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'invalid entry',
+        include: 'https://example.com/mise.toml',
+        expected: {
+          depName: 'https://example.com/mise.toml',
+          skipReason: 'unsupported-url',
+        },
+      },
+    ])('extracts $description', async ({ include, expected }) => {
+      const content = `include = ["${include}"]`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [{ depType: 'include', ...expected }],
+      });
+    });
+
+    it('extracts includes together with tools', async () => {
+      const content = codeBlock`
+        include = ["oci::ghcr.io/org/base:1.0"]
+
+        [tools]
+        erlang = '23.3'
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps.map((dep) => dep.depType)).toEqual([
+        'tools',
+        'include',
+      ]);
+    });
+
+    it('ignores invalid include values', async () => {
+      const content = codeBlock`
+        include = "not-an-array"
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+  });
 });

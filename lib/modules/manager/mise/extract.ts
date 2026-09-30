@@ -29,6 +29,7 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { extractInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
@@ -86,7 +87,9 @@ export async function extractPackageFile(
     }
   }
 
-  if (!toolEntries.length) {
+  const includeDeps = misefile.include.map(extractInclude);
+
+  if (!toolEntries.length && !includeDeps.length) {
     return null;
   }
 
@@ -105,9 +108,12 @@ export async function extractPackageFile(
     }
   }
 
-  const deps = toolEntries.map(([name, toolData, depType]) =>
-    extractToolEntry(name, toolData, depType, lockFileData),
-  );
+  const deps = [
+    ...toolEntries.map(([name, toolData, depType]) =>
+      extractToolEntry(name, toolData, depType, lockFileData),
+    ),
+    ...includeDeps,
+  ];
   const result: PackageFileContent = { deps };
 
   if (lockFileData) {
