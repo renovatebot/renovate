@@ -23,3 +23,9 @@ Rules from this list are converted to environment variable directives if they ma
 - No `hostType` is defined, or
 - `hostType` is `cargo`, or
 - `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
+
+### Git index registries
+
+When Renovate clones a git index registry over `http(s)` to look up versions (this requires `allowCustomCrateGitRegistries`), it exports the same `insteadOf` directives as for artifact updates, with `hostType=crate` in place of `hostType=cargo`.
+Git uses the credentials of the directive whose URL matches the index URL.
+Sparse registries (`sparse+https://`) are fetched over HTTP, and use `hostRules` like other datasources.

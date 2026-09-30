@@ -7,6 +7,7 @@ import { dir } from 'tmp-promise';
 import upath from 'upath';
 import type { MockedFunction } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -17,6 +18,7 @@ import type {
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
@@ -556,6 +558,74 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toMatchObject({
         dependencyUrl: 'https://github.com/mcorbin/testregistry/mypkg',
         releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
+      });
+    });
+
+    describe('host rules for git registries', () => {
+      const httpsUrl = 'https://gitlab.corp/group/crates-index.git';
+      const sshUrl = 'ssh://git@gitlab.corp/group/crates-index.git';
+
+      beforeEach(() => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: true,
+        });
+      });
+
+      it('clones http(s) registries with host rule authentication', async () => {
+        const { mockClone } = setupGitMocks();
+        hostRules.add({
+          hostType: 'crate',
+          matchHost: 'gitlab.corp',
+          username: 'user',
+          password: 'pass',
+        });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [httpsUrl],
+        });
+
+        expect(res).not.toBeNull();
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+          authentication: { hostTypes: ['crate'] },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          httpsUrl,
+          expect.any(String),
+          { '--depth': 1 },
+        );
+        expect(getGitEnvironmentVariables({}, ['crate'])).toStrictEqual({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: 'url.https://user:pass@gitlab.corp/.insteadOf',
+          GIT_CONFIG_KEY_1: 'url.https://user:pass@gitlab.corp/.insteadOf',
+          GIT_CONFIG_KEY_2: 'url.https://user:pass@gitlab.corp/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.corp/',
+          GIT_CONFIG_VALUE_1: 'git@gitlab.corp:',
+          GIT_CONFIG_VALUE_2: 'https://gitlab.corp/',
+        });
+      });
+
+      it('clones other registries without authentication', async () => {
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sshUrl],
+        });
+
+        expect(res).not.toBeNull();
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          sshUrl,
+          expect.any(String),
+          { '--depth': 1 },
+        );
       });
     });
 
