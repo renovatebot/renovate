@@ -64,6 +64,7 @@ export async function getChangedFiles(baseRef: string): Promise<string[]> {
     'ls-files',
     '--others',
     '--exclude-standard',
+    '--full-name',
   ]);
   const files = `${diff}\n${untracked}`.split('\n').filter((f) => f.length > 0);
   return [...new Set(files)];

@@ -79,6 +79,7 @@ describe('tools/agents/hooks/utils/git', () => {
         'ls-files',
         '--others',
         '--exclude-standard',
+        '--full-name',
       ]);
       expect(result).toEqual(['lib/foo.ts', 'lib/bar.ts']);
     });
