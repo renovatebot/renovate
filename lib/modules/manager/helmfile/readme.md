@@ -23,7 +23,24 @@ For this you use a custom `hostRules` array.
 
 Renovate passes `hostRules` with `hostType: 'helm'` to `helmfile deps` for classic (non-OCI) repositories.
 It does so through the `<NAME>_USERNAME` and `<NAME>_PASSWORD` environment variables, where `<NAME>` is the repository name in upper case with dashes replaced by underscores.
-Helmfile only uses them when the repository sets no `username` or `password` itself.
+The `hostRules` entry must have both a `username` and a `password`, and its `matchHost` must match the repository `url`.
+Helmfile only uses these variables when the repository sets no `username` or `password` itself.
+
+For example, with this `helmfile.yaml`:
+
+```yaml
+repositories:
+  - name: team-a-charts
+    url: https://charts.example.com/team-a
+  - name: public
+    url: https://public.example.com
+releases:
+  - name: app
+    chart: team-a-charts/app
+    version: 1.0.0
+```
+
+and this Renovate config:
 
 ```json5
 {
@@ -37,6 +54,9 @@ Helmfile only uses them when the repository sets no `username` or `password` its
   ],
 }
 ```
+
+Renovate runs `helmfile deps` with `TEAM_A_CHARTS_USERNAME` and `TEAM_A_CHARTS_PASSWORD` set.
+The `public` repository has no matching `hostRules` entry, so it gets no credentials.
 
 #### OCI registries
 
