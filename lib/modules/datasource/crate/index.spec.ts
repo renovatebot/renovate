@@ -608,8 +608,11 @@ describe('modules/datasource/crate/index', () => {
         });
       });
 
-      it('clones the crates.io git index with host rule authentication', async () => {
-        GlobalConfig.set(adminConfig);
+      it('clones the crates.io git index with host rule authentication without allowCustomCrateGitRegistries', async () => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: false,
+        });
         const { mockClone } = setupGitMocks();
 
         const res = await getPkgReleases({
