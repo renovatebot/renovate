@@ -142,10 +142,6 @@ export function exec(
       detached: process.platform !== 'win32',
       shell,
       extendEnv: false,
-      // Keep command failures as results so timeout metadata remains available
-      // to the exit handler below.
-      // TODO: Refactor to await execa result (#45650)
-      reject: false,
     });
     // Execa 8 starts its timeout promise before its lazy thenable is consumed.
     // Handle both outcomes now so a timeout cannot reject before the exit event.
