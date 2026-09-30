@@ -1494,6 +1494,46 @@ describe('workers/repository/update/branch/auto-replace', () => {
       },
     );
 
+    it.each([
+      {
+        description: 'tag bump with a sha and version comment',
+        comment: ' # v0.5.0',
+        newValue: 'v0.6.0',
+        expectedComment: ' # v0.6.0',
+      },
+      {
+        description: 'version comment with extra words',
+        comment: ' # tag=v0.5.0 (stable)',
+        newValue: 'v0.6.0',
+        expectedComment: ' # v0.6.0 (stable)',
+      },
+      {
+        description: 'branch digest bump keeping the comment',
+        comment: ' # main',
+        newValue: 'main',
+        expectedComment: ' # main',
+      },
+    ])(
+      'mise include: updates $description',
+      async ({ comment, newValue, expectedComment }) => {
+        const oldSha = 'a'.repeat(40);
+        const newDigest = 'b'.repeat(40);
+        const entry = `git::https://gitlab.com/org/cfg.git//mise.toml?ref=`;
+        const prefix = `include = [\n  "${entry}`;
+        const suffix = `",${comment}\n  "oci::ghcr.io/org/base:1.0",\n]\n`;
+        const content = `${prefix}${oldSha}${suffix}`;
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps[0];
+        Object.assign(upgrade, dep, { newValue, newDigest, depIndex: 0 });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(
+          `${prefix}${newDigest}",${expectedComment}\n  "oci::ghcr.io/org/base:1.0",\n]\n`,
+        );
+      },
+    );
+
     it('jsonata: rebases when autoReplaceStringTemplate fails to compile', async () => {
       const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
       upgrade.manager = 'jsonata';

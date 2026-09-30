@@ -87,7 +87,9 @@ export async function extractPackageFile(
     }
   }
 
-  const includeDeps = misefile.include.map(extractInclude);
+  const includeDeps = misefile.include.map((include) =>
+    extractInclude(include, content),
+  );
 
   if (!toolEntries.length && !includeDeps.length) {
     return null;

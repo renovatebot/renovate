@@ -5,6 +5,7 @@ import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
@@ -70,7 +71,9 @@ const backendDatasources = {
   include: [
     BitbucketTagsDatasource.id,
     DockerDatasource.id,
+    GitRefsDatasource.id,
     GitTagsDatasource.id,
+    GithubDigestDatasource.id,
     GithubTagsDatasource.id,
   ],
   // not supported
