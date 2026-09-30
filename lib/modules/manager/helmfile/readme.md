@@ -19,6 +19,25 @@ If you need to change the versioning format, read the [versioning](../../version
 To use private sources of Helm charts, you must set the password and username you use to authenticate to the private source.
 For this you use a custom `hostRules` array.
 
+#### Classic repositories
+
+Renovate passes `hostRules` with `hostType: 'helm'` to `helmfile deps` for classic (non-OCI) repositories.
+It does so through the `<NAME>_USERNAME` and `<NAME>_PASSWORD` environment variables, where `<NAME>` is the repository name in upper case with dashes replaced by underscores.
+Helmfile only uses them when the repository sets no `username` or `password` itself.
+
+```json5
+{
+  hostRules: [
+    {
+      matchHost: 'https://charts.example.com',
+      hostType: 'helm',
+      username: '<some-username>',
+      password: '<some-password>',
+    },
+  ],
+}
+```
+
 #### OCI registries
 
 ```json5

@@ -309,6 +309,63 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
   });
 
+  it('passes helm host rule credentials of classic repositories as environment variables', async () => {
+    const helmfileYamlMixedRepos = codeBlock`
+    repositories:
+      - name: my-charts
+        url: https://charts.example.com/stable
+      - name: public
+        url: https://public.example.com
+      - name: oci-charts
+        url: charts.example.com/oci
+        oci: true
+    releases:
+      - name: chart
+        chart: my-charts/chart
+        version: 0.12.0
+    `;
+    hostRules.add({
+      hostType: 'helm',
+      matchHost: 'charts.example.com',
+      username: 'testuser',
+      password: 'testpass',
+    });
+
+    git.getFile.mockResolvedValueOnce(lockFile);
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    await expect(
+      helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: helmfileYamlMixedRepos,
+        config,
+      }),
+    ).resolves.not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helmfile deps -f helmfile.yaml',
+        options: {
+          env: {
+            MY_CHARTS_USERNAME: 'testuser',
+            MY_CHARTS_PASSWORD: 'testpass',
+          },
+        },
+      },
+    ]);
+    const execEnv = execSnapshots[0].options?.env;
+    expect(execEnv).not.toHaveProperty('PUBLIC_USERNAME');
+    expect(execEnv).not.toHaveProperty('PUBLIC_PASSWORD');
+    expect(execEnv).not.toHaveProperty('OCI_CHARTS_USERNAME');
+    expect(execEnv).not.toHaveProperty('OCI_CHARTS_PASSWORD');
+  });
+
   it.each([
     {
       binarySource: 'docker' as const,
