@@ -17,10 +17,10 @@ Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#to
 
 ### Remote task files
 
-Renovate supports remote [git task files](https://mise.jdx.dev/tasks/toml-tasks.html#git) in `tasks.<name>.file`, using the `git::<https|ssh>://<host>/<repo>.git//<path>?ref=<ref>` form.
+Renovate supports remote [git task files](https://mise.jdx.dev/tasks/toml-tasks.html#git) in `tasks.<name>.file`, using the same `git::` forms as for remote `include` entries.
 The path may point to any file, not only to TOML files.
 `ref` handling, datasources and comment hints work like for remote `include` entries, and the dependencies have the `depType` `task-<name>-file`.
-Local paths and `http(s)://` URLs have no version and are ignored.
+Local paths and plain `http(s)://` URLs without the `git::` prefix have no version and are ignored.
 
 ```toml
 [tasks.build]
@@ -39,7 +39,18 @@ Renovate supports the remote forms of the top level [`include`](https://mise.jdx
   Entries without a `ref` are skipped, as mise then uses the default branch.
 - `oci::<registry>/<repo>[:tag][@sha256:<digest>]`: handled like a Docker image, using the `docker` datasource.
 
-A `ref` that is a full or short commit sha needs a trailing `# <version>` or `# <branch>` comment.
+A tag `ref` is updated to the newest tag:
+
+```toml
+include = [
+  "git::https://github.com/org/cfg.git//mise.toml?ref=v0.5.0",
+  "oci::ghcr.io/org/base:1.0",
+]
+```
+
+#### Pinning to a commit sha
+
+Optionally, a `ref` can be a full or short commit sha, if it has a trailing `# <version>` or `# <branch>` comment.
 Renovate updates the sha and the comment:
 
 ```toml
