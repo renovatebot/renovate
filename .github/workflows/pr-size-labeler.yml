@@ -1,24 +1,31 @@
 name: PR Size Labeler
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - synchronize
       - reopened
       - ready_for_review
 
+permissions: {}
+
 jobs:
   auto-label-pr:
     if: github.event.pull_request.draft != true
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
+      # checks out the base branch only, never the pull request head
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          filter: blob:none # we don't need all blobs
+          sparse-checkout: .github/pull-request-size.yml
+          sparse-checkout-cone-mode: false
           show-progress: false
 
       - name: Label PR based on size
@@ -26,5 +33,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the GitHub token for authentication
           github_repository: ${{ github.repository }} # Pass the repository name
-          github_pr_number: ${{ github.event.number }} # Pass the pull request number
+          github_pr_number: ${{ github.event.pull_request.number }} # Pass the pull request number
           config_file_path: '.github/pull-request-size.yml' # Specify the path to the configuration file
