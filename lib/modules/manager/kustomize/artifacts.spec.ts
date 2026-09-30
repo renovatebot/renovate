@@ -447,7 +447,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         depType: 'HelmChart',
         depName: 'other',
         currentVersion: '1.0.0',
-        registryUrls: ['https://other.example.com'],
+        registryUrls: ['https://other.example.com/charts?a=1&b=2'],
         datasource: HelmDatasource.id,
       },
     ];
@@ -464,7 +464,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         cmd: "helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 --repo https://charts.example.com --username user --password 'pass word' example",
       },
       {
-        cmd: 'helm pull --untar --untardir charts/other-1.0.0 --version 1.0.0 --repo https://other.example.com other',
+        cmd: "helm pull --untar --untardir charts/other-1.0.0 --version 1.0.0 --repo 'https://other.example.com/charts?a=1&b=2' other",
       },
     ]);
   });
