@@ -276,6 +276,29 @@ describe('modules/manager/nix/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted nix constraint', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['flake.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+
+    await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: '{}',
+      config: { ...config, extractedConstraints: { nix: '2.10.0' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool nix 2.10.0' },
+      { cmd: updateInputCmd },
+    ]);
+  });
+
   it('catches errors', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecSequence([new Error('exec error')]);

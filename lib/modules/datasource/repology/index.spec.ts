@@ -61,10 +61,6 @@ const fixtureJdk = Fixtures.get(`openjdk.json`);
 const fixturePython = Fixtures.get(`python.json`);
 
 describe('modules/datasource/repology/index', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {
@@ -304,6 +300,20 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
+    });
+
+    it('returns null when the api fallback finds no matching package', async () => {
+      mockResolverCall('debian_stable', 'unknown-package', 'binname', {
+        status: 403,
+      });
+      mockApiCall('unknown-package', { status: 200, body: '[]' });
+
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        packageName: 'debian_stable/unknown-package',
+      });
+      expect(res).toBeNull();
     });
 
     it('returns correct version for multi-package project with same name', async () => {

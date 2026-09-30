@@ -1,4 +1,3 @@
-// TODO: add tests
 import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, git, logger, partial, scm } from '~test/util.ts';
@@ -249,6 +248,17 @@ describe('modules/manager/npm/post-update/index', () => {
               dev: true,
               peerDependencies: { vue: '3.x' },
             },
+            // workspace pinning vue exactly, must stay: it is the link target
+            // of node_modules/@vue-repro/app
+            'packages/app': {
+              name: '@vue-repro/app',
+              version: '1.0.0',
+              dependencies: { vue: '3.5.39' },
+            },
+            'node_modules/@vue-repro/app': {
+              resolved: 'packages/app',
+              link: true,
+            },
           },
         }),
       );
@@ -292,6 +302,10 @@ describe('modules/manager/npm/post-update/index', () => {
       // packages without an exact pin on the updated dep stay
       expect(written.packages['node_modules/@vue/test-utils']).toBeDefined();
       expect(written.packages['node_modules/@vue/shared']).toBeDefined();
+      // workspaces stay even when they pin exactly, else npm fails with
+      // EMISSINGTARGET on the link entry referencing them
+      expect(written.packages['packages/app']).toBeDefined();
+      expect(written.packages['node_modules/@vue-repro/app']).toBeDefined();
     });
 
     it('writes .npmrc files', async () => {
@@ -334,6 +348,61 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
         'packages/core/.npmrc',
         '#dummy\n',
+      );
+    });
+
+    it('snapshots a shared .npmrc only once', async () => {
+      fs.readLocalFile.mockResolvedValue('original');
+      const originalNpmrcFiles = new Map<string, string>();
+
+      await writeExistingFiles(
+        updateConfig,
+        {
+          npm: [
+            {
+              packageFile: 'packages/core/package.json',
+              npmrc: 'first',
+              managerData: {},
+            },
+            {
+              packageFile: 'packages/core/package.json',
+              npmrc: 'second',
+              managerData: {},
+            },
+          ],
+        },
+        originalNpmrcFiles,
+      );
+
+      expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
+        'packages/core/.npmrc',
+        'utf8',
+      );
+      expect(originalNpmrcFiles).toEqual(
+        new Map([['packages/core/.npmrc', 'original']]),
+      );
+    });
+
+    it('logs and continues if a temporary .npmrc cannot be prepared', async () => {
+      const err = new Error('read failed');
+      fs.readLocalFile.mockRejectedValueOnce(err);
+
+      await expect(
+        writeExistingFiles(updateConfig, {
+          npm: [
+            {
+              packageFile: 'packages/core/package.json',
+              npmrc: 'sanitized',
+              managerData: {},
+            },
+          ],
+        }),
+      ).toResolve();
+
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { npmrcFilename: 'packages/core/.npmrc', err },
+        'Error writing .npmrc',
       );
     });
 
@@ -583,6 +652,140 @@ describe('modules/manager/npm/post-update/index', () => {
         ['randomFolder/.npmrc'],
         ['packages/pnpm/.npmrc'],
       ]);
+    });
+
+    it('restores a nested repository .npmrc after generating artifacts', async () => {
+      const npmrcFilename = 'packages/core/.npmrc';
+      const originalNpmrc = 'package-lock=false\r\nkeep = true';
+      const files = new Map<string, string>([[npmrcFilename, originalNpmrc]]);
+      fs.readLocalFile.mockImplementation((fileName): Promise<string | null> =>
+        Promise.resolve(files.get(fileName) ?? null),
+      );
+      fs.writeLocalFile.mockImplementation((fileName, content) => {
+        files.set(fileName, content.toString());
+        return Promise.resolve();
+      });
+      fs.deleteLocalFile.mockImplementation((fileName) => {
+        files.delete(fileName);
+        return Promise.resolve();
+      });
+
+      const packageFiles: AdditionalPackageFiles = {
+        npm: [
+          {
+            packageFile: 'packages/core/package.json',
+            npmrc: 'keep = true',
+            managerData: {
+              npmLock: 'packages/core/package-lock.json',
+              npmrcFileName: npmrcFilename,
+            },
+          },
+        ],
+      };
+      const config = partial<PostUpdateConfig>({
+        upgrades: [{}],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'packages/core/package.json',
+            contents: '{}',
+          },
+        ],
+      });
+
+      await expect(getAdditionalFiles(config, packageFiles)).toResolve();
+
+      expect(files.get(npmrcFilename)).toBe(originalNpmrc);
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        npmrcFilename,
+        'keep = true\n',
+      );
+      expect(fs.writeLocalFile).toHaveBeenLastCalledWith(
+        npmrcFilename,
+        originalNpmrc,
+      );
+    });
+
+    it('restores a repository .npmrc when artifact generation throws', async () => {
+      const npmrcFilename = '.npmrc';
+      const originalNpmrc = 'package-lock=false';
+      let npmrcOnDisk = originalNpmrc;
+      fs.readLocalFile.mockImplementation((fileName): Promise<string | null> =>
+        Promise.resolve(fileName === npmrcFilename ? npmrcOnDisk : null),
+      );
+      fs.writeLocalFile.mockImplementation((fileName, content) => {
+        if (fileName === npmrcFilename) {
+          npmrcOnDisk = content.toString();
+        }
+        return Promise.resolve();
+      });
+      spyNpm.mockImplementationOnce(() => {
+        expect(npmrcOnDisk).toBe('\n');
+        return Promise.reject(new Error('artifact failure'));
+      });
+
+      const packageFiles: AdditionalPackageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            npmrc: '',
+            managerData: {
+              npmLock: 'package-lock.json',
+              npmrcFileName: npmrcFilename,
+            },
+          },
+        ],
+      };
+      const config = partial<PostUpdateConfig>({
+        upgrades: [{}],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'package.json',
+            contents: '{}',
+          },
+        ],
+      });
+
+      await expect(getAdditionalFiles(config, packageFiles)).rejects.toThrow(
+        'artifact failure',
+      );
+      expect(npmrcOnDisk).toBe(originalNpmrc);
+      expect(fs.writeLocalFile).toHaveBeenLastCalledWith(
+        npmrcFilename,
+        originalNpmrc,
+      );
+    });
+
+    it('logs and continues when restoring a repository .npmrc fails', async () => {
+      const npmrcFilename = '.npmrc';
+      const originalNpmrc = 'package-lock=false';
+      const err = new Error('restore failed');
+      fs.readLocalFile.mockResolvedValue(originalNpmrc);
+      fs.writeLocalFile.mockResolvedValueOnce().mockRejectedValueOnce(err);
+
+      await expect(
+        getAdditionalFiles(partial<PostUpdateConfig>({ upgrades: [] }), {
+          npm: [
+            {
+              packageFile: 'package.json',
+              npmrc: '',
+              managerData: { npmrcFileName: npmrcFilename },
+            },
+          ],
+        }),
+      ).toResolve();
+
+      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(1, npmrcFilename, '\n');
+      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+        2,
+        npmrcFilename,
+        originalNpmrc,
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { npmrcFilename, err },
+        'Error restoring .npmrc',
+      );
     });
 
     it('adds artifact notice on beforeFallback', async () => {

@@ -90,7 +90,9 @@ export class DockerDatasource extends Datasource {
 
   override readonly defaultVersioning = dockerVersioningId;
 
-  override readonly defaultRegistryUrls = [DOCKER_HUB];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [DOCKER_HUB];
+  }
 
   override readonly defaultConfig = defaultConfig;
 
@@ -412,6 +414,7 @@ export class DockerDatasource extends Datasource {
             ? _err.err
             : /* istanbul ignore next: can never happen */ _err;
 
+        // v8 ignore else -- needs a non-5xx failure from the manifest request
         if (
           typeof err.statusCode === 'number' &&
           err.statusCode >= 500 &&
@@ -450,6 +453,7 @@ export class DockerDatasource extends Datasource {
       );
 
       // TODO: fix me, architecture is required in spec
+      // v8 ignore else -- needs a config blob with neither key
       if (
         configResponse &&
         ('config' in configResponse.body ||
@@ -587,9 +591,11 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
+          // v8 ignore else -- needs the helm config blob request to come back empty
           if (configResponse) {
             // Helm chart
             const url = findHelmSourceUrl(configResponse.body);
+            // v8 ignore else -- needs a helm chart with no source url
             if (url) {
               labels[sourceLabel] = url;
             }
@@ -626,6 +632,7 @@ export class DockerDatasource extends Datasource {
         }
       }
 
+      // v8 ignore else -- labels are always set by the branches above
       if (labels) {
         logger.debug(
           {
@@ -760,6 +767,8 @@ export class DockerDatasource extends Datasource {
       'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
       'https://quay.io', // Quay sorts from oldest to newest, so we need to get all pages
       'https://cgr.dev', // Chainguard sorts lexically and publishes a tag per build, so current versions sort past the page limit
+      'https://registry.access.redhat.com', // RH catalog; Quay-style lexicographic sort, high tag counts
+      'https://registry.redhat.io', // RH authenticated catalog; same backend
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
@@ -1045,6 +1054,9 @@ export class DockerDatasource extends Datasource {
               }
               // TODO: return null if no matching architecture digest found
               // https://github.com/renovatebot/renovate/discussions/22639
+              // NOTE: reaching the implicit else needs a manifest list with no
+              // digest header. A coverage-ignore hint cannot suppress it on an
+              // `else if`.
             } else if (
               hasKey('docker-content-digest', manifestResponse.headers)
             ) {

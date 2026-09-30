@@ -15,6 +15,10 @@ type TestConfig = PackageRuleInputConfig & {
 };
 
 describe('util/package-rules/index', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   const config1: TestConfig = {
     foo: 'bar',
 
@@ -198,6 +202,58 @@ describe('util/package-rules/index', () => {
     expect(res.enabled).toBeTrue();
     expect(res.skipReason).toBeUndefined();
     expect(res.skipStage).toBeUndefined();
+  });
+
+  it('unsets skipReason=unknown-registry if a rule gives it a registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('unsets skipReason=unknown-registry if config gives it a default registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      defaultRegistryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+      packageRules: [],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('keeps skipReason=unknown-registry when enabled=true gives it no registry', async () => {
+    // the dependency is wanted, but there is still nowhere to look it up
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          enabled: true,
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBe('unknown-registry');
+    expect(res.skipStage).toBe('extract');
   });
 
   it('does not set skipReason=package-rules if the last packageRule has force.enabled=true', async () => {
@@ -670,6 +726,34 @@ describe('util/package-rules/index', () => {
     expect(res.y).toBeUndefined();
   });
 
+  it('filters isBreaking', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchIsBreaking: true,
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+        {
+          matchIsBreaking: false,
+          // @ts-expect-error -- testing
+          y: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'minor' as UpdateType,
+      isBreaking: true,
+    };
+
+    const res = await applyPackageRules({ ...config, ...dep });
+
+    expect(res.x).toBe(1);
+    expect(res.y).toBeUndefined();
+  });
+
   it('matches matchSourceUrls with glob', async () => {
     const config: TestConfig = {
       packageRules: [
@@ -859,7 +943,6 @@ describe('util/package-rules/index', () => {
     };
 
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add(hostRule);
     });
 
@@ -949,6 +1032,45 @@ describe('util/package-rules/index', () => {
       expect(error.validationMessage).toBe(
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
       );
+    });
+
+    it('does not throw when unauthenticated on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+          },
+        ],
+      };
+      hostRules.clear();
+
+      await expect(applyPackageRules(config)).resolves.not.toThrow();
+    });
+
+    it('does not apply the packageRule on platform=local', async () => {
+      GlobalConfig.set({
+        platform: 'local',
+      });
+
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+            // @ts-expect-error -- testing
+            x: 1,
+          },
+        ],
+      };
+      hostRules.clear();
+
+      const res = await applyPackageRules(config);
+      expect(res.x).toBeUndefined();
     });
 
     it('uses productLinks.documentation in error message URL', async () => {

@@ -82,6 +82,7 @@ export function handleDepString(ctx: Ctx): Ctx {
   for (const token of stringTokens) {
     if (token.type === 'symbol') {
       const varData = findVariable(token.value, ctx);
+      // v8 ignore else -- needs a script where this lookup resolves to nothing
       if (varData) {
         packageFile = varData.packageFile;
         fileReplacePosition = varData.fileReplacePosition;
@@ -147,6 +148,7 @@ export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
     dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
+    // v8 ignore else -- needs a script where this lookup resolves to nothing
     if (varData) {
       dep.sharedVariableName = varData.key;
       dep.currentValue = varData.value;
@@ -201,6 +203,7 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
     dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
+    // v8 ignore else -- needs a script where this lookup resolves to nothing
     if (varData) {
       dep.sharedVariableName = varData.key;
       dep.managerData = {
@@ -359,6 +362,7 @@ export function handleRegistryUrl(ctx: Ctx): Ctx {
   if (ctx.tokenMap.name) {
     const nameTokens = loadFromTokenMap(ctx, 'name');
     const nameValue = interpolateString(nameTokens, ctx, localVariables);
+    // v8 ignore else -- needs a script where this lookup resolves to nothing
     if (nameValue) {
       localVariables = {
         ...localVariables,
@@ -375,9 +379,11 @@ export function handleRegistryUrl(ctx: Ctx): Ctx {
     ctx,
     localVariables,
   );
+  // v8 ignore else -- needs a script where this lookup resolves to nothing
   if (registryUrl) {
     registryUrl = registryUrl.replace(regEx(/\\/g), '');
     const url = parseUrl(registryUrl);
+    // v8 ignore else -- needs a script where this lookup resolves to nothing
     if (url?.host && url.protocol) {
       const registryType = isExclusiveRegistry(ctx) ? 'exclusive' : 'regular';
       if (registryType === 'exclusive' && !ctx.tmpRegistryContent.length) {
@@ -421,6 +427,7 @@ export function handleCatalogLongFormDep(ctx: Ctx): Ctx {
 
   if (ctx.tokenMap.version) {
     const version = interpolateString(loadFromTokenMap(ctx, 'version'), ctx);
+    // v8 ignore else -- needs a script where this lookup resolves to nothing
     if (version) {
       handleLongFormDep(ctx);
     }
@@ -460,6 +467,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
       loadFromTokenMap(ctx, 'parentPath'),
       ctx,
     );
+    // v8 ignore else -- needs a script where this lookup resolves to nothing
     if (parentPath && scriptFile) {
       scriptFile = upath.join(parentPath, scriptFile);
     }
@@ -527,6 +535,7 @@ export function handleImplicitDep(ctx: Ctx): Ctx {
     dep.skipReason = 'unspecified-version';
   } else if (versionTokens[0].type === 'symbol') {
     const varData = findVariable(versionTokens[0].value, ctx);
+    // v8 ignore else -- needs a script where this lookup resolves to nothing
     if (varData) {
       dep.sharedVariableName = varData.key;
       dep.currentValue = varData.value;

@@ -6,6 +6,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { getToolConfig } from '../../../util/exec/containerbase.ts';
 import { isToolName } from '../../../util/exec/types.ts';
 import { coerceObject } from '../../../util/object.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -16,6 +17,7 @@ const supportedPresetSources: Record<string, string> = {
   github: GithubTagsDatasource.id,
   gitlab: GitlabTagsDatasource.id,
   gitea: GiteaTagsDatasource.id,
+  forgejo: ForgejoTagsDatasource.id,
 };
 
 export function extractPackageFile(

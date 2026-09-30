@@ -81,7 +81,6 @@ describe('modules/manager/helmfile/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
   });
 
   it('returns null if no helmfile.lock found', async () => {
@@ -390,6 +389,34 @@ describe('modules/manager/helmfile/artifacts', () => {
       expect(execSnapshots).toMatchObject(expectedCommands);
     },
   );
+
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+    git.getFile.mockResolvedValueOnce(lockFile);
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    await expect(
+      helmfile.updateArtifacts({
+        packageFileName: 'helmfile.yaml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: helmfileYaml,
+        config: {
+          ...config,
+          // the lock file pins helmfile 0.151.0, which takes precedence here
+          extractedConstraints: { helm: '3.7.2', helmfile: '0.100.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool helm 3.7.2' },
+      { cmd: 'install-tool helmfile 0.151.0' },
+      { cmd: 'helmfile deps -f helmfile.yaml' },
+    ]);
+  });
 
   it.each([
     'not found',

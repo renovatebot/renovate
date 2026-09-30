@@ -47,6 +47,32 @@ describe('workers/repository/process/index', () => {
       });
     });
 
+    it('keeps the first base branch package files and tolerates no fork sync', async () => {
+      const { syncForkWithUpstream } = scm;
+      Object.defineProperty(scm, 'syncForkWithUpstream', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
+      extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
+      vi.mocked(lookup).mockResolvedValue({
+        branches: [],
+        branchList: [],
+        packageFiles: { npm: [] },
+      });
+      config.baseBranchPatterns = ['branch1', 'branch2'];
+      scm.branchExists.mockResolvedValue(true);
+
+      try {
+        const res = await extractDependencies(config);
+
+        expect(res.packageFiles).toEqual({ npm: [] });
+        expect(scm.branchExists).toHaveBeenCalled();
+      } finally {
+        scm.syncForkWithUpstream = syncForkWithUpstream;
+      }
+    });
+
     it('reads config from default branch if useBaseBranchConfig not specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile.mockResolvedValueOnce({});

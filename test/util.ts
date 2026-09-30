@@ -41,7 +41,8 @@ export const platform = vi.mocked(partial<Required<Platform>>(_platform));
 export const scm = vi.mocked(_scm);
 export const env = vi.mocked(_env);
 export const hostRules = vi.mocked(_hostRules);
-export const logger = vi.mocked(_logger, true);
+export const logger: ReturnType<typeof vi.mockObject<typeof _logger>> =
+  vi.mocked(_logger, true);
 
 export type { RenovateConfig };
 

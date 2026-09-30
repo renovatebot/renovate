@@ -244,7 +244,7 @@ export function setBranchStatus(
 
 export function getBranchStatusCheck(
   _branchName: string,
-  _context: string | null | undefined,
+  _context: string,
 ): Promise<BranchStatus | null> {
   logger.debug('Not implemented setBranchStatus');
   return Promise.resolve(null);
@@ -300,8 +300,7 @@ export function ensureComment(_config: EnsureCommentConfig): Promise<boolean> {
 
 export function ensureCommentRemoval(
   _ensureCommentRemoval:
-    | EnsureCommentRemovalConfigByTopic
-    | EnsureCommentRemovalConfigByContent,
+    EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   logger.debug('Not implemented ensureCommentRemoval');
   return Promise.resolve();
@@ -309,10 +308,6 @@ export function ensureCommentRemoval(
 
 export function massageMarkdown(prBody: string): string {
   return smartTruncate(smartLinks(prBody), maxBodyLength());
-}
-
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(false);
 }
 
 export function getRawFile(

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import traverse from 'neotraverse/legacy';
+import { map } from 'neotraverse';
 import upath from 'upath';
 import { rawExec as _exec } from '../lib/util/exec/common.ts';
 import type {
@@ -30,16 +30,14 @@ function execSnapshot(
 
   const cwd = upath.toUnix(process.cwd());
 
-  // traverse binds `this.update()` to the callback, requires regular function
-  // eslint-disable-next-line prefer-arrow-callback
-  return traverse(snapshot).map(function fixup(v) {
-    if (is.string(v)) {
-      const val = v
+  return map(snapshot, (ctx, val) => {
+    if (is.string(val)) {
+      const newVal = val
         .replace(regEx(/\\(?<char>\w)/g), '/$<char>')
         .replace(regEx(/^[A-Z]:\//), '/') // replace windows paths
         .replace(regEx(/"[A-Z]:\//g), '"/') // replace windows paths
         .replace(cwd, '/root/project');
-      this.update(val);
+      ctx.update(newVal);
     }
   });
 }

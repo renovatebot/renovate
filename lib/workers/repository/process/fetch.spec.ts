@@ -44,9 +44,13 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'package.json',
             deps: [
-              { depName: 'abcd' },
-              { depName: 'foo' },
-              { depName: 'skipped', skipReason: 'some-reason' as never },
+              { depName: 'abcd', packageName: 'abcd' },
+              { depName: 'foo', packageName: 'foo' },
+              {
+                depName: 'skipped',
+                packageName: 'skipped',
+                skipReason: 'some-reason' as never,
+              },
             ],
           },
         ],
@@ -85,6 +89,157 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
 
+    it('keeps skipping an unknown-registry dep which config gives no registry', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping an unknown-registry dep which only a rule enables', async () => {
+      // the rule says the dependency is wanted, but names no registry to look
+      // it up in, so there is still nothing Renovate can do with it
+      config.packageRules = [{ matchDatasources: ['apk'], enabled: true }];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('looks up an unknown-registry dep which config gives a registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipStage',
+      );
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        }),
+      );
+    });
+
+    it('looks up an unknown-registry dep which config gives a default registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.defaultRegistryUrls = [
+        'https://dl-cdn.alpinelinux.org/alpine?arch=x86_64',
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(lookupUpdates).toHaveBeenCalledOnce();
+    });
+
+    it('keeps skipping an unknown-registry dep which brought its own registry', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['git-refs'],
+          registryUrls: ['https://example.com'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        'pre-commit': [
+          {
+            packageFile: '.pre-commit-config.yaml',
+            deps: [
+              {
+                depName: 'some/repo',
+                datasource: 'git-refs',
+                skipReason: 'unknown-registry',
+                registryUrls: ['https://unknown-host.com'],
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles['pre-commit'][0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       // @ts-expect-error -- intentionally using invalid constraint names
@@ -94,7 +249,13 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'pom.xml',
             extractedConstraints: { some: 'constraint', other: 'constraint' },
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -131,7 +292,13 @@ describe('workers/repository/process/fetch', () => {
                 gomodMod: 'pfile-version',
                 go: 'go-version',
               },
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -157,7 +324,13 @@ describe('workers/repository/process/fetch', () => {
             {
               packageFile: 'pom.xml',
               constraintsVersioning: { go: 'go-version' },
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -180,7 +353,13 @@ describe('workers/repository/process/fetch', () => {
             {
               packageFile: 'pom.xml',
               // no constraintsVersioning on pFile
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -205,7 +384,13 @@ describe('workers/repository/process/fetch', () => {
             {
               packageFile: 'pom.xml',
               // no constraintsVersioning on pFile
-              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
             },
           ],
         };
@@ -216,6 +401,77 @@ describe('workers/repository/process/fetch', () => {
         expect(lookupUpdates).toHaveBeenCalledWith(
           expect.objectContaining({
             constraintsVersioning: { gomodMod: 'config-version' },
+          }),
+        );
+      });
+
+      it('is merged from dep with packageFile and config', async () => {
+        config.constraintsVersioning = { '%goMod': 'config-version' };
+        const packageFiles: Record<string, PackageFile[]> = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              constraintsVersioning: {
+                '%goMod': 'pfile-version',
+                perl: 'pfile-perl-version',
+              },
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                  constraintsVersioning: {
+                    '%goMod': 'dep-version',
+                    perl: 'dep-perl-version',
+                    vscode: 'dep-vscode-version',
+                  },
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: {
+              '%goMod': 'config-version',
+              perl: 'pfile-perl-version',
+              vscode: 'dep-vscode-version',
+            },
+          }),
+        );
+      });
+
+      it('is set from dep if only set on dep', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                  constraintsVersioning: { perl: 'dep-perl-version' },
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: { perl: 'dep-perl-version' },
           }),
         );
       });
@@ -233,6 +489,7 @@ describe('workers/repository/process/fetch', () => {
               {
                 datasource: MavenDatasource.id,
                 depName: 'bbb',
+                packageName: 'bbb',
                 extractedConstraints: { python: '<3.12' },
               },
             ],
@@ -266,10 +523,16 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'values.yaml',
             deps: [
-              { depName: '', currentValue: '2.8.11', datasource: 'docker' },
-              { depName: 'abcd' },
+              {
+                depName: '',
+                packageName: '',
+                currentValue: '2.8.11',
+                datasource: 'docker',
+              },
+              { depName: 'abcd', packageName: 'abcd' },
               { currentValue: '2.8.11', datasource: 'docker' },
-              { depName: ' ' },
+              // a whitespace-only name is trimmed away during extraction
+              { depName: '', packageName: '' },
               {},
               { depName: undefined },
               // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid depName type to test invalid-name skip handling
@@ -296,6 +559,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'dep-name',
+                packageName: 'dep-name',
                 currentValue: '2.8.11',
                 datasource: 'docker',
                 isInternal: true,
@@ -322,6 +586,7 @@ describe('workers/repository/process/fetch', () => {
               {
                 datasource: MavenDatasource.id,
                 depName: 'bbb',
+                packageName: 'bbb',
                 isInternal: true,
               },
             ],
@@ -341,7 +606,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -358,7 +629,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -375,7 +652,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };

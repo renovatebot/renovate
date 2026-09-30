@@ -3,15 +3,12 @@ import {
   RDSClient,
 } from '@aws-sdk/client-rds';
 import { coerceArray } from '../../../util/array.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Lazy } from '../../../util/lazy.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
 export class AwsRdsDatasource extends Datasource {
   static readonly id = 'aws-rds';
-
-  override readonly caching = true;
 
   private readonly rds: Lazy<RDSClient>;
 
@@ -20,7 +17,7 @@ export class AwsRdsDatasource extends Datasource {
     this.rds = new Lazy(() => new RDSClient({}));
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName: serializedFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const cmd = new DescribeDBEngineVersionsCommand({
@@ -39,13 +36,12 @@ export class AwsRdsDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${AwsRdsDatasource.id}`,
         key: `getReleases:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

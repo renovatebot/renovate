@@ -253,7 +253,6 @@ export function isLimitReached(
     return handleConcurrentLimits(limit, config);
   }
 
-  // istanbul ignore next: should not happen
   throw new Error(
     'Config is required for computing limits for Branches and PullRequests',
   );

@@ -9,6 +9,7 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import type { PyProject } from '../schema.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
@@ -37,16 +38,19 @@ export class PixiProcessor extends BasePyProjectProcessor {
     return [];
   }
 
-  updateArtifacts(
+  async updateArtifacts(
     { config, updatedDeps, packageFileName }: UpdateArtifact,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
-    const constraint =
-      config.constraints?.pixi ?? project.tool?.pixi?.['requires-pixi'];
+    const constraint = await resolveToolConstraint(
+      config,
+      'pixi',
+      () => project.tool?.pixi?.['requires-pixi'],
+    );
 
     // The `pep621` manager has already written the updated package file, so
     // `newPackageFileContent` is intentionally left unset here.
-    return updatePixiLockfile({
+    return await updatePixiLockfile({
       packageFileName,
       updatedDeps,
       isLockFileMaintenance: config.isLockFileMaintenance,

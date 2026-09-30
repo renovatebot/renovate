@@ -1,5 +1,6 @@
 import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
 import {
+  HOST_BLOCKED,
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
 } from '../../../constants/error-messages.ts';
@@ -17,6 +18,7 @@ import type {
   HttpResponse,
   OutgoingHttpHeaders,
 } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
 import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
 import { coerceObject } from '../../../util/object.ts';
@@ -63,11 +65,17 @@ export async function getAuthHeaders(
       noAuth: true,
       cacheProvider: memCacheProvider,
     };
-    const apiCheckResponse = apiCheckUrl.endsWith('/v2/')
-      ? await http.get(apiCheckUrl, options)
-      : // use json request, as this will be cached for tags, so it returns json
-        // TODO: add cache test
-        await http.getJsonUnchecked(apiCheckUrl, options);
+    // Written as an if/else rather than a ternary on purpose: v8 gives the
+    // branch that follows an `await` inside a ternary a negative hit count,
+    // which the coverage reporters then read as uncovered.
+    let apiCheckResponse: HttpResponse<unknown>;
+    if (apiCheckUrl.endsWith('/v2/')) {
+      apiCheckResponse = await http.get(apiCheckUrl, options);
+    } else {
+      // use json request, as this will be cached for tags, so it returns json
+      // TODO: add cache test
+      apiCheckResponse = await http.getJsonUnchecked(apiCheckUrl, options);
+    }
 
     if (apiCheckResponse.statusCode === 200) {
       logger.debug(`No registry auth required for ${apiCheckUrl}`);
@@ -264,8 +272,11 @@ export async function getAuthHeaders(
       throw err;
     }
     /* v8 ignore if -- hostRules-disabled host is swallowed silently, not mocked in specs */
-    if (err.message === HOST_DISABLED) {
-      logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
+    if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+      logger.trace(
+        { registryHost, dockerRepository, err },
+        refusedHostMessage(err),
+      );
       return undefined;
     }
     logger.warn(

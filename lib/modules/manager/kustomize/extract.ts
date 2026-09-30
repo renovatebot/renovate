@@ -8,7 +8,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
-import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import { getOciChartDep, isOCIRegistry } from '../helmv3/oci.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -90,7 +90,10 @@ export function extractImage(
     logger.debug({ image }, 'Invalid image name');
     return null;
   }
-  const nameDep = getDep(nameToSplit, false, aliases);
+  const nameDep = getDep(nameToSplit, {
+    specifyReplaceString: false,
+    registryAliases: aliases,
+  });
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
@@ -131,7 +134,10 @@ export function extractImage(
       };
     }
 
-    const dep = getDep(`${depName}:${newTag}`, false, aliases);
+    const dep = getDep(`${depName}:${newTag}`, {
+      specifyReplaceString: false,
+      registryAliases: aliases,
+    });
     return {
       ...dep,
       replaceString: newTag,
@@ -159,18 +165,10 @@ export function extractHelmChart(
   }
 
   if (isOCIRegistry(helmChart.repo)) {
-    const dep = getDep(
-      `${removeOCIPrefix(helmChart.repo)}/${helmChart.name}:${helmChart.version}`,
-      false,
-      aliases,
-    );
-    delete dep.replaceString;
     return {
-      ...dep,
+      ...getOciChartDep(helmChart.repo, helmChart.name, aliases),
       depName: helmChart.name,
-      // https://github.com/helm/helm/issues/10312
-      // https://github.com/helm/helm/issues/10678
-      pinDigests: false,
+      currentValue: helmChart.version,
     };
   }
 

@@ -338,6 +338,9 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
 - As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 25 hours, see [`prNotPendingHours`](#prnotpendinghours))
 
+Note that `"automergeType": "branch"` only works with GitHub merge queues or GitLab merge trains if Renovate is on the merge queue's bypass list, because the merge queue does not allow pushing directly to the base branch otherwise.
+If the push is rejected, Renovate falls back to creating a PR.
+
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
@@ -1206,6 +1209,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 If `extractVersion` cannot be captured with a named capture group in `matchString`, then it can be defined manually using this field.
 It will be compiled using Handlebars and the regex `groups` result.
+See [`extractVersion`](#extractversion) for how the value is used.
 
 ### `customManagers.fileFormat`
 
@@ -1810,6 +1814,9 @@ Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/p
 Only use this config option when the raw version strings from the datasource do not match the expected format that you need in your package file.
 You must define a "named capture group" called `version` like in the examples below.
 
+`extractVersion` is only applied to the versions returned by the datasource.
+It is not applied to the `currentValue` from your package file, so `currentValue` must already be in the extracted format.
+
 For example, to extract only the major.minor precision from a GitHub release, the following would work:
 
 ```json
@@ -2159,7 +2166,7 @@ A preset alternative to the above is:
 }
 ```
 
-To match specific ports you have to add a protocol to `matchHost`:
+To match a specific port, add the port to `matchHost`:
 
 ```json
 {
@@ -2172,12 +2179,17 @@ To match specific ports you have to add a protocol to `matchHost`:
 }
 ```
 
-!!! warning
-  Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
+!!! note
+  A `matchHost` with a port or a path but no scheme, like `domain.com:9118` or `domain.com/path`, is treated as `https://domain.com:9118` or `https://domain.com/path`.
+  To match a port over plain `http`, include the scheme.
 
 !!! note
   Disabling a host is only 100% effective if added to self-hosted config.
   Renovate currently still checks its _cache_ for results first before trying to connect, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same Renovate deployment has successfully queried for the same dependency recently.
+
+!!! note
+  `enabled` is not resolved by specificity alone: host rules from the self-hosted administrator's own config are resolved at a higher trust level than those from repository config or a preset.
+  So if the administrator's own rules set `enabled` for a host, repository config or a preset cannot re-enable - or disable - that host, no matter how specific its `matchHost` is.
 
 ### `hostRules.abortIgnoreStatusCodes`
 
@@ -2346,8 +2358,10 @@ By default, all headers starting with "X-" are allowed.
 
 A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+`headers` you configure in a repository config file, or a preset it extends, are checked against `allowedHeaders`.
 Any header which is not permitted is dropped, and a warning is logged.
+
+`allowedHeaders` does not constrain the self-hosted administrator's own `hostRules` (for example in a `config.js` file, or a `repositories[]` entry): their `headers` are always applied, regardless of `allowedHeaders`.
 
 When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
 
@@ -2446,7 +2460,7 @@ registry=https://gitlab.myorg.com/api/v4/packages/npm/
 ```
 
 !!! note
-  Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` → `https://domain.com/path`)
+  Values containing a URL path or a port but missing a scheme will be prepended with `https://` (e.g. `domain.com/path` → `https://domain.com/path`, `domain.com:9118` → `https://domain.com:9118`).
 
 ### `hostRules.maxRequestsPerSecond`
 
@@ -2987,6 +3001,33 @@ When `minimumReleaseAge` is set to a time duration, the `minimumReleaseAgeBehavi
 When set to `timestamp-required`, this version is not treated stable unless there is release timestamp, and that release timestamp is past the [`minimumReleaseAge`](#minimumreleaseage).
 
 When set to `timestamp-optional`, Renovate will treat a release without a releaseTimestamp as stable.
+
+This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
+
+## `minimumReleaseAgeBuffer`
+
+Use this option to extend the time Renovate waits before suggesting an update, on top of [`minimumReleaseAge`](#minimumreleaseage).
+
+Some projects publish a set of related packages, where companion packages (like platform-specific binaries) are published _after_ the main package.
+For example, `@biomejs/biome@2.5.10` may be published some minutes before `@biomejs/cli-linux-x64@2.5.10`.
+If your package manager enforces its own release age cooldown, like pnpm's `minimumReleaseAge` setting or npm's `--before` flag, Renovate may suggest the main package as soon as it passes `minimumReleaseAge`, while a companion package published later is still within the package manager's cooldown.
+The package manager then refuses to update the lock file, and the update fails with an artifact error.
+
+`minimumReleaseAgeBuffer` avoids this by letting Renovate wait longer than the package manager's cooldown.
+Renovate defers the update until `minimumReleaseAge` _plus_ the buffer duration has passed, while the package manager keeps using the plain `minimumReleaseAge` cutoff.
+This way, packages published up to the buffer time after the suggested release have also passed the package manager's cooldown.
+
+By default, Renovate uses a buffer of 30 minutes.
+Set `minimumReleaseAgeBuffer` to `null` to disable the buffer.
+
+For example, with the following configuration Renovate waits 3 days plus 1 hour before suggesting an update, while the package manager's cooldown stays at 3 days:
+
+```json
+{
+  "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBuffer": "1 hour"
+}
+```
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
@@ -3589,6 +3630,32 @@ The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+### `packageRules.matchIsBreaking`
+
+Use `matchIsBreaking` to match updates based on whether Renovate considers them breaking.
+Set it to `true` to match only breaking updates, or `false` to match only non-breaking updates.
+
+What counts as breaking depends on the versioning of the dependency:
+
+- Versionings with their own notion of breaking changes decide themselves, for example Cargo treats a minor bump of a `0.x` crate (`0.1.0` to `0.2.0`) as breaking
+- For all other versionings, an update is breaking if its `updateType` is `major`
+
+Rules with `matchIsBreaking` never match when there is no update to evaluate, for example for `lockFileMaintenance`.
+
+The following example automerges all non-breaking updates of packages in the `@myorg` scope:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["@myorg{/,}**"],
+      "matchIsBreaking": false,
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### `packageRules.matchJsonata`
 
 Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
@@ -3604,6 +3671,7 @@ $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
 $detectPlatform(sourceUrl) = 'github'
+$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://registry.example.com/**"])
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
@@ -3611,6 +3679,7 @@ $detectPlatform(sourceUrl) = 'github'
 Renovate provides the following custom JSONata functions:
 
 - `$detectPlatform(url)` - Takes a URL string and returns the detected platform (`azure`, `bitbucket`, `bitbucket-server`, `forgejo`, `gitea`, `github`, `gitlab`) or `null`.
+- `$matchRegexOrGlob(input, patterns)` - Returns `true` if `input` matches `patterns`, using Renovate's [string pattern matching](./string-pattern-matching.md) syntax. `input` can be a string or an array of strings, in which case any matching element returns `true`. `patterns` is an array of strings, or a single string. Returns `false` if `input` is missing. Use this to combine conditions on different fields with `or`, which separate `match*` options can't do because they are combined with `and`.
 
 ### `packageRules.matchManagers`
 
@@ -4603,7 +4672,7 @@ By default this label is `"rebase"` but you can configure it to anything you wan
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
+- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead. On GitHub, if the base branch has a merge queue, `conflicted` is used because the merge queue already tests PRs against the head of the base branch. The same applies on GitLab if merge trains are enabled on the project
 - `automerging`: Renovate will use `behind-base-branch` if configured to automerge, Otherwise, `never` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted
@@ -4649,6 +4718,7 @@ The aliases support variables with default values (using the `:-` syntax) which 
 This feature works with the following managers:
 
 - [`ansible`](modules/manager/ansible/index.md)
+- [`argocd`](modules/manager/argocd/index.md)
 - [`bazel-module`](modules/manager/bazel-module/index.md)
 - [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
 - [`circleci`](modules/manager/circleci/index.md)
@@ -4663,6 +4733,7 @@ This feature works with the following managers:
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
 - [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
+- [`helmsman`](modules/manager/helmsman/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
 - [`terraform`](modules/manager/terraform/index.md)
@@ -4731,6 +4802,10 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
+
+In some situations managers can not derive which registry a given dependency comes from.
+In that case, managers skip it with `skipReason: unknown-registry` rather than look it up somewhere which may hold the wrong versions.
+When specifying `registryUrls` alongside a dependency with `skipReason: unknown-registry`, Renovate will use the configured `registryUrls`.
 
 ## `replacement`
 

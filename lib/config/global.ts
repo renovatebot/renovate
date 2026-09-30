@@ -8,7 +8,7 @@ import type {
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
   static OPTIONS = [
-    'allowCustomCrateRegistries',
+    'allowCustomCrateGitRegistries',
     'allowPlugins',
     'allowScripts',
     'allowShellExecutorForPostUpgradeCommands',
@@ -43,6 +43,8 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
+    'inheritConfigTrusted',
+    'internalHostAccess',
     /** NOTE that this is not a config option, but an internal variable **/
     'localDir',
     'migratePresets',
@@ -66,8 +68,7 @@ export class GlobalConfig {
     'toolSettings',
     'userAgent',
   ] as const satisfies readonly (
-    | keyof RepoGlobalConfig
-    | keyof InternalGlobalConfigOptions
+    keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions
   )[];
 
   private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};
