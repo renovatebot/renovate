@@ -39,11 +39,16 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.yarn = yarn;
       }
       for (const dep of packageFile.deps) {
-        dep.lockedVersion =
-          lockFileCache[yarnLock].lockedVersions?.[
-            // TODO: types (#22198)
-            `${dep.depName}@${dep.currentValue}`
-          ];
+        if (
+          dep.depType !== 'devEngines.runtime' &&
+          dep.depType !== 'devEngines.packageManager'
+        ) {
+          dep.lockedVersion =
+            lockFileCache[yarnLock].lockedVersions?.[
+              // TODO: types (#22198)
+              `${dep.depName}@${dep.currentValue}`
+            ];
+        }
         if (
           (dep.depType === 'engines' ||
             dep.depType === 'packageManager' ||

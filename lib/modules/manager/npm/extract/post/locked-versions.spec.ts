@@ -54,6 +54,75 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       'c@2.0.0': '3.0.0',
     };
 
+    it.each([true, false])(
+      'does not derive devEngines versions from yarn.lock (isYarn1: %s)',
+      async (isYarn1) => {
+        yarn.getYarnLock.mockResolvedValue({
+          isYarn1,
+          lockedVersions: {
+            'node@22.0.0': '22.0.0',
+            'yarn@4.6.0': '4.6.0',
+          },
+        });
+        const packageFiles: PackageFile<NpmManagerData>[] = [
+          {
+            packageFile: 'package.json',
+            managerData: { yarnLock: 'yarn.lock' },
+            deps: [
+              {
+                depName: 'node',
+                currentValue: '22.0.0',
+                depType: 'devEngines.runtime',
+              },
+              {
+                depName: 'yarn',
+                currentValue: '4.6.0',
+                depType: 'devEngines.packageManager',
+              },
+              {
+                depName: 'node',
+                currentValue: '22.0.0',
+                depType: 'dependencies',
+              },
+              {
+                depName: 'yarn',
+                currentValue: '4.6.0',
+                depType: 'dependencies',
+              },
+            ],
+          },
+        ];
+
+        await getLockedVersions(packageFiles);
+
+        expect(packageFiles[0].deps).toEqual([
+          {
+            depName: 'node',
+            currentValue: '22.0.0',
+            depType: 'devEngines.runtime',
+          },
+          {
+            depName: 'yarn',
+            currentValue: '4.6.0',
+            depType: 'devEngines.packageManager',
+            ...(isYarn1 ? {} : { packageName: '@yarnpkg/cli-dist' }),
+          },
+          {
+            depName: 'node',
+            currentValue: '22.0.0',
+            depType: 'dependencies',
+            lockedVersion: '22.0.0',
+          },
+          {
+            depName: 'yarn',
+            currentValue: '4.6.0',
+            depType: 'dependencies',
+            lockedVersion: '4.6.0',
+          },
+        ]);
+      },
+    );
+
     it('uses yarn.lock with yarn v1.22.0', async () => {
       const yarnVersion = '1.22.0';
       const lockfileVersion = undefined;
