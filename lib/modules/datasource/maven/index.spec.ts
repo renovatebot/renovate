@@ -116,10 +116,6 @@ describe('modules/datasource/maven/index', () => {
     });
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('returns null when metadata is not found', async () => {
     httpMock
       .scope(baseUrl)

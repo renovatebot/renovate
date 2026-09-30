@@ -21,10 +21,6 @@ const updateArtifact: UpdateArtifact = {
 };
 
 describe('modules/manager/deno/artifacts', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('updateArtifacts()', () => {
     let localDirResult: DirectoryResult;
     let localDir: string;

@@ -60,7 +60,6 @@ describe('modules/manager/mise/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
     );
