@@ -1972,6 +1972,32 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it.each`
+      packageManager
+      ${{ name: 'yarn', version: '4.6.0' }}
+      ${[{ name: 'yarn', version: '4.6.0' }]}
+    `(
+      'recognizes devEngines.packageManager for Yarn catalogs: $packageManager',
+      async ({ packageManager }) => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          'catalog:\n  is-positive: 1.0.0\n',
+        );
+        fs.readLocalFile.mockResolvedValueOnce(
+          JSON.stringify({ devEngines: { packageManager } }),
+        );
+
+        const res = await extractAllPackageFiles(defaultExtractConfig, [
+          '.yarnrc.yml',
+        ]);
+
+        expect(res[0]).toMatchObject({
+          packageFile: '.yarnrc.yml',
+          deps: [{ depName: 'is-positive', depType: 'yarn.catalog.default' }],
+          managerData: { hasPackageManager: true },
+        });
+      },
+    );
+
     it('extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps', async () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules

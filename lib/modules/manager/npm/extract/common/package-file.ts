@@ -21,7 +21,9 @@ import {
 import { setNodeCommitTopic } from './node.ts';
 import { extractOverrideDepsRec } from './overrides.ts';
 
-export function hasDevEnginesPackageManager(packageJson: NpmPackage): boolean {
+export function hasDevEnginesPackageManager(
+  packageJson: Pick<NpmPackage, 'devEngines'>,
+): boolean {
   const pm = packageJson.devEngines?.packageManager;
   if (Array.isArray(pm)) {
     return pm.some((item) => isNonEmptyObject(item));
@@ -200,7 +202,8 @@ export async function hasPackageManager(
   const packageJsonResult = await loadPackageJson(packageJsonDir);
 
   return (
-    isNonEmptyString(packageJsonResult?.packageManager?.name) &&
-    isNonEmptyString(packageJsonResult?.packageManager?.version)
+    (isNonEmptyString(packageJsonResult?.packageManager?.name) &&
+      isNonEmptyString(packageJsonResult?.packageManager?.version)) ||
+    hasDevEnginesPackageManager({ devEngines: packageJsonResult.devEngines })
   );
 }
