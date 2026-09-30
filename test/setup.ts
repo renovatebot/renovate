@@ -11,6 +11,9 @@ afterEach(async () => {
   // dynamic import to avoid caching this before per-file mocks are hoisted into place
   const hostRules = await import('../lib/util/host-rules.ts');
   hostRules.clear();
+
+  const { GlobalConfig } = await import('../lib/config/global.ts');
+  GlobalConfig.reset();
 });
 
 vi.mock('../lib/modules/platform/index.ts', () => ({
