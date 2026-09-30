@@ -617,6 +617,16 @@ describe('modules/manager/npm/post-update/index', () => {
         vi.mocked(yarn.isYarnUpdate).mockImplementation(
           actualYarn.isYarnUpdate,
         );
+        const plannedManifest = JSON.stringify(
+          depType === 'packageManager'
+            ? { packageManager: 'yarn@4.6.0' }
+            : {
+                devEngines: {
+                  packageManager: { name: 'yarn', version: '4.6.0' },
+                },
+              },
+        );
+        let diskManifest = plannedManifest;
         const oldYarnrc = 'yarnPath: .yarn/releases/yarn-4.5.0.cjs\n';
         const newYarnrc = 'yarnPath: .yarn/releases/yarn-4.6.0.cjs\n';
         git.getFile.mockImplementation((fileName) =>
@@ -625,6 +635,9 @@ describe('modules/manager/npm/post-update/index', () => {
           ),
         );
         fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === 'package.json') {
+            return Promise.resolve(diskManifest);
+          }
           if (fileName === '.yarnrc.yml') {
             return Promise.resolve(newYarnrc);
           }
@@ -633,7 +646,14 @@ describe('modules/manager/npm/post-update/index', () => {
           }
           return Promise.resolve(null);
         });
-        spyYarn.mockResolvedValue({ lockFile: 'lock contents' });
+        spyYarn.mockImplementation(() => {
+          // Yarn also adds packageManager when only devEngines was declared.
+          diskManifest = JSON.stringify({
+            ...JSON.parse(plannedManifest),
+            packageManager: 'yarn@4.6.0',
+          });
+          return Promise.resolve({ lockFile: 'lock contents' });
+        });
         const config = partial<PostUpdateConfig>({
           upgrades: [
             {
@@ -644,7 +664,11 @@ describe('modules/manager/npm/post-update/index', () => {
             },
           ],
           updatedPackageFiles: [
-            { type: 'addition', path: 'package.json', contents: '{}' },
+            {
+              type: 'addition',
+              path: 'package.json',
+              contents: plannedManifest,
+            },
           ],
         });
 
@@ -657,6 +681,10 @@ describe('modules/manager/npm/post-update/index', () => {
           ],
         });
 
+        expect(JSON.parse(diskManifest).packageManager).toBe('yarn@4.6.0');
+        expect(config.updatedPackageFiles).toEqual([
+          { type: 'addition', path: 'package.json', contents: plannedManifest },
+        ]);
         expect(res).toEqual({
           artifactErrors: [],
           artifactNotices: [],
