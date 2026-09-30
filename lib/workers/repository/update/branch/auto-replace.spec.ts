@@ -1534,6 +1534,57 @@ describe('workers/repository/update/branch/auto-replace', () => {
       },
     );
 
+    it.each([
+      {
+        description: 'a tag',
+        suffix: '',
+        ref: 'v1.0.0',
+        newValue: 'v1.1.0',
+        newDigest: undefined,
+        expectedRef: 'v1.1.0',
+        expectedSuffix: '',
+      },
+      {
+        description: 'a sha with a version comment',
+        suffix: ' # v1.0.0',
+        ref: 'a'.repeat(40),
+        newValue: 'v1.1.0',
+        newDigest: 'b'.repeat(40),
+        expectedRef: 'b'.repeat(40),
+        expectedSuffix: ' # v1.1.0',
+      },
+    ])(
+      'mise task file: updates $description',
+      async ({
+        suffix,
+        ref,
+        newValue,
+        newDigest,
+        expectedRef,
+        expectedSuffix,
+      }) => {
+        const entry =
+          'git::https://github.com/org/tasks.git//scripts/build.sh?ref=';
+        function build(r: string, s: string): string {
+          return `[tasks.build]\nfile = "${entry}${r}"${s}\n\n[tools]\nnode = "1.0"\n`;
+        }
+        const content = build(ref, suffix);
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps.find(
+          (d) => d.depType === 'task-build-file',
+        )!;
+        Object.assign(upgrade, dep, {
+          newValue,
+          newDigest,
+          depIndex: extracted!.deps.indexOf(dep),
+        });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(build(expectedRef, expectedSuffix));
+      },
+    );
+
     it('jsonata: rebases when autoReplaceStringTemplate fails to compile', async () => {
       const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
       upgrade.manager = 'jsonata';

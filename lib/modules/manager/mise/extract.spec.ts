@@ -2147,4 +2147,119 @@ describe('modules/manager/mise/extract', () => {
       ).resolves.toBeNull();
     });
   });
+
+  describe('remote task files', () => {
+    const sha = '0123456789abcdef0123456789abcdef01234567';
+
+    it('extracts a github tag ref', async () => {
+      const content = codeBlock`
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'github.com/org/tasks',
+            depType: 'task-build-file',
+            datasource: 'github-tags',
+            packageName: 'org/tasks',
+            currentValue: 'v1.0.0',
+            replaceString:
+              'git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0',
+            autoReplaceStringTemplate:
+              'git::https://github.com/org/tasks.git//scripts/build.sh?ref={{newValue}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts a gitlab ssh ref', async () => {
+      const content = codeBlock`
+        [tasks.lint]
+        file = "git::ssh://git@gitlab.com/group/tasks.git//lint.sh?ref=v2.1"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'gitlab.com/group/tasks',
+          depType: 'task-lint-file',
+          datasource: 'git-tags',
+          packageName: 'ssh://git@gitlab.com/group/tasks.git',
+          currentValue: 'v2.1',
+        },
+      ]);
+    });
+
+    it('extracts a sha ref with a version comment', async () => {
+      const content = `[tasks.build]\nfile = "git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # v1.0.0\n`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depType: 'task-build-file',
+          datasource: 'github-tags',
+          currentDigest: sha,
+          currentValue: 'v1.0.0',
+          replaceString: `git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # v1.0.0`,
+          autoReplaceStringTemplate:
+            'git::https://github.com/org/tasks.git//build.sh?ref={{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}" # {{newValue}}',
+        },
+      ]);
+    });
+
+    it('extracts a sha ref with a branch comment', async () => {
+      const content = `[tasks.build]\nfile = "git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # main\n`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depType: 'task-build-file',
+          datasource: 'github-digest',
+          versioning: 'exact',
+          currentDigest: sha,
+          currentValue: 'main',
+        },
+      ]);
+    });
+
+    it('skips a ref-less file', async () => {
+      const content = codeBlock`
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//build.sh"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        { depType: 'task-build-file', skipReason: 'unspecified-version' },
+      ]);
+    });
+
+    it('ignores local and http files', async () => {
+      const content = codeBlock`
+        [tasks.local]
+        file = "scripts/build.sh"
+
+        [tasks.remote]
+        file = "https://example.com/build.sh"
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+
+    it('extracts task files together with tools', async () => {
+      const content = codeBlock`
+        [tools]
+        erlang = '23.3'
+
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//build.sh?ref=v1.0.0"
+        tools = { node = "20" }
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps.map((dep) => dep.depType)).toEqual([
+        'tools',
+        'task-build-tools',
+        'task-build-file',
+      ]);
+    });
+  });
 });

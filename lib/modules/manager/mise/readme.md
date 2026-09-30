@@ -15,6 +15,21 @@ Renovate supports all standard mise configuration file patterns:
 
 Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#tools-dev-tools) and [`tasks.*.tools`](https://mise.jdx.dev/tasks/task-configuration.html#tools) keys.
 
+### Remote task files
+
+Renovate supports remote [git task files](https://mise.jdx.dev/tasks/toml-tasks.html#git) in `tasks.<name>.file`, using the `git::<https|ssh>://<host>/<repo>.git//<path>?ref=<ref>` form.
+The path may point to any file, not only to TOML files.
+`ref` handling, datasources and comment hints work like for remote `include` entries, and the dependencies have the `depType` `task-<name>-file`.
+Local paths and `http(s)://` URLs have no version and are ignored.
+
+```toml
+[tasks.build]
+file = "git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0"
+
+[tasks.lint]
+file = "git::ssh://git@gitlab.com/org/tasks.git//lint.sh?ref=0123456789abcdef0123456789abcdef01234567" # v1.0.0
+```
+
 ### Remote `include` support
 
 Renovate supports the remote forms of the top level [`include`](https://mise.jdx.dev/configuration.html#include) key:

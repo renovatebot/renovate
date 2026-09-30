@@ -37,6 +37,7 @@ export type MiseTool = z.infer<typeof MiseTool>;
 const MiseTask = z
   .object({
     tools: z.record(z.string(), MiseTool).optional(),
+    file: z.string().optional(),
   })
   .passthrough()
   .catch({});

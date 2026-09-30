@@ -1,0 +1,157 @@
+import { regEx } from '../../../util/regex.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import * as exactVersioning from '../../versioning/exact/index.ts';
+import {
+  isSha,
+  isShortSha,
+  parseComment,
+  versionLikeRe,
+} from '../github-actions/parse.ts';
+import type { PackageDependency } from '../types.ts';
+
+// e.g. git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.2.0
+// e.g. git::ssh://git@github.com/org/cfg.git//mise.toml
+const gitReferenceRegex = regEx(
+  /^git::(?<url>(?:https|ssh):\/\/(?:[^@/]+@)?(?<host>[^/:]+)(?::\d+)?\/(?<repo>.+?\.git))(?:\/\/(?<path>[^?]*))?(?:\?(?<query>.*))?$/,
+);
+const refRegex = regEx(/(?:^|&)ref=(?<ref>[^&]+)/);
+const refValueRegex = regEx(/(?<prefix>[?&]ref=)[^&]+/);
+// the rest of the line after a reference string, e.g. `", # v1.0.0`
+const trailingCommentRegex = regEx(
+  /^(?<separator>["']\s*,?[ \t]*)#(?<comment>.*)$/,
+);
+
+interface ReferenceComment {
+  /** text between the reference string and the comment, e.g. `", ` */
+  separator: string;
+  /** everything after the reference string up to the end of the hint token */
+  replaceSuffix: string;
+  /** the hint: a version (`v1.2.3`) or a branch (`main`) */
+  value: string;
+}
+
+/**
+ * Finds the trailing `#` comment of an array entry in the raw file.
+ * Only entries of multi-line arrays can carry a comment.
+ */
+function findComment(
+  reference: string,
+  content: string,
+): ReferenceComment | undefined {
+  let index = content.indexOf(reference);
+  while (index !== -1) {
+    const end = index + reference.length;
+    const lineEnd = content.indexOf('\n', end);
+    const rest = content.slice(end, lineEnd === -1 ? undefined : lineEnd);
+    const groups = trailingCommentRegex.exec(rest.trimEnd())?.groups;
+    if (groups) {
+      const data = parseComment(groups.comment);
+      const value = data.pinnedVersion ?? data.ref;
+      if (value && data.index !== undefined && data.matchedString) {
+        const tokenEnd = data.index + data.matchedString.length;
+        return {
+          separator: groups.separator,
+          replaceSuffix: `${groups.separator}#${groups.comment.slice(0, tokenEnd)}`,
+          value,
+        };
+      }
+    }
+    index = content.indexOf(reference, end);
+  }
+  return undefined;
+}
+
+/**
+ * Handles `ref=<sha>`: the version or branch comes from the trailing comment.
+ */
+function applyPinnedRef(
+  dep: PackageDependency,
+  reference: string,
+  url: string,
+  ref: string,
+  content: string,
+): void {
+  if (isSha(ref)) {
+    dep.currentDigest = ref;
+  } else {
+    dep.currentDigestShort = ref;
+  }
+  const comment = findComment(reference, content);
+  if (!comment) {
+    dep.skipReason = 'unversioned-reference';
+    return;
+  }
+  dep.currentValue = comment.value;
+  // Also match the comment, so that it is updated together with the sha.
+  dep.replaceString = `${reference}${comment.replaceSuffix}`;
+  dep.autoReplaceStringTemplate = `${reference.replace(
+    refValueRegex,
+    '$<prefix>{{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}',
+  )}${comment.separator}# {{newValue}}`;
+  if (!versionLikeRe.test(comment.value)) {
+    // branch hint: only the digest changes
+    dep.versioning = exactVersioning.id;
+    if (dep.datasource === GithubTagsDatasource.id) {
+      dep.datasource = GithubDigestDatasource.id;
+    } else {
+      dep.datasource = GitRefsDatasource.id;
+      dep.packageName = url;
+    }
+  }
+}
+
+/**
+ * Extracts a `git::<protocol>://<host>/<repo>.git//<path>?ref=<ref>` reference.
+ * Returns `null` if `reference` is not a git reference.
+ * `content` is the raw file, used to read trailing comment hints.
+ * @link https://mise.jdx.dev/tasks/toml-tasks.html#git
+ */
+export function extractGitReference(
+  reference: string,
+  content: string,
+  depType: string,
+): PackageDependency | null {
+  const groups = gitReferenceRegex.exec(reference)?.groups;
+  if (!groups) {
+    return null;
+  }
+  const { url, host, repo, query } = groups;
+  const repoName = repo.replace(regEx(/\.git$/), '');
+  const dep: PackageDependency = {
+    depName: `${host}/${repoName}`,
+    depType,
+    packageName: url,
+  };
+
+  if (host === 'github.com') {
+    dep.datasource = GithubTagsDatasource.id;
+    dep.packageName = repoName;
+  } else if (host === 'bitbucket.org') {
+    dep.datasource = BitbucketTagsDatasource.id;
+    dep.packageName = repoName;
+  } else {
+    dep.datasource = GitTagsDatasource.id;
+  }
+
+  const ref = refRegex.exec(query ?? '')?.groups?.ref;
+  if (!ref) {
+    dep.skipReason = 'unspecified-version';
+    return dep;
+  }
+  if (isSha(ref) || isShortSha(ref)) {
+    applyPinnedRef(dep, reference, url, ref, content);
+    return dep;
+  }
+  dep.currentValue = ref;
+  // Match the whole entry, but only replace the `ref` value.
+  dep.replaceString = reference;
+  dep.autoReplaceStringTemplate = reference.replace(
+    refValueRegex,
+    '$<prefix>{{newValue}}',
+  );
+  return dep;
+}
