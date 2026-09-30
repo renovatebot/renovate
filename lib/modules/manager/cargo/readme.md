@@ -26,6 +26,7 @@ Rules from this list are converted to environment variable directives if they ma
 
 ### Git index registries
 
-When Renovate clones a git index registry over `http(s)` to look up versions (this requires `allowCustomCrateGitRegistries`), it exports the same `insteadOf` directives as for artifact updates, with `hostType=crate` in place of `hostType=cargo`.
+When Renovate clones a git index registry over `http(s)` to look up versions, it exports the same `insteadOf` directives as for artifact updates, with `hostType=crate` in place of `hostType=cargo`.
 Git uses the credentials of the directive whose URL matches the index URL.
+Cloning a git index registry other than the crates.io index (`https://index.crates.io/`) requires `allowCustomCrateGitRegistries`.
 Sparse registries (`sparse+https://`) are fetched over HTTP, and use `hostRules` like other datasources.

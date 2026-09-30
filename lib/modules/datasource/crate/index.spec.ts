@@ -608,6 +608,30 @@ describe('modules/datasource/crate/index', () => {
         });
       });
 
+      it('clones the crates.io git index with host rule authentication', async () => {
+        GlobalConfig.set(adminConfig);
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [CRATES_IO_REGISTRY_URL_PARSED],
+        });
+
+        expect(res).toMatchObject({
+          dependencyUrl: 'https://crates.io/crates/mypkg',
+        });
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+          authentication: { hostTypes: ['crate'] },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          'https://index.crates.io',
+          expect.any(String),
+          { '--depth': 1 },
+        );
+      });
+
       it('clones other registries without authentication', async () => {
         const { mockClone } = setupGitMocks();
 
