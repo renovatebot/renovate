@@ -68,19 +68,20 @@ const backendDatasources = {
   pypi: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
   spm: [GithubReleasesDatasource.id],
   ubi: [GithubReleasesDatasource.id],
-  // remote `include` entries
-  include: [
-    BitbucketTagsDatasource.id,
-    DockerDatasource.id,
-    GitRefsDatasource.id,
-    GitTagsDatasource.id,
-    GithubDigestDatasource.id,
-    GithubTagsDatasource.id,
-    GitlabTagsDatasource.id,
-  ],
   // not supported
   vfox: [],
 };
+
+// datasources of remote `include` entries and git task files
+const remoteReferenceDatasources = [
+  BitbucketTagsDatasource.id,
+  DockerDatasource.id,
+  GitRefsDatasource.id,
+  GitTagsDatasource.id,
+  GithubDigestDatasource.id,
+  GithubTagsDatasource.id,
+  GitlabTagsDatasource.id,
+];
 
 /**
  * Backends that are definitely supported out-of-the-box with Renovate.
@@ -98,6 +99,7 @@ export const maybeSupportedBackendDatasources = new Set<string>(
   ),
 );
 
-export const supportedDatasources = deduplicateArray(
-  Object.values(backendDatasources).flat(),
-).sort();
+export const supportedDatasources = deduplicateArray([
+  ...Object.values(backendDatasources).flat(),
+  ...remoteReferenceDatasources,
+]).sort();
