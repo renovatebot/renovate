@@ -1,8 +1,7 @@
 import url from 'node:url';
-import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { getEnv } from '../../../util/env.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseUrl } from '../../../util/url.ts';
@@ -74,22 +73,10 @@ export function getRepoUrl(
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  const env = getEnv();
-
-  if (
-    gitUrl === 'endpoint' ||
-    isNonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
-    res.body.http_url_to_repo === null
-  ) {
+  if (gitUrl === 'endpoint' || res.body.http_url_to_repo === null) {
     if (res.body.http_url_to_repo === null) {
       logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
-    if (env.GITLAB_IGNORE_REPO_URL) {
-      logger.warn(
-        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
-      );
-    }
-
     const parsedEndpoint = parseUrl(defaults.endpoint);
     if (!parsedEndpoint) {
       throw new Error(`Invalid GitLab endpoint: ${defaults.endpoint}`);

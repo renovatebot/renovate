@@ -2,7 +2,6 @@ import { isArray, isString } from '@sindresorhus/is';
 import { RequestError, type RetryObject } from 'got';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
-import { getEnv } from '../env.ts';
 import { parseLinkHeader, parseUrl } from '../url.ts';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
@@ -54,12 +53,6 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           ? parseUrl(linkHeader.next.url)
           : null;
         if (nextUrl) {
-          if (getEnv().GITLAB_IGNORE_REPO_URL) {
-            const defaultEndpoint = parseUrl(baseUrl)!;
-            nextUrl.protocol = defaultEndpoint.protocol;
-            nextUrl.host = defaultEndpoint.host;
-          }
-
           // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
           if (nextUrl.origin === resolvedUrl.origin) {
             opts.url = nextUrl;
@@ -76,7 +69,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
                 requestOrigin: resolvedUrl.origin,
                 paginationOrigin: nextUrl.origin,
               },
-              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
+              'Ignoring cross-origin GitLab pagination link.',
             );
           }
         }

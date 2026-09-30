@@ -56,26 +56,17 @@ describe('util/http/gitlab', () => {
     );
   });
 
-  it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
+  it('does not rebase pagination links with the removed GITLAB_IGNORE_REPO_URL variable', async () => {
     vi.stubEnv('GITLAB_IGNORE_REPO_URL', 'true');
     setBaseUrl(`${selfHostedUrl}/api/v4/`);
 
-    httpMock
-      .scope(selfHostedUrl)
-      .get('/api/v4/some-url')
-      .reply(200, ['a'], {
-        link: '<https://other.host.com/gitlab/api/v4/some-url&page=2>; rel="next", <https://other.host.com/gitlab/api/v4/some-url&page=3>; rel="last"',
-      })
-      .get('/api/v4/some-url&page=2')
-      .reply(200, ['b', 'c'], {
-        link: '<https://other.host.com/gitlab/api/v4/some-url&page=3>; rel="next", <https://other.host.com/gitlab/api/v4/some-url&page=3>; rel="last"',
-      })
-      .get('/api/v4/some-url&page=3')
-      .reply(200, ['d']);
+    httpMock.scope(selfHostedUrl).get('/api/v4/some-url').reply(200, ['a'], {
+      link: '<https://other.host.com/gitlab/api/v4/some-url&page=2>; rel="next", <https://other.host.com/gitlab/api/v4/some-url&page=3>; rel="last"',
+    });
     const res = await gitlabApi.getJsonUnchecked('some-url', {
       paginate: true,
     });
-    expect(res.body).toHaveLength(4);
+    expect(res.body).toEqual(['a']);
   });
 
   it('does not follow pagination links to a different origin', async () => {
@@ -93,7 +84,7 @@ describe('util/http/gitlab', () => {
         requestOrigin: 'https://gitlab.com',
         paginationOrigin: 'https://other.host.com',
       },
-      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
+      'Ignoring cross-origin GitLab pagination link.',
     );
   });
 
@@ -111,7 +102,7 @@ describe('util/http/gitlab', () => {
         requestOrigin: 'https://gitlab.com',
         paginationOrigin: 'http://gitlab.com',
       },
-      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
+      'Ignoring cross-origin GitLab pagination link.',
     );
   });
 
