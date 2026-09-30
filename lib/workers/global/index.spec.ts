@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import * as instrumentation from '../../instrumentation/index.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
@@ -200,6 +201,32 @@ describe('workers/global/index', () => {
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
   });
+
+  it.each(['owner/repo', { repository: 'owner/repo' }])(
+    'uses standard repository span attributes for %j',
+    async (repository) => {
+      const instrument = vi.spyOn(instrumentation, 'instrument');
+      parseConfigs.mockResolvedValueOnce({
+        platform: 'github',
+        enabled: true,
+        repositories: [repository],
+      });
+
+      await globalWorker.start();
+
+      expect(instrument).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.any(Function),
+        {
+          attributes: {
+            'vcs.provider.name': 'github',
+            'vcs.owner.name': 'owner',
+            'vcs.repository.name': 'repo',
+          },
+        },
+      );
+    },
+  );
 
   it('returns the exit code of the first errored repository when exitCodeForErrors is enabled', async () => {
     parseConfigs.mockResolvedValueOnce({
