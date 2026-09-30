@@ -17,6 +17,13 @@ describe('config/app-strings', () => {
     expect(filenames.includes('def')).toBeTrue();
   });
 
+  it('excludes package.json even when explicitly configured', () => {
+    setUserConfigFileNames(['package.json', 'custom.json']);
+
+    expect(getConfigFileNames()).not.toContain('package.json');
+    expect(getConfigFileNames()).toContain('custom.json');
+  });
+
   it('expands brace patterns for json, jsonc and json5 filenames', () => {
     const filenames = getConfigFileNames();
 
@@ -64,7 +71,6 @@ describe('config/app-strings', () => {
       '.renovaterc.json',
       '.renovaterc.jsonc',
       '.renovaterc.json5',
-      'package.json',
     ]);
   });
 });

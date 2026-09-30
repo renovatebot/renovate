@@ -9,7 +9,6 @@ const configFilePatterns = [
   '.gitlab/renovate.json{,c,5}',
   '.renovaterc',
   '.renovaterc.json{,c,5}',
-  'package.json',
 ];
 
 const configFileNames = configFilePatterns.flatMap((p) => braceExpand(p));
@@ -43,5 +42,7 @@ export function getConfigFileNames(platform?: PlatformId): string[] {
       filteredConfigFileNames.push(`.${platform}/renovate.json5`);
     }
   }
-  return [...userAddedConfigFileNames, ...filteredConfigFileNames];
+  return [...userAddedConfigFileNames, ...filteredConfigFileNames].filter(
+    (fileName) => fileName !== 'package.json',
+  );
 }

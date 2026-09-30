@@ -101,7 +101,7 @@ describe('workers/repository/init/merge', () => {
       );
     });
 
-    it('returns cache config from onboarding cache - package.json', async () => {
+    it('ignores package.json in the onboarding cache', async () => {
       const pJson = JSON.stringify({
         schema: 'https://docs.renovate.com',
       });
@@ -110,31 +110,47 @@ describe('workers/repository/init/merge', () => {
         'package.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(pJson);
+      scm.getFileList.mockResolvedValue(['package.json']);
+
+      await expect(detectRepoFileConfig()).resolves.toEqual({});
+      expect(
+        onboardingCache.getOnboardingConfigFromCache,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('redetects a dedicated config when the onboarding cache refers to package.json', async () => {
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'package.json',
+      );
+      scm.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({ prHourlyLimit: 5 }));
+
       await expect(detectRepoFileConfig()).resolves.toEqual({
-        configFileName: 'package.json',
-        configFileParsed: { schema: 'https://docs.renovate.com' },
+        configFileName: 'renovate.json',
+        configFileParsed: { prHourlyLimit: 5 },
       });
+      expect(
+        onboardingCache.getOnboardingConfigFromCache,
+      ).not.toHaveBeenCalled();
     });
 
     it('clones, if onboarding cache is valid but parsed config is undefined', async () => {
       OnboardingState.onboardingCacheValid = true;
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
-        'package.json',
+        'renovate.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
         undefined,
       );
-      scm.getFileList.mockResolvedValueOnce(['package.json']);
+      scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const pJson = JSON.stringify({
-        name: 'something',
-        renovate: {
-          prHourlyLimit: 10,
-        },
+        prHourlyLimit: 10,
       });
       fs.readLocalFile.mockResolvedValueOnce(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
       await expect(detectRepoFileConfig()).resolves.toEqual({
-        configFileName: 'package.json',
+        configFileName: 'renovate.json',
         configFileParsed: { prHourlyLimit: 10 },
       });
     });
@@ -158,7 +174,8 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
-    it('uses package.json config if found', async () => {
+    it('ignores package.json config and invalidates an old repository cache entry', async () => {
+      repoCache.getCache().configFileName = 'package.json';
       scm.getFileList.mockResolvedValue(['package.json']);
       const pJson = JSON.stringify({
         name: 'something',
@@ -168,18 +185,13 @@ describe('workers/repository/init/merge', () => {
       });
       fs.readLocalFile.mockResolvedValue(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
-      await expect(detectRepoFileConfig()).resolves.toEqual({
-        configFileName: 'package.json',
-        configFileParsed: { prHourlyLimit: 10 },
-      });
+      await expect(detectRepoFileConfig()).resolves.toEqual({});
       // get from repoCache
-      await expect(detectRepoFileConfig()).resolves.toEqual({
-        configFileName: 'package.json',
-        configFileParsed: { prHourlyLimit: 10 },
-      });
+      await expect(detectRepoFileConfig()).resolves.toEqual({});
+      expect(platform.getRawFile).not.toHaveBeenCalled();
     });
 
-    it('massages package.json renovate string', async () => {
+    it('ignores package.json renovate strings', async () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       const pJson = JSON.stringify({
         name: 'something',
@@ -187,10 +199,7 @@ describe('workers/repository/init/merge', () => {
       });
       fs.readLocalFile.mockResolvedValue(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
-      await expect(detectRepoFileConfig()).resolves.toEqual({
-        configFileName: 'package.json',
-        configFileParsed: { extends: ['github>renovatebot/renovate'] },
-      });
+      await expect(detectRepoFileConfig()).resolves.toEqual({});
     });
 
     it('returns error if cannot parse', async () => {
