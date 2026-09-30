@@ -35,7 +35,7 @@ file = "git::ssh://git@gitlab.com/org/tasks.git//lint.sh?ref=0123456789abcdef012
 Renovate supports the remote forms of the top level [`include`](https://mise.jdx.dev/configuration.html#include) key:
 
 - `git::<https|ssh>://<host>/<repo>.git//<path>?ref=<ref>`: the `ref` is looked up as a Git tag.
-  GitHub and Bitbucket Cloud repositories use the `github-tags` and `bitbucket-tags` datasources, other hosts use `git-tags`.
+  GitHub, GitLab and Bitbucket Cloud repositories use the `github-tags`, `gitlab-tags` and `bitbucket-tags` datasources, other hosts use `git-tags`.
   Entries without a `ref` are skipped, as mise then uses the default branch.
 - `oci::<registry>/<repo>[:tag][@sha256:<digest>]`: handled like a Docker image, using the `docker` datasource.
 

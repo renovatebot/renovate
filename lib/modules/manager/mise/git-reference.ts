@@ -4,6 +4,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import * as exactVersioning from '../../versioning/exact/index.ts';
 import {
   isSha,
@@ -132,6 +133,9 @@ export function extractGitReference(
     dep.packageName = repoName;
   } else if (host === 'bitbucket.org') {
     dep.datasource = BitbucketTagsDatasource.id;
+    dep.packageName = repoName;
+  } else if (host === 'gitlab.com') {
+    dep.datasource = GitlabTagsDatasource.id;
     dep.packageName = repoName;
   } else {
     dep.datasource = GitTagsDatasource.id;

@@ -1877,8 +1877,8 @@ describe('modules/manager/mise/extract', () => {
         include: 'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
         expected: {
           depName: 'gitlab.com/group/sub/cfg',
-          packageName: 'https://gitlab.com/group/sub/cfg.git',
-          datasource: 'git-tags',
+          packageName: 'group/sub/cfg',
+          datasource: 'gitlab-tags',
           currentValue: '1.0',
           replaceString:
             'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
@@ -1891,8 +1891,8 @@ describe('modules/manager/mise/extract', () => {
         include: 'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
         expected: {
           depName: 'gitlab.com/group/cfg',
-          packageName: 'ssh://git@gitlab.com/group/cfg.git',
-          datasource: 'git-tags',
+          packageName: 'group/cfg',
+          datasource: 'gitlab-tags',
           currentValue: 'main',
           replaceString:
             'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
@@ -1926,10 +1926,10 @@ describe('modules/manager/mise/extract', () => {
       },
       {
         description: 'git without path and ref',
-        include: 'git::https://gitlab.com/org/cfg.git?depth=1',
+        include: 'git::https://git.example.com/org/cfg.git?depth=1',
         expected: {
-          depName: 'gitlab.com/org/cfg',
-          packageName: 'https://gitlab.com/org/cfg.git',
+          depName: 'git.example.com/org/cfg',
+          packageName: 'https://git.example.com/org/cfg.git',
           datasource: 'git-tags',
           skipReason: 'unspecified-version',
         },
@@ -2066,8 +2066,8 @@ describe('modules/manager/mise/extract', () => {
       it('uses the tag datasource of the host for version comments', async () => {
         const dep = await extractOne(gl, ' # v1.0.0');
         expect(dep).toMatchObject({
-          datasource: 'git-tags',
-          packageName: 'https://gitlab.com/org/cfg.git',
+          datasource: 'gitlab-tags',
+          packageName: 'org/cfg',
           currentValue: 'v1.0.0',
         });
       });
@@ -2184,8 +2184,8 @@ describe('modules/manager/mise/extract', () => {
         {
           depName: 'gitlab.com/group/tasks',
           depType: 'task-lint-file',
-          datasource: 'git-tags',
-          packageName: 'ssh://git@gitlab.com/group/tasks.git',
+          datasource: 'gitlab-tags',
+          packageName: 'group/tasks',
           currentValue: 'v2.1',
         },
       ]);

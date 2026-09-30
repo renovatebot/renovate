@@ -9,6 +9,7 @@ import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts'
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -75,6 +76,7 @@ const backendDatasources = {
     GitTagsDatasource.id,
     GithubDigestDatasource.id,
     GithubTagsDatasource.id,
+    GitlabTagsDatasource.id,
   ],
   // not supported
   vfox: [],
