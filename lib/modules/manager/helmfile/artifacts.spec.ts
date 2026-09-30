@@ -81,7 +81,6 @@ describe('modules/manager/helmfile/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
   });
 
   it('returns null if no helmfile.lock found', async () => {

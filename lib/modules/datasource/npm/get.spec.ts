@@ -23,7 +23,6 @@ const http = new Http('npm');
 
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
-    hostRules.clear();
     setNpmrc();
   });
 

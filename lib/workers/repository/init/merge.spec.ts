@@ -73,7 +73,6 @@ vi.mock('../../../config/migrate-validate.ts');
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    hostRules.clear();
     GlobalConfig.reset();
   });
 
