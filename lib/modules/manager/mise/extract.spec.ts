@@ -1982,6 +1982,22 @@ describe('modules/manager/mise/extract', () => {
           skipReason: 'unsupported-url',
         },
       },
+      {
+        description: 'git without protocol',
+        include: 'git::git@github.com:org/cfg.git//mise.toml?ref=v1',
+        expected: {
+          depName: 'git::git@github.com:org/cfg.git//mise.toml?ref=v1',
+          skipReason: 'unsupported-url',
+        },
+      },
+      {
+        description: 'git without repository',
+        include: 'git::https://github.com//mise.toml?ref=v1',
+        expected: {
+          depName: 'git::https://github.com//mise.toml?ref=v1',
+          skipReason: 'unsupported-url',
+        },
+      },
     ])('extracts $description', async ({ include, expected }) => {
       const content = `include = ["${include}"]`;
       const result = await extractPackageFile(content, miseFilename);

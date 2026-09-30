@@ -1,4 +1,6 @@
+import { parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
+import { trimSlashes } from '../../../util/url.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -9,12 +11,8 @@ import * as exactVersioning from '../../versioning/exact/index.ts';
 import { isSha, isShortSha, versionLikeRe } from '../github-actions/parse.ts';
 import type { PackageDependency } from '../types.ts';
 
-// e.g. git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.2.0
-// e.g. git::ssh://git@github.com/org/cfg.git//mise.toml
-const gitReferenceRegex = regEx(
-  /^git::(?<url>(?:https|ssh):\/\/(?:[^@/]+@)?(?<host>[^/:]+)(?::\d+)?\/(?<repo>.+?\.git))(?:\/\/(?<path>[^?]*))?(?:\?(?<query>.*))?$/,
-);
-const refRegex = regEx(/(?:^|&)ref=(?<ref>[^&]+)/);
+const gitPrefix = 'git::';
+const protocolRegex = regEx(/^(?:https|ssh):\/\/[^/]+/);
 const refValueRegex = regEx(/(?<prefix>[?&]ref=)[^&]+/);
 // the rest of the line after a reference string, e.g. `", # v1.0.0`
 // `=` is excluded so that `# tag=v1.0.0` style comments are not read as a branch
@@ -97,6 +95,39 @@ function applyPinnedRef(
   }
 }
 
+interface GitReference {
+  /** repository url without the file path and query, e.g. `https://github.com/org/cfg.git` */
+  url: string;
+  host: string;
+  /** e.g. `org/cfg` */
+  repoName: string;
+  ref: string | undefined;
+}
+
+/**
+ * Parses e.g. `https://github.com/org/cfg.git//base/mise.toml?ref=v1.2.0`
+ * or `ssh://git@github.com/org/cfg.git//mise.toml`.
+ */
+function parseGitReference(reference: string): GitReference | null {
+  const origin = protocolRegex.exec(reference)?.[0];
+  if (!origin) {
+    return null;
+  }
+  const parsed = parseGitUrl(reference);
+  // `//` separates the repository from the file path, which git-url-parse does not handle
+  const [repoPath] = parsed.pathname.split('//');
+  const repoName = trimSlashes(repoPath).replace(regEx(/\.git$/), '');
+  if (!repoName) {
+    return null;
+  }
+  return {
+    url: `${origin}${repoPath}`,
+    host: parsed.resource,
+    repoName,
+    ref: parsed.query.ref,
+  };
+}
+
 /**
  * Extracts a `git::<protocol>://<host>/<repo>.git//<path>?ref=<ref>` reference.
  * Returns `null` if `reference` is not a git reference.
@@ -108,12 +139,14 @@ export function extractGitReference(
   content: string,
   depType: string,
 ): PackageDependency | null {
-  const groups = gitReferenceRegex.exec(reference)?.groups;
-  if (!groups) {
+  if (!reference.startsWith(gitPrefix)) {
     return null;
   }
-  const { url, host, repo, query } = groups;
-  const repoName = repo.replace(regEx(/\.git$/), '');
+  const parsed = parseGitReference(reference.slice(gitPrefix.length));
+  if (!parsed) {
+    return null;
+  }
+  const { url, host, repoName, ref } = parsed;
   const dep: PackageDependency = {
     depName: `${host}/${repoName}`,
     depType,
@@ -133,7 +166,6 @@ export function extractGitReference(
     dep.datasource = GitTagsDatasource.id;
   }
 
-  const ref = refRegex.exec(query ?? '')?.groups?.ref;
   if (!ref) {
     dep.skipReason = 'unspecified-version';
     return dep;
