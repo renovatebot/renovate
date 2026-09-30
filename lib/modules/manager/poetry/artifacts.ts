@@ -244,7 +244,7 @@ export async function updateArtifacts({
     });
   } catch (err) {
     if (err instanceof ExecError && err.timedOut) {
-      logger.error({ err, lockFileName }, 'Poetry lockfile update timed out');
+      logger.debug({ err }, `Failed to update ${lockFileName} file`);
       return [
         {
           artifactError: {

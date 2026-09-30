@@ -790,12 +790,9 @@ describe('modules/manager/poetry/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'poetry update --lock --no-interaction dep1' },
       ]);
-      expect(logger.logger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          err: expect.objectContaining({ timedOut: true }),
-          lockFileName: 'poetry.lock',
-        }),
-        'Poetry lockfile update timed out',
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.objectContaining({ timedOut: true }) },
+        'Failed to update poetry.lock file',
       );
     });
 

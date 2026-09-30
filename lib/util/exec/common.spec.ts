@@ -45,6 +45,7 @@ interface StubArgs {
   stdout?: string;
   stderr?: string;
   timeout?: number;
+  timeoutRejection?: 'internal' | 'subprocess';
   pid?: number;
 }
 
@@ -79,6 +80,7 @@ function getSpawnStub(args: StubArgs): any {
     stdout,
     stderr,
     timeout,
+    timeoutRejection,
     pid = 31415,
   } = args;
   const listeners: Events = {};
@@ -87,12 +89,30 @@ function getSpawnStub(args: StubArgs): any {
     shortMessage?: string;
     timedOut: boolean;
   }) => void;
-  const subprocess = new Promise<{
+  let rejectResult!: (error: Error) => void;
+  const resultPromise = new Promise<{
     shortMessage?: string;
     timedOut: boolean;
-  }>((resolve) => {
+  }>((resolve, reject) => {
     resolveResult = resolve;
-  }) as any;
+    rejectResult = reject;
+  });
+  let normalizedResult: typeof resultPromise | undefined;
+  const subprocess =
+    timeoutRejection === 'internal'
+      ? {
+          // oxlint-disable-next-line unicorn/no-thenable -- emulate Execa 8's lazy thenable
+          then(...args: Parameters<typeof resultPromise.then>) {
+            normalizedResult ??= resultPromise.catch(
+              (error: Error & { timedOut?: boolean }) => ({
+                shortMessage: `Command timed out after ${timeout} milliseconds: ${cmd}`,
+                timedOut: error.timedOut === true,
+              }),
+            );
+            return normalizedResult.then(...args);
+          },
+        }
+      : resultPromise;
 
   // init listeners
   function on(name: string, cb: Listener) {
@@ -166,6 +186,16 @@ function getSpawnStub(args: StubArgs): any {
         return;
       }
       complete = true;
+      if (timeoutRejection) {
+        rejectResult(
+          Object.assign(new Error('Timed out'), {
+            signal: 'SIGTERM',
+            timedOut: true,
+          }),
+        );
+        setTimeout(() => listeners.exit?.(null, 'SIGTERM'), 0);
+        return;
+      }
       resolveResult({
         shortMessage: `Command timed out after ${timeout} milliseconds: ${cmd}`,
         timedOut: true,
@@ -174,7 +204,7 @@ function getSpawnStub(args: StubArgs): any {
     }, timeout);
   }
 
-  Object.assign(subprocess, {
+  void Object.assign(subprocess, {
     nodeChildProcess: {
       on,
       spawnargs: cmd.split(regEx(/\s+/)),
@@ -683,8 +713,42 @@ describe('util/exec/common', () => {
         exitCode: null,
         exitSignal: 'SIGSTOP',
         timeout: 5,
+        timeoutRejection: 'internal',
       });
       execa.mockImplementationOnce((_cmd, _opts) => stub);
+      const unhandledRejection = vi.fn();
+      process.on('unhandledRejection', unhandledRejection);
+
+      try {
+        await expect(
+          exec(cmd, partial<RawExecOptions>({ timeout: 5 })),
+        ).rejects.toMatchObject({
+          cmd,
+          signal: 'SIGTERM',
+          timedOut: true,
+          message: `Command timed out after 5 milliseconds: ${cmd}`,
+        });
+        await new Promise<void>((resolve) => {
+          setImmediate(resolve);
+        });
+
+        expect(unhandledRejection).not.toHaveBeenCalled();
+      } finally {
+        process.off('unhandledRejection', unhandledRejection);
+      }
+    });
+
+    it('normalizes a rejected Execa timeout result', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal: 'SIGSTOP',
+        timeout: 5,
+        timeoutRejection: 'subprocess',
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
       await expect(
         exec(cmd, partial<RawExecOptions>({ timeout: 5 })),
       ).rejects.toMatchObject({
@@ -708,6 +772,26 @@ describe('util/exec/common', () => {
       await expect(
         exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
+    });
+
+    it('settles only once when multiple process events are emitted', async () => {
+      const firstError = new Error('first error');
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal: null,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+      const result = exec(cmd, partial<RawExecOptions>({}));
+
+      stub.nodeChildProcess.emit('error', firstError);
+      stub.nodeChildProcess.emit('error', new Error('second error'));
+      stub.nodeChildProcess.emit('exit', 0, null);
+
+      await expect(result).rejects.toMatchObject({
+        cmd,
+        message: firstError.message,
+      });
     });
 
     it('process exits with error due to exceeded stdout maxBuffer', async () => {
