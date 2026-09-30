@@ -49,7 +49,7 @@ export async function getLockedVersions(
           dep.depName === 'yarn' &&
           !isYarn1
         ) {
-          dep.packageName = '@yarnpkg/cli';
+          dep.packageName = '@yarnpkg/cli-dist';
         }
       }
     } else if (npmLock) {
