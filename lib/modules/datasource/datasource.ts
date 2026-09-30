@@ -61,6 +61,11 @@ export abstract class Datasource implements DatasourceApi {
 
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
+  postprocessRelease?(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult>;
+
   handleHttpErrors(_err: HttpError): void {
     // intentionally empty
   }
@@ -101,13 +106,5 @@ export abstract class Datasource implements DatasourceApi {
     }
 
     throw err;
-  }
-
-  // istanbul ignore next: no-op implementation, never called
-  postprocessRelease(
-    _config: PostprocessReleaseConfig,
-    release: Release,
-  ): Promise<PostprocessReleaseResult> {
-    return Promise.resolve(release);
   }
 }
