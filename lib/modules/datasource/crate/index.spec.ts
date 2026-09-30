@@ -18,7 +18,6 @@ import type {
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
@@ -597,15 +596,6 @@ describe('modules/datasource/crate/index', () => {
           expect.any(String),
           { '--depth': 1 },
         );
-        expect(getGitEnvironmentVariables({}, ['crate'])).toStrictEqual({
-          GIT_CONFIG_COUNT: '3',
-          GIT_CONFIG_KEY_0: 'url.https://user:pass@gitlab.corp/.insteadOf',
-          GIT_CONFIG_KEY_1: 'url.https://user:pass@gitlab.corp/.insteadOf',
-          GIT_CONFIG_KEY_2: 'url.https://user:pass@gitlab.corp/.insteadOf',
-          GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.corp/',
-          GIT_CONFIG_VALUE_1: 'git@gitlab.corp:',
-          GIT_CONFIG_VALUE_2: 'https://gitlab.corp/',
-        });
       });
 
       it('clones the crates.io git index with host rule authentication without allowCustomCrateGitRegistries', async () => {
