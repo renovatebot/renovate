@@ -1248,6 +1248,33 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it.each([false, true])(
+      'extracts devEngines constraints with array form: %s',
+      async (arrayForm) => {
+        const runtime = { name: 'node', version: '22.11.0' };
+        const packageManager = { name: 'pnpm', version: '9.0.0' };
+        const content = JSON.stringify({
+          engines: { node: '20.0.0', pnpm: '8.0.0' },
+          packageManager: 'pnpm@8.15.5',
+          devEngines: {
+            runtime: arrayForm ? [runtime] : runtime,
+            packageManager: arrayForm ? [packageManager] : packageManager,
+          },
+        });
+
+        const res = await npmExtract.extractPackageFile(
+          content,
+          'package.json',
+          defaultExtractConfig,
+        );
+
+        expect(res?.extractedConstraints).toEqual({
+          node: '22.11.0',
+          pnpm: '9.0.0',
+        });
+      },
+    );
+
     it('extracts devEngines.runtime and devEngines.packageManager', async () => {
       const pJson = {
         devEngines: {

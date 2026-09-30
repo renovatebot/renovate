@@ -260,7 +260,10 @@ export function getExtractedConstraints(
   for (const dep of deps) {
     if (
       !dep.skipReason &&
-      (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+      (dep.depType === 'engines' ||
+        dep.depType === 'packageManager' ||
+        dep.depType === 'devEngines.runtime' ||
+        dep.depType === 'devEngines.packageManager') &&
       dep.depName &&
       isConstraintName(dep.depName) &&
       constraints.includes(dep.depName) &&
