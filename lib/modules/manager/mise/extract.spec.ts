@@ -1983,6 +1983,59 @@ describe('modules/manager/mise/extract', () => {
         },
       },
       {
+        description: 'git over http',
+        include: 'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref=v1',
+        expected: {
+          depName: 'git.acme.com/org/cfg',
+          packageName: 'http://git.acme.com:8080/org/cfg.git',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops https',
+        include:
+          'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref=v1',
+        expected: {
+          depName: 'dev.azure.com/org/proj/_git/cfg',
+          packageName: 'https://dev.azure.com/org/proj/_git/cfg',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops ssh',
+        include: 'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref=v1',
+        expected: {
+          depName: 'ssh.dev.azure.com/org/proj/cfg',
+          packageName: 'git@ssh.dev.azure.com:v3/org/proj/cfg',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops ssh without ref',
+        include: 'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml',
+        expected: {
+          depName: 'ssh.dev.azure.com/org/proj/cfg',
+          packageName: 'git@ssh.dev.azure.com:v3/org/proj/cfg',
+          datasource: 'git-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
         description: 'git without protocol',
         include: 'git::git@github.com:org/cfg.git//mise.toml?ref=v1',
         expected: {

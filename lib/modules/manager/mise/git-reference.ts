@@ -12,7 +12,11 @@ import { isSha, isShortSha, versionLikeRe } from '../github-actions/parse.ts';
 import type { PackageDependency } from '../types.ts';
 
 const gitPrefix = 'git::';
-const protocolRegex = regEx(/^(?:https|ssh):\/\/[^/]+/);
+const protocolRegex = regEx(/^(?:https?|ssh):\/\/[^/]+/);
+// scp-like urls are only supported by mise for Azure DevOps, which git-url-parse can not parse
+const azureDevOpsSshRegex = regEx(
+  /^(?<url>git@(?<host>ssh\.dev\.azure\.com):v3\/(?<repoName>[^/]+\/[^/]+\/[^/]+))\/\/[^?]+(?:\?(?<query>.*))?$/,
+);
 const refValueRegex = regEx(/(?<prefix>[?&]ref=)[^&]+/);
 // the rest of the line after a reference string, e.g. `", # v1.0.0`
 // `=` is excluded so that `# tag=v1.0.0` style comments are not read as a branch
@@ -109,6 +113,15 @@ interface GitReference {
  * or `ssh://git@github.com/org/cfg.git//mise.toml`.
  */
 function parseGitReference(reference: string): GitReference | null {
+  const azure = azureDevOpsSshRegex.exec(reference)?.groups;
+  if (azure) {
+    return {
+      url: azure.url,
+      host: azure.host,
+      repoName: azure.repoName,
+      ref: new URLSearchParams(azure.query).get('ref') ?? undefined,
+    };
+  }
   const origin = protocolRegex.exec(reference)?.[0];
   if (!origin) {
     return null;
