@@ -180,12 +180,17 @@ export function exec(
         if (signal === 'SIGTERM') {
           void subprocessResult.then((outcome) => {
             const result = 'result' in outcome ? outcome.result : outcome.error;
-            const timedOut = isObject(result) && result.timedOut === true;
+            const timedOut =
+              isObject(result) &&
+              'timedOut' in result &&
+              result.timedOut === true;
             const command = cp.spawnargs.join(' ');
             let message = `Command failed: ${command}\nInterrupted by ${signal}`;
             if (timedOut) {
               message =
-                isObject(result) && isString(result.shortMessage)
+                isObject(result) &&
+                'shortMessage' in result &&
+                isString(result.shortMessage)
                   ? result.shortMessage
                   : `Command timed out${opts.timeout === undefined ? '' : ` after ${opts.timeout} milliseconds`}: ${command}`;
             }
