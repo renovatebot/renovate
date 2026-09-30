@@ -610,6 +610,70 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it.each(['packageManager', 'devEngines.packageManager'])(
+      'collects Yarn binary artifacts for %s updates',
+      async (depType) => {
+        const actualYarn = await vi.importActual<typeof yarn>('./yarn.ts');
+        vi.mocked(yarn.isYarnUpdate).mockImplementation(
+          actualYarn.isYarnUpdate,
+        );
+        const oldYarnrc = 'yarnPath: .yarn/releases/yarn-4.5.0.cjs\n';
+        const newYarnrc = 'yarnPath: .yarn/releases/yarn-4.6.0.cjs\n';
+        git.getFile.mockImplementation((fileName) =>
+          Promise.resolve(
+            fileName === '.yarnrc.yml' ? oldYarnrc : 'lock contents',
+          ),
+        );
+        fs.readLocalFile.mockImplementation((fileName) => {
+          if (fileName === '.yarnrc.yml') {
+            return Promise.resolve(newYarnrc);
+          }
+          if (fileName === '.yarn/releases/yarn-4.6.0.cjs') {
+            return Promise.resolve('new yarn binary');
+          }
+          return Promise.resolve(null);
+        });
+        spyYarn.mockResolvedValue({ lockFile: 'lock contents' });
+        const config = partial<PostUpdateConfig>({
+          upgrades: [
+            {
+              depName: 'yarn',
+              depType,
+              newValue: '4.6.0',
+              managerData: { yarnLock: 'yarn.lock' },
+            },
+          ],
+          updatedPackageFiles: [
+            { type: 'addition', path: 'package.json', contents: '{}' },
+          ],
+        });
+
+        const res = await getAdditionalFiles(config, {
+          npm: [
+            {
+              packageFile: 'package.json',
+              managerData: { yarnLock: 'yarn.lock' },
+            },
+          ],
+        });
+
+        expect(res).toEqual({
+          artifactErrors: [],
+          artifactNotices: [],
+          updatedArtifacts: [
+            { type: 'addition', path: '.yarnrc.yml', contents: newYarnrc },
+            { type: 'deletion', path: '.yarn/releases/yarn-4.5.0.cjs' },
+            {
+              type: 'addition',
+              path: '.yarn/releases/yarn-4.6.0.cjs',
+              contents: 'new yarn binary',
+              isExecutable: true,
+            },
+          ],
+        });
+      },
+    );
+
     it('works', async () => {
       await expect(
         getAdditionalFiles({ ...updateConfig }, additionalFiles),
