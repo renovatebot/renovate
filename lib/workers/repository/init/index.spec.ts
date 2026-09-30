@@ -32,10 +32,6 @@ describe('workers/repository/init/index', () => {
     GlobalConfig.set({ localDir: '', cacheDir: '' });
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   describe('initRepo', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());

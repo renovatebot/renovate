@@ -17,12 +17,10 @@ const requirementsGitPackages = Fixtures.get('requirements-git-packages.txt');
 describe('modules/manager/pip_requirements/extract', () => {
   beforeEach(() => {
     vi.stubEnv('PIP_TEST_TOKEN', undefined);
-    GlobalConfig.reset();
   });
 
   afterEach(() => {
     vi.stubEnv('PIP_TEST_TOKEN', undefined);
-    GlobalConfig.reset();
   });
 
   describe('extractPackageFile()', () => {

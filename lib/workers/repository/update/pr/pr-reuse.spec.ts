@@ -11,8 +11,6 @@ describe('workers/repository/update/pr/pr-reuse', () => {
       value: tryReuseFn,
       writable: true,
     });
-
-    GlobalConfig.reset();
   });
 
   it('returns null if platform does not support PR reuse', async () => {

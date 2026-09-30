@@ -68,7 +68,6 @@ describe('util/exec/index', () => {
     dockerModule.resetPrefetchedImages();
     vi.restoreAllMocks();
     processEnvOrig = process.env;
-    GlobalConfig.reset();
     setCustomEnv({});
   });
 

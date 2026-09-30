@@ -52,8 +52,6 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[k] = v as HttpCache;
       return Promise.resolve(null as never);
     });
-
-    GlobalConfig.reset();
   });
 
   function mockTime(time: string) {
@@ -448,10 +446,6 @@ describe('util/http/cache/package-http-cache-provider', () => {
   });
 
   describe('cacheAllowed', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     // Test matrix covering all combinations of:
     // 1. cachePrivatePackages (true, false)
     // 2. checkCacheControlHeader (true, false)

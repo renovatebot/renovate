@@ -12,7 +12,6 @@ let npmResponse: any;
 
 describe('modules/datasource/npm/index', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
     setNpmrc();
     npmResponse = {
       name: 'foobar',

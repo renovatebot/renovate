@@ -39,10 +39,6 @@ describe('util/http/index', () => {
   });
 
   describe('applyDefaultHeaders', () => {
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('sets default user-agent', () => {
       const options = {};
       applyDefaultHeaders(options);
@@ -350,10 +346,6 @@ describe('util/http/index', () => {
   });
 
   describe('host guard', () => {
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     describe('by default', () => {
       describe('when response does not become config', () => {
         it('warns about, but allows, requests to internal hosts', async () => {

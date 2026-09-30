@@ -784,10 +784,6 @@ describe('modules/datasource/index', () => {
         });
 
         describe('Cache', () => {
-          afterAll(() => {
-            GlobalConfig.reset();
-          });
-
           class CachingDatasource extends DummyDatasource {
             override caching = true;
           }

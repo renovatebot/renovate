@@ -34,7 +34,6 @@ describe('workers/repository/init/inherited', () => {
       inheritConfigStrict: false,
     };
     InheritConfig.reset();
-    GlobalConfig.reset();
   });
 
   it('should return the same config if repository or inheritConfig is not defined', async () => {

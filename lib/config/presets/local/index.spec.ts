@@ -27,10 +27,6 @@ describe('config/presets/local/index', () => {
   });
 
   describe('getPreset()', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('throws for unsupported platform', async () => {
       GlobalConfig.set({
         // @ts-expect-error -- testing invalid platform

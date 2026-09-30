@@ -22,7 +22,6 @@ describe('workers/repository/update/branch/commit', () => {
         platformCommit: 'auto',
       } satisfies BranchConfig;
       scm.commitAndPush.mockResolvedValueOnce(fakeSha('123test'));
-      GlobalConfig.reset();
     });
 
     it('handles empty files', async () => {

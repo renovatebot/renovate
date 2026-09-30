@@ -27,7 +27,6 @@ describe('modules/datasource/rpm/index', () => {
     rpmDatasource = new RpmDatasource();
     cacheDirResult = await tmpDir({ unsafeCleanup: true });
 
-    GlobalConfig.reset();
     memCache.init();
     GlobalConfig.set({ cacheDir: cacheDirResult.path });
     await packageCache.init({ cacheDir: cacheDirResult.path });
@@ -37,7 +36,6 @@ describe('modules/datasource/rpm/index', () => {
     vi.restoreAllMocks();
     await packageCache.cleanup({});
     memCache.reset();
-    GlobalConfig.reset();
     await cacheDirResult?.cleanup();
     cacheDirResult = null;
   });

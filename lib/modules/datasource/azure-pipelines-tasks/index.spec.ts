@@ -13,10 +13,6 @@ const marketplaceTasksPath =
   '/renovatebot/azure-devops-marketplace/main/azure-pipelines-marketplace-tasks.json';
 
 describe('modules/datasource/azure-pipelines-tasks/index', () => {
-  beforeEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns null for unknown task', async () => {
     httpMock
       .scope(gitHubHost)

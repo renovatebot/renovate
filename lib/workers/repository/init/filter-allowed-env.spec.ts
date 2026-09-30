@@ -3,10 +3,6 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { filterAllowedEnv } from './filter-allowed-env.ts';
 
 describe('workers/repository/init/filter-allowed-env', () => {
-  beforeEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns undefined when env is undefined', () => {
     expect(filterAllowedEnv(undefined)).toBeUndefined();
   });

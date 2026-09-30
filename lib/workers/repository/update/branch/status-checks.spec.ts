@@ -20,7 +20,6 @@ describe('workers/repository/update/branch/status-checks', () => {
           minimumReleaseAge: 'renovate/stability-days',
         }),
       });
-      GlobalConfig.reset();
     });
 
     it('returns if not configured', async () => {
@@ -185,7 +184,6 @@ describe('workers/repository/update/branch/status-checks', () => {
           mergeConfidence: 'renovate/merge-confidence',
         }),
       };
-      GlobalConfig.reset();
     });
 
     it('returns if not configured', async () => {

@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../config/global.ts';
 import { setCustomEnv, setUserEnv } from '../env.ts';
 import { exec as _exec } from '../exec/index.ts';
 import { add, clear } from '../host-rules.ts';
@@ -10,7 +9,6 @@ const exec = vi.mocked(_exec);
 
 describe('util/git/exec', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
     setCustomEnv({});
     setUserEnv({});
     clear();

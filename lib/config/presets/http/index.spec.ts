@@ -45,10 +45,6 @@ describe('config/presets/http/index', () => {
         GlobalConfig.set({ internalHostAccess: 'block' });
       });
 
-      afterEach(() => {
-        GlobalConfig.reset();
-      });
-
       it('throws a distinct error for a blocked host', async () => {
         // no mocked response: the request is blocked before it is ever made
         await expect(
