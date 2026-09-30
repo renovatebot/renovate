@@ -7,6 +7,7 @@ import type {
 import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import {
+  findHelmRepositoryCredentials,
   generateHelmEnvs,
   generateLoginCmd,
   generateRegistryLoginCmd,
@@ -149,7 +150,7 @@ describe('modules/manager/helmv3/common', () => {
     );
   });
 
-  describe('helmRepositoryCredentialArgs', () => {
+  describe('findHelmRepositoryCredentials', () => {
     beforeEach(() => {
       hostRules.clear();
     });
@@ -158,13 +159,57 @@ describe('modules/manager/helmv3/common', () => {
       hostRules.add({
         hostType: 'helm',
         matchHost: 'charts.example.com',
-        username: 'test user',
+        username: 'testuser',
         password: 'testpass',
       });
 
       expect(
+        findHelmRepositoryCredentials('https://charts.example.com/stable'),
+      ).toEqual({ username: 'testuser', password: 'testpass' });
+    });
+
+    it('returns null when the host rule lacks a password', () => {
+      hostRules.add({
+        hostType: 'helm',
+        matchHost: 'charts.example.com',
+        username: 'testuser',
+      });
+
+      expect(
+        findHelmRepositoryCredentials('https://charts.example.com'),
+      ).toBeNull();
+    });
+
+    it('returns null when no helm host rule matches', () => {
+      hostRules.add({
+        hostType: 'docker',
+        matchHost: 'charts.example.com',
+        username: 'testuser',
+        password: 'testpass',
+      });
+
+      expect(
+        findHelmRepositoryCredentials('https://charts.example.com'),
+      ).toBeNull();
+    });
+  });
+
+  describe('helmRepositoryCredentialArgs', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it('returns quoted username and password from the helm host rule', () => {
+      hostRules.add({
+        hostType: 'helm',
+        matchHost: 'charts.example.com',
+        username: 'test user',
+        password: "p@ss w'rd;$HOME",
+      });
+
+      expect(
         helmRepositoryCredentialArgs('https://charts.example.com/stable'),
-      ).toEqual(["--username 'test user'", '--password testpass']);
+      ).toEqual(["--username 'test user'", `--password 'p@ss w'"'"'rd;$HOME'`]);
     });
 
     it('returns no arguments when the host rule lacks a password', () => {

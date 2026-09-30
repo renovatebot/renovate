@@ -74,17 +74,29 @@ export async function generateRegistryLoginCmd(
 }
 
 /**
- * Returns the `--username` and `--password` arguments from the helm host rule of `repository`, or none when it lacks either.
+ * Returns the username and password of the Helm host rule of `repository`, or null when it lacks either.
  */
-export function helmRepositoryCredentialArgs(repository: string): string[] {
+export function findHelmRepositoryCredentials(
+  repository: string,
+): { username: string; password: string } | null {
   const { username, password } = hostRules.find({
     url: repository,
     hostType: HelmDatasource.id,
   });
-  if (!(username && password)) {
-    return [];
-  }
-  return [`--username ${quote(username)}`, `--password ${quote(password)}`];
+  return username && password ? { username, password } : null;
+}
+
+/**
+ * Returns the `--username` and `--password` arguments from the Helm host rule of `repository`, or none when it lacks either.
+ */
+export function helmRepositoryCredentialArgs(repository: string): string[] {
+  const credentials = findHelmRepositoryCredentials(repository);
+  return credentials
+    ? [
+        `--username ${quote(credentials.username)}`,
+        `--password ${quote(credentials.password)}`,
+      ]
+    : [];
 }
 
 export function generateHelmEnvs(helmConstraint?: string): ExtraEnv {
