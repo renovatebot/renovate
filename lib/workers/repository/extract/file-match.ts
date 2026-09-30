@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../../config/types.ts';
+import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { minimatch } from '../../../util/minimatch.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
@@ -40,12 +41,14 @@ export function getFilteredFileList(
   config: RenovateConfig,
   fileList: string[],
 ): string[] {
-  const { includePaths, ignorePaths } = config;
-  // TODO #22198
+  return instrument('getFilteredFileList', () => {
+    const { includePaths, ignorePaths } = config;
+    // TODO #22198
 
-  let filteredList = getIncludedFiles(fileList, includePaths!);
-  filteredList = filterIgnoredFiles(filteredList, ignorePaths!);
-  return filteredList;
+    let filteredList = getIncludedFiles(fileList, includePaths!);
+    filteredList = filterIgnoredFiles(filteredList, ignorePaths!);
+    return filteredList;
+  });
 }
 
 export function getMatchingFiles(
