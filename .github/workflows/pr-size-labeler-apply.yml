@@ -4,7 +4,7 @@ name: PR Size Labeler (apply)
 # never checks out or runs pull request code. The pull request number comes from
 # an untrusted artifact, so it is validated against the triggering run first.
 on:
-  workflow_run:
+  workflow_run: # zizmor: ignore[dangerous-triggers] no pull request code is checked out or run, and the artifact is validated
     workflows:
       - PR Size Labeler
     types:
