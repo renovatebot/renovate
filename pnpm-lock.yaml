@@ -314,8 +314,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       prettier:
-        specifier: 3.9.8
-        version: 3.9.8
+        specifier: 3.9.9
+        version: 3.9.9
       protobufjs:
         specifier: 8.8.0
         version: 8.8.0
@@ -4836,8 +4836,8 @@ packages:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier@3.9.8:
-    resolution: {integrity: sha512-WRFq3Wn3WId7LLROfMLdH7xaFr2jR62wU8nLO6rQUOLOxNZUviyJQs1M0iIhLexSFy+L+w0ch66wtoO2jRjG0A==}
+  prettier@3.9.9:
+    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -10200,7 +10200,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  prettier@3.9.8: {}
+  prettier@3.9.9: {}
 
   pretty-format@29.7.0:
     dependencies:
