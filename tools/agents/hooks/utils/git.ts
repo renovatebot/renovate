@@ -26,7 +26,10 @@ export async function getRepoRoot(dir?: string): Promise<string | null> {
   }
 }
 
-async function getBaseRef(): Promise<string> {
+/**
+ * Returns the merge base with `origin/main`, else the upstream branch, else `HEAD`.
+ */
+export async function getBaseRef(): Promise<string> {
   try {
     const out = await git.raw(['merge-base', 'origin/main', 'HEAD']);
     if (out.trim()) {
@@ -52,8 +55,10 @@ async function getBaseRef(): Promise<string> {
   return 'HEAD';
 }
 
-export async function getChangedFiles(): Promise<string[]> {
-  const baseRef = await getBaseRef();
+/**
+ * Returns the files added, copied, modified or renamed since `baseRef`.
+ */
+export async function getChangedFiles(baseRef: string): Promise<string[]> {
   const out = await git.diff(['--name-only', '--diff-filter=ACMR', baseRef]);
   return out
     .trim()
