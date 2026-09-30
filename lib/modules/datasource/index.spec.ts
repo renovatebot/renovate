@@ -115,26 +115,6 @@ class DummyDatasource4 extends DummyDatasource3 {
   }
 }
 
-class DummyDatasource5 extends Datasource {
-  override registryStrategy = undefined as never;
-  private registriesMock: RegistriesMock;
-
-  constructor(registriesMock: RegistriesMock = defaultRegistriesMock) {
-    super(datasource);
-    this.registriesMock = registriesMock;
-  }
-
-  override getReleases({
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const fn = this.registriesMock[registryUrl!];
-    if (isFunction(fn)) {
-      return Promise.resolve(fn());
-    }
-    return Promise.resolve(fn ?? null);
-  }
-}
-
 vi.mock('./metadata-manual.ts', () => ({
   manualChangelogUrls: {
     dummy: {
@@ -499,6 +479,7 @@ describe('modules/datasource/index', () => {
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
+        registryStrategy: 'first',
         getDefaultRegistryUrls: () => ['https://function-registry.com'],
         getReleases: ({ registryUrl }) =>
           Promise.resolve(
@@ -518,6 +499,7 @@ describe('modules/datasource/index', () => {
         supportsCustomRegistry: () => true,
         releaseTimestampSupport: false,
         sourceUrlSupport: 'none',
+        registryStrategy: 'first',
         getDefaultRegistryUrls: () => undefined,
         getReleases: vi.fn(),
         postprocessRelease: (_config, release) => Promise.resolve(release),
@@ -1064,31 +1046,6 @@ describe('modules/datasource/index', () => {
           });
 
           expect(res).toBeNull();
-        });
-
-        it('defaults to hunt strategy', async () => {
-          const registries: RegistriesMock = {
-            'https://reg1.com': null,
-            'https://reg2.com': () => {
-              throw new Error('unknown');
-            },
-            'https://reg3.com': { releases: [{ version: '1.0.0' }] },
-            'https://reg4.com': { releases: [{ version: '2.0.0' }] },
-            'https://reg5.com': { releases: [{ version: '3.0.0' }] },
-          };
-          const registryUrls = Object.keys(registries);
-          datasources.set(datasource, new DummyDatasource5(registries));
-
-          const res = await getPkgReleases({
-            datasource,
-            packageName,
-            registryUrls,
-          });
-
-          expect(res).toMatchObject({
-            registryUrl: 'https://reg3.com',
-            releases: [{ version: '1.0.0' }],
-          });
         });
       });
 

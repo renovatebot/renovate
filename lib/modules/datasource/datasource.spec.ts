@@ -45,6 +45,10 @@ class CachedDatasource extends Datasource {
 }
 
 describe('modules/datasource/datasource', () => {
+  it('defaults to the first registry strategy', () => {
+    expect(new TestDatasource().registryStrategy).toBe('first');
+  });
+
   it('should throw on 429', async () => {
     const testDatasource = new TestDatasource();
 
