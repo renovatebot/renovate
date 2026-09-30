@@ -26,6 +26,7 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: pr-number
+          path: ${{ runner.temp }}/pr-number
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
 
@@ -36,7 +37,7 @@ jobs:
           REPO: ${{ github.repository }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          pr_number="$(cat pr-number.txt)"
+          pr_number="$(cat "$RUNNER_TEMP/pr-number/pr-number.txt")"
           if ! [[ "$pr_number" =~ ^[0-9]+$ ]]; then
             echo "::error::Invalid pull request number"
             exit 1
