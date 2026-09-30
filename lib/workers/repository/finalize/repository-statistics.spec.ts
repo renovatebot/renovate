@@ -51,7 +51,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
             closed: 1,
             merged: 1,
           },
-          lastMergedAt: '2024-01-15T10:00:00Z',
+          lastPRMergedAt: '2024-01-15T10:00:00Z',
         },
         `Renovate repository PR statistics`,
       );
@@ -86,7 +86,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
             closed: 0,
             merged: 3,
           },
-          lastMergedAt: '2024-03-05T10:00:00Z',
+          lastPRMergedAt: '2024-03-05T10:00:00Z',
         },
         `Renovate repository PR statistics`,
       );

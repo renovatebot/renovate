@@ -27,7 +27,7 @@ export function runRenovateRepoStats(
   prList: Pr[],
 ): void {
   const prStats = { total: 0, open: 0, closed: 0, merged: 0 };
-  let lastMergedAt: string | undefined;
+  let lastPRMergedAt: string | undefined;
 
   for (const pr of prList) {
     if (
@@ -40,8 +40,8 @@ export function runRenovateRepoStats(
     switch (pr.state) {
       case 'merged':
         prStats.merged += 1;
-        if (pr.closedAt && (!lastMergedAt || pr.closedAt > lastMergedAt)) {
-          lastMergedAt = pr.closedAt;
+        if (pr.closedAt && (!lastPRMergedAt || pr.closedAt > lastPRMergedAt)) {
+          lastPRMergedAt = pr.closedAt;
         }
         break;
       case 'closed':
@@ -55,7 +55,7 @@ export function runRenovateRepoStats(
     }
   }
   logger.debug(
-    { stats: prStats, lastMergedAt },
+    { stats: prStats, lastPRMergedAt },
     `Renovate repository PR statistics`,
   );
 }
