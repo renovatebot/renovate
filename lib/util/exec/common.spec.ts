@@ -46,6 +46,10 @@ interface StubArgs {
   stderr?: string;
   timeout?: number;
   timeoutRejection?: 'internal' | 'subprocess';
+  resolvedResult?: {
+    shortMessage?: string;
+    timedOut?: boolean;
+  };
   pid?: number;
 }
 
@@ -81,18 +85,19 @@ function getSpawnStub(args: StubArgs): any {
     stderr,
     timeout,
     timeoutRejection,
+    resolvedResult = { timedOut: false },
     pid = 31415,
   } = args;
   const listeners: Events = {};
   let complete = false;
   let resolveResult!: (result: {
     shortMessage?: string;
-    timedOut: boolean;
+    timedOut?: boolean;
   }) => void;
   let rejectResult!: (error: Error) => void;
   const resultPromise = new Promise<{
     shortMessage?: string;
-    timedOut: boolean;
+    timedOut?: boolean;
   }>((resolve, reject) => {
     resolveResult = resolve;
     rejectResult = reject;
@@ -167,7 +172,7 @@ function getSpawnStub(args: StubArgs): any {
   setTimeout(() => {
     if (error) {
       complete = true;
-      resolveResult({ timedOut: false });
+      resolveResult(resolvedResult);
       listeners.error?.(error);
       return;
     }
@@ -176,7 +181,7 @@ function getSpawnStub(args: StubArgs): any {
       return;
     }
     complete = true;
-    resolveResult({ timedOut: false });
+    resolveResult(resolvedResult);
     listeners.exit?.(exitCode, exitSignal);
   }, 0);
 
@@ -689,6 +694,48 @@ describe('util/exec/common', () => {
         signal: exitSignal,
         timedOut: undefined,
         message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
+      });
+    });
+
+    it('handles a SIGTERM result without timeout metadata', async () => {
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal,
+        resolvedResult: {},
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(cmd, partial<RawExecOptions>({})),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        timedOut: undefined,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
+      });
+    });
+
+    it('reports a timeout without a configured duration', async () => {
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal,
+        resolvedResult: { timedOut: true },
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(cmd, partial<RawExecOptions>({})),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        timedOut: true,
+        message: `Command timed out: ${cmd}`,
       });
     });
 
