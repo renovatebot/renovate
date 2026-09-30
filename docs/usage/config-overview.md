@@ -152,6 +152,7 @@ For example, the CLI parameter `--platform=gitlab` is the same as setting `"plat
 
 CLI config is read last and takes precedence over Environment and File config.
 For example, if you configure conflicting values in Environment, File config and CLI config, then the CLI config will be merged last and "win" if values conflict.
+The exception is `repositories`: repositories passed as CLI arguments select which repositories Renovate runs against, but each keeps any matching object entry from the [`repositories`](./self-hosted-configuration.md#repositories) array in File or Environment config.
 
 It is important that you:
 
