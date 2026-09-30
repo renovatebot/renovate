@@ -1,4 +1,9 @@
-import { isString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyString,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { logger } from '../../../../../logger/index.ts';
 import { coerceArray } from '../../../../../util/array.ts';
@@ -16,6 +21,7 @@ import {
   id as npmVersioningId,
 } from '../../../../versioning/npm/index.ts';
 import type { PackageDependency } from '../../../types.ts';
+import type { NpmPackage } from '../types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
@@ -236,6 +242,7 @@ export function extractDependency(
 
 export function getExtractedConstraints(
   deps: PackageDependency[],
+  devEngines?: NpmPackage['devEngines'],
 ): Partial<Record<ConstraintName, string>> {
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   const constraints: ConstraintName[] = [
@@ -258,5 +265,20 @@ export function getExtractedConstraints(
       extractedConstraints[dep.depName] = dep.currentValue;
     }
   }
+
+  // devEngines.runtime takes precedence over engines and packageManager
+  const runtime = devEngines?.runtime;
+  for (const { name, version } of isArray(runtime)
+    ? runtime
+    : [runtime].filter(isTruthy)) {
+    if (
+      isConstraintName(name) &&
+      constraints.includes(name) &&
+      isNonEmptyString(version)
+    ) {
+      extractedConstraints[name] = version;
+    }
+  }
+
   return extractedConstraints;
 }

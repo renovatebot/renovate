@@ -26,6 +26,7 @@ export type NpmPackage = PackageJson & {
   };
   devEngines?: {
     packageManager?: DevEngineItem | DevEngineItem[];
+    runtime?: DevEngineItem | DevEngineItem[];
   };
 };
 

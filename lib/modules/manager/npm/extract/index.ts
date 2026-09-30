@@ -183,7 +183,10 @@ export async function extractPackageFile(
     }
   }
 
-  const extractedConstraints = getExtractedConstraints(res.deps);
+  const extractedConstraints = getExtractedConstraints(
+    res.deps,
+    packageJson.devEngines,
+  );
 
   if (yarnrcConfig) {
     for (const dep of res.deps) {

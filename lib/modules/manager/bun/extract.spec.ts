@@ -322,6 +322,26 @@ describe('modules/manager/bun/extract', () => {
     });
   });
 
+  it('extracts bun constraint from devEngines.runtime', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.readLocalFile.mockResolvedValueOnce(
+      JSON.stringify({
+        name: 'test',
+        version: '0.0.1',
+        devEngines: {
+          runtime: {
+            name: 'bun',
+            version: '1.4.0',
+          },
+        },
+      }),
+    );
+    const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+    expect(packageFiles).toMatchObject([
+      { extractedConstraints: { bun: '1.4.0' } },
+    ]);
+  });
+
   it('extracts .npmrc from sibling or parent directory', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('package.json');
     fs.findLocalSiblingOrParent.mockImplementation(

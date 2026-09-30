@@ -1,6 +1,59 @@
-import { parseDepName } from './dependency.ts';
+import type { PackageDependency } from '../../../types.ts';
+import { getExtractedConstraints, parseDepName } from './dependency.ts';
 
 describe('modules/manager/npm/extract/common/dependency', () => {
+  describe('getExtractedConstraints', () => {
+    it('returns empty object when no deps and no devEngines are given', () => {
+      expect(getExtractedConstraints([])).toEqual({});
+    });
+
+    it('extracts a single devEngines.runtime object', () => {
+      expect(
+        getExtractedConstraints([], {
+          runtime: { name: 'bun', version: '1.4.0' },
+        }),
+      ).toEqual({ bun: '1.4.0' });
+    });
+
+    it('extracts an array of devEngines.runtime entries', () => {
+      expect(
+        getExtractedConstraints([], {
+          runtime: [
+            { name: 'node', version: '20.0.0' },
+            { name: 'bun', version: '1.4.0' },
+          ],
+        }),
+      ).toEqual({ node: '20.0.0', bun: '1.4.0' });
+    });
+
+    it('prefers devEngines.runtime over engines for the same tool', () => {
+      const deps: PackageDependency[] = [
+        { depType: 'engines', depName: 'node', currentValue: '18.0.0' },
+      ];
+      expect(
+        getExtractedConstraints(deps, {
+          runtime: { name: 'node', version: '20.0.0' },
+        }),
+      ).toEqual({ node: '20.0.0' });
+    });
+
+    it('ignores devEngines.runtime entries with an unknown name', () => {
+      expect(
+        getExtractedConstraints([], {
+          runtime: { name: 'deno', version: '1.0.0' },
+        }),
+      ).toEqual({});
+    });
+
+    it('ignores devEngines.runtime entries with a missing version', () => {
+      expect(
+        getExtractedConstraints([], {
+          runtime: { name: 'bun' },
+        }),
+      ).toEqual({});
+    });
+  });
+
   describe('parseDepName', () => {
     it('returns key unchanged for non-resolutions depTypes', () => {
       expect(parseDepName('dependencies', '@cypress/request/qs@~6.14.1')).toBe(

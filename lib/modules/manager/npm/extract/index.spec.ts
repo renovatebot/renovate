@@ -1241,6 +1241,29 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('extracts bun constraint from devEngines.runtime', async () => {
+      const pJson = {
+        devEngines: {
+          runtime: {
+            name: 'bun',
+            version: '1.4.0',
+          },
+        },
+        dependencies: {
+          express: '2.0.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { bun: '1.4.0' },
+      });
+    });
+
     it('extracts dependencies from overrides', async () => {
       const content = codeBlock`
         {

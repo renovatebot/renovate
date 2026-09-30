@@ -137,7 +137,10 @@ export function extractPackageJson(
     }
   }
 
-  const extractedConstraints = getExtractedConstraints(deps);
+  const extractedConstraints = getExtractedConstraints(
+    deps,
+    packageJson.devEngines,
+  );
 
   return {
     deps,
