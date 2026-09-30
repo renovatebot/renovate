@@ -1,3 +1,4 @@
+import type { ToolName as ContainerbaseToolName } from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
 import type { VersioningName } from '../../versioning-list.generated.ts';
@@ -9,8 +10,6 @@ export interface ConstraintDefinition {
 
 /**
  * A `tool` that Containerbase supports.
- *
- * TODO #41849 replace with upstream types
  */
 export const toolDefinitions = [
   {
@@ -152,7 +151,9 @@ export const toolDefinitions = [
   {
     name: 'vendir',
   },
-] as const satisfies ConstraintDefinition[];
+] as const satisfies readonly (ConstraintDefinition & {
+  name: ContainerbaseToolName;
+})[];
 
 /**
  * A `tool` that Containerbase supports.
