@@ -7,7 +7,6 @@ import { dir } from 'tmp-promise';
 import upath from 'upath';
 import type { MockedFunction } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
-import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -560,7 +559,7 @@ describe('modules/datasource/crate/index', () => {
       });
     });
 
-    describe('host rules for git registries', () => {
+    describe('git authentication', () => {
       const httpsUrl = 'https://gitlab.corp/group/crates-index.git';
       const sshUrl = 'ssh://git@gitlab.corp/group/crates-index.git';
 
@@ -571,14 +570,8 @@ describe('modules/datasource/crate/index', () => {
         });
       });
 
-      it('clones http(s) registries with host rule authentication', async () => {
+      it('passes crate authentication to git when cloning an http(s) registry', async () => {
         const { mockClone } = setupGitMocks();
-        hostRules.add({
-          hostType: 'crate',
-          matchHost: 'gitlab.corp',
-          username: 'user',
-          password: 'pass',
-        });
 
         const res = await getPkgReleases({
           datasource,
@@ -598,7 +591,7 @@ describe('modules/datasource/crate/index', () => {
         );
       });
 
-      it('clones the crates.io git index with host rule authentication without allowCustomCrateGitRegistries', async () => {
+      it('passes crate authentication to git for the crates.io git index without allowCustomCrateGitRegistries', async () => {
         GlobalConfig.set({
           ...adminConfig,
           allowCustomCrateGitRegistries: false,
@@ -625,7 +618,7 @@ describe('modules/datasource/crate/index', () => {
         );
       });
 
-      it('clones other registries without authentication', async () => {
+      it('does not pass authentication to git for ssh registries', async () => {
         const { mockClone } = setupGitMocks();
 
         const res = await getPkgReleases({
