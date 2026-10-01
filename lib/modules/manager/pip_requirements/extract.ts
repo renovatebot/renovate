@@ -36,7 +36,7 @@ export function extractPackageFile(
   const deps = content
     .split(newlineRegex)
     .map((rawline) => {
-      let dep: PackageDependency = {};
+      let dep: PackageDependency<PipRequirementsManagerData> = {};
       const [line, comment] = rawline.split('#').map((part) => part.trim());
       if (isSkipComment(comment)) {
         dep.skipReason = 'ignored';
