@@ -4,6 +4,7 @@ export interface CliArgs {
   all: boolean;
   fix: boolean;
   noTest: boolean;
+  coverageDir: string;
   targets: string[];
 }
 
