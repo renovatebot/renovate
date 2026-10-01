@@ -19,7 +19,7 @@ const gitlab = vi.mocked(_gitlab);
 describe('config/presets/local/index', () => {
   beforeEach(() => {
     const preset = { resolved: 'preset' };
-    platform.getRawFile.mockResolvedValue('{ resolved: "preset" }');
+    platform.getRawFile.mockResolvedValue(JSON.stringify(preset));
     gitea.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     forgejo.getPresetFromEndpoint.mockResolvedValueOnce(preset);
     github.getPresetFromEndpoint.mockResolvedValueOnce(preset);

@@ -659,8 +659,18 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(GetFileCommand)
         .resolvesOnce({ fileContent: uint8arrData });
-      const res = await codeCommit.getJsonFile('file.json');
+      const res = await codeCommit.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('rejects JSON5-only syntax in a JSON file', async () => {
+      codeCommitClient.on(GetFileCommand).resolvesOnce({
+        fileContent: new Uint8Array(Buffer.from("{foo: 'bar'}")),
+      });
+
+      await expect(codeCommit.getJsonFile('file.json')).rejects.toThrow(
+        'Parse error: Expected string for object property on line 1 column 2',
+      );
     });
 
     it('returns null', async () => {
