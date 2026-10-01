@@ -253,6 +253,7 @@ function sortVersions(version: string, other: string): number {
   if (!a || !b) {
     return 0;
   }
+  // Unorderable pairs are filtered out by `isCompatible` before sorting.
   return compare(a, b) ?? 0;
 }
 
