@@ -622,8 +622,8 @@ importers:
         version: 3.3.1
     optionalDependencies:
       openpgp:
-        specifier: 6.3.1
-        version: 6.3.1(@openpgp/web-stream-tools@0.3.1)
+        specifier: 6.3.2
+        version: 6.3.2(@openpgp/web-stream-tools@0.3.1)
       re2:
         specifier: 1.26.1
         version: 1.26.1
@@ -4597,8 +4597,8 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openpgp@6.3.1:
-    resolution: {integrity: sha512-7oSPvmlKPojxFoyelT5DWPIAVmqWZh4qU/5pO6bdoShEtRpCw9Sye9IXUQj6EFM3XpgGssqccAr705YtTcLNQw==}
+  openpgp@6.3.2:
+    resolution: {integrity: sha512-wcZTzHz41LV8Y48zH/JlD1JT8YdNmpWOuMAjQ/podvvCwsjBEU37K3znJh4UQcj3hksE5z9TzvhbUbwzsGvlLQ==}
     engines: {node: '>= 18.0.0', typescript: '>= 5.0.0'}
     peerDependencies:
       '@openpgp/web-stream-tools': ~0.3.0
@@ -9975,7 +9975,7 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openpgp@6.3.1(@openpgp/web-stream-tools@0.3.1):
+  openpgp@6.3.2(@openpgp/web-stream-tools@0.3.1):
     optionalDependencies:
       '@openpgp/web-stream-tools': 0.3.1(@types/node@24.13.6)(typescript@7.0.2)
     optional: true
