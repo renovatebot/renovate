@@ -14,6 +14,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags/index.ts';
 import * as _githubActionsArtifacts from '../../../../modules/manager/github-actions/artifacts.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
@@ -25,10 +26,12 @@ import type {
   PrDebugData,
 } from '../../../../modules/platform/index.ts';
 import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { id as githubActionsVersioningId } from '../../../../modules/versioning/github-actions/index.ts';
 import * as _repoCache from '../../../../util/cache/repository/index.ts';
 import * as _exec from '../../../../util/exec/index.ts';
 import type { FileChange, StatusResult } from '../../../../util/git/types.ts';
 import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
+import { Result } from '../../../../util/result.ts';
 import * as _sanitize from '../../../../util/sanitize.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as _limits from '../../../global/limits.ts';
@@ -38,6 +41,9 @@ import type {
   CacheFingerprintMatchResult,
 } from '../../../types.ts';
 import * as _changelog from '../../changelog/index.ts';
+import { lookupUpdates } from '../../process/lookup/index.ts';
+import type { LookupUpdateConfig } from '../../process/lookup/types.ts';
+import { branchifyUpgrades } from '../../updates/branchify.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
@@ -114,6 +120,10 @@ describe('workers/repository/update/branch/index', () => {
       updatedArtifacts: [],
       artifactNotices: [],
     };
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
 
     beforeEach(() => {
       githubActionsArtifacts.updateActionsLockfile.mockResolvedValue({
@@ -245,6 +255,306 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pending',
       });
+    });
+
+    it('creates the lock file maintenance branch with an inherited minimumReleaseAge', async () => {
+      const { branches } = await branchifyUpgrades(
+        {
+          ...getConfig(),
+          baseBranch: config.baseBranch,
+          errors: [],
+          warnings: [],
+          minimumReleaseAge: '1 day',
+          prCreation: 'not-pending',
+          semanticCommits: 'disabled',
+          lockFileMaintenance: { enabled: true },
+        },
+        { npm: [{ packageFile: 'package.json', deps: [] }] },
+      );
+      expect(branches).toHaveLength(1);
+      expect(branches[0].upgrades).toMatchObject([
+        {
+          updateType: 'lockFileMaintenance',
+          minimumReleaseAge: '1 day',
+        },
+      ]);
+      expect(branches[0].upgrades[0].releaseTimestamp).toBeUndefined();
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+        updatedArtifacts: [
+          { type: 'addition', path: 'package-lock.json', contents: '{}\n' },
+        ],
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      platform.getBranchStatus.mockResolvedValue('green');
+
+      const res = await branchWorker.processBranch({
+        ...config,
+        ...branches[0],
+      });
+
+      expect(res).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        result: 'pending',
+        commitSha,
+      });
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          state: 'green',
+          context: 'renovate/stability-days',
+        }),
+      );
+    });
+
+    it.each`
+      internalChecksFilter | timestamp                     | packageRuleAge | prCreation       | state       | result
+      ${'strict'}          | ${'2026-09-24T00:00:00.000Z'} | ${undefined}   | ${'not-pending'} | ${'green'}  | ${'pending'}
+      ${'none'}            | ${'2026-09-24T00:00:00.000Z'} | ${undefined}   | ${'not-pending'} | ${'green'}  | ${'pending'}
+      ${'flexible'}        | ${'2026-09-30T12:00:00.000Z'} | ${undefined}   | ${'immediate'}   | ${'yellow'} | ${'pr-created'}
+      ${'none'}            | ${'2026-09-30T12:00:00.000Z'} | ${undefined}   | ${'immediate'}   | ${'yellow'} | ${'pr-created'}
+      ${'strict'}          | ${'2026-09-24T00:00:00.000Z'} | ${'14 days'}   | ${'immediate'}   | ${'yellow'} | ${'pr-created'}
+    `(
+      'creates a digest branch and publishes $state with $internalChecksFilter filtering and age override $packageRuleAge',
+      async ({
+        internalChecksFilter,
+        timestamp,
+        packageRuleAge,
+        prCreation,
+        state,
+        result,
+      }) => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime('2026-10-01T00:00:00.000Z');
+        const packageRules = packageRuleAge
+          ? [{ matchNewValue: 'v7', minimumReleaseAge: packageRuleAge }]
+          : [];
+        const lookupConfig = partial<LookupUpdateConfig>({
+          ...getConfig(),
+          manager: 'github-actions',
+          depName: 'actions/checkout',
+          packageName: 'actions/checkout',
+          currentValue: 'v7',
+          currentDigest: fakeSha('current'),
+          datasource: GithubTagsDatasource.id,
+          versioning: githubActionsVersioningId,
+          minimumReleaseAge: '1 day',
+          rangeStrategy: 'bump',
+          internalChecksFilter,
+          packageRules,
+        });
+        vi.spyOn(
+          GithubTagsDatasource.prototype,
+          'getReleases',
+        ).mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v7.0.0',
+              releaseTimestamp: '2020-01-01T00:00:00.000Z' as Timestamp,
+            },
+            { version: 'v7.0.1', releaseTimestamp: timestamp as Timestamp },
+          ],
+        });
+        vi.spyOn(
+          GithubTagsDatasource.prototype,
+          'getDigest',
+        ).mockResolvedValueOnce(fakeSha('new'));
+        const lookupResult = await Result.wrap(
+          lookupUpdates(lookupConfig),
+        ).unwrapOrThrow();
+        expect(lookupResult.updates).toMatchObject([
+          { updateType: 'digest', newValue: 'v7', newDigest: fakeSha('new') },
+        ]);
+        expect(lookupResult.updates[0].pendingChecks).toBeUndefined();
+        expect(lookupResult.updates[0].releaseTimestamp).toBeUndefined();
+        expect(lookupResult.currentVersionTimestamp).toBe(
+          '2020-01-01T00:00:00.000Z',
+        );
+        const { branches } = await branchifyUpgrades(
+          {
+            ...getConfig(),
+            baseBranch: config.baseBranch,
+            errors: [],
+            warnings: [],
+            minimumReleaseAge: '1 day',
+            prCreation,
+            semanticCommits: 'disabled',
+            internalChecksFilter,
+            packageRules,
+          },
+          {
+            'github-actions': [
+              {
+                packageFile: '.github/workflows/test.yml',
+                deps: [
+                  {
+                    depName: lookupConfig.depName,
+                    packageName: lookupConfig.packageName,
+                    currentValue: lookupConfig.currentValue,
+                    currentDigest: lookupConfig.currentDigest,
+                    datasource: lookupConfig.datasource,
+                    versioning: lookupConfig.versioning,
+                    ...lookupResult,
+                  },
+                ],
+              },
+            ],
+          },
+        );
+        expect(branches).toHaveLength(1);
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+          updatedPackageFiles: [
+            {
+              type: 'addition',
+              path: '.github/workflows/test.yml',
+              contents: codeBlock`
+              on: push
+              jobs:
+                test:
+                  runs-on: ubuntu-latest
+                  steps:
+                    - uses: actions/checkout@${fakeSha('new')} # v7
+            `,
+            },
+          ],
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        platform.getBranchStatus.mockResolvedValue('green');
+
+        const res = await branchWorker.processBranch({
+          ...config,
+          ...branches[0],
+        });
+
+        expect(res).toMatchObject({
+          branchExists: true,
+          updatesVerified: true,
+          commitSha,
+          result,
+        });
+        expect(platform.setBranchStatus).toHaveBeenCalledWith(
+          expect.objectContaining({
+            state,
+            context: 'renovate/stability-days',
+          }),
+        );
+        expect(lookupResult.currentValueTimestamp).toBe(timestamp);
+        expect(branches[0].upgrades[0]).toMatchObject({
+          currentValueTimestamp: timestamp,
+          minimumReleaseAge: packageRuleAge ?? '1 day',
+        });
+      },
+    );
+
+    describe('minimumReleaseAge timestamps', () => {
+      const oldTimestamp = '2026-09-24T00:00:00.000Z' as Timestamp;
+      const youngTimestamp = '2026-09-30T12:00:00.000Z' as Timestamp;
+      const boundaryTimestamp = '2026-09-30T00:00:00.000Z' as Timestamp;
+
+      beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime('2026-10-01T00:00:00.000Z');
+        config.prCreation = 'immediate';
+        config.stabilityStatus = 'yellow';
+        getUpdated.getUpdatedPackageFiles.mockResolvedValue({
+          ...updatedPackageFiles,
+          updatedPackageFiles: [
+            { type: 'addition', path: 'package.json', contents: '{}\n' },
+          ],
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValue({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it.each`
+        updateType     | currentValue | newValue    | currentValueTimestamp | releaseTimestamp  | minimumReleaseAgeBehaviour | state
+        ${'digest'}    | ${'v7'}      | ${'v7'}     | ${oldTimestamp}       | ${youngTimestamp} | ${'timestamp-required'}    | ${'green'}
+        ${'digest'}    | ${'v7'}      | ${'v7'}     | ${youngTimestamp}     | ${oldTimestamp}   | ${'timestamp-required'}    | ${'yellow'}
+        ${'digest'}    | ${'v7'}      | ${'v7'}     | ${boundaryTimestamp}  | ${undefined}      | ${'timestamp-required'}    | ${'green'}
+        ${'digest'}    | ${'v7'}      | ${'v7'}     | ${undefined}          | ${oldTimestamp}   | ${'timestamp-required'}    | ${'yellow'}
+        ${'digest'}    | ${'v7'}      | ${'v7'}     | ${undefined}          | ${youngTimestamp} | ${'timestamp-optional'}    | ${'green'}
+        ${'digest'}    | ${'latest'}  | ${'latest'} | ${null}               | ${undefined}      | ${'timestamp-required'}    | ${'yellow'}
+        ${'pinDigest'} | ${'v7'}      | ${'v7'}     | ${oldTimestamp}       | ${undefined}      | ${'timestamp-required'}    | ${'green'}
+        ${'pinDigest'} | ${'v7'}      | ${'v7'}     | ${undefined}          | ${oldTimestamp}   | ${'timestamp-required'}    | ${'yellow'}
+        ${'pinDigest'} | ${'latest'}  | ${'latest'} | ${null}               | ${undefined}      | ${'timestamp-required'}    | ${'green'}
+        ${'digest'}    | ${'v7'}      | ${'v8'}     | ${youngTimestamp}     | ${oldTimestamp}   | ${'timestamp-required'}    | ${'green'}
+        ${'digest'}    | ${'v7'}      | ${'v8'}     | ${oldTimestamp}       | ${youngTimestamp} | ${'timestamp-required'}    | ${'yellow'}
+        ${'minor'}     | ${'1.0.0'}   | ${'1.1.0'}  | ${oldTimestamp}       | ${youngTimestamp} | ${'timestamp-required'}    | ${'yellow'}
+      `(
+        'publishes $state for $updateType $currentValue → $newValue with current=$currentValueTimestamp and release=$releaseTimestamp',
+        async ({
+          updateType,
+          currentValue,
+          newValue,
+          currentValueTimestamp,
+          releaseTimestamp,
+          minimumReleaseAgeBehaviour,
+          state,
+        }) => {
+          config.upgrades = partial<BranchUpgradeConfig>([
+            {
+              updateType,
+              currentValue,
+              newValue,
+              currentValueTimestamp,
+              releaseTimestamp,
+              minimumReleaseAgeBehaviour,
+              minimumReleaseAge: '1 day',
+            },
+          ]);
+
+          const res = await branchWorker.processBranch(config);
+
+          expect(res).toMatchObject({ branchExists: true, commitSha });
+          expect(platform.setBranchStatus).toHaveBeenCalledWith(
+            expect.objectContaining({
+              state,
+              context: 'renovate/stability-days',
+            }),
+          );
+        },
+      );
+
+      it.each([false, true])(
+        'keeps grouped updates pending regardless of digest order (digest first: %s)',
+        async (digestFirst) => {
+          const digest = partial<BranchUpgradeConfig>({
+            updateType: 'digest',
+            currentValue: 'v7',
+            newValue: 'v7',
+            currentValueTimestamp: oldTimestamp,
+            minimumReleaseAge: '1 day',
+          });
+          const version = partial<BranchUpgradeConfig>({
+            updateType: 'minor',
+            releaseTimestamp: youngTimestamp,
+            minimumReleaseAge: '1 day',
+          });
+          config.upgrades = digestFirst ? [digest, version] : [version, digest];
+
+          await branchWorker.processBranch(config);
+
+          expect(platform.setBranchStatus).toHaveBeenCalledWith(
+            expect.objectContaining({
+              state: 'yellow',
+              context: 'renovate/stability-days',
+            }),
+          );
+        },
+      );
     });
 
     describe('if release is missing releaseTimestamp with minimumReleaseAge set', () => {

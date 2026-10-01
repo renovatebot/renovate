@@ -4968,9 +4968,11 @@ describe('workers/repository/process/lookup/index', () => {
         'getDigest',
       ).mockResolvedValueOnce(fakeSha('new'));
 
-      const { updates } = await Result.wrap(
-        lookup.lookupUpdates(config),
-      ).unwrapOrThrow();
+      const { updates, currentValueTimestamp, currentVersionTimestamp } =
+        await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+
+      expect(currentValueTimestamp).toBe(yesterday.toISOString());
+      expect(currentVersionTimestamp).toBe(lastWeek.toISOString());
 
       expect(updates).toEqual([
         {
@@ -5002,9 +5004,11 @@ describe('workers/repository/process/lookup/index', () => {
         'getDigest',
       ).mockResolvedValueOnce(fakeSha('new'));
 
-      const { updates } = await Result.wrap(
+      const { updates, currentValueTimestamp } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
+
+      expect(currentValueTimestamp).toBeUndefined();
 
       expect(updates).toEqual([
         {
@@ -5265,9 +5269,11 @@ describe('workers/repository/process/lookup/index', () => {
         'getDigest',
       ).mockResolvedValueOnce(fakeSha('new'));
 
-      const { updates } = await Result.wrap(
+      const { updates, currentValueTimestamp } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
+
+      expect(currentValueTimestamp).toBe(lastWeek.toISOString());
 
       expect(updates).toEqual([
         {
@@ -5354,19 +5360,26 @@ describe('workers/repository/process/lookup/index', () => {
       config.minimumReleaseAge = '3 days';
       config.minimumReleaseAgeBehaviour = 'timestamp-required';
       config.internalChecksFilter = 'none';
-      // No releaseTimestamp: under `strict`/`timestamp-required` this would be held
-      // as pending, but `none` opts out of internal checks entirely.
+      // Candidate filtering is disabled, but branch stability still needs the timestamp.
       getGithubTags.mockResolvedValueOnce({
-        releases: [{ version: 'v7.0.0' }, { version: 'v7.0.1' }],
+        releases: [
+          { version: 'v7.0.0' },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z' as Timestamp,
+          },
+        ],
       });
       vi.spyOn(
         GithubTagsDatasource.prototype,
         'getDigest',
       ).mockResolvedValueOnce(fakeSha('new'));
 
-      const { updates } = await Result.wrap(
+      const { updates, currentValueTimestamp } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
+
+      expect(currentValueTimestamp).toBe('2020-01-01T00:00:00.000Z');
 
       expect(updates).toEqual([
         {
@@ -5408,9 +5421,11 @@ describe('workers/repository/process/lookup/index', () => {
         'getDigest',
       ).mockResolvedValueOnce(fakeSha('new'));
 
-      const { updates } = await Result.wrap(
+      const { updates, currentValueTimestamp } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
+
+      expect(currentValueTimestamp).toBe(yesterday.toISOString());
 
       expect(updates).toEqual([
         {
@@ -5531,9 +5546,11 @@ describe('workers/repository/process/lookup/index', () => {
         'getDigest',
       ).mockResolvedValueOnce(fakeSha('new'));
 
-      const { updates } = await Result.wrap(
-        lookup.lookupUpdates(config),
-      ).unwrapOrThrow();
+      const { updates, currentValueTimestamp, currentVersionTimestamp } =
+        await Result.wrap(lookup.lookupUpdates(config)).unwrapOrThrow();
+
+      expect(currentValueTimestamp).toBe(yesterday.toISOString());
+      expect(currentVersionTimestamp).toBe(lastWeek.toISOString());
 
       expect(updates).toEqual([
         {
@@ -5548,39 +5565,82 @@ describe('workers/repository/process/lookup/index', () => {
 
     // Unlike `digest`, an unversioned `currentValue` (e.g. `latest`) is exempt from `minimumReleaseAge` entirely for `pinDigest`:
     // pinning a ref that already floats to latest is strictly safer, so holding it would only prolong the un-pinned state.
-    it('does not hold `pinDigest` updates for unversioned `currentValue`s (e.g. `latest`)', async () => {
-      config.currentValue = 'alpine';
-      config.packageName = 'node';
-      config.datasource = DockerDatasource.id;
+    it.each(['strict', 'none'])(
+      'does not hold unversioned `pinDigest` updates with %s filtering',
+      async (internalChecksFilter) => {
+        config.currentValue = 'alpine';
+        config.packageName = 'node';
+        config.datasource = DockerDatasource.id;
+        config.pinDigests = true;
+        config.minimumReleaseAge = '3 days';
+        config.internalChecksFilter = internalChecksFilter;
+        getDockerReleases.mockResolvedValueOnce({
+          releases: [
+            { version: 'alpine' },
+            { version: '8.0.0' },
+            { version: '8.1.0' },
+          ],
+        });
+        getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+
+        const { updates, currentValueTimestamp } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(currentValueTimestamp).toBeNull();
+
+        expect(updates).toEqual([
+          {
+            isPinDigest: true,
+            newDigest: 'sha256:abcdef1234567890',
+            newValue: 'alpine',
+            updateType: 'pinDigest',
+          },
+        ]);
+        // Short-circuited: no age check ran, so no "no releaseTimestamp to age against" log noise.
+        expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.stringContaining('has no releaseTimestamp to age against'),
+        );
+      },
+    );
+
+    it('holds a versioned pinDigest when the current version is missing from releases', async () => {
+      config.currentValue = 'v7.9.0';
       config.pinDigests = true;
-      config.minimumReleaseAge = '3 days';
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '1 day';
       config.internalChecksFilter = 'strict';
-      getDockerReleases.mockResolvedValueOnce({
+      config.rollbackPrs = false;
+      getGithubTags.mockResolvedValueOnce({
         releases: [
-          { version: 'alpine' },
-          { version: '8.0.0' },
-          { version: '8.1.0' },
+          {
+            version: 'v7.0.0',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z' as Timestamp,
+          },
         ],
       });
-      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce(fakeSha('new'));
 
-      const { updates } = await Result.wrap(
+      const { updates, currentValueTimestamp } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
+      expect(currentValueTimestamp).toBeUndefined();
       expect(updates).toEqual([
         {
-          isPinDigest: true,
-          newDigest: 'sha256:abcdef1234567890',
-          newValue: 'alpine',
           updateType: 'pinDigest',
+          isPinDigest: true,
+          newValue: 'v7.9.0',
+          newDigest: fakeSha('new'),
+          pendingChecks: true,
         },
       ]);
-      // Short-circuited: no age check ran, so no "no releaseTimestamp to age against" log noise.
-      expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
-        expect.anything(),
-        expect.stringContaining('has no releaseTimestamp to age against'),
-      );
     });
 
     it('handles no fitting version and no version in lock file', async () => {
