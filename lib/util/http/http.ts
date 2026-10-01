@@ -238,13 +238,16 @@ export abstract class HttpBase<
       cacheProvider = options.cacheProvider;
     }
 
-    const requestKey = hash(
-      `got-${JSON.stringify({
-        url,
-        headers: options.headers,
-        method,
-      })}`,
-    );
+    const requestKey = isReadMethod
+      ? hash(
+          `got-${JSON.stringify({
+            url,
+            headers: options.headers,
+            method,
+            throwHttpErrors: options.throwHttpErrors !== false,
+          })}`,
+        )
+      : '';
 
     const memCacheKey =
       !process.env.RENOVATE_X_DISABLE_HTTP_MEMCACHE &&
