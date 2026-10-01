@@ -31,8 +31,7 @@ export class RubygemsDatasource extends Datasource {
   private metadataCache: MetadataCache;
 
   constructor() {
-    super(RubygemsDatasource.id);
-    this.http = new Http(RubygemsDatasource.id);
+    super(RubygemsDatasource.id, new Http(RubygemsDatasource.id));
     this.versionsEndpointCache = new VersionsEndpointCache(this.http);
     this.metadataCache = new MetadataCache(this.http);
   }
