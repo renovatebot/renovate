@@ -1,10 +1,6 @@
 import urlJoin from 'url-join';
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { Result } from '../../../util/result.ts';
 import { Datasource } from '../datasource.ts';
-import { ReleasesConfig } from '../schema.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BuildpacksRegistryResponse } from './schema.ts';
 
@@ -33,42 +29,29 @@ export class BuildpacksRegistryDatasource extends Datasource {
   private async _getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const result = Result.parse(config, ReleasesConfig)
-      .transform(({ packageName, registryUrl }) => {
-        const url = urlJoin(
-          registryUrl,
-          'api',
-          'v1',
-          'buildpacks',
-          packageName,
-        );
-
-        return this.http.getJsonSafe(url, BuildpacksRegistryResponse);
-      })
-      .transform(({ versions, latest }): ReleaseResult => {
-        const releases: Release[] = versions;
-
-        const res: ReleaseResult = { releases };
-
-        if (latest?.homepage) {
-          res.homepage = latest.homepage;
-        }
-
-        return res;
-      });
-
-    const { val, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'buildpacks: validation error');
+    const { packageName, registryUrl } = config;
+    /* v8 ignore next -- should never happen */
+    if (!registryUrl) {
       return null;
     }
 
-    if (err) {
-      this.handleGenericErrors(err);
+    const url = urlJoin(registryUrl, 'api', 'v1', 'buildpacks', packageName);
+
+    const body = await this.fetchJsonOrNull(url, BuildpacksRegistryResponse);
+    if (!body) {
+      return null;
     }
 
-    return val;
+    const { versions, latest } = body;
+    const releases: Release[] = versions;
+
+    const res: ReleaseResult = { releases };
+
+    if (latest?.homepage) {
+      res.homepage = latest.homepage;
+    }
+
+    return res;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
