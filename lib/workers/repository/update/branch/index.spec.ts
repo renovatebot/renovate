@@ -332,8 +332,7 @@ describe('workers/repository/update/branch/index', () => {
         const packageRules = packageRuleAge
           ? [{ matchNewValue: 'v7', minimumReleaseAge: packageRuleAge }]
           : [];
-        const lookupConfig = partial<LookupUpdateConfig>({
-          ...getConfig(),
+        const lookupConfig: LookupUpdateConfig = {
           manager: 'github-actions',
           depName: 'actions/checkout',
           packageName: 'actions/checkout',
@@ -342,10 +341,11 @@ describe('workers/repository/update/branch/index', () => {
           datasource: GithubTagsDatasource.id,
           versioning: githubActionsVersioningId,
           minimumReleaseAge: '1 day',
+          minimumReleaseAgeBehaviour: 'timestamp-required',
           rangeStrategy: 'bump',
           internalChecksFilter,
           packageRules,
-        });
+        };
         vi.spyOn(
           GithubTagsDatasource.prototype,
           'getReleases',
@@ -397,7 +397,11 @@ describe('workers/repository/update/branch/index', () => {
                     currentDigest: lookupConfig.currentDigest,
                     datasource: lookupConfig.datasource,
                     versioning: lookupConfig.versioning,
-                    ...lookupResult,
+                    updates: lookupResult.updates,
+                    currentVersion: lookupResult.currentVersion,
+                    currentVersionTimestamp:
+                      lookupResult.currentVersionTimestamp,
+                    currentValueTimestamp: lookupResult.currentValueTimestamp,
                   },
                 ],
               },

@@ -5565,7 +5565,7 @@ describe('workers/repository/process/lookup/index', () => {
 
     // Unlike `digest`, an unversioned `currentValue` (e.g. `latest`) is exempt from `minimumReleaseAge` entirely for `pinDigest`:
     // pinning a ref that already floats to latest is strictly safer, so holding it would only prolong the un-pinned state.
-    it.each(['strict', 'none'])(
+    it.each<LookupUpdateConfig['internalChecksFilter']>(['strict', 'none'])(
       'does not hold unversioned `pinDigest` updates with %s filtering',
       async (internalChecksFilter) => {
         config.currentValue = 'alpine';
