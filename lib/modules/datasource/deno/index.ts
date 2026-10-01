@@ -1,21 +1,22 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as semanticVersioning from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type { Release } from '../index.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   DenoAPIModuleResponse,
   DenoAPIModuleVersionResponse,
 } from './schema.ts';
 
-export class DenoDatasource extends Datasource {
+export class DenoDatasource extends RegistryDatasource {
   static readonly id = 'deno';
 
   override supportsCustomRegistry(_packageName: string): boolean {
@@ -24,7 +25,7 @@ export class DenoDatasource extends Datasource {
 
   override readonly defaultVersioning = semanticVersioning.id;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://apiland.deno.dev'];
   }
 
@@ -42,9 +43,7 @@ export class DenoDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const massagedRegistryUrl = registryUrl!;
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const extractResult = regEx(
       /^(?:https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/,
     ).exec(packageName);
@@ -61,7 +60,7 @@ export class DenoDatasource extends Datasource {
 
     // https://apiland.deno.dev/v2/modules/postgres
     const moduleAPIURL = joinUrlParts(
-      massagedRegistryUrl,
+      registryUrl,
       'v2/modules',
       massagedPackageName,
     );
@@ -69,11 +68,12 @@ export class DenoDatasource extends Datasource {
     return await this.getReleaseResult(moduleAPIURL);
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        // TODO: types (#22198)
         key: `getReleases:${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },

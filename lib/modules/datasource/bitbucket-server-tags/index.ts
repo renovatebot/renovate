@@ -4,10 +4,8 @@ import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server.ts';
 import { regEx } from '../../../util/regex.ts';
-import { Result } from '../../../util/result.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import { DigestsConfig, ReleasesConfig } from '../schema.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -72,16 +70,10 @@ export class BitbucketServerTagsDatasource extends Datasource<BitbucketServerHtt
       return null;
     }
 
-    const result = Result.parse(config, ReleasesConfig)
-      .transform(({ registryUrl }) => {
-        const url = `${BitbucketServerTagsDatasource.getApiUrl(registryUrl)}projects/${projectKey}/repos/${repositorySlug}/tags`;
+    const url = `${BitbucketServerTagsDatasource.getApiUrl(registryUrl)}projects/${projectKey}/repos/${repositorySlug}/tags`;
 
-        return this.http.getJsonSafe(
-          url,
-          { paginate: true },
-          BitbucketServerTags,
-        );
-      })
+    const result = this.http
+      .getJsonSafe(url, { paginate: true }, BitbucketServerTags)
       .transform((tags) =>
         tags.map(({ displayId, hash }) => ({
           version: displayId,
@@ -179,20 +171,18 @@ export class BitbucketServerTagsDatasource extends Datasource<BitbucketServerHtt
       return this.getTagCommit(baseUrl, newValue, config);
     }
 
-    const result = Result.parse(config, DigestsConfig)
-      .transform(() => {
-        const url = `${baseUrl}/commits?ignoreMissing=true`;
+    const url = `${baseUrl}/commits?ignoreMissing=true`;
 
-        return this.http.getJsonSafe(
-          url,
-          {
-            paginate: true,
-            limit: 1,
-            maxPages: 1,
-          },
-          BitbucketServerCommits,
-        );
-      })
+    const result = this.http
+      .getJsonSafe(
+        url,
+        {
+          paginate: true,
+          limit: 1,
+          maxPages: 1,
+        },
+        BitbucketServerCommits,
+      )
       .transform((commits) => {
         return commits[0]?.id;
       });

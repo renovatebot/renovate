@@ -1,4 +1,5 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -6,8 +7,12 @@ import {
   isVersion,
   id as semverVersioningId,
 } from '../../versioning/semver/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 
 const lineTerminationRegex = regEx(`\r?\n`);
 const releaseBeginningChar = '\t{';
@@ -20,14 +25,14 @@ const releaseVersionRegex = regEx(
 );
 const releaseFutureRegex = regEx(`Future:\\s+true`);
 
-export class GolangVersionDatasource extends Datasource {
+export class GolangVersionDatasource extends RegistryDatasource {
   static readonly id = 'golang-version';
 
   constructor() {
     super(GolangVersionDatasource.id);
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://raw.githubusercontent.com/golang/website'];
   }
 
@@ -46,12 +51,7 @@ export class GolangVersionDatasource extends Datasource {
 
   private async fetchReleases({
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
       homepage: 'https://go.dev/',
       sourceUrl: 'https://github.com/golang/go',
@@ -140,7 +140,9 @@ export class GolangVersionDatasource extends Datasource {
     return res;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
         key: `${config.registryUrl}`,

@@ -8,7 +8,6 @@ import { getPkgReleases } from '../index.ts';
 import { adoptiumRegistryUrl } from './adoptium.ts';
 import { datasource, defaultRegistryUrl, pageSize } from './common.ts';
 import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
-import { JavaVersionDatasource } from './index.ts';
 
 function getPath(page: number, imageType = 'jdk', args = ''): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC${args}&page=${page}`;
@@ -517,7 +516,7 @@ describe('modules/datasource/java-version/index', () => {
         expect(res).toBeNull();
       });
 
-      it('falls back to default graalvm registry when registryUrl is undefined', async () => {
+      it('uses the default graalvm registry when none is configured', async () => {
         httpMock
           .scope(graalvmRegistryUrl)
           .get('/jvm/ga/linux/x86_64.json')
@@ -539,18 +538,6 @@ describe('modules/datasource/java-version/index', () => {
           packageName: 'oracle-graalvm-jdk',
         });
         expect(res?.releases).toHaveLength(3);
-      });
-
-      it('uses the default graalvm registry in the datasource directly', async () => {
-        httpMock
-          .scope(graalvmRegistryUrl)
-          .get('/jvm/ga/linux/x86_64.json')
-          .reply(200, oracleGraalvmJdkReleases);
-        const res = await new JavaVersionDatasource().getReleases({
-          packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
-        });
-        expect(res?.releases).toHaveLength(3);
-        expect(res?.registryUrl).toBe(graalvmRegistryUrl);
       });
 
       it('uses adoptium registry for adoptium and graalvm registry for graalvm', async () => {

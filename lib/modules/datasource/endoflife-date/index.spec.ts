@@ -80,15 +80,6 @@ describe('modules/datasource/endoflife-date/index', () => {
       });
     });
 
-    it('returns null without registryUrl', async () => {
-      const endoflifeDateDatasource = new EndoflifeDateDatasource();
-      const res = await endoflifeDateDatasource.getReleases({
-        registryUrl: '',
-        packageName,
-      });
-      expect(res).toBeNull();
-    });
-
     it('returns null for 404', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(404);
       await expect(

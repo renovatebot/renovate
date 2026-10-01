@@ -1,16 +1,17 @@
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
 import mavenVersion, * as mavenVersioning from '../../versioning/maven/index.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
-  GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
+  RegistryGetReleasesConfig,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -63,14 +64,14 @@ function extractVersions(metadata: XmlDocument): MetadataResults {
   return res;
 }
 
-export const defaultRegistryUrls = [MAVEN_REPO];
+export const defaultRegistryUrls: NonEmptyArray<string> = [MAVEN_REPO];
 
-export class MavenDatasource extends Datasource {
+export class MavenDatasource extends RegistryDatasource {
   static id = 'maven';
 
   override readonly caching = true;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return defaultRegistryUrls;
   }
 
@@ -108,12 +109,7 @@ export class MavenDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
 

@@ -1,5 +1,6 @@
 import { isBoolean } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { queryReleases } from '../../../util/github/graphql/index.ts';
 import type {
@@ -11,10 +12,10 @@ import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { Datasource } from '../datasource.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types.ts';
@@ -31,10 +32,10 @@ function inferHashAlg(digest: string): string {
   }
 }
 
-export class GithubReleaseAttachmentsDatasource extends Datasource<GithubHttp> {
+export class GithubReleaseAttachmentsDatasource extends RegistryDatasource<GithubHttp> {
   static readonly id = 'github-release-attachments';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://github.com'];
   }
 
@@ -223,8 +224,8 @@ export class GithubReleaseAttachmentsDatasource extends Datasource<GithubHttp> {
       currentValue,
       currentDigest,
       registryUrl,
-    }: DigestConfig,
-    newValue: string,
+    }: RegistryDigestConfig,
+    newValue?: string,
   ): Promise<string | null> {
     logger.debug(
       { repo, currentValue, currentDigest, registryUrl, newValue },
@@ -235,6 +236,9 @@ export class GithubReleaseAttachmentsDatasource extends Datasource<GithubHttp> {
     }
     if (!currentValue) {
       return currentDigest;
+    }
+    if (!newValue) {
+      return null;
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
@@ -268,7 +272,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource<GithubHttp> {
    *  - Sanitize the versions if desired (e.g. strip out leading 'v')
    *  - Return a dependency object containing sourceUrl string and releases array
    */
-  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
+  async getReleases(config: RegistryGetReleasesConfig): Promise<ReleaseResult> {
     const releasesResult = await queryReleases(config, this.http);
     const releases = releasesResult.map((item) => {
       const { version, releaseTimestamp, isStable } = item;
