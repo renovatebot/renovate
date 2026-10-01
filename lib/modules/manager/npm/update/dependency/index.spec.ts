@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
+import type { NpmManagerData } from '../../types.ts';
 
 function readFixture(x: string): string {
   return Fixtures.get(x, '../..');
@@ -350,7 +351,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('supports alias-based replacement', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'dependencies',
         depName: 'config',
         newName: 'abc',
@@ -581,7 +582,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('updates devEngines.packageManager single object', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'pnpm',
         newValue: '9.5.0',
@@ -619,7 +620,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('updates devEngines.runtime single object', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.runtime',
         depName: 'node',
         newValue: '22.12.0',
@@ -642,7 +643,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('updates devEngines.packageManager array form by index', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'yarn',
         newValue: '4.6.0',
@@ -676,7 +677,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('returns same content if devEngines version already matches', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'pnpm',
         newValue: '9.0.0',
@@ -693,7 +694,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('returns null if devEngines depName mismatch', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'yarn',
         newValue: '4.6.0',
@@ -718,7 +719,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('returns null if devEngines section missing', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'pnpm',
         newValue: '9.5.0',
@@ -742,7 +743,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       // Both items share version "9.0.0"; when updating index 1, the first
       // string-level "9.0.0" hit belongs to index 0 and must be rejected by
       // the dequal verification so the loop finds the correct occurrence.
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'yarn',
         newValue: '4.6.0',
@@ -776,7 +777,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('returns null for devEngines array form when name mismatches index', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'yarn',
         newValue: '4.6.0',
@@ -805,7 +806,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('returns null for devEngines array form when index missing', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.packageManager',
         depName: 'pnpm',
         newValue: '9.5.0',
@@ -831,7 +832,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('returns null if devEngines content throws error', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'devEngines.runtime',
         depName: 'node',
         newValue: '22.12.0',
