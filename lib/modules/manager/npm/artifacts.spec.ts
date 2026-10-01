@@ -27,6 +27,164 @@ const validDepUpdate = {
 } satisfies Upgrade<Record<string, unknown>>;
 
 describe('modules/manager/npm/artifacts', () => {
+  describe('devEngines.packageManager hashes', () => {
+    const generatedVersion = `8.15.6+sha512.${sha512HexDigest}`;
+    const devEnginesUpdate = {
+      ...validDepUpdate,
+      depType: 'devEngines.packageManager',
+    };
+
+    it.each([false, true])(
+      'updates hashes with array form: %s',
+      async (arrayForm) => {
+        const item = { name: 'pnpm', version: '8.15.6', onFail: 'error' };
+        const other = { name: 'yarn', version: '4.0.0' };
+        const input = {
+          devEngines: { packageManager: arrayForm ? [other, item] : item },
+        };
+        const expectedItem = { ...item, version: generatedVersion };
+
+        const res = await updateArtifacts({
+          packageFileName: 'package.json',
+          updatedDeps: [
+            {
+              ...devEnginesUpdate,
+              managerData: arrayForm ? { devEnginesIndex: 1 } : {},
+            },
+          ],
+          newPackageFileContent: JSON.stringify(input, null, 2),
+          config,
+        });
+
+        expect(res).toEqual([
+          {
+            file: {
+              type: 'addition',
+              path: 'package.json',
+              contents: JSON.stringify(
+                {
+                  devEngines: {
+                    packageManager: arrayForm
+                      ? [other, expectedItem]
+                      : expectedItem,
+                  },
+                },
+                null,
+                2,
+              ),
+            },
+          },
+        ]);
+      },
+    );
+
+    it.each([false, true])(
+      'uses the same hash for both fields with reversed updates: %s',
+      async (reversed) => {
+        const updates = [validDepUpdate, devEnginesUpdate];
+        if (reversed) {
+          updates.reverse();
+        }
+        const res = await updateArtifacts({
+          packageFileName: 'package.json',
+          updatedDeps: updates,
+          newPackageFileContent: JSON.stringify({
+            packageManager: 'pnpm@8.15.6',
+            devEngines: { packageManager: { name: 'pnpm', version: '8.15.6' } },
+          }),
+          config,
+        });
+
+        expect(res).toEqual([
+          {
+            file: {
+              type: 'addition',
+              path: 'package.json',
+              contents: JSON.stringify({
+                packageManager: `pnpm@${generatedVersion}`,
+                devEngines: {
+                  packageManager: { name: 'pnpm', version: generatedVersion },
+                },
+              }),
+            },
+          },
+        ]);
+      },
+    );
+
+    it.each([undefined, 'invalid'])(
+      'returns an artifact error for digest %s',
+      async (newDigest) => {
+        const res = await updateArtifacts({
+          packageFileName: 'package.json',
+          updatedDeps: [{ ...devEnginesUpdate, newDigest }],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        expect(res).toEqual([
+          {
+            artifactError: {
+              fileName: 'package.json',
+              stderr:
+                'Cannot update packageManager hash for pnpm@8.15.6: no valid digest available',
+            },
+          },
+        ]);
+      },
+    );
+
+    it('skips ranges without a hash', async () => {
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...devEnginesUpdate,
+            currentValue: '^8.15.5',
+            newDigest: undefined,
+          },
+        ],
+        newPackageFileContent: '{}',
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null if the hash already matches', async () => {
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [devEnginesUpdate],
+        newPackageFileContent: JSON.stringify({
+          devEngines: {
+            packageManager: { name: 'pnpm', version: generatedVersion },
+          },
+        }),
+        config,
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns an artifact error when the target cannot be updated', async () => {
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [devEnginesUpdate],
+        newPackageFileContent: '{}',
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          artifactError: {
+            fileName: 'package.json',
+            stderr: 'Failed to apply Corepack hash for pnpm@8.15.6',
+          },
+        },
+      ]);
+    });
+  });
+
   it('returns null if no packageManager updates present', async () => {
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',

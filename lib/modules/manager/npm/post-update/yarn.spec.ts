@@ -634,12 +634,15 @@ describe('modules/manager/npm/post-update/yarn', () => {
     },
   );
 
-  it.each([
-    ['1.22.0', '^1.10.0'],
-    ['2.1.0', '>= 2.0.0'],
-  ])(
-    'performs yarn binary update using yarn v%s',
-    async (yarnVersion, yarnCompatibility) => {
+  it.each`
+    yarnVersion | yarnCompatibility | depType
+    ${'1.22.0'} | ${'^1.10.0'}      | ${'packageManager'}
+    ${'2.1.0'}  | ${'>= 2.0.0'}     | ${'packageManager'}
+    ${'1.22.0'} | ${'^1.10.0'}      | ${'devEngines.packageManager'}
+    ${'2.1.0'}  | ${'>= 2.0.0'}     | ${'devEngines.packageManager'}
+  `(
+    'performs $depType yarn binary update using yarn v$yarnVersion',
+    async ({ yarnVersion, yarnCompatibility, depType }) => {
       Fixtures.mock(
         {
           'yarn.lock': 'package-lock-contents',
@@ -658,7 +661,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         {
           depName: 'yarn',
-          depType: 'packageManager',
+          depType,
           newValue: '3.0.1',
         },
       ]);

@@ -12,6 +12,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { updateDependency } from './update/dependency/index.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
@@ -38,7 +39,7 @@ export async function updateArtifacts(
 }
 
 /**
- * Updates the corepack hash of the `packageManager` field from the new version's integrity digest.
+ * Updates corepack hashes in `packageManager` and `devEngines.packageManager` from the new version's integrity digest.
  * @see https://github.com/nodejs/corepack/blob/57bfb67b062ea1b8746b302bcdbf9f8e8438c526/sources/corepackUtils.ts#L300
  */
 function handlePackageManagerUpdates(
@@ -46,44 +47,57 @@ function handlePackageManagerUpdates(
 ): UpdateArtifactsResult | null {
   const { packageFileName, updatedDeps, newPackageFileContent } =
     updateArtifactsConfig;
-  const packageManagerUpdate = updatedDeps.find(
-    (dep) => dep.depType === 'packageManager',
+  const packageManagerUpdates = updatedDeps.filter(
+    (dep) =>
+      (dep.depType === 'packageManager' ||
+        dep.depType === 'devEngines.packageManager') &&
+      dep.currentValue &&
+      regEx(versionWithHashRegString).test(dep.currentValue),
   );
 
-  if (!packageManagerUpdate) {
-    logger.debug('No packageManager updates - returning null');
-    return null;
+  let newContent = newPackageFileContent;
+  for (const packageManagerUpdate of packageManagerUpdates) {
+    const { depName, newVersion, newDigest } = packageManagerUpdate;
+    const sriMatch = regEx(sriRegString).exec(newDigest ?? '');
+    if (!sriMatch?.groups) {
+      logger.warn(
+        { packageFileName, depName, newVersion, newDigest },
+        'Cannot update packageManager hash: no valid digest available',
+      );
+      return {
+        artifactError: {
+          fileName: packageFileName,
+          stderr: `Cannot update packageManager hash for ${depName}@${newVersion}: no valid digest available`,
+        },
+      };
+    }
+
+    const { algo, hash } = sriMatch.groups;
+    const hexHash = Buffer.from(hash, 'base64').toString('hex');
+    const versionWithHash = `${newVersion}+${algo}.${hexHash}`;
+
+    if (packageManagerUpdate.depType === 'packageManager') {
+      newContent = newContent.replace(
+        regEx(packageManagerFieldRegString),
+        `$1${depName}@${versionWithHash}"`,
+      );
+    } else {
+      const updatedContent = updateDependency({
+        fileContent: newContent,
+        packageFile: packageFileName,
+        upgrade: { ...packageManagerUpdate, newValue: versionWithHash },
+      });
+      if (!updatedContent) {
+        return {
+          artifactError: {
+            fileName: packageFileName,
+            stderr: `Failed to apply Corepack hash for ${depName}@${newVersion}`,
+          },
+        };
+      }
+      newContent = updatedContent;
+    }
   }
-
-  const { currentValue, depName, newVersion, newDigest } = packageManagerUpdate;
-
-  // Only rewrite the hash if the current value already has one
-  if (!currentValue || !regEx(versionWithHashRegString).test(currentValue)) {
-    return null;
-  }
-
-  const sriMatch = regEx(sriRegString).exec(newDigest ?? '');
-  if (!sriMatch?.groups) {
-    logger.warn(
-      { packageFileName, depName, newVersion, newDigest },
-      'Cannot update packageManager hash: no valid digest available',
-    );
-    return {
-      artifactError: {
-        fileName: packageFileName,
-        stderr: `Cannot update packageManager hash for ${depName}@${newVersion}: no valid digest available`,
-      },
-    };
-  }
-
-  const { algo, hash } = sriMatch.groups;
-  const hexHash = Buffer.from(hash, 'base64').toString('hex');
-  const newPackageManagerValue = `${depName}@${newVersion}+${algo}.${hexHash}`;
-
-  const newContent = newPackageFileContent.replace(
-    regEx(packageManagerFieldRegString),
-    `$1${newPackageManagerValue}"`,
-  );
 
   if (newContent === newPackageFileContent) {
     return null;

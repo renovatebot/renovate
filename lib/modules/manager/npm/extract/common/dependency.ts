@@ -65,7 +65,12 @@ export function extractDependency(
     return dep;
   }
   dep.currentValue = input.trim();
-  if (depType === 'engines' || depType === 'packageManager') {
+  if (
+    depType === 'engines' ||
+    depType === 'packageManager' ||
+    depType === 'devEngines.runtime' ||
+    depType === 'devEngines.packageManager'
+  ) {
     if (depName === 'node') {
       dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
@@ -82,6 +87,9 @@ export function extractDependency(
     } else if (depName === 'pnpm') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'pnpm';
+    } else if (depType === 'devEngines.runtime' && depName === 'deno') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Deno';
     } else if (depName === 'vscode') {
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
@@ -249,7 +257,10 @@ export function getExtractedConstraints(
   for (const dep of deps) {
     if (
       !dep.skipReason &&
-      (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+      (dep.depType === 'engines' ||
+        dep.depType === 'packageManager' ||
+        dep.depType === 'devEngines.runtime' ||
+        dep.depType === 'devEngines.packageManager') &&
       dep.depName &&
       isConstraintName(dep.depName) &&
       constraints.includes(dep.depName) &&
