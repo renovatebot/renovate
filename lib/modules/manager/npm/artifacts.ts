@@ -1,13 +1,9 @@
 import { isEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
-import { quote } from 'shlex';
 import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
-import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
-  ensureCacheDir,
   localPathExists,
   readLocalFile,
   writeLocalFile,
@@ -16,27 +12,21 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
-import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants.ts';
-import { getNodeToolConstraint } from './post-update/node-version.ts';
-import { processHostRules } from './post-update/rules.ts';
-import { lazyLoadPackageJson } from './post-update/utils.ts';
-import { withNpmrcHostRules } from './utils.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
 const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 
-// Execute 'corepack use' command for npm manager updates
-// This step is necessary because Corepack recommends attaching a hash after the version
-// The hash is generated only after running 'corepack use' and cannot be fetched from the npm registry
+// Matches a Subresource Integrity string, eg. sha512-<base64 digest>
+const sriRegString = '^(?<algo>sha\\d+)-(?<hash>[A-Za-z0-9+/]+={0,2})$';
+
+const packageManagerFieldRegString = '("packageManager"\\s*:\\s*")[^"]*"';
+
 export async function updateArtifacts(
   updateArtifactsConfig: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
   let res: UpdateArtifactsResult[] = [];
-  res.push(
-    coerceObject(await handlePackageManagerUpdates(updateArtifactsConfig)),
-  );
+  res.push(coerceObject(handlePackageManagerUpdates(updateArtifactsConfig)));
   res.push(coerceObject(await updatePnpmWorkspace(updateArtifactsConfig)));
 
   res = res.filter(isNonEmptyObject);
@@ -47,15 +37,15 @@ export async function updateArtifacts(
   return res;
 }
 
-async function handlePackageManagerUpdates(
+/**
+ * Updates the corepack hash of the `packageManager` field from the new version's integrity digest.
+ * @see https://github.com/nodejs/corepack/blob/57bfb67b062ea1b8746b302bcdbf9f8e8438c526/sources/corepackUtils.ts#L300
+ */
+function handlePackageManagerUpdates(
   updateArtifactsConfig: UpdateArtifact,
-): Promise<UpdateArtifactsResult | null> {
-  const {
-    packageFileName,
-    config,
-    updatedDeps,
-    newPackageFileContent: existingPackageFileContent,
-  } = updateArtifactsConfig;
+): UpdateArtifactsResult | null {
+  const { packageFileName, updatedDeps, newPackageFileContent } =
+    updateArtifactsConfig;
   const packageManagerUpdate = updatedDeps.find(
     (dep) => dep.depType === 'packageManager',
   );
@@ -65,88 +55,48 @@ async function handlePackageManagerUpdates(
     return null;
   }
 
-  const { currentValue, depName, newVersion } = packageManagerUpdate;
+  const { currentValue, depName, newVersion, newDigest } = packageManagerUpdate;
 
-  // Execute 'corepack use' command only if the currentValue already has hash in it
+  // Only rewrite the hash if the current value already has one
   if (!currentValue || !regEx(versionWithHashRegString).test(currentValue)) {
     return null;
   }
 
-  // write old updates before executing corepack update so that they are not removed from package file
-  await writeLocalFile(packageFileName, existingPackageFileContent);
-
-  // Asumming that corepack only needs to modify the package.json file in the root folder
-  // As it should not be regular practice to have different package managers in different workspaces
-  const pkgFileDir = upath.dirname(packageFileName);
-  const { additionalNpmrcContent } = processHostRules();
-  const lazyPkgJson = lazyLoadPackageJson(pkgFileDir);
-  const cmd = `corepack use ${quote(`${depName}@${newVersion}`)}`;
-
-  const nodeConstraints = await getNodeToolConstraint(
-    config,
-    updatedDeps,
-    pkgFileDir,
-    lazyPkgJson,
-  );
-
-  const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
-  const pnpmConfigStoreDir = await ensureCacheDir(PNPM_STORE_DIR);
-  const execOptions: ExecOptions = {
-    cwdFile: packageFileName,
-    extraEnv: {
-      // To make sure pnpm store location is consistent between "corepack use"
-      // here and the pnpm commands in ./post-update/pnpm.ts. Check
-      // ./post-update/pnpm.ts for more details.
-      npm_config_cache_dir: pnpmConfigCacheDir,
-      npm_config_store_dir: pnpmConfigStoreDir,
-      pnpm_config_cache_dir: pnpmConfigCacheDir,
-      pnpm_config_store_dir: pnpmConfigStoreDir,
-    },
-    toolConstraints: [
-      nodeConstraints,
-      {
-        toolName: 'corepack',
-        constraint: await resolveToolConstraint(config, 'corepack'),
+  const sriMatch = regEx(sriRegString).exec(newDigest ?? '');
+  if (!sriMatch?.groups) {
+    logger.warn(
+      { packageFileName, depName, newVersion, newDigest },
+      'Cannot update packageManager hash: no valid digest available',
+    );
+    return {
+      artifactError: {
+        fileName: packageFileName,
+        stderr: `Cannot update packageManager hash for ${depName}@${newVersion}: no valid digest available`,
       },
-    ],
-    docker: {},
-  };
+    };
+  }
 
-  return await withNpmrcHostRules(
-    pkgFileDir,
-    additionalNpmrcContent,
-    async () => {
-      try {
-        await exec(cmd, execOptions);
-        const newPackageFileContent = await readLocalFile(
-          packageFileName,
-          'utf8',
-        );
-        if (
-          !newPackageFileContent ||
-          existingPackageFileContent === newPackageFileContent
-        ) {
-          return null;
-        }
-        logger.debug('Returning updated package.json');
-        return {
-          file: {
-            type: 'addition',
-            path: packageFileName,
-            contents: newPackageFileContent,
-          },
-        };
-      } catch (err) {
-        logger.warn({ err }, 'Error updating package.json');
-        return {
-          artifactError: {
-            fileName: packageFileName,
-            stderr: err.message,
-          },
-        };
-      }
-    },
+  const { algo, hash } = sriMatch.groups;
+  const hexHash = Buffer.from(hash, 'base64').toString('hex');
+  const newPackageManagerValue = `${depName}@${newVersion}+${algo}.${hexHash}`;
+
+  const newContent = newPackageFileContent.replace(
+    regEx(packageManagerFieldRegString),
+    `$1${newPackageManagerValue}"`,
   );
+
+  if (newContent === newPackageFileContent) {
+    return null;
+  }
+
+  logger.debug('Returning updated package.json');
+  return {
+    file: {
+      type: 'addition',
+      path: packageFileName,
+      contents: newContent,
+    },
+  };
 }
 
 /**

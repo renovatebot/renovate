@@ -597,10 +597,6 @@ describe('modules/datasource/terraform-provider/index', () => {
   });
 
   describe('getProviderPackages', () => {
-    afterEach(() => {
-      hostRules.clear();
-    });
-
     it('returns flat hash list from the linux/amd64 packages map', async () => {
       httpMock
         .scope(openTofuRegistryUrl)

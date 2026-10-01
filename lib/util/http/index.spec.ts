@@ -33,7 +33,6 @@ describe('util/http/index', () => {
 
   beforeEach(() => {
     http = new Http('dummy');
-    hostRules.clear();
     queue.clear();
     throttle.clear();
     resetCache();

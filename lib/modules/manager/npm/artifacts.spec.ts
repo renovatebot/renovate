@@ -1,62 +1,32 @@
 import { codeBlock } from 'common-tags';
-import upath from 'upath';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs } from '~test/util.ts';
-import { GlobalConfig } from '../../../config/global.ts';
-import type {
-  InternalGlobalConfigOptions,
-  RepoGlobalConfig,
-} from '../../../config/types.ts';
-import * as docker from '../../../util/exec/docker/index.ts';
+import { fs } from '~test/util.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import * as rules from './post-update/rules.ts';
 
-vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
-  // `join` fixes Windows CI
-  localDir: upath.join('/tmp/github/some/repo'),
-  cacheDir: upath.join('/tmp/renovate/cache'),
-  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
-  binarySource: 'global',
-};
-const dockerAdminConfig = {
-  ...adminConfig,
-  binarySource: 'docker',
-  dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-} satisfies RepoGlobalConfig;
+// 32-byte digest, as used by sha256
+const sha256HexDigest = 'abcdef0123456789'.repeat(4);
+// 48-byte digest, as used by sha384
+const sha384HexDigest = 'abcdef0123456789'.repeat(6);
+// 64-byte digest, as used by sha512
+const sha512HexDigest = 'abcdef0123456789'.repeat(8);
 
-process.env.CONTAINERBASE = 'true';
+function sriDigest(algo: string, hexDigest: string): string {
+  return `${algo}-${Buffer.from(hexDigest, 'hex').toString('base64')}`;
+}
 
 const config: UpdateArtifactsConfig = {};
 const validDepUpdate = {
   depName: 'pnpm',
   depType: 'packageManager',
-  currentValue:
-    '8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589',
+  currentValue: `8.15.5+sha256.${sha256HexDigest}`,
   newVersion: '8.15.6',
+  newDigest: sriDigest('sha512', sha512HexDigest),
 } satisfies Upgrade<Record<string, unknown>>;
 
 describe('modules/manager/npm/artifacts', () => {
-  const spyProcessHostRules = vi.spyOn(rules, 'processHostRules');
-
-  beforeEach(() => {
-    env.getChildProcessEnv.mockReturnValue({
-      ...envMock.basic,
-      LANG: 'en_US.UTF-8',
-      LC_ALL: 'en_US',
-    });
-    GlobalConfig.set(adminConfig);
-    docker.resetPrefetchedImages();
-    spyProcessHostRules.mockReturnValue({
-      additionalNpmrcContent: [],
-      additionalYarnRcYml: undefined,
-    });
-  });
-
   it('returns null if no packageManager updates present', async () => {
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
@@ -91,205 +61,201 @@ describe('modules/manager/npm/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('some content');
-    const execSnapshots = mockExecAll();
+    const newPackageFileContent = codeBlock`
+      {
+        "packageManager": "pnpm@8.15.6+sha512.${sha512HexDigest}"
+      }
+    `;
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
-      config: { ...config },
+      newPackageFileContent,
+      config,
     });
 
     expect(res).toBeNull();
-    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
-  it('returns updated package.json', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('{}') // for node constraints
-      .mockResolvedValue('some new content'); // for updated package.json
-    const execSnapshots = mockExecAll();
+  it('returns updated package.json using the sha512 digest', async () => {
+    const newPackageFileContent = codeBlock`
+      {
+        "name": "some-repo",
+        "packageManager": "pnpm@8.15.5+sha256.${sha256HexDigest}",
+        "dependencies": {
+          "foo": "1.0.0"
+        }
+      }
+    `;
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
-      config: { ...config },
+      newPackageFileContent,
+      config,
     });
 
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
-          path: 'package.json',
           type: 'addition',
+          path: 'package.json',
+          contents: codeBlock`
+            {
+              "name": "some-repo",
+              "packageManager": "pnpm@8.15.6+sha512.${sha512HexDigest}",
+              "dependencies": {
+                "foo": "1.0.0"
+              }
+            }
+          `,
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
-  it('quotes the corepack package spec', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('{}') // for node constraints
-      .mockResolvedValue('some new content'); // for updated package.json
-    const execSnapshots = mockExecAll();
+  it('preserves compact formatting when replacing the packageManager value', async () => {
+    const newPackageFileContent = `{"name":"some-repo","packageManager":"pnpm@8.15.5+sha256.${sha256HexDigest}"}`;
 
-    await updateArtifacts({
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'package.json',
+          contents: `{"name":"some-repo","packageManager":"pnpm@8.15.6+sha512.${sha512HexDigest}"}`,
+        },
+      },
+    ]);
+  });
+
+  it('supports a sha256 digest', async () => {
+    const newPackageFileContent = codeBlock`
+      {
+        "packageManager": "pnpm@8.15.5+sha256.${sha256HexDigest}"
+      }
+    `;
+
+    const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [
-        {
-          ...validDepUpdate,
-          depName: 'pnpm; echo hello',
-        },
+        { ...validDepUpdate, newDigest: sriDigest('sha256', sha256HexDigest) },
       ],
-      newPackageFileContent: 'some content',
-      config: { ...config },
-    });
-
-    expect(execSnapshots).toMatchObject([
-      { cmd: `corepack use 'pnpm; echo hello@8.15.6'` },
-    ]);
-  });
-
-  it('supports docker mode', async () => {
-    GlobalConfig.set(dockerAdminConfig);
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('some new content');
-
-    const res = await updateArtifacts({
-      packageFileName: 'package.json',
-      updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
-      config: {
-        ...config,
-        constraints: { node: '20.1.0', corepack: '0.29.3' },
-      },
+      newPackageFileContent,
+      config,
     });
 
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
-          path: 'package.json',
           type: 'addition',
+          path: 'package.json',
+          contents: codeBlock`
+            {
+              "packageManager": "pnpm@8.15.6+sha256.${sha256HexDigest}"
+            }
+          `,
         },
-      },
-    ]);
-
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e CI ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/renovatebot/base-image ' +
-          "bash -l -c '" +
-          'install-tool node 20.1.0 ' +
-          '&& ' +
-          'install-tool corepack 0.29.3 ' +
-          '&& ' +
-          'corepack use pnpm@8.15.6' +
-          "'",
       },
     ]);
   });
 
-  it('supports install mode', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('some new content');
+  it('supports a sha384 digest', async () => {
+    const newPackageFileContent = codeBlock`
+      {
+        "packageManager": "pnpm@8.15.5+sha256.${sha256HexDigest}"
+      }
+    `;
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
-      updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
-      config: {
-        ...config,
-        constraints: { node: '20.1.0', corepack: '0.29.3' },
-      },
+      updatedDeps: [
+        { ...validDepUpdate, newDigest: sriDigest('sha384', sha384HexDigest) },
+      ],
+      newPackageFileContent,
+      config,
     });
 
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
-          path: 'package.json',
           type: 'addition',
+          path: 'package.json',
+          contents: codeBlock`
+            {
+              "packageManager": "pnpm@8.15.6+sha384.${sha384HexDigest}"
+            }
+          `,
         },
       },
     ]);
-
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'install-tool node 20.1.0',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      { cmd: 'install-tool corepack 0.29.3' },
-
-      {
-        cmd: 'corepack use pnpm@8.15.6',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
   });
 
-  it('falls back to the extracted node and corepack constraints', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('{}') // for node constraints
-      .mockResolvedValue('some new content'); // for updated package.json
-    const execSnapshots = mockExecAll();
-
-    await updateArtifacts({
-      packageFileName: 'package.json',
-      updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
-      config: {
-        ...config,
-        extractedConstraints: { node: '20.1.0', corepack: '0.29.3' },
-      },
-    });
-
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool node 20.1.0' },
-      { cmd: 'install-tool corepack 0.29.3' },
-      { cmd: 'corepack use pnpm@8.15.6' },
-    ]);
-  });
-
-  it('catches errors', async () => {
-    const execSnapshots = mockExecSequence([new Error('exec error')]);
+  it('returns an artifactError if newDigest is missing', async () => {
+    const newPackageFileContent = codeBlock`
+      {
+        "packageManager": "pnpm@8.15.5+sha256.${sha256HexDigest}"
+      }
+    `;
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
-      updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
-      config: {
-        ...config,
-        constraints: { node: '20.1.0', corepack: '0.29.3' },
-      },
+      updatedDeps: [{ ...validDepUpdate, newDigest: undefined }],
+      newPackageFileContent,
+      config,
     });
 
     expect(res).toEqual([
       {
-        artifactError: { fileName: 'package.json', stderr: 'exec error' },
+        artifactError: {
+          fileName: 'package.json',
+          stderr:
+            'Cannot update packageManager hash for pnpm@8.15.6: no valid digest available',
+        },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
+  });
+
+  it('returns an artifactError if newDigest is not a valid SRI string', async () => {
+    const newPackageFileContent = codeBlock`
+      {
+        "packageManager": "pnpm@8.15.5+sha256.${sha256HexDigest}"
+      }
+    `;
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [{ ...validDepUpdate, newDigest: 'not-a-valid-digest' }],
+      newPackageFileContent,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr:
+            'Cannot update packageManager hash for pnpm@8.15.6: no valid digest available',
+        },
+      },
+    ]);
+  });
+
+  it('returns null if the packageManager field cannot be found in the content', async () => {
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [validDepUpdate],
+      newPackageFileContent: '{"name":"some-repo"}',
+      config,
+    });
+
+    expect(res).toBeNull();
   });
 
   describe('updatePnpmWorkspace()', () => {

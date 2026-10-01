@@ -59,8 +59,10 @@ function extractDockerAction(
   actionRef: DockerReference,
   config: ExtractConfig,
 ): PackageDependency {
-  const dep = getDep(actionRef.originalRef, true, config.registryAliases);
-  dep.depType = 'docker';
+  const dep = getDep(actionRef.originalRef, {
+    registryAliases: config.registryAliases,
+    depType: 'docker',
+  });
   dep.replaceString = actionRef.originalRef;
   return dep;
 }
@@ -288,21 +290,21 @@ function extractWithYAMLParser(
 
   for (const job of Object.values(obj.jobs)) {
     if (job.container) {
-      const dep = getDep(job.container, true, config.registryAliases);
-      // v8 ignore else -- `getDep()` always returns a dep
-      if (dep) {
-        dep.depType = 'container';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(job.container, {
+          registryAliases: config.registryAliases,
+          depType: 'container',
+        }),
+      );
     }
 
     for (const service of job.services) {
-      const dep = getDep(service, true, config.registryAliases);
-      // v8 ignore else -- `getDep()` always returns a dep
-      if (dep) {
-        dep.depType = 'service';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(service, {
+          registryAliases: config.registryAliases,
+          depType: 'service',
+        }),
+      );
     }
 
     for (const runner of job['runs-on']) {

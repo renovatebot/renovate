@@ -13,7 +13,7 @@
 Please select one of the following:
 
 - [ ] This closes an existing Issue, Closes: # <!-- NOTE that this should NOT be a Discussion -->
-- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation
+- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add a minimal reproduction repository as part of this PR.
 
 ## AI assistance disclosure
 
@@ -45,6 +45,7 @@ Who answers review comments:
 
 - [ ] @username will read and reply directly. **Name the account.**
 - [ ] An agent will draft replies and @username will read them before they are posted. **Name the account.**
+- [ ] An agent will draft replies and reply autonomously. **This is heavily discouraged, and we prefer that there are humans in the loop**
 - [ ] Nobody has explicitly committed to replying.
 
 ## Documentation (please check one with an [x])
@@ -62,6 +63,14 @@ I have verified these changes via:
 - [ ] Both unit tests + ran on a real repository
 
 The public repository: <URL>
+
+A reproduction is compulsory for PRs that do not close an Issue: link a public repository above that reproduces the bug or shows the new behavior.
+If this PR closes an Issue, confirm the fix against the Issue's reproduction.
+If you are not adding a reproduction, state your reason here:
+
+<!-- Reason for not adding a reproduction -->
+
+PRs without a reproduction or a stated reason will not be reviewed and may be closed.
 
 <!-- If you have any suggestions about this PR template, edit it here: https://github.com/renovatebot/renovate/edit/main/.github/pull_request_template.md -->
 

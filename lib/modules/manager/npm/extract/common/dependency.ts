@@ -74,7 +74,7 @@ export function extractDependency(
       const major =
         isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
       if (major && major > 1) {
-        dep.packageName = '@yarnpkg/cli';
+        dep.packageName = '@yarnpkg/cli-dist';
       }
     } else if (depName === 'npm') {
       dep.datasource = NpmDatasource.id;
@@ -108,7 +108,7 @@ export function extractDependency(
       const major =
         isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
       if (major && major > 1) {
-        dep.packageName = '@yarnpkg/cli';
+        dep.packageName = '@yarnpkg/cli-dist';
       }
     } else if (depName === 'npm') {
       dep.datasource = NpmDatasource.id;

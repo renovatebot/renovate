@@ -63,7 +63,6 @@ describe('util/merge-confidence/index', () => {
     });
 
     afterEach(() => {
-      hostRules.clear();
       resetConfig();
     });
 

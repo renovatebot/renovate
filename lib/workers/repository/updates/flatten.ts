@@ -1,12 +1,12 @@
 import { isUndefined } from '@sindresorhus/is';
 import {
+  applyDatasourceDefaultConfig,
   filterConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
-import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import { get } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -134,11 +134,7 @@ export async function flattenUpdates(
               // @ts-expect-error -- not easily typed
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
-            // apply config from datasource
-            const datasourceConfig = await getDefaultConfig(
-              depConfig.datasource!,
-            );
-            updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
+            updateConfig = await applyDatasourceDefaultConfig(updateConfig);
             updateConfig = await applyPackageRules(
               updateConfig,
               'datasource-merge',
