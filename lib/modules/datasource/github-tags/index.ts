@@ -17,7 +17,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 
-export class GithubTagsDatasource extends Datasource {
+export class GithubTagsDatasource extends Datasource<GithubHttp> {
   static readonly id = 'github-tags';
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
@@ -34,11 +34,8 @@ export class GithubTagsDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  override http: GithubHttp;
-
   constructor() {
-    super(GithubTagsDatasource.id);
-    this.http = new GithubHttp(GithubTagsDatasource.id);
+    super(GithubTagsDatasource.id, new GithubHttp(GithubTagsDatasource.id));
   }
 
   async getCommit(
