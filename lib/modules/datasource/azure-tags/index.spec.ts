@@ -78,18 +78,14 @@ describe('modules/datasource/azure-tags/index', () => {
     });
   });
 
-  describe('static methods', () => {
+  describe('helpers', () => {
     it('getCacheKey returns the expected format', () => {
-      const key = AzureTagsDatasource.getCacheKey(
-        'registry-url',
-        'repo-name',
-        'tags',
-      );
+      const key = azureTags.getCacheKey('registry-url', 'repo-name', 'tags');
       expect(key).toBe('registry-url:repo-name:tags');
     });
 
     it('getSourceUrl returns the correct URL format', () => {
-      const url = AzureTagsDatasource.getSourceUrl(
+      const url = azureTags.getSourceUrl(
         'repo-name',
         'https://dev.azure.com/organization/',
       );
