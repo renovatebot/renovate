@@ -174,7 +174,7 @@ describe('modules/manager/flux/extract', () => {
         'clusters/my-cluster/flux-system/gotk-components.yaml',
       );
       expect(result).not.toBeNull();
-      expect(result?.deps[0].managerData?.components).toBeUndefined();
+      expect(result?.deps[0].managerData).toEqual({ components: undefined });
     });
 
     it('ignores system manifests without a version', () => {

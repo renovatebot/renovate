@@ -21,6 +21,7 @@ import {
   updateLockFile,
 } from '../util.ts';
 import { Doc, LockVersion } from './schema.ts';
+import type { HelmfileManagerData } from './types.ts';
 import { isOciRepositoryFlagSet } from './utils.ts';
 
 export async function updateArtifacts({
@@ -28,7 +29,9 @@ export async function updateArtifacts({
   updatedDeps,
   newPackageFileContent,
   config,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+}: UpdateArtifact<HelmfileManagerData>): Promise<
+  UpdateArtifactsResult[] | null
+> {
   logger.trace(`helmfile.updateArtifacts(${packageFileName})`);
 
   const { isLockFileMaintenance } = config;
