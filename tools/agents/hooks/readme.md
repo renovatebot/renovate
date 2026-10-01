@@ -30,3 +30,5 @@ Blocks tool invocations that use forbidden package managers or test runners (e.g
 Runs when Claude Code is about to stop.
 
 Executes `pnpm check --all` against all files changed since the base branch. If the check fails, the stop is blocked and Claude is prompted to fix the issues before finishing. The block reason includes the check output, cut down to its start and its end when it is long, so Claude sees which checks failed and why. The check only blocks a stop once: when `stop_hook_active` shows Claude is already continuing because this hook blocked it before, the stop is let through without checking again.
+
+The check writes its coverage report to `.cache/stop-hook/coverage` (`pnpm check --coverage-dir`), so it does not clash with a manual `pnpm check` or `pnpm vitest` that uses the default `coverage` directory at the same time.

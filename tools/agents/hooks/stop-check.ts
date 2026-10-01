@@ -7,6 +7,8 @@ import { readStdin } from './utils/stdin.ts';
 
 const maxOutputLength = 10_000;
 
+const coverageDir = '.cache/stop-hook/coverage';
+
 /**
  * Returns the output, or only its start and its end with a truncation hint when it is longer than `maxOutputLength`.
  */
@@ -30,12 +32,16 @@ if (!input.success || !input.data.stop_hook_active) {
   const changedFiles = await getChangedFiles();
 
   if (changedFiles.length > 0) {
-    const result = await exec('pnpm', ['check', '--all', ...changedFiles], {
-      stdout: 'pipe',
-      stderr: 'pipe',
-      all: true,
-      reject: false,
-    });
+    const result = await exec(
+      'pnpm',
+      ['check', '--all', `--coverage-dir=${coverageDir}`, ...changedFiles],
+      {
+        stdout: 'pipe',
+        stderr: 'pipe',
+        all: true,
+        reject: false,
+      },
+    );
     const output = coerceString(result.all);
     process.stderr.write(output);
     if (result.failed) {

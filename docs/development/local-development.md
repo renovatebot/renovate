@@ -168,6 +168,7 @@ pnpm check
 pnpm check lib/util/http        # scope to a directory
 pnpm check lib/util/hash.ts     # scope to a file
 pnpm check --fix lib/util/http  # auto-fix only
+pnpm check --coverage-dir tmp/coverage lib/util/http  # write the coverage report to another directory (default: coverage)
 ```
 
 ### Vitest

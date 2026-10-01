@@ -18,6 +18,12 @@ const stderrSpy = vi
   .spyOn(process.stderr, 'write')
   .mockImplementation(() => true);
 
+const checkArgs = [
+  'check',
+  '--all',
+  '--coverage-dir=.cache/stop-hook/coverage',
+];
+
 function makeInput(stopHookActive?: boolean): string {
   return JSON.stringify({
     session_id: 'test-session',
@@ -36,7 +42,7 @@ beforeEach(() => {
   readStdin.mockResolvedValue(makeInput());
 });
 
-it('runs pnpm check --all with changed files', async () => {
+it('runs pnpm check --all with the coverage directory and the changed files', async () => {
   getChangedFiles.mockResolvedValue(['lib/foo.ts', 'lib/bar.ts']);
   exec.mockResolvedValue({ failed: false, all: 'Checks: ok' });
 
@@ -44,7 +50,7 @@ it('runs pnpm check --all with changed files', async () => {
 
   expect(exec).toHaveBeenCalledWith(
     'pnpm',
-    ['check', '--all', 'lib/foo.ts', 'lib/bar.ts'],
+    [...checkArgs, 'lib/foo.ts', 'lib/bar.ts'],
     { stdout: 'pipe', stderr: 'pipe', all: true, reject: false },
   );
   expect(stderrSpy).toHaveBeenCalledWith('Checks: ok');
@@ -77,7 +83,7 @@ it('still runs the check when the input does not parse as a Stop hook input', as
 
   await import('./stop-check.ts');
 
-  expect(exec).toHaveBeenCalledWith('pnpm', ['check', '--all', 'lib/foo.ts'], {
+  expect(exec).toHaveBeenCalledWith('pnpm', [...checkArgs, 'lib/foo.ts'], {
     stdout: 'pipe',
     stderr: 'pipe',
     all: true,
