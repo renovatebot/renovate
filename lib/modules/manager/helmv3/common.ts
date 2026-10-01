@@ -11,6 +11,7 @@ import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { ecrRegex, getECRAuthToken } from '../../datasource/docker/ecr.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { removeOCIPrefix } from './oci.ts';
 import type { RepositoryRule } from './types.ts';
 
@@ -70,6 +71,32 @@ export async function generateRegistryLoginCmd(
     }),
   };
   return generateLoginCmd(repositoryRule);
+}
+
+/**
+ * Returns the username and password of the Helm host rule of `repository`, or null when it lacks either.
+ */
+export function findHelmRepositoryCredentials(
+  repository: string,
+): { username: string; password: string } | null {
+  const { username, password } = hostRules.find({
+    url: repository,
+    hostType: HelmDatasource.id,
+  });
+  return username && password ? { username, password } : null;
+}
+
+/**
+ * Returns the `--username` and `--password` arguments from the Helm host rule of `repository`, or none when it lacks either.
+ */
+export function helmRepositoryCredentialArgs(repository: string): string[] {
+  const credentials = findHelmRepositoryCredentials(repository);
+  return credentials
+    ? [
+        `--username ${quote(credentials.username)}`,
+        `--password ${quote(credentials.password)}`,
+      ]
+    : [];
 }
 
 export function generateHelmEnvs(helmConstraint?: string): ExtraEnv {
