@@ -5,11 +5,10 @@ import * as packageCache from '../../../util/cache/package/index.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { BaseGoDatasource } from './base.ts';
-import { GoDirectDatasource } from './releases-direct.ts';
+import { getDirectReleases } from './releases-direct.ts';
 
 vi.mock('./base.ts');
 
-const datasource = new GoDirectDatasource();
 const getDatasourceSpy = vi.spyOn(BaseGoDatasource, 'getDatasource');
 
 describe('modules/datasource/go/releases-direct', () => {
@@ -19,7 +18,7 @@ describe('modules/datasource/go/releases-direct', () => {
   describe('getReleases', () => {
     it('returns null for null getDatasource result', async () => {
       getDatasourceSpy.mockResolvedValueOnce(null);
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'golang.org/foo/something',
       });
       expect(res).toBeNull();
@@ -28,7 +27,7 @@ describe('modules/datasource/go/releases-direct', () => {
     it('throws for getDatasource error', async () => {
       getDatasourceSpy.mockRejectedValueOnce(new Error('unknown'));
       await expect(
-        datasource.getReleases({
+        getDirectReleases({
           packageName: 'golang.org/foo/something',
         }),
       ).rejects.toThrow('unknown');
@@ -47,7 +46,7 @@ describe('modules/datasource/go/releases-direct', () => {
         ],
       });
 
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'golang.org/x/text',
       });
 
@@ -92,7 +91,7 @@ describe('modules/datasource/go/releases-direct', () => {
             },
           },
         ]);
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'code.forgejo.org/go-chi/cache',
       });
       expect(res).toEqual({
@@ -134,7 +133,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
           { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
         ]);
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'golang.org/x/text',
       });
       expect(res).toMatchObject({
@@ -175,7 +174,7 @@ describe('modules/datasource/go/releases-direct', () => {
             },
           },
         ]);
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'gitea.com/go-chi/cache',
       });
       expect(res).toEqual({
@@ -215,7 +214,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { gitRef: 'v2.0.0', version: 'v2.0.0' },
         ],
       });
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'renovatebot.com/abc/def',
       });
       expect(res).toEqual({
@@ -247,7 +246,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
           { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
         ]);
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'my.custom.domain/golang/myrepo',
       });
       expect(res).toMatchObject({
@@ -270,7 +269,7 @@ describe('modules/datasource/go/releases-direct', () => {
           page: 1,
           values: [{ name: 'v1.0.0' }, { name: 'v2.0.0' }],
         });
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'bitbucket.org/golang/text',
       });
       expect(res).toMatchObject({
@@ -292,7 +291,7 @@ describe('modules/datasource/go/releases-direct', () => {
         ],
       });
 
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'git.enterprise.com/example/module',
       });
 
@@ -331,7 +330,7 @@ describe('modules/datasource/go/releases-direct', () => {
         { packageName: 'gopkg.in/x' },
       ];
       for (const pkg of packages) {
-        const res = await datasource.getReleases(pkg);
+        const res = await getDirectReleases(pkg);
         expect(res?.releases).toBeEmpty();
       }
       expect(githubGetTags).toHaveBeenCalledTimes(3);
@@ -352,7 +351,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
           { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
         ]);
-      const res = await datasource.getReleases({
+      const res = await getDirectReleases({
         packageName: 'gitlab.com/group/subgroup/repo',
       });
       expect(res).toMatchObject({
@@ -391,7 +390,7 @@ describe('modules/datasource/go/releases-direct', () => {
 
       for (const pkg of packages) {
         const prefix = pkg.packageName.split('/')[3];
-        const result = await datasource.getReleases(pkg);
+        const result = await getDirectReleases(pkg);
         expect(result?.releases).toHaveLength(1);
         expect(result?.releases[0].version.startsWith(prefix)).toBeFalse();
       }
@@ -416,10 +415,10 @@ describe('modules/datasource/go/releases-direct', () => {
       githubGetTags.mockResolvedValue({ releases });
 
       await expect(
-        datasource.getReleases({ packageName: 'github.com/x/text/a' }),
+        getDirectReleases({ packageName: 'github.com/x/text/a' }),
       ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
       await expect(
-        datasource.getReleases({ packageName: 'github.com/x/text/b' }),
+        getDirectReleases({ packageName: 'github.com/x/text/b' }),
       ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
     });
 
@@ -441,45 +440,29 @@ describe('modules/datasource/go/releases-direct', () => {
         ],
       });
 
-      const result = await datasource.getReleases(pkg);
+      const result = await getDirectReleases(pkg);
       expect(result?.releases).toEqual([
         { version: 'v2.0.0', gitRef: 'b/v2.0.0' },
         { version: 'v3.0.0', gitRef: 'b/v3.0.0' },
       ]);
     });
 
-    describe('package cache', () => {
-      let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
-
-      beforeEach(() => {
-        setCache = vi.spyOn(packageCache, 'setWithRawTtl');
-        getDatasourceSpy.mockResolvedValueOnce({
-          datasource: 'github-tags',
-          packageName: 'golang/text',
-          registryUrl: 'https://github.com',
-        });
-        githubGetTags.mockResolvedValueOnce({
-          releases: [{ gitRef: 'v1.0.0', version: 'v1.0.0' }],
-        });
+    it('leaves caching of the releases to the `go` datasource', async () => {
+      const setCache: MockInstance<typeof packageCache.setWithRawTtl> =
+        vi.spyOn(packageCache, 'setWithRawTtl');
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'golang/text',
+        registryUrl: 'https://github.com',
+      });
+      githubGetTags.mockResolvedValueOnce({
+        releases: [{ gitRef: 'v1.0.0', version: 'v1.0.0' }],
       });
 
-      afterEach(() => {
-        setCache.mockRestore();
-      });
+      await getDirectReleases({ packageName: 'github.com/golang/text' });
 
-      it('caches public modules', async () => {
-        await datasource.getReleases({ packageName: 'github.com/golang/text' });
-
-        expect(setCache).toHaveBeenCalledOnce();
-      });
-
-      it('does not cache modules matching GONOPROXY', async () => {
-        vi.stubEnv('GONOPROXY', 'github.com/golang/*');
-
-        await datasource.getReleases({ packageName: 'github.com/golang/text' });
-
-        expect(setCache).not.toHaveBeenCalled();
-      });
+      expect(setCache).not.toHaveBeenCalled();
+      setCache.mockRestore();
     });
   });
 });
