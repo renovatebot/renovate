@@ -171,6 +171,14 @@ function isValid(input: string | undefined | null): boolean {
   return parse(input) !== null;
 }
 
+// vcpkg does not compare versions across schemes, so a candidate using a
+// different scheme is not an upgrade of the current one.
+function isCompatible(version: string, current?: string): boolean {
+  const v = parse(version);
+  const c = current ? parse(current) : null;
+  return !!v && (!c || v.scheme === c.scheme);
+}
+
 function isStable(version: string): boolean {
   const parsed = parse(version);
   if (!parsed) {
@@ -275,7 +283,7 @@ export const api: VersioningApi = {
   getMajor,
   getMinor,
   getPatch,
-  isCompatible: isValid,
+  isCompatible,
   isGreaterThan,
   isSingleVersion: isValid,
   isStable,

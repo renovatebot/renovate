@@ -64,13 +64,32 @@ describe('modules/versioning/vcpkg/index', () => {
     });
   });
 
-  describe('.isCompatible(version)', () => {
-    it('mirrors isValid', () => {
+  describe('.isCompatible(version, current)', () => {
+    it('accepts any valid version when there is no current one', () => {
       expect(vcpkg.isCompatible('1.2.3')).toBeTrue();
       expect(vcpkg.isCompatible('1.2.3#7')).toBeTrue();
       expect(vcpkg.isCompatible('opaque')).toBeTrue();
       expect(vcpkg.isCompatible('')).toBeFalse();
     });
+
+    it.each`
+      version         | current         | expected
+      ${'1.2.4'}      | ${'1.2.3'}      | ${true}
+      ${'1.2.4'}      | ${'1.2.3#1'}    | ${true}
+      ${'2024-02-01'} | ${'2024-01-15'} | ${true}
+      ${'opaque'}     | ${'other'}      | ${true}
+      ${'2024-01-15'} | ${'1.2.3'}      | ${false}
+      ${'1.2.3'}      | ${'2024-01-15'} | ${false}
+      ${'opaque'}     | ${'1.2.3'}      | ${false}
+      ${'1.2.3'}      | ${'opaque'}     | ${false}
+      ${''}           | ${'1.2.3'}      | ${false}
+      ${'1.2.3'}      | ${'#1'}         | ${true}
+    `(
+      'isCompatible("$version", "$current") === $expected',
+      ({ version, current, expected }) => {
+        expect(vcpkg.isCompatible(version, current)).toBe(expected);
+      },
+    );
   });
 
   describe('.isSingleVersion(version)', () => {
