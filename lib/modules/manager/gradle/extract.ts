@@ -61,7 +61,7 @@ function updatePackageRegistries(
 }
 
 export function matchesContentDescriptor(
-  dep: PackageDependency<GradleManagerData>,
+  dep: PackageDependency,
   contentDescriptors?: ContentDescriptorSpec[],
 ): boolean {
   const [groupId, artifactId] = (dep.packageName ?? dep.depName!).split(':');
@@ -176,7 +176,7 @@ async function parsePackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
   extractedDeps: PackageDependency<GradleManagerData>[],
-  packageFilesByName: Record<string, PackageFile>,
+  packageFilesByName: Record<string, PackageFile<GradleManagerData>>,
   packageRegistries: PackageRegistry[],
 ): Promise<PackageDependency<GradleManagerData>[]> {
   const varRegistry: VariableRegistry = {};
@@ -248,7 +248,7 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[] | null> {
-  const packageFilesByName: Record<string, PackageFile> = {};
+  const packageFilesByName: Record<string, PackageFile<GradleManagerData>> = {};
   const packageRegistries: PackageRegistry[] = [];
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const kotlinSourceFiles = packageFiles.filter(isKotlinSourceFile);
@@ -276,7 +276,7 @@ export async function extractAllPackageFiles(
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      let pkgFile: PackageFile = packageFilesByName[key];
+      let pkgFile: PackageFile<GradleManagerData> = packageFilesByName[key];
       // istanbul ignore if: won't happen if "apply from" processes only initially known files
       if (!pkgFile) {
         pkgFile = {

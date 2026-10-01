@@ -84,7 +84,7 @@ function handleGitDep(
 
 function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
   dep.datasource = GalaxyCollectionDatasource.id;
-  dep.depName = dep.managerData.name;
+  dep.depName = dep.managerData.name ?? undefined;
   dep.registryUrls = dep.managerData.source
     ? /* istanbul ignore next: should have test */ [dep.managerData.source]
     : [];
@@ -93,9 +93,9 @@ function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
 
 function finalize(dependency: AnsibleGalaxyPackageDependency): void {
   const dep = dependency;
-  dep.depName = dep.managerData.name;
+  dep.depName = dep.managerData.name ?? undefined;
 
-  const name = dep.managerData.name;
+  const name = dep.depName ?? '';
   const nameMatch = nameMatchRegex.exec(name);
 
   // use type if defined
@@ -115,9 +115,9 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): void {
         handleGitDep(dep, nameMatch);
         break;
       }
-      if (galaxyDepRegex.exec(dep.managerData.name)) {
+      if (galaxyDepRegex.exec(name)) {
         dep.datasource = GalaxyCollectionDatasource.id;
-        dep.depName = dep.managerData.name;
+        dep.depName = name;
         break;
       }
       dep.skipReason = 'no-source-match';

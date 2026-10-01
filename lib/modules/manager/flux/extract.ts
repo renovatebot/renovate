@@ -505,11 +505,12 @@ function resolveResourceManifest(
   return deps;
 }
 
+// TODO: type the resource deps from the docker and helm helpers so this can return `PackageFileContent<FluxManagerData>` again
 export function extractPackageFile(
   content: string,
   packageFile: string,
   config?: ExtractConfig,
-): PackageFileContent<FluxManagerData> | null {
+): PackageFileContent | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;
@@ -536,9 +537,9 @@ export function extractPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
-): Promise<PackageFile<FluxManagerData>[] | null> {
+): Promise<PackageFile[] | null> {
   const manifests: FluxManifest[] = [];
-  const results: PackageFile<FluxManagerData>[] = [];
+  const results: PackageFile[] = [];
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
