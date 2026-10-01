@@ -1,15 +1,16 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as glasskubeVersioning from '../../versioning/glasskube/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   GlasskubePackageManifest,
   GlasskubePackageVersions,
 } from './schema.ts';
 
-export class GlasskubePackagesDatasource extends Datasource {
+export class GlasskubePackagesDatasource extends RegistryDatasource {
   static readonly id = 'glasskube-packages';
   static readonly defaultRegistryUrl =
     'https://packages.dl.glasskube.dev/packages';
@@ -18,7 +19,7 @@ export class GlasskubePackagesDatasource extends Datasource {
   }
   override defaultVersioning = glasskubeVersioning.id;
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [GlasskubePackagesDatasource.defaultRegistryUrl];
   }
 
@@ -29,12 +30,12 @@ export class GlasskubePackagesDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const result: ReleaseResult = { releases: [] };
 
     const { val: versions, err: versionsErr } = await this.http
       .getYamlSafe(
-        joinUrlParts(registryUrl!, packageName, 'versions.yaml'),
+        joinUrlParts(registryUrl, packageName, 'versions.yaml'),
         GlasskubePackageVersions,
       )
       .unwrap();
@@ -51,7 +52,7 @@ export class GlasskubePackagesDatasource extends Datasource {
     const { val: latestManifest, err: latestManifestErr } = await this.http
       .getYamlSafe(
         joinUrlParts(
-          registryUrl!,
+          registryUrl,
           packageName,
           versions.latestVersion,
           'package.yaml',
@@ -76,7 +77,7 @@ export class GlasskubePackagesDatasource extends Datasource {
   }
 
   override getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     return withCache(
       {

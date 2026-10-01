@@ -1,19 +1,20 @@
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { id as semver } from '../../versioning/semver-coerced/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { Registry } from './schema.ts';
 
-export class TypstDatasource extends Datasource {
+export class TypstDatasource extends RegistryDatasource {
   static readonly id = 'typst';
 
   override supportsCustomRegistry(_packageName: string): boolean {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://packages.typst.org/preview/index.json'];
   }
 
@@ -25,7 +26,7 @@ export class TypstDatasource extends Datasource {
 
   private async _getReleases({
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const [, pkg] = packageName.split('/');
 
     const [registryUrl] = this.getDefaultRegistryUrls('');
@@ -52,7 +53,7 @@ export class TypstDatasource extends Datasource {
   }
 
   override async getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const [namespace] = config.packageName.split('/');
     if (namespace !== 'preview') {

@@ -1,21 +1,20 @@
 import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
-import { Result } from '../../../util/result.ts';
-import { Datasource } from '../datasource.ts';
-import { DigestsConfig, ReleasesConfig } from '../schema.ts';
+import { RegistryDatasource } from '../datasource.ts';
 import type {
-  DigestConfig,
-  GetReleasesConfig,
+  RegistryDigestConfig,
+  RegistryGetReleasesConfig,
   Release,
   ReleaseResult,
 } from '../types.ts';
 import { CdnjsAPISriResponse, CdnjsAPIVersionResponse } from './schema.ts';
 
-export class CdnjsDatasource extends Datasource {
+export class CdnjsDatasource extends RegistryDatasource {
   static readonly id = 'cdnjs';
 
   constructor() {
@@ -26,7 +25,7 @@ export class CdnjsDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://api.cdnjs.com/'];
   }
 
@@ -35,20 +34,19 @@ export class CdnjsDatasource extends Datasource {
     'The source URL is determined from the `repository` field in the results.';
 
   private async _getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const result = Result.parse(config, ReleasesConfig)
-      .transform(({ packageName, registryUrl }) => {
-        const [library] = packageName.split('/');
+    const { packageName, registryUrl } = config;
+    const [library] = packageName.split('/');
 
-        const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
+    const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
 
-        return this.http.getJsonSafe(
-          url,
-          { cacheProvider: memCacheProvider },
-          CdnjsAPIVersionResponse,
-        );
-      })
+    const result = this.http
+      .getJsonSafe(
+        url,
+        { cacheProvider: memCacheProvider },
+        CdnjsAPIVersionResponse,
+      )
       .transform(({ versions, homepage, repository }): ReleaseResult => {
         const releases: Release[] = versions;
 
@@ -79,7 +77,9 @@ export class CdnjsDatasource extends Datasource {
     return val;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     const library = config.packageName.split('/')[0];
     return withCache(
       {
@@ -93,19 +93,17 @@ export class CdnjsDatasource extends Datasource {
   }
 
   private async _getDigest(
-    config: DigestConfig,
+    config: RegistryDigestConfig,
     newValue: string,
   ): Promise<string | null> {
-    const { packageName } = config;
+    const { packageName, registryUrl } = config;
     const [library] = packageName.split('/');
     const assetName = packageName.replace(`${library}/`, '');
 
-    const result = Result.parse(config, DigestsConfig)
-      .transform(({ registryUrl }) => {
-        const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
+    const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
 
-        return this.http.getJsonSafe(url, CdnjsAPISriResponse);
-      })
+    const result = this.http
+      .getJsonSafe(url, CdnjsAPISriResponse)
       .transform(({ sri }): string => {
         return sri?.[assetName];
       });
@@ -125,9 +123,12 @@ export class CdnjsDatasource extends Datasource {
   }
 
   override getDigest(
-    config: DigestConfig,
-    newValue: string,
+    config: RegistryDigestConfig,
+    newValue?: string,
   ): Promise<string | null> {
+    if (!newValue) {
+      return Promise.resolve(null);
+    }
     return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,

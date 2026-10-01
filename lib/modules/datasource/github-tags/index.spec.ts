@@ -21,6 +21,7 @@ describe('modules/datasource/github-tags/index', () => {
 
   describe('getDigest', () => {
     const packageName = 'some/dep';
+    const registryUrl = 'https://github.com';
 
     it('returns commit digest', async () => {
       httpMock
@@ -28,7 +29,10 @@ describe('modules/datasource/github-tags/index', () => {
         .get(`/repos/${packageName}/commits?per_page=1`)
         .reply(200, [{ sha: 'abcdef' }]);
 
-      const res = await github.getDigest({ packageName }, undefined);
+      const res = await github.getDigest(
+        { packageName, registryUrl },
+        undefined,
+      );
 
       expect(res).toBe('abcdef');
     });
@@ -38,7 +42,10 @@ describe('modules/datasource/github-tags/index', () => {
         .scope(githubApiHost)
         .get(`/repos/${packageName}/commits?per_page=1`)
         .reply(200, []);
-      const res = await github.getDigest({ packageName }, undefined);
+      const res = await github.getDigest(
+        { packageName, registryUrl },
+        undefined,
+      );
       expect(res).toBeNull();
     });
 
@@ -47,7 +54,10 @@ describe('modules/datasource/github-tags/index', () => {
         .scope(githubApiHost)
         .get(`/repos/${packageName}/commits?per_page=1`)
         .reply(200, [{ sha: 'abcdef' }]);
-      const res = await github.getDigest({ packageName }, undefined);
+      const res = await github.getDigest(
+        { packageName, registryUrl },
+        undefined,
+      );
       expect(res).toBe('abcdef');
     });
 
@@ -66,7 +76,10 @@ describe('modules/datasource/github-tags/index', () => {
           hash: 'abc',
         },
       ]);
-      const res = await github.getDigest({ packageName }, 'v2.0.0');
+      const res = await github.getDigest(
+        { packageName, registryUrl },
+        'v2.0.0',
+      );
       expect(res).toBe('abc');
     });
 
@@ -84,7 +97,10 @@ describe('modules/datasource/github-tags/index', () => {
           releaseTimestamp: '2022-01-01' as Timestamp,
         }),
       ]);
-      const res = await github.getDigest({ packageName }, 'v2.0.0');
+      const res = await github.getDigest(
+        { packageName, registryUrl },
+        'v2.0.0',
+      );
       expect(res).toBeNull();
     });
 
@@ -103,13 +119,19 @@ describe('modules/datasource/github-tags/index', () => {
           hash: 'abc',
         },
       ]);
-      const res = await github.getDigest({ packageName }, 'v3.0.0');
+      const res = await github.getDigest(
+        { packageName, registryUrl },
+        'v3.0.0',
+      );
       expect(res).toBeNull();
     });
 
     it('returns null for error', async () => {
       vi.spyOn(githubGraphql, 'queryTags').mockRejectedValueOnce('error');
-      const res = await github.getDigest({ packageName }, 'v3.0.0');
+      const res = await github.getDigest(
+        { packageName, registryUrl },
+        'v3.0.0',
+      );
       expect(res).toBeNull();
     });
   });

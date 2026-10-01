@@ -1,22 +1,27 @@
 import { isTruthy } from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
 import { id as bazelVersioningId } from '../../versioning/bazel-module/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { BazelModuleMetadata } from './schema.ts';
 
-export class BazelDatasource extends Datasource {
+export class BazelDatasource extends RegistryDatasource {
   static readonly id = 'bazel';
 
   static readonly bazelCentralRepoUrl =
     'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [BazelDatasource.bazelCentralRepoUrl];
   }
   override readonly registryStrategy = 'hunt';
@@ -36,9 +41,9 @@ export class BazelDatasource extends Datasource {
   private async fetchReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const path = BazelDatasource.packageMetadataPath(packageName);
-    const url = joinUrlParts(registryUrl!, path);
+    const url = joinUrlParts(registryUrl, path);
     const result: ReleaseResult = { releases: [] };
     try {
       let metadata: BazelModuleMetadata;
@@ -84,10 +89,12 @@ export class BazelDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl!}:${config.packageName}`,
+        key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
       () => this.fetchReleases(config),

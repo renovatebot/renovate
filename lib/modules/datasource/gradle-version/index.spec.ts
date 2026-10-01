@@ -3,7 +3,10 @@ import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { id as versioning } from '../../versioning/gradle/index.ts';
-import type { GetPkgReleasesConfig, GetReleasesConfig } from '../index.ts';
+import type {
+  GetPkgReleasesConfig,
+  RegistryGetReleasesConfig,
+} from '../index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GradleVersionDatasource } from './index.ts';
 
@@ -195,7 +198,7 @@ describe('modules/datasource/gradle-version/index', () => {
 
       await expect(
         gradleVersionDatasource.getReleases(
-          partial<GetReleasesConfig>({
+          partial<RegistryGetReleasesConfig>({
             registryUrl: 'https://services.gradle.org/versions/all',
           }),
         ),
@@ -203,7 +206,7 @@ describe('modules/datasource/gradle-version/index', () => {
 
       await expect(
         gradleVersionDatasource.getReleases(
-          partial<GetReleasesConfig>({
+          partial<RegistryGetReleasesConfig>({
             registryUrl: 'http://baz.qux',
           }),
         ),

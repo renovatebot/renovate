@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http } from '../../../util/http/index.ts';
@@ -18,9 +19,9 @@ import { MAVEN_REPO } from '../maven/common.ts';
 import { MavenDatasource } from '../maven/index.ts';
 import { downloadHttpContent, downloadHttpProtocol } from '../maven/util.ts';
 import type {
-  GetReleasesConfig,
   PostprocessReleaseConfig,
   PostprocessReleaseResult,
+  RegistryGetReleasesConfig,
   RegistryStrategy,
   Release,
   ReleaseResult,
@@ -42,7 +43,7 @@ interface PomInfo {
 export class SbtPackageDatasource extends MavenDatasource {
   static override readonly id = 'sbt-package';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return [MAVEN_REPO];
   }
 
@@ -337,13 +338,9 @@ export class SbtPackageDatasource extends MavenDatasource {
   }
 
   override async getReleases(
-    config: GetReleasesConfig,
+    config: RegistryGetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const { packageName, registryUrl } = config;
-    // istanbul ignore if
-    if (!registryUrl) {
-      return null;
-    }
 
     const sbtReleases = await this.getSbtReleases(registryUrl, packageName);
     if (sbtReleases) {

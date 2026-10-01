@@ -1,14 +1,19 @@
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type {
+  RegistryGetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
 import { GitlabReleases } from './schema.ts';
 
-export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
+export class GitlabReleasesDatasource extends RegistryDatasource<GitlabHttp> {
   static readonly id = 'gitlab-releases';
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://gitlab.com'];
   }
 
@@ -29,12 +34,7 @@ export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
   private async _getReleases({
     registryUrl,
     packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const urlEncodedRepo = encodeURIComponent(packageName);
     const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
 
@@ -60,11 +60,12 @@ export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
     }
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${GitlabReleasesDatasource.id}`,
-        // TODO: types (#22198)
         key: `${config.registryUrl}/${config.packageName}`,
         fallback: true,
       },

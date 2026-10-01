@@ -1,13 +1,14 @@
 import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import type { NonEmptyArray } from '../../../types/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
-import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { RegistryDatasource } from '../datasource.ts';
+import type { RegistryGetReleasesConfig, ReleaseResult } from '../types.ts';
 import { ElmPackageReleases } from './schema.ts';
 
-export class ElmPackageDatasource extends Datasource {
+export class ElmPackageDatasource extends RegistryDatasource {
   static readonly id = 'elm-package';
 
   constructor() {
@@ -18,7 +19,7 @@ export class ElmPackageDatasource extends Datasource {
     return false;
   }
 
-  override getDefaultRegistryUrls(_packageName: string): string[] {
+  override getDefaultRegistryUrls(_packageName: string): NonEmptyArray<string> {
     return ['https://package.elm-lang.org'];
   }
 
@@ -35,11 +36,7 @@ export class ElmPackageDatasource extends Datasource {
   async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore if -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
+  }: RegistryGetReleasesConfig): Promise<ReleaseResult | null> {
     const baseUrl = registryUrl;
     const pkgUrl = joinUrlParts(
       baseUrl,
@@ -82,7 +79,9 @@ export class ElmPackageDatasource extends Datasource {
     return result;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  getReleases(
+    config: RegistryGetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${ElmPackageDatasource.id}`,

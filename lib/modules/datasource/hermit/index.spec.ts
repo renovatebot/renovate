@@ -163,14 +163,6 @@ describe('modules/datasource/hermit/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('should get null result on empty registryUrl', async () => {
-      await expect(
-        datasource.getReleases({
-          packageName: 'go',
-        }),
-      ).resolves.toBeNull();
-    });
-
     it('should fail on missing index.json asset', async () => {
       httpMock
         .scope(githubApiHost)

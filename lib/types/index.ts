@@ -41,6 +41,11 @@ export type Nullish<T extends Val> = T | null | undefined;
 export type MaybePromise<T> = T | Promise<T>;
 
 /**
+ * An array with at least one element, as narrowed to by `isNonEmptyArray()`.
+ */
+export type NonEmptyArray<T> = [T, ...T[]];
+
+/**
  * The Extends utility type ensures that U is a subset of T (typically a union).
  * This helps ensure that we get a typescript error should anything ever be removed
  * from T but still remain in U.

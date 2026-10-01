@@ -14,15 +14,6 @@ describe('modules/datasource/hackage/index', () => {
   });
 
   describe('getReleases', () => {
-    it('return null with empty registryUrl', async () => {
-      await expect(
-        new HackageDatasource().getReleases({
-          packageName: 'base',
-          registryUrl: undefined,
-        }),
-      ).resolves.toBeNull();
-    });
-
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/package/base.json').reply(404);
       await expect(
