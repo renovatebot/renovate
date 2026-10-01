@@ -1,3 +1,4 @@
+import { defaultRegistryUrl, getApiBaseUrl } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -16,7 +17,7 @@ export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   }
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
-    return ['https://gitlab.com'];
+    return [defaultRegistryUrl];
   }
 
   override readonly releaseTimestampSupport = true;
@@ -36,8 +37,8 @@ export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
     const packageNameEncoded = encodeURIComponent(packageName);
 
     return joinUrlParts(
-      registryUrl,
-      `api/v4/projects`,
+      getApiBaseUrl(registryUrl),
+      'projects',
       projectNameEncoded,
       `packages?package_name=${packageNameEncoded}&per_page=100`,
     );
