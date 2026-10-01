@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
+import type { NpmManagerData } from '../../types.ts';
 
 function readFixture(x: string): string {
   return Fixtures.get(x, '../..');
@@ -349,7 +350,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
     });
 
     it('supports alias-based replacement', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'dependencies',
         depName: 'config',
         newName: 'abc',

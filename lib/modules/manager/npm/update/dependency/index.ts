@@ -118,7 +118,7 @@ export function updateDependency({
   fileContent,
   packageFile: packageFileName,
   upgrade,
-}: UpdateDependencyConfig): string | null {
+}: UpdateDependencyConfig<NpmManagerData>): string | null {
   if (
     upgrade.depType?.startsWith('pnpm.catalog') ||
     upgrade.depType === pnpmWorkspaceOverrides
@@ -138,7 +138,8 @@ export function updateDependency({
   }
 
   const { depType, managerData } = upgrade;
-  const depName: string = managerData?.key ?? upgrade.depName;
+  // TODO #22198
+  const depName = managerData?.key ?? upgrade.depName!;
   let { newValue } = upgrade;
 
   newValue = getNewGitValue(upgrade) ?? newValue;
