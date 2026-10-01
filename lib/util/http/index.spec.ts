@@ -13,6 +13,7 @@ import { hasProxy } from '../../proxy.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { resetCache } from '../cache/repository/index.ts';
 import * as hostRules from '../host-rules.ts';
+import { memCacheProvider } from './cache/memory-http-cache-provider.ts';
 import { applyDefaultHeaders } from './http.ts';
 import { Http, HttpError } from './index.ts';
 import * as queue from './queue.ts';
@@ -1097,6 +1098,7 @@ describe('util/http/index', () => {
   describe('Throttling', () => {
     afterEach(() => {
       vi.useRealTimers();
+      memCache.reset();
     });
 
     it('works without throttling', async () => {
@@ -1123,6 +1125,25 @@ describe('util/http/index', () => {
       const t2 = Date.now();
 
       expect(t2 - t1).toBeGreaterThanOrEqual(4000);
+    });
+
+    it('does not throttle responses served from the cache provider', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true, advanceTimeDelta: 1 });
+      memCache.init();
+      httpMock.scope(baseUrl).get('/foo').reply(200, 'bar');
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo', {
+        cacheProvider: memCacheProvider,
+      });
+      const res = await http.get('http://renovate.com/foo', {
+        cacheProvider: memCacheProvider,
+      });
+      const t2 = Date.now();
+
+      expect(res.body).toBe('bar');
+      expect(t2 - t1).toBeLessThan(100);
     });
   });
 
