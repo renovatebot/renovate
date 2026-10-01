@@ -24,7 +24,7 @@ For this you use a custom `hostRules` array.
 Renovate passes `hostRules` with `hostType: 'helm'` to `helmfile deps` for classic (non-OCI) repositories.
 It does so through the `<NAME>_USERNAME` and `<NAME>_PASSWORD` environment variables, where `<NAME>` is the repository name in upper case with dashes replaced by underscores.
 The `hostRules` entry must have both a `username` and a `password`, and its `matchHost` must match the repository `url`.
-Helmfile only uses these variables when the repository sets no `username` or `password` itself.
+Helmfile uses each variable only when the repository does not set that field itself.
 
 For example, with this `helmfile.yaml`:
 
