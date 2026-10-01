@@ -204,6 +204,6 @@ export async function hasPackageManager(
   return (
     (isNonEmptyString(packageJsonResult?.packageManager?.name) &&
       isNonEmptyString(packageJsonResult?.packageManager?.version)) ||
-    hasDevEnginesPackageManager({ devEngines: packageJsonResult.devEngines })
+    hasDevEnginesPackageManager(packageJsonResult)
   );
 }
