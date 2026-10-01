@@ -3020,19 +3020,6 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
-    name: 'dnsCache',
-    description: 'Enable got DNS cache.',
-    type: 'boolean',
-    default: false,
-    stage: 'repository',
-    parents: ['hostRules'],
-    cli: false,
-    env: false,
-    experimental: true,
-    deprecationMsg:
-      'This option is deprecated and will be removed in a future release.',
-  },
-  {
     name: 'keepAlive',
     description: 'Enable HTTP keep-alive for hosts.',
     type: 'boolean',
