@@ -167,20 +167,8 @@ function compare(a: ParsedVersion, b: ParsedVersion): number | null {
   return a.portVersion - b.portVersion;
 }
 
-function isValid(input: string): boolean {
+function isValid(input: string | undefined | null): boolean {
   return parse(input) !== null;
-}
-
-function isVersion(input: string | undefined | null): boolean {
-  return parse(input) !== null;
-}
-
-function isCompatible(version: string): boolean {
-  return isValid(version);
-}
-
-function isSingleVersion(version: string): boolean {
-  return isVersion(version);
 }
 
 function isStable(version: string): boolean {
@@ -287,12 +275,12 @@ export const api: VersioningApi = {
   getMajor,
   getMinor,
   getPatch,
-  isCompatible,
+  isCompatible: isValid,
   isGreaterThan,
-  isSingleVersion,
+  isSingleVersion: isValid,
   isStable,
   isValid,
-  isVersion,
+  isVersion: isValid,
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
