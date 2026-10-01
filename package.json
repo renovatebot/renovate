@@ -275,7 +275,7 @@
     "zod": "4.6.5"
   },
   "optionalDependencies": {
-    "openpgp": "6.3.1",
+    "openpgp": "6.3.2",
     "re2": "1.26.1"
   },
   "devDependencies": {
