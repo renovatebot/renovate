@@ -1,51 +1,34 @@
-import type { MockInstance } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import type { ReleaseResult } from '../index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GoDatasource } from './index.ts';
 
-const getReleasesDirectMock = vi.fn();
-
-const getDigestForgejoMock = vi.fn();
-const getDigestGiteaMock = vi.fn();
-const getDigestGithubMock = vi.fn();
-const getDigestGitlabMock = vi.fn();
-const getDigestGitMock = vi.fn();
-const getDigestBitbucketMock = vi.fn();
-vi.mock('./releases-direct.ts', () => {
+const getDigestMocks: Record<string, Mock> = {
+  'bitbucket-tags': vi.fn(),
+  'forgejo-tags': vi.fn(),
+  'git-tags': vi.fn(),
+  'gitea-tags': vi.fn(),
+  'github-tags': vi.fn(),
+  'gitlab-tags': vi.fn(),
+};
+vi.mock('./tag-datasources.ts', () => {
   return {
-    GoDirectDatasource: vi.fn(
-      class {
-        forgejo = {
-          getDigest: (...args: any[]) => getDigestForgejoMock(...args),
-        };
-        git = { getDigest: (...args: any[]) => getDigestGitMock(...args) };
-        gitea = { getDigest: (...args: any[]) => getDigestGiteaMock(...args) };
-        github = {
-          getDigest: (...args: any[]) => getDigestGithubMock(...args),
-        };
-        gitlab = {
-          getDigest: (...args: any[]) => getDigestGitlabMock(...args),
-        };
-        bitbucket = {
-          getDigest: (...args: any[]) => getDigestBitbucketMock(...args),
-        };
-        getReleases = (...args: any[]) => getReleasesDirectMock(...args);
-      },
-    ),
+    getGoTagDatasource: (datasource: string) =>
+      datasource in getDigestMocks
+        ? { api: { getDigest: getDigestMocks[datasource] } }
+        : undefined,
   };
 });
 
 const getReleasesProxyMock = vi.fn();
-vi.mock('./releases-goproxy.ts', () => {
+vi.mock('./releases-goproxy.ts', async (importOriginal) => {
   return {
-    GoProxyDatasource: vi.fn(
-      class {
-        getReleases = () => getReleasesProxyMock();
-      },
-    ),
+    ...(await importOriginal<typeof import('./releases-goproxy.ts')>()),
+    getGoproxyReleases: (...args: unknown[]) => getReleasesProxyMock(...args),
   };
 });
 
@@ -56,15 +39,15 @@ describe('modules/datasource/go/index', () => {
     it('fetches releases', async () => {
       const expected = { releases: [{ version: '0.0.1' }] };
       getReleasesProxyMock.mockResolvedValue(expected);
-      getReleasesDirectMock.mockResolvedValue(null);
 
       const res = await datasource.getReleases({
         packageName: 'golang.org/foo/bar',
       });
 
       expect(res).toBe(expected);
-      expect(getReleasesProxyMock).toHaveBeenCalled();
-      expect(getReleasesDirectMock).not.toHaveBeenCalled();
+      expect(getReleasesProxyMock).toHaveBeenCalledExactlyOnceWith({
+        packageName: 'golang.org/foo/bar',
+      });
     });
   });
 
@@ -98,7 +81,9 @@ describe('modules/datasource/go/index', () => {
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
-      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      getDigestMocks['gitlab-tags'].mockResolvedValue(
+        'abcdefabcdefabcdefabcdef',
+      );
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
         undefined,
@@ -111,7 +96,7 @@ describe('modules/datasource/go/index', () => {
         .scope('https://renovatebot.com/')
         .get('/abc/def?go-get=1')
         .reply(200, Fixtures.get('go-get-git-digest.html'));
-      getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      getDigestMocks['git-tags'].mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'renovatebot.com/abc/def' },
         undefined,
@@ -125,7 +110,9 @@ describe('modules/datasource/go/index', () => {
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
-      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      getDigestMocks['gitlab-tags'].mockResolvedValue(
+        'abcdefabcdefabcdefabcdef',
+      );
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
         branch,
@@ -138,13 +125,15 @@ describe('modules/datasource/go/index', () => {
         .scope('https://golang.org/')
         .get('/x/text?go-get=1')
         .reply(200, Fixtures.get('go-get-github.html'));
-      getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
+      getDigestMocks['github-tags'].mockResolvedValueOnce(
+        'abcdefabcdefabcdefabcdef',
+      );
       const res = await datasource.getDigest(
         { packageName: 'golang.org/x/text' },
         'v1.2.3',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
+      expect(getDigestMocks['github-tags']).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -159,13 +148,15 @@ describe('modules/datasource/go/index', () => {
         .scope('https://golang.org/')
         .get('/x/text?go-get=1')
         .reply(200, Fixtures.get('go-get-github.html'));
-      getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
+      getDigestMocks['github-tags'].mockResolvedValueOnce(
+        'abcdefabcdefabcdefabcdef',
+      );
       const res = await datasource.getDigest(
         { packageName: 'golang.org/x/text' },
         'v0.0.0',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
-      expect(getDigestGithubMock).toHaveBeenCalledExactlyOnceWith(
+      expect(getDigestMocks['github-tags']).toHaveBeenCalledExactlyOnceWith(
         {
           datasource: 'github-tags',
           packageName: 'golang/text',
@@ -176,7 +167,7 @@ describe('modules/datasource/go/index', () => {
     });
 
     it('support bitbucket digest', async () => {
-      getDigestBitbucketMock.mockResolvedValueOnce('123');
+      getDigestMocks['bitbucket-tags'].mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
         {
           packageName: 'bitbucket.org/golang/text',
@@ -187,7 +178,7 @@ describe('modules/datasource/go/index', () => {
     });
 
     it('support forgejo digest', async () => {
-      getDigestForgejoMock.mockResolvedValueOnce('123');
+      getDigestMocks['forgejo-tags'].mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
         {
           packageName: 'code.forgejo.org/go-chi/cache',
@@ -198,7 +189,7 @@ describe('modules/datasource/go/index', () => {
     });
 
     it('support gitea digest', async () => {
-      getDigestGiteaMock.mockResolvedValueOnce('123');
+      getDigestMocks['gitea-tags'].mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
         {
           packageName: 'gitea.com/go-chi/cache',
@@ -250,7 +241,6 @@ describe('modules/datasource/go/index', () => {
         };
 
         getReleasesProxyMock.mockResolvedValue(expected);
-        getReleasesDirectMock.mockResolvedValue(null);
 
         const res = await getPkgReleases({
           datasource: GoDatasource.id,
@@ -292,7 +282,6 @@ describe('modules/datasource/go/index', () => {
         };
 
         getReleasesProxyMock.mockResolvedValue(expected);
-        getReleasesDirectMock.mockResolvedValue(null);
 
         const res = await getPkgReleases({
           datasource: GoDatasource.id,
@@ -313,23 +302,52 @@ describe('modules/datasource/go/index', () => {
   });
 
   describe('package cache', () => {
+    const publicProxyUrl = 'https://proxy.golang.org';
+    const privateProxyUrl = 'https://artifactory.example.com/api/go/go';
+
     let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
 
     beforeEach(() => {
       setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+      getReleasesProxyMock.mockResolvedValue({ releases: [] });
     });
 
     afterEach(() => {
       setCache.mockRestore();
+      GlobalConfig.reset();
+    });
+
+    it('writes a single entry per releases lookup', async () => {
+      vi.stubEnv('GOPROXY', publicProxyUrl);
+
+      await datasource.getReleases({ packageName: 'golang.org/foo/bar' });
+
+      expect(setCache).toHaveBeenCalledOnce();
     });
 
     it('does not cache releases for modules matching GOPRIVATE', async () => {
       vi.stubEnv('GOPRIVATE', 'golang.org/foo/*');
-      getReleasesProxyMock.mockResolvedValue({ releases: [] });
 
       await datasource.getReleases({ packageName: 'golang.org/foo/bar' });
 
       expect(setCache).not.toHaveBeenCalled();
+    });
+
+    it('does not cache releases of modules served by a private proxy', async () => {
+      vi.stubEnv('GOPROXY', privateProxyUrl);
+
+      await datasource.getReleases({ packageName: 'golang.org/foo/bar' });
+
+      expect(setCache).not.toHaveBeenCalled();
+    });
+
+    it('caches releases of modules served by a private proxy if cachePrivatePackages is enabled', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+      vi.stubEnv('GOPROXY', privateProxyUrl);
+
+      await datasource.getReleases({ packageName: 'golang.org/foo/bar' });
+
+      expect(setCache).toHaveBeenCalledOnce();
     });
 
     it('does not cache digests for modules matching GOPRIVATE', async () => {
@@ -338,7 +356,9 @@ describe('modules/datasource/go/index', () => {
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
-      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      getDigestMocks['gitlab-tags'].mockResolvedValue(
+        'abcdefabcdefabcdefabcdef',
+      );
 
       await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
@@ -353,7 +373,9 @@ describe('modules/datasource/go/index', () => {
         .scope('https://gitlab.com/')
         .get('/group/subgroup?go-get=1')
         .reply(200, Fixtures.get('go-get-gitlab.html'));
-      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      getDigestMocks['gitlab-tags'].mockResolvedValue(
+        'abcdefabcdefabcdefabcdef',
+      );
 
       await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
