@@ -7,7 +7,6 @@ import { InheritConfig, NOT_PRESENT } from '../config/inherit.ts';
 import type { GlobalInheritableConfig } from '../config/types.ts';
 import type { PlatformFamilyId } from '../constants/index.ts';
 import { PLATFORM_FAMILIES } from '../constants/index.ts';
-import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
 import * as hostRules from './host-rules.ts';
 import { coerceObject } from './object.ts';
@@ -83,35 +82,11 @@ export function parseJson(
     return null;
   }
 
-  if (filename.endsWith('.jsonc')) {
-    return parseJsonc(content);
-  }
-
   if (filename.endsWith('.json5')) {
     return JSON5.parse(content);
   }
 
-  return parseJsonWithFallback(content, filename);
-}
-
-export function parseJsonWithFallback(
-  content: string,
-  context: string,
-): JsonValue {
-  let parsedJson: JsonValue;
-
-  try {
-    parsedJson = parseJsonc(content);
-  } catch {
-    // warn if json5 format used in json
-    parsedJson = JSON5.parse(content);
-    logger.warn(
-      { context },
-      'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
-    );
-  }
-
-  return parsedJson;
+  return parseJsonc(content);
 }
 
 export function parseJsonc(content: string): JsonValue {
