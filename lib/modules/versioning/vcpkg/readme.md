@@ -15,5 +15,4 @@ Renovate treats the port-version as a tie-breaker after the base versions compar
 
 Vcpkg has no range expression syntax.
 Manifest `dependencies` carry a single `version>=` lower bound, and `overrides` carry an exact pin.
-Renovate treats `matches` as a `>=` comparison for the numeric and date schemes, so any candidate version at or above the constraint satisfies.
-Opaque strings have no ordering on the base, so only versions with the same base satisfy, with port-version still providing the `>=` comparison once the base matches.
+In both cases the value is a bare version, with no operator, so Renovate compares values for equality like other versioning modules without ranges.

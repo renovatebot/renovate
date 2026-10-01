@@ -253,14 +253,14 @@ describe('modules/versioning/vcpkg/index', () => {
     it.each`
       version         | range           | expected
       ${'1.2.3'}      | ${'1.2.3'}      | ${true}
-      ${'1.2.4'}      | ${'1.2.3'}      | ${true}
+      ${'1.2.4'}      | ${'1.2.3'}      | ${false}
       ${'1.2.3'}      | ${'1.2.4'}      | ${false}
-      ${'1.2.3#1'}    | ${'1.2.3#0'}    | ${true}
+      ${'1.2.3#1'}    | ${'1.2.3#0'}    | ${false}
       ${'1.2.3#0'}    | ${'1.2.3#1'}    | ${false}
-      ${'2024-02-01'} | ${'2024-01-15'} | ${true}
+      ${'2024-02-01'} | ${'2024-01-15'} | ${false}
       ${'2024-01-15'} | ${'2024-02-01'} | ${false}
       ${'opaque'}     | ${'opaque'}     | ${true}
-      ${'opaque#3'}   | ${'opaque#1'}   | ${true}
+      ${'opaque#3'}   | ${'opaque#1'}   | ${false}
       ${'opaque#1'}   | ${'opaque#3'}   | ${false}
       ${'opaque'}     | ${'other'}      | ${false}
       ${'1.2.3'}      | ${'2024-01-15'} | ${false}
@@ -274,12 +274,10 @@ describe('modules/versioning/vcpkg/index', () => {
   });
 
   describe('.getSatisfyingVersion(versions, range)', () => {
-    it('returns the highest version satisfying the `>=` constraint', () => {
-      // Out-of-order list so the iteration exercises both the "new best" and
-      // the "already covered" branches of the loop.
+    it('returns the matching version', () => {
       const versions = ['1.2.3', '2.0.0', '1.2.3#1', '1.2.4'];
-      expect(vcpkg.getSatisfyingVersion(versions, '1.2.3')).toBe('2.0.0');
-      expect(vcpkg.getSatisfyingVersion(versions, '1.2.4')).toBe('2.0.0');
+      expect(vcpkg.getSatisfyingVersion(versions, '1.2.3')).toBe('1.2.3');
+      expect(vcpkg.getSatisfyingVersion(versions, '1.2.3#1')).toBe('1.2.3#1');
       expect(vcpkg.getSatisfyingVersion(versions, '2.0.0')).toBe('2.0.0');
       expect(vcpkg.getSatisfyingVersion(versions, '3.0.0')).toBeNull();
     });
@@ -289,13 +287,13 @@ describe('modules/versioning/vcpkg/index', () => {
     });
 
     it('ignores unparseable candidates', () => {
-      const versions = ['1.2.3', '', '1.2.4'];
-      expect(vcpkg.getSatisfyingVersion(versions, '1.2.3')).toBe('1.2.4');
+      const versions = ['', '1.2.4'];
+      expect(vcpkg.getSatisfyingVersion(versions, '1.2.4')).toBe('1.2.4');
     });
   });
 
   describe('.minSatisfyingVersion(versions, range)', () => {
-    it('returns the lowest version satisfying the `>=` constraint', () => {
+    it('returns the matching version', () => {
       const versions = ['1.2.4', '1.2.3', '1.2.3#1', '2.0.0'];
       expect(vcpkg.minSatisfyingVersion(versions, '1.2.3')).toBe('1.2.3');
       expect(vcpkg.minSatisfyingVersion(versions, '1.2.4')).toBe('1.2.4');

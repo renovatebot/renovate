@@ -261,54 +261,21 @@ function sortVersions(version: string, other: string): number {
 }
 
 function matches(version: string, range: string): boolean {
-  // vcpkg has no range syntax; manifest dependencies are a `>=` lower bound.
-  const v = parse(version);
-  const r = parse(range);
-  if (!v || !r) {
-    return false;
-  }
-  const result = compare(v, r);
-  return result !== null && result >= 0;
+  return equals(version, range);
 }
 
 function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  let bestStr: string | null = null;
-  let bestParsed: ParsedVersion | null = null;
-  for (const version of versions) {
-    if (!matches(version, range)) {
-      continue;
-    }
-    // parse succeeds for any matches-accepted input
-    const parsed = parse(version)!;
-    if (!bestParsed || compare(parsed, bestParsed)! > 0) {
-      bestParsed = parsed;
-      bestStr = version;
-    }
-  }
-  return bestStr;
+  return versions.find((version) => equals(version, range)) ?? null;
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  let bestStr: string | null = null;
-  let bestParsed: ParsedVersion | null = null;
-  for (const version of versions) {
-    if (!matches(version, range)) {
-      continue;
-    }
-    // parse succeeds for any matches-accepted input
-    const parsed = parse(version)!;
-    if (!bestParsed || compare(parsed, bestParsed)! < 0) {
-      bestParsed = parsed;
-      bestStr = version;
-    }
-  }
-  return bestStr;
+  return versions.find((version) => equals(version, range)) ?? null;
 }
 
 function getNewValue({ newVersion }: NewValueConfig): string {
