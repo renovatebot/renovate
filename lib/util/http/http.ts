@@ -13,7 +13,6 @@ import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { hash } from '../hash.ts';
-import { acquireLock } from '../mutex.ts';
 import { coerceObject } from '../object.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
@@ -62,6 +61,33 @@ export interface InternalHttpOptions extends HttpOptions {
   method?: HttpMethod;
 
   parseJson?: Options['parseJson'];
+}
+
+const inFlightRequests = new WeakMap<
+  HttpCacheProvider,
+  Map<string, Promise<HttpResponse<unknown>>>
+>();
+
+function getInFlightRequest(
+  cacheProvider: HttpCacheProvider,
+  requestKey: string,
+): Promise<HttpResponse<unknown>> | null {
+  return inFlightRequests.get(cacheProvider)?.get(requestKey) ?? null;
+}
+
+/**
+ * Registers a cache provider request as in flight until it settles.
+ */
+function setInFlightRequest(
+  cacheProvider: HttpCacheProvider,
+  requestKey: string,
+  request: Promise<HttpResponse<unknown>>,
+): Promise<HttpResponse<unknown>> {
+  const requests = inFlightRequests.get(cacheProvider) ?? new Map();
+  inFlightRequests.set(cacheProvider, requests);
+  const pending = request.finally(() => requests.delete(requestKey));
+  requests.set(requestKey, pending);
+  return pending;
 }
 
 export function applyDefaultHeaders(options: OptionsInit): void {
@@ -212,21 +238,24 @@ export abstract class HttpBase<
       cacheProvider = options.cacheProvider;
     }
 
+    const requestKey = hash(
+      `got-${JSON.stringify({
+        url,
+        headers: options.headers,
+        method,
+      })}`,
+    );
+
     const memCacheKey =
       !process.env.RENOVATE_X_DISABLE_HTTP_MEMCACHE &&
       !cacheProvider &&
       options.memCache !== false &&
       isReadMethod
-        ? hash(
-            `got-${JSON.stringify({
-              url,
-              headers: options.headers,
-              method,
-            })}`,
-          )
+        ? requestKey
         : null;
 
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
+    let sharedResponse = false;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
@@ -236,14 +265,13 @@ export abstract class HttpBase<
       if (resPromise && !cacheProvider) {
         ObsoleteCacheHitLogger.write(url);
       }
+    } else if (cacheProvider) {
+      resPromise = getInFlightRequest(cacheProvider, requestKey);
+      sharedResponse = !!resPromise;
     }
 
     // v8 ignore else -- TODO: add test #40625
     if (!resPromise) {
-      if (cacheProvider) {
-        await cacheProvider.setCacheHeaders(method, url, options);
-      }
-
       const startTime = Date.now();
       const fetchTask: GotTask = () => {
         const queueMs = Date.now() - startTime;
@@ -258,31 +286,35 @@ export abstract class HttpBase<
       const queue = getQueue(url);
       const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
-      // cached responses don't hit the server, so they skip the throttle and queue
-      async function httpTask(): Promise<HttpResponse<unknown>> {
-        if (cacheProvider) {
-          const releaseLock = await acquireLock(
-            `${options.method} ${url}`,
-            'http-mutex',
-            timeout * 2,
-          );
-          try {
-            const cachedResponse = await cacheProvider.bypassServer<unknown>(
-              options.method,
-              url,
-            );
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-          } finally {
-            releaseLock();
-          }
-        }
-        return queuedTask();
+      const { maxRetryAfter = 60 } = hostRule;
+      function httpTask(): Promise<HttpResponse<unknown>> {
+        return wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
       }
 
-      const { maxRetryAfter = 60 } = hostRule;
-      resPromise = wrapWithRetry(httpTask, url, getRetryAfter, maxRetryAfter);
+      // cached responses don't hit the server, so they skip the throttle and queue
+      const cachedTask = async (
+        provider: HttpCacheProvider,
+      ): Promise<HttpResponse<unknown>> => {
+        let res = await provider.bypassServer<unknown>(options.method, url);
+        if (!res) {
+          await provider.setCacheHeaders(method, url, options);
+          res = await httpTask();
+        }
+        const resCopy = copyResponse(res, false);
+        resCopy.authorization = !!options?.headers?.authorization;
+        this.handleResponse(resolvedUrl, resCopy);
+        return await provider.wrapServerResponse(method, url, resCopy);
+      };
+
+      if (cacheProvider) {
+        resPromise = setInFlightRequest(
+          cacheProvider,
+          requestKey,
+          cachedTask(cacheProvider),
+        );
+      } else {
+        resPromise = httpTask();
+      }
 
       if (memCacheKey) {
         memCache.set(memCacheKey, resPromise);
@@ -291,15 +323,22 @@ export abstract class HttpBase<
 
     try {
       const res = await resPromise;
+
+      if (cacheProvider) {
+        if (!sharedResponse) {
+          return res;
+        }
+        // identical requests share one response, so each caller gets its own copy
+        const resCopy = copyResponse(res, true);
+        resCopy.authorization = res.authorization;
+        return resCopy;
+      }
+
       const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
       this.handleResponse(resolvedUrl, resCopy);
-
-      if (cacheProvider) {
-        return await cacheProvider.wrapServerResponse(method, url, resCopy);
-      }
 
       return resCopy;
     } catch (err) {
