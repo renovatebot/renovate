@@ -6973,7 +6973,12 @@ describe('workers/repository/process/lookup/index', () => {
         .reply(200, '')
         .get('/@latest')
         .reply(200, { Version: 'v2.0.0-20240509183442-62759503f434' });
-      httpMock.scope(githubApiHost).post('/graphql').reply(404);
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(404)
+        .post('/graphql')
+        .reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),

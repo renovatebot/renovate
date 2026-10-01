@@ -10,7 +10,10 @@ import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import { filterMap } from '../../../util/filter-map.ts';
-import { queryReleases } from '../../../util/github/graphql/index.ts';
+import {
+  queryReleases,
+  queryTags,
+} from '../../../util/github/graphql/index.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
@@ -187,7 +190,7 @@ export class GoProxyDatasource extends Datasource {
     }
 
     if (result?.sourceUrl && servedByProxy) {
-      await this.addGithubReleaseTimestamps(
+      await this.addGithubTimestamps(
         packageName,
         result.sourceUrl,
         result.releases,
@@ -200,9 +203,9 @@ export class GoProxyDatasource extends Datasource {
   /**
    * A Go proxy reports the commit time of the tagged commit as a version's `Time`, which can be much earlier than the point at which that version was released.
    *
-   * When the module is hosted on GitHub and the version has a GitHub Release, the Release's publication time is a better indicator of when the version became available.
+   * When the module is hosted on GitHub, a GitHub Release's publication time, or - if there's no Release - the git tag's own creation time (distinct from the commit time for an annotated tag), is a better indicator of when the version became available. A Release is preferred over a tag when both exist for the same version.
    */
-  async addGithubReleaseTimestamps(
+  async addGithubTimestamps(
     packageName: string,
     sourceUrl: string,
     releases: Release[],
@@ -220,38 +223,47 @@ export class GoProxyDatasource extends Datasource {
     const repository = trimTrailingSlash(
       trimLeadingSlash(parsedUrl.pathname),
     ).replace(regEx(/\.git$/), '');
+    const githubConfig = {
+      packageName: repository,
+      registryUrl: parsedUrl.origin,
+    };
 
-    try {
-      const githubReleases = await queryReleases(
-        {
-          packageName: repository,
-          registryUrl: parsedUrl.origin,
-        },
-        this.githubHttp,
-      );
+    const [githubTags, githubReleases] = await Promise.all([
+      queryTags(githubConfig, this.githubHttp).catch((err) => {
+        logger.debug(
+          { err, packageName },
+          'Error fetching GitHub Tags for Go module',
+        );
+        return [];
+      }),
+      queryReleases(githubConfig, this.githubHttp).catch((err) => {
+        logger.debug(
+          { err, packageName },
+          'Error fetching GitHub Releases for Go module',
+        );
+        return [];
+      }),
+    ]);
 
-      const timestamps = new Map<string, Timestamp>();
-      for (const { version, releaseTimestamp } of githubReleases) {
-        timestamps.set(version, releaseTimestamp);
+    const timestamps = new Map<string, Timestamp>();
+    for (const { version, releaseTimestamp } of githubTags) {
+      timestamps.set(version, releaseTimestamp);
+    }
+    for (const { version, releaseTimestamp } of githubReleases) {
+      timestamps.set(version, releaseTimestamp);
+    }
+
+    const tagPrefix = getTagPrefix(packageName, timestamps.keys());
+    for (const release of releases) {
+      const version = release.version.replace(incompatibleSuffixRegex, '');
+      const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
+      if (
+        releaseTimestamp &&
+        (!release.releaseTimestamp ||
+          releaseTimestamp > release.releaseTimestamp)
+      ) {
+        release.releaseTimestamp = releaseTimestamp;
       }
-
-      const tagPrefix = getTagPrefix(packageName, timestamps.keys());
-      for (const release of releases) {
-        const version = release.version.replace(incompatibleSuffixRegex, '');
-        const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
-        if (
-          releaseTimestamp &&
-          (!release.releaseTimestamp ||
-            releaseTimestamp > release.releaseTimestamp)
-        ) {
-          release.releaseTimestamp = releaseTimestamp;
-        }
-      }
-    } catch (err) {
-      logger.debug(
-        { err, packageName },
-        'Error fetching GitHub Releases for Go module',
-      );
     }
   }
 

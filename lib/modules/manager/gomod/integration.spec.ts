@@ -18,6 +18,7 @@ describe('modules/manager/gomod/integration', () => {
     baseConfig.manager = 'gomod';
     baseConfig.constraintsFiltering = 'strict';
     vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValue([]);
+    vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue([]);
   });
 
   describe('when constraintsFiltering=strict', () => {
