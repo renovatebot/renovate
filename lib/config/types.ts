@@ -673,12 +673,6 @@ export type AllowedParents =
   '.' | (typeof namedParents)[number] | ManagerName | UpdateTypeOptions;
 export interface RenovateOptionBase {
   /**
-   * If true, the option can only be configured by people with access to the Renovate instance.
-   * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
-   */
-  globalOnly?: boolean;
-
-  /**
    * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
    *
    * This is in addition to any existing config validation, and ensures that these options are re-validated due to their sensitive nature.
@@ -831,7 +825,7 @@ export interface RenovateObjectOption extends RenovateOptionBase {
   type: 'object';
 }
 
-export type RenovateOptions =
+type RenovateOptionType =
   | RenovateStringOption
   | RenovateNumberArrayOption
   | RenovateStringArrayOption
@@ -839,6 +833,28 @@ export type RenovateOptions =
   | RenovateBooleanOption
   | RenovateArrayOption
   | RenovateObjectOption;
+
+/**
+ * An option which can only be configured by people with access to the Renovate instance.
+ *
+ * It should be documented in docs/usage/self-hosted-configuration.md, and doesn't have to say where it can be used yet - see #43020.
+ */
+interface SelfHostedOption {
+  globalOnly: true;
+  scopes?: ConfigScope[];
+  parents?: AllowedParents[];
+}
+
+/**
+ * An option which a repository can configure, which has to say where it can be used, through either its `scopes` or its `parents`.
+ */
+type ConfigurableOption = { globalOnly?: false } & (
+  | { scopes: ConfigScope[]; parents?: AllowedParents[] }
+  | { parents: AllowedParents[]; scopes?: ConfigScope[] }
+);
+
+export type RenovateOptions = RenovateOptionType &
+  (SelfHostedOption | ConfigurableOption);
 
 export interface PackageRuleInputConfig extends RenovateConfig {
   versioning?: string;

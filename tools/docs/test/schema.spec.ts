@@ -4,6 +4,7 @@ import _addFormats from 'ajv-formats';
 import { getOptions } from '../../../lib/config/options/index.ts';
 import { groups } from '../../../lib/config/presets/internal/index.ts';
 import type {
+  ConfigScope,
   RenovateOptions,
   RenovateStringOption,
 } from '../../../lib/config/types.ts';
@@ -20,11 +21,26 @@ const addFormats = _addFormats as unknown as typeof _addFormats.default;
 
 const managers = new Set<string>(allManagersList);
 
-function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
-  return partial<RenovateStringOption>({
+function option(
+  overrides: Partial<RenovateStringOption & { scopes: ConfigScope[] }>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { scopes: ConfigScope[] }>({
     name: 'anOption',
     description: 'A description',
     type: 'string',
+    ...overrides,
+  });
+}
+
+/** a self-hosted option, which doesn't have to say where it can be used */
+function globalOption(
+  overrides: Partial<RenovateStringOption>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { globalOnly: true }>({
+    name: 'aGlobalOption',
+    description: 'A description',
+    type: 'string',
+    globalOnly: true,
     ...overrides,
   });
 }
@@ -109,7 +125,7 @@ describe('tools/docs/test/schema', () => {
     it('links a global option to the self-hosted page', () => {
       expect(
         getOptionDocsUrl(
-          option({ name: 'onboarding', globalOnly: true }),
+          globalOption({ name: 'onboarding' }),
           headings(['onboarding'], ['onboarding']),
         ),
       ).toBe(
