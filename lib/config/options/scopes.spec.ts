@@ -1,6 +1,10 @@
 import { partial } from '../../../test/util.ts';
 import type { RenovateOptions, RenovateStringOption } from '../types.ts';
-import { describeAllowedLocations, getAllowedParents } from './scopes.ts';
+import {
+  describeAllowedLocations,
+  getAllowedParents,
+  sharedScopes,
+} from './scopes.ts';
 
 function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
   return partial<RenovateStringOption>({
@@ -27,6 +31,20 @@ describe('config/options/scopes', () => {
       expect(
         getAllowedParents(option({ scopes: ['repo', 'packageRule'] })),
       ).toEqual(['.', 'packageRules']);
+    });
+
+    it('expands the shared scopes to every place per-update config applies', () => {
+      const parents = getAllowedParents(option({ scopes: sharedScopes }));
+
+      expect(parents).toContain('.');
+      expect(parents).toContain('packageRules');
+      // manager(s)
+      expect(parents).toContain('npm');
+      expect(parents).toContain('mise');
+      // `updateType`s
+      expect(parents).toContain('major');
+      expect(parents).toContain('vulnerabilityAlerts');
+      expect(parents).toContain('group');
     });
 
     it('expands the manager and update type scopes', () => {
