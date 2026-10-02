@@ -159,6 +159,9 @@ function createSingleConfig(
       } else {
         temp.enum = option.allowedValues;
       }
+    } else if (option.suggestedValues) {
+      /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
+      temp.anyOf = [{ enum: option.suggestedValues }, { type: option.type }];
     }
   }
   if (option.default !== undefined) {
