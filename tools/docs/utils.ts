@@ -98,3 +98,39 @@ export function formatCell(row: string[], colIndex: number): string {
   // Default cell
   return `<td>${col}</td>`;
 }
+
+/**
+ * Indexes the `##` and `###` headings of a config docs page, mapping each option's heading to the lines of its section.
+ *
+ * Child options are indexed as `parent.optionName`, matching how they are documented.
+ */
+export function indexMarkdown(
+  lines: string[],
+): Record<string, [number, number]> {
+  const indexed: Record<string, [number, number]> = {};
+
+  let optionName = '';
+  let start = 0;
+  for (const [i, line] of lines.entries()) {
+    if (line.startsWith('## ') || line.startsWith('### ')) {
+      if (optionName) {
+        indexed[optionName] = [start, i - 1];
+      }
+      start = i;
+      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
+    }
+  }
+  indexed[optionName] = [start, lines.length - 1];
+
+  return indexed;
+}
+
+/**
+ * The headings which document config options on the given page, e.g. `enabled` or `packageRules.matchPackageNames`.
+ */
+export async function readDocsHeadings(
+  configFile: string,
+): Promise<Set<string>> {
+  const content = await readFile(`docs/usage/${configFile}`);
+  return new Set(Object.keys(indexMarkdown(content.split('\n'))));
+}
