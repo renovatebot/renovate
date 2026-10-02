@@ -753,6 +753,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'env',
+    scopes: ['repo'],
     description:
       'Environment variables that Renovate uses when executing package manager commands.',
     type: 'object',
@@ -1408,6 +1409,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'gitAuthor',
+    scopes: ['repo'],
     description:
       'Author to use for Git commits. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
     type: 'string',
@@ -1431,6 +1433,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'gitIgnoredAuthors',
+    scopes: ['repo'],
     description:
       'Git author emails ignored by Renovate. Entries can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322) strings, glob patterns, or regex patterns using Renovate regex syntax.',
     patternMatch: true,
