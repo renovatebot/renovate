@@ -48,6 +48,7 @@ import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
+import { getAllowedParents } from './options/scopes.ts';
 import { resolveConfigPresets } from './presets/index.ts';
 import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import { isRelativePresetReference, parsePreset } from './presets/parse.ts';
@@ -177,8 +178,9 @@ function initOptions(): void {
   for (const option of options) {
     optionTypes[option.name] = option.type;
 
-    if (option.parents) {
-      optionParents[option.name] = option.parents;
+    const parents = getAllowedParents(option);
+    if (parents) {
+      optionParents[option.name] = parents;
     }
 
     if (option.inheritConfigSupport) {

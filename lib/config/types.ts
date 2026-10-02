@@ -629,6 +629,24 @@ export interface ValidationMessage {
   message: string;
 }
 
+/**
+ * The kinds of place a config option can be used, which expand to the {@link AllowedParents} they cover.
+ *
+ * These are for the places which can't reasonably be listed, like every manager or every update type, so an option which is only valid in a specific object - like `hostRules` - should use `parents` instead.
+ */
+export const configScopes = [
+  /** the top level of a repository, global, inherited or preset config */
+  'repo',
+  /** a `packageRules` entry */
+  'packageRule',
+  /** a manager's configuration object, like `npm` */
+  'manager',
+  /** an update type's configuration object, like `major` */
+  'updateType',
+] as const;
+
+export type ConfigScope = (typeof configScopes)[number];
+
 export type AllowedParents =
   | '.'
   | 'bumpVersions'
@@ -684,6 +702,13 @@ export interface RenovateOptionBase {
   name: string;
 
   parents?: AllowedParents[];
+
+  /**
+   * The kinds of place this option can be used, which are expanded alongside any `parents`.
+   *
+   * An option which declares neither is treated as valid anywhere, which is what we're working towards removing in #43020.
+   */
+  scopes?: ConfigScope[];
 
   stage?: RenovateConfigStage;
 
