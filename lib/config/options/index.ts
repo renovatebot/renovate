@@ -1503,6 +1503,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'registryAliases',
+    scopes: sharedScopes,
     description: 'Aliases for registries.',
     mergeable: true,
     type: 'object',
