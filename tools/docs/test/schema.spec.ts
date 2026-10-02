@@ -129,6 +129,35 @@ describe('tools/docs/test/schema', () => {
       ).toBeFalse();
     });
 
+    it('validates the children of an option which nests a config', () => {
+      expect(
+        repoSchema({
+          postUpgradeTasks: { commands: ['echo hi'], executionMode: 'branch' },
+        }),
+      ).toBeTrue();
+      expect(
+        repoSchema({ postUpgradeTasks: { commands: 'echo hi' } }),
+      ).toBeFalse();
+      expect(
+        repoSchema({
+          vulnerabilityAlerts: { vulnerabilityFixStrategy: 'nope' },
+        }),
+      ).toBeFalse();
+    });
+
+    it('validates the children of a map of configs', () => {
+      expect(
+        repoSchema({
+          customDatasources: {
+            myDatasource: { format: 'json', transformTemplates: ['{}'] },
+          },
+        }),
+      ).toBeTrue();
+      expect(
+        repoSchema({ customDatasources: { myDatasource: { format: 'nope' } } }),
+      ).toBeFalse();
+    });
+
     it('validates an option which nests a config as a config', () => {
       expect(globalSchema({ force: { automerge: true } })).toBeTrue();
       expect(globalSchema({ force: { automerge: 'nope' } })).toBeFalse();
