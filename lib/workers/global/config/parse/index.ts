@@ -2,15 +2,22 @@ import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { setUserConfigFileNames } from '../../../../config/app-strings.ts';
 import { setPrivateKeys } from '../../../../config/decrypt.ts';
 import * as defaultsParser from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { mergeChildConfig } from '../../../../config/utils.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger, setContext } from '../../../../logger/index.ts';
+import type { HostRule } from '../../../../types/host-rules.ts';
 import { coerceArray } from '../../../../util/array.ts';
+import { clone } from '../../../../util/clone.ts';
 import { setCustomEnv } from '../../../../util/env.ts';
 import { readSystemFile } from '../../../../util/fs/index.ts';
+import {
+  add as addHostRule,
+  clear as clearHostRules,
+} from '../../../../util/host-rules.ts';
 import { addSecretForSanitizing } from '../../../../util/sanitize.ts';
 import { ensureTrailingSlash } from '../../../../util/url.ts';
 import * as additionalConfigFileParser from './additional-config-file.ts';
@@ -31,6 +38,55 @@ export async function resolveGlobalExtends(
   } catch (err) {
     logger.error({ err }, 'Error resolving config preset');
     throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
+
+/**
+ * Returns the administrator's `hostRules` with secrets and variables applied, or none if they cannot all be applied yet.
+ */
+function getInterpolatedHostRules(config: AllConfig): HostRule[] {
+  try {
+    const { hostRules } = applySecretsAndVariablesToConfig({
+      config: { hostRules: clone(coerceArray(config.hostRules)) },
+      secrets: config.secrets,
+      variables: config.variables,
+      deleteSecrets: true,
+      deleteVariables: true,
+    });
+    return coerceArray(hostRules);
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Not applying hostRules to globalExtends, as their secrets or variables cannot be resolved yet',
+    );
+    return [];
+  }
+}
+
+/**
+ * Resolves `globalExtends` presets with the administrator's own `hostRules` and `internalHostAccess` in effect.
+ */
+async function resolveGlobalExtendsAsAdmin(
+  globalExtends: string[],
+  config: AllConfig,
+): Promise<AllConfig> {
+  // `globalExtends` is fetched before `start()` sets `GlobalConfig` and `globalInitialize()` registers `hostRules`, so the administrator's own `internalHostAccess`, `endpoint` and `hostRules` are applied for the duration of that fetch only - `globalInitialize()` then registers the final, merged `hostRules`
+  try {
+    GlobalConfig.set({
+      allowedHeaders: config.allowedHeaders,
+      endpoint: config.endpoint,
+      internalHostAccess: config.internalHostAccess,
+      platform: config.platform,
+      userAgent: config.userAgent,
+    });
+    for (const rule of getInterpolatedHostRules(config)) {
+      // the same `trusted` tier as `setGlobalHostRules()`, so that `allowInternal` is kept and can grant
+      addHostRule(rule, { trusted: true });
+    }
+    return await resolveGlobalExtends(globalExtends, config.ignorePresets);
+  } finally {
+    clearHostRules();
+    GlobalConfig.reset();
   }
 }
 
@@ -64,9 +120,9 @@ export async function parseConfigs(
 
   if (isNonEmptyArray(config?.globalExtends)) {
     // resolve global presets immediately
-    resolvedGlobalExtends = await resolveGlobalExtends(
+    resolvedGlobalExtends = await resolveGlobalExtendsAsAdmin(
       config.globalExtends,
-      config.ignorePresets,
+      config,
     );
     config = mergeChildConfig(resolvedGlobalExtends, config);
     delete config.globalExtends;
