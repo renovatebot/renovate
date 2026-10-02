@@ -693,6 +693,11 @@ export interface RenovateOptionBase {
 
   allowedValues?: string[];
 
+  /**
+   * Values to suggest in editors through our JSON schema, for an option which accepts more than them - like one which also takes a regex or glob pattern.
+   */
+  suggestedValues?: string[];
+
   allowString?: boolean;
 
   cli?: boolean;
