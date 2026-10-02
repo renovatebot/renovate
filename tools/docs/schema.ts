@@ -142,14 +142,13 @@ function createSingleConfig(
       } else {
         temp.enum = option.allowedValues;
       }
-      /* v8 ignore start -- not yet reachable; the next two commits each introduce a scalar option using `suggestedValues` */
     } else if (option.suggestedValues) {
+      /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
       Object.assign(
         temp,
         suggestValues(option.suggestedValues, { type: option.type }),
       );
     }
-    /* v8 ignore stop */
   }
   if (option.default !== undefined) {
     temp.default = option.default;
