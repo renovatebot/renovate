@@ -57,10 +57,14 @@ import type {
   RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
+  StatusCheckWhen,
   ValidationMessage,
   ValidationResult,
 } from './types.ts';
-import { allowedStatusCheckStrings } from './types.ts';
+import {
+  allowedStatusCheckStrings,
+  allowedStatusCheckWhenValues,
+} from './types.ts';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches.ts';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers.ts';
 import { ConfigValidationTopic } from './validation-helpers/types.ts';
@@ -870,7 +874,6 @@ export async function validateConfig(
                     }
                   }
                 } else if (key === 'statusCheckWhen') {
-                  const allowedWhenValues = ['always', 'never', 'failed'];
                   for (const [
                     statusCheckKey,
                     statusCheckValue,
@@ -887,7 +890,9 @@ export async function validateConfig(
                     }
                     if (
                       !isString(statusCheckValue) ||
-                      !allowedWhenValues.includes(statusCheckValue)
+                      !allowedStatusCheckWhenValues.includes(
+                        statusCheckValue as StatusCheckWhen,
+                      )
                     ) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
