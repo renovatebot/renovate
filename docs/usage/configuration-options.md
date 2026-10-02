@@ -332,7 +332,7 @@ You may choose from these values:
 - `squash`, flatten the commits that are being merged into a single new commit
 
 Platforms may only support _some_ of these merge strategies.
-On GitHub branches with a merge queue, `auto` uses the repository's default merge method.
+On GitHub branches with a merge queue, `automergeStrategy` is not applied: GitHub uses the repository's default merge method for a direct merge and the merge queue's configured method otherwise.
 
 If the chosen automerge strategy is not supported on your platform then Renovate stops automerging.
 In that case you'll have to set a supported automerge strategy.

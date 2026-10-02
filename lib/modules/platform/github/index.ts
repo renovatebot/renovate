@@ -2266,12 +2266,17 @@ async function asyncMergePr(
     bypass_rules: bypassRules ?? true,
   };
   const mergeMethod = mapMergeStartegy(strategy) ?? config.mergeMethod;
-  // GitHub refuses a merge method once the merge queue takes over ("Custom
-  // merge params are not supported when merging via a merge queue"), so only
-  // send it on queue branches when the user configured an explicit strategy
-  const explicitStrategy = !!strategy && strategy !== 'auto';
-  if (mergeMethod && (!queueEnabled || explicitStrategy)) {
+  // The merge method only applies to direct merges. On merge queue branches
+  // GitHub uses the repository's default method for a direct bypass merge and
+  // the merge queue's configured method otherwise
+  if (mergeMethod && !queueEnabled) {
     body.merge_method = mergeMethod;
+  }
+  if (queueEnabled && strategy && strategy !== 'auto') {
+    logger.debug(
+      { pr: prNo, strategy },
+      'The merge method is not sent on branches with a merge queue',
+    );
   }
 
   const outcome = await requestAsyncMerge(prNo, body);
@@ -2281,32 +2286,10 @@ async function asyncMergePr(
   if (outcome === 'rejected') {
     return false;
   }
-  if (outcome.status !== 'failed') {
-    return handleAsyncMergeResult(prNo, outcome);
-  }
-
-  logger.debug(
-    { pr: prNo, message: outcome.details.message },
-    'GitHub refused the merge',
-  );
-  if (!queueEnabled || !body.merge_method) {
-    return false;
-  }
-  // The failure may be the merge queue rejecting the merge method
-  return asyncEnqueuePr(prNo);
-}
-
-async function asyncEnqueuePr(prNo: number): Promise<boolean> {
-  const outcome = await requestAsyncMerge(prNo, {
-    merge_action: 'merge_queue',
-  });
-  if (isString(outcome)) {
-    return false;
-  }
   if (outcome.status === 'failed') {
     logger.debug(
       { pr: prNo, message: outcome.details.message },
-      'Failed to add PR to the merge queue',
+      'GitHub refused the merge',
     );
     return false;
   }

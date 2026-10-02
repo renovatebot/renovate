@@ -6215,16 +6215,10 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeFalse();
     });
 
-    it('adds the PR to the merge queue when a merge with an explicit strategy fails', async () => {
+    it('sends no merge method on a merge queue branch with an explicit strategy', async () => {
       const scope = httpMock.scope(githubApiHost);
       scope
-        .put(asyncUrl, defaultMergeBody)
-        .reply(202, pending('uuid-4'))
-        .get(`${asyncUrl}/uuid-4`)
-        .reply(200, failed())
-        .put(asyncUrl, { merge_action: 'merge_queue' })
-        .reply(202, pending('uuid-5'))
-        .get(`${asyncUrl}/uuid-5`)
+        .put(asyncUrl, { merge_action: 'default', bypass_rules: true })
         .reply(200, enqueued());
       await initRepoWithPr(scope, { id: 'MQ_1' });
 
@@ -6238,48 +6232,10 @@ describe('modules/platform/github/index', () => {
       await expect(github.getPr(1234)).resolves.toMatchObject({
         state: 'open',
       });
-    });
-
-    it('returns false if adding the PR to the merge queue fails', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      scope
-        .put(asyncUrl, defaultMergeBody)
-        .reply(200, failed())
-        .put(asyncUrl, { merge_action: 'merge_queue' })
-        .reply(202, pending('uuid-6'))
-        .get(`${asyncUrl}/uuid-6`)
-        .reply(200, failed());
-      await initRepoWithPr(scope, { id: 'MQ_1' });
-
-      const res = await github.mergePr({
-        id: 1234,
-        branchName: 'somebranch',
-        strategy: 'squash',
-      });
-
-      expect(res).toBeFalse();
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { pr: 1234, message: 'Rule violation' },
-        'Failed to add PR to the merge queue',
+        { pr: 1234, strategy: 'squash' },
+        'The merge method is not sent on branches with a merge queue',
       );
-    });
-
-    it('returns false if the merge queue request errors', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      scope
-        .put(asyncUrl, defaultMergeBody)
-        .reply(200, failed())
-        .put(asyncUrl, { merge_action: 'merge_queue' })
-        .reply(422, { message: 'Unprocessable' });
-      await initRepoWithPr(scope, { id: 'MQ_1' });
-
-      const res = await github.mergePr({
-        id: 1234,
-        branchName: 'somebranch',
-        strategy: 'squash',
-      });
-
-      expect(res).toBeFalse();
     });
 
     it('returns false if the merge fails and there is no merge queue', async () => {
