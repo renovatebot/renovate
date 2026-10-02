@@ -59,6 +59,21 @@ describe('config/options/scopes', () => {
       expect(parents).not.toContain('.');
     });
 
+    it('expands the `any` scope to every object a config nests in', () => {
+      const parents = getAllowedParents(option({ scopes: ['any'] }));
+
+      expect(parents).toContain('.');
+      expect(parents).toContain('packageRules');
+      // manager(s)
+      expect(parents).toContain('npm');
+      // `updateType`s
+      expect(parents).toContain('major');
+      // the objects which aren't a scope of their own
+      expect(parents).toContain('hostRules');
+      expect(parents).toContain('customManagers');
+      expect(parents).toContain('postUpgradeTasks');
+    });
+
     it('combines parents and scopes without duplicates', () => {
       expect(
         getAllowedParents(
