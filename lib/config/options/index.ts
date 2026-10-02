@@ -520,6 +520,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minimumGroupSize',
+    scopes: sharedScopes,
     description:
       'The minimum number of updates which must be in a group for branches to be created.',
     type: 'integer',
@@ -1119,12 +1120,14 @@ const options: Readonly<RenovateOptions>[] = [
   // Scheduling
   {
     name: 'timezone',
+    scopes: sharedScopes,
     description:
       'Must conform to [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format.',
     type: 'string',
   },
   {
     name: 'schedule',
+    scopes: sharedScopes,
     description: 'Limit branch creation to these times of day or week.',
     type: 'array',
     subType: 'string',
@@ -1135,6 +1138,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeSchedule',
+    scopes: sharedScopes,
     description: 'Limit automerge to these times of day or week.',
     type: 'array',
     subType: 'string',
@@ -1145,6 +1149,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'updateNotScheduled',
+    scopes: sharedScopes,
     description:
       'Whether to update branches when not scheduled. Renovate will not create branches outside of the schedule.',
     stage: 'branch',
@@ -1282,6 +1287,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'skipArtifactsUpdate',
+    scopes: sharedScopes,
     description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
     default: false,
@@ -1455,6 +1461,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'excludeCommitPaths',
+    scopes: sharedScopes,
     description:
       'A file matching any of these glob patterns will not be committed, even if the file has been updated.',
     type: 'array',
@@ -1831,6 +1838,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'autoReplaceGlobalMatch',
+    scopes: sharedScopes,
     description:
       'Control whether replacement regular expressions are global matches or only the first match.',
     type: 'boolean',
@@ -2110,6 +2118,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bumpVersion',
+    scopes: sharedScopes,
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch', 'prerelease'],
@@ -2367,6 +2376,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'internalChecksAsSuccess',
+    scopes: sharedScopes,
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
     type: 'boolean',
@@ -2516,6 +2526,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Automatic merging
   {
     name: 'automerge',
+    scopes: sharedScopes,
     description:
       'Whether to automerge branches/PRs automatically, without human intervention.',
     type: 'boolean',
@@ -2523,6 +2534,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeType',
+    scopes: sharedScopes,
     description: 'How to automerge, if enabled.',
     type: 'string',
     allowedValues: ['branch', 'pr', 'pr-comment'],
@@ -2530,6 +2542,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeStrategy',
+    scopes: sharedScopes,
     description:
       'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
     type: 'string',
@@ -2546,6 +2559,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeComment',
+    scopes: sharedScopes,
     description:
       'PR comment to add to trigger automerge. Only used if `automergeType=pr-comment`.',
     type: 'string',
@@ -2553,6 +2567,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreTests',
+    scopes: sharedScopes,
     description: 'Set to `true` to enable automerging without tests.',
     type: 'boolean',
     default: false,
@@ -2830,6 +2845,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Dependency Groups
   {
     name: 'groupName',
+    scopes: sharedScopes,
     description: 'Human understandable name for the dependency group.',
     type: 'string',
     default: null,
@@ -2837,6 +2853,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'groupSlug',
+    scopes: sharedScopes,
     description:
       'Slug to use for group (e.g. in branch name). Slug is calculated from `groupName` if `null`.',
     type: 'string',
@@ -2860,6 +2877,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'groupSingleUpdates',
+    scopes: sharedScopes,
     description:
       'Apply group settings even when the group contains only one update.',
     type: 'boolean',
