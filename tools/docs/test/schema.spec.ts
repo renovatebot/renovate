@@ -158,18 +158,30 @@ describe('tools/docs/test/schema', () => {
       globalSchema = await compileSchema({ isGlobal: true });
     });
 
-    it('validates a map of values as if it were a nested config', () => {
+    it('allows a map of values to use any key', () => {
       /* `secrets` is self-hosted only, so is only in the global schema */
       expect(
         schemaError(globalSchema, { secrets: { enabled: 'a-secret' } }),
-      ).toBe('must be boolean');
+      ).toBeUndefined();
 
       expect(
         schemaError(repoSchema, {
           registryAliases: { labels: 'https://example.com' },
         }),
-      ).toBe('must be array');
+      ).toBeUndefined();
+    });
 
+    it('validates the values of a map', () => {
+      expect(schemaError(globalSchema, { secrets: { MY_TOKEN: 123 } })).toBe(
+        'must be string',
+      );
+
+      expect(
+        schemaError(repoSchema, { registryAliases: { docker: 123 } }),
+      ).toBe('must be string');
+    });
+
+    it('validates a map which does not declare its values as a nested config', () => {
       expect(schemaError(repoSchema, { env: { automerge: 'true' } })).toBe(
         'must be boolean',
       );
