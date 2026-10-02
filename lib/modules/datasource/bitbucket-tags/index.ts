@@ -40,11 +40,11 @@ export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<Bitbuck
     return `${normalizedUrl}${packageName}`;
   }
 
-  getRegistryUrl(registryUrl?: string): string {
+  protected getRegistryUrl(registryUrl?: string): string {
     return BitbucketTagsDatasource.getRegistryURL(registryUrl);
   }
 
-  getSourceUrl(packageName: string, registryUrl?: string): string {
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     return BitbucketTagsDatasource.getSourceUrl(packageName, registryUrl);
   }
 
