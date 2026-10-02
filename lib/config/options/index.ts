@@ -1530,6 +1530,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'defaultRegistryUrls',
+    scopes: lookupScopes,
     description:
       'List of registry URLs to use as the default for a datasource.',
     type: 'array',
@@ -1552,6 +1553,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'registryUrls',
+    scopes: lookupScopes,
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
     type: 'array',
@@ -1627,6 +1629,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'updateInternalDeps',
+    scopes: ['repo', 'manager'],
     description:
       'Whether to update internal dep versions in a monorepo. Works on Yarn Workspaces.',
     type: 'boolean',
