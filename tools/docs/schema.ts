@@ -126,6 +126,12 @@ function createSingleConfig(
         } else {
           temp.items.enum = option.allowedValues;
         }
+      } else if (option.suggestedValues) {
+        /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
+        temp.items.anyOf = [
+          { enum: option.suggestedValues },
+          { type: option.subType },
+        ];
       }
     }
     if (option.subType === 'string' && option.allowString === true) {
