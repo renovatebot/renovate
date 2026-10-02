@@ -191,6 +191,18 @@ describe('tools/docs/test/schema', () => {
       );
     });
 
+    it('validates the keys of an object whose keys are a known set', () => {
+      expect(
+        schemaError(repoSchema, {
+          statusCheckNames: { artifactError: 'renovate/artifacts' },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaError(repoSchema, { statusCheckNames: { bogusCheck: 'x' } }),
+      ).toBe('must NOT have additional properties');
+    });
+
     it('validates the values of a map against their allowed values', () => {
       expect(
         schemaError(repoSchema, {
