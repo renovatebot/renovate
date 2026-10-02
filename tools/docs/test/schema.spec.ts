@@ -115,6 +115,20 @@ describe('tools/docs/test/schema', () => {
       expect(repoSchema({ registryAliases: { docker: 123 } })).toBeFalse();
     });
 
+    it('allows an environment variable named after a config option', () => {
+      expect(repoSchema({ env: { automerge: 'true' } })).toBeTrue();
+      expect(repoSchema({ env: { GOPROXY: 123 } })).toBeFalse();
+    });
+
+    it('validates the values of a map against their allowed values', () => {
+      expect(
+        repoSchema({ statusCheckWhen: { artifactError: 'failed' } }),
+      ).toBeTrue();
+      expect(
+        repoSchema({ statusCheckWhen: { artifactError: 'sometimes' } }),
+      ).toBeFalse();
+    });
+
     it('validates an option which nests a config as a config', () => {
       expect(globalSchema({ force: { automerge: true } })).toBeTrue();
       expect(globalSchema({ force: { automerge: 'nope' } })).toBeFalse();
