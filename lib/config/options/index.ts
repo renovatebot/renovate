@@ -2434,12 +2434,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitHourlyLimit',
+    scopes: sharedScopes,
     description: 'Rate limit commits to maximum x per hour. 0 means no limit.',
     type: 'integer',
     default: 0,
   },
   {
     name: 'prHourlyLimit',
+    scopes: sharedScopes,
     description:
       'Rate limit PRs to maximum x created per hour. 0 means no limit.',
     type: 'integer',
@@ -2447,6 +2449,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prConcurrentLimit',
+    scopes: sharedScopes,
     description:
       'Limit to a maximum of x concurrent branches/PRs. 0 means no limit.',
     type: 'integer',
@@ -2454,6 +2457,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchConcurrentLimit',
+    scopes: sharedScopes,
     description:
       'Limit to a maximum of x concurrent branches. 0 means no limit, `null` (default) inherits value from `prConcurrentLimit`.',
     type: 'integer',
