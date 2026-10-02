@@ -1,6 +1,8 @@
 import { isPlainObject } from '@sindresorhus/is';
 import { getOptions } from '../../lib/config/options/index.ts';
+import { getAllowedParents } from '../../lib/config/options/scopes.ts';
 import type {
+  AllowedParents,
   RenovateOptions,
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
@@ -214,10 +216,18 @@ function createSchemaForParentConfigs(
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (!option.parents || option.parents.includes('.')) {
+    const parents = getAllowedParents(option);
+    if (!parents || parents.includes('.')) {
       properties[option.name] = { $ref: `#/definitions/${option.name}` };
     }
   }
+}
+
+/**
+ * The objects an option can be used in, other than the top level of a config.
+ */
+function getNestedParents(option: RenovateOptions): AllowedParents[] {
+  return (getAllowedParents(option) ?? []).filter((parent) => parent !== '.');
 }
 
 /**
@@ -246,50 +256,48 @@ function addChildrenToParents(
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (option.parents) {
-      for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        getChildrenSchema(definitions[parent]).allOf = [
-          {
-            type: 'object',
-            properties: {
-              description: {
-                oneOf: [
-                  {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      description:
-                        'A custom description for this configuration object',
-                    },
-                  },
-                  {
+    for (const parent of getNestedParents(option)) {
+      getChildrenSchema(definitions[parent]).allOf = [
+        {
+          type: 'object',
+          properties: {
+            description: {
+              oneOf: [
+                {
+                  type: 'array',
+                  items: {
                     type: 'string',
                     description:
                       'A custom description for this configuration object',
                   },
-                ],
-              },
-              overrideDescription: {
-                oneOf: [
-                  {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      description:
-                        'Description which replaces the descriptions of any presets which this config extends',
-                    },
-                  },
-                  {
+                },
+                {
+                  type: 'string',
+                  description:
+                    'A custom description for this configuration object',
+                },
+              ],
+            },
+            overrideDescription: {
+              oneOf: [
+                {
+                  type: 'array',
+                  items: {
                     type: 'string',
                     description:
                       'Description which replaces the descriptions of any presets which this config extends',
                   },
-                ],
-              },
+                },
+                {
+                  type: 'string',
+                  description:
+                    'Description which replaces the descriptions of any presets which this config extends',
+                },
+              ],
             },
           },
-        ];
-      }
+        },
+      ];
     }
   }
 }
@@ -322,8 +330,8 @@ function createSchemaForChildConfigs(
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (option.parents) {
-      for (const parent of option.parents.filter((parent) => parent !== '.')) {
+    for (const parent of getNestedParents(option)) {
+      {
         const children = getChildrenSchema(definitions[parent]);
         children.allOf[0].properties[option.name] = {
           $ref: `#/definitions/${option.name}`,
